@@ -26,8 +26,18 @@
   padding: $euiSize;
 }
 
+.lnsIndexPatternDimensionEditor__section--subSection {
+  padding: $euiSize;
+  border-top: $euiBorderThin;
+}
+
+.lnsIndexPatternDimensionEditor__section--paddedLeftRight {
+  margin: $euiSizeS $euiSize;
+}
+
 .lnsIndexPatternDimensionEditor__section--collapseNext {
   margin-bottom: -$euiSizeL;
+  border-top: $euiBorderThin;
 }
 
 .lnsIndexPatternDimensionEditor__section--shaded {

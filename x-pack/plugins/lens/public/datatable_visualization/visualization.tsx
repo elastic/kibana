@@ -190,6 +190,9 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
             defaultMessage: 'Rows',
           }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownRow', {
+            defaultMessage: 'Row',
+          }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
             defaultMessage:
               'Split table rows by field. This is recommended for high cardinality breakdowns.',
@@ -221,6 +224,9 @@ export const getDatatableVisualization = ({
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
             defaultMessage: 'Columns',
           }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
+            defaultMessage: 'Column',
+          }),
           groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
             defaultMessage:
               "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
@@ -244,6 +250,9 @@ export const getDatatableVisualization = ({
           groupId: 'metrics',
           groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
             defaultMessage: 'Metrics',
+          }),
+          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.metric', {
+            defaultMessage: 'Metric',
           }),
           layerId: state.layerId,
           accessors: sortedColumns

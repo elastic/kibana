@@ -136,13 +136,15 @@ export function DataDimensionEditor(
             setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
           }}
         />
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={localLayer?.palette}
-          setPalette={(newPalette) => {
-            setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
-          }}
-        />
+        {!layer.collapseFn && (
+          <PalettePicker
+            palettes={props.paletteService}
+            activePalette={localLayer?.palette}
+            setPalette={(newPalette) => {
+              setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
+            }}
+          />
+        )}
       </>
     );
   }

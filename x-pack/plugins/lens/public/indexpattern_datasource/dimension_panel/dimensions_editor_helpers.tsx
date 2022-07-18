@@ -15,7 +15,8 @@
 import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiCallOut, EuiButtonGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import { operationDefinitionMap } from '../operations';
 
 export const formulaOperationName = 'formula';
@@ -112,7 +113,7 @@ export const CalloutWarning = ({
   );
 };
 
-export interface DimensionEditorTab {
+export interface DimensionEditorGroupsOptions {
   enabled: boolean;
   state: boolean;
   onClick: () => void;
@@ -120,25 +121,57 @@ export interface DimensionEditorTab {
   label: string;
 }
 
-export const DimensionEditorTabs = ({ tabs }: { tabs: DimensionEditorTab[] }) => {
+export const DimensionEditorButtonGroups = ({
+  options,
+  onMethodChange,
+  selectedMethod,
+}: {
+  options: DimensionEditorGroupsOptions[];
+  onMethodChange: (id: string) => void;
+  selectedMethod: string;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const enabledGroups = options.filter(({ enabled }) => enabled);
+  const groups = enabledGroups.map(({ id, label }) => {
+    return {
+      id,
+      label,
+      'data-test-subj': `lens-dimensionTabs-${id}`,
+    };
+  });
+
+  const onChange = (optionId: string) => {
+    onMethodChange(optionId);
+    const selectedOption = options.find(({ id }) => id === optionId);
+    selectedOption?.onClick();
+  };
+
   return (
-    <EuiTabs
-      size="s"
-      className="lnsIndexPatternDimensionEditor__header"
-      data-test-subj="lens-dimensionTabs"
-    >
-      {tabs.map(({ id, enabled, state, onClick, label }) => {
-        return enabled ? (
-          <EuiTab
-            key={id}
-            isSelected={state}
-            data-test-subj={`lens-dimensionTabs-${id}`}
-            onClick={onClick}
-          >
-            {label}
-          </EuiTab>
-        ) : null;
-      })}
-    </EuiTabs>
+    <>
+      <EuiText
+        size="s"
+        css={css`
+          margin: ${euiTheme.size.s} ${euiTheme.size.base} 0;
+        `}
+      >
+        <h5>
+          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingMethod', {
+            defaultMessage: 'Method',
+          })}
+        </h5>
+      </EuiText>
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.lens.indexPattern.dimensionEditorModes', {
+          defaultMessage: 'Dimension editor configuration modes',
+        })}
+        isFullWidth
+        options={groups}
+        idSelected={selectedMethod}
+        onChange={(id) => onChange(id)}
+        css={css`
+          padding: ${euiTheme.size.s} ${euiTheme.size.base};
+        `}
+      />
+    </>
   );
 };

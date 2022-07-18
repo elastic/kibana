@@ -188,97 +188,6 @@ export function TableDimensionEditor(
           }}
         />
       </EuiFormRow>
-      {!column.isTransposed && (
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
-            defaultMessage: 'Hide column',
-          })}
-          display="columnCompressedSwitch"
-        >
-          <EuiSwitch
-            compressed
-            label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
-              defaultMessage: 'Hide column',
-            })}
-            showLabel={false}
-            data-test-subj="lns-table-column-hidden"
-            checked={Boolean(column?.hidden)}
-            disabled={!column.hidden && visibleColumnsCount <= 1}
-            onChange={() => {
-              const newState = {
-                ...state,
-                columns: state.columns.map((currentColumn) => {
-                  if (currentColumn.columnId === accessor) {
-                    return {
-                      ...currentColumn,
-                      hidden: !column.hidden,
-                    };
-                  } else {
-                    return currentColumn;
-                  }
-                }),
-              };
-              setState(newState);
-            }}
-          />
-        </EuiFormRow>
-      )}
-      {isNumeric && (
-        <>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.lens.table.summaryRow.label', {
-              defaultMessage: 'Summary Row',
-            })}
-            display="columnCompressed"
-          >
-            <EuiComboBox
-              fullWidth
-              compressed
-              isClearable={false}
-              data-test-subj="lnsDatatable_summaryrow_function"
-              placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
-                defaultMessage: 'Field',
-              })}
-              options={getSummaryRowOptions()}
-              selectedOptions={[
-                {
-                  label: getDefaultSummaryLabel(summaryRow),
-                  value: summaryRow,
-                },
-              ]}
-              singleSelection={{ asPlainText: true }}
-              onChange={(choices) => {
-                const newValue = choices[0].value as SummaryRowType;
-                setState({
-                  ...state,
-                  columns: updateColumnWith(state, accessor, { summaryRow: newValue }),
-                });
-              }}
-            />
-          </EuiFormRow>
-          {summaryRow !== 'none' && (
-            <EuiFormRow
-              display="columnCompressed"
-              fullWidth
-              label={i18n.translate('xpack.lens.table.summaryRow.customlabel', {
-                defaultMessage: 'Summary label',
-              })}
-            >
-              <EuiFieldText
-                fullWidth
-                compressed
-                data-test-subj="lnsDatatable_summaryrow_label"
-                value={summaryLabel ?? fallbackSummaryLabel}
-                onChange={(e) => {
-                  onSummaryLabelChange(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          )}
-        </>
-      )}
       {showDynamicColoringFeature && (
         <>
           <EuiFormRow
@@ -404,6 +313,97 @@ export function TableDimensionEditor(
                   </PalettePanelContainer>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFormRow>
+          )}
+        </>
+      )}
+      {!column.isTransposed && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
+            defaultMessage: 'Hide column',
+          })}
+          display="columnCompressedSwitch"
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
+              defaultMessage: 'Hide column',
+            })}
+            showLabel={false}
+            data-test-subj="lns-table-column-hidden"
+            checked={Boolean(column?.hidden)}
+            disabled={!column.hidden && visibleColumnsCount <= 1}
+            onChange={() => {
+              const newState = {
+                ...state,
+                columns: state.columns.map((currentColumn) => {
+                  if (currentColumn.columnId === accessor) {
+                    return {
+                      ...currentColumn,
+                      hidden: !column.hidden,
+                    };
+                  } else {
+                    return currentColumn;
+                  }
+                }),
+              };
+              setState(newState);
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {isNumeric && (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.lens.table.summaryRow.label', {
+              defaultMessage: 'Summary Row',
+            })}
+            display="columnCompressed"
+          >
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              data-test-subj="lnsDatatable_summaryrow_function"
+              placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
+                defaultMessage: 'Field',
+              })}
+              options={getSummaryRowOptions()}
+              selectedOptions={[
+                {
+                  label: getDefaultSummaryLabel(summaryRow),
+                  value: summaryRow,
+                },
+              ]}
+              singleSelection={{ asPlainText: true }}
+              onChange={(choices) => {
+                const newValue = choices[0].value as SummaryRowType;
+                setState({
+                  ...state,
+                  columns: updateColumnWith(state, accessor, { summaryRow: newValue }),
+                });
+              }}
+            />
+          </EuiFormRow>
+          {summaryRow !== 'none' && (
+            <EuiFormRow
+              display="columnCompressed"
+              fullWidth
+              label={i18n.translate('xpack.lens.table.summaryRow.customlabel', {
+                defaultMessage: 'Summary label',
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                compressed
+                data-test-subj="lnsDatatable_summaryrow_label"
+                value={summaryLabel ?? fallbackSummaryLabel}
+                onChange={(e) => {
+                  onSummaryLabelChange(e.target.value);
+                }}
+              />
             </EuiFormRow>
           )}
         </>

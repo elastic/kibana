@@ -279,6 +279,13 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.minValueLabel', {
+                defaultMessage: 'Minimum value',
+              }),
+            ],
+          },
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
@@ -295,6 +302,13 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.maxValueLabel', {
+                defaultMessage: 'Maximum value',
+              }),
+            ],
+          },
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
@@ -311,6 +325,13 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.goalValueLabel', {
+                defaultMessage: 'Goal value',
+              }),
+            ],
+          },
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,

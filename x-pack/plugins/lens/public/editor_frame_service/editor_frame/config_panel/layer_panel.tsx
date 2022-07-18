@@ -556,7 +556,7 @@ export function LayerPanel(
         panelRef={(el) => (panelRef.current = el)}
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
-        groupLabel={activeGroup?.groupLabel || ''}
+        groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
         handleClose={() => {
           if (layerDatasource) {
             if (

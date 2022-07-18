@@ -8,6 +8,7 @@
 import './dimension_editor.scss';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiListGroup,
   EuiSpacer,
@@ -15,6 +16,8 @@ import {
   EuiFormLabel,
   EuiToolTip,
   EuiText,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
@@ -52,9 +55,9 @@ import {
   isQuickFunction,
   getParamEditor,
   formulaOperationName,
-  DimensionEditorTabs,
+  DimensionEditorButtonGroups,
   CalloutWarning,
-  DimensionEditorTab,
+  DimensionEditorGroupsOptions,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -110,6 +113,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const temporaryQuickFunction = Boolean(temporaryState === quickFunctionsName);
   const temporaryStaticValue = Boolean(temporaryState === staticValueOperationName);
+  const { euiTheme } = useEuiTheme();
 
   const updateLayer = useCallback(
     (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
@@ -324,12 +328,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      let color: EuiListGroupItemProps['color'] = 'primary';
-      if (isActive) {
-        color = 'text';
-      } else if (!compatibleWithCurrentField) {
-        color = 'subdued';
-      }
+      // let color: EuiListGroupItemProps['color'] = 'primary';
+      // if (isActive) {
+      //   color = 'text';
+      // } else if (!compatibleWithCurrentField) {
+      //   color = 'subdued';
+      // }
 
       let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
       if (isActive && disabledStatus) {
@@ -347,13 +351,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </EuiToolTip>
         );
       } else if (isActive) {
-        label = <strong>{operationDisplay[operationType].displayName}</strong>;
+        label = (
+          <EuiText color={euiTheme.colors.primary} size="s">
+            {operationDisplay[operationType].displayName}
+          </EuiText>
+        );
+      } else if (!compatibleWithCurrentField) {
+        label = (
+          <>
+            {label}
+            <EuiIcon type="dot" color="warning" />
+          </>
+        );
       }
 
       return {
         id: operationType as string,
         label,
-        color,
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
@@ -548,7 +562,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const quickFunctions = (
     <>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Functions',
@@ -558,6 +572,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
           gutterSize="none"
+          color="primary"
           listItems={
             // add a padding item containing a non breakable space if the number of operations is not even
             // otherwise the column layout will break within an element
@@ -567,7 +582,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       </div>
 
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
         {shouldDisplayReferenceEditor ? (
           <>
             {selectedColumn.references.map((referenceId, index) => {
@@ -724,7 +739,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </>
   ) : null;
 
-  const TabContent = showQuickFunctions ? quickFunctions : customParamEditor;
+  const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
   const onFormatChange = useCallback(
     (newFormat) => {
@@ -743,9 +758,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const hasFormula =
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
-  const hasTabs = !isFullscreen && (hasFormula || supportStaticValue);
+  const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+  const initialMethod = useMemo(() => {
+    let methodId = '';
+    if (showStaticValueFunction) {
+      methodId = staticValueOperationName;
+    } else if (showQuickFunctions) {
+      methodId = quickFunctionsName;
+    } else if (
+      temporaryState === 'none' &&
+      selectedColumn?.operationType === formulaOperationName
+    ) {
+      methodId = formulaOperationName;
+    }
+    return methodId;
+  }, [selectedColumn?.operationType, showQuickFunctions, showStaticValueFunction, temporaryState]);
+  const [selectedMethod, setSelectedMethod] = useState(initialMethod);
 
-  const tabs: DimensionEditorTab[] = [
+  const options: DimensionEditorGroupsOptions[] = [
     {
       id: staticValueOperationName,
       enabled: Boolean(supportStaticValue),
@@ -826,15 +856,35 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   return (
     <div id={columnId}>
-      {hasTabs ? <DimensionEditorTabs tabs={tabs} /> : null}
+      <EuiText
+        size="s"
+        css={css`
+          margin: ${euiTheme.size.s} ${euiTheme.size.base} 0;
+        `}
+      >
+        <h4>
+          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
+            defaultMessage: 'Data',
+          })}
+        </h4>
+      </EuiText>
+      {hasButtonGroups ? (
+        <DimensionEditorButtonGroups
+          options={options}
+          onMethodChange={(optionId: string) => {
+            setSelectedMethod(optionId);
+          }}
+          selectedMethod={selectedMethod}
+        />
+      ) : null}
       <CalloutWarning
         currentOperationType={selectedColumn?.operationType}
         temporaryStateType={temporaryState}
       />
-      {TabContent}
+      {ButtonGroupContent}
 
       {shouldDisplayAdvancedOptions && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
           <AdvancedOptions
             options={[
               {
@@ -937,6 +987,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
       {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
+          <EuiText
+            size="s"
+            css={css`
+              margin-bottom: ${euiTheme.size.base};
+            `}
+          >
+            <h4>
+              {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingAppearance', {
+                defaultMessage: 'Appearance',
+              })}
+            </h4>
+          </EuiText>
           {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <NameInput
               // re-render the input from scratch to obtain new "initial value" if the underlying default label changes

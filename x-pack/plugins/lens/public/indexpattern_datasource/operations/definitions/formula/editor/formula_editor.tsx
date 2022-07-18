@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -18,6 +19,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
@@ -112,6 +114,8 @@ export function FormulaEditor({
   const overflowDiv1 = React.useRef<HTMLElement>();
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+
+  const { euiTheme } = useEuiTheme();
 
   const visibleOperationsMap = useMemo(
     () => filterByVisibleOperation(operationDefinitionMap),
@@ -650,9 +654,29 @@ export function FormulaEditor({
       className={classNames({
         lnsIndexPatternDimensionEditor: true,
         'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
+        'lnsIndexPatternDimensionEditor__section--paddedLeftRight': !isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      {!isFullscreen && (
+        <EuiText
+          size="s"
+          css={css`
+            margin-bottom: ${euiTheme.size.s};
+          `}
+        >
+          <h5>
+            {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingFormula', {
+              defaultMessage: 'Formula',
+            })}
+          </h5>
+        </EuiText>
+      )}
+      <div
+        className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded"
+        css={css`
+          border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
+        `}
+      >
         <div className="lnsFormula">
           <div className="lnsFormula__editor">
             <div className="lnsFormula__editorHeader">
