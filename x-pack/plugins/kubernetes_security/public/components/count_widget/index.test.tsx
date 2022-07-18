@@ -8,7 +8,7 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
-import { CountWidget, LOADING_TEST_ID, TOOLTIP_TEST_ID } from '.';
+import { CountWidget, LOADING_TEST_ID, TOOLTIP_TEST_ID, VALUE_TEST_ID } from '.';
 import { useFetchCountWidgetData } from './hooks';
 import { fireEvent, waitFor } from '@testing-library/dom';
 
@@ -137,9 +137,9 @@ describe('CountWidget component', () => {
           isLoading: false,
         }));
         render();
-        fireEvent.mouseOver(renderResult.getByText('Info'));
+        fireEvent.mouseOver(renderResult.getByTestId(VALUE_TEST_ID));
         await waitFor(() => renderResult.getByTestId(TOOLTIP_TEST_ID));
-        expect(renderResult.queryByText(MOCK_DATA_THOUSAND.pages[0])).toBeTruthy();
+        expect(renderResult.queryByText('5,236')).toBeTruthy();
       });
     });
   });
