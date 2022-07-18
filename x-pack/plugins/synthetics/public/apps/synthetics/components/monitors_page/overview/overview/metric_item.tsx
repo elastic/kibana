@@ -61,15 +61,11 @@ export const MetricItem = ({
             overflow: 'hidden',
           }}
         >
-          {monitorId && locationName && (
-            <input
-              type="button"
-              onClick={() => onClick(monitorId, locationName ?? '')}
-              value="hello"
-            />
-          )}
           <Chart>
-            <Settings baseTheme={DARK_THEME} />
+            <Settings
+              onElementClick={() => monitorId && locationName && onClick(monitorId, locationName)}
+              baseTheme={DARK_THEME}
+            />
             <Metric
               id={`${monitorId}-${locationId}`}
               data={[

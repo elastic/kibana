@@ -107,7 +107,7 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
     status,
   } = useFetcher(() => fetchSyntheticsMonitor(id), [id]);
 
-  const monitrDetail = useMonitorDetail(id, location);
+  const monitorDetail = useMonitorDetail(id, location);
   const locationStatuses = useStatusByLocation(id);
   return (
     <EuiFlyout onClose={props.onClose}>
@@ -123,7 +123,7 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonIcon iconType="popout" href={(monitrDetail.data as any)?.url?.full} />
+                <EuiButtonIcon iconType="popout" href={(monitorDetail.data as any)?.url?.full} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
@@ -144,6 +144,7 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
                   field: 'observer.geo.name',
                   render: () => (
                     <EuiSelect
+                      compressed
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       options={
@@ -161,8 +162,8 @@ export function MonitorDetailFlyout(props: { id: string; location: string; onClo
                   render: (item: string) => moment(item).fromNow(),
                 },
               ]}
-              items={monitrDetail.data ? [monitrDetail.data] : []}
-              loading={monitrDetail.loading}
+              items={monitorDetail.data ? [monitorDetail.data] : []}
+              loading={monitorDetail.loading}
               pagination={undefined}
             />
           </EuiFlyoutHeader>
