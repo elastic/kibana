@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
-import {
-  RuleExecutionSavedObject,
-  RuleExecutionAttributes,
-  RULE_EXECUTION_SO_TYPE,
-} from './saved_objects_type';
+import type { RuleExecutionSavedObject, RuleExecutionAttributes } from './saved_objects_type';
+import { RULE_EXECUTION_SO_TYPE } from './saved_objects_type';
 import {
   getRuleExecutionSoId,
   getRuleExecutionSoReferences,

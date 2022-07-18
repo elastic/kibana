@@ -16,13 +16,11 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { DetailsPanel } from '.';
-import {
-  TimelineExpandedDetail,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
@@ -93,7 +91,6 @@ describe('Details Panel Component', () => {
 
   const mockProps = {
     browserFields: {},
-    docValueFields: [],
     handleOnPanelClosed: jest.fn(),
     isFlyoutView: false,
     runtimeMappings: {},
@@ -153,7 +150,6 @@ describe('Details Panel Component', () => {
       expect(wrapper.find('DetailsPanel')).toMatchSnapshot(`
         <DetailsPanel
           browserFields={Object {}}
-          docValueFields={Array []}
           handleOnPanelClosed={[MockFunction]}
           isFlyoutView={false}
           runtimeMappings={Object {}}

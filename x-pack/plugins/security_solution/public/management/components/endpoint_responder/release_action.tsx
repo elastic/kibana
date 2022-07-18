@@ -7,11 +7,11 @@
 
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import { EndpointCommandDefinitionMeta } from './types';
+import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
-import { CommandExecutionComponentProps } from '../console/types';
+import type { CommandExecutionComponentProps } from '../console/types';
 import { ActionError } from './action_error';
 
 export const ReleaseActionResult = memo<

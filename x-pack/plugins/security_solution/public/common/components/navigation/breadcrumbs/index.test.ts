@@ -7,15 +7,16 @@
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbsForRoute, ObjectWithNavTabs, useSetBreadcrumbs } from '.';
+import type { ObjectWithNavTabs } from '.';
+import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
+import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import { GetSecuritySolutionUrl } from '../../link_to';
+import type { GetSecuritySolutionUrl } from '../../link_to';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsGroupedNavigationEnabled } from '../helpers';
@@ -77,28 +78,6 @@ const getMockObject = (
         id: '',
         isOpen: false,
         graphEventId: '',
-      },
-      timerange: {
-        global: {
-          linkTo: ['timeline'],
-          timerange: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-        },
-        timeline: {
-          linkTo: ['global'],
-          timerange: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-        },
       },
     },
   };
@@ -469,17 +448,17 @@ describe('Navigation Breadcrumbs', () => {
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({
             text: 'Security',
-            href: "securitySolutionUI/get_started?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/get_started',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Hosts',
-            href: "securitySolutionUI/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/hosts',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: "securitySolutionUI/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+            href: 'securitySolutionUI/hosts/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
@@ -789,28 +768,26 @@ describe('Navigation Breadcrumbs', () => {
           chromeMock,
           navigateToUrlMock
         );
-        const searchString =
-          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))";
 
         expect(setBreadcrumbsMock).toBeCalledWith([
           expect.objectContaining({
             text: 'Security',
-            href: `securitySolutionUI/get_started${searchString}`,
+            href: 'securitySolutionUI/get_started',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Explore',
-            href: `securitySolutionUI/explore`,
+            href: 'securitySolutionUI/explore',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'Hosts',
-            href: `securitySolutionUI/hosts${searchString}`,
+            href: 'securitySolutionUI/hosts',
             onClick: expect.any(Function),
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: `securitySolutionUI/hosts/siem-kibana${searchString}`,
+            href: 'securitySolutionUI/hosts/siem-kibana',
             onClick: expect.any(Function),
           }),
           {

@@ -13,7 +13,11 @@ import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { openExceptionFlyoutFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
+import {
+  openExceptionFlyoutFromRuleSettings,
+  goToExceptionsTab,
+  editException,
+} from '../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
@@ -32,7 +36,6 @@ import {
   EXCEPTION_ITEM_CONTAINER,
   ADD_EXCEPTIONS_BTN,
   EXCEPTION_FIELD_LIST,
-  EDIT_EXCEPTIONS_BTN,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
   EXCEPTION_FLYOUT_VERSION_CONFLICT,
   EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
@@ -302,8 +305,7 @@ describe('Exceptions flyout', () => {
 
     context('When updating an item with version conflict', () => {
       it('Displays version conflict error', () => {
-        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
-        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+        editException();
 
         // update exception item via api
         updateExceptionListItem('simple_list_item', {
@@ -334,8 +336,7 @@ describe('Exceptions flyout', () => {
 
     context('When updating an item for a list that has since been deleted', () => {
       it('Displays missing exception list error', () => {
-        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
-        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+        editException();
 
         // delete exception list via api
         deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);

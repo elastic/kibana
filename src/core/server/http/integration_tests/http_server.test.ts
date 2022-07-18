@@ -12,9 +12,8 @@ import moment from 'moment';
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { HttpConfig } from '../http_config';
-import { Router } from '../router';
-import { HttpServer } from '../http_server';
+import { Router } from '@kbn/core-http-router-server-internal';
+import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
 
 describe('Http server', () => {
   let server: HttpServer;

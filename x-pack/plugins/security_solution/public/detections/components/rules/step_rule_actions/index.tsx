@@ -15,14 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  RuleStep,
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';

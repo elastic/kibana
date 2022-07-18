@@ -7,17 +7,17 @@
 
 import * as t from 'io-ts';
 
+import type { Description } from '../../common/schemas';
 import {
   id,
   descriptionOrUndefined,
-  Description,
   platformOrUndefined,
   query,
   versionOrUndefined,
   interval,
   ecsMappingOrUndefined,
 } from '../../common/schemas';
-import { RequiredKeepUndefined } from '../../../types';
+import type { RequiredKeepUndefined } from '../../../types';
 
 export const createSavedQueryRequestSchema = t.type({
   id,

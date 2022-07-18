@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -14,10 +14,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import uuid from 'uuid';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';

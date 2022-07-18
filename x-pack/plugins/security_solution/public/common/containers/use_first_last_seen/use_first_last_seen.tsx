@@ -11,12 +11,12 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
-import {
+import type {
   Direction,
-  FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
 } from '../../../../common/search_strategy';
+import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';

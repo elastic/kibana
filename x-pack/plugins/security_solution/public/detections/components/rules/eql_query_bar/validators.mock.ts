@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidationError } from '../../../../shared_imports';
+import type { ValidationError } from '../../../../shared_imports';
 import { ERROR_CODES } from './validators';
 
 export const getEqlResponseError = (): ValidationError => ({

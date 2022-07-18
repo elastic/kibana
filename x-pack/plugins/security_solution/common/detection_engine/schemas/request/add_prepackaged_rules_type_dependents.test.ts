@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { addPrepackagedRuleValidateTypeDependents } from './add_prepackaged_rules_type_dependents';
 import { getAddPrepackagedRulesSchemaMock } from './add_prepackaged_rules_schema.mock';
 
