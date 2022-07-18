@@ -14,7 +14,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SearchQueryLanguage } from '../../../common/types';
 import { useAiOpsKibana } from '../../kibana_context';
 import { getPluginsStart } from '../../kibana_services';
-import { createMergedEsQuery } from '../../../common/search_utils';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   dataView: DataView;
   searchString: Query['query'];

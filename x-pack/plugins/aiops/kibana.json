@@ -12,6 +12,7 @@
   "requiredPlugins": [
     "charts",
     "data",
+    "discover",
     "licensing",
     "unifiedSearch"
   ],

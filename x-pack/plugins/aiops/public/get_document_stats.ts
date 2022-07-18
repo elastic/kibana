@@ -9,7 +9,7 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { Query } from '@kbn/es-query';
-import { buildBaseFilterCriteria } from './query_utils';
+import { buildBaseFilterCriteria } from './application/utils/query_utils';
 
 export interface DocumentCountStats {
   interval?: number;

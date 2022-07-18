@@ -19,7 +19,6 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import {
@@ -27,7 +26,7 @@ import {
   SearchQueryLanguage,
   isSavedSearchSavedObject,
   SavedSearchSavedObject,
-} from './types';
+} from '../../../common/types';
 
 const DEFAULT_QUERY = {
   bool: {

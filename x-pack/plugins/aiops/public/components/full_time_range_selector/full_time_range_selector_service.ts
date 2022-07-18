@@ -14,7 +14,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getTimeFieldRange } from '../../application/services/time_field_range';
-import { addExcludeFrozenToQuery } from '../../query_utils';
+import { addExcludeFrozenToQuery } from '../../application/utils/query_utils';
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
