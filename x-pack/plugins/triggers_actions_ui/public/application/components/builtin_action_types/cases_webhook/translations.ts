@@ -419,21 +419,21 @@ export const STEP_1 = i18n.translate(
 export const STEP_2 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step2',
   {
-    defaultMessage: 'Create incident in external system',
+    defaultMessage: 'Create incident',
   }
 );
 
 export const STEP_3 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step3',
   {
-    defaultMessage: 'Get incident information from external system',
+    defaultMessage: 'Get incident information',
   }
 );
 
 export const STEP_4 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4',
   {
-    defaultMessage: 'Add comments and updates in external system',
+    defaultMessage: 'Comments and updates',
   }
 );
 
