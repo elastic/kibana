@@ -7,6 +7,8 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from './common/navigation/constants';
+import { CspRouter } from './application/app';
 import type {
   CspClientPluginSetup,
   CspClientPluginStart,
@@ -34,6 +36,7 @@ export class CspPlugin
       title: PLUGIN_NAME,
       euiIconType: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
+      defaultPath: CLOUD_SECURITY_POSTURE_BASE_PATH,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -48,7 +51,9 @@ export class CspPlugin
     return {};
   }
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
-    return {};
+    return {
+      getCloudSecurityPostureRouter: () => CspRouter,
+    };
   }
 
   public stop() {}

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import type { ComponentType, ReactNode } from 'react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspClientPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CspClientPluginStart {}
+
+export interface CspClientPluginStart {
+  getCloudSecurityPostureRouter(): ComponentType<{
+    securitySolutionContext: CspSecuritySolutionContext;
+  }>;
+}
 
 export interface CspClientPluginSetupDeps {
   // required
@@ -29,4 +35,9 @@ export interface CspClientPluginStartDeps {
   charts: ChartsPluginStart;
   discover: DiscoverStart;
   // optional
+}
+
+export interface CspSecuritySolutionContext {
+  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  getSpyRouteComponent: () => ComponentType<{ pageName?: CloudSecurityPosturePageId }>;
 }
