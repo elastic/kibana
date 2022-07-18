@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiHorizontalRule,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -29,7 +30,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { FieldStats } from '@kbn/unified-field-list-plugin/public';
 import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
-// import { DiscoverFieldDetails } from './discover_field_details';
+import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
@@ -388,28 +389,38 @@ function DiscoverFieldComponent({
       <>
         {showFieldStats && (
           <>
+            <EuiText color="subdued" size="s">
+              {'Stats as in Lens:'}
+            </EuiText>
+            <EuiSpacer size="s" />
             <FieldStats
               query={state.query!}
               filters={state.filters!}
               fromDate={dateRange.from}
               toDate={dateRange.to}
               dataViewOrDataViewId={indexPattern}
-              field={field}
-              testSubject="lnsFieldListPanel"
+              field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
+              testSubject="dscFieldListPanel"
             />
-            {/* <EuiTitle size="xxxs"> */}
-            {/*  <h5>*/}
-            {/*    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {*/}
-            {/*      defaultMessage: 'Top 5 values',*/}
-            {/*    })}*/}
-            {/*  </h5>*/}
-            {/* </EuiTitle> */}
-            {/* <DiscoverFieldDetails */}
-            {/*  indexPattern={indexPattern}*/}
-            {/*  field={field}*/}
-            {/*  details={details}*/}
-            {/*  onAddFilter={onAddFilter}*/}
-            {/* /> */}
+            {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
+            <EuiSpacer size="l" />
+            <EuiText color="subdued" size="s">
+              {'Current Discover stats:'}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiTitle size="xxxs">
+              <h5>
+                {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                  defaultMessage: 'Top 5 values',
+                })}
+              </h5>
+            </EuiTitle>
+            <DiscoverFieldDetails
+              indexPattern={indexPattern}
+              field={field}
+              details={details}
+              onAddFilter={onAddFilter}
+            />
           </>
         )}
 
