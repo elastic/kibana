@@ -53,10 +53,17 @@ describe('ResultSettingsLogic', () => {
     nonTextResultFields: {},
     textResultFields: {},
     queryPerformanceScore: 0,
+    fieldCapabilities: (_: string) => { return {}; },
+
   };
 
+  const FUNCTIONAL_SELECTORS = [
+    'fieldCapabilities',
+    'isSnippetAllowed',
+  ]
+
   // Values without selectors
-  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
+  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS), FUNCTIONAL_SELECTORS);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,7 +72,7 @@ describe('ResultSettingsLogic', () => {
 
   it('has expected default values', () => {
     mount();
-    expect(ResultSettingsLogic.values).toEqual({
+    expect(omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS)).toEqual({
       ...DEFAULT_VALUES,
       ...SELECTORS,
     });
@@ -408,6 +415,11 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
+          }
         });
 
         expect(ResultSettingsLogic.values.serverResultFields).toEqual({
@@ -431,6 +443,10 @@ describe('ResultSettingsLogic', () => {
             },
             bar: {},
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+          }
         });
 
         expect(ResultSettingsLogic.values.reducedServerResultFields).toEqual({

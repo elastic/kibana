@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaFieldCapabilities, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
@@ -79,6 +79,8 @@ interface ResultSettingsValues {
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
+  fieldCapabilities: (fieldName: string) => SchemaFieldCapabilities;
+  isSnippetAllowed: (fieldName: string) => boolean;
 }
 
 const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
@@ -184,11 +186,23 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         return nonTextResultFields;
       },
     ],
+    fieldCapabilities: [
+      () => [selectors.schema],
+      (schema: AdvancedSchema) => {
+        return (fieldName: string): SchemaFieldCapabilities => schema[fieldName].capabilities
+      },
+    ],
+    isSnippetAllowed: [
+      () => [selectors.fieldCapabilities],
+      (fieldCapabilitiesSelector: (fieldName: string) => SchemaFieldCapabilities)  => {
+        return (fieldName: string): boolean => !!fieldCapabilitiesSelector(fieldName).snippet;
+      },
+    ],
     serverResultFields: [
       () => [selectors.resultFields, selectors.schema],
       (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
-          if (!!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
+          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
             return serverResultFields;
           }
           return {

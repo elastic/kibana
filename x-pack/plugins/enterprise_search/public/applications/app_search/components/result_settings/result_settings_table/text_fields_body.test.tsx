@@ -37,6 +37,7 @@ describe('TextFieldsBody', () => {
         snippetFallback: false,
       },
     },
+    isSnippetAllowed: (_: string) => true
   };
 
   const actions = {
