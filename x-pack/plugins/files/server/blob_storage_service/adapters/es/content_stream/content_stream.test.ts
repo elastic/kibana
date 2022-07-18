@@ -218,8 +218,7 @@ describe('ContentStream', () => {
       const [[request]] = client.deleteByQuery.mock.calls;
 
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('query.bool.should.0.match.head_chunk_id', 'something.0');
-      expect(request).toHaveProperty('query.bool.should.1.match._id', 'something.0');
+      expect(request).toHaveProperty('query.bool.must.match.bid', 'something');
     });
 
     it('should split raw data into chunks', async () => {
@@ -230,17 +229,18 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenCalledTimes(3);
       expect(client.index).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining(set({}, 'document.data', '12'))
+        expect.objectContaining({
+          id: 'something.0',
+          index: 'somewhere',
+          document: { data: '12', bid: 'something' },
+        })
       );
       expect(client.index).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
           id: 'something.1',
           index: 'somewhere',
-          document: {
-            head_chunk_id: 'something.0',
-            data: '34',
-          },
+          document: { bid: 'something', data: '34' },
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
@@ -249,8 +249,9 @@ describe('ContentStream', () => {
           id: 'something.2',
           index: 'somewhere',
           document: {
-            head_chunk_id: 'something.0',
+            bid: 'something',
             data: '56',
+            last: true,
           },
         })
       );
@@ -264,7 +265,14 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenCalledTimes(3);
       expect(client.index).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining(set({}, 'document.data', Buffer.from('123').toString('base64')))
+        expect.objectContaining({
+          id: 'something.0',
+          index: 'somewhere',
+          document: {
+            data: Buffer.from('123').toString('base64'),
+            bid: 'something',
+          },
+        })
       );
       expect(client.index).toHaveBeenNthCalledWith(
         2,
@@ -273,7 +281,7 @@ describe('ContentStream', () => {
           index: 'somewhere',
           document: {
             data: Buffer.from('456').toString('base64'),
-            head_chunk_id: 'something.0',
+            bid: 'something',
           },
         })
       );
@@ -284,7 +292,8 @@ describe('ContentStream', () => {
           index: 'somewhere',
           document: {
             data: Buffer.from('78').toString('base64'),
-            head_chunk_id: 'something.0',
+            bid: 'something',
+            last: true,
           },
         })
       );
@@ -299,11 +308,7 @@ describe('ContentStream', () => {
 
       const [[deleteRequest]] = client.deleteByQuery.mock.calls;
 
-      expect(deleteRequest).toHaveProperty(
-        'query.bool.should.0.match.head_chunk_id',
-        'something.0'
-      );
-      expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', 'something.0');
+      expect(deleteRequest).toHaveProperty('query.bool.must.match.bid', 'something');
     });
   });
 });

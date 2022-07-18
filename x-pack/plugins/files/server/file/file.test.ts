@@ -54,10 +54,10 @@ describe('File', () => {
   });
 
   it('deletes file content when an upload fails', async () => {
-    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStore');
+    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorage');
 
     (esClient.index as jest.Mock).mockRejectedValue(new Error('test'));
-    const fileSO = { attributes: { status: 'AWAITING_UPLOAD' } };
+    const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
     (soClient.create as jest.Mock).mockResolvedValue(fileSO);
     (soClient.update as jest.Mock).mockResolvedValue(fileSO);
 

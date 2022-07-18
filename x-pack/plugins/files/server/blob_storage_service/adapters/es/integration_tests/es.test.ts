@@ -83,8 +83,16 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toBe('upload this');
-    // Called twice because we did not know where the file contents end
-    expect((esClient.get as sinon.SinonSpy).calledTwice).toBe(true);
+    // Called once because we should have found 'last: true'
+    expect((esClient.get as sinon.SinonSpy).calledOnce).toBe(true);
+    expect((esClient.get as sinon.SinonSpy).args[0]).toEqual([
+      {
+        id: id + '.0',
+        index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
+        _source_includes: ['data', 'last'],
+      },
+    ]);
+    expect((await (esClient.get as sinon.SinonSpy).returnValues[0])._source.last).toBe(true);
   });
 
   it('uploads and downloads a file of many chunks', async () => {

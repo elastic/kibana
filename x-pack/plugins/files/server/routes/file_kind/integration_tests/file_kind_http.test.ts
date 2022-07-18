@@ -104,12 +104,12 @@ describe('File kind HTTP API', () => {
   test('create', async () => {
     expect(await createFile()).toEqual({
       id: expect.any(String),
-      created_at: expect.any(String),
-      updated_at: expect.any(String),
+      created: expect.any(String),
+      updated: expect.any(String),
       name: 'myFile',
-      file_kind: fileKind,
+      fileKind,
       status: 'AWAITING_UPLOAD',
-      mime: 'image/png',
+      mimeType: 'image/png',
       extension: 'png',
       meta: {},
       alt: 'a picture of my dog',

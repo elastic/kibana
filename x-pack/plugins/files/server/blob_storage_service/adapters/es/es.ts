@@ -67,13 +67,13 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async upload(
     src: Readable,
-    { transforms }: { transforms?: Transform[] } = {}
+    { transforms, id }: { transforms?: Transform[]; id?: string } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
     try {
       const dest = getWritableContentStream({
-        id: undefined, // We are creating a new file
+        id,
         client: this.esClient,
         index: this.index,
         logger: this.logger.get('content-stream-upload'),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { errors as esErrors } from '@elastic/elasticsearch';
+import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
@@ -115,7 +116,7 @@ export class ContentStream extends Duplex {
     return this.maxChunkSize;
   }
 
-  private async readChunk() {
+  private async readChunk(): Promise<[data: null | string, last?: boolean]> {
     if (!this.id) {
       throw new Error('No document ID provided. Cannot read chunk.');
     }
@@ -127,15 +128,16 @@ export class ContentStream extends Duplex {
       const response = await this.client.get<FileChunkDocument>({
         id,
         index: this.index,
-        _source_includes: ['data'],
+        _source_includes: ['data', 'last'],
       });
-      return response?._source?.data;
+      const source = response?._source;
+      return [source?.data ?? null, source?.last];
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
         if (this.isSizeUnknown() && !readingHeadChunk) {
           // Assume there is no more content to read.
-          return null;
+          return [null];
         }
         if (readingHeadChunk) {
           this.logger.error(`File not found (id: ${this.getHeadChunkId()}).`);
@@ -159,7 +161,7 @@ export class ContentStream extends Duplex {
 
   _read() {
     this.readChunk()
-      .then((content) => {
+      .then(([content, last]) => {
         if (!content) {
           this.logger.debug(`Chunk is empty.`);
           this.push(null);
@@ -172,7 +174,7 @@ export class ContentStream extends Duplex {
         this.chunksRead++;
         this.bytesRead += buffer.byteLength;
 
-        if (this.isRead()) {
+        if (this.isRead() || last) {
           this.logger.debug(`Read ${this.bytesRead} of ${this.parameters.size} bytes.`);
           this.push(null);
         }
@@ -181,14 +183,13 @@ export class ContentStream extends Duplex {
   }
 
   private async removeChunks() {
-    const id = this.getHeadChunkId();
-    this.logger.debug(`Clearing existing chunks for ${id}`);
+    const bid = this.getId();
+    this.logger.debug(`Clearing existing chunks for ${bid}`);
     await this.client.deleteByQuery({
       index: this.index,
       query: {
         bool: {
-          should: [{ match: { head_chunk_id: id } }, { match: { _id: id } }],
-          minimum_should_match: 1,
+          must: { match: { bid } },
         },
       },
     });
@@ -209,20 +210,51 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${this.getId()}.${chunkNumber}`;
   }
 
+  /**
+   * Holds a reference to the last written chunk without actually writing it to ES.
+   *
+   * This enables us to reliably determine what the real last chunk is at the cost
+   * of holding, at most, 2 full chunks in memory.
+   */
+  private indexRequestBuffer: undefined | IndexRequest<FileChunkDocument>;
   private async writeChunk(data: string) {
     const chunkId = this.getChunkId(this.chunksWritten);
-    const isHeadChunk = this.chunksWritten === 0;
 
-    this.logger.debug(`Writing chunk #${this.chunksWritten} (${chunkId}).`);
+    if (!this.indexRequestBuffer) {
+      this.indexRequestBuffer = {
+        id: chunkId,
+        index: this.index,
+        document: { data, bid: this.getId() },
+      };
+      return;
+    }
 
-    await this.client.index<FileChunkDocument>({
+    this.logger.debug(`Writing chunk with ID "${this.indexRequestBuffer.id}".`);
+    await this.client.index<FileChunkDocument>(this.indexRequestBuffer);
+
+    // Hold a reference to the next buffer
+    this.indexRequestBuffer = {
       id: chunkId,
       index: this.index,
+      document: { data, bid: this.getId() },
+    };
+  }
+
+  private async finalizeLastChunk() {
+    if (!this.indexRequestBuffer) {
+      return;
+    }
+
+    this.logger.debug(`Writing last chunk with id "${this.indexRequestBuffer.id}".`);
+
+    await this.client.index<FileChunkDocument>({
+      ...this.indexRequestBuffer,
       document: {
-        data,
-        head_chunk_id: isHeadChunk ? undefined : this.getHeadChunkId(),
+        ...this.indexRequestBuffer.document!,
+        last: true,
       },
     });
+    this.indexRequestBuffer = undefined;
   }
 
   private async flush(size = this.bytesBuffered) {
@@ -288,6 +320,7 @@ export class ContentStream extends Duplex {
 
   _final(callback: Callback) {
     this.flush()
+      .then(() => this.finalizeLastChunk())
       .then(() => callback())
       .catch(callback);
   }
@@ -314,7 +347,7 @@ export class ContentStream extends Duplex {
 export interface ContentStreamArgs {
   client: ElasticsearchClient;
   /**
-   * Provide an Elasticsearch document ID to read from an existing document
+   * Provide base ID from which all chunks derive their IDs.
    */
   id?: string;
 
