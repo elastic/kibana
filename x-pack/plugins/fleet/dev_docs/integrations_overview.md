@@ -58,6 +58,8 @@ Each policy template is also exposed as its own distinct integration, and can be
 🔗 [Package spec reference](https://github.com/elastic/package-spec/blob/main/versions/1/integration/manifest.spec.yml#L221-L261)
 
 Each `policy_template` entry defines a set of `inputs`. An `input` is essentially a named grouping of fields related to a particular type of data to be ingested.
+Each `input` declares a `type` that typically maps to a Beats input like [httpjson](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-httpjson.html) or [filestream](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-filestream.html). Elastic Agent manages Beats under the hood,
+so these `inputs` are how we can configure the individual Beats that Agent is managing.
 
 For example, the Nginx integration defines three inputs:
 
@@ -103,7 +105,42 @@ For example, the Nginx integration's `access` data stream defines an entry in it
 
 The "Nginx access logs" fieldset we see in the policy editor UI is defined [here](https://github.com/elastic/integrations/blob/main/packages/nginx/data_stream/access/manifest.yml#L4-L40) in the `data_streams/access/manifest.yml` file within the Nginx integration. It's `input` value is set to `logfile`, so it appears under the "Collect logs from Nginx instances" section in the policy editor. The `title` and `description` values control what appears on the left-hand side to describe the fieldset.
 
+### Data stream assets
+
+Each data stream directory may contain an `elasticsearch` or `kibana` directory that contains assets (like ingest pipelines or Kibana dashboards) for a given
+stack component. These assets are usually YML or JSON files that Fleet passes off to the corresponding stack component to install. For example, the Nginx integration's `data_stream/access` directory contains an `elasticsearch/ingest_pipeline` directory that contains the following files:
+
+- `default.yml`
+- `third-party.yml`
+
+These files represent two ingest pipelines that ship with the Nginx integration to provide out-of-the-box mappings, field processing, etc for Nginx data.
+
 For more information on data streams, see Fleet's dev docs [here](https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/dev_docs/data_streams.md).
+
+### `agent/stream` directory
+
+Each data stream contains an `agent/stream` directory that includes YML files for configuring agent. These are template files that are compiled by Fleet when
+generating the full agent policy.
+
+_TODO: Document this in more detail_
+
+### `fields` directory
+
+The `fields` directory contains YML files that define the [mappings](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html) for a given data stream. There may be any number of `fields` files based on the integration maintainers preferred organization for their mappings. For example, many integrations
+contain a `base-fields.yml` file for common mappings, an `ecs.yml` file for [ECS](https://www.elastic.co/guide/en/ecs/current/index.html)-compliant fields, an
+`agent.yml` file for mappings specific to the actual agent process, and a `fields.yml` file for everything else.
+
+## `docs` directory
+
+Contains the README file rendered on the integrations detail page for the integration.
+
+## `img` directory
+
+Contains screenshots rendered on the integrations detail page for the integration.
+
+## `kibana` directory
+
+Contains top level Kibana assets (dashboards, visualizations, saved searches etc) for the integration.
 
 ## Relationship diagram
 
