@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export const setDocTitle = (title = 'Workpad') => {
-  document.title = `${title} - Kibana`;
+import { i18n } from '@kbn/i18n';
+
+export const getUntitledWorkpadLabel = () =>
+  i18n.translate('xpack.canvas.workpadApp.untitledWorkpadLabel', {
+    defaultMessage: 'Untitled workpad',
+  });
+
+export const setDocTitle = (title?: string) => {
+  document.title = `${title || getUntitledWorkpadLabel()} - Kibana`;
 };

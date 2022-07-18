@@ -7,6 +7,7 @@
 
 import React, { FC, MouseEventHandler, useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { CANVAS } from '../../../i18n';
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
@@ -14,6 +15,7 @@ import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
 import { CanvasWorkpad, CommitFn } from '../../../types';
+import { getUntitledWorkpadLabel } from '../../lib/doc_title';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
@@ -46,6 +48,8 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
 
   const commit = interactivePageLayout.current || (() => {});
 
+  const untitledWorkpadLabel = getUntitledWorkpadLabel();
+
   return (
     <div className="canvasLayout">
       <div className="canvasLayout__rows">
@@ -57,7 +61,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
                 className="euiScreenReaderOnly"
                 ref={workpadTitle}
                 tabIndex={-1}
-              >{`${CANVAS} - ${workpad.name || 'Workpad'}`}</h1>
+              >{`${CANVAS} - ${workpad.name || untitledWorkpadLabel}`}</h1>
               <WorkpadHeader commit={commit} />
             </div>
 
