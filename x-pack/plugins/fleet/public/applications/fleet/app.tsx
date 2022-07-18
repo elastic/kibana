@@ -361,7 +361,7 @@ export const AppRoutes = memo(
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
-              defaultMode="standalone"
+              defaultMode={flyoutContext.defaultMode || 'standalone'}
               isIntegrationFlow={true}
               onClose={() => flyoutContext.closeEnrollmentFlyout()}
             />
