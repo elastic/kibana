@@ -26,7 +26,7 @@ import {
   FileKind,
   FileJSON,
 } from '../../common';
-import { File } from '../file';
+import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
 import { FileNotFoundError } from './errors';
 
@@ -232,9 +232,6 @@ export class InternalFileService {
       page,
       perPage,
     });
-    return result.saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-    }));
+    return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
   }
 }
