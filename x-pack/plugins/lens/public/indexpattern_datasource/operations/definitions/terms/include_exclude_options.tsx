@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText, EuiText } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin';
+import { useDebouncedValue } from '../../../../shared_components';
 
 export interface IncludeExcludeOptions {
   label: string;
@@ -140,6 +141,40 @@ export const IncludeExcludeRow = ({
     updateParams(operation, terms, param, false);
   };
 
+  const onIncludeRegexChangeToDebounce = useCallback(
+    (newIncludeValue: string | number | undefined) => {
+      setRegex({
+        ...regex,
+        include: newIncludeValue,
+      });
+      updateParams('include', [newIncludeValue ?? ''], 'includeIsRegex', true);
+    },
+    [regex, updateParams]
+  );
+
+  const onExcludeRegexChangeToDebounce = useCallback(
+    (newExcludeValue: string | number | undefined) => {
+      setRegex({
+        ...regex,
+        exclude: newExcludeValue,
+      });
+      updateParams('exclude', [newExcludeValue ?? ''], 'excludeIsRegex', true);
+    },
+    [regex, updateParams]
+  );
+
+  const { inputValue: includeRegexValue, handleInputChange: onIncludeRegexValueChange } =
+    useDebouncedValue<string | number | undefined>({
+      onChange: onIncludeRegexChangeToDebounce,
+      value: regex.include,
+    });
+
+  const { inputValue: excludeRegexValue, handleInputChange: onExcludeRegexValueChange } =
+    useDebouncedValue<string | number | undefined>({
+      onChange: onExcludeRegexChangeToDebounce,
+      value: regex.exclude,
+    });
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -188,14 +223,9 @@ export const IncludeExcludeRow = ({
               }
             )}
             data-test-subj="lens-include-terms-regex-input"
-            value={regex.include}
+            value={includeRegexValue}
             onChange={(e) => {
-              const value = e.target.value;
-              setRegex({
-                ...regex,
-                include: value,
-              });
-              updateParams('include', [value], 'includeIsRegex', true);
+              onIncludeRegexValueChange(e.target.value);
             }}
             aria-label={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
@@ -268,14 +298,9 @@ export const IncludeExcludeRow = ({
                 defaultMessage: 'Enter a regex to filter values',
               }
             )}
-            value={regex.exclude}
+            value={excludeRegexValue}
             onChange={(e) => {
-              const value = e.target.value;
-              setRegex({
-                ...regex,
-                exclude: value,
-              });
-              updateParams('exclude', [value], 'excludeIsRegex', true);
+              onExcludeRegexValueChange(e.target.value);
             }}
             aria-label={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
