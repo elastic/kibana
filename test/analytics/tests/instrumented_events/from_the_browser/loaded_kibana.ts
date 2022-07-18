@@ -42,17 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.value3).to.be.a('number');
       expect(event.properties.value4).to.be.a('number');
       expect(event.properties.value5).to.be.a('number');
-
-      expect(event.properties).to.have.property('bootstrap_started');
-      expect(event.properties.bootstrap_started).to.be.a('number');
-      expect(event.properties).to.have.property('core_created');
-      expect(event.properties.core_created).to.be.a('number');
-      expect(event.properties).to.have.property('setup_done');
-      expect(event.properties.setup_done).to.be.a('number');
-      expect(event.properties).to.have.property('start_done');
-      expect(event.properties.start_done).to.be.a('number');
-      expect(event.properties).to.have.property('first_app_nav');
-      expect(event.properties.start_done).to.be.a('number');
     });
   });
 }
