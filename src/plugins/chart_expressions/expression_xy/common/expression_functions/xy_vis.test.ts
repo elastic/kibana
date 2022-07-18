@@ -233,7 +233,10 @@ describe('xyVis', () => {
           annotationLayers: [],
           isHistogram: true,
           xScaleType: 'time',
-          xExtent: { type: 'axisExtentConfig', mode: 'dataBounds' },
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
+          },
         },
         createMockExecutionContext()
       )
@@ -255,11 +258,14 @@ describe('xyVis', () => {
           ...restLayerArgs,
           referenceLines: [],
           annotationLayers: [],
-          xExtent: {
-            type: 'axisExtentConfig',
-            mode: 'full',
-            lowerBound: undefined,
-            upperBound: undefined,
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: {
+              type: 'axisExtentConfig',
+              mode: 'full',
+              lowerBound: undefined,
+              upperBound: undefined,
+            },
           },
         },
         createMockExecutionContext()
@@ -282,9 +288,9 @@ describe('xyVis', () => {
           ...restLayerArgs,
           referenceLines: [],
           annotationLayers: [],
-          xExtent: {
-            type: 'axisExtentConfig',
-            mode: 'dataBounds',
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
           },
         },
         createMockExecutionContext()
@@ -292,7 +298,7 @@ describe('xyVis', () => {
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
-  test('it renders with custom xExtent for a numeric histogram', async () => {
+  test('it renders with custom x-axis extent for a numeric histogram', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
@@ -304,11 +310,14 @@ describe('xyVis', () => {
         referenceLines: [],
         annotationLayers: [],
         isHistogram: true,
-        xExtent: {
-          type: 'axisExtentConfig',
-          mode: 'custom',
-          lowerBound: 0,
-          upperBound: 10,
+        xAxisConfig: {
+          type: 'xAxisConfig',
+          extent: {
+            type: 'axisExtentConfig',
+            mode: 'custom',
+            lowerBound: 0,
+            upperBound: 10,
+          },
         },
       },
       createMockExecutionContext()
@@ -320,11 +329,14 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
-          xExtent: {
-            type: 'axisExtentConfig',
-            mode: 'custom',
-            lowerBound: 0,
-            upperBound: 10,
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: {
+              type: 'axisExtentConfig',
+              mode: 'custom',
+              lowerBound: 0,
+              upperBound: 10,
+            },
           },
           layers: [
             {

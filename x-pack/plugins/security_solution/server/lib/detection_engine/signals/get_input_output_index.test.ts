@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { getInputIndex, GetInputIndex } from './get_input_output_index';
+import type { GetInputIndex } from './get_input_output_index';
+import { getInputIndex } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: RuleExecutorServicesMock;

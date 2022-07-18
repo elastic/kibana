@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -12,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiAccordion,
-  EuiAccordionProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -21,7 +21,8 @@ import styled from 'styled-components';
 
 import { pickBy, isEmpty, map } from 'lodash';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
+import type { FormData } from '../../shared_imports';
+import { UseField, Form, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';

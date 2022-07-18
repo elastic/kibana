@@ -7,6 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { CommandDefinition } from '..';
+import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
+
 export type ParsedArgData = string[];
 
 interface ParsedCommandInput<TArgs extends object = any> {
@@ -17,16 +20,16 @@ interface ParsedCommandInput<TArgs extends object = any> {
 }
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
-  const inputFirstSpacePosition = input.indexOf(' ');
-
   const response: ParsedCommandInput = {
-    name: input.substring(
-      0,
-      inputFirstSpacePosition === -1 ? input.length : inputFirstSpacePosition
-    ),
+    name: getCommandNameFromTextInput(input),
     args: {},
   };
 
+  if (!input) {
+    return response;
+  }
+
+  const inputFirstSpacePosition = input.indexOf(' ');
   const rawArguments =
     inputFirstSpacePosition === -1
       ? []
@@ -115,4 +118,81 @@ class ParsedCommand implements ParsedCommandInterface {
 
 export const parseCommandInput = (input: string): ParsedCommandInterface => {
   return new ParsedCommand(input);
+};
+
+export const getCommandNameFromTextInput = (input: string): string => {
+  const trimmedInput = input.trimStart();
+
+  if (!trimmedInput) {
+    return '';
+  }
+
+  const firstSpacePosition = input.indexOf(' ');
+
+  if (firstSpacePosition === -1) {
+    return trimmedInput;
+  }
+
+  return trimmedInput.substring(0, firstSpacePosition);
+};
+
+export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
+  let requiredArgs = '';
+  let optionalArgs = '';
+  const exclusiveOrArgs = [];
+
+  if (command.args) {
+    for (const [argName, argDefinition] of Object.entries(command.args)) {
+      if (argDefinition.required) {
+        if (requiredArgs.length) {
+          requiredArgs += ' ';
+        }
+        requiredArgs += `--${argName}`;
+      } else if (argDefinition.exclusiveOr) {
+        exclusiveOrArgs.push(`--${argName}`);
+      } else {
+        if (optionalArgs.length) {
+          optionalArgs += ' ';
+        }
+        optionalArgs += `--${argName}`;
+      }
+    }
+  }
+
+  const buildArgumentText = ({
+    required,
+    exclusive,
+    optional,
+  }: {
+    required?: string;
+    exclusive?: string;
+    optional?: string;
+  }) => {
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
+      optional && optional.length > 0 ? `[${optional}]` : ''
+    }`.trim();
+  };
+
+  return exclusiveOrArgs.length > 0
+    ? exclusiveOrArgs.map((exclusiveArg) => {
+        return buildArgumentText({
+          required: requiredArgs,
+          exclusive: exclusiveArg,
+          optional: optionalArgs,
+        });
+      })
+    : [buildArgumentText({ required: requiredArgs, optional: optionalArgs })];
+};
+
+export const parsedPidOrEntityIdParameter = (parameters: {
+  pid?: ParsedArgData;
+  entityId?: ParsedArgData;
+}): EndpointActionDataParameterTypes => {
+  if (parameters.pid) {
+    return { pid: Number(parameters.pid[0]) };
+  } else if (parameters.entityId) {
+    return { entity_id: parameters.entityId[0] };
+  }
+
+  return undefined;
 };

@@ -19,7 +19,7 @@ import {
 } from '../../../../common/containers/use_full_screen';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
 import { ACTION_INVESTIGATE_IN_RESOLVER } from '../../../../timelines/components/timeline/body/translations';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
   (get(['agent', 'type', 0], ecsData) === 'endpoint' ||

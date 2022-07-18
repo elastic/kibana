@@ -12,13 +12,13 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
@@ -48,7 +48,7 @@ export const MockFatalErrorsService = fatalErrorsServiceMock.create();
 export const FatalErrorsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockFatalErrorsService);
-jest.doMock('./fatal_errors', () => ({
+jest.doMock('@kbn/core-fatal-errors-browser-internal', () => ({
   FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
@@ -68,7 +68,7 @@ jest.doMock('./notifications', () => ({
 
 export const MockHttpService = httpServiceMock.create();
 export const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
-jest.doMock('./http', () => ({
+jest.doMock('@kbn/core-http-browser-internal', () => ({
   HttpService: HttpServiceConstructor,
 }));
 
@@ -76,7 +76,7 @@ export const MockUiSettingsService = uiSettingsServiceMock.create();
 export const UiSettingsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockUiSettingsService);
-jest.doMock('./ui_settings', () => ({
+jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
   UiSettingsService: UiSettingsServiceConstructor,
 }));
 

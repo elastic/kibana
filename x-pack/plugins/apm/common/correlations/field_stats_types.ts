@@ -6,9 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CorrelationsParams } from './types';
-
-export type FieldStatsCommonRequestParams = CorrelationsParams;
 
 export interface Field {
   fieldName: string;

@@ -19,9 +19,28 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+
+jest.mock('../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: jest.fn().mockReturnValue({
+    loading: false,
+    result: {
+      edges: [],
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+      totalCount: -1,
+    },
+    search: jest.fn(),
+    refetch: jest.fn(),
+    inspect: {},
+  }),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

@@ -9,7 +9,8 @@ import type { RulesSchema } from '../../common/detection_engine/schemas/response
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
+import type { CompleteTimeline } from './timeline';
+import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -460,7 +461,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     description,
     risk_score: riskScore,
     severity,
-    output_index: '.siem-signals-default',
+    output_index: '',
     author: [],
     false_positives: [],
     from: 'now-50000h',

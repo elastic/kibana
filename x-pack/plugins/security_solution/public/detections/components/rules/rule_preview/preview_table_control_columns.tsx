@@ -8,7 +8,7 @@
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { ControlColumnProps, ActionProps } from '@kbn/timelines-plugin/common';
+import type { ControlColumnProps, ActionProps } from '@kbn/timelines-plugin/common';
 import { getActionsColumnWidth, DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import * as i18n from './translations';
 

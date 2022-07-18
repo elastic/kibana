@@ -23,7 +23,7 @@ export const debugTelemetryRoute = createApmServerRoute({
     const taskManagerStart = await plugins.taskManager?.start();
     const savedObjectsClient = coreContext.savedObjects.client;
 
-    await taskManagerStart?.runNow?.(APM_TELEMETRY_TASK_NAME);
+    await taskManagerStart?.runSoon?.(APM_TELEMETRY_TASK_NAME);
 
     const apmTelemetryObject = await savedObjectsClient.get(
       APM_TELEMETRY_SAVED_OBJECT_TYPE,

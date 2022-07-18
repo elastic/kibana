@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINTS_ACTION_LIST_ROUTE,
 } from '../../../common/endpoint/constants';
-import {
+import type {
   ActionDetails,
   ActionListApiResponse,
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  ActionResponseOutput,
+  ProcessesEntry,
 } from '../../../common/endpoint/types';
-import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
@@ -85,8 +88,6 @@ export const sendEndpointActionResponse = async (
   action: ActionDetails,
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
-  // FIXME:PT Generate command specific responses
-
   const endpointResponse = endpointActionGenerator.generateResponse({
     agent: { id: action.agents[0] },
     EndpointActions: {
@@ -94,6 +95,7 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
+        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       },
       started_at: action.startedAt,
     },
@@ -112,5 +114,50 @@ export const sendEndpointActionResponse = async (
     refresh: 'wait_for',
   });
 
+  // ------------------------------------------
+  // Post Action Response tasks
+  // ------------------------------------------
+
+  // For isolate, If the response is not an error, then also send a metadata update
+  if (action.command === 'isolate' && !endpointResponse.error) {
+    for (const agentId of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentId, {
+        Endpoint: {
+          state: {
+            isolation: true,
+          },
+        },
+      });
+    }
+  }
+
+  // For UnIsolate, if response is not an Error, then also send metadata update
+  if (action.command === 'unisolate' && !endpointResponse.error) {
+    for (const agentId of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentId, {
+        Endpoint: {
+          state: {
+            isolation: false,
+          },
+        },
+      });
+    }
+  }
+
   return endpointResponse;
+};
+
+const getOutputDataIfNeeded = (
+  command: EndpointActionData['command']
+): { output?: ActionResponseOutput } => {
+  return command === 'running-processes'
+    ? ({
+        output: {
+          type: 'json',
+          content: {
+            entries: endpointActionGenerator.randomResponseActionProcesses(100),
+          },
+        },
+      } as { output: ActionResponseOutput<ProcessesEntry> })
+    : {};
 };

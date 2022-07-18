@@ -14,6 +14,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  log = this.ctx.getService('log');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -186,5 +187,44 @@ export class ConsolePageObject extends FtrService {
     } catch (e) {
       return false;
     }
+  }
+
+  public async hasInvalidSyntax() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasErrorMarker() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async clickFoldWidget() {
+    const widget = await this.find.byCssSelector('.ace_fold-widget');
+    await widget.click();
+  }
+
+  public async hasFolds() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
+      return folds.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async getResponseStatus() {
+    const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
+    const text = await statusBadge.getVisibleText();
+    return text.replace(/[^\d.]+/, '');
   }
 }

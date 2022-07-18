@@ -19,20 +19,23 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
-import { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  cspRuleAssetSavedObjectType,
+  CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  benchmarksInputSchema,
-  BenchmarksQuerySchema,
+  benchmarksQueryParamsSchema,
+  BenchmarksQueryParams,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
-import { isNonNullable } from '../../../common/utils/helpers';
+import type { CspRule } from '../../../common/schemas';
+import {
+  createCspRuleSearchFilterByPackagePolicy,
+  isNonNullable,
+} from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
@@ -50,7 +53,7 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: Partial<BenchmarksQuerySchema>
+  queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
@@ -104,15 +107,18 @@ export interface RulesStatusAggregation {
 export const getCspRulesStatus = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
-  const cspRules = soClient.find<CspRuleSchema, RulesStatusAggregation>({
-    type: cspRuleAssetSavedObjectType,
-    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
+): Promise<SavedObjectsFindResponse<CspRule, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRule, RulesStatusAggregation>({
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId: packagePolicy.id,
+      policyId: packagePolicy.policy_id,
+    }),
     aggs: {
       enabled_status: {
         filter: {
           term: {
-            [`${cspRuleAssetSavedObjectType}.attributes.enabled`]: true,
+            [`${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.enabled`]: true,
           },
         },
       },
@@ -194,7 +200,10 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksInputSchema },
+      validate: { query: benchmarksQueryParamsSchema },
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {

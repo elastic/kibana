@@ -6,9 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { HttpFetchError } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -23,7 +22,6 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
-import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 import { isDataView } from '../../../common/types/data_view';
 
@@ -206,6 +204,9 @@ export const getCreateTransformSettingsRequestBody = (
       DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND
       ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
       : {}),
+    ...(typeof transformDetailsState.transformSettingsNumFailureRetries === 'number'
+      ? { num_failure_retries: transformDetailsState.transformSettingsNumFailureRetries }
+      : {}),
   };
   return Object.keys(settings).length > 0 ? { settings } : {};
 };
@@ -266,11 +267,3 @@ export const getCreateTransformRequestBody = (
   // conditionally add additional settings
   ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });
-
-export function isHttpFetchError(error: any): error is HttpFetchError {
-  return (
-    error instanceof HttpFetchError &&
-    typeof error.name === 'string' &&
-    typeof error.message !== 'undefined'
-  );
-}

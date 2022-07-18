@@ -6,24 +6,24 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
-import type { ActionDetailsApiResponse } from '../../../../common/endpoint/types';
+import type { ActionDetailsApiResponse, ProcessesEntry } from '../../../../common/endpoint/types';
 
-export const useGetActionDetails = (
+export const useGetActionDetails = <TOutputType extends object = object>(
   actionId: string,
-  options: UseQueryOptions<ActionDetailsApiResponse, HttpFetchError> = {}
-): UseQueryResult<ActionDetailsApiResponse, HttpFetchError> => {
+  options: UseQueryOptions<ActionDetailsApiResponse<ProcessesEntry>, IHttpFetchError> = {}
+): UseQueryResult<ActionDetailsApiResponse<ProcessesEntry>, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionDetailsApiResponse, HttpFetchError>({
+  return useQuery<ActionDetailsApiResponse<ProcessesEntry>, IHttpFetchError>({
     queryKey: ['get-action-details', actionId],
     ...options,
     queryFn: () => {
-      return http.get<ActionDetailsApiResponse>(
+      return http.get<ActionDetailsApiResponse<ProcessesEntry>>(
         resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' })
       );
     },

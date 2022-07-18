@@ -13,6 +13,7 @@ import { ManageRoutesSpy } from './manage_spy_routes';
 import { SpyRouteComponent } from './spy_routes';
 import { useRouteSpy } from './use_route_spy';
 import { generateHistoryMock, generateRoutesMock } from './mocks';
+import { SecurityPageName } from '../../../app/types';
 
 const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
 jest.mock('./use_route_spy', () => ({
@@ -81,7 +82,7 @@ describe('Spy Routes', () => {
                 flowTarget: undefined,
               },
             }}
-            pageName="hosts"
+            pageName={SecurityPageName.hosts}
           />
         </ManageRoutesSpy>
       );
@@ -127,7 +128,7 @@ describe('Spy Routes', () => {
               flowTarget: undefined,
             },
           }}
-          pageName="hosts"
+          pageName={SecurityPageName.hosts}
         />
       );
 
@@ -146,7 +147,7 @@ describe('Spy Routes', () => {
           path: newPathname,
           url: newPathname,
           params: {
-            pageName: 'hosts',
+            pageName: SecurityPageName.hosts,
             detailName: undefined,
             tabName: HostsTableType.authentications,
             search: '',
@@ -162,7 +163,7 @@ describe('Spy Routes', () => {
           route: {
             detailName: undefined,
             history: mockHistoryValue,
-            pageName: 'hosts',
+            pageName: SecurityPageName.hosts,
             pathName: newPathname,
             tabName: HostsTableType.authentications,
             search: '?updated="true"',

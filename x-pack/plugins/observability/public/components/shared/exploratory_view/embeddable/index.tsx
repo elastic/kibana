@@ -11,6 +11,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import type { DataViewState } from '../hooks/use_app_data_view';
@@ -43,6 +44,10 @@ export function getExploratoryViewEmbeddable(
 
     const isDarkMode = uiSettings?.get('theme:darkMode');
 
+    const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
+      return lens.stateHelperApi();
+    }, []);
+
     const loadIndexPattern = useCallback(
       async ({ dataType }: { dataType: AppDataType }) => {
         const dataTypesIndexPatterns = props.dataTypesIndexPatterns;
@@ -70,13 +75,18 @@ export function getExploratoryViewEmbeddable(
       }
     }, [series?.dataType, loadIndexPattern]);
 
-    if (Object.keys(indexPatterns).length === 0 || loading) {
+    if (Object.keys(indexPatterns).length === 0 || loading || !lensHelper || lensLoading) {
       return <EuiLoadingSpinner />;
     }
 
     return (
       <EuiThemeProvider darkMode={isDarkMode}>
-        <ExploratoryViewEmbeddable {...props} indexPatterns={indexPatterns} lens={lens} />
+        <ExploratoryViewEmbeddable
+          {...props}
+          indexPatterns={indexPatterns}
+          lens={lens}
+          lensFormulaHelper={lensHelper.formula}
+        />
       </EuiThemeProvider>
     );
   };

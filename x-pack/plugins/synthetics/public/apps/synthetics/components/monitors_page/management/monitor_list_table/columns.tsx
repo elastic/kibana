@@ -132,12 +132,7 @@ export function getMonitorListColumns({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorEnabled
-          id={monitor.id}
-          monitor={monitor}
-          isDisabled={!canEditSynthetics}
-          reloadPage={reloadPage}
-        />
+        <MonitorEnabled id={monitor.id} monitor={monitor} reloadPage={reloadPage} />
       ),
     },
     {

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: `/context-encoded-param/_doc/${customDocIdParam}`,
+        path: `/context_encoded_param/_doc/${customDocIdParam}`,
         method: 'PUT',
         body: {
           username: 'Dmitry',
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
       await PageObjects.settings.createIndexPattern(
-        'context-encoded-param',
+        'context_encoded_param',
         '@timestamp',
         true,
         customDataViewIdParam
@@ -41,8 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    it('should navigate correctly when ', async () => {
-      await PageObjects.discover.selectIndexPattern('context-encoded-param');
+    it('should navigate correctly', async () => {
+      await PageObjects.discover.selectIndexPattern('context_encoded_param');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitForDocTableLoadingComplete();
 

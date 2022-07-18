@@ -8,8 +8,8 @@
 import { last, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { StartServices } from '../../../../types';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
@@ -17,7 +17,7 @@ import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
-import {
+import type {
   RouteSpyState,
   HostRouteSpyState,
   NetworkRouteSpyState,
@@ -26,9 +26,10 @@ import {
 } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { GenericNavRecord, NavigateToUrl } from '../types';
+import type { GenericNavRecord, NavigateToUrl } from '../types';
 import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page';
-import { GetSecuritySolutionUrl, useGetSecuritySolutionUrl } from '../../link_to';
+import type { GetSecuritySolutionUrl } from '../../link_to';
+import { useGetSecuritySolutionUrl } from '../../link_to';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 
 export interface ObjectWithNavTabs {
@@ -84,7 +85,7 @@ export const getBreadcrumbsForRoute = (
   }
 
   const newMenuLeadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
-    spyState.pageName as SecurityPageName,
+    spyState.pageName,
     getSecuritySolutionUrl,
     object.navTabs,
     isGroupedNavigationEnabled

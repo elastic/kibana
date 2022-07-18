@@ -11,11 +11,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { IUiSettingsClient } from '../../ui_settings';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
 import { OverlayStart } from '../../overlays';
-import { CoreContextProvider } from '../../utils';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;

@@ -34,6 +34,7 @@ export const MethodJson: React.FC = () => {
       docsUrl="#"
       type="json"
       onNameChange={(value: string) => onNameChange(value)}
+      onSubmit={() => null}
     >
       <EuiPanel
         color="subdued"

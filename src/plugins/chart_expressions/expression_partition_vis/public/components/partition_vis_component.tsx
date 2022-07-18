@@ -14,7 +14,6 @@ import {
   Partition,
   Position,
   Settings,
-  RenderChangeListener,
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
@@ -135,8 +134,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     setShowLegend(legendShow);
   }, [showLegendDefault]);
 
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
       if (isRendered) {
         props.renderComplete();
       }
@@ -360,7 +359,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   return (
     <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
-        <VisualizationNoResults hasNegativeValues={hasNegative} chartType={visType} />
+        <VisualizationNoResults
+          hasNegativeValues={hasNegative}
+          chartType={visType}
+          renderComplete={onRenderChange}
+        />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendColorPickerWrapperContext.Provider
@@ -387,6 +390,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitRowAccessor={splitChartRowAccessor}
               />
               <Settings
+                noResults={
+                  <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
+                }
                 debugState={window._echDebugStateFlag ?? false}
                 showLegend={
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
