@@ -16,8 +16,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../common/types/api';
-
-import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
@@ -26,11 +25,15 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
+import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
+import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
+import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
+import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
+import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
-import { SearchIndexDomainManagement } from './domain_management';
 import { SearchIndexIndexMappings } from './index_mappings';
+import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
-import { SearchIndexScheduling } from './scheduling';
 
 export enum SearchIndexTabId {
   // all indices
@@ -47,8 +50,8 @@ export enum SearchIndexTabId {
 export const SearchIndex: React.FC = () => {
   const { makeRequest, apiReset } = useActions(FetchIndexApiLogic);
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { indexName, tabId = SearchIndexTabId.OVERVIEW } = useParams<{
-    indexName: string;
+  const { indexName } = useValues(IndexNameLogic);
+  const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
@@ -90,7 +93,7 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <SearchIndexScheduling />,
+      content: <ConnectorSchedulingComponent />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -104,6 +107,13 @@ export const SearchIndex: React.FC = () => {
       id: SearchIndexTabId.DOMAIN_MANAGEMENT,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
         defaultMessage: 'Manage Domains',
+      }),
+    },
+    {
+      content: <AutomaticCrawlScheduler />,
+      id: SearchIndexTabId.SCHEDULING,
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
+        defaultMessage: 'Scheduling',
       }),
     },
   ];
@@ -127,15 +137,18 @@ export const SearchIndex: React.FC = () => {
       )
     );
   };
-
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
       isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
-      pageHeader={{ pageTitle: indexName }}
+      pageHeader={{
+        pageTitle: indexName,
+        rightSideItems: indexData?.crawler ? [<CrawlerStatusIndicator />] : [],
+      }}
     >
       <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      {indexData?.crawler && <CrawlCustomSettingsFlyout />}
     </EnterpriseSearchContentPageTemplate>
   );
 };

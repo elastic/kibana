@@ -40,7 +40,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     showAlertDetails,
     useFetchAlertData,
   }) => {
-    const { userCanCrud, features } = useCasesContext();
+    const { features } = useCasesContext();
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -171,7 +171,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
-              userCanCrud={userCanCrud}
               isLoading={isLoading && loadingKey === 'title'}
               title={caseData.title}
               onSubmit={onSubmitTitle}
@@ -181,7 +180,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         >
           <CaseActionBar
             caseData={caseData}
-            userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
             onUpdateField={onUpdateField}
           />

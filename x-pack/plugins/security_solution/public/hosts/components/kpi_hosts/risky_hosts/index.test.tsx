@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 
 import { RiskyHosts } from '.';
 import { TestProviders } from '../../../../common/mock';
-import { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
+import type { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
 
 describe('RiskyHosts', () => {
   const defaultProps = {

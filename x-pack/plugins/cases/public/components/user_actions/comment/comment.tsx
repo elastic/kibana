@@ -16,6 +16,7 @@ import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
+import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 const getDeleteLabelTitle = () => `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
@@ -41,8 +42,8 @@ const getCreateCommentUserAction = ({
   userAction,
   caseData,
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   comment,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -68,7 +69,6 @@ const getCreateCommentUserAction = ({
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         comment,
-        userCanCrud,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
         commentRefs,
@@ -91,14 +91,18 @@ const getCreateCommentUserAction = ({
         onRuleDetailsClick,
         onShowAlertDetails,
       });
+
       return alertBuilder.build();
+
     case CommentType.actions:
       const actionBuilder = createActionAttachmentUserActionBuilder({
         userAction,
         comment,
         actionsNavigation,
       });
+
       return actionBuilder.build();
+
     case CommentType.externalReference:
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
@@ -106,7 +110,18 @@ const getCreateCommentUserAction = ({
         externalReferenceAttachmentTypeRegistry,
         caseData,
       });
+
       return externalReferenceBuilder.build();
+
+    case CommentType.persistableState:
+      const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
+        userAction,
+        comment,
+        persistableStateAttachmentTypeRegistry,
+        caseData,
+      });
+
+      return persistableBuilder.build();
     default:
       return [];
   }
@@ -115,8 +130,8 @@ const getCreateCommentUserAction = ({
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   userAction,
-  userCanCrud,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -151,8 +166,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseData,
         userAction: commentUserAction,
         externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         comment,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
