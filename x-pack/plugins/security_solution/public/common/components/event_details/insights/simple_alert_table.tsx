@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { EuiLoadingContent, EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
@@ -33,9 +34,13 @@ const columns: Array<EuiBasicTableColumn<Record<string, string[]>>> = [
   },
 ];
 
+const alertLimit = 10;
+
 export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }) => {
+  const sampledData = useMemo(() => alertIds.slice(0, alertLimit), [alertIds]);
+
   const { loading, error, data } = useAlertsByIds({
-    alertIds,
+    alertIds: sampledData,
     fields: TABLE_FIELDS,
   });
   const mappedData = useMemo(() => {
@@ -50,7 +55,23 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
   } else if (error) {
     return <>{'Failed to load data'}</>;
   } else if (mappedData) {
-    return <EuiBasicTable items={mappedData} columns={columns} />;
+    const showLimitedDataNote = alertIds.length > alertLimit;
+    return (
+      <>
+        {showLimitedDataNote && (
+          <div>
+            <em>
+              <FormattedMessage
+                id="xpack.securitySolution.alertDetails.overview.limitedAlerts"
+                defaultMessage="Showing only the latest 10 alerts. View the rest of alerts in timeline."
+              />
+            </em>
+            <EuiSpacer />
+          </div>
+        )}
+        <EuiBasicTable items={mappedData} columns={columns} />
+      </>
+    );
   }
   return null;
 });
