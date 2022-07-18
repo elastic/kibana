@@ -7,8 +7,9 @@
 
 import React, { useContext, useMemo } from 'react';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiText } from '@elastic/eui';
 
+import { StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
 
 function getCalleeFunction(frame: StackFrameMetadata): string {
@@ -57,7 +58,7 @@ export const TopNFunctionsTable = () => {
 
     return ctx.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => ({
       rank: i + 1,
-      function: topN.Frame.ExeFileName,
+      frame: topN.Frame,
       samples: topN.CountExclusive,
       exclusiveCPU: (topN.CountExclusive / ctx.TotalCount) * 100,
       inclusiveCPU: (topN.CountInclusive / ctx.TotalCount) * 100,
@@ -70,8 +71,15 @@ export const TopNFunctionsTable = () => {
       name: 'Rank',
     },
     {
-      field: 'function',
+      field: 'frame',
       name: 'Function',
+      width: '50%',
+      render: (f: StackFrameMetadata) => (
+        <EuiText size="s">
+          <strong>{getCalleeFunction(f)}</strong>
+          <p>{getCalleeSource(f)}</p>
+        </EuiText>
+      ),
     },
     {
       field: 'samples',
