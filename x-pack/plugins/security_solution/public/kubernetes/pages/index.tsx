@@ -86,7 +86,6 @@ export const KubernetesContainer = React.memo(() => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
         ),
-        indexPattern,
         globalFilter: {
           filterQuery,
           startDate: from,
