@@ -19,6 +19,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    */
   meta?: TMeta;
 
+  /** An optional component used to render the modal body on console exit when actions are pending */
+  ExitPendingActionComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+
   /** An optional component used to render the Overlay page title where the console will be displayed */
   PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 

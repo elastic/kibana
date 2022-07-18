@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ActionLogButton,
+  EndpointExitModalMessage,
   getEndpointResponseActionsConsoleCommands,
 } from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
@@ -55,6 +56,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
             ActionComponents: [ActionLogButton],
+            ExitPendingActionComponent: EndpointExitModalMessage,
           })
           .show();
       }
