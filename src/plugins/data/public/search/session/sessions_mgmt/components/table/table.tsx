@@ -12,7 +12,6 @@ import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
@@ -98,8 +97,6 @@ export function SearchSessionsMgmtTable({
     doRefresh();
     searchUsageCollector.trackSessionsListLoaded();
   }, [doRefresh, searchUsageCollector]);
-
-  useInterval(doRefresh, refreshInterval);
 
   const onActionComplete: OnActionComplete = () => {
     doRefresh();
