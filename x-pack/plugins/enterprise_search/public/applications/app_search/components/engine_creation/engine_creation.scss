@@ -14,7 +14,7 @@
   .euiSelectableListItem-isFocused,
   .euiSelectableListItem__append {
     position: absolute;
-    top: 0.25rem;
+    top: $euiSizeXS;
     right: calc(1rem - 2px);
   }
 }
