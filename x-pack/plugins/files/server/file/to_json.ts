@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FileSavedObjectAttributes, FileJSON } from '../../common/types';
+
+export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes): FileJSON<M> {
+  const {
+    name,
+    mime_type: mimeType,
+    size,
+    created,
+    Updated,
+    FileKind,
+    Status,
+    Alt,
+    ChunkSize,
+    Compression,
+    Extension,
+    Meta,
+  } = attrs;
+  return {
+    id,
+    name,
+    mimeType,
+    size,
+    created,
+    updated: Updated,
+    fileKind: FileKind,
+    alt: Alt,
+    chunkSize: ChunkSize,
+    compression: Compression,
+    extension: Extension,
+    status: Status,
+    meta: Meta as M,
+  };
+}
