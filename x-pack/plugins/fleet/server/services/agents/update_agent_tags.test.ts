@@ -4,17 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { updateAgentTags } from './update_agent_tags';
 
+jest.mock('./filter_hosted_agents', () => ({
+  filterHostedPolicies: jest
+    .fn()
+    .mockImplementation((soClient, givenAgents) => Promise.resolve(givenAgents)),
+}));
+
 describe('update_agent_tags', () => {
   let esClient: ElasticsearchClientMock;
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createInternalClient();
+    soClient = savedObjectsClientMock.create();
     esClient.mget.mockResolvedValue({
       docs: [
         {
@@ -46,19 +54,19 @@ describe('update_agent_tags', () => {
   }
 
   it('should replace tag in middle place when one add and one remove tag', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['two']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], ['two']);
 
     expectTagsInEsBulk(['one', 'newName', 'three']);
   });
 
   it('should replace tag in first place when one add and one remove tag', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['one']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], ['one']);
 
     expectTagsInEsBulk(['newName', 'two', 'three']);
   });
 
   it('should replace tag in last place when one add and one remove tag', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['three']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], ['three']);
 
     expectTagsInEsBulk(['one', 'two', 'newName']);
   });
@@ -72,31 +80,37 @@ describe('update_agent_tags', () => {
         } as any,
       ],
     });
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['three']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], ['three']);
 
     expectTagsInEsBulk(['newName']);
   });
 
   it('should remove duplicate tags', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['one'], ['two']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], ['two']);
 
     expectTagsInEsBulk(['one', 'three']);
   });
 
   it('should add tag at the end when no tagsToRemove', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], []);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], []);
 
     expectTagsInEsBulk(['one', 'two', 'three', 'newName']);
   });
 
   it('should add tag at the end when tagsToRemove not in existing tags', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['dummy']);
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['newName'], ['dummy']);
 
     expectTagsInEsBulk(['one', 'two', 'three', 'newName']);
   });
 
   it('should add tag at the end when multiple tagsToRemove', async () => {
-    await updateAgentTags(esClient, { agentIds: ['agent1'] }, ['newName'], ['one', 'two']);
+    await updateAgentTags(
+      soClient,
+      esClient,
+      { agentIds: ['agent1'] },
+      ['newName'],
+      ['one', 'two']
+    );
 
     expectTagsInEsBulk(['three', 'newName']);
   });

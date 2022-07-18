@@ -122,12 +122,14 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
 
   try {
     const results = await AgentService.updateAgentTags(
+      soClient,
       esClient,
       { ...agentOptions, batchSize: request.body.batchSize },
       request.body.tagsToAdd ?? [],
