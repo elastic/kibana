@@ -3283,6 +3283,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-integrations-browser-internal@link:bazel-bin/packages/core/integrations/core-integrations-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-integrations-browser-mocks@link:bazel-bin/packages/core/integrations/core-integrations-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -6951,6 +6959,14 @@
   uid ""
 
 "@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-integrations-browser-internal@link:bazel-bin/packages/core/integrations/core-integrations-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-integrations-browser-mocks@link:bazel-bin/packages/core/integrations/core-integrations-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -13640,7 +13656,7 @@ domhandler@^3.0.0:
   dependencies:
     domelementtype "^2.0.1"
 
-domhandler@^4.0.0, domhandler@^4.0, domhandler@^4.2.0, domhandler@^4.2.2:
+domhandler@^4.0, domhandler@^4.0.0, domhandler@^4.2.0, domhandler@^4.2.2:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-4.3.0.tgz#16c658c626cf966967e306f966b431f77d4a5626"
   integrity sha512-fC0aXNQXqKSFTr2wDNZDhsEYjCiYsDWl3D01kwt25hm1YIPyDGHvvi3rw+PLqHAl/m71MaiF7d5zvBr0p5UB2g==
