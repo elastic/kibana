@@ -28,8 +28,6 @@ export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match
 export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
   '[data-test-subj="enriched-with-threat-intel"]';
 
-export const JSON_VIEW_WRAPPER = '[data-test-subj="jsonViewWrapper"]';
-
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
 export const JSON_TEXT = '[data-test-subj="jsonView"]';

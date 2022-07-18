@@ -221,19 +221,10 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
-const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
-  return extractFirstParamValue(query, 'included_policies') || '';
-};
-
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
-});
-
-export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
-  ...extractListPaginationParams(query),
-  included_policies: extractIncludedPolicies(query),
 });
 
 export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {

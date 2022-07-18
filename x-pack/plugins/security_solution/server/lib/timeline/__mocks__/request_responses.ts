@@ -96,15 +96,6 @@ export const createTimelineWithoutTimelineId = {
   timelineType: TimelineType.default,
 };
 
-export const createDraftTimelineWithoutTimelineId = {
-  templateTimelineId: null,
-  timeline: inputTimeline,
-  timelineId: null,
-  version: null,
-  timelineType: TimelineType.default,
-  status: TimelineStatus.draft,
-};
-
 export const createTemplateTimelineWithoutTimelineId = {
   timeline: inputTemplateTimeline,
   timelineId: null,

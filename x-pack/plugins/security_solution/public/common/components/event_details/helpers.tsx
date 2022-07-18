@@ -14,13 +14,11 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import type { BrowserField, BrowserFields } from '../../containers/source';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import type { ColumnHeaderOptions } from '../../../../common/types';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 /**
@@ -52,23 +50,6 @@ export interface AlertSummaryRow {
     isReadOnly?: boolean;
   };
 }
-
-export const getColumnHeaderFromBrowserField = ({
-  browserField,
-  width = DEFAULT_COLUMN_MIN_WIDTH,
-}: {
-  browserField: Partial<BrowserField>;
-  width?: number;
-}): ColumnHeaderOptions => ({
-  category: browserField.category,
-  columnHeaderType: 'not-filtered',
-  description: browserField.description != null ? browserField.description : undefined,
-  example: browserField.example != null ? `${browserField.example}` : undefined,
-  id: browserField.name || '',
-  type: browserField.type,
-  aggregatable: browserField.aggregatable,
-  initialWidth: width,
-});
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

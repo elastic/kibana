@@ -47,15 +47,6 @@ export const internalArtifactCompleteSchema = t.intersection([
 ]);
 export type InternalArtifactCompleteSchema = t.TypeOf<typeof internalArtifactCompleteSchema>;
 
-export const internalArtifactCreateSchema = t.intersection([
-  internalArtifactCompleteSchema,
-  t.exact(
-    t.type({
-      created,
-    })
-  ),
-]);
-
 export const internalManifestEntrySchema = t.exact(
   t.type({
     policyId: t.union([identifier, t.undefined]),

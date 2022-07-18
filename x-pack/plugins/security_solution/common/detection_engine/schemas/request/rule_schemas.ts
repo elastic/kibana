@@ -434,10 +434,6 @@ export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
-export const machineLearningFullPatchSchema = t.intersection([
-  machineLearningPatchParams,
-  sharedPatchSchema,
-]);
 const responseRequiredFields = {
   id,
   rule_id,

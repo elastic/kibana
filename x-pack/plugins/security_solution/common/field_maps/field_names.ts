@@ -31,7 +31,6 @@ export const ALERT_RULE_META = `${ALERT_RULE_NAMESPACE}.meta` as const;
 export const ALERT_RULE_RISK_SCORE_MAPPING = `${ALERT_RULE_NAMESPACE}.risk_score_mapping` as const;
 export const ALERT_RULE_SEVERITY_MAPPING = `${ALERT_RULE_NAMESPACE}.severity_mapping` as const;
 export const ALERT_RULE_THREAT = `${ALERT_RULE_NAMESPACE}.threat` as const;
-export const ALERT_RULE_THRESHOLD = `${ALERT_RULE_NAMESPACE}.threshold` as const;
 export const ALERT_RULE_THROTTLE = `${ALERT_RULE_NAMESPACE}.throttle` as const;
 export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as const;
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;

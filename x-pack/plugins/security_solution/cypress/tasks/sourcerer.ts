@@ -73,21 +73,6 @@ export const isSourcererOptions = (patternNames: string[]) => {
   });
 };
 
-export const selectSourcererOption = (patternName: string) => {
-  cy.get(SOURCERER.comboBoxInput).click();
-  cy.get(SOURCERER.comboBoxOptions)
-    .find(`button.euiFilterSelectItem[title="${patternName}"]`)
-    .click();
-  clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
-};
-
-export const deselectSourcererOption = (patternName: string) => {
-  cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"] button`).click();
-  clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
-};
-
 export const deselectSourcererOptions = (patternNames: string[]) => {
   patternNames.forEach((patternName) =>
     cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"] button`).click()

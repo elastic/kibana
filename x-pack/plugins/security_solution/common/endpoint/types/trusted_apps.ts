@@ -20,14 +20,8 @@ export interface GetTrustedAppsListResponse {
   data: TrustedApp[];
 }
 
-export interface PostTrustedAppCreateResponse {
-  data: TrustedApp;
-}
-
 /** API request params for updating a Trusted App */
 export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
-
-export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
 
 export enum OperatorFieldIds {
   is = 'is',

@@ -420,15 +420,6 @@ export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResp
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
- * All Timeline Saved object type with metadata
- */
-
-export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
-  total: runtimeTypes.number,
-  data: TimelineSavedToReturnObjectRuntimeType,
-});
-
-/**
  * Import/export timelines
  */
 

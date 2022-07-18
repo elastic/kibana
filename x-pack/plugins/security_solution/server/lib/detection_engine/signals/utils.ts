@@ -637,13 +637,6 @@ export const createSearchAfterReturnTypeFromResponse = ({
   });
 };
 
-export interface PreviewReturnType {
-  totalCount: number;
-  matrixHistogramData: unknown[];
-  errors?: string[] | undefined;
-  warningMessages?: string[] | undefined;
-}
-
 export const createSearchAfterReturnType = ({
   success,
   warning,

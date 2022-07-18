@@ -7,7 +7,6 @@
 
 import type {
   GetAggregateRuleExecutionEventsResponse,
-  GetInstalledIntegrationsResponse,
   RulesSchema,
 } from '../../../../../../common/detection_engine/schemas/response';
 
@@ -105,30 +104,3 @@ export const fetchRuleExecutionEvents = async ({
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
-
-export const fetchInstalledIntegrations = async ({
-  packages,
-  signal,
-}: {
-  packages?: string[];
-  signal?: AbortSignal;
-}): Promise<GetInstalledIntegrationsResponse> => {
-  return Promise.resolve({
-    installed_integrations: [
-      {
-        package_name: 'atlassian_bitbucket',
-        package_title: 'Atlassian Bitbucket',
-        package_version: '1.0.1',
-        integration_name: 'audit',
-        integration_title: 'Audit Logs',
-        is_enabled: true,
-      },
-      {
-        package_name: 'system',
-        package_title: 'System',
-        package_version: '1.6.4',
-        is_enabled: true,
-      },
-    ],
-  });
-};
