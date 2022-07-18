@@ -8,7 +8,7 @@
 
 import Eslint from 'eslint';
 
-const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
+export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
 const messages = {
   [NAKED_DISABLE_MSG_ID]:
     'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',

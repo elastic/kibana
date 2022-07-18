@@ -8,7 +8,7 @@
 
 import dedent from 'dedent';
 import { RuleTester } from 'eslint';
-import { NoNakedESLintDisableRule } from './no_naked_eslint_disable';
+import { NoNakedESLintDisableRule, NAKED_DISABLE_MSG_ID } from './no_naked_eslint_disable';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -121,8 +121,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: '\nconst a = 1;',
@@ -136,8 +135,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: `\nconst a = 1;`,
@@ -150,8 +148,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: '',
@@ -164,8 +161,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: '',
@@ -178,8 +174,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 1,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: `alert('foo');`,
@@ -197,8 +192,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 3,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: dedent`
@@ -222,8 +216,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 3,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: dedent`
@@ -246,8 +239,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 3,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: dedent`
@@ -269,8 +261,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               line: 3,
-              message:
-                'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+              messageId: NAKED_DISABLE_MSG_ID,
             },
           ],
           output: dedent`
