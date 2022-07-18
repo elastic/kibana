@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -14,8 +12,8 @@ import {
   EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
-import { partition } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { AllRulesTabs } from './rules_table_toolbar';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -28,18 +26,17 @@ import { useTags } from '../../../../containers/detection_engine/rules/use_tags'
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import type { EuiBasicTableOnChange } from '../types';
-import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
-import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
-import { useBulkActions } from './bulk_actions/use_bulk_actions';
-import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
-import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
+import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { showRulesTable } from './helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesTabs } from './rules_table_toolbar';
-import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { AllRulesUtilityBar } from './utility_bar';
+import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
+import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
+import { BulkEditDryRunConfirmation } from './bulk_actions/bulk_edit_dry_run_confirmation';
+import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
+import { useBulkActions } from './bulk_actions/use_bulk_actions';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -137,11 +134,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideBulkEditConfirmation,
     });
 
-    const { customRulesCount, isCustomRulesCountLoading } = useCustomRulesCount({
-      enabled: isBulkEditConfirmationVisible && isAllSelected,
-      filterOptions,
-    });
-
     const {
       bulkEditActionType,
       isBulkEditFlyoutVisible,
@@ -153,11 +145,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
 
-    const [selectedElasticRuleIds, selectedCustomRuleIds] = useMemo(() => {
-      const ruleImmutabilityMap = new Map(rules.map((rule) => [rule.id, rule.immutable]));
-      const predicate = (id: string) => ruleImmutabilityMap.get(id);
-      return partition(predicate, selectedRuleIds);
-    }, [rules, selectedRuleIds]);
+    const { bulkActionsDryRunResult, isBulkActionsDryRunLoading, executeBulkActionsDryRun } =
+      useBulkActionsDryRun();
 
     const getBulkItemsPopoverContent = useBulkActions({
       filterOptions,
@@ -165,6 +154,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       confirmBulkEdit,
       completeBulkEditForm,
       reFetchTags,
+      executeBulkActionsDryRun,
     });
 
     const paginationMemo = useMemo(
@@ -322,21 +312,16 @@ export const RulesTables = React.memo<RulesTableProps>(
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
         )}
-        {isBulkEditConfirmationVisible && !isCustomRulesCountLoading && (
-          <BulkEditConfirmation
-            customRulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
-            elasticRulesCount={
-              isAllSelected
-                ? Math.max((pagination.total ?? 0) - customRulesCount, 0)
-                : selectedElasticRuleIds.length
-            }
+        {isBulkEditConfirmationVisible && (
+          <BulkEditDryRunConfirmation
+            result={bulkActionsDryRunResult}
             onCancel={handleBulkEditCancel}
             onConfirm={handleBulkEditConfirm}
           />
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
-            rulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}
@@ -356,7 +341,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
-              isBulkActionInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
+              isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
               hasDisabledActions={loadingRulesAction != null}
               hasBulkActions
             />
