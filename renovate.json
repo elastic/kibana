@@ -178,7 +178,7 @@
         "team:security-onboarding-and-lifecycle-mgt"
       ],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
     }
   ]
