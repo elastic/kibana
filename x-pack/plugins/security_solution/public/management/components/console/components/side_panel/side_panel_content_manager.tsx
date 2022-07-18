@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
 import {
   EuiText,
   EuiIcon,
@@ -24,10 +23,6 @@ import { useWithCommandList } from '../../hooks/state_selectors/use_with_command
 import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
-
-const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme: { eui } }) => eui.euiTextSubduedColor};
-`;
 
 export const SidePanelContentManager = memo(() => {
   const dispatch = useConsoleStateDispatch();
@@ -47,14 +42,14 @@ export const SidePanelContentManager = memo(() => {
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <StyledEuiTitle size="s">
+              <EuiTitle size="s">
                 <h3>
                   <FormattedMessage
                     id="xpack.securitySolution.console.sidePanel.helpTitle"
                     defaultMessage="Help"
                   />
                 </h3>
-              </StyledEuiTitle>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -69,8 +64,18 @@ export const SidePanelContentManager = memo(() => {
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.console.sidePanel.helpDescription"
-              defaultMessage="To execute response actions add to main text bar ({icon}) use a comment or a parameter if necessary."
-              values={{ icon: <EuiIcon type="plusInCircle" /> }}
+              defaultMessage="To execute response actions {addText} ({icon}) use a comment or a parameter if necessary."
+              values={{
+                icon: <EuiIcon type="plusInCircle" />,
+                addText: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.console.sidePanel.helpDescription.addText"
+                      defaultMessage="add to main text bar"
+                    />
+                  </strong>
+                ),
+              }}
             />
           </EuiText>
         </>
