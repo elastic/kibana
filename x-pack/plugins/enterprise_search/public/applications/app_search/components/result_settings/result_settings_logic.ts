@@ -199,7 +199,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
     isSnippetAllowed: [
       () => [selectors.schema], (schema: AdvancedSchema) => {
-        return (fieldName: string): boolean => !!schema[fieldName].capabilities.snippet;
+        return (fieldName: string): boolean => !!schema[fieldName]?.capabilities.snippet;
       },
     ],
     serverResultFields: [

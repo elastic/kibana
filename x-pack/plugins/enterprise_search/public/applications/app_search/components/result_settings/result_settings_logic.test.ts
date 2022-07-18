@@ -280,6 +280,47 @@ describe('ResultSettingsLogic', () => {
 
   describe('selectors', () => {
     describe('textResultFields', () => {
+      it('should filter out nested fields and keep subfields only', () => {
+        mount({
+          schema: {
+            'simple_field': { type: SchemaType.Text, capabilities: {} },
+            'nested_object': { type: SchemaType.Nested, capabilities: {} },
+            'nested_object.subfield': { type: SchemaType.Text, capabilities: {} },
+            'simple_object.subfield': { type: SchemaType.Text, capabilities: {} },
+          },
+          resultFields: {
+            'simple_field': { raw: true },
+            'nested_object': { raw: true },
+            'nested_object.subfield': { raw: true },
+            'simple_object.subfield': { raw: true },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.textResultFields).toEqual({
+          'simple_field': { raw: true },
+          'nested_object.subfield': { raw: true },
+          'simple_object.subfield': { raw: true },
+        });
+      });
+
+      it('should filter out field that are missing in the schema', () => {
+        mount({
+          schema: {
+            'simple_field': { type: SchemaType.Text, capabilities: {} },
+          },
+          resultFields: {
+            'simple_field': { raw: true },
+            'invalid_field': { raw: true },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.textResultFields).toEqual({
+          'simple_field': { raw: true },
+        });
+      });
+    });
+
+    describe('textResultFields', () => {
       it('should return only resultFields that have a type of "text" in the engine schema', () => {
         mount({
           schema: {
@@ -319,6 +360,27 @@ describe('ResultSettingsLogic', () => {
         expect(ResultSettingsLogic.values.nonTextResultFields).toEqual({
           bar: { raw: true, rawSize: 5 },
         });
+      });
+    });
+
+    describe('isSnippetAllowed', () => {
+      it('should return true if field have the snippet capability', () => {
+        mount({
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: { snippet: true } },
+          }
+        });
+
+        expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(true);
+      });
+
+      it('should return false otherwise', () => {
+        mount({
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+          }
+        });
+        expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(false);
       });
     });
 

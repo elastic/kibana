@@ -112,6 +112,15 @@ describe('TextFieldsBody', () => {
       snippetCheckbox.simulate('change');
       expect(actions.toggleSnippetForField).toHaveBeenCalledWith('foo');
     });
+
+    describe('when "isSnippetAllowed" return false', () => {
+      values.isSnippetAllowed = (_: string) => false;
+
+      it('the snippet checkbox is disabled', () => {
+        const snippetCheckbox = getSnippetCheckbox();
+        expect(snippetCheckbox.prop('disabled')).toEqual(true);
+      });
+    });
   });
 
   describe('the "fallback" checkbox within each table row', () => {
