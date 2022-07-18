@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import {
   CLOUD_SECURITY_POSTURE_BASE_PATH,
   type CspSecuritySolutionContext,
 } from '@kbn/cloud-security-posture-plugin/public';
-import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
@@ -35,7 +36,9 @@ const CloudSecurityPosture = () => {
     // TODO: Finer granularity of this needs to be implemented in the cloud security posture plugin
     <TrackApplicationView viewId="cloud_security_posture">
       <SecuritySolutionPageWrapper noPadding noTimeline>
-        <CloudSecurityPostureRouter securitySolutionContext={securitySolutionContext} />
+        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+          <CloudSecurityPostureRouter securitySolutionContext={securitySolutionContext} />
+        </Suspense>
       </SecuritySolutionPageWrapper>
     </TrackApplicationView>
   );
