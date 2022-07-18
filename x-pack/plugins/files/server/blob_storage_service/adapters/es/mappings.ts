@@ -9,7 +9,6 @@ import type {
   MappingTypeMapping,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { JsonValue } from '@kbn/utility-types';
 
 /**
  * These are the fields we expect to find a given document acting as a file chunk.
@@ -24,54 +23,21 @@ export interface FileChunkDocument {
   data: string;
 
   /**
-   * If a file spans multiple documents, this field points to the first document.
-   *
-   * @note This is used to conveniently delete all of a file's chunks by
-   * issuing a single delete-by query.
-   *
-   * @note It is not recommended to use this for file retrieval by query because
-   * loading all file chunks into ES memory can degrade cluster performance.
+   * Blob ID field that tags a set of blobs as belonging to the same file.
    */
-  head_chunk_id?: string;
+  bid: string;
 
   /**
-   * Size of this document-part (chunk) in bytes.
+   * Whether this is the last chunk in a sequence.
    */
-  size?: number;
-
-  /**
-   * Compression used on the file.
-   */
-  compression?: 'gzip' | string;
-
-  /**
-   * Custom data that can be added by an application for its own purposes.
-   *
-   * @note Suitable for data about a file chunk that should not be searchable but
-   * used by an application when downloaded later.
-   */
-  app_metadata?: {
-    [key: string]: JsonValue;
-  };
+  last?: boolean;
 }
 
 export const mappings: MappingTypeMapping = {
   dynamic: false,
   properties: {
-    data: { type: 'binary' }, // Base64 encoded content, binary fields are automatically marked as not searchable
-    head_chunk_id: { type: 'keyword', index: true },
-    size: {
-      index: false,
-      type: 'long',
-    },
-    compression: {
-      index: false,
-      type: 'keyword',
-    },
-    app_metadata: {
-      enabled: false, // Do not parse this value for mapping in ES
-      type: 'object',
-      properties: {},
-    },
+    data: { type: 'binary' }, // Binary fields are automatically marked as not searchable by ES
+    bid: { type: 'keyword', index: true },
+    last: { type: 'boolean', index: false },
   } as Record<keyof FileChunkDocument, MappingProperty>, // Ensure that our ES types and TS types stay somewhat in sync
 } as const;
