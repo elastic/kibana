@@ -72,7 +72,7 @@ export function createTelemetryTimelineTaskConfig() {
         endpoint_alert_count: { value: number };
       };
       sender.getTelemetryUsageCluster()?.incrementCounter({
-        counterName: 'endpoint_alert',
+        counterName: 'telemetry_endpoint_alert',
         counterType: 'endpoint_alert_count',
         incrementBy: aggregations?.endpoint_alert_count.value,
       });
