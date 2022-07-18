@@ -6,10 +6,46 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { MetricsCollector, IntervalHistogram } from '@kbn/core-metrics-server';
+import type {
+  MetricsCollector,
+  IntervalHistogram,
+  OpsProcessMetrics,
+} from '@kbn/core-metrics-server';
 import { EventLoopDelaysMonitor } from '../event_loop_delays';
-import { createMockOpsProcessMetrics } from './process.mocks';
 
+// internal duplicate of metricsCollectorMock
+const createCollector = <T = any>(
+  collectReturnValue: any = {}
+): jest.Mocked<MetricsCollector<T>> => {
+  const collector: jest.Mocked<MetricsCollector<T>> = {
+    collect: jest.fn().mockResolvedValue(collectReturnValue),
+    reset: jest.fn(),
+  };
+
+  return collector;
+};
+
+export const metricsCollectorMock = {
+  create: createCollector,
+};
+
+// internal duplicate of process.mocks
+function createMockOpsProcessMetrics(): OpsProcessMetrics {
+  const histogram = mocked.createHistogram();
+
+  return {
+    memory: {
+      heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
+      resident_set_size_in_bytes: 1,
+    },
+    event_loop_delay: 1,
+    event_loop_delay_histogram: histogram,
+    pid: 1,
+    uptime_in_millis: 1,
+  };
+}
+
+// internal duplicate of base collector mock
 const createMock = () => {
   const mocked: jest.Mocked<MetricsCollector<any>> = {
     collect: jest.fn(),
@@ -21,13 +57,13 @@ const createMock = () => {
   return mocked;
 };
 
-/* internal duplicate of `collectorMock` exposed in @kbn/core-metrics-collectors-server-mocks for unit tests*/
+// internal duplicate of `collectorMock` exposed in @kbn/core-metrics-collectors-server-mocks for unit tests*/
 export const collectorMock = {
   create: createMock,
   createOpsProcessMetrics: createMockOpsProcessMetrics,
 };
 
-// EventLoopDelay mocks
+// internal duplicate of EventLoopDelay mocks
 // internal duplicate of EventLoopDelay mocks exposed in @kbn/core-metrics-collectors-server-mocks for unit tests
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}

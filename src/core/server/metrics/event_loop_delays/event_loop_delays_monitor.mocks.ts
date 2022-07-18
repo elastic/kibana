@@ -7,7 +7,7 @@
  */
 import moment from 'moment';
 import type { IntervalHistogram } from '@kbn/core-metrics-server';
-import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import type { IEventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 // move to public mocks
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}
@@ -59,7 +59,7 @@ function createMockMonitorDataMsHistogram(
 
 function createMockEventLoopDelaysMonitor() {
   const mockCollect = jest.fn();
-  const MockEventLoopDelaysMonitor: jest.MockedClass<typeof EventLoopDelaysMonitor> = jest
+  const MockEventLoopDelaysMonitor: jest.MockedClass<typeof IEventLoopDelaysMonitor> = jest
     .fn()
     .mockReturnValue({
       collect: mockCollect,

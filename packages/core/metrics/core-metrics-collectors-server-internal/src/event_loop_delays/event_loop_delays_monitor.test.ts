@@ -10,7 +10,7 @@
 jest.mock('perf_hooks');
 import { monitorEventLoopDelay } from 'perf_hooks';
 import { EventLoopDelaysMonitor, nsToMs } from './event_loop_delays_monitor';
-import { mocked } from './event_loop_delays_monitor.mocks';
+import { mocked } from '../collectors/mocks_internal';
 
 describe('EventLoopDelaysMonitor', () => {
   beforeAll(() => {

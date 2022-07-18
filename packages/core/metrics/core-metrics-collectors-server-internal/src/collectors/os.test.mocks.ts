@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { collectorMock } from './collectors/mocks'; // public mock to be exported from `@kbn/core-metrics-collectors-server-mocks`
-
-export const mockOpsCollector = collectorMock.create();
-
-jest.doMock('./ops_metrics_collector', () => ({
-  OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
+import { metricsCollectorMock } from './mocks_internal';
+// move to public mocks
+export const cgroupCollectorMock = metricsCollectorMock.create();
+jest.doMock('./cgroup', () => ({
+  OsCgroupMetricsCollector: jest.fn(() => cgroupCollectorMock),
 }));

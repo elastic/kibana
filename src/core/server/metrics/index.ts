@@ -7,16 +7,17 @@
  */
 
 // export type {
-//   InternalMetricsServiceStart,
-//   InternalMetricsServiceSetup,
 //   MetricsServiceSetup,
 //   MetricsServiceStart,
 //   OpsMetrics,
 //   IntervalHistogram,
-// } from './types';
-// export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collectors';
+// } from '@kbn/core-metrics-server';
+// export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from '@kbn/core-metrics-server';
 export { MetricsService } from './metrics_service';
 export type { InternalMetricsServiceStart, InternalMetricsServiceSetup } from './metrics_service';
 export { opsConfig } from './ops_config';
 export type { OpsConfigType } from './ops_config';
-export { type IEventLoopDelaysMonitor, EventLoopDelaysMonitor } from './event_loop_delays';
+// export {
+//   type IEventLoopDelaysMonitor,
+//   EventLoopDelaysMonitor,
+// } from '@kbn/core-metrics-collectors-server-internal';

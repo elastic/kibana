@@ -8,8 +8,8 @@
 
 import fs from 'fs';
 import { join as joinPath } from 'path';
-import { Logger } from '@kbn/logging';
-import { MetricsCollector, OpsOsMetrics } from '@kbn/core-metrics-server';
+import type { Logger } from '@kbn/logging';
+import type { MetricsCollector, OpsOsMetrics } from '@kbn/core-metrics-server';
 
 type OsCgroupMetrics = Pick<OpsOsMetrics, 'cpu' | 'cpuacct'>;
 

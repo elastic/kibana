@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { metricsCollectorMock } from './collector.mock';
-// move to public mocks
-export const cgroupCollectorMock = metricsCollectorMock.create();
-jest.doMock('./cgroup', () => ({
-  OsCgroupMetricsCollector: jest.fn(() => cgroupCollectorMock),
-}));
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/metrics/core-metrics-collectors-server-internal'],
+};
