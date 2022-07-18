@@ -206,22 +206,6 @@ export function winlogRecordID(event: WinlogEvent): undefined | string {
 }
 
 /**
- * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
- */
-type EventSequenceFields = Partial<
-  | {
-      endgame: Partial<{
-        serial_event_id: ECSField<number>;
-      }>;
-    }
-  | {
-      event: Partial<{
-        sequence: ECSField<number>;
-      }>;
-    }
->;
-
-/**
  * The event.id ECS field.
  */
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {

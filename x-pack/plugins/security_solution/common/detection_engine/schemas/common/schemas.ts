@@ -23,6 +23,8 @@ export type Author = t.TypeOf<typeof author>;
 export const building_block_type = t.string;
 export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 
+export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
+
 export const description = NonEmptyString;
 export type Description = t.TypeOf<typeof description>;
 
@@ -35,13 +37,25 @@ export const outcome = t.union([
 ]);
 export type Outcome = t.TypeOf<typeof outcome>;
 
+export const alias_target_id = t.string;
 export const alias_purpose = t.union([
   t.literal('savedObjectConversion'),
   t.literal('savedObjectImport'),
 ]);
-
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
+export const event_category_override = t.string;
+export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
+
+export const tiebreaker_field = t.string;
+
+export const tiebreakerFieldOrUndefined = t.union([tiebreaker_field, t.undefined]);
+
+export const timestamp_field = t.string;
+
+export const timestampFieldOrUndefined = t.union([timestamp_field, t.undefined]);
+
+export const false_positives = t.array(t.string);
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;
@@ -83,6 +97,10 @@ export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 export const index = t.array(t.string);
 export type Index = t.TypeOf<typeof index>;
 
+export const data_view_id = t.string;
+
+export const dataViewIdOrUndefined = t.union([data_view_id, t.undefined]);
+
 export const indexOrUndefined = t.union([index, t.undefined]);
 export type IndexOrUndefined = t.TypeOf<typeof indexOrUndefined>;
 
@@ -98,7 +116,11 @@ export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 export const license = t.string;
 export type License = t.TypeOf<typeof license>;
 
+export const licenseOrUndefined = t.union([license, t.undefined]);
+
 export const objects = t.array(t.type({ rule_id }));
+
+export const output_index = t.string;
 
 export const saved_id = t.string;
 
@@ -108,7 +130,11 @@ export type SavedIdOrUndefined = t.TypeOf<typeof savedIdOrUndefined>;
 export const timeline_id = t.string;
 export type TimelineId = t.TypeOf<typeof timeline_id>;
 
+export const timelineIdOrUndefined = t.union([timeline_id, t.undefined]);
+
 export const timeline_title = t.string;
+
+export const timelineTitleOrUndefined = t.union([timeline_title, t.undefined]);
 
 export const timestamp_override = t.string;
 export type TimestampOverride = t.TypeOf<typeof timestamp_override>;
@@ -124,6 +150,7 @@ export const timestampOverrideFallbackDisabledOrUndefined = t.union([
   timestamp_override_fallback_disabled,
   t.undefined,
 ]);
+
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
  * to be added to the meta object

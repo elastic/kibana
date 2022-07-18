@@ -206,18 +206,6 @@ const createPinnedEvent = async ({
   return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
 };
 
-const getSavedPinnedEvent = async (request: FrameworkRequest, pinnedEventId: string) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObject = await savedObjectsClient.get<PinnedEventWithoutExternalRefs>(
-    pinnedEventSavedObjectType,
-    pinnedEventId
-  );
-
-  const populatedPinnedEvent = pinnedEventFieldsMigrator.populateFieldsFromReferences(savedObject);
-
-  return convertSavedObjectToSavedPinnedEvent(populatedPinnedEvent);
-};
-
 const getAllSavedPinnedEvents = async (
   request: FrameworkRequest,
   options: SavedObjectsFindOptions

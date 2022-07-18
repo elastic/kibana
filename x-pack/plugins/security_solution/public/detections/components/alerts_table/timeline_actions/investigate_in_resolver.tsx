@@ -14,8 +14,3 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
       get(['event', 'module', 0], ecsData) === 'sysmon')) &&
   get(['process', 'entity_id'], ecsData)?.length === 1 &&
   get(['process', 'entity_id', 0], ecsData) !== '';
-interface InvestigateInResolverProps {
-  timelineId: string;
-  ecsData: Ecs;
-  onClose: () => void;
-}

@@ -66,11 +66,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
-interface SortExceptionsReturn {
-  exceptionsWithValueLists: ExceptionListItemSchema[];
-  exceptionsWithoutValueLists: ExceptionListItemSchema[];
-}
-
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const hasReadIndexPrivileges = async (args: {

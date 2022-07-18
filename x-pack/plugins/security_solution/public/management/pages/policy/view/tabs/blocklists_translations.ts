@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
   deleteModalTitle: i18n.translate(
@@ -27,6 +28,15 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
       defaultMessage: 'Error while attempting to remove blocklist entry',
     }
   ),
+  flyoutWarningCalloutMessage: (maxNumber: number) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.blocklist.layout.flyout.searchWarning.text',
+      {
+        defaultMessage:
+          'Only the first {maxNumber} blocklist entries are displayed. Please use the search bar to refine the results.',
+        values: { maxNumber },
+      }
+    ),
   flyoutNoArtifactsToBeAssignedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.layout.flyout.noAssignable',
     {
@@ -39,6 +49,11 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
       defaultMessage: 'Assign blocklist entries',
     }
   ),
+  flyoutSubtitle: (policyName: string): string =>
+    i18n.translate('xpack.securitySolution.endpoint.policy.blocklist.layout.flyout.subtitle', {
+      defaultMessage: 'Select blocklist entries to add to {policyName}',
+      values: { policyName },
+    }),
   flyoutSearchPlaceholder: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.layout.search.label',
     {
@@ -51,10 +66,32 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
       defaultMessage: `An error occurred updating blocklist entry`,
     }
   ),
+  flyoutSuccessMessageText: (updatedExceptions: ExceptionListItemSchema[]): string =>
+    updatedExceptions.length > 1
+      ? i18n.translate(
+          'xpack.securitySolution.endpoint.policy.blocklist.layout.flyout.toastSuccess.textMultiples',
+          {
+            defaultMessage: '{count} blocklist entries have been added to your list.',
+            values: { count: updatedExceptions.length },
+          }
+        )
+      : i18n.translate(
+          'xpack.securitySolution.endpoint.policy.blocklist.layout.flyout.toastSuccess.textSingle',
+          {
+            defaultMessage: '"{name}" blocklist has been added to your list.',
+            values: { name: updatedExceptions[0].name },
+          }
+        ),
   emptyUnassignedTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.empty.unassigned.title',
     { defaultMessage: 'No assigned blocklist entries' }
   ),
+  emptyUnassignedMessage: (policyName: string): string =>
+    i18n.translate('xpack.securitySolution.endpoint.policy.blocklist.empty.unassigned.content', {
+      defaultMessage:
+        'There are currently no blocklist entries assigned to {policyName}. Assign blocklist entries now or add and manage them on the blocklist page.',
+      values: { policyName },
+    }),
   emptyUnassignedPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.empty.unassigned.primaryAction',
     {
@@ -81,6 +118,12 @@ export const POLICY_ARTIFACT_BLOCKLISTS_LABELS = Object.freeze({
     'xpack.securitySolution.endpoint.policy.blocklist.empty.unexisting.action',
     { defaultMessage: 'Add blocklist entry' }
   ),
+  listTotalItemCountMessage: (totalItemsCount: number): string =>
+    i18n.translate('xpack.securitySolution.endpoint.policy.blocklists.list.totalItemCount', {
+      defaultMessage:
+        'Showing {totalItemsCount, plural, one {# blocklist entry} other {# blocklist entries}}',
+      values: { totalItemsCount },
+    }),
   listRemoveActionNotAllowedMessage: i18n.translate(
     'xpack.securitySolution.endpoint.policy.blocklist.list.removeActionNotAllowed',
     {
