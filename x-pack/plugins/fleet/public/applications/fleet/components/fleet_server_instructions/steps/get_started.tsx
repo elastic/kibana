@@ -97,7 +97,11 @@ const GettingStartedStepContent: React.FunctionComponent<{
 
       <EuiForm onSubmit={quickStartCreateForm.submit}>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={`
+              max-width: 100%;
+            `}
+          >
             <FleetServerHostComboBox
               fleetServerHost={fleetServerHost}
               fleetServerHostSettings={fleetServerHostSettings}
