@@ -14,11 +14,11 @@ describe('useLocationMonitors', () => {
   it('returns expected results', () => {
     const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
 
-    expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: '' });
+    expect(result.current).toStrictEqual({ locations: [] });
     expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
       aggs: {
-        monitorNames: {
-          terms: { field: 'synthetics-monitor.attributes.name.keyword', size: 10000 },
+        locations: {
+          terms: { field: 'synthetics-monitor.attributes.locations.id', size: 10000 },
         },
       },
       perPage: 0,
@@ -29,8 +29,11 @@ describe('useLocationMonitors', () => {
   it('returns expected results after data', async () => {
     defaultCore.savedObjects.client.find = jest.fn().mockReturnValue({
       aggregations: {
-        monitorNames: {
-          buckets: [{ key: 'Test' }, { key: 'Test 1' }],
+        locations: {
+          buckets: [
+            { key: 'Test', doc_count: 5 },
+            { key: 'Test 1', doc_count: 0 },
+          ],
         },
       },
     });
@@ -39,10 +42,21 @@ describe('useLocationMonitors', () => {
       wrapper: WrappedHelper,
     });
 
-    expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: 'Test' });
+    expect(result.current).toStrictEqual({ locations: [] });
 
     await waitForNextUpdate();
 
-    expect(result.current).toStrictEqual({ nameAlreadyExists: true, validName: '' });
+    expect(result.current).toStrictEqual({
+      locations: [
+        {
+          id: 'Test',
+          count: 5,
+        },
+        {
+          id: 'Test 1',
+          count: 0,
+        },
+      ],
+    });
   });
 });
