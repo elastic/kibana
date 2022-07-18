@@ -19,8 +19,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
 export const getDevLocation = (devUrl: string): ServiceLocation => ({
   id: 'localhost',
-  // HACK: makes it easier to test the dev mode
-  label: 'Dev Service',
+  label: 'Local Synthetics Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
