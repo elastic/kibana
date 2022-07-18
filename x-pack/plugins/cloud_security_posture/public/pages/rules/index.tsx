@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
+import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { CspPageNavigationItem } from '../../common/navigation/types';
+import type { CspPageNavigationItem } from '../../common/navigation/types';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
