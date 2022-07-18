@@ -11,7 +11,11 @@ import {
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  ServiceLocations,
+} from '../../../common/runtime_types';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -201,7 +205,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
 
     const allMonitorIds: string[] = [];
     const pages: Record<number, unknown[]> = {};
-    let currentPage = 1;
+    let currentPage = 0;
     let currentItem = 0;
     let total = 0;
 
@@ -212,12 +216,13 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       allMonitorIds.push(id);
 
       /* for reach location, add a config item */
-      const locations = monitor.attributes.locations;
+      const locations = monitor.attributes[ConfigKey.LOCATIONS];
       locations.forEach((location) => {
         const config = {
           id,
-          name: monitor.attributes.name,
+          name: monitor.attributes[ConfigKey.NAME],
           location,
+          isEnabled: monitor.attributes[ConfigKey.ENABLED],
         };
         if (!pages[currentPage]) {
           pages[currentPage] = [config];
