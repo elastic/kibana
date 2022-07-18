@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../common/mock';
-import { useHostOverview } from '.';
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import { TestProviders } from '../../../../common/mock';
+import { useUserDetails } from '.';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
-jest.mock('../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
@@ -17,19 +17,19 @@ const mockSearch = jest.fn();
 
 const defaultProps = {
   endDate: '2020-07-08T08:20:18.966Z',
-  hostName: 'my-macbook',
   indexNames: ['fakebeat-*'],
   skip: false,
   startDate: '2020-07-07T08:20:18.966Z',
+  userName: 'myUserName',
 };
 
-describe('useHostOverview', () => {
+describe('useUserDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
       result: {
-        hostDetails: {},
+        overviewNetwork: {},
       },
       search: mockSearch,
       refetch: jest.fn(),
@@ -38,7 +38,7 @@ describe('useHostOverview', () => {
   });
 
   it('runs search', () => {
-    renderHook(() => useHostOverview(defaultProps), {
+    renderHook(() => useUserDetails(defaultProps), {
       wrapper: TestProviders,
     });
 
@@ -50,7 +50,7 @@ describe('useHostOverview', () => {
       ...defaultProps,
       skip: true,
     };
-    renderHook(() => useHostOverview(props), {
+    renderHook(() => useUserDetails(props), {
       wrapper: TestProviders,
     });
 
@@ -60,7 +60,7 @@ describe('useHostOverview', () => {
     const props = {
       ...defaultProps,
     };
-    const { rerender } = renderHook(() => useHostOverview(props), {
+    const { rerender } = renderHook(() => useUserDetails(props), {
       wrapper: TestProviders,
     });
     props.skip = true;
