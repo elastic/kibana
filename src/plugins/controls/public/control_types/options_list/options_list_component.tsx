@@ -40,13 +40,15 @@ export const OptionsListComponent = ({
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState?.invalidSelections);
-  const validSelections = select((state) => state.componentState?.validSelections);
-  const selectedOptions = select((state) => state.input.selectedOptions);
-  const controlStyle = select((state) => state.input.controlStyle);
-  const singleSelect = select((state) => state.input.singleSelect);
+  const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const validSelections = select((state) => state.componentState.validSelections);
+
+  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const id = select((state) => state.explicitInput.id);
+
   const loading = select((state) => state.output.loading);
-  const id = select((state) => state.input.id);
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
 import { RangeSliderEmbeddableInput } from '../../../common/control_types/range_slider/types';
@@ -14,8 +14,7 @@ import { ControlOutput } from '../../types';
 
 // Component state is only used by public components.
 export interface RangeSliderComponentState {
-  field?: DataViewField;
-  fieldFormatter: (value: string) => string;
+  field?: FieldSpec;
   min: string;
   max: string;
   isInvalid?: boolean;

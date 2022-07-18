@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
+
+import { Filter } from '@kbn/es-query';
 
 import { OptionsListField, OptionsListReduxState, OptionsListComponentState } from './types';
 
 export const optionsListReducers = {
   deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.input.selectedOptions) return;
-    const itemIndex = state.input.selectedOptions.indexOf(action.payload);
+    if (!state.explicitInput.selectedOptions) return;
+    const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
     if (itemIndex !== -1) {
-      const newSelections = [...state.input.selectedOptions];
+      const newSelections = [...state.explicitInput.selectedOptions];
       newSelections.splice(itemIndex, 1);
-      state.input.selectedOptions = newSelections;
+      state.explicitInput.selectedOptions = newSelections;
     }
   },
   deselectOptions: (
@@ -28,27 +27,27 @@ export const optionsListReducers = {
     action: PayloadAction<string[]>
   ) => {
     for (const optionToDeselect of action.payload) {
-      if (!state.input.selectedOptions) return;
-      const itemIndex = state.input.selectedOptions.indexOf(optionToDeselect);
+      if (!state.explicitInput.selectedOptions) return;
+      const itemIndex = state.explicitInput.selectedOptions.indexOf(optionToDeselect);
       if (itemIndex !== -1) {
-        const newSelections = [...state.input.selectedOptions];
+        const newSelections = [...state.explicitInput.selectedOptions];
         newSelections.splice(itemIndex, 1);
-        state.input.selectedOptions = newSelections;
+        state.explicitInput.selectedOptions = newSelections;
       }
     }
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.input.selectedOptions) state.input.selectedOptions = [];
-    state.input.selectedOptions?.push(action.payload);
+    if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+    state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<string>
   ) => {
-    state.input.selectedOptions = [action.payload];
+    state.explicitInput.selectedOptions = [action.payload];
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
-    if (state.input.selectedOptions) state.input.selectedOptions = [];
+    if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];
@@ -88,10 +87,10 @@ export const optionsListReducers = {
   ) => {
     state.output.filters = action.payload;
   },
-  setDataView: (
+  setDataViewId: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<DataView | undefined>
+    action: PayloadAction<string | undefined>
   ) => {
-    state.output.dataViews = action.payload ? [action.payload] : [];
+    state.output.dataViewId = action.payload;
   },
 };

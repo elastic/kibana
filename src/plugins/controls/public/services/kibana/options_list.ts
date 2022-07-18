@@ -86,7 +86,7 @@ class OptionsListService implements ControlsOptionsListService {
       ...passThroughProps,
       filters: esFilters,
       fieldName: field.name,
-      fieldSpec: field.toSpec?.(),
+      fieldSpec: field,
       textFieldName: (field as OptionsListField).textFieldName,
     };
   };

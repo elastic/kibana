@@ -23,12 +23,12 @@ export interface ReduxEmbeddableSyncSettings<
 > {
   disableSync: boolean;
   isInputEqual?: (
-    a: ReduxEmbeddableStateType['input'],
-    b: ReduxEmbeddableStateType['input']
+    a: Partial<ReduxEmbeddableStateType['explicitInput']>,
+    b: Partial<ReduxEmbeddableStateType['explicitInput']>
   ) => boolean;
   isOutputEqual?: (
-    a: ReduxEmbeddableStateType['output'],
-    b: ReduxEmbeddableStateType['output']
+    a: Partial<ReduxEmbeddableStateType['output']>,
+    b: Partial<ReduxEmbeddableStateType['output']>
   ) => boolean;
 }
 
@@ -57,7 +57,7 @@ export interface ReduxEmbeddableState<
   OutputType extends EmbeddableOutput = EmbeddableOutput,
   StateType extends unknown = unknown
 > {
-  input: InputType;
+  explicitInput: InputType;
   output: OutputType;
   componentState: StateType;
 }
@@ -91,7 +91,7 @@ export interface ReduxEmbeddableContext<
   } & {
     // Generic reducers to interact with embeddable Input and Output.
     updateEmbeddableReduxInput: ActionCreatorWithPayload<
-      Partial<ReduxEmbeddableStateType['input']>
+      Partial<ReduxEmbeddableStateType['explicitInput']>
     >;
     updateEmbeddableReduxOutput: ActionCreatorWithPayload<
       Partial<ReduxEmbeddableStateType['output']>

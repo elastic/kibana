@@ -13,10 +13,10 @@ import {
   PayloadAction,
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
-import { Filter } from '@kbn/es-query';
 import React, { ReactNode, PropsWithChildren } from 'react';
-import { EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   EmbeddableReducers,
@@ -27,19 +27,7 @@ import {
 } from './types';
 import { syncReduxEmbeddable } from './sync_redux_embeddable';
 import { EmbeddableReduxContext } from './use_redux_embeddable_context';
-
-// TODO: Make filters serializable so we don't need special treatment for them.
-type InputWithFilters = Partial<EmbeddableInput> & { filters: Filter[] };
-const stateContainsFilters = (state: Partial<EmbeddableInput>): state is InputWithFilters => {
-  if ((state as InputWithFilters).filters) return true;
-  return false;
-};
-const cleanFiltersForSerialize = (filters: Filter[]): Filter[] => {
-  return filters.map((filter) => {
-    if (filter.meta.value) delete filter.meta.value;
-    return filter;
-  });
-};
+import { cleanStateForRedux } from './clean_redux_embeddable_state';
 
 export const createReduxEmbeddableTools = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
@@ -50,7 +38,10 @@ export const createReduxEmbeddableTools = <
   syncSettings,
   initialComponentState,
 }: {
-  embeddable: IEmbeddable<ReduxEmbeddableStateType['input'], ReduxEmbeddableStateType['output']>;
+  embeddable: IEmbeddable<
+    ReduxEmbeddableStateType['explicitInput'],
+    ReduxEmbeddableStateType['output']
+  >;
   initialComponentState?: ReduxEmbeddableStateType['componentState'];
   syncSettings?: ReduxEmbeddableSyncSettings;
   reducers: ReducerType;
@@ -59,9 +50,9 @@ export const createReduxEmbeddableTools = <
   const genericReducers = {
     updateEmbeddableReduxInput: (
       state: Draft<ReduxEmbeddableStateType>,
-      action: PayloadAction<Partial<ReduxEmbeddableStateType['input']>>
+      action: PayloadAction<Partial<ReduxEmbeddableStateType['explicitInput']>>
     ) => {
-      state.input = { ...state.input, ...action.payload };
+      state.explicitInput = { ...state.explicitInput, ...action.payload };
     },
     updateEmbeddableReduxOutput: (
       state: Draft<ReduxEmbeddableStateType>,
@@ -72,15 +63,13 @@ export const createReduxEmbeddableTools = <
   };
 
   // create initial state from Embeddable
-  const initialState: ReduxEmbeddableStateType = {
-    input: embeddable.getInput(),
+  let initialState: ReduxEmbeddableStateType = {
     output: embeddable.getOutput(),
     componentState: initialComponentState ?? {},
+    explicitInput: embeddable.getExplicitInput(),
   } as ReduxEmbeddableStateType;
 
-  if (stateContainsFilters(initialState.input)) {
-    initialState.input.filters = cleanFiltersForSerialize(initialState.input.filters);
-  }
+  initialState = cleanStateForRedux<ReduxEmbeddableStateType>(initialState);
 
   // create slice out of reducers and embeddable initial state.
   const slice = createSlice<ReduxEmbeddableStateType, SliceCaseReducers<ReduxEmbeddableStateType>>({

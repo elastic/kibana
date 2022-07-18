@@ -17,38 +17,38 @@ export const controlGroupReducers = {
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['controlStyle']>
   ) => {
-    state.input.controlStyle = action.payload;
+    state.explicitInput.controlStyle = action.payload;
   },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>
   ) => {
-    state.input.defaultControlWidth = action.payload;
+    state.explicitInput.defaultControlWidth = action.payload;
   },
   setDefaultControlGrow: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlGrow']>
   ) => {
-    state.input.defaultControlGrow = action.payload;
+    state.explicitInput.defaultControlGrow = action.payload;
   },
   setControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
   ) => {
-    state.input.panels[action.payload.embeddableId].width = action.payload.width;
+    state.explicitInput.panels[action.payload.embeddableId].width = action.payload.width;
   },
   setControlGrow: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ grow: boolean; embeddableId: string }>
   ) => {
-    state.input.panels[action.payload.embeddableId].grow = action.payload.grow;
+    state.explicitInput.panels[action.payload.embeddableId].grow = action.payload.grow;
   },
   setControlOrders: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<{ ids: string[] }>
   ) => {
     action.payload.ids.forEach((id, index) => {
-      state.input.panels[id].order = index;
+      state.explicitInput.panels[id].order = index;
     });
   },
 };

@@ -153,10 +153,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const {
       getState,
       dispatch,
-      actions: { setFieldAndFormatter, setDataView },
+      actions: { setField, setDataViewId },
     } = this.reduxEmbeddableTools;
     const {
-      input: { dataViewId, fieldName },
+      explicitInput: { dataViewId, fieldName },
     } = getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
@@ -164,7 +164,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.dataView = await this.dataViewsService.get(dataViewId);
         if (!this.dataView)
           throw new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId));
-        dispatch(setDataView(this.dataView));
+        dispatch(setDataViewId(this.dataView.id));
       } catch (e) {
         this.onFatalError(e);
       }
@@ -176,13 +176,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         this.onFatalError(new Error(RangeSliderStrings.errors.getDataViewNotFoundError(fieldName)));
       }
 
-      dispatch(
-        setFieldAndFormatter({
-          field: this.field,
-          fieldFormatter:
-            this.field && this.dataView?.getFormatterForField(this.field).getConverterFor('text'),
-        })
-      );
+      dispatch(setField(this.field?.toSpec()));
     }
 
     return { dataView: this.dataView, field: this.field! };
@@ -296,11 +290,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: { setLoading, setIsInvalid, setDataView, publishFilters },
+      actions: { setLoading, setIsInvalid, setDataViewId, publishFilters },
     } = this.reduxEmbeddableTools;
     const {
       componentState: { min: availableMin, max: availableMax },
-      input: {
+      explicitInput: {
         query,
         timeRange,
         filters = [],
@@ -321,7 +315,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       batch(() => {
         dispatch(setLoading(false));
         dispatch(setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection));
-        dispatch(setDataView(dataView));
+        dispatch(setDataViewId(dataView.id));
         dispatch(publishFilters([]));
       });
       return;
@@ -376,7 +370,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         batch(() => {
           dispatch(setLoading(false));
           dispatch(setIsInvalid(true));
-          dispatch(setDataView(dataView));
+          dispatch(setDataViewId(dataView.id));
           dispatch(publishFilters([]));
         });
         return;
@@ -386,7 +380,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     batch(() => {
       dispatch(setLoading(false));
       dispatch(setIsInvalid(false));
-      dispatch(setDataView(dataView));
+      dispatch(setDataViewId(dataView.id));
       dispatch(publishFilters([rangeFilter]));
     });
   };
@@ -398,6 +392,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   public destroy = () => {
     super.destroy();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
   };
 
   public render = (node: HTMLElement) => {
@@ -406,11 +401,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     }
     const { Wrapper: RangeSliderReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <RangeSliderReduxWrapper>
-          <RangeSliderComponent />
-        </RangeSliderReduxWrapper>
+        <ControlsServicesProvider>
+          <RangeSliderReduxWrapper>
+            <RangeSliderComponent />
+          </RangeSliderReduxWrapper>
+        </ControlsServicesProvider>
       </KibanaThemeProvider>,
       node
     );

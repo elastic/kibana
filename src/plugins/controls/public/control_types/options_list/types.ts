@@ -7,16 +7,18 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 import { ControlOutput } from '../../types';
-import { OptionsListEmbeddableInput } from '../../../common/control_types/options_list/types';
+import {
+  OptionsListEmbeddableInput,
+  OptionsListField,
+} from '../../../common/control_types/options_list/types';
 
 export * from '../../../common/control_types/options_list/types';
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
-  field?: DataViewField;
+  field?: OptionsListField;
   totalCardinality?: number;
   availableOptions?: string[];
   invalidSelections?: string[];

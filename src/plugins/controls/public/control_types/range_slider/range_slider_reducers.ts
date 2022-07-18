@@ -9,16 +9,14 @@
 import { Filter } from '@kbn/es-query';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { RangeSliderComponentState, RangeSliderReduxState, RangeValue } from './types';
+import { RangeSliderReduxState, RangeValue } from './types';
 
-export const getDefaultComponentState = () => ({
+export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
   min: '',
   max: '',
-  loading: true,
   isInvalid: false,
-  fieldFormatter: (value: string) => value,
 });
 
 export const rangeSliderReducers = {
@@ -26,24 +24,19 @@ export const rangeSliderReducers = {
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<RangeValue>
   ) => {
-    state.input.value = action.payload;
+    state.explicitInput.value = action.payload;
   },
-  setFieldAndFormatter: (
+  setField: (
     state: WritableDraft<RangeSliderReduxState>,
-    action: PayloadAction<{
-      field?: DataViewField;
-      fieldFormatter?: RangeSliderComponentState['fieldFormatter'];
-    }>
+    action: PayloadAction<FieldSpec | undefined>
   ) => {
-    state.componentState.field = action.payload.field;
-    state.componentState.fieldFormatter =
-      action.payload.fieldFormatter ?? ((value: string) => value);
+    state.componentState.field = action.payload;
   },
-  setDataView: (
+  setDataViewId: (
     state: WritableDraft<RangeSliderReduxState>,
-    action: PayloadAction<DataView | undefined>
+    action: PayloadAction<string | undefined>
   ) => {
-    state.output.dataViews = action.payload ? [action.payload] : [];
+    state.output.dataViewId = action.payload;
   },
   setLoading: (state: WritableDraft<RangeSliderReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;

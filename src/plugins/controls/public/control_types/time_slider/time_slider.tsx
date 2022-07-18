@@ -38,8 +38,8 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   const dispatch = useEmbeddableDispatch();
 
   const availableRange = select((state) => state.componentState.range);
-  const value = select((state) => state.input.value);
-  const id = select((state) => state.input.id);
+  const value = select((state) => state.explicitInput.value);
+  const id = select((state) => state.explicitInput.id);
 
   const { min, max } = availableRange
     ? availableRange

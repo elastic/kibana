@@ -16,14 +16,14 @@ import {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
 import { ControlsService } from './services/controls';
 
 export interface CommonControlOutput {
   filters?: Filter[];
-  dataViews?: DataView[];
+  dataViewId?: string;
 }
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;

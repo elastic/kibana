@@ -18,19 +18,26 @@ import {
   EuiFlexItem,
   EuiDualRange,
 } from '@elastic/eui';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderReduxState, RangeValue } from './types';
 import { rangeSliderReducers } from './range_slider_reducers';
+import { pluginServices } from '../../services';
 
 const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
 export const RangeSliderPopover = () => {
+  // Controls Services Context
+  const { dataViews } = pluginServices.getHooks();
+  const { get: getDataViewById } = dataViews.useService();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [rangeSliderMin, setRangeSliderMin] = useState<number>(-Infinity);
   const [rangeSliderMax, setRangeSliderMax] = useState<number>(Infinity);
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+
   const rangeRef = useRef<EuiDualRange | null>(null);
 
   const {
@@ -41,14 +48,31 @@ export const RangeSliderPopover = () => {
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const id = select((state) => state.input.id);
-  const value = select((state) => state.input.value);
-  const title = select((state) => state.input.title);
   const min = select((state) => state.componentState.min);
   const max = select((state) => state.componentState.max);
-  const isLoading = select((state) => state.output.loading);
   const isInvalid = select((state) => state.componentState.isInvalid);
-  const fieldFormatter = select((state) => state.componentState.fieldFormatter);
+  const fieldSpec = select((state) => state.componentState.field);
+
+  const id = select((state) => state.explicitInput.id);
+  const value = select((state) => state.explicitInput.value) ?? ['', ''];
+  const title = select((state) => state.explicitInput.title);
+
+  const isLoading = select((state) => state.output.loading);
+  const dataViewId = select((state) => state.output.dataViewId);
+
+  // derive field formatter from fieldSpec and dataViewId
+  useEffect(() => {
+    (async () => {
+      if (!dataViewId || !fieldSpec) return;
+      // dataViews are cached, and should always be available without having to hit ES.
+      const dataView = await getDataViewById(dataViewId);
+      setFieldFormatter(
+        () =>
+          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
+          ((toFormat: string) => toFormat)
+      );
+    })();
+  }, [fieldSpec, dataViewId, getDataViewById]);
 
   let errorMessage = '';
   let helpText = '';

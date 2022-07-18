@@ -11,6 +11,9 @@ import deepEqual from 'fast-deep-equal';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { EnhancedStore } from '@reduxjs/toolkit';
 import { ReduxEmbeddableContext, ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
+import { cleanInputForRedux } from './clean_redux_embeddable_state';
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export const syncReduxEmbeddable = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
@@ -22,17 +25,23 @@ export const syncReduxEmbeddable = <
 }: {
   settings?: ReduxEmbeddableSyncSettings;
   store: EnhancedStore<ReduxEmbeddableStateType>;
-  embeddable: IEmbeddable<ReduxEmbeddableStateType['input'], ReduxEmbeddableStateType['output']>;
+  embeddable: IEmbeddable<
+    ReduxEmbeddableStateType['explicitInput'],
+    ReduxEmbeddableStateType['output']
+  >;
   actions: ReduxEmbeddableContext<ReduxEmbeddableStateType>['actions'];
 }) => {
   if (settings?.disableSync) {
     return;
   }
 
+  let embeddableToReduxInProgress = false;
+  let reduxToEmbeddableInProgress = false;
+
   const { isInputEqual: inputEqualityCheck, isOutputEqual: outputEqualityCheck } = settings ?? {};
   const inputEqual = (
-    inputA: ReduxEmbeddableStateType['input'],
-    inputB: ReduxEmbeddableStateType['input']
+    inputA: Partial<ReduxEmbeddableStateType['explicitInput']>,
+    inputB: Partial<ReduxEmbeddableStateType['explicitInput']>
   ) => (inputEqualityCheck ? inputEqualityCheck(inputA, inputB) : deepEqual(inputA, inputB));
   const outputEqual = (
     outputA: ReduxEmbeddableStateType['output'],
@@ -41,9 +50,11 @@ export const syncReduxEmbeddable = <
 
   // when the redux store changes, diff, and push updates to the embeddable input or to the output.
   const unsubscribeFromStore = store.subscribe(() => {
+    if (embeddableToReduxInProgress) return;
+    reduxToEmbeddableInProgress = true;
     const reduxState = store.getState();
-    if (!inputEqual(reduxState.input, embeddable.getInput())) {
-      embeddable.updateInput(reduxState.input);
+    if (!inputEqual(reduxState.explicitInput, embeddable.getExplicitInput())) {
+      embeddable.updateInput(reduxState.explicitInput);
     }
     if (!outputEqual(reduxState.output, embeddable.getOutput())) {
       // updating output is usually not accessible from outside of the embeddable.
@@ -54,22 +65,37 @@ export const syncReduxEmbeddable = <
         }
       ).updateOutput(reduxState.output);
     }
+    reduxToEmbeddableInProgress = false;
   });
 
   // when the embeddable input changes, diff and dispatch to the redux store
-  const inputSubscription = embeddable.getInput$().subscribe((embeddableInput) => {
-    const reduxState = store.getState();
-    if (!inputEqual(reduxState.input, embeddableInput)) {
-      store.dispatch(actions.updateEmbeddableReduxInput(embeddableInput));
+  const inputSubscription = embeddable.getInput$().subscribe(() => {
+    if (reduxToEmbeddableInProgress) return;
+    embeddableToReduxInProgress = true;
+    const { explicitInput: reduxExplicitInput } = store.getState();
+
+    // store only explicit input in the store
+    const embeddableExplictiInput = embeddable.getExplicitInput() as Writeable<
+      ReduxEmbeddableStateType['explicitInput']
+    >;
+
+    if (!inputEqual(reduxExplicitInput, embeddableExplictiInput)) {
+      store.dispatch(
+        actions.updateEmbeddableReduxInput(cleanInputForRedux(embeddableExplictiInput))
+      );
     }
+    embeddableToReduxInProgress = false;
   });
 
   // when the embeddable output changes, diff and dispatch to the redux store
   const outputSubscription = embeddable.getOutput$().subscribe((embeddableOutput) => {
+    if (reduxToEmbeddableInProgress) return;
+    embeddableToReduxInProgress = true;
     const reduxState = store.getState();
     if (!outputEqual(reduxState.output, embeddableOutput)) {
       store.dispatch(actions.updateEmbeddableReduxOutput(embeddableOutput));
     }
+    embeddableToReduxInProgress = false;
   });
   return () => {
     unsubscribeFromStore();

@@ -196,11 +196,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: { setField, setDataView },
+      actions: { setField, setDataViewId },
     } = this.reduxEmbeddableTools;
 
     const {
-      input: { dataViewId, fieldName, parentFieldName, childFieldName },
+      explicitInput: { dataViewId, fieldName, parentFieldName, childFieldName },
     } = getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
@@ -211,7 +211,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       } catch (e) {
         this.onFatalError(e);
       }
-      dispatch(setDataView(this.dataView));
+
+      dispatch(setDataViewId(this.dataView?.id));
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
@@ -227,7 +228,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         ? parentField.name
         : undefined;
       (originalField as OptionsListField).textFieldName = textFieldName;
-      this.field = originalField;
+      this.field = originalField?.toSpec();
 
       if (this.field === undefined) {
         this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
@@ -252,8 +253,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dispatch(setLoading(true));
 
     const {
-      input: { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout },
+      explicitInput: { selectedOptions, runPastTimeout },
     } = getState();
+
+    // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
+    const { ignoreParentSettings, filters, query, timeRange } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();

@@ -47,14 +47,16 @@ export const OptionsListPopover = ({
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState?.invalidSelections);
-  const totalCardinality = select((state) => state.componentState?.totalCardinality);
-  const availableOptions = select((state) => state.componentState?.availableOptions);
-  const selectedOptions = select((state) => state.input.selectedOptions);
-  const singleSelect = select((state) => state.input.singleSelect);
-  const field = select((state) => state.componentState?.field);
+  const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const totalCardinality = select((state) => state.componentState.totalCardinality);
+  const availableOptions = select((state) => state.componentState.availableOptions);
+  const field = select((state) => state.componentState.field);
+
+  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const title = select((state) => state.explicitInput.title);
+
   const loading = select((state) => state.output.loading);
-  const title = select((state) => state.input.title);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);

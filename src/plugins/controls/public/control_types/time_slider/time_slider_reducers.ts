@@ -15,6 +15,6 @@ export const timeSliderReducers = {
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<[number | null, number | null]>
   ) => {
-    state.input.value = action.payload;
+    state.explicitInput.value = action.payload;
   },
 };
