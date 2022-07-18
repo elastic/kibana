@@ -149,12 +149,14 @@ interface ECSComboboxFieldProps {
   field: FieldHook<string>;
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;
   idAria?: string;
+  ecsMappingFieldPath: string;
 }
 
 const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   field,
   euiFieldProps = {},
   idAria,
+  ecsMappingFieldPath = 'ecs_mapping',
 }) => {
   const { setValue } = field;
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<ECSSchemaOption>>>(
@@ -231,10 +233,10 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   }, [selectedOptions]);
 
   const availableECSSchemaOptions = useMemo(() => {
-    const currentFormECSFieldValues = map(formData.ecs_mapping, 'key');
+    const currentFormECSFieldValues = map(formData[ecsMappingFieldPath], 'key');
 
     return ECSSchemaOptions.filter(({ label }) => !currentFormECSFieldValues.includes(label));
-  }, [formData.ecs_mapping]);
+  }, [formData, ecsMappingFieldPath]);
 
   useEffect(() => {
     // @ts-expect-error update types
@@ -514,7 +516,8 @@ export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
 
 export interface ECSMappingEditorFieldProps {
   euiFieldProps?: EuiComboBoxProps<{}>;
-  formPath: string;
+  path?: string;
+  queryFieldPath?: string;
 }
 
 interface ECSMappingEditorFormProps {
@@ -523,6 +526,7 @@ interface ECSMappingEditorFormProps {
   item: ArrayItem;
   isLastItem?: boolean;
   onDelete?: FormArrayField['removeItem'];
+  ecsMappingFieldPath: string;
 }
 
 const ecsFieldValidator = (
@@ -616,6 +620,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   item,
   isLastItem,
   onDelete,
+  ecsMappingFieldPath,
 }) => {
   const MultiFields = useMemo(
     () => (
@@ -704,6 +709,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 euiFieldProps={ecsComboBoxEuiFieldProps}
                 validationData={validationData}
                 readDefaultValueOnForm={!item.isNew}
+                ecsMappingFieldPath={ecsMappingFieldPath}
                 // @ts-expect-error update types
                 config={config}
               />
@@ -765,15 +771,23 @@ interface OsqueryColumn {
 }
 
 export const ECSMappingEditorField = React.memo(
-  ({ euiFieldProps, formPath = '' }: ECSMappingEditorFieldProps) => {
+  ({
+    euiFieldProps,
+    path = 'ecs_mapping',
+    queryFieldPath = 'query',
+  }: ECSMappingEditorFieldProps) => {
     const lastItemPath = useRef<string>();
     const onAdd = useRef<FormArrayField['addItem']>();
     const itemsList = useRef<ArrayItem[]>([]);
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
-    const [initialFormData, formDataSerializer, isMounted] = useFormData();
-    const { query = '', ...formData } = get(initialFormData, formPath);
+    const [formData, formDataSerializer, isMounted] = useFormData();
 
     const { validateFields } = useFormContext();
+
+    const queryFieldValue = useMemo(
+      () => get(formData, queryFieldPath),
+      [formData, queryFieldPath]
+    );
 
     useEffect(() => {
       // Additional 'suspended' validation of osquery ecs fields. fieldsToValidateOnChange doesn't work because it happens before the osquerySchema gets updated.
@@ -782,14 +796,14 @@ export const ECSMappingEditorField = React.memo(
       if (fieldsToValidate.length > 2) {
         setTimeout(() => validateFields(fieldsToValidate), 0);
       }
-    }, [query, validateFields]);
+    }, [queryFieldValue, validateFields]);
 
     useEffect(() => {
-      if (!query?.length) {
+      if (!queryFieldValue?.length) {
         return;
       }
 
-      const oneLineQuery = removeMultilines(query);
+      const oneLineQuery = removeMultilines(queryFieldValue);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;
@@ -1013,7 +1027,7 @@ export const ECSMappingEditorField = React.memo(
       setOsquerySchemaOptions((prevValue) =>
         !deepEqual(prevValue, newOptions) ? newOptions : prevValue
       );
-    }, [query]);
+    }, [queryFieldValue]);
 
     useLayoutEffect(() => {
       if (isMounted) {
@@ -1027,32 +1041,22 @@ export const ECSMappingEditorField = React.memo(
           return;
         }
 
-        const itemKey = get(initialFormData, `${lastItemPath.current}.key`);
+        const itemKey = get(formData, `${lastItemPath.current}.key`);
 
         if (itemKey) {
-          const serializedFormData = get(formDataSerializer(), formPath);
-          const data = {
-            ...serializedFormData,
-            ecs_mapping: convertECSMappingToObject(serializedFormData.ecs_mapping),
-          };
+          const serializedFormData = formDataSerializer();
+          console.error('serializedFormData', serializedFormData);
           const itemValue =
-            data.ecs_mapping &&
-            (data.ecs_mapping[`${itemKey}`]?.field || data.ecs_mapping[`${itemKey}`]?.value);
+            serializedFormData[path] &&
+            (serializedFormData[path][`${itemKey}`]?.field ||
+              serializedFormData[path][`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();
           }
         }
       }
-    }, [
-      euiFieldProps?.isDisabled,
-      formData,
-      formDataSerializer,
-      formPath,
-      initialFormData,
-      isMounted,
-      onAdd,
-    ]);
+    }, [euiFieldProps?.isDisabled, formData, formDataSerializer, isMounted, onAdd, path]);
 
     return (
       <>
@@ -1094,7 +1098,7 @@ export const ECSMappingEditorField = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <UseArray path={formPath ? `${formPath}.ecs_mapping` : 'ecs_mapping'}>
+        <UseArray path={path}>
           {({ items, addItem, removeItem }) => {
             lastItemPath.current = items[items.length - 1]?.path;
             onAdd.current = addItem;
@@ -1110,6 +1114,7 @@ export const ECSMappingEditorField = React.memo(
                     isLastItem={index === items.length - 1}
                     onDelete={removeItem}
                     isDisabled={!!euiFieldProps?.isDisabled}
+                    ecsMappingFieldPath={path}
                   />
                 ))}
               </>

@@ -16,7 +16,8 @@ interface IProps {
   item: ArrayItem;
 }
 
-export const OsqueryResponseAction = ({ item }: IProps) => {
+export const OsqueryResponseAction = (props: IProps) => {
+  // IT SHOULD BE MOVED INTO OSQUERY PLUGIN
   const { osquery } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
@@ -58,11 +59,7 @@ export const OsqueryResponseAction = ({ item }: IProps) => {
       );
     }
     if (OsqueryForm) {
-      return (
-        <>
-          <OsqueryForm item={item} />
-        </>
-      );
+      return <OsqueryForm {...props} />;
     }
   }
 

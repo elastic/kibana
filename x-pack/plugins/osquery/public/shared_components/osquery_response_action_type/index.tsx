@@ -11,11 +11,9 @@ import { QueryClientProvider } from 'react-query';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 
-import { get } from 'lodash';
-import { useEffectOnce } from 'react-use';
 import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
-import { UseField, useFormContext, useFormData } from '../../shared_imports';
+import { UseField, useFormContext } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
@@ -29,19 +27,9 @@ interface IProps {
   item: ArrayItem;
 }
 
+// eslint-disable-next-line react/display-name
 export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = React.memo(
   ({ item }) => {
-    const [isMounted, setMounted] = useState(false);
-    const [data] = useFormData();
-
-    console.log({ data });
-    useEffectOnce(() => {
-      const actionData = get(data, item.path);
-
-      if (actionData && !isMounted) {
-        setMounted(true);
-      }
-    });
     const permissions = useKibana().services.application.capabilities.osquery;
     const [advancedContentState, setAdvancedContentState] =
       useState<EuiAccordionProps['forceState']>('closed');
@@ -121,7 +109,6 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
           component={GhostFormField}
           readDefaultValueOnForm={!item.isNew}
         />
-
         <>
           <EuiSpacer size="m" />
           <StyledEuiAccordion
@@ -131,7 +118,10 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
             buttonContent="Advanced"
           >
             <EuiSpacer size="xs" />
-            {isMounted && <ECSMappingEditorField formPath={`${item.path}.params`} />}
+            <ECSMappingEditorField
+              path={`${item.path}.params.ecs_mapping`}
+              queryFieldPath={`${item.path}.params.query`}
+            />
           </StyledEuiAccordion>
         </>
       </QueryClientProvider>

@@ -33,13 +33,13 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const [data] = useFormData();
   const action = get(data, item.path);
 
-  const getResponseActionTypeForm = useCallback(() => {
-    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-      return <OsqueryResponseAction item={item} />;
-    }
-    // Place for other ResponseActionTypes
-    return null;
-  }, [action?.actionTypeId, item]);
+  // const getResponseActionTypeForm = useCallback(() => {
+  //   if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+  //     return <OsqueryResponseAction item={item} />;
+  //   }
+  //   // Place for other ResponseActionTypes
+  //   return null;
+  // }, [action?.actionTypeId, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
@@ -91,11 +91,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
-      <UseField
-        path={item.path}
-        component={getResponseActionTypeForm}
-        defaultValue={{ actionTypeId: '.osquery', params: {} }}
-      />
+      <OsqueryResponseAction item={item} />
     </EuiAccordion>
   );
 });

@@ -621,7 +621,7 @@ export const internalRuleToAPIResponse = (
     // Actions
     throttle: transformFromAlertThrottle(rule, legacyRuleActions),
     actions: transformActions(rule.actions, legacyRuleActions),
-    response_actions: rule.responseActions.map(transformAlertToRuleResponseAction),
+    response_actions: rule.responseActions?.map(transformAlertToRuleResponseAction) ?? undefined,
     // Execution summary
     execution_summary: mergedExecutionSummary ?? undefined,
   };

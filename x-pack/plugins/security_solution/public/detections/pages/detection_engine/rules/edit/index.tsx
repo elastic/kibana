@@ -229,7 +229,7 @@ const EditRulePageComponent: FC = () => {
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
-                  ruleType={rule.type}
+                  ruleType={rule?.type}
                 />
               )}
               <EuiSpacer />
@@ -240,15 +240,16 @@ const EditRulePageComponent: FC = () => {
     ],
     [
       rule?.immutable,
+      rule?.type,
       loading,
       defineStep.data,
       isLoading,
       setFormHook,
+      dataViewOptions,
       aboutStep.data,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
-      dataViewOptions,
     ]
   );
 

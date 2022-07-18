@@ -115,27 +115,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           );
 
           const completeRule = {
-            // TEMPORARY SOLUTION TO TEST AND SHOW
-            ruleConfig: {
-              ...rule,
-              responseActions: [
-                {
-                  type: 'osquery',
-                  params: {
-                    query: 'select * from uptime',
-                    ecs_mapping: {
-                      labels: { field: 'hours' },
-                    },
-                  },
-                },
-                {
-                  type: 'osquery',
-                  params: {
-                    query: 'select * from users',
-                  },
-                },
-              ],
-            },
+            ruleConfig: rule,
             ruleParams: params,
             alertId,
           };
