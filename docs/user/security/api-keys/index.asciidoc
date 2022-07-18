@@ -47,7 +47,7 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 
 [IMPORTANT]
 ============================================================================
-Interactive users authenticating via ApiKey is deprecated and will be removed in a future version.
+API Keys are intended for programmatic access to {kib} and {es}, and should not be used to authenticate access via a web browser.
 ============================================================================
 
 [float]
