@@ -49,11 +49,16 @@ import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { layerTypes } from '../../../common';
 
+jest.mock('./reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
   QueryInput: () => null,
 }));
+
 jest.mock('../operations');
+
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
 
@@ -1945,8 +1950,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Moving average',
       'Percentile',
       'Percentile rank',
+      'Standard deviation',
       'Sum',
       'Unique count',
+      ' ',
     ]);
   });
 

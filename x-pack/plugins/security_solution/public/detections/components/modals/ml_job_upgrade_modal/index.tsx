@@ -6,7 +6,7 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { MlSummaryJob } from '@kbn/ml-plugin/common';
+import type { MlSummaryJob } from '@kbn/ml-plugin/common';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { rgba } from 'polished';

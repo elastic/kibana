@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { SetQuery, DeleteQuery } from './types';
+import type { SetQuery, DeleteQuery } from './types';
 
 export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const dispatch = useDispatch();

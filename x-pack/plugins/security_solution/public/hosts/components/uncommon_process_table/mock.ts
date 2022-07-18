@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsUncommonProcessesStrategyResponse } from '../../../../common/search_strategy';
+import type { HostsUncommonProcessesStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: HostsUncommonProcessesStrategyResponse = {
   totalCount: 5,

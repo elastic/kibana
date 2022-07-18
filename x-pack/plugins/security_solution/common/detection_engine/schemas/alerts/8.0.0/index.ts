@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -41,16 +41,16 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 // TODO: Create and import 8.0.0 versioned ListArray schema
-import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 // TODO: Create and import 8.0.0 versioned alerting-types schemas
-import {
+import type {
   RiskScoreMapping,
   SeverityMapping,
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import {
+import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
+import type {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
@@ -70,7 +70,7 @@ import {
   ALERT_RULE_TIMESTAMP_OVERRIDE,
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
-import { RuleAlertAction, SearchTypes } from '../../../types';
+import type { RuleAlertAction, SearchTypes } from '../../../types';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.

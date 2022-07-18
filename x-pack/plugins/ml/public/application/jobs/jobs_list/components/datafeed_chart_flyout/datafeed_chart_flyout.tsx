@@ -50,12 +50,14 @@ import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import {
   CombinedJobWithStats,
   ModelSnapshot,
+  MlSummaryJob,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
+import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
 import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
@@ -594,4 +596,88 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       </EuiFlyout>
     </EuiPortal>
   );
+};
+
+type ShowFunc = (jobUpdate: MlSummaryJob) => void;
+
+interface JobListDatafeedChartFlyoutProps {
+  setShowFunction: (showFunc: ShowFunc) => void;
+  unsetShowFunction: () => void;
+  refreshJobs(): void;
+}
+
+/**
+ * Component to wire the datafeed chart flyout with the Job list view.
+ * @param setShowFunction function to show the flyout
+ * @param unsetShowFunction function called when flyout is closed
+ * @param refreshJobs function to refresh the jobs list
+ * @constructor
+ */
+export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = ({
+  setShowFunction,
+  unsetShowFunction,
+  refreshJobs,
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [job, setJob] = useState<MlSummaryJob | undefined>();
+  const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();
+
+  const [isRevertModelSnapshotFlyoutVisible, setIsRevertModelSnapshotFlyoutVisible] =
+    useState(false);
+  const [snapshot, setSnapshot] = useState<ModelSnapshot | null>(null);
+
+  const showFlyoutCallback = useCallback((jobUpdate: MlSummaryJob) => {
+    setJob(jobUpdate);
+    setIsVisible(true);
+  }, []);
+
+  const showRevertModelSnapshot = useCallback(async () => {
+    // Need to load the full job with stats, as the model snapshot
+    // flyout needs the timestamp of the last result.
+    const fullJob: CombinedJobWithStats = await loadFullJob(job!.id);
+    setJobWithStats(fullJob);
+    setIsRevertModelSnapshotFlyoutVisible(true);
+  }, [job]);
+
+  useEffect(() => {
+    setShowFunction(showFlyoutCallback);
+    return () => {
+      unsetShowFunction();
+    };
+  }, []);
+
+  if (isVisible === true && job !== undefined) {
+    return (
+      <DatafeedChartFlyout
+        onClose={() => setIsVisible(false)}
+        onModelSnapshotAnnotationClick={(modelSnapshot) => {
+          setIsVisible(false);
+          setSnapshot(modelSnapshot);
+          showRevertModelSnapshot();
+        }}
+        end={job.latestResultsTimestampMs || Date.now()}
+        jobId={job.id}
+      />
+    );
+  }
+
+  if (
+    isRevertModelSnapshotFlyoutVisible === true &&
+    jobWithStats !== undefined &&
+    snapshot !== null
+  ) {
+    return (
+      <RevertModelSnapshotFlyout
+        snapshot={snapshot}
+        snapshots={[snapshot]}
+        job={jobWithStats}
+        closeFlyout={() => {
+          setIsRevertModelSnapshotFlyoutVisible(false);
+        }}
+        refresh={refreshJobs}
+      />
+    );
+  }
+
+  return null;
 };

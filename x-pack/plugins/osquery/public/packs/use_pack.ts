@@ -7,9 +7,9 @@
 
 import { useQuery } from 'react-query';
 
-import { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
-import { OsqueryManagerPackagePolicy } from '../../common/types';
+import type { OsqueryManagerPackagePolicy } from '../../common/types';
 
 interface UsePack {
   packId: string;

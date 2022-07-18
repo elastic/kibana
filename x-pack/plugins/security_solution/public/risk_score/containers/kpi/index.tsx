@@ -13,21 +13,23 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createFilter } from '../../../common/containers/helpers';
 
+import type {
+  KpiRiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+  RiskScoreAggByFields,
+} from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
-  KpiRiskScoreRequestOptions,
-  KpiRiskScoreStrategyResponse,
   RiskQueries,
-  RiskScoreAggByFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SeverityCount } from '../../../common/components/severity/types';
+import type { SeverityCount } from '../../../common/components/severity/types';
 import { useSpaceId } from '../common';
 
 type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {

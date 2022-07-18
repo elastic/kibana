@@ -430,7 +430,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
+export type ParamEditorCustomProps = Record<string, unknown> & {
+  labels?: string[];
+  isInline?: boolean;
+};
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns

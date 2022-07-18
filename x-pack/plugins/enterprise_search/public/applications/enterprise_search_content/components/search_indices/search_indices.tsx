@@ -136,6 +136,7 @@ export const SearchIndices: React.FC = () => {
         {
           render: ({ name }: SearchIndex) => (
             <EuiButtonIconTo
+              aria-label={name}
               iconType="eye"
               data-test-subj="view-search-index-button"
               to={generatePath(SEARCH_INDEX_PATH, {
@@ -262,10 +263,12 @@ export const SearchIndices: React.FC = () => {
             />
           </>
         ) : (
-          <AddContentEmptyPrompt />
+          <>
+            <AddContentEmptyPrompt />
+            <EuiSpacer size="xxl" />
+            {engineSteps}
+          </>
         )}
-        <EuiSpacer size="xxl" />
-        {indices.length === 0 && !isLoading && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>

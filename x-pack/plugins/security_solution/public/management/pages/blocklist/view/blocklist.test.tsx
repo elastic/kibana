@@ -8,7 +8,8 @@
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BLOCKLIST_PATH } from '../../../../../common/constants';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { Blocklist } from './blocklist';
 
 describe('When on the blocklist page', () => {

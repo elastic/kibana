@@ -25,7 +25,7 @@ describe('addConnectorPackageApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
         body: JSON.stringify({ index_name: 'indexName' }),
       });
-      expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
+      await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
     });
   });
 });
