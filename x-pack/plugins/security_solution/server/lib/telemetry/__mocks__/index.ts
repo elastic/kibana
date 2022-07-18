@@ -14,7 +14,7 @@ import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 import { stubEndpointMetricsResponse } from './metrics';
-import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts'
+import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,

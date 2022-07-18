@@ -69,7 +69,7 @@ export function createTelemetryTimelineTaskConfig() {
       const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
       const aggregations = endpointAlerts?.aggregations as unknown as {
-        endpoint_alert_count: { value: number }
+        endpoint_alert_count: { value: number };
       };
       sender.getTelemetryUsageCluster()?.incrementCounter({
         counterName: 'endpoint_alert',

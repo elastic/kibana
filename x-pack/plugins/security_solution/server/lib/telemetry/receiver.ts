@@ -669,7 +669,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const aggregations = response.body?.aggregations as unknown as {
       prebuilt_rule_alert_count: { value: number };
-    }
+    };
 
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
