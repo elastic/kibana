@@ -24,6 +24,10 @@ export interface ParsedPackageJson {
     /** Is this package only intended for dev? */
     devOnly?: boolean;
   };
+  /** Scripts defined in the package.json file */
+  scripts?: {
+    [key: string]: string | undefined;
+  };
   /** All other fields in the package.json are typed as unknown as we don't care what they are */
   [key: string]: unknown;
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
+import { SomeDevLog } from '@kbn/some-dev-log';
 
 /**
  * Information about how CiStatsReporter should talk to the ci-stats service. Normally
@@ -23,7 +23,7 @@ export interface Config {
   buildId: string;
 }
 
-function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown }) {
+function validateConfig(log: SomeDevLog, config: { [k in keyof Config]: unknown }) {
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
   if (!validApiToken) {
     log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');
@@ -39,7 +39,7 @@ function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown 
   return config as Config;
 }
 
-export function parseConfig(log: ToolingLog) {
+export function parseConfig(log: SomeDevLog) {
   const configJson = process.env.KIBANA_CI_STATS_CONFIG;
   if (!configJson) {
     log.debug('KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter');
