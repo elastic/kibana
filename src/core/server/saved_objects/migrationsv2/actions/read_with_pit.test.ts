@@ -36,18 +36,24 @@ describe('readWithPit', () => {
     expect(client.search).toHaveBeenCalledTimes(1);
     expect(client.search).toHaveBeenCalledWith({
       allow_partial_search_results: false,
-      pit: {
-        id: 'pitId',
-        keep_alive: '10m',
-      },
-      query: {
-        match_all: {},
-      },
-      search_after: undefined,
       seq_no_primary_term: undefined,
-      size: 10000,
-      sort: '_shard_doc:asc',
-      track_total_hits: true,
+      body: {
+        pit: {
+          id: 'pitId',
+          keep_alive: '10m',
+        },
+        query: {
+          match_all: {},
+        },
+        search_after: undefined,
+        size: 10000,
+        sort: {
+          _shard_doc: {
+            order: 'asc',
+          },
+        },
+        track_total_hits: true,
+      },
     });
   });
 
