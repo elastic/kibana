@@ -14,15 +14,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('delete', () => {
-    before(() =>
-      esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
+    before(
+      async () =>
+        await esArchiver.load(
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
     );
-    after(() =>
-      esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
+    after(
+      async () =>
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
     );
 
     it('should return generic 404 when trying to delete a doc with importableAndExportable types', async () =>

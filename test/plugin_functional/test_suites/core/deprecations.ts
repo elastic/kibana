@@ -87,8 +87,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   ];
 
   describe('deprecations service', () => {
-    before(() => esArchiver.load('test/functional/fixtures/es_archiver/deprecations_service'));
-    after(() => esArchiver.unload('test/functional/fixtures/es_archiver/deprecations_service'));
+    before(
+      async () => await esArchiver.load('test/functional/fixtures/es_archiver/deprecations_service')
+    );
+    after(
+      async () =>
+        await esArchiver.unload('test/functional/fixtures/es_archiver/deprecations_service')
+    );
 
     describe('GET /api/deprecations/', async () => {
       it('returns registered config deprecations and feature deprecations', async () => {

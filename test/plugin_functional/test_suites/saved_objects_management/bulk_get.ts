@@ -16,15 +16,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
-      before(() =>
-        esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      before(
+        async () =>
+          await esArchiver.load(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
-      after(() =>
-        esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-        )
+      after(
+        async () =>
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          )
       );
       const URL = '/api/kibana/management/saved_objects/_bulk_get';
       const hiddenTypeExportableImportable = {

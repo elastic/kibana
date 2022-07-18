@@ -14,15 +14,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('export', () => {
-    before(() =>
-      esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
+    before(
+      async () =>
+        await esArchiver.load(
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
     );
-    after(() =>
-      esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
+    after(
+      async () =>
+        await esArchiver.unload(
+          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
     );
 
     it('resolves objects with importableAndExportable types', async () => {
