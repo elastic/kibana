@@ -12,7 +12,8 @@
   "requiredPlugins": [
     "charts",
     "data",
-    "licensing"
+    "licensing",
+    "unifiedSearch"
   ],
   "optionalPlugins": [],
   "requiredBundles": ["kibanaReact", "fieldFormats"],

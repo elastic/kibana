@@ -37,8 +37,10 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   latest,
   windowParameters,
 }) => {
-  const { services } = useAiOpsKibana();
-  const basePath = services.http?.basePath.get() ?? '';
+  const {
+    services: { http },
+  } = useAiOpsKibana();
+  const basePath = http?.basePath.get() ?? '';
 
   const { cancel, start, data, isRunning, error } = useFetchStream<
     ApiExplainLogRateSpikes,

@@ -70,7 +70,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     if (!searchParams) return;
 
     try {
-      const resp: any = await lastValueFrom(
+      const resp = await lastValueFrom(
         data.search.search({
           params: getDocumentCountStatsRequest(searchParams),
         })
