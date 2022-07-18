@@ -22,13 +22,17 @@ import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
 
+interface Options {
+  isEndpointList: boolean;
+}
+
 /**
  * Returns a list (array) of actions for an individual endpoint
  * @param endpointMetadata
  */
 export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined,
-  isEndpointList?: boolean
+  options?: Options
 ): ContextMenuItemNavByRouterProps[] => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
@@ -134,7 +138,7 @@ export const useEndpointActionItems = (
               },
             ]
           : []),
-        ...(isEndpointList
+        ...(options?.isEndpointList
           ? [
               {
                 'data-test-subj': 'actionsLink',
@@ -252,6 +256,6 @@ export const useEndpointActionItems = (
     isPlatinumPlus,
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
-    isEndpointList,
+    options?.isEndpointList,
   ]);
 };
