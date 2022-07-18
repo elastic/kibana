@@ -12,7 +12,7 @@ import React from 'react';
 import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
 
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiLink,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -26,6 +26,10 @@ import {
   IconType,
   EuiIcon,
   EuiToolTip,
+  EuiTableSortingType,
+  CriteriaWithPagination,
+  EuiSearchBarProps,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
@@ -212,7 +216,7 @@ class SavedObjectFinderUi extends React.Component<
   public render() {
     return (
       <React.Fragment>
-        {this.renderSearchBar()}
+        {/* {this.renderSearchBar()} */}
         {this.renderListing()}
       </React.Fragment>
     );
@@ -455,7 +459,6 @@ class SavedObjectFinderUi extends React.Component<
   }
 
   private renderListing() {
-    const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
     const { onChoose, savedObjectMetaData } = this.props;
     const taggingApi = getSavedObjects().getSavedObjectsTagging();
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
@@ -534,10 +537,36 @@ class SavedObjectFinderUi extends React.Component<
       ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
     ];
     const pagination = {
-      pageIndex: 0,
-      pageSize: 50,
-      totalItemCount: 1000,
+      pageIndex: this.state.page,
+      pageSize: this.state.perPage,
+      totalItemCount: this.state.items.length,
       pageSizeOptions: [5, 10, 20, 50],
+      showPerPageOptions: !Boolean(this.props.fixedPageSize),
+    };
+    const typeFilter: SearchFilterConfig = {
+      type: 'field_value_selection',
+      field: 'type',
+      name: i18n.translate('savedObjects.finder.filterButtonLabel', {
+        defaultMessage: 'Types',
+      }),
+      multiSelect: 'or',
+      options: this.props.savedObjectMetaData.map((metaData) => ({
+        value: metaData.type,
+        name: metaData.name,
+      })),
+    };
+    const search: EuiSearchBarProps = {
+      onChange: ({ query }) => {
+        this.setState({ query: query?.text ?? '' }, this.fetchItems);
+      },
+      box: {
+        incremental: true,
+      },
+      filters: [
+        ...(this.props.showFilter ? [typeFilter] : []),
+        ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
+      ],
+      toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
     };
 
     return (
@@ -616,15 +645,26 @@ class SavedObjectFinderUi extends React.Component<
               itemsPerPageOptions={[5, 10, 15, 25]}
             />
           ))} */}
-        <EuiBasicTable
+        <EuiInMemoryTable
           loading={
             (this.state.isFetchingItems && this.state.items.length === 0) ||
             !this.state.allowedTypes.length
           }
           itemId="id"
-          items={items}
+          items={this.state.items}
           columns={columns}
-          // pagination={pagination}
+          message={this.props.noItemsMessage}
+          search={search}
+          pagination={pagination}
+          sorting={true}
+          onChange={(table: CriteriaWithPagination<SavedObjectFinderItem>) => {
+            const { index: page, size: perPage } = table.page || {};
+
+            this.setState({
+              page,
+              perPage,
+            });
+          }}
         />
       </>
     );
