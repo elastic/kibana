@@ -34,10 +34,10 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const expected = {
-    chunksLength: 7,
-    actionsLength: 6,
-    noIndexChunksLength: 3,
-    noIndexActionsLength: 2,
+    chunksLength: 8,
+    actionsLength: 7,
+    noIndexChunksLength: 4,
+    noIndexActionsLength: 3,
     actionFilter: 'add_change_points',
     errorFilter: 'error',
     changePoints: [

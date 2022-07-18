@@ -645,7 +645,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -6991,13 +6999,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -7067,13 +7069,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -12961,7 +12957,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -13001,7 +12997,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -13858,7 +13854,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "({ id, ...restOfSpec }: ",
+              "({ id, name, title, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13884,7 +13880,7 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, ...restOfSpec }",
+                "label": "{ id, name, title, ...restOfSpec }",
                 "description": [],
                 "signature": [
                   {
@@ -14733,13 +14729,7 @@
                 "text": "ElasticsearchClient"
               },
               ", request?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -16300,13 +16290,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any> | undefined"
                 ],
                 "path": "src/plugins/data_views/server/types.ts",
@@ -19407,7 +19391,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -19447,7 +19431,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -19535,7 +19519,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
@@ -21011,7 +20995,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "({ id, ...restOfSpec }: ",
+              "({ id, name, title, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21037,7 +21021,7 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, ...restOfSpec }",
+                "label": "{ id, name, title, ...restOfSpec }",
                 "description": [],
                 "signature": [
                   {
@@ -22637,7 +22621,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
@@ -23176,7 +23160,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: ({ id, ...restOfSpec }: ",
+          "{ create: ({ id, name, title, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23430,7 +23414,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
@@ -23527,7 +23511,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {

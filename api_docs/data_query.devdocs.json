@@ -53,13 +53,7 @@
                 "label": "uiSettings",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
+                  "IUiSettingsClient"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
@@ -1164,13 +1158,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ") => { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -1240,13 +1228,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,

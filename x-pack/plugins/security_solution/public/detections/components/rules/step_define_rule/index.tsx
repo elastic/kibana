@@ -480,6 +480,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiFlexItem grow={1}>
                 <StyledButtonGroup
                   legend="Rule index pattern or data view selector"
+                  data-test-subj="dataViewIndexPatternButtonGroup"
                   idSelected={dataSourceRadioIdSelected}
                   onChange={onChangeDataSource}
                   options={dataViewIndexPatternToggleButtonOptions}

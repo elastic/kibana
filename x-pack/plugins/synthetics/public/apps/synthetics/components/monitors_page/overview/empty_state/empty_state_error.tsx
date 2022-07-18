@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 interface EmptyStateErrorProps {
   errors: Array<IHttpFetchError<ResponseErrorBody>>;

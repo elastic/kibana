@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
-  InjectedMetadataParams,
-  InternalInjectedMetadataSetup,
-  InternalInjectedMetadataStart,
+  type InjectedMetadataParams,
+  type InternalInjectedMetadataSetup,
+  type InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
@@ -21,19 +22,18 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
-import { filter, firstValueFrom } from 'rxjs';
+import { HttpService } from '@kbn/core-http-browser-internal';
+import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { HttpService } from './http';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
-import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
-import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';

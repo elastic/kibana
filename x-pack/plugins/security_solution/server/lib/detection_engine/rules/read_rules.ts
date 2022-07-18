@@ -6,6 +6,7 @@
  */
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
 import type { ReadRuleOptions } from './types';
@@ -26,43 +27,45 @@ export const readRules = async ({
 }: ReadRuleOptions): Promise<
   SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
-  if (id != null) {
-    try {
-      const rule = await rulesClient.resolve({ id });
-      if (isAlertType(rule)) {
-        if (rule?.outcome === 'exactMatch') {
-          const { outcome, ...restOfRule } = rule;
-          return restOfRule;
+  return withSecuritySpan('readRules', async () => {
+    if (id != null) {
+      try {
+        const rule = await rulesClient.resolve({ id });
+        if (isAlertType(rule)) {
+          if (rule?.outcome === 'exactMatch') {
+            const { outcome, ...restOfRule } = rule;
+            return restOfRule;
+          }
+          return rule;
+        } else {
+          return null;
         }
-        return rule;
-      } else {
-        return null;
+      } catch (err) {
+        if (err?.output?.statusCode === 404) {
+          return null;
+        } else {
+          // throw non-404 as they would be 500 or other internal errors
+          throw err;
+        }
       }
-    } catch (err) {
-      if (err?.output?.statusCode === 404) {
+    } else if (ruleId != null) {
+      const ruleFromFind = await findRules({
+        rulesClient,
+        filter: `alert.attributes.params.ruleId: "${ruleId}"`,
+        page: 1,
+        fields: undefined,
+        perPage: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+      if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
         return null;
       } else {
-        // throw non-404 as they would be 500 or other internal errors
-        throw err;
+        return ruleFromFind.data[0];
       }
-    }
-  } else if (ruleId != null) {
-    const ruleFromFind = await findRules({
-      rulesClient,
-      filter: `alert.attributes.params.ruleId: "${ruleId}"`,
-      page: 1,
-      fields: undefined,
-      perPage: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-    });
-    if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
-      return null;
     } else {
-      return ruleFromFind.data[0];
+      // should never get here, and yet here we are.
+      return null;
     }
-  } else {
-    // should never get here, and yet here we are.
-    return null;
-  }
+  });
 };

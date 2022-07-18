@@ -54,6 +54,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
           </div>
           <div>
             <ConsoleCodeBlock>
+              <EuiSpacer size="m" />
               <FormattedMessage
                 id="xpack.securitySolution.console.badArgument.helpMessage"
                 defaultMessage="Enter {helpCmd} for further assistance."
