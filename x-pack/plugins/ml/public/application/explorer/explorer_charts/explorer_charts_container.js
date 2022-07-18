@@ -16,7 +16,9 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import {
   getChartType,
@@ -167,6 +169,7 @@ function ExplorerChartContainer({
 
   const chartRef = useRef(null);
 
+  const { euiTheme } = useEuiTheme();
   const chartTheme = chartsService.theme.useChartsTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -230,17 +233,19 @@ function ExplorerChartContainer({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div className="ml-explorer-chart-icons">
+          <div
+            css={css`
+              padding: ${euiTheme.size.xs};
+            `}
+          >
             {tooManyBuckets && (
-              <span className="ml-explorer-chart-icon">
-                <EuiIconTip
-                  content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
-                  position="top"
-                  size="s"
-                  type="alert"
-                  color="warning"
-                />
-              </span>
+              <EuiIconTip
+                content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
+                position="top"
+                size="s"
+                type="alert"
+                color="warning"
+              />
             )}
             {explorerSeriesLink && (
               <EuiToolTip position="top" content={textViewButton}>
@@ -391,7 +396,11 @@ export const ExplorerChartsContainerUI = ({
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
-      <EuiFlexGrid columns={chartsColumns} data-test-subj="mlExplorerChartsContainer">
+      <EuiFlexGrid
+        columns={chartsColumns}
+        gutterSize="m"
+        data-test-subj="mlExplorerChartsContainer"
+      >
         {seriesToUse.length > 0 &&
           seriesToUse.map((series) => (
             <EuiFlexItem

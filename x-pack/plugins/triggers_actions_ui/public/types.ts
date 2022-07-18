@@ -50,6 +50,7 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
@@ -58,6 +59,14 @@ import type { RuleEventLogListProps } from './application/sections/rule_details/
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
+import type {
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
+} from './application/sections/field_browser/types';
+import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -95,9 +104,16 @@ export type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   RulesListNotifyBadgeProps,
+  FieldBrowserProps,
+  FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  BrowserFieldItem,
+  RulesListVisibleColumns,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -341,7 +357,14 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
+}
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
+  filteredRuleTypes?: string[];
 }
 
 export enum Percentiles {
@@ -413,6 +436,7 @@ export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -423,6 +447,10 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    width?: number;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {

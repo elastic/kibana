@@ -7,13 +7,14 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EntityType } from '@kbn/timelines-plugin/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { BrowserFields, DocValueFields } from '../../../common/containers/source';
+import type { BrowserFields } from '../../../common/containers/source';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
@@ -23,7 +24,6 @@ import { UserDetailsPanel } from './user_details';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
@@ -41,7 +41,6 @@ interface DetailsPanelProps {
 export const DetailsPanel = React.memo(
   ({
     browserFields,
-    docValueFields,
     entityType,
     handleOnPanelClosed,
     isFlyoutView,
@@ -83,7 +82,6 @@ export const DetailsPanel = React.memo(
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
-          docValueFields={docValueFields}
           entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}

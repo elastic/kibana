@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
@@ -21,7 +22,7 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';

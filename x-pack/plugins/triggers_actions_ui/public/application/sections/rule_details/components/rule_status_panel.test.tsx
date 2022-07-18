@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { RuleStatusPanelWithApi, RuleStatusPanel } from './rule_status_panel';
+import RuleStatusPanelWithApi, { RuleStatusPanel } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({

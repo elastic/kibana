@@ -59,7 +59,6 @@ RUNTIME_DEPS = [
   "@npm//webpack",
   "@npm//webpack-merge",
   "@npm//webpack-sources",
-  "@npm//zlib"
 ]
 
 TYPES_DEPS = [
@@ -71,6 +70,7 @@ TYPES_DEPS = [
   "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-ui-shared-deps-src:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-synthetic-package-map:npm_module_types",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
@@ -80,7 +80,6 @@ TYPES_DEPS = [
   "@npm//lmdb-store",
   "@npm//pirates",
   "@npm//rxjs",
-  "@npm//zlib",
   "@npm//@types/babel__core",
   "@npm//@types/compression-webpack-plugin",
   "@npm//@types/dedent",
@@ -118,6 +117,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

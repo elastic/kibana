@@ -7,7 +7,8 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { CommentAttributes, CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
+import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import { CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
 import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
 

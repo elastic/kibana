@@ -16,6 +16,7 @@ import {
 } from './synthetics_service/enablement';
 import {
   getAllSyntheticsMonitorRoute,
+  getSyntheticsMonitorOverviewRoute,
   getSyntheticsMonitorRoute,
 } from './monitor_cruds/get_monitor';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
@@ -38,6 +39,7 @@ export const syntheticsAppRestApiRoutes: UMRestApiRouteFactory[] = [
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getAllSyntheticsMonitorRoute,
+  getSyntheticsMonitorOverviewRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,

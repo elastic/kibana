@@ -258,7 +258,7 @@
         "tags": [],
         "label": "ElasticV3ShipperOptions",
         "description": [
-          "\r\nOptions for the Elastic V3 shipper"
+          "\nOptions for the Elastic V3 shipper"
         ],
         "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
         "deprecated": false,
@@ -270,7 +270,7 @@
             "tags": [],
             "label": "channelName",
             "description": [
-              "\r\nThe name of the channel to stream all the events to."
+              "\nThe name of the channel to stream all the events to."
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
             "deprecated": false
@@ -282,7 +282,7 @@
             "tags": [],
             "label": "version",
             "description": [
-              "\r\nThe product's version."
+              "\nThe product's version."
             ],
             "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
             "deprecated": false
@@ -294,7 +294,7 @@
             "tags": [],
             "label": "sendTo",
             "description": [
-              "\r\nProvide it to override the Analytics client's default configuration."
+              "\nProvide it to override the Analytics client's default configuration."
             ],
             "signature": [
               "\"staging\" | \"production\" | undefined"
@@ -309,7 +309,7 @@
             "tags": [],
             "label": "debug",
             "description": [
-              "\r\nShould show debug information about the requests it makes to the V3 API."
+              "\nShould show debug information about the requests it makes to the V3 API."
             ],
             "signature": [
               "boolean | undefined"

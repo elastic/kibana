@@ -7,23 +7,25 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
-import { Action } from 'typescript-fsa';
+import type { Action } from 'typescript-fsa';
 import uuid from 'uuid';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
-import {
+import type {
   ColumnHeaderOptions,
-  DataProviderType,
-  TimelineId,
-  TimelineStatus,
-  TimelineType,
-  TimelineTabs,
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
+} from '../../../../common/types/timeline';
+import {
+  DataProviderType,
+  TimelineId,
+  TimelineStatus,
+  TimelineType,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import {
@@ -39,7 +41,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../store/timeline/actions';
-import { TimelineModel } from '../../store/timeline/model';
+import type { TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
 
 import {
@@ -51,7 +53,7 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import {
+import type {
   OpenTimelineResult,
   UpdateTimeline,
   DispatchUpdateTimeline,
@@ -67,8 +69,8 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import { NoteResult } from '../../../../common/types/timeline/note';
+import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
