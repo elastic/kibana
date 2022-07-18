@@ -9,7 +9,11 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
+import {
+  getTagFindReferences,
+  parseQuery,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
 
 import {
   EuiInMemoryTable,
@@ -21,8 +25,9 @@ import {
   CriteriaWithPagination,
   EuiSearchBarProps,
   SearchFilterConfig,
+  Query,
+  PropertySort,
 } from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -33,6 +38,7 @@ import {
   SavedObject,
 } from '@kbn/core/public';
 
+import { simpleSavedObjectToSavedObject } from '@kbn/data-views-plugin/public';
 import { LISTING_LIMIT_SETTING } from '../../common';
 import { getSavedObjects } from '../services';
 
@@ -61,14 +67,11 @@ interface SavedObjectFinderItem extends SavedObject {
 
 interface SavedObjectFinderState {
   items: SavedObjectFinderItem[];
-  query: string;
+  query: Query;
   isFetchingItems: boolean;
   page: number;
   perPage: number;
-  sortDirection?: Direction;
-  sortOpen: boolean;
-  filterOpen: boolean;
-  filteredTypes: string[];
+  sort?: PropertySort;
   allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
@@ -116,12 +119,17 @@ class SavedObjectFinderUi extends React.Component<
 
   private isComponentMounted: boolean = false;
 
-  private debouncedFetch = debounce(async (query: string) => {
+  private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
+    const { queryText, visibleTypes, selectedTags } = parseQuery(query, this.state.allowedTypes);
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
+
+    const searchTypes = Object.keys(metaDataMap).filter(
+      (type) => !visibleTypes || visibleTypes.includes(type)
+    );
 
     const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
       if (item.defaultSearchField) {
@@ -131,15 +139,21 @@ class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
-    const originalSavedObjects = await getSavedObjects().savedObjectsClient.find<FinderAttributes>({
-      type: Object.keys(metaDataMap),
+    const response = await this.props.savedObjects.client.find<FinderAttributes>({
+      type: searchTypes,
       fields: [...new Set(fields)],
-      search: query ? `${query}*` : undefined,
+      search: queryText ? `${queryText}*` : undefined,
+      page: 1,
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],
+      defaultSearchOperator: 'AND',
+      hasReference: getTagFindReferences({
+        selectedTags,
+        taggingApi: getSavedObjects().getSavedObjectsTagging(),
+      }),
     });
 
-    const savedObjects = originalSavedObjects
+    const savedObjects = response.savedObjects
       .map((savedObject) => {
         const {
           attributes: { name, title },
@@ -147,7 +161,7 @@ class SavedObjectFinderUi extends React.Component<
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name && typeof name === 'string' ? name : titleToUse;
         return {
-          ...savedObject,
+          ...simpleSavedObjectToSavedObject(savedObject),
           title: titleToUse,
           name: nameToUse,
           simple: new SimpleSavedObject(this.props.savedObjects.client, savedObject),
@@ -168,7 +182,7 @@ class SavedObjectFinderUi extends React.Component<
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
-    if (query === this.state.query) {
+    if (query.text === this.state.query.text) {
       this.setState({
         isFetchingItems: false,
         page: 0,
@@ -185,10 +199,7 @@ class SavedObjectFinderUi extends React.Component<
       isFetchingItems: false,
       page: 0,
       perPage: props.initialPageSize || props.fixedPageSize || 10,
-      query: '',
-      filterOpen: false,
-      filteredTypes: [],
-      sortOpen: false,
+      query: Query.parse(''),
       allowedTypes: [],
     };
   }
@@ -233,6 +244,16 @@ class SavedObjectFinderUi extends React.Component<
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
     const taggingApi = getSavedObjects().getSavedObjectsTagging();
+    const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
+    const tagColumn: EuiTableFieldDataColumnType<SavedObject> | undefined = originalTagColumn
+      ? {
+          ...originalTagColumn,
+          sortable: (item) =>
+            typeof originalTagColumn.sortable === 'function'
+              ? originalTagColumn.sortable(item) ?? ''
+              : '',
+        }
+      : undefined;
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       {
         field: 'type',
@@ -244,7 +265,9 @@ class SavedObjectFinderUi extends React.Component<
         description: i18n.translate('savedObjects.finder.typeDescription', {
           defaultMessage: 'Type of the saved object',
         }),
-        sortable: true,
+        sortable: ({ type }) => {
+          return getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
+        },
         'data-test-subj': 'savedObjectFinderType',
         render: (type, item) => {
           const typeLabel = getSavedObjects().getSavedObjectLabel(type, this.state.allowedTypes);
@@ -279,7 +302,7 @@ class SavedObjectFinderUi extends React.Component<
           defaultMessage: 'Title of the saved object',
         }),
         dataType: 'string',
-        sortable: true,
+        sortable: ({ name }) => name?.toLowerCase(),
         'data-test-subj': 'savedObjectFinderTitle',
         render: (_, item) => {
           const currentSavedObjectMetaData = savedObjectMetaData.find(
@@ -306,14 +329,14 @@ class SavedObjectFinderUi extends React.Component<
           );
         },
       },
-      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
+      ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
       pageSizeOptions: [5, 10, 20, 50],
-      showPerPageOptions: !Boolean(this.props.fixedPageSize),
+      showPerPageOptions: !this.props.fixedPageSize,
     };
     const typeFilter: SearchFilterConfig = {
       type: 'field_value_selection',
@@ -329,7 +352,7 @@ class SavedObjectFinderUi extends React.Component<
     };
     const search: EuiSearchBarProps = {
       onChange: ({ query }) => {
-        this.setState({ query: query?.text ?? '' }, this.fetchItems);
+        this.setState({ query: query ?? Query.parse('') }, this.fetchItems);
       },
       box: {
         incremental: true,
@@ -343,23 +366,21 @@ class SavedObjectFinderUi extends React.Component<
 
     return (
       <EuiInMemoryTable
-        loading={
-          (this.state.isFetchingItems && this.state.items.length === 0) ||
-          !this.state.allowedTypes.length
-        }
+        loading={this.state.isFetchingItems || !this.state.allowedTypes.length}
         itemId="id"
-        items={this.state.items}
+        items={this.state.allowedTypes.length ? this.state.items : []}
         columns={columns}
         message={this.props.noItemsMessage}
         search={search}
         pagination={pagination}
-        sorting={true}
+        sorting={this.state.sort ? { sort: this.state.sort } : true}
         onChange={(table: CriteriaWithPagination<SavedObjectFinderItem>) => {
           const { index: page, size: perPage } = table.page || {};
 
           this.setState({
             page,
             perPage,
+            sort: table.sort,
           });
         }}
       />
