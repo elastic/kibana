@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -47,7 +47,7 @@ export const TotalCountHeader = ({
         <EuiIconTip
           content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
             defaultMessage:
-              'Random sampler is being used for the total document count and the chart. Values shown are estimated. Adjust the slider to a higher percentage for better accuracy, or 100% to exact values.',
+              'Random sampler is being used for the total document count and the chart. Values shown are estimated.',
           })}
           position="right"
           type="iInCircle"
