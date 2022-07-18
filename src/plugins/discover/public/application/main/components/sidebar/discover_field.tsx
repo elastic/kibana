@@ -26,13 +26,15 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { FieldStatsFromSample } from '@kbn/unified-field-list-plugin/public';
+import { FieldStats } from '@kbn/unified-field-list-plugin/public';
 import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
-import { DiscoverFieldDetails } from './discover_field_details';
+// import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
+import type { AppState } from '../../services/discover_state';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -263,6 +265,11 @@ export interface DiscoverFieldProps {
    * Optionally show or hide field stats in the popover
    */
   showFieldStats?: boolean;
+
+  /**
+   * Discover App State
+   */
+  state: AppState;
 }
 
 function DiscoverFieldComponent({
@@ -279,7 +286,10 @@ function DiscoverFieldComponent({
   onEditField,
   onDeleteField,
   showFieldStats,
+  state,
 }: DiscoverFieldProps) {
+  const services = useDiscoverServices();
+  const { data } = services;
   const [infoIsOpen, setOpen] = useState(false);
 
   const toggleDisplay = useCallback(
@@ -372,24 +382,34 @@ function DiscoverFieldComponent({
 
   const renderPopover = () => {
     const details = getDetails(field);
+    const dateRange = data.query.timefilter.timefilter.getTime();
+
     return (
       <>
         {showFieldStats && (
           <>
-            <FieldStatsFromSample />
-            <EuiTitle size="xxxs">
-              <h5>
-                {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                  defaultMessage: 'Top 5 values',
-                })}
-              </h5>
-            </EuiTitle>
-            <DiscoverFieldDetails
-              indexPattern={indexPattern}
+            <FieldStats
+              query={state.query!}
+              filters={state.filters!}
+              fromDate={dateRange.from}
+              toDate={dateRange.to}
+              dataViewOrDataViewId={indexPattern}
               field={field}
-              details={details}
-              onAddFilter={onAddFilter}
+              testSubject="lnsFieldListPanel"
             />
+            {/* <EuiTitle size="xxxs"> */}
+            {/*  <h5>*/}
+            {/*    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {*/}
+            {/*      defaultMessage: 'Top 5 values',*/}
+            {/*    })}*/}
+            {/*  </h5>*/}
+            {/* </EuiTitle> */}
+            {/* <DiscoverFieldDetails */}
+            {/*  indexPattern={indexPattern}*/}
+            {/*  field={field}*/}
+            {/*  details={details}*/}
+            {/*  onAddFilter={onAddFilter}*/}
+            {/* /> */}
           </>
         )}
 
@@ -404,7 +424,7 @@ function DiscoverFieldComponent({
           </>
         )}
         {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
-        <DiscoverFieldVisualize
+        <DiscoverFieldVisualize // TODO: what to do with `details`?
           field={field}
           indexPattern={indexPattern}
           multiFields={rawMultiFields}

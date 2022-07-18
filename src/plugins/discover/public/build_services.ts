@@ -81,6 +81,7 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
+  charts: ChartsPluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -125,5 +126,6 @@ export const buildServices = memoize(function (
     dataViewEditor: plugins.dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
+    charts: plugins.charts,
   };
 });
