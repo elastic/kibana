@@ -11,7 +11,11 @@ import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../../common';
+import {
+  ExpressionAstExpression,
+  ExpressionValueError,
+  IInterpreterRenderHandlers,
+} from '../../common';
 import { ExpressionLoader } from '../loader';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
 import { useDebouncedValue } from './use_debounced_value';
@@ -39,6 +43,11 @@ interface ExpressionRendererState {
   isLoading: boolean;
   error: null | ExpressionRenderError;
 }
+
+const isExpressionError = (result: unknown): result is ExpressionValueError => {
+  const { type } = (result ?? {}) as { type?: string };
+  return type === 'error';
+};
 
 export function useExpressionRenderer(
   nodeRef: RefObject<HTMLElement>,
@@ -123,11 +132,11 @@ export function useExpressionRenderer(
   useEffect(() => {
     const subscription = expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
       const newState: Partial<ExpressionRendererState> = { isEmpty: false };
-      if (!hasHandledErrorRef.current) {
+      if (!isExpressionError(result)) {
         newState.error = null;
       }
-      setState(newState);
       onData$?.(result, expressionLoaderRef.current?.inspect(), partial);
+      setState(newState);
     });
 
     return () => subscription?.unsubscribe();
