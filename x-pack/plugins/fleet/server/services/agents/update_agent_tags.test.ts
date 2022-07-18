@@ -10,6 +10,12 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { updateAgentTags } from './update_agent_tags';
 
+jest.mock('./filter_hosted_agents', () => ({
+  filterHostedPolicies: jest
+    .fn()
+    .mockImplementation((soClient, givenAgents) => Promise.resolve(givenAgents)),
+}));
+
 describe('update_agent_tags', () => {
   let esClient: ElasticsearchClientMock;
   let soClient: jest.Mocked<SavedObjectsClientContract>;
