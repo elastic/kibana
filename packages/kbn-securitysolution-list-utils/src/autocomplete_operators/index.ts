@@ -117,7 +117,6 @@ export const DETECTION_ENGINE_EXCEPTION_OPERATORS: OperatorOption[] = [
   isNotInListOperator,
 ];
 
-
 export const ALL_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,

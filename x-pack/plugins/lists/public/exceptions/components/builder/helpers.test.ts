@@ -18,8 +18,8 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  BuilderEntry,
   ALL_OPERATORS,
+  BuilderEntry,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,

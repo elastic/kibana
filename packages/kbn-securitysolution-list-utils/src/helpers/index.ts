@@ -680,7 +680,7 @@ export const getOperatorOptions = (
   item: FormattedBuilderEntry,
   listType: ExceptionListType,
   isBoolean: boolean,
-  includeValueListOperators = true,
+  includeValueListOperators = true
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
@@ -693,9 +693,7 @@ export const getOperatorOptions = (
   } else if (!includeValueListOperators) {
     return EXCEPTION_OPERATORS_SANS_LISTS;
   } else {
-    return listType === 'detection'
-      ? DETECTION_ENGINE_EXCEPTION_OPERATORS
-      : ALL_OPERATORS;
+    return listType === 'detection' ? DETECTION_ENGINE_EXCEPTION_OPERATORS : ALL_OPERATORS;
   }
 };
 
