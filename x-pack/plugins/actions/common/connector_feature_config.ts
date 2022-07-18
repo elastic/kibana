@@ -22,6 +22,7 @@ interface ConnectorFeatureConfig {
 
 export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
+export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
 
 export const AlertingConnectorFeature: ConnectorFeatureConfig = {
@@ -38,6 +39,13 @@ export const CasesConnectorFeature: ConnectorFeatureConfig = {
   }),
 };
 
+export const UptimeConnectorFeature: ConnectorFeatureConfig = {
+  id: UptimeConnectorFeatureId,
+  name: i18n.translate('xpack.actions.availableConnectorFeatures.uptime', {
+    defaultMessage: 'Uptime',
+  }),
+};
+
 export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   id: SecurityConnectorFeatureId,
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
@@ -48,6 +56,7 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
 const AllAvailableConnectorFeatures: ConnectorFeatureConfig[] = [
   AlertingConnectorFeature,
   CasesConnectorFeature,
+  UptimeConnectorFeature,
   SecuritySolutionFeature,
 ];
 

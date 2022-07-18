@@ -13,7 +13,11 @@ import { Logger } from '@kbn/core/server';
 import { postPagerduty } from './lib/post_pagerduty';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '../../common';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -143,7 +147,11 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),
-    featureConfig: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    featureConfig: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

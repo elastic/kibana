@@ -58,6 +58,7 @@ import { createServiceWrapper } from './create_service_wrapper';
 import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '../../../common';
 
@@ -100,6 +101,7 @@ export function getServiceNowITSMActionType(
     featureConfig: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
+      UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {

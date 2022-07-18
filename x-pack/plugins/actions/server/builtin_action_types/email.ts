@@ -15,6 +15,7 @@ import {
   AlertingConnectorFeatureId,
   AdditionalEmailServices,
   withoutMustacheTemplate,
+  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '../../common';
 
@@ -217,7 +218,11 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
-    featureConfig: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    featureConfig: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

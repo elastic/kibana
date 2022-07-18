@@ -26,7 +26,11 @@ import {
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from './lib/get_custom_agents';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '../../common';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -71,7 +75,11 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
-    featureConfig: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    featureConfig: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       secrets: schema.object(secretsSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

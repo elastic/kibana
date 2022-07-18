@@ -35,6 +35,7 @@ import * as i18n from './translations';
 import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '../../../common';
 
@@ -72,6 +73,7 @@ export function getActionType(
     featureConfig: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
+      UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
