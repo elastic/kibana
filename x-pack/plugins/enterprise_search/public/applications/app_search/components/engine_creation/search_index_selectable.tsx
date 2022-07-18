@@ -61,7 +61,9 @@ interface IndexStatusDetailsProps {
 }
 
 export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }) => {
-  return !option ? <></> : (
+  return !option ? (
+    <></>
+  ) : (
     <EuiFlexGroup className="entSearch__indexListItem" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiHealth color={option.health ? healthColorsMap[option.health] : ''}>
@@ -116,5 +118,5 @@ export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }
         </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
-  )
+  );
 };

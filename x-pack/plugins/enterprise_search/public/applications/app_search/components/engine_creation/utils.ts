@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
 import { generatePath } from 'react-router-dom';
+
+import dedent from 'dedent';
 
 import { ElasticsearchIndex } from '../../../../../common/types';
 import { ENGINE_CRAWLER_PATH, ENGINE_PATH } from '../../routes';
