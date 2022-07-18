@@ -129,6 +129,9 @@ describe('operator', () => {
       {
         label: 'is not in list',
       },
+      {
+        label: 'matches',
+      },
     ]);
   });
 
