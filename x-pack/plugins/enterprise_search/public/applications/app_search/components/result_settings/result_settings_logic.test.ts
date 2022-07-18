@@ -45,6 +45,7 @@ describe('ResultSettingsLogic', () => {
   };
 
   const SELECTORS = {
+    validResultFields: {},
     serverResultFields: {},
     reducedServerResultFields: {},
     resultFieldsEmpty: true,
@@ -53,17 +54,13 @@ describe('ResultSettingsLogic', () => {
     nonTextResultFields: {},
     textResultFields: {},
     queryPerformanceScore: 0,
-    fieldCapabilities: (_: string) => { return {}; },
-
+    isSnippetAllowed: (_: string) => true,
   };
 
-  const FUNCTIONAL_SELECTORS = [
-    'fieldCapabilities',
-    'isSnippetAllowed',
-  ]
+  const FUNCTIONAL_SELECTORS = ['fieldCapabilities', 'isSnippetAllowed']
 
   // Values without selectors
-  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS), FUNCTIONAL_SELECTORS);
+  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,7 +71,7 @@ describe('ResultSettingsLogic', () => {
     mount();
     expect(omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS)).toEqual({
       ...DEFAULT_VALUES,
-      ...SELECTORS,
+      ...omit(SELECTORS, FUNCTIONAL_SELECTORS),
     });
   });
 

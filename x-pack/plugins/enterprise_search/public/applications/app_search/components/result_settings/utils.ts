@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import { AdvancedSchema, SchemaType } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
+import { ResultSettings } from './result_settings';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
@@ -101,10 +102,10 @@ export const convertToServerFieldResultSetting = (fieldResultSetting: FieldResul
 };
 
 export const splitResultFields = (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
-  return Object.entries(schema).reduce((acc, [fieldName, { type: fieldType }]) => {
-    if (fieldType === SchemaType.Nested) return acc; // Nested fields are not displayed in the UI.
+  return Object.entries(resultFields).reduce((acc, [fieldName, resultFieldSettings]) => {
+    const fieldType = schema[fieldName].type;
     const targetField = fieldType === SchemaType.Text ? 'textResultFields' : 'nonTextResultFields';
-    return { ...acc, [targetField]: { ...acc[targetField], [fieldName]: resultFields[fieldName] } };
+    return { ...acc, [targetField]: { ...acc[targetField], [fieldName]: resultFieldSettings } };
   }, {
     textResultFields: {},
     nonTextResultFields: {}

@@ -71,6 +71,7 @@ interface ResultSettingsValues {
   schema: AdvancedSchema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  validResultFields: FieldResultSettingObject;
   textResultFields: FieldResultSettingObject;
   nonTextResultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
@@ -172,39 +173,40 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
-    textResultFields: [
+    validResultFields: [
       () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema): FieldResultSettingObject => {
+        return Object.entries(resultFields).reduce((validResultFields, [fieldName, fieldSettings]) => {
+          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
+            return validResultFields;
+          }
+          return { ...validResultFields, [fieldName]: fieldSettings };
+        }, {});
+      },
+    ],
+    textResultFields: [
+      () => [selectors.validResultFields, selectors.schema],
       (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { textResultFields } = splitResultFields(resultFields, schema);
         return textResultFields;
       },
     ],
     nonTextResultFields: [
-      () => [selectors.resultFields, selectors.schema],
+      () => [selectors.validResultFields, selectors.schema],
       (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { nonTextResultFields } = splitResultFields(resultFields, schema);
         return nonTextResultFields;
       },
     ],
-    fieldCapabilities: [
-      () => [selectors.schema],
-      (schema: AdvancedSchema) => {
-        return (fieldName: string): SchemaFieldCapabilities => schema[fieldName].capabilities
-      },
-    ],
     isSnippetAllowed: [
-      () => [selectors.fieldCapabilities],
-      (fieldCapabilitiesSelector: (fieldName: string) => SchemaFieldCapabilities)  => {
-        return (fieldName: string): boolean => !!fieldCapabilitiesSelector(fieldName).snippet;
+      () => [selectors.schema], (schema: AdvancedSchema) => {
+        return (fieldName: string): boolean => !!schema[fieldName].capabilities.snippet;
       },
     ],
     serverResultFields: [
-      () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
+      () => [selectors.validResultFields],
+      (resultFields: FieldResultSettingObject) => {
         return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
-          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
-            return serverResultFields;
-          }
           return {
             ...serverResultFields,
             [fieldName]: convertToServerFieldResultSetting(settings as FieldResultSetting),
@@ -213,11 +215,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       },
     ],
     resultFieldsAtDefaultSettings: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
     ],
     resultFieldsEmpty: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
