@@ -10,7 +10,10 @@ import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
-export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
+export function useBreadcrumb(
+  breadcrumb: Breadcrumb | Breadcrumb[],
+  fnDeps: any[] = []
+) {
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {
@@ -38,5 +41,5 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match]);
+  }, [match, ...fnDeps]);
 }
