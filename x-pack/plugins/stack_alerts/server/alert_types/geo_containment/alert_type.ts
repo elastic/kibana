@@ -143,6 +143,7 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
   entityDocumentId: string;
   detectionDateTime: string;
   entityLocation: string;
+  // recovered alerts are not contained in boundary so context does boundary state
   containingBoundaryId?: string;
   containingBoundaryName?: unknown;
 }
