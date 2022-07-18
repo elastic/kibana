@@ -12,7 +12,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
-import { AlertingConnectorFeature } from '../../common';
+import { AlertingConnectorFeatureId } from '../../common';
 
 export type ServerLogActionType = ActionType<{}, {}, ActionParamsType>;
 export type ServerLogActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -49,7 +49,7 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',
     }),
-    featureConfig: [AlertingConnectorFeature.id],
+    featureConfig: [AlertingConnectorFeatureId],
     validate: {
       params: ParamsSchema,
     },

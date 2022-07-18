@@ -33,9 +33,9 @@ import {
 } from './types';
 import * as i18n from './translations';
 import {
-  AlertingConnectorFeature,
-  CasesConnectorFeature,
-  SecuritySolutionFeature,
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  SecurityConnectorFeatureId,
 } from '../../../common';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
@@ -70,9 +70,9 @@ export function getActionType(
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     featureConfig: [
-      AlertingConnectorFeature.id,
-      CasesConnectorFeature.id,
-      SecuritySolutionFeature.id,
+      AlertingConnectorFeatureId,
+      CasesConnectorFeatureId,
+      SecurityConnectorFeatureId,
     ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {

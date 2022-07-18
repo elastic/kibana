@@ -244,7 +244,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText('Select a connector')).toBeInTheDocument();
     });
 
-    it('shows the availability badges when the connector type is selected', async () => {
+    it('shows the feature id badges when the connector type is selected', async () => {
       const { getByTestId, getByText } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}

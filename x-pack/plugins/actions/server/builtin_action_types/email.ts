@@ -12,10 +12,10 @@ import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { Logger } from '@kbn/core/server';
 import {
-  AlertingConnectorFeature,
+  AlertingConnectorFeatureId,
   AdditionalEmailServices,
   withoutMustacheTemplate,
-  SecuritySolutionFeature,
+  SecurityConnectorFeatureId,
 } from '../../common';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
@@ -217,7 +217,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
-    featureConfig: [AlertingConnectorFeature.id, SecuritySolutionFeature.id],
+    featureConfig: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

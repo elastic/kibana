@@ -20,22 +20,26 @@ interface ConnectorFeatureConfig {
   name: string;
 }
 
+export const AlertingConnectorFeatureId = 'alerting';
+export const CasesConnectorFeatureId = 'cases';
+export const SecurityConnectorFeatureId = 'siem';
+
 export const AlertingConnectorFeature: ConnectorFeatureConfig = {
-  id: 'alerting',
+  id: AlertingConnectorFeatureId,
   name: i18n.translate('xpack.actions.availableConnectorFeatures.alerting', {
     defaultMessage: 'Alerting',
   }),
 };
 
 export const CasesConnectorFeature: ConnectorFeatureConfig = {
-  id: 'cases',
+  id: CasesConnectorFeatureId,
   name: i18n.translate('xpack.actions.availableConnectorFeatures.cases', {
     defaultMessage: 'Cases',
   }),
 };
 
 export const SecuritySolutionFeature: ConnectorFeatureConfig = {
-  id: 'siem',
+  id: SecurityConnectorFeatureId,
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
     defaultMessage: 'Security Solutions',
   }),

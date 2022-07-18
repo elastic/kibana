@@ -27,9 +27,9 @@ import {
 import { createExternalService } from './service';
 import { api } from './api';
 import {
-  AlertingConnectorFeature,
-  CasesConnectorFeature,
-  SecuritySolutionFeature,
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  SecurityConnectorFeatureId,
 } from '../../../common';
 interface GetActionTypeParams {
   logger: Logger;
@@ -56,9 +56,9 @@ export function getActionType(
       defaultMessage: 'Swimlane',
     }),
     featureConfig: [
-      AlertingConnectorFeature.id,
-      CasesConnectorFeature.id,
-      SecuritySolutionFeature.id,
+      AlertingConnectorFeatureId,
+      CasesConnectorFeatureId,
+      SecurityConnectorFeatureId,
     ],
     validate: {
       config: schema.object(SwimlaneServiceConfiguration, {

@@ -137,7 +137,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionType: actionTypesIndex[action.actionTypeId]
             ? actionTypesIndex[action.actionTypeId].name
             : action.actionTypeId,
-          actionTypeAvailability: actionTypesIndex[action.actionTypeId]
+          featureIds: actionTypesIndex[action.actionTypeId]
             ? actionTypesIndex[action.actionTypeId].featureConfig
             : [],
         };
@@ -257,9 +257,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'actionTypeAvailability',
+      field: 'featureIds',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeAvailabilityTitle',
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle',
         {
           defaultMessage: 'Availability',
         }
@@ -271,10 +271,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {(availability ?? []).map((featureId: string) => (
               <EuiFlexItem grow={false} key={featureId}>
-                <EuiBadge
-                  data-test-subj="connectorsTableCell-actionTypeAvailability"
-                  color="default"
-                >
+                <EuiBadge data-test-subj="connectorsTableCell-featureIds" color="default">
                   {getConnectorFeatureName(featureId)}
                 </EuiBadge>
               </EuiFlexItem>

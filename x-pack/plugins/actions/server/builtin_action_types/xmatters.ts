@@ -12,7 +12,7 @@ import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { postXmatters } from './lib/post_xmatters';
-import { AlertingConnectorFeature } from '../../common';
+import { AlertingConnectorFeatureId } from '../../common';
 
 export type XmattersActionType = ActionType<
   ActionTypeConfigType,
@@ -69,7 +69,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.xmattersTitle', {
       defaultMessage: 'xMatters',
     }),
-    featureConfig: [AlertingConnectorFeature.id],
+    featureConfig: [AlertingConnectorFeatureId],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

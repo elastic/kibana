@@ -14,11 +14,11 @@ import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
-import { SERVER_APP_ID } from '../../../../../common/constants';
 
 interface Props {
   field: FieldHook;
@@ -121,7 +121,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        featureId: SERVER_APP_ID,
+        featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
       }),
     [

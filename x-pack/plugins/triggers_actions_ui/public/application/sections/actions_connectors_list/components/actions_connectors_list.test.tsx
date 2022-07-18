@@ -203,15 +203,12 @@ describe('actions_connectors_list component with items', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(4);
 
-    const actionTypeAvailabilityBadges = wrapper.find(
-      'EuiBadge[data-test-subj="connectorsTableCell-actionTypeAvailability"]'
+    const featureIdsBadges = wrapper.find(
+      'EuiBadge[data-test-subj="connectorsTableCell-featureIds"]'
     );
-    expect(actionTypeAvailabilityBadges).toHaveLength(5);
+    expect(featureIdsBadges).toHaveLength(5);
 
-    expect(uniq(actionTypeAvailabilityBadges.map((badge) => badge.text()))).toEqual([
-      'Alerting',
-      'Cases',
-    ]);
+    expect(uniq(featureIdsBadges.map((badge) => badge.text()))).toEqual(['Alerting', 'Cases']);
   });
 
   it('renders table with preconfigured connectors', async () => {

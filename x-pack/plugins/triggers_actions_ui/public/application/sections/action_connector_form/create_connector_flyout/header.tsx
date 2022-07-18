@@ -24,8 +24,8 @@ const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
-  actionTypeAvailability?: string[] | null;
-}> = ({ icon, actionTypeName, actionTypeMessage, actionTypeAvailability }) => {
+  featureIds?: string[] | null;
+}> = ({ icon, actionTypeName, actionTypeMessage, featureIds }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -51,7 +51,7 @@ const FlyoutHeaderComponent: React.FC<{
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}
               </EuiText>
-              {actionTypeAvailability && actionTypeAvailability.length > 0 && (
+              {featureIds && featureIds.length > 0 && (
                 <>
                   <EuiSpacer size="m" />
                   <EuiFlexGroup
@@ -62,7 +62,7 @@ const FlyoutHeaderComponent: React.FC<{
                     alignItems="center"
                   >
                     Availability:{' '}
-                    {actionTypeAvailability.map((featureId: string) => (
+                    {featureIds.map((featureId: string) => (
                       <EuiFlexItem grow={false} key={featureId}>
                         <EuiBadge color="default">{getConnectorFeatureName(featureId)}</EuiBadge>
                       </EuiFlexItem>
