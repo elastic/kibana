@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode } from 'react';
+import React, { createContext, ReactNode, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -16,6 +17,7 @@ import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
+import { replace } from '../../components/shared/links/url_helpers';
 
 export interface APMServiceContextValue {
   serviceName: string;
@@ -37,6 +39,8 @@ export function ApmServiceContextProvider({
 }: {
   children: ReactNode;
 }) {
+  const history = useHistory();
+
   const {
     path: { serviceName },
     query,
@@ -62,6 +66,16 @@ export function ApmServiceContextProvider({
     transactionTypes,
     agentName,
   });
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  useMemo(() => {
+    if (
+      transactionTypes.length &&
+      !transactionTypes.some((type) => type === transactionType)
+    ) {
+      replace(history, { query: { transactionType: transactionTypes[0] } });
+    }
+  }, [history, transactionType, transactionTypes]);
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
