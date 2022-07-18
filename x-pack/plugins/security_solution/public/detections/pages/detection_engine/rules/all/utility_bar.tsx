@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiSwitch,
-  EuiSwitchEvent,
-  EuiContextMenuPanelDescriptor,
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';

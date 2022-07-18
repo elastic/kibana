@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ReactNode, useEffect } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
+import React, { memo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
-import { ParsedCommandInterface } from '../service/parsed_command_input';
-import { CommandDefinition, CommandExecutionComponentProps } from '../types';
+import type { ParsedCommandInterface } from '../service/parsed_command_input';
+import type { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -53,6 +54,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
           </div>
           <div>
             <ConsoleCodeBlock>
+              <EuiSpacer size="m" />
               <FormattedMessage
                 id="xpack.securitySolution.console.badArgument.helpMessage"
                 defaultMessage="Enter {helpCmd} for further assistance."

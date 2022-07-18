@@ -23,8 +23,9 @@ import { useKibana } from '../../../lib/kibana';
 import { Panel } from '../../panel';
 import { Loader } from '../../loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListItemIdentifiers, Filter } from '../types';
-import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
+import type { ExceptionListItemIdentifiers, Filter } from '../types';
+import type { State, ViewerFlyoutName } from './reducer';
+import { allExceptionItemsReducer } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';

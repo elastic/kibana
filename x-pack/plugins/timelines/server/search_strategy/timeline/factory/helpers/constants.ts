@@ -6,9 +6,7 @@
  */
 
 import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-
-// TODO: share with security_solution/common/cti/constants.ts
-export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';

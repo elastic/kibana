@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActionCell } from '../table/action_cell';
-import { EnrichedFieldInfo } from '../types';
+import type { EnrichedFieldInfo } from '../types';
 
 const ActionWrapper = euiStyled.div`
   width: 0;

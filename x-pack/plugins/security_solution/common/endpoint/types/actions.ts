@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
@@ -55,9 +55,9 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields {
+interface EndpointActionFields<TOutputContent extends object = object> {
   action_id: string;
-  data: EndpointActionData;
+  data: EndpointActionData<undefined, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -96,8 +96,7 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields &
-    ActionResponseFields & { output?: ActionResponseOutput<TOutputContent> };
+  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -119,10 +118,14 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<T extends EndpointActionDataParameterTypes = never> {
+export interface EndpointActionData<
+  T extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
+  output?: ActionResponseOutput<TOutputContent>;
 }
 
 export interface FleetActionResponseData {

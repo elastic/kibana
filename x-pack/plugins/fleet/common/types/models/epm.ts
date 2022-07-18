@@ -34,6 +34,7 @@ export enum InstallStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
   installing = 'installing',
+  reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
 }
 

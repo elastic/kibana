@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
-import { FetchRulesResponse, Rule } from './types';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { FetchRulesResponse, Rule } from './types';
 
 export const savedRuleMock: Rule = {
   author: [],

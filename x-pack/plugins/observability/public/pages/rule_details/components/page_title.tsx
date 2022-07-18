@@ -10,7 +10,7 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elasti
 import { PageHeaderProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { LAST_UPDATED_MESSAGE, CREATED_WORD, BY_WORD, ON_WORD } from '../translations';
-import { getHealthColor } from '../../rules/config';
+import { getHealthColor } from '../config';
 
 export function PageTitle({ rule }: PageHeaderProps) {
   const { triggersActionsUi } = useKibana().services;

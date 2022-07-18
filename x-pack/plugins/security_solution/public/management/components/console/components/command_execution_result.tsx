@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ComponentType, useMemo } from 'react';
-import type { ReactNode } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { ReactNode, PropsWithChildren, ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CommonProps, EuiPanel, EuiSpacer } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import classNames from 'classnames';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
