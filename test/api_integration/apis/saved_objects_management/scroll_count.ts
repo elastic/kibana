@@ -16,6 +16,7 @@ const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   describe('scroll_count', () => {
     describe('with less than 10k objects', () => {
@@ -132,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         await importVisualizations({ startIdx: 6001, endIdx: 12000 });
       });
       after(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.emptyKibanaIndex();
       });
 
       it('returns the correct count for each included types', async () => {
