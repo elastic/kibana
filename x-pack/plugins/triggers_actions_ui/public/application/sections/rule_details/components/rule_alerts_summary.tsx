@@ -23,12 +23,12 @@ import { useLoadRuleTypes } from '../../../hooks/use_load_rule_types';
 
 export interface RuleAlertsSummaryProps {
   rule: Rule;
-  filteredSolutions: string[];
+  filteredRuleTypes: string[];
 }
-export const RuleAlertsSummary = ({ rule, filteredSolutions }: RuleAlertsSummaryProps) => {
+export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const { ruleTypes } = useLoadRuleTypes({
-    filteredSolutions,
+    filteredRuleTypes,
   });
   const {
     ruleAlertsAggs: { active, recovered },

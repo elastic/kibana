@@ -336,7 +336,7 @@ export function RuleDetailsPage() {
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleAlertsSummary({
             rule,
-            filteredSolutions: OBSERVABILITY_SOLUTIONS,
+            filteredRuleTypes: OBSERVABILITY_SOLUTIONS,
           })}
         </EuiFlexItem>
         <EuiSpacer size="m" />
