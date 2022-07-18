@@ -117,9 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
-          'Unique count of @message.raw [1]',
-          'Unique count of @message.raw [2]',
+          'Value count of @message.raw',
+          'Value count of @message.raw [1]',
+          'Value count of @message.raw [2]',
         ]);
       });
       it('should move duplicated column to non-compatible dimension group', async () => {
@@ -128,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           to: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         });
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
-          'Unique count of @message.raw',
-          'Unique count of @message.raw [1]',
+          'Value count of @message.raw',
+          'Value count of @message.raw [1]',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
           'Top 5 values of @message.raw',
@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'swap'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-          'Unique count of @timestamp'
+          'Value count of @timestamp'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
           'Top 3 values of @message.raw'

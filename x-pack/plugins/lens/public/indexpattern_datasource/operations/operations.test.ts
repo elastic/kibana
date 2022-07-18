@@ -384,6 +384,21 @@ describe('getOperationTypesForField', () => {
                 "type": "field",
               },
               Object {
+                "field": "timestamp",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "source",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
                 "operationType": "math",
                 "type": "managedReference",
               },
