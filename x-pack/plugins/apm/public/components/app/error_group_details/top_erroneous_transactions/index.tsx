@@ -27,6 +27,7 @@ import { TransactionDetailLink } from '../../../shared/links/apm/transaction_det
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { asInteger } from '../../../../../common/utils/formatters';
 
 type ErroneousTransactions =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions'>;
@@ -146,7 +147,15 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         return (
           <SparkPlot
             isLoading={loading}
-            valueLabel={occurrences}
+            valueLabel={i18n.translate(
+              'xpack.apm.errorGroupTopTransactions.column.occurrences.valueLabel',
+              {
+                defaultMessage: `{occurrences} occ.`,
+                values: {
+                  occurrences: asInteger(occurrences),
+                },
+              }
+            )}
             series={currentPeriodTimeseries}
             comparisonSeries={
               comparisonEnabled && isTimeComparison(offset)
