@@ -14,6 +14,7 @@ import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
+  makeCaseStringy,
   removeSlash,
   throwIfResponseIsNotValidSpecial,
 } from './utils';
@@ -110,13 +111,6 @@ export const createExternalService = (
       throw createServiceError(error, 'Unable to get incident');
     }
   };
-
-  const makeCaseStringy = (properties: Record<string, string | string[]>) => ({
-    case: Object.entries(properties).reduce(
-      (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
-      {}
-    ),
-  });
 
   const createIncident = async ({
     incident,

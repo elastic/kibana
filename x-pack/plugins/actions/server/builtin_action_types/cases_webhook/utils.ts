@@ -116,3 +116,10 @@ export const throwIfResponseIsNotValidSpecial = ({
 };
 
 export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+export const makeCaseStringy = (properties: Record<string, string | string[]>) => ({
+  case: Object.entries(properties).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
+    {}
+  ),
+});
