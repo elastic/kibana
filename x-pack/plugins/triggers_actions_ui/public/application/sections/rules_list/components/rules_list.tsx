@@ -73,7 +73,6 @@ import { DeleteModalConfirmation } from '../../../components/delete_modal_confir
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './rules_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
@@ -327,11 +326,7 @@ export const RulesList = ({
       try {
         const result = await loadActionTypes({ http });
         const sortedResult = result
-          .filter(
-            // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
-            // Issue: https://github.com/elastic/kibana/issues/82502.
-            ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
-          )
+          .filter(({ id }) => actionTypeRegistry.has(id))
           .sort((a, b) => a.name.localeCompare(b.name));
         setActionTypes(sortedResult);
       } catch (e) {

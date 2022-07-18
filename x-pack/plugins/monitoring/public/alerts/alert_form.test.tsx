@@ -271,7 +271,7 @@ describe('alert_form', () => {
       it('renders available action cards', async () => {
         const wrapperTwo = await setup();
         const actionOption = wrapperTwo.find(
-          `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+          `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
         );
         expect(actionOption.exists()).toBeTruthy();
       });

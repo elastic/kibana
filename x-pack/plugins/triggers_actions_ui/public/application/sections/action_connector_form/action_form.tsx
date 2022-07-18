@@ -254,7 +254,7 @@ export const ActionForm = ({
           <EuiKeyPadMenuItem
             key={index}
             isDisabled={!checkEnabledResult.isEnabled}
-            data-test-subj={`${item.id}-ActionTypeSelectOption`}
+            data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >

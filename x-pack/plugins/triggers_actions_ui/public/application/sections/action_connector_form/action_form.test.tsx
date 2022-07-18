@@ -350,12 +350,12 @@ describe('action_form', () => {
     it('renders available action cards', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
-          .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
+          .find(`EuiToolTip [data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
@@ -369,21 +369,23 @@ describe('action_form', () => {
     it('does not render action types disabled by config', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
+        '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
 
     it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       expect(actionOption.exists()).toBeTruthy();
     });
 
     it('renders available action groups for the selected action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
@@ -418,7 +420,7 @@ describe('action_form', () => {
           },
         },
       ]);
-      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
         `[data-test-subj="addNewActionConnectorActionGroup-1"]`
@@ -455,7 +457,7 @@ describe('action_form', () => {
         ],
         'iHaveRecovered'
       );
-      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
         `[data-test-subj="addNewActionConnectorActionGroup-1"]`
@@ -481,7 +483,7 @@ describe('action_form', () => {
     it('renders available connectors for the selected action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}-0"]`);
@@ -522,7 +524,9 @@ describe('action_form', () => {
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       actionOption.first().simulate('click');
       const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured-1"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
@@ -543,7 +547,9 @@ describe('action_form', () => {
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       actionOption.first().simulate('click');
       const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
       const addNewConnectorButton = preconfigPannel.find(
@@ -555,12 +561,12 @@ describe('action_form', () => {
     it('renders action types disabled by license', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
+        '[data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
-          .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
+          .find('EuiToolTip [data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]')
           .exists()
       ).toBeTruthy();
     });

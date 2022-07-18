@@ -31,7 +31,7 @@ import {
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
@@ -221,10 +221,7 @@ function isConnectorSupported(
   action: FindActionResult,
   actionTypes: Record<string, ActionType>
 ): boolean {
-  return (
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense
-  );
+  return actionTypes[action.actionTypeId]?.enabledInLicense;
 }
 
 async function update(

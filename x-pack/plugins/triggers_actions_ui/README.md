@@ -1350,12 +1350,6 @@ Then this dependencies will be used to embed Actions form or register your own a
  import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
  import { RuleAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
- const ALOWED_BY_PLUGIN_ACTION_TYPES = [
-   { id: '.email', name: 'Email', enabled: true },
-   { id: '.index', name: 'Index', enabled: false },
-   { id: '.example-action', name: 'Example Action', enabled: false },
- ];
-
  export const ComponentWithActionsForm: () => {
    const { http, triggersActionsUi, notifications } = useKibana().services;
    const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
@@ -1398,7 +1392,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           http={http}
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
-          actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
+          featureId="alerting"
           toastNotifications={notifications.toasts}
           consumer={initialAlert.consumer}
         />
@@ -1420,7 +1414,7 @@ interface ActionAccordionFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
-  actionTypes?: ActionType[];
+  featureId: string;
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   capabilities: ApplicationStart['capabilities'];
