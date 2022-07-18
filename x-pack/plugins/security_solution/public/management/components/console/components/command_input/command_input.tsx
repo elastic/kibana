@@ -11,6 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
 import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
@@ -82,6 +83,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const dispatch = useConsoleStateDispatch();
   const { rightOfCursor, textEntered } = useWithInputTextEntered();
+  const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
@@ -111,9 +113,9 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     return classNames({
       cmdInput: true,
       active: isKeyInputBeingCaptured,
-      error: false,
+      error: visibleState === 'error',
     });
-  }, [isKeyInputBeingCaptured]);
+  }, [isKeyInputBeingCaptured, visibleState]);
 
   const disableArrowButton = useMemo(
     () => textEntered.length === 0 && rightOfCursor.text.length === 0,
