@@ -20,21 +20,21 @@ export const DEFAULT_TEXT_ALIGNMENT = 'left';
 const alignButtonIcons = [
   {
     id: `left`,
-    label: i18n.translate('xpack.lens.metricChart.alignLabel.left', {
+    label: i18n.translate('xpack.lens.legacyMetric.alignLabel.left', {
       defaultMessage: 'Align left',
     }),
     iconType: 'editorAlignLeft',
   },
   {
     id: `center`,
-    label: i18n.translate('xpack.lens.metricChart.alignLabel.center', {
+    label: i18n.translate('xpack.lens.legacyMetric.alignLabel.center', {
       defaultMessage: 'Align center',
     }),
     iconType: 'editorAlignCenter',
   },
   {
     id: `right`,
-    label: i18n.translate('xpack.lens.metricChart.alignLabel.right', {
+    label: i18n.translate('xpack.lens.legacyMetric.alignLabel.right', {
       defaultMessage: 'Align right',
     }),
     iconType: 'editorAlignRight',
@@ -44,7 +44,7 @@ const alignButtonIcons = [
 export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
   return (
     <EuiButtonGroup
-      legend={i18n.translate('xpack.lens.metricChart.titleAlignLabel', {
+      legend={i18n.translate('xpack.lens.legacyMetric.titleAlignLabel', {
         defaultMessage: 'Align',
       })}
       options={alignButtonIcons}

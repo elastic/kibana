@@ -40,10 +40,9 @@ export interface MetricVisualizationState {
   maxCols?: number;
 }
 
-// TODO - consider relaxing?
-export const supportedTypes = new Set(['number']);
+const supportedDataTypes = new Set(['number']);
 
-// TODO - do we need this?
+// TODO - deduplicate with gauges?
 function computePaletteParams(params: CustomPaletteParams) {
   return {
     ...params,
@@ -206,7 +205,7 @@ export const getMetricVisualization = ({
     const hasColoring = props.state.palette != null;
     const stops = props.state.palette?.params?.stops || [];
     const isSupportedMetricOperation = (op: OperationMetadata) =>
-      !op.isBucketed && supportedTypes.has(op.dataType);
+      !op.isBucketed && supportedDataTypes.has(op.dataType);
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
     return {
       groups: [

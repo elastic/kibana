@@ -182,10 +182,10 @@ export const getLegacyMetricVisualization = ({
     {
       id: 'lnsMetric',
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
+      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
         defaultMessage: 'Goal and single value',
       }),
       sortPriority: 3,
@@ -210,8 +210,8 @@ export const getLegacyMetricVisualization = ({
   getDescription() {
     return {
       icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
+      label: i18n.translate('xpack.lens.legacyMetric.label', {
+        defaultMessage: 'Legacy Metric',
       }),
     };
   },
@@ -236,7 +236,9 @@ export const getLegacyMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
+            defaultMessage: 'Legacy Metric',
+          }),
           layerId: props.state.layerId,
           accessors: props.state.accessor
             ? [
@@ -261,7 +263,7 @@ export const getLegacyMetricVisualization = ({
     return [
       {
         type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.metric.addLayer', {
+        label: i18n.translate('xpack.lens.legacyMetric.addLayer', {
           defaultMessage: 'Visualization',
         }),
       },
