@@ -159,6 +159,7 @@ export function Filtering({
             >
               <QueryInput
                 indexPatternTitle={indexPattern.title}
+                disableAutoFocus={true}
                 value={queryInput}
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}
