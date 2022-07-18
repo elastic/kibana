@@ -154,7 +154,7 @@ export function runSynthtrace() {
 
         const runOptions = parseRunCliFlags(argv);
 
-        const { logger, apmEsClient } = getCommonServices(runOptions);
+        const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions);
 
         const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
         const to = new Date(toMs);
@@ -250,7 +250,7 @@ export function runSynthtrace() {
           await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);
 
         if (live) {
-          await startLiveDataUpload(apmEsClient, logger, runOptions, to, version);
+          await startLiveDataUpload(apmEsClient, apmIntakeClient, logger, runOptions, to, version);
         }
       }
     )

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Client, { FlushOptions } from 'elastic-apm-http-client';
+import Client, { ClientStats, FlushOptions } from 'elastic-apm-http-client';
 import Util from 'util';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
@@ -15,6 +15,7 @@ import { StreamProcessor } from '../../stream_processor';
 import { EntityStreams } from '../../entity_streams';
 import { Fields } from '../../entity';
 import { Span } from './intake_v2/span';
+import { Error } from './intake_v2/error';
 import { Metadata } from './intake_v2/metadata';
 import { Transaction } from './intake_v2/transaction';
 
@@ -34,11 +35,13 @@ export interface ApmSynthtraceApmClientOptions {
   // defaults to true if unspecified
   refreshAfterIndex?: boolean;
 }
+
 interface ClientState {
   client: Client;
   enqueued: number;
   sendSpan: (s: Span) => Promise<void>;
   sendTransaction: (s: Transaction) => Promise<void>;
+  sendError: (e: Error) => Promise<void>;
   flush: (o: FlushOptions) => Promise<void>;
 }
 export class ApmSynthtraceApmClient {
@@ -49,7 +52,7 @@ export class ApmSynthtraceApmClient {
     options?: ApmSynthtraceApmClientOptions
   ) {}
 
-  map(fields: ApmFields): Span | Transaction {
+  map(fields: ApmFields): [Span | Transaction, Error[]] {
     const set = <T extends keyof ApmFields, K>(
       key: T,
       context: NonNullable<K>,
@@ -127,11 +130,11 @@ export class ApmSynthtraceApmClient {
     set(
       'event.outcome',
       e,
-      (c, v) => (c.outcome = v === 'failure' ? 'failure' : v === 'success' ? 'success' : null)
+      (c, v) => (c.outcome = v === 'failure' ? 'failure' : v === 'success' ? 'success' : 'unknown')
     );
 
     if (e.kind === 'span') {
-      set('span.duration.us', e, (c, v) => (c.duration = v));
+      set('span.duration.us', e, (c, v) => (c.duration = v / 1000));
       set('span.type', e, (c, v) => (c.type = v));
       set('span.subtype', e, (c, v) => (c.subtype = v));
 
@@ -145,15 +148,34 @@ export class ApmSynthtraceApmClient {
       set('transaction.name', e, (c, v) => (c.name = v));
       set('transaction.type', e, (c, v) => (c.type = v));
       set('transaction.id', e, (c, v) => (c.id = v));
-      set('transaction.duration.us', e, (c, v) => (c.duration = v));
-      // 'transaction.sampled': true;
+      set('transaction.duration.us', e, (c, v) => (c.duration = v / 1000));
+      set('transaction.sampled', e, (c, v) => (c.sampled = v));
     }
 
-    // 'error.id': string;
-    // 'error.exception': ApmException[];
-    // 'error.grouping_name': string;
-    // 'error.grouping_key': string;
+    let errors: Error[] = [];
+    if (fields['error.id']) {
+      const exceptions = fields['error.exception'] ?? [];
+      errors = exceptions.map((ex) => {
+        const err: Error = {
+          id: '0',
+          timestamp: Math.trunc((fields['@timestamp'] ?? 0) * 1000),
+          context: e.context,
+        };
+        set('error.id', err, (c, v) => (c.id = v));
+        set('parent.id', err, (c, v) => (c.parent_id = v));
+        set('trace.id', err, (c, v) => (c.trace_id = v));
+        set('transaction.id', err, (c, v) => (c.transaction_id = v));
+        set('error.grouping_name', err, (c, v) => (c.culprit = v));
+        err.exception = {
+          message: ex.message,
+          type: 'Exception',
+        };
+        if (!err.parent_id) err.parent_id = err.transaction_id ?? err.trace_id;
+        return err;
+      });
+    }
 
+    // TODO include event more context
     // 'cloud.provider': string;
     // 'cloud.project.name': string;
     // 'cloud.service.name': string;
@@ -167,7 +189,7 @@ export class ApmSynthtraceApmClient {
     // 'faas.trigger.type': string;
     // 'faas.trigger.request_id': string;
 
-    return e;
+    return [e, errors];
   }
 
   async index<TFields>(
@@ -209,15 +231,17 @@ export class ApmSynthtraceApmClient {
       return;
     }
     const queueSize = 10000;
-    for await (const item of sideEffectYield()) {
+    for await (const [item, _] of sideEffectYield()) {
       if (item == null) continue;
 
       const service = item.context?.service?.name ?? 'unknown';
       const hostName = fields ? fields['host.name'] : 'unknown';
-      const lookup = `${service}-${hostName}`;
+      // TODO evaluate if we really need service specific clients
+      // const lookup = `${service}::${hostName}`;
+      const lookup = `constant_key::1`;
       if (!this._serviceClients.has(lookup)) {
         const client = new Client({
-          userAgent: 'x',
+          userAgent: `apm-agent-synthtrace/${sp.version}`,
           serverUrl: this.apmTarget,
           maxQueueSize: queueSize,
           bufferWindowSize: queueSize / 2,
@@ -236,6 +260,7 @@ export class ApmSynthtraceApmClient {
           enqueued: 0,
           sendSpan: Util.promisify(client.sendSpan).bind(client),
           sendTransaction: Util.promisify(client.sendTransaction).bind(client),
+          sendError: Util.promisify(client.sendError).bind(client),
           flush: Util.promisify(client.flush).bind(client),
         });
       }
@@ -251,19 +276,63 @@ export class ApmSynthtraceApmClient {
       }
       yielded++;
       clientState.enqueued++;
+      /* TODO finish implementing sending errors
+      errors.forEach((e) => {
+        clientState.sendError(e);
+        clientState.enqueued++;
+      });*/
       if (clientState.enqueued % queueSize === 0) {
         this.logger.debug(
-          ` -- Flushing client: ${lookup} after enqueueing ${clientState.enqueued}`
+          ` -- ${sp.name} Flushing client: ${lookup} after enqueueing ${clientState.enqueued}`
         );
         await clientState.flush({});
       }
     }
-    for (const [clientName, state] of this._serviceClients) {
+    for (const [, state] of this._serviceClients) {
       await state.flush({});
-      this.logger.info(
-        ` -- sent: ${clientName}: ${state.client.sent}, enqueued: ${state.enqueued}`
-      );
     }
+    // this attempts to group similar service names together for cleaner reporting
+    const totals = Array.from(this._serviceClients).reduce((p, c, i, a) => {
+      const serviceName = c[0].split('::')[0].replace(/-\d+$/, '');
+      if (!p.has(serviceName)) {
+        p.set(serviceName, { enqueued: 0, sent: 0, names: new Set<string>() });
+      }
+      const s = p.get(serviceName)!;
+      s.enqueued += c[1].enqueued;
+      s.sent += c[1].client.sent;
+      s.names.add(c[0]);
+      const stats = c[1].client._getStats();
+      if (!s.stats) {
+        s.stats = stats;
+      } else {
+        s.stats.backoffReconnectCount += stats.backoffReconnectCount;
+        s.stats.numEvents += stats.numEvents;
+        s.stats.numEventsSent += stats.numEventsSent;
+        s.stats.numEventsDropped += stats.numEventsDropped;
+        s.stats.numEventsEnqueued += stats.numEventsEnqueued;
+        s.stats.slowWriteBatch += stats.slowWriteBatch;
+      }
+      return p;
+    }, new Map<string, { enqueued: number; sent: number; names: Set<string>; stats?: ClientStats }>());
+    for (const [serviceGroup, state] of totals) {
+      // only report details if there is a discrepancy in the bookkeeping of synthtrace and the client
+      if (
+        state.stats &&
+        (state.stats.numEventsDropped > 0 || state.enqueued !== state.stats.numEventsSent)
+      ) {
+        this.logger.info(
+          ` -- ${serviceGroup} (${state.names.size} services) sent: ${state.sent}, enqueued: ${state.enqueued}`
+        );
+        this.logger.info(` -- ${serviceGroup} (${state.names.size} services) client stats`);
+        this.logger.info(`    -- numEvents: ${state.stats.numEvents}`);
+        this.logger.info(`    -- numEventsSent: ${state.stats.numEventsSent}`);
+        this.logger.info(`    -- numEventsEnqueued: ${state.stats.numEventsEnqueued}`);
+        this.logger.info(`    -- numEventsDropped: ${state.stats.numEventsDropped}`);
+        this.logger.info(`    -- backoffReconnectCount: ${state.stats.backoffReconnectCount}`);
+        this.logger.info(`    -- slowWriteBatch: ${state.stats.slowWriteBatch}`);
+      }
+    }
+
     options?.itemStartStopCallback?.apply(this, [fields, true]);
   }
 }

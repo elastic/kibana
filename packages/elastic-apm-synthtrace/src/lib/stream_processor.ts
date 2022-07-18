@@ -56,7 +56,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-  private readonly name: string;
+  public readonly name: string;
   public readonly version: string;
   private readonly versionMajor: number;
 

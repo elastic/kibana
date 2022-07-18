@@ -8,12 +8,13 @@
 
 // eslint-disable-next-line max-classes-per-file
 declare module 'elastic-apm-http-client' {
+  import EventEmitter from 'events';
   import { Span } from './intake_v2/span';
   import { Transaction } from './intake_v2/transaction';
   import { Error } from './intake_v2/error';
   import { Metadata } from './intake_v2/metadata';
 
-  class Client {
+  class Client extends EventEmitter {
     constructor(opts: ClientOptions);
 
     sent: number;
@@ -25,6 +26,15 @@ declare module 'elastic-apm-http-client' {
 
     public flush(opts: FlushOptions, callback: () => void): void;
     public destroy(): void;
+    public _getStats(): ClientStats;
+  }
+  export interface ClientStats {
+    numEvents: number;
+    numEventsDropped: number;
+    numEventsEnqueued: number;
+    numEventsSent: number;
+    slowWriteBatch: number;
+    backoffReconnectCount: number;
   }
   export interface ClientOptions {
     /** (required) The HTTP user agent that your module should identify itself as */
