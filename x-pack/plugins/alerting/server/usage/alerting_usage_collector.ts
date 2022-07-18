@@ -128,9 +128,13 @@ export function createAlertingUsageCollector(
 
         return {
           ...state,
+          success: true,
         };
       } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
         return {
+          success: false,
+          error_message: errMessage,
           count_total: 0,
           count_active_total: 0,
           count_disabled_total: 0,
@@ -202,6 +206,8 @@ export function createAlertingUsageCollector(
       }
     },
     schema: {
+      success: { type: 'boolean' },
+      error_message: { type: 'keyword' },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },

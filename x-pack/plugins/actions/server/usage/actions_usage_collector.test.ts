@@ -6,9 +6,11 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import { registerActionsUsageCollector } from './actions_usage_collector';
 import { configSchema, ActionsConfig } from '../config';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 
@@ -42,5 +44,49 @@ describe('registerActionsUsageCollector', () => {
     );
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');
+  });
+
+  it('should return success:true when there is no error', async () => {
+    const mockStats = {
+      count_total: 10,
+      count_active_total: 1,
+    };
+    mockTaskManagerStart.get.mockResolvedValue({
+      id: '1',
+      state: mockStats,
+    } as unknown as ConcreteTaskInstance);
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(mockTaskManagerStart);
+    });
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      config,
+      taskManagerPromise
+    );
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual({
+      alert_history_connector_enabled: false,
+      success: true,
+      ...mockStats,
+    });
+  });
+
+  it('should return success:false and an error message when there is error', async () => {
+    mockTaskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(mockTaskManagerStart);
+    });
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      config,
+      taskManagerPromise
+    );
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
+      expect.objectContaining({
+        success: false,
+        error_message: 'error message',
+      })
+    );
   });
 });
