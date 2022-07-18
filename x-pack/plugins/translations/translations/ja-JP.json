@@ -639,7 +639,6 @@
     "xpack.lens.indexPattern.terms.accuracyModeDescription": "精度モードを有効にする",
     "xpack.lens.indexPattern.terms.accuracyModeHelp": "高カーディナリティデータの結果が改善されますが、Elasticsearchの負荷が大きくなります。",
     "xpack.lens.indexPattern.terms.addaFilter": "フィールドの追加",
-    "xpack.lens.indexPattern.terms.addField": "フィールドの追加",
     "xpack.lens.indexPattern.terms.advancedSettings": "高度な設定",
     "xpack.lens.indexPattern.terms.chooseFields": "{count, plural, other  {個のフィールド}}",
     "xpack.lens.indexPattern.terms.deleteButtonAriaLabel": "削除",

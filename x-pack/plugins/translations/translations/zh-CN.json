@@ -639,7 +639,6 @@
     "xpack.lens.indexPattern.terms.accuracyModeDescription": "启用准确性模式",
     "xpack.lens.indexPattern.terms.accuracyModeHelp": "改进结果以获得高基数数据，但会增加 Elasticsearch 集群的负载。",
     "xpack.lens.indexPattern.terms.addaFilter": "添加字段",
-    "xpack.lens.indexPattern.terms.addField": "添加字段",
     "xpack.lens.indexPattern.terms.advancedSettings": "高级",
     "xpack.lens.indexPattern.terms.chooseFields": "{count, plural, other {字段}}",
     "xpack.lens.indexPattern.terms.deleteButtonAriaLabel": "删除",
