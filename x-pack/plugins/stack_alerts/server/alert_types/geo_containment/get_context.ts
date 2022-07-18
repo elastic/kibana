@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from './alert_type';
+import { OTHER_CATEGORY } from './es_query_builder';
 
 export function getAlertId(entityName: string, boundaryName: unknown) {
   return `${entityName}-${boundaryName}`;
@@ -36,16 +37,18 @@ export function getAlertContext(
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date
 ): GeoContainmentInstanceContext {
-  return {
+  const context: GeoContainmentInstanceContext = {
     entityId: entityName,
     entityDateTime: containment.dateInShape || null,
     entityDocumentId: containment.docId,
-    detectionDateTime: new Date(windowEnd).toISOString(),
     entityLocation: `POINT (${containment.location[0]} ${containment.location[1]})`,
-    containingBoundaryId: containment.shapeLocationId,
-    containingBoundaryName:
-      shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId,
+    detectionDateTime: new Date(windowEnd).toISOString(),
   };
+  if (containment.shapeLocationId !== OTHER_CATEGORY) {
+    context.containingBoundaryId = containment.shapeLocationId;
+    context.containingBoundaryName = shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId;
+  }
+  return context;
 }
 
 export function getRecoveredAlertContext(
@@ -60,14 +63,14 @@ export function getRecoveredAlertContext(
   // recovered alert's latest entity location is either:
   // 1) activeEntities - entity moved from one boundary to another boundary
   // 2) inactiveEntities - entity moved from one boundary to outside all boundaries
-  let latestLocation: GeoContainmentInstanceState | undefined;
+  let containment: GeoContainmentInstanceState | undefined;
   if (activeEntities.has(entityName) && activeEntities.get(entityName)?.length) {
-    latestLocation = _.orderBy(activeEntities.get(entityName), ['dateInShape'], ['desc'])[0];
+    containment = _.orderBy(activeEntities.get(entityName), ['dateInShape'], ['desc'])[0];
   } else if (inactiveEntities.has(entityName) && inactiveEntities.get(entityName)?.length) {
-    latestLocation = inactiveEntities.get(entityName)![0];
+    containment = inactiveEntities.get(entityName)![0];
   }
 
-  return latestLocation
-    ? getAlertContext(entityName, latestLocation, shapesIdsNamesMap, windowEnd)
+  return containment
+    ? getAlertContext(entityName, containment, shapesIdsNamesMap, windowEnd)
     : null;
 }

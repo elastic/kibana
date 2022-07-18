@@ -21,6 +21,12 @@ export const OTHER_CATEGORY = 'other';
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
+interface BoundaryHit {
+  _index: string;
+  _id: string;
+  fields?: Record<string, unknown[]>;
+}
+
 export const getEsFormattedQuery = (query: Query, indexPattern?: DataViewBase) => {
   let esFormattedQuery;
 
@@ -47,8 +53,7 @@ export async function getShapesFilters(
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const boundaryData = await esClient.search<Record<string, any>>({
+  const boundaryData = await esClient.search<Record<string, BoundaryHit>>({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
@@ -59,17 +64,13 @@ export async function getShapesFilters(
   });
 
   for (let i = 0; i < boundaryData.hits.hits.length; i++) {
-    const hit = boundaryData.hits.hits[i] as {
-      _index: string;
-      _id: string;
-      fields?: Record<string, unknown[]>;
-    };
-    filters[hit._id] = {
+    const boundaryHit: BoundaryHit = boundaryData.hits.hits[i];
+    filters[boundaryHit._id] = {
       geo_shape: {
         [geoField]: {
           indexed_shape: {
-            index: hit._index,
-            id: hit._id,
+            index: boundaryHit._index,
+            id: boundaryHit._id,
             path: boundaryGeoField,
           },
         },
@@ -77,12 +78,12 @@ export async function getShapesFilters(
     };
     if (
       boundaryNameField &&
-      hit.fields &&
-      hit.fields[boundaryNameField] &&
-      hit.fields[boundaryNameField].length
+      boundaryHit.fields &&
+      boundaryHit.fields[boundaryNameField] &&
+      boundaryHit.fields[boundaryNameField].length
     ) {
       // fields API always returns an array, grab first value
-      shapesIdsNamesMap[hit._id] = hit.fields[boundaryNameField][0];
+      shapesIdsNamesMap[boundaryHit._id] = boundaryHit.fields[boundaryNameField][0];
     }
   }
 

@@ -143,8 +143,8 @@ export interface GeoContainmentInstanceContext extends AlertInstanceContext {
   entityDocumentId: string;
   detectionDateTime: string;
   entityLocation: string;
-  containingBoundaryId: string;
-  containingBoundaryName: unknown;
+  containingBoundaryId?: string;
+  containingBoundaryName?: unknown;
 }
 
 export type GeoContainmentAlertType = RuleType<
