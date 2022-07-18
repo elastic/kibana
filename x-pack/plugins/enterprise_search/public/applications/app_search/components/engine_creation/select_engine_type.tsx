@@ -14,6 +14,7 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -93,12 +94,24 @@ export const SelectEngineType: React.FC = () => {
               defaultMessage: `
                 You can now create search engines that use an existing
                 Elasticsearch index to combine the search management tools of App
-                Search with the flexibility of Elasticsearch indices. Learn more.
+                Search with the flexibility of Elasticsearch indices.
               `,
             }
           )}
+          <EuiLink
+            href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines.html"
+            external
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.selectEngineTypeForm.description.link',
+              {
+                defaultMessage: 'Learn more',
+              }
+            )}
+          </EuiLink>
         </EuiText>
 
+        <EuiSpacer />
         <EuiSpacer />
 
         <EuiFlexGroup gutterSize="l">
@@ -107,14 +120,14 @@ export const SelectEngineType: React.FC = () => {
               title={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.appSearch.title',
                 {
-                  defaultMessage: 'Manage documents with App Search',
+                  defaultMessage: 'App Search managed docs',
                 }
               )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.appSearch.description',
                 {
                   defaultMessage: `
-                    Use App Search APIs to manage documents. App Search will manage your documents and underlying index for you.
+                    Use App Search APIs to manage your documents. App Search will write your documents into an underlying index and manage it for you.
                   `,
                 }
               )}
@@ -132,7 +145,7 @@ export const SelectEngineType: React.FC = () => {
               title={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.elasticsearch.title',
                 {
-                  defaultMessage: 'Elasticsearch index-based engine',
+                  defaultMessage: 'Elasticsearch index-based',
                 }
               )}
               description={i18n.translate(
@@ -141,7 +154,7 @@ export const SelectEngineType: React.FC = () => {
                   defaultMessage: `
                     Use an existing index to manage your documents.
                     Adds search with App Search to Elasticsearch indices.
-                    Some functions require specific subfields. Learn more.
+                    Some functions require specific subfields.
                   `,
                 }
               )}
@@ -166,6 +179,8 @@ export const SelectEngineType: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
+              iconType="arrowRight"
+              iconSide="right"
               onClick={() => {
                 setCreationStep(EngineCreationSteps.ConfigureStep);
               }}

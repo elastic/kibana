@@ -91,7 +91,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
               'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.description',
               {
                 defaultMessage:
-                  'Your App Search engine will be created with the following configuration',
+                  'Your App Search engine will be created with the following configuration.',
               }
             )}
           </EuiText>
@@ -115,7 +115,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                   {i18n.translate(
                     'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.engineType.description',
                     {
-                      defaultMessage: 'Elasticsearch-managed index',
+                      defaultMessage: 'Elasticsearch index-based',
                     }
                   )}
                 </EuiText>
@@ -184,15 +184,16 @@ export const ReviewElasticsearchEngine: React.FC = () => {
               size="m"
               title={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.title',
-                { defaultMessage: 'An alias will be created for this index' }
+                {
+                  defaultMessage: 'An alias will be created and used for this engine',
+                }
               )}
               iconType="iInCircle"
             >
               <EuiI18n
                 token="xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body"
-                default={`The index you\'ve selected has a name that does not match the Enterprise Search
-                naming pattern of "search-." We will automatically create an alias for you
-                named {aliasName} and assign it to the engine, {name}.`}
+                default={`Enterprise Search will create an alias for you named
+                  {aliasName} and use it as the source of the engine, {name}.`}
                 values={{
                   aliasName: <b>{aliasName}</b>,
                   name: <b>{name}</b>,

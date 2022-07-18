@@ -108,8 +108,11 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     badge: {
       color: 'success',
       label: 'Index',
-      toolTipTitle: 'Index name conforms to pattern',
-      toolTipContent: 'There is no need to specify an alias, but it is still allowed.',
+      toolTipTitle: 'Index name is compatible',
+      toolTipContent: dedent(`
+        You can directly use this index. You can also optionally create an
+        alias to use as the source of the engine instead.
+      `),
     },
     total: {
       docs: {
@@ -131,10 +134,10 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       color: 'warning',
       label: 'Index',
       icon: 'iInCircle',
-      toolTipTitle: 'Index name does not conform to pattern',
+      toolTipTitle: 'Index name is incompatible',
       toolTipContent: dedent(`
-        Choosing this index will require specifying an alias prefixed with
-        'search-' in the Alias input below.
+        Enterprise Search will automatically create an alias to use as the
+        source of the search engine rather than use this index directly.
       `),
     },
     total: {
@@ -156,11 +159,8 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     badge: {
       color: 'success',
       label: 'Alias',
-      toolTipTitle: 'Alias name conforms to pattern',
-      toolTipContent: dedent(`
-        Aliases cannot be created for other aliases. Choosing this alias will
-        disable the Alias input below.
-      `),
+      toolTipTitle: 'Alias is compatible',
+      toolTipContent: 'You can use this alias.',
     },
     total: {
       docs: {
@@ -182,11 +182,8 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       color: 'danger',
       label: 'Alias',
       icon: 'alert',
-      toolTipTitle: 'Alias name does not conform to pattern',
-      toolTipContent: dedent(`
-        This alias is incompatible with Enterprise Search. Please choose
-        another index or alias.
-      `),
+      toolTipTitle: 'Alias name is incompatible',
+      toolTipContent: `You'll have to create a new alias prefixed with "search-".`,
     },
     total: {
       docs: {

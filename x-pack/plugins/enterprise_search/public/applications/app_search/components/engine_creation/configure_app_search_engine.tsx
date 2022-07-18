@@ -108,7 +108,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
               'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
               {
                 defaultMessage:
-                  'Provide a unique name and an optional language analyzer for your App Search engine.',
+                  'Provide a unique name and an optional language choice for your App Search engine.',
               }
             )}
           </EuiText>

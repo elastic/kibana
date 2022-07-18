@@ -47,31 +47,28 @@ export const formatIndicesToSelectable = (
       color = 'success';
 
       if (index.alias) {
-        toolTipTitle = 'Alias name conforms to pattern';
-        toolTipContent = dedent(`
-          Aliases cannot be created for other aliases. Choosing this alias will
-          disable the Alias input below.
-        `);
+        toolTipTitle = 'Alias is compatible';
+        toolTipContent = 'You can use this alias.';
       } else {
-        toolTipTitle = 'Index name conforms to pattern';
-        toolTipContent = 'There is no need to specify an alias, but it is still allowed.';
+        toolTipTitle = 'Index name is compatible';
+        toolTipContent = dedent(`
+          You can directly use this index. You can also optionally create an
+          alias to use as the source of the engine instead.
+        `);
       }
     } else {
       if (index.alias) {
         icon = 'alert';
         color = 'danger';
-        toolTipTitle = 'Alias name does not conform to pattern';
-        toolTipContent = dedent(`
-          This alias is incompatible with Enterprise Search. Please choose
-          another index or alias.
-        `);
+        toolTipTitle = 'Alias name is incompatible';
+        toolTipContent = `You'll have to create a new alias prefixed with "search-".`;
       } else {
         icon = 'iInCircle';
         color = 'warning';
-        toolTipTitle = 'Index name does not conform to pattern';
+        toolTipTitle = 'Index name is incompatible';
         toolTipContent = dedent(`
-          Choosing this index will require specifying an alias prefixed with
-          'search-' in the Alias input below.
+          Enterprise Search will automatically create an alias to use as the
+          source of the search engine rather than use this index directly.
         `);
       }
     }
