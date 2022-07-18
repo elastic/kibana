@@ -20,7 +20,11 @@ import { Console } from '../../console';
 interface ManagedConsole
   extends Pick<
     ConsoleRegistrationInterface,
-    'consoleProps' | 'PageTitleComponent' | 'PageBodyComponent' | 'ActionComponents'
+    | 'consoleProps'
+    | 'ExitPendingActionComponent'
+    | 'PageTitleComponent'
+    | 'PageBodyComponent'
+    | 'ActionComponents'
   > {
   client: RegisteredConsoleClient;
   console: JSX.Element; // actual console component
@@ -274,9 +278,12 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       {visibleConsole && (
         <ConsolePageOverlay
           hasPendingActions={hasPendingActions}
+          pendingExitMessage={
+            visibleConsole.ExitPendingActionComponent && (
+              <visibleConsole.ExitPendingActionComponent meta={visibleConsoleMeta} />
+            )
+          }
           onHide={handleOnHide}
-          agentId={visibleConsole.client.id}
-          hostName={visibleConsole.client.meta.endpoint?.host.hostname}
           console={
             <Console
               {...visibleConsole.consoleProps}

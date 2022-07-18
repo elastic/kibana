@@ -19,6 +19,12 @@ export const CONSOLE_EXIT_MODAL_INFO = Object.freeze({
       defaultMessage: 'Okay, exit responder',
     }
   ),
+  genericMessage: i18n.translate(
+    'xpack.securitySolution.consolePageOverlay.exitModal.genericMessage',
+    {
+      defaultMessage: 'Pending response actions will resume.',
+    }
+  ),
   title: i18n.translate('xpack.securitySolution.consolePageOverlay.exitModal.title', {
     defaultMessage: 'Action is in progress',
   }),

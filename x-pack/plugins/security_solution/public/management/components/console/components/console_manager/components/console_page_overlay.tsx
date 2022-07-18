@@ -21,24 +21,22 @@ const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.bac
 });
 
 export interface ConsolePageOverlayProps {
-  agentId: string;
   console: ReactNode;
   hasPendingActions: boolean;
-  hostName: string;
   isHidden: boolean;
   onHide: () => void;
   pageTitle?: ReactNode;
+  pendingExitMessage?: ReactNode;
   body?: ReactNode;
   actions?: ReactNode[];
 }
 
 export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
   ({
-    agentId,
     console,
     hasPendingActions,
-    hostName,
     onHide,
+    pendingExitMessage,
     isHidden,
     body,
     actions,
@@ -109,10 +107,9 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         <PageLayout {...layoutProps}>
           {showExitModal && (
             <ConsoleExitModal
+              message={pendingExitMessage}
               onClose={onHide}
               onCancel={onCancelModal}
-              agentId={agentId}
-              hostName={hostName}
               data-test-subj={getTestId('console-exit-modal')}
             />
           )}

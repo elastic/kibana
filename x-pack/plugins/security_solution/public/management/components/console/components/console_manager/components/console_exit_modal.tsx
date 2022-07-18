@@ -6,22 +6,18 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import { CONSOLE_EXIT_MODAL_INFO } from '../translations';
-import { ConsoleExitModalActionLogLink, HostNameText } from './console_exit_modal_link';
 
 export const ConsoleExitModal = memo(
   ({
-    agentId,
     'data-test-subj': dataTestSubj,
-    hostName,
+    message,
     onClose,
     onCancel,
   }: {
-    agentId: string;
     'data-test-subj'?: string;
-    hostName: string;
+    message?: React.ReactNode;
     onClose: () => void;
     onCancel: () => void;
   }) => {
@@ -35,32 +31,7 @@ export const ConsoleExitModal = memo(
         title={CONSOLE_EXIT_MODAL_INFO.title}
         maxWidth={500}
       >
-        <ConsoleExitModalActionLogLink
-          agentId={agentId}
-          hostName={hostName}
-          onClose={onClose}
-          data-test-subj={dataTestSubj}
-        />
-        <EuiSpacer size="l" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.consolePageOverlay.exitModal.body"
-            defaultMessage="Access it here : {linkText}"
-            values={{
-              linkText: (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.securitySolution.consolePageOverlay.exitModal.linkText"
-                    defaultMessage="Manage> Endpoints> {hostName}> Action log."
-                    values={{
-                      hostName: <HostNameText hostName={hostName} />,
-                    }}
-                  />
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
+        {message ? message : <EuiText size="s">{CONSOLE_EXIT_MODAL_INFO.genericMessage}</EuiText>}
       </EuiConfirmModal>
     );
   }

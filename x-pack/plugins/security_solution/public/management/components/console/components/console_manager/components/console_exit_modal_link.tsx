@@ -19,31 +19,20 @@ export const HostNameText = ({ hostName }: { hostName: string }) => (
   </EuiText>
 );
 
-export const ConsoleExitModalActionLogLink = memo(
-  ({
-    agentId,
-    hostName,
-    onClose,
-    'data-test-subj': dataTestSubj,
-  }: {
-    agentId: string;
-    'data-test-subj'?: string;
-    hostName: string;
-    onClose: () => void;
-  }) => {
-    return (
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.securitySolution.consolePageOverlay.exitModal.actionLogLink"
-          defaultMessage="Pending response actions will resume. You may track progress of the action on {hostName}'s {link}."
-          values={{
-            hostName: <HostNameText hostName={hostName} />,
-            link: <strong>{CONSOLE_EXIT_MODAL_INFO.actionLogLink}</strong>,
-          }}
-        />
-      </EuiText>
-    );
-  }
-);
+export const ConsoleExitModalActionLogLink = memo(({ hostName }: { hostName: string }) => {
+  return (
+    <EuiText size="s">
+      <FormattedMessage
+        id="xpack.securitySolution.consolePageOverlay.exitModal.actionLogLink"
+        defaultMessage="{genericMessage} You may track progress of the action on {hostName}'s {link}."
+        values={{
+          genericMessage: CONSOLE_EXIT_MODAL_INFO.genericMessage,
+          hostName: <HostNameText hostName={hostName} />,
+          link: <strong>{CONSOLE_EXIT_MODAL_INFO.actionLogLink}</strong>,
+        }}
+      />
+    </EuiText>
+  );
+});
 
 ConsoleExitModalActionLogLink.displayName = 'ConsoleExitModalActionLogLink';
