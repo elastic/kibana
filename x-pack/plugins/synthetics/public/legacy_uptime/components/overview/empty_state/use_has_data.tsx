@@ -12,7 +12,11 @@ import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
-import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../common/constants';
+import {
+  MONITOR_ADD_ROUTE,
+  MONITOR_EDIT_ROUTE,
+  MONITOR_ROUTE,
+} from '../../../../../common/constants';
 
 export const useHasData = () => {
   const { loading, error, data } = useSelector(indexStatusSelector);
@@ -24,8 +28,9 @@ export const useHasData = () => {
 
   const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
   const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
+  const isMonitorRoute = useRouteMatch(MONITOR_ROUTE);
 
-  const skippedRoute = isAddRoute?.isExact || isEditRoute?.isExact;
+  const skippedRoute = isAddRoute?.isExact || isEditRoute?.isExact || isMonitorRoute?.isExact;
 
   useEffect(() => {
     if (!skippedRoute) {

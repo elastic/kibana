@@ -26,7 +26,6 @@ import { infrastructureRouteRepository } from '../infrastructure/route';
 import { latencyDistributionRouteRepository } from '../latency_distribution/route';
 import { metricsRouteRepository } from '../metrics/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
-import { rumRouteRepository } from '../rum_client/route';
 import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
@@ -50,7 +49,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...latencyDistributionRouteRepository,
     ...metricsRouteRepository,
     ...observabilityOverviewRouteRepository,
-    ...rumRouteRepository,
     ...serviceMapRouteRepository,
     ...serviceNodeRouteRepository,
     ...serviceRouteRepository,
