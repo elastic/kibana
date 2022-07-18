@@ -9,9 +9,10 @@ import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
-import { SessionsComponentsProps } from './types';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { TimelineId } from '@kbn/timelines-plugin/common';
+import type { SessionsComponentsProps } from './types';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');

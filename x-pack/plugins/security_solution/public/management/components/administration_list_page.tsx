@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import {
-  CommonProps,
   EuiPageHeader,
   EuiPageContent,
   EuiPageContentBody,

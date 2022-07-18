@@ -57,7 +57,13 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'tag2'], expect.anything());
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag1', 'tag2'],
+      expect.anything(),
+      undefined,
+      undefined
+    );
   });
 
   it('should remove selected tag when previously selected', async () => {
@@ -69,7 +75,13 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag1'));
 
-    expect(mockUpdateTags).toHaveBeenCalledWith('agent1', [], expect.anything());
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      [],
+      expect.anything(),
+      undefined,
+      undefined
+    );
   });
 
   it('should add new tag when not found in search and button clicked', () => {
@@ -82,7 +94,53 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(result.getAllByText('Create a new tag "newTag"')[0].closest('button')!);
 
-    expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'newTag'], expect.anything());
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag1', 'newTag'],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+  });
+
+  it('should add new tag by removing special chars', () => {
+    const result = renderComponent('agent1');
+    const searchInput = result.getByRole('combobox');
+
+    fireEvent.input(searchInput, {
+      target: { value: 'Tag-123: _myTag"' },
+    });
+
+    fireEvent.click(result.getAllByText('Create a new tag "Tag-123 _myTag"')[0].closest('button')!);
+
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag1', 'Tag-123 _myTag'],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+  });
+
+  it('should limit new tag to 20 length', () => {
+    const result = renderComponent('agent1');
+    const searchInput = result.getByRole('combobox');
+
+    fireEvent.input(searchInput, {
+      target: { value: '01234567890123456789123' },
+    });
+
+    fireEvent.click(
+      result.getAllByText('Create a new tag "01234567890123456789"')[0].closest('button')!
+    );
+
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag1', '01234567890123456789'],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
   });
 
   it('should add selected tag when previously unselected - bulk selection', async () => {
@@ -94,7 +152,14 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(getTag('tag2'));
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith('', ['tag2'], [], expect.anything());
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      '',
+      ['tag2'],
+      [],
+      expect.anything(),
+      undefined,
+      undefined
+    );
   });
 
   it('should remove selected tag when previously selected - bulk selection', async () => {
@@ -110,7 +175,9 @@ describe('TagsAddRemove', () => {
       ['agent1', 'agent2'],
       [],
       ['tag1'],
-      expect.anything()
+      expect.anything(),
+      undefined,
+      undefined
     );
   });
 
@@ -124,7 +191,14 @@ describe('TagsAddRemove', () => {
 
     fireEvent.click(result.getAllByText('Create a new tag "newTag"')[0].closest('button')!);
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith('query', ['newTag'], [], expect.anything());
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'query',
+      ['newTag'],
+      [],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
   });
 
   it('should make tag options button visible on mouse enter', async () => {

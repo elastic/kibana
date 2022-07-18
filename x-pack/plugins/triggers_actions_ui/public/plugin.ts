@@ -59,6 +59,7 @@ import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RulesListProps,
   RulesListNotifyBadgeProps,
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
@@ -113,10 +114,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: RuleTagBadgeProps<T>
   ) => ReactElement<RuleTagBadgeProps<T>>;
   getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
+  getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
-  getRulesList: () => ReactElement;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
@@ -335,8 +336,11 @@ export class Plugin
       getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
         return getRulesListNotifyBadgeLazy(props);
       },
-      getRulesList: () => {
-        return getRulesListLazy({ connectorServices: this.connectorServices! });
+      getRulesList: (props: RulesListProps) => {
+        return getRulesListLazy({
+          connectorServices: this.connectorServices!,
+          rulesListProps: props,
+        });
       },
       getRuleDefinition: (
         props: Omit<RuleDefinitionProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>

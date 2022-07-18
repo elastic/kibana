@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
+import type { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
 
 export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
   cy.request({

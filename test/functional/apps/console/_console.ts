@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
 
-GET _search
+# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }
 
@@ -51,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -124,6 +126,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with query params', () => {
+      it('should issue a successful request', async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(
+          '\n GET _cat/aliases?format=json&v=true&pretty=true'
+        );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
     describe('multiple requests output', () => {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
@@ -162,21 +180,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('{\n\t\t"_source": []');
       };
 
-      it('should save the state of folding/unfolding when navigating back to Console', async () => {
+      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
         await PageObjects.console.clearTextArea();
         await enterRequestWithBody();
         await PageObjects.console.clickFoldWidget();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.dismissTutorial();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
-      it('should save the state of folding/unfolding when the page reloads', async () => {
-        // blocks the close help button for several seconds so just retry until we can click it.
-        await retry.try(async () => {
-          await PageObjects.console.collapseHelp();
-        });
+      it('should restore the state of folding/unfolding when the page reloads', async () => {
         await PageObjects.console.clearTextArea();
         await enterRequestWithBody();
         await PageObjects.console.clickFoldWidget();

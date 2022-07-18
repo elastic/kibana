@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
 
+import { sanitizeTag } from '../utils';
+
 import { TagOptions } from './tag_options';
 
 interface Props {
@@ -64,15 +66,29 @@ export const TagsAddRemove: React.FC<Props> = ({
     setLabels(labelsFromTags(allTags));
   }, [allTags, labelsFromTags]);
 
-  const updateTags = async (tagsToAdd: string[], tagsToRemove: string[]) => {
+  const updateTags = async (
+    tagsToAdd: string[],
+    tagsToRemove: string[],
+    successMessage?: string,
+    errorMessage?: string
+  ) => {
     if (agentId) {
       updateTagsHook.updateTags(
         agentId,
         difference(selectedTags, tagsToRemove).concat(tagsToAdd),
-        () => onTagsUpdated()
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
       );
     } else {
-      updateTagsHook.bulkUpdateTags(agents!, tagsToAdd, tagsToRemove, () => onTagsUpdated());
+      updateTagsHook.bulkUpdateTags(
+        agents!,
+        tagsToAdd,
+        tagsToRemove,
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
+      );
     }
   };
 
@@ -124,8 +140,9 @@ export const TagsAddRemove: React.FC<Props> = ({
               defaultMessage: 'Find or create label...',
             }),
             onChange: (value: string) => {
-              setSearchValue(value);
+              setSearchValue(sanitizeTag(value));
             },
+            value: searchValue ?? '',
           }}
           options={labels}
           renderOption={renderOption}
@@ -136,17 +153,32 @@ export const TagsAddRemove: React.FC<Props> = ({
                 if (!searchValue) {
                   return;
                 }
-                updateTags([searchValue], []);
+                updateTags(
+                  [searchValue],
+                  [],
+                  i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
+                    defaultMessage: 'Tag created',
+                  }),
+                  i18n.translate('xpack.fleet.createAgentTags.errorNotificationTitle', {
+                    defaultMessage: 'Tag creation failed',
+                  })
+                );
               }}
             >
-              <EuiIcon type="plus" />{' '}
-              <FormattedMessage
-                id="xpack.fleet.tagsAddRemove.createText"
-                defaultMessage='Create a new tag "{name}"'
-                values={{
-                  name: searchValue,
-                }}
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="plus" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.fleet.tagsAddRemove.createText"
+                    defaultMessage='Create a new tag "{name}"'
+                    values={{
+                      name: searchValue,
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiButtonEmpty>
           }
         >

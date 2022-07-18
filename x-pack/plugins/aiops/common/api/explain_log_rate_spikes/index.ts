@@ -8,6 +8,7 @@
 export {
   addChangePointsAction,
   errorAction,
+  resetAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';
