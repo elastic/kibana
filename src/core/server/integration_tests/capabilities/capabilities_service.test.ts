@@ -19,7 +19,7 @@ import {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
-import { CapabilitiesService, CapabilitiesSetup } from '..';
+import { CapabilitiesService, CapabilitiesSetup } from '../../capabilities';
 
 const coreId = Symbol('core');
 
