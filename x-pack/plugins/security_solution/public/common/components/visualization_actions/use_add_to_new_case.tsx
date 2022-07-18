@@ -23,7 +23,7 @@ export interface UseAddToNewCaseProps {
 const owner = APP_ID;
 
 export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
   const attachments = useMemo(() => {
     return [
@@ -52,6 +52,10 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
 
   return {
     onAddToNewCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
+    disabled:
+      lensAttributes == null ||
+      timeRange == null ||
+      !userCasesPermissions.create ||
+      !userCasesPermissions.read,
   };
 };
