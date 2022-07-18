@@ -6,15 +6,16 @@
  */
 
 import { CaseConnector } from '../../../common/api';
+import { IndexRefresh } from '../../services/types';
 
 export interface MappingsArgs {
   connector: CaseConnector;
 }
 
-export interface CreateMappingsArgs extends MappingsArgs {
+export interface CreateMappingsArgs extends MappingsArgs, IndexRefresh {
   owner: string;
 }
 
-export interface UpdateMappingsArgs extends MappingsArgs {
+export interface UpdateMappingsArgs extends MappingsArgs, IndexRefresh {
   mappingId: string;
 }

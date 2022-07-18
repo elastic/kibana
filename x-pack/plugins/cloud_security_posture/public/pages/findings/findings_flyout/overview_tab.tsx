@@ -17,6 +17,7 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../types';
@@ -24,8 +25,6 @@ import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
-
-const INDEX_LINK_NAME = 'logs-cloud_security_posture.findings_latest-default';
 
 const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
   {
@@ -63,9 +62,9 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{INDEX_LINK_NAME}</EuiLink>
+      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
     ) : (
-      INDEX_LINK_NAME
+      LATEST_FINDINGS_INDEX_DEFAULT_NS
     ),
   },
 ];
