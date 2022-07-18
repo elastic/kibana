@@ -13,8 +13,8 @@ import type {
   PackagePolicyServiceInterface,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import moment, { MomentInput } from 'moment';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, STATUS_ROUTE_PATH } from '../../../common/constants';
 import type { CspAppContext } from '../../plugin';
 import type { CspRouter } from '../../types';
@@ -28,11 +28,29 @@ import { isLatestFindingsIndexExists } from '../../lib/is_latest_findings_index_
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
-const getHealthyAgents = (enrichedAgentPolicies: GetAgentPoliciesResponseItem[]): number =>
-  enrichedAgentPolicies.reduce(
+// this function currently returns all agents instead of healthy agents only
+const getHealthyAgents = async (
+  soClient: SavedObjectsClientContract,
+  installedIntegrations: PackagePolicy[],
+  agentPolicyService: AgentPolicyServiceInterface,
+  agentService: AgentService
+): Promise<number> => {
+  const agentPolicies = await getCspAgentPolicies(
+    soClient,
+    installedIntegrations,
+    agentPolicyService
+  );
+
+  const enrichedAgentPolicies = await addRunningAgentToAgentPolicy(
+    agentService,
+    agentPolicies || []
+  );
+
+  return enrichedAgentPolicies.reduce(
     (previousValue, currentValue) => previousValue + (currentValue.agents || 0),
     0
   );
+};
 
 const getMinutesPassedSinceMoment = (momentInput: MomentInput): number =>
   moment().diff(moment(momentInput), 'minutes');
@@ -71,17 +89,13 @@ const getCspSetupStatus = async (
       }),
     ]);
 
-  const agentPolicies = await getCspAgentPolicies(
+  const healthyAgents = await getHealthyAgents(
     soClient,
     installedIntegrations.items,
-    agentPolicyService
+    agentPolicyService,
+    agentService
   );
 
-  const enrichedAgentPolicies = await addRunningAgentToAgentPolicy(
-    agentService,
-    agentPolicies || []
-  );
-  const healthyAgents = getHealthyAgents(enrichedAgentPolicies);
   const installedIntegrationsTotal = installedIntegrations.total;
   const latestPackageVersion = latestPackageInfo.version;
 
