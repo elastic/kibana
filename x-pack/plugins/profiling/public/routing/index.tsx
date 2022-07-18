@@ -169,7 +169,7 @@ const routes = {
               '/functions/topn': {
                 element: (
                   <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.functions', {
+                    title={i18n.translate('xpack.profiling.breadcrumb.topnFunctions', {
                       defaultMessage: 'Top N',
                     })}
                     href="/functions/topn"
