@@ -116,8 +116,8 @@ export const stateToDashboardContainerInput = ({
     panels,
     query,
     title,
-    filters,
     timeRestore,
+    filters: dashboardFilters,
   } = dashboardState;
 
   return {
@@ -127,7 +127,7 @@ export const stateToDashboardContainerInput = ({
       .filter(
         (filter) =>
           isFilterPinned(filter) ||
-          filters.some((dashboardFilter) =>
+          dashboardFilters.some((dashboardFilter) =>
             filtersAreEqual(migrateFilter(_.cloneDeep(dashboardFilter)), filter)
           )
       ),
