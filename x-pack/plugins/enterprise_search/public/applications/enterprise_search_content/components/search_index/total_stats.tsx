@@ -13,8 +13,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiStatProps } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-
 import { CustomFormattedTimestamp } from '../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';
+
 import { OverviewLogic } from './overview.logic';
 
 interface TotalStatsProps {
