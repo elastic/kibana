@@ -23,9 +23,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
+  async function* instantiateDeleter(session: { delete: () => any }) {
+    yield session.delete();
+  }
+
+  const list = async (po: { goTo: () => any; getList: () => any }) => {
+    await po.goTo();
+    return po.getList();
+  };
+
+  const deleteSessions = async () => {
+    let seshList = await list(PageObjects.searchSessionsManagement);
+    const count = seshList.length;
+
+    if (count === 0) return;
+    log.info(`\n### Count of Saved Search Sessions: \n  ${count}`);
+
+    seshList = await list(PageObjects.searchSessionsManagement);
+    const sesh = seshList[0];
+
+    log.debug(`\n### Deleting Saved Search Session: \n  ${sesh.name}`);
+    const deleter = instantiateDeleter(sesh);
+
+    try {
+      await deleter.next();
+      await deleter.return();
+    } catch (e) {
+      log.debug(`\n### e: \n${JSON.stringify(e, null, 2)}`);
+      await deleter.return();
+    }
+
+    await deleteSessions();
+  };
+
   describe('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
+        await deleteSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
         await retry.tryForTime(10000, async () => {
@@ -35,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await searchSessions.deleteAllSearchSessions();
+        await deleteSessions();
       });
 
       it('Saves a session and verifies it in the Management app', async () => {
