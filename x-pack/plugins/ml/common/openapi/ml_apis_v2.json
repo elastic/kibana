@@ -18,8 +18,11 @@
   } ],
   "schemes" : [ "https" ],
   "security" : [
-  {
-    "basicAuth": [ ]
+    {
+      "basicAuth": [ ]
+    },
+    {
+      "apiKey" : [ ]
     }
   ],
   "paths" : {

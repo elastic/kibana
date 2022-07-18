@@ -75,6 +75,10 @@ components:
   basicAuth:
     type: http
     scheme: basic
+  apiKeyAuth:
+    type: apiKey
+    in: header
+    name: ApiKey
  schemas:
     syncResponse:
       type: object
@@ -167,4 +171,5 @@ components:
           "datafeedsRemoved":{}
         }
 security:
-  - basicAuth: []
+  - basicAuth: [ ]
+  - ApiKeyAuth: [ ]
