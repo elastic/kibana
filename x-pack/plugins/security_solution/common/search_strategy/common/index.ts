@@ -34,12 +34,6 @@ export interface PaginationInput {
   tiebreaker?: Maybe<string>;
 }
 
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
-}
-
 export interface ShardsResponse {
   total: number;
   successful: number;

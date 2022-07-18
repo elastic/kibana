@@ -182,13 +182,6 @@ export interface RuleError {
   error: { status_code: number; message: string };
 }
 
-export type BulkRuleResponse = Array<Rule | RuleError>;
-
-export interface RuleResponseBuckets {
-  rules: Rule[];
-  errors: RuleError[];
-}
-
 export interface PaginationOptions {
   page: number;
   perPage: number;

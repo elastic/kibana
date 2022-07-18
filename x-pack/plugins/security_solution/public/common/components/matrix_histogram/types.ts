@@ -102,12 +102,6 @@ export interface HistogramBucket {
   key: number;
   doc_count: number;
 }
-export interface GroupBucket {
-  key: string;
-  signals: {
-    buckets: HistogramBucket[];
-  };
-}
 
 export interface BarchartConfigs {
   series: {

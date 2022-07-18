@@ -9,8 +9,6 @@ import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
   GetAgentsResponse,
-  DeletePackagePoliciesResponse,
-  DeletePackagePoliciesRequest,
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
@@ -38,23 +36,6 @@ export const sendGetPackagePolicy = (
   options?: HttpFetchOptions
 ) => {
   return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
-};
-
-/**
- * Retrieves a single package policy based on ID from ingest
- * @param http
- * @param body
- * @param options
- */
-export const sendDeletePackagePolicy = (
-  http: HttpStart,
-  body: DeletePackagePoliciesRequest,
-  options?: HttpFetchOptions
-) => {
-  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_POLICY, {
-    ...options,
-    body: JSON.stringify(body.body),
-  });
 };
 
 /**

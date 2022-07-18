@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 
 import {
   elementOrChildrenHasFocus,
@@ -15,10 +15,7 @@ import {
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
 import type { BrowserField, BrowserFields } from '../../containers/source';
-import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
@@ -36,11 +33,6 @@ export const search = {
     schema: true,
   },
 };
-
-export interface ItemValues {
-  value: JSX.Element;
-  valueAsString: string;
-}
 
 /**
  * An item rendered in the table
@@ -77,35 +69,6 @@ export const getColumnHeaderFromBrowserField = ({
   aggregatable: browserField.aggregatable,
   initialWidth: width,
 });
-
-/**
- * Returns a collection of columns, where the first column in the collection
- * is a timestamp, and the remaining columns are all the columns in the
- * specified category
- */
-export const getColumnsWithTimestamp = ({
-  browserFields,
-  category,
-}: {
-  browserFields: BrowserFields;
-  category: string;
-}): ColumnHeaderOptions[] => {
-  const emptyFields: Record<string, Partial<BrowserField>> = {};
-  const timestamp = get('base.fields.@timestamp', browserFields);
-  const categoryFields: Array<Partial<BrowserField>> = [
-    ...Object.values(getOr(emptyFields, `${category}.fields`, browserFields)),
-  ];
-
-  return timestamp != null && categoryFields.length
-    ? uniqBy('id', [
-        getColumnHeaderFromBrowserField({
-          browserField: timestamp,
-          width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-        }),
-        ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
-      ])
-    : [];
-};
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

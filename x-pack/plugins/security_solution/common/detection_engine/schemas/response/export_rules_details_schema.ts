@@ -30,7 +30,6 @@ export const exportRulesDetails = {
 };
 
 const exportRulesDetailsSchema = t.exact(t.type(exportRulesDetails));
-export type ExportRulesDetailsSchema = t.TypeOf<typeof exportRulesDetailsSchema>;
 
 // With exceptions
 export const exportRulesDetailsWithExceptionsSchema = createSchema(

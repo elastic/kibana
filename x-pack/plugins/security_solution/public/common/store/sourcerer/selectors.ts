@@ -42,8 +42,6 @@ export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (s
 export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
   sourcerer.sourcererScopes;
 
-export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
-
 export const kibanaDataViewsSelector = () =>
   createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);
 

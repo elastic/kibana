@@ -18,7 +18,6 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type {
   ElasticsearchClient,
@@ -58,7 +57,6 @@ import type {
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
-  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
@@ -74,21 +72,6 @@ interface SortExceptionsReturn {
 }
 
 export const MAX_RULE_GAP_RATIO = 4;
-
-export const shorthandMap = {
-  s: {
-    momentString: 'seconds',
-    asFn: (duration: moment.Duration) => duration.asSeconds(),
-  },
-  m: {
-    momentString: 'minutes',
-    asFn: (duration: moment.Duration) => duration.asMinutes(),
-  },
-  h: {
-    momentString: 'hours',
-    asFn: (duration: moment.Duration) => duration.asHours(),
-  },
-};
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
@@ -309,28 +292,6 @@ export const getExceptions = async ({
   }
 };
 
-export const sortExceptionItems = (exceptions: ExceptionListItemSchema[]): SortExceptionsReturn => {
-  return exceptions.reduce<SortExceptionsReturn>(
-    (acc, exception) => {
-      const { entries } = exception;
-      const { exceptionsWithValueLists, exceptionsWithoutValueLists } = acc;
-
-      if (hasLargeValueList(entries)) {
-        return {
-          exceptionsWithValueLists: [...exceptionsWithValueLists, { ...exception }],
-          exceptionsWithoutValueLists,
-        };
-      } else {
-        return {
-          exceptionsWithValueLists,
-          exceptionsWithoutValueLists: [...exceptionsWithoutValueLists, { ...exception }],
-        };
-      }
-    },
-    { exceptionsWithValueLists: [], exceptionsWithoutValueLists: [] }
-  );
-};
-
 export const generateId = (
   docIndex: string,
   docId: string,
@@ -383,14 +344,6 @@ export const wrapBuildingBlocks = (
       },
     };
   });
-};
-
-export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit => {
-  return {
-    _id: generateSignalId(signal.signal),
-    _index: index,
-    _source: signal,
-  };
 };
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
@@ -696,13 +649,6 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createPreviewReturnType = (): PreviewReturnType => ({
-  matrixHistogramData: [],
-  totalCount: 0,
-  errors: [],
-  warningMessages: [],
-});
-
 export const createSearchAfterReturnType = ({
   success,
   warning,
@@ -927,8 +873,6 @@ export const isThresholdParams = (params: RuleParams): params is ThresholdRulePa
   params.type === 'threshold';
 export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
   params.type === 'query';
-export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
-  params.type === 'saved_query';
 export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
