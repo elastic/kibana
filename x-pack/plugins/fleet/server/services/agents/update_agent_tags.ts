@@ -95,7 +95,7 @@ async function updateTagsBatch(
   const filteredAgents = await filterHostedPolicies(
     soClient,
     givenAgents,
-    outgoingErrors,
+    errors,
     `Cannot modify tags on a hosted agent`
   );
 
