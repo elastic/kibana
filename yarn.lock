@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.12.0":
-  version "46.12.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.12.0.tgz#95c5ba2d4eff75b52fb294b867fb7b147da3383a"
-  integrity sha512-YIILkL3CXSoBMBiwj1N6FJTWMB9PpKi1bfMZVJCGHb23+J3LiiAqsQYsZbm7L28ziH3s0RveRomRcfVo38NvMg==
+"@elastic/charts@46.13.0":
+  version "46.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.13.0.tgz#6000de23944f264c8ac2bb0a8728fac1eb8c3b2f"
+  integrity sha512-v3qGpARn8stI5v6aSUaQE3tEYdZLmGgA//oU4BSLemmKUaBpaK5ZOYwjoBGdqzo52F7gqM7/O1QepdfxS/CBRw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -13640,7 +13640,7 @@ domhandler@^3.0.0:
   dependencies:
     domelementtype "^2.0.1"
 
-domhandler@^4.0.0, domhandler@^4.0, domhandler@^4.2.0, domhandler@^4.2.2:
+domhandler@^4.0, domhandler@^4.0.0, domhandler@^4.2.0, domhandler@^4.2.2:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-4.3.0.tgz#16c658c626cf966967e306f966b431f77d4a5626"
   integrity sha512-fC0aXNQXqKSFTr2wDNZDhsEYjCiYsDWl3D01kwt25hm1YIPyDGHvvi3rw+PLqHAl/m71MaiF7d5zvBr0p5UB2g==
