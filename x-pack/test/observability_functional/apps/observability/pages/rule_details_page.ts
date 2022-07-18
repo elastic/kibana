@@ -150,15 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show the rule edit and delete button if user has permissions', async () => {
         await testSubjects.click('actions');
+
         await testSubjects.existOrFail('editRuleButton');
         await testSubjects.existOrFail('deleteRuleButton');
       });
 
-      it('should open and close actions popover correctly if user has permissions', async () => {
-        await testSubjects.click('actions');
-        // popover should be open
-        await testSubjects.existOrFail('editRuleButton');
-
+      it('should close actions popover correctly', async () => {
         await testSubjects.click('actions');
 
         // popover should be closed
