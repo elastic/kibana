@@ -39,7 +39,6 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { prepareEcsFieldsToValidate } from '../../common/helpers';
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
@@ -1044,11 +1043,7 @@ export const ECSMappingEditorField = React.memo(
         const itemKey = get(formData, `${lastItemPath.current}.key`);
 
         if (itemKey) {
-          const serializedFormData = formDataSerializer();
-          const itemValue =
-            serializedFormData[path] &&
-            (serializedFormData[path][`${itemKey}`]?.field ||
-              serializedFormData[path][`${itemKey}`]?.value);
+          const itemValue = get(formData, `${lastItemPath.current}.result.value`);
 
           if (itemValue && onAdd.current) {
             onAdd.current();
