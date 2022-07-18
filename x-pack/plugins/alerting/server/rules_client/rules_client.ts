@@ -35,6 +35,7 @@ import {
   IEventLogClient,
   IEventLogger,
   SAVED_OBJECT_REL_PRIMARY,
+  FindOptionsType,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import {
@@ -106,7 +107,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -352,6 +353,16 @@ export interface GetExecutionLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+}
+
+export interface GetActionErrorLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: FindOptionsType['sort'];
 }
 
 interface ScheduleRuleOptions {
@@ -788,7 +799,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogWithErrorsResult> {
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -826,43 +837,97 @@ export class RulesClient {
     const eventLogClient = await this.getEventLogClient();
 
     try {
-      const [aggResult, errorResult] = await Promise.all([
-        eventLogClient.aggregateEventsBySavedObjectIds(
-          'alert',
-          [id],
-          {
-            start: parsedDateStart.toISOString(),
-            end: parsedDateEnd.toISOString(),
-            filter,
-            aggs: getExecutionLogAggregation({
-              page,
-              perPage,
-              sort,
-            }),
-          },
-          rule.legacyId !== null ? [rule.legacyId] : undefined
-        ),
-        eventLogClient.findEventsBySavedObjectIds(
-          'alert',
-          [id],
-          {
-            start: parsedDateStart.toISOString(),
-            end: parsedDateEnd.toISOString(),
-            per_page: 500,
-            filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
-            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-          },
-          rule.legacyId !== null ? [rule.legacyId] : undefined
-        ),
-      ]);
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          filter,
+          aggs: getExecutionLogAggregation({
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
 
-      return {
-        ...formatExecutionLogResult(aggResult),
-        ...formatExecutionErrorsResult(errorResult),
-      };
+      return formatExecutionLogResult(aggResult);
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getActionErrorLog({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLog(): getting action error logs for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetActionErrorLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const defaultFilter =
+      '(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)';
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          sort,
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
       );
       throw err;
     }

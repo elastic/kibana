@@ -18,7 +18,19 @@ export const executionLogSortableColumns = [
   'num_new_alerts',
 ] as const;
 
+export const actionErrorLogSortableColumns = [
+  '@timestamp',
+  'event.start',
+  'event.end',
+  'event.provider',
+  'event.duration',
+  'event.action',
+  'message',
+];
+
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
+
+export type ActionErrorLogSortFields = typeof actionErrorLogSortableColumns[number];
 
 export interface IExecutionLog {
   id: string;
@@ -56,5 +68,3 @@ export interface IExecutionLogResult {
   total: number;
   data: IExecutionLog[];
 }
-
-export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
