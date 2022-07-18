@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           disabledFeatures: ['visualize'],
         });
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/spaces/disabled_features/discover',
+          'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/custom_space',
           { space: customSpace }
         );
       });
