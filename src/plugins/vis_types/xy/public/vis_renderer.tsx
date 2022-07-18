@@ -57,11 +57,7 @@ export const getXYVisRenderer: (deps: {
           hasMixedXY ? `render_${originatingApp}_mixed_xy` : undefined,
         ].filter(Boolean) as string[];
 
-        plugins.usageCollection?.reportUiCounter(
-          originatingApp,
-          METRIC_TYPE.COUNT,
-          counterEvents
-        );
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
       }
 
       handlers.done();
