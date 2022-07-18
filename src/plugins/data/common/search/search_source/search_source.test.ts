@@ -124,10 +124,9 @@ describe('SearchSource', () => {
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
       });
       expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
-        ['fakebeat', 'mybeat-*'],
+        ['mybeat-*'],
         `
         Array [
-          "fakebeat",
           "mybeat-*",
         ]
       `
