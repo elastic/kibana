@@ -64,7 +64,7 @@ export interface ChangePoint extends FieldValuePair {
   histogram?: ChangePointHistogramItem[];
 }
 
-interface ChangePointHistogramItem {
+export interface ChangePointHistogramItem {
   doc_count_overall: number;
   doc_count_change_point: number;
   key: number;

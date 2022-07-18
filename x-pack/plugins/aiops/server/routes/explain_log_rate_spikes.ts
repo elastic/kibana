@@ -156,6 +156,19 @@ export const defineExplainLogRateSpikesRoute = (
           }
         }
 
+        if (changePoints?.length === 0) {
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded: 1,
+              loadingState: `Done.`,
+            })
+          );
+
+          end();
+          return;
+        }
+
         const histogramFields: [NumericHistogramField] = [
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
         ];

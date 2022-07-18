@@ -16,6 +16,7 @@ export type {
   AggCardinality,
   ChangePoint,
   ChangePointHistogram,
+  ChangePointHistogramItem,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,

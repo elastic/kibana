@@ -6,10 +6,12 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { ImpactBar } from './impact_bar';
+
+import { MiniHistogram } from '../mini_histogram';
+
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -29,46 +31,6 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
-      field: 'score',
-      name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel',
-            {
-              defaultMessage: 'Score',
-            }
-          )}
-        </>
-      ),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { score }) => {
-        return (
-          <>
-            <ImpactBar size="m" value={Number(score.toFixed(2))} label={score.toFixed(2)} />
-          </>
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'pValue',
-      name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel',
-            {
-              defaultMessage: 'Impact',
-            }
-          )}
-        </>
-      ),
-      render: (_, { pValue }) => {
-        const label = getFailedTransactionsCorrelationImpactLabel(pValue);
-        return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
-      },
-      sortable: true,
-    },
-    {
       field: 'fieldName',
       name: i18n.translate(
         'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
@@ -87,8 +49,45 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
     },
     {
       field: 'pValue',
+      name: (
+        <>
+          {i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel',
+            {
+              defaultMessage: 'Log rate',
+            }
+          )}
+        </>
+      ),
+      render: (_, { histogram, fieldName, fieldValue }) => {
+        return histogram ? (
+          <MiniHistogram chartData={histogram} label={`${fieldName}:${fieldValue}`} />
+        ) : null;
+      },
+      sortable: false,
+    },
+    {
+      field: 'pValue',
       name: 'p-value',
       render: (pValue: number) => pValue.toPrecision(3),
+      sortable: true,
+    },
+    {
+      field: 'pValue',
+      name: (
+        <>
+          {i18n.translate(
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel',
+            {
+              defaultMessage: 'Impact',
+            }
+          )}
+        </>
+      ),
+      render: (_, { pValue }) => {
+        const label = getFailedTransactionsCorrelationImpactLabel(pValue);
+        return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
+      },
       sortable: true,
     },
   ];
@@ -119,7 +118,10 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
     <EuiBasicTable
       compressed
       columns={columns}
-      items={pageOfItems ?? []}
+      // Temporary default sorting by ascending pValue until we add native table sorting
+      items={pageOfItems.sort((a, b) => {
+        return (a?.pValue ?? 1) - (b?.pValue ?? 0);
+      })}
       noItemsMessage={noDataText}
       onChange={onChange}
       pagination={pagination}
