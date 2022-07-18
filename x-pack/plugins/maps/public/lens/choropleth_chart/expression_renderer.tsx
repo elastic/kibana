@@ -68,7 +68,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
 
         if (originatingApp) {
           plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-            `render_${originatingApp}_${'map'}`,
+            `render_${originatingApp}_map`,
           ]);
         }
 
