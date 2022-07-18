@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         await importVisualizations({ startIdx: 6001, endIdx: 12000 });
       });
       after(async () => {
-        await esArchiver.emptyKibanaIndex();
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('returns the correct count for each included types', async () => {
