@@ -10086,18 +10086,18 @@ function mkdirP (p, opts, f, made) {
     else if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
     if (!made) made = null;
-
+    
     var cb = f || function () {};
     p = path.resolve(p);
-
+    
     xfs.mkdir(p, mode, function (er) {
         if (!er) {
             made = made || p;
@@ -10130,10 +10130,10 @@ mkdirP.sync = function sync (p, opts, made) {
     if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
@@ -12291,7 +12291,7 @@ var util = __webpack_require__(2);
  */
 
 exports = module.exports = __webpack_require__(112);
-exports.setup = init;
+exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -23386,7 +23386,7 @@ var util = __webpack_require__("util");
  */
 
 exports = module.exports = __webpack_require__("../../node_modules/debug/src/debug.js");
-exports.setup = init;
+exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -34308,7 +34308,7 @@ if (
     // @return {number} The 32-bit hash
     MurmurHash3.prototype.result = function() {
         var k1, h1;
-
+        
         k1 = this.k1;
         h1 = this.h1;
 
@@ -36573,7 +36573,7 @@ function regExpEscape (s) {
 
 module.exports = function (args, opts) {
     if (!opts) opts = {};
-
+    
     var flags = { bools : {}, strings : {}, unknownFn: null };
 
     if (typeof opts['unknown'] === 'function') {
@@ -36587,7 +36587,7 @@ module.exports = function (args, opts) {
           flags.bools[key] = true;
       });
     }
-
+    
     var aliases = {};
     Object.keys(opts.alias || {}).forEach(function (key) {
         aliases[key] = [].concat(opts.alias[key]);
@@ -36606,12 +36606,12 @@ module.exports = function (args, opts) {
      });
 
     var defaults = opts['default'] || {};
-
+    
     var argv = { _ : [] };
     Object.keys(flags.bools).forEach(function (key) {
         setArg(key, defaults[key] === undefined ? false : defaults[key]);
     });
-
+    
     var notFlags = [];
 
     if (args.indexOf('--') !== -1) {
@@ -36633,7 +36633,7 @@ module.exports = function (args, opts) {
             ? Number(val) : val
         ;
         setKey(argv, key.split('.'), value);
-
+        
         (aliases[key] || []).forEach(function (x) {
             setKey(argv, x.split('.'), value);
         });
@@ -36666,7 +36666,7 @@ module.exports = function (args, opts) {
             o[key] = [ o[key], value ];
         }
     }
-
+    
     function aliasIsBoolean(key) {
       return aliases[key].some(function (x) {
           return flags.bools[x];
@@ -36675,7 +36675,7 @@ module.exports = function (args, opts) {
 
     for (var i = 0; i < args.length; i++) {
         var arg = args[i];
-
+        
         if (/^--.+=/.test(arg)) {
             // Using [\s\S] instead of . because js doesn't support the
             // 'dotall' regex modifier. See:
@@ -36712,29 +36712,29 @@ module.exports = function (args, opts) {
         }
         else if (/^-[^-]+/.test(arg)) {
             var letters = arg.slice(1,-1).split('');
-
+            
             var broken = false;
             for (var j = 0; j < letters.length; j++) {
                 var next = arg.slice(j+2);
-
+                
                 if (next === '-') {
                     setArg(letters[j], next, arg)
                     continue;
                 }
-
+                
                 if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
                     setArg(letters[j], next.split('=')[1], arg);
                     broken = true;
                     break;
                 }
-
+                
                 if (/[A-Za-z]/.test(letters[j])
                 && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
                     setArg(letters[j], next, arg);
                     broken = true;
                     break;
                 }
-
+                
                 if (letters[j+1] && letters[j+1].match(/\W/)) {
                     setArg(letters[j], arg.slice(j+2), arg);
                     broken = true;
@@ -36744,7 +36744,7 @@ module.exports = function (args, opts) {
                     setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
                 }
             }
-
+            
             var key = arg.slice(-1)[0];
             if (!broken && key !== '-') {
                 if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
@@ -36774,17 +36774,17 @@ module.exports = function (args, opts) {
             }
         }
     }
-
+    
     Object.keys(defaults).forEach(function (key) {
         if (!hasKey(argv, key.split('.'))) {
             setKey(argv, key.split('.'), defaults[key]);
-
+            
             (aliases[key] || []).forEach(function (x) {
                 setKey(argv, x.split('.'), defaults[key]);
             });
         }
     });
-
+    
     if (opts['--']) {
         argv['--'] = new Array();
         notFlags.forEach(function(key) {
@@ -36841,18 +36841,18 @@ function mkdirP (p, opts, f, made) {
     else if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
     if (!made) made = null;
-
+    
     var cb = f || function () {};
     p = path.resolve(p);
-
+    
     xfs.mkdir(p, mode, function (er) {
         if (!er) {
             made = made || p;
@@ -36886,10 +36886,10 @@ mkdirP.sync = function sync (p, opts, made) {
     if (!opts || typeof opts !== 'object') {
         opts = { mode: opts };
     }
-
+    
     var mode = opts.mode;
     var xfs = opts.fs || fs;
-
+    
     if (mode === undefined) {
         mode = _0777 & (~process.umask());
     }
@@ -37150,7 +37150,7 @@ function ncp (source, dest, options, callback) {
   limit = (limit < 1) ? 1 : (limit > 512) ? 512 : limit;
 
   startCopy(currentPath);
-
+  
   function startCopy(source) {
     started++;
     if (filter) {
@@ -37233,10 +37233,10 @@ function ncp (source, dest, options, callback) {
   function copyFile(file, target) {
     var readStream = fs.createReadStream(file.name),
         writeStream = fs.createWriteStream(target, { mode: file.mode });
-
+    
     readStream.on('error', onError);
     writeStream.on('error', onError);
-
+    
     if(transform) {
       transform(readStream, writeStream, file);
     } else {
@@ -37361,7 +37361,7 @@ function ncp (source, dest, options, callback) {
     if (typeof errs.write === 'undefined') {
       errs.push(err);
     }
-    else {
+    else { 
       errs.write(err.stack + '\n\n');
     }
     return cb();
@@ -41304,7 +41304,7 @@ posix.parse = function(pathString) {
   if (!allParts || allParts.length !== 5) {
     throw new TypeError("Invalid path '" + pathString + "'");
   }
-
+  
   return {
     root: allParts[1],
     dir: allParts[0].slice(0, -1),
