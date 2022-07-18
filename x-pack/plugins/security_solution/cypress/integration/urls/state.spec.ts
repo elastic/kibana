@@ -216,7 +216,7 @@ describe('url state', () => {
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`
+      `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))`
     );
   });
 
@@ -229,12 +229,12 @@ describe('url state', () => {
     cy.get(HOSTS).should(
       'have.attr',
       'href',
-      `/app/security/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')`
+      `/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
     );
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')`
+      `/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
     );
     cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
@@ -245,7 +245,7 @@ describe('url state', () => {
     cy.get(ANOMALIES_TAB).should(
       'have.attr',
       'href',
-      "/app/security/hosts/siem-kibana/anomalies?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
+      "/app/security/hosts/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
     );
 
     cy.get(BREADCRUMBS)
@@ -253,14 +253,14 @@ describe('url state', () => {
       .should(
         'have.attr',
         'href',
-        `/app/security/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')`
+        `/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
       );
     cy.get(BREADCRUMBS)
       .eq(2)
       .should(
         'have.attr',
         'href',
-        `/app/security/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')`
+        `/app/security/hosts/siem-kibana?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))`
       );
   });
 
