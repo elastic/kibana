@@ -123,10 +123,15 @@ export interface DataViewsServiceDeps {
  */
 export interface DataViewsServicePublicMethods {
   /**
-   * Clear the cache of data views.
-   * @param id
+   * Clear the cache of data view saved objects.
    */
-  clearCache: (id?: string | undefined) => void;
+  clearCache: () => void;
+
+  /**
+   * Clear the cache of data view instances.
+   */
+  clearInstanceCache: (id?: string) => void;
+
   /**
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
@@ -396,11 +401,16 @@ export class DataViewsService {
   };
 
   /**
-   * Clear index pattern list cache.
-   * @param id optionally clear a single id
+   * Clear index pattern saved objects cache.
    */
-  clearCache = (id?: string) => {
+  clearCache = () => {
     this.savedObjectsCache = null;
+  };
+
+  /**
+   * Clear index pattern instance cache
+   */
+  clearInstanceCache = (id?: string) => {
     if (id) {
       this.dataViewCache.clear(id);
     } else {

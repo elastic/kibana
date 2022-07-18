@@ -267,7 +267,7 @@ export const IndexPatternTable = ({
             id={dataView.id}
             title={dataView.title}
             refresh={() => {
-              dataViews.clearCache(dataView.id);
+              dataViews.clearInstanceCache(dataView.id);
               loadDataViews();
             }}
           />
