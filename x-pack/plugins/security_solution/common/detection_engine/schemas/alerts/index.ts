@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { BaseFields840 } from './8.4.0';
+
 import type {
   EqlBuildingBlockFields830,
   EqlShellFields830,
   WrappedFields830,
   DetectionAlert830,
-  BaseFields830,
   Ancestor830,
 } from './8.3.0';
 
@@ -22,7 +23,7 @@ export type DetectionAlert = DetectionAlert800 | DetectionAlert830;
 
 export type {
   Ancestor830 as AncestorLatest,
-  BaseFields830 as BaseFieldsLatest,
+  BaseFields840 as BaseFieldsLatest,
   DetectionAlert830 as DetectionAlertLatest,
   WrappedFields830 as WrappedFieldsLatest,
   EqlBuildingBlockFields830 as EqlBuildingBlockFieldsLatest,

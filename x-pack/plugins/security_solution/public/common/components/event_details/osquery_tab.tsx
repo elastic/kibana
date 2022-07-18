@@ -35,6 +35,8 @@ export const useOsqueryTab = ({
     return;
   }
 
+  console.error('rawEventData', rawEventData);
+
   const { OsqueryResults } = osquery;
   const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
     (action: { action_type_id: string }) => action.action_type_id === '.osquery'
