@@ -49,11 +49,19 @@ export const getXYVisRenderer: (deps: {
         histogram: 'vertical_bar',
       };
       const originatingApp = 'agg_based';
-
       if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+        const hasMixedXY = visConfig.seriesParams.some((item) => item.type !== visType);
+
+        const counterEvents = [
           `render_${originatingApp}_${visTypeTelemetryMap[visType] ?? visType}`,
-        ]);
+          hasMixedXY ? `render_${originatingApp}_mixed_xy` : undefined,
+        ].filter(Boolean) as string[];
+
+        plugins.usageCollection?.reportUiCounter(
+          originatingApp,
+          METRIC_TYPE.COUNT,
+          counterEvents
+        );
       }
 
       handlers.done();

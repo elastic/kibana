@@ -53,10 +53,19 @@ const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfi
 
     const byTypes = layers.reduce(
       (acc, item) => {
+        if (
+          !acc.mixedXY &&
+          item.layerType === LayerTypes.DATA &&
+          item.seriesType !== dataLayer.seriesType
+        ) {
+          acc.mixedXY = true;
+        }
+
         acc[item.layerType] += 1;
         return acc;
       },
       {
+        mixedXY: false,
         [LayerTypes.REFERENCELINE]: 0,
         [LayerTypes.ANNOTATIONS]: 0,
         [LayerTypes.DATA]: 0,
@@ -74,6 +83,7 @@ const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfi
       byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
       byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
       byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
+      byTypes.mixedXY ? 'mixed_xy' : undefined,
     ]
       .filter(Boolean)
       .map((item) => `render_${originatingApp}_${item}`);
