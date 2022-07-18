@@ -88,10 +88,10 @@ export const ReviewElasticsearchEngine: React.FC = () => {
 
           <EuiText color="subdued" textAlign="center">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+              'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.description',
               {
                 defaultMessage:
-                  'placeholder text, please fix me, the mocks had something from a different slide',
+                  'Your App Search engine will be created with the following configuration',
               }
             )}
           </EuiText>
@@ -104,14 +104,21 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 <EuiText>
                   <h4>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+                      'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.engineType.title',
                       {
                         defaultMessage: 'Engine Type',
                       }
                     )}
                   </h4>
                 </EuiText>
-                <EuiText>Elasticsearch-managed index</EuiText>
+                <EuiText>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.engineType.description',
+                    {
+                      defaultMessage: 'Elasticsearch-managed index',
+                    }
+                  )}
+                </EuiText>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -119,7 +126,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 <EuiText>
                   <h4>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+                      'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.aliasName.title',
                       {
                         defaultMessage: 'Alias Name',
                       }
@@ -134,7 +141,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 <EuiText>
                   <h4>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+                      'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.engineName.title',
                       {
                         defaultMessage: 'Engine Name',
                       }
@@ -154,7 +161,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
                 <EuiText>
                   <h4>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+                      'xpack.enterpriseSearch.appSearch.engineCreation.reviewForm.elasticsearchIndex.title',
                       {
                         defaultMessage: 'Elasticsearch Index',
                       }

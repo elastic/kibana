@@ -28,8 +28,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
-
 import {
   ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
   SANITIZED_NAME_NOTE,
@@ -39,6 +37,8 @@ import {
   ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
   SUPPORTED_LANGUAGES,
 } from './constants';
+
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
 export const ConfigureAppSearchEngine: React.FC = () => {
   const { isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);
@@ -50,21 +50,36 @@ export const ConfigureAppSearchEngine: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            title: 'Search engine type',
-            status: 'complete',
             onClick: () => {
               setCreationStep(EngineCreationSteps.SelectStep);
             },
+            status: 'complete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',
+              {
+                defaultMessage: 'Search engine type',
+              }
+            ),
           },
           {
-            title: 'Configuration',
+            onClick: () => {},
             status: 'current',
-            onClick: () => {},
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.configuration.label',
+              {
+                defaultMessage: 'Configuration',
+              }
+            ),
           },
           {
-            title: 'Finish',
-            status: 'disabled',
             onClick: () => {},
+            status: 'disabled',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
+              {
+                defaultMessage: 'Finish',
+              }
+            ),
           },
         ]}
       />

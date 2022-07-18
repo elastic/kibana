@@ -24,14 +24,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  ENGINE_CREATION_SELECT_APP_SEARCH_TITLE,
-  ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION,
-  ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE,
-  ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION,
-  ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL,
-} from './constants';
-
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
 export const SelectEngineType: React.FC = () => {
@@ -43,20 +35,35 @@ export const SelectEngineType: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            title: 'Search engine type',
-            status: 'current',
             onClick: () => {},
+            status: 'current',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',
+              {
+                defaultMessage: 'Search engine type',
+              }
+            ),
           },
           {
-            title: 'Configuration',
             onClick: () => {
               setCreationStep(EngineCreationSteps.ConfigureStep);
             },
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.configuration.label',
+              {
+                defaultMessage: 'Configuration',
+              }
+            ),
           },
           {
-            title: 'Review',
-            status: 'disabled',
             onClick: () => {},
+            status: 'disabled',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
+              {
+                defaultMessage: 'Review',
+              }
+            ),
           },
         ]}
       />
@@ -68,7 +75,7 @@ export const SelectEngineType: React.FC = () => {
           <EuiTitle>
             <h2>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engineCreation.SelectEngineTypeForm.title',
+                'xpack.enterpriseSearch.appSearch.engineCreation.selectEngineTypeForm.title',
                 {
                   defaultMessage: 'Select a search engine type',
                 }
@@ -81,13 +88,12 @@ export const SelectEngineType: React.FC = () => {
 
         <EuiText color="subdued" textAlign="center">
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engineCreation.SelectEngineTypeForm.description',
+            'xpack.enterpriseSearch.appSearch.engineCreation.selectEngineTypeForm.description',
             {
               defaultMessage: `
-                You can now create search engines that are backed by an
-                Elasticsearch index. We need some good copy here explaining what
-                all the hubub about this new method is and a link to learn more
-                about it.
+                You can now create search engines that use an existing
+                Elasticsearch index to combine the search management tools of App
+                Search with the flexibility of Elasticsearch indices. Learn more.
               `,
             }
           )}
@@ -99,30 +105,56 @@ export const SelectEngineType: React.FC = () => {
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
             <EuiCard
-              title={ENGINE_CREATION_SELECT_APP_SEARCH_TITLE}
-              description={ENGINE_CREATION_SELECT_APP_SEARCH_DESCRIPTION}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.appSearch.title',
+                {
+                  defaultMessage: 'Manage documents with App Search',
+                }
+              )}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.appSearch.description',
+                {
+                  defaultMessage: `
+                    Use App Search APIs to manage documents. App Search will manage your documents and underlying index for you. 
+                  `,
+                }
+              )}
               selectable={{
+                isSelected: engineType === 'appSearch',
                 onClick: () => {
                   setEngineType('appSearch');
                 },
-                isSelected: engineType === 'appSearch',
               }}
               hasBorder
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              title={ENGINE_CREATION_SELECT_ELASTICSEARCH_TITLE}
-              description={ENGINE_CREATION_SELECT_ELASTICSEARCH_DESCRIPTION}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.elasticsearch.title',
+                {
+                  defaultMessage: 'Elasticsearch index-based engine',
+                }
+              )}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.elasticsearch.description',
+                {
+                  defaultMessage: `
+                    Use an existing index to manage your documents. 
+                    Adds search with App Search to Elasticsearch indices.
+                    Some functions require specific subfields. Learn more.
+                  `,
+                }
+              )}
               betaBadgeProps={{
                 label: 'Beta',
                 tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
               }}
               selectable={{
+                isSelected: engineType === 'elasticsearch',
                 onClick: () => {
                   setEngineType('elasticsearch');
                 },
-                isSelected: engineType === 'elasticsearch',
               }}
               hasBorder
             />
@@ -139,7 +171,12 @@ export const SelectEngineType: React.FC = () => {
                 setCreationStep(EngineCreationSteps.ConfigureStep);
               }}
             >
-              {ENGINE_CREATION_NEXT_STEP_BUTTON_LABEL}
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engineCreation.nextStep.buttonLabel',
+                {
+                  defaultMessage: 'Continue',
+                }
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

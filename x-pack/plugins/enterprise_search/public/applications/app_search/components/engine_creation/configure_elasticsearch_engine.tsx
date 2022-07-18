@@ -75,10 +75,15 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   } = useActions(EngineCreationLogic);
 
   const onChange = (options: SearchIndexSelectableOption[]) => {
-    const selected = options.find((option) => option.checked === 'on');
-    setSelectedIndex(selected?.label ?? '');
-    if (selected?.alias ?? false) setAliasName('');
-    setIsAliasAllowed(!selected?.alias ?? true);
+    const selectedOption = options.find((option) => option.checked === 'on');
+    setSelectedIndex(selectedOption?.label ?? '');
+
+    // If this is an alias, remove the alias name. Do nothing if an option was deselected
+    if (selectedOption?.alias ?? false) setAliasName('');
+
+    // Set isAliasAllowed depending on if the selectedOption is an alias or not.
+    // Set it to true if an option was deselected.
+    setIsAliasAllowed(!selectedOption?.alias ?? true);
   };
 
   const aliasOptionalOrRequired = !isAliasAllowed
@@ -96,22 +101,35 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            title: 'Search engine type',
-            status: 'complete',
             onClick: () => {
               setCreationStep(EngineCreationSteps.SelectStep);
             },
+            status: 'complete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',
+              {
+                defaultMessage: 'Search engine type',
+              }
+            ),
           },
           {
-            title: 'Configuration',
-            status: 'current',
             onClick: () => {},
+            status: 'current',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.configuration.label',
+              {
+                defaultMessage: 'Configuration',
+              }
+            ),
           },
           {
-            title: 'Review',
-            onClick: () => {
-              setCreationStep(EngineCreationSteps.ReviewStep);
-            },
+            onClick: () => {},
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
+              {
+                defaultMessage: 'Review',
+              }
+            ),
           },
         ]}
       />
@@ -182,23 +200,20 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
           <EuiCallOut
             size="m"
             title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.title',
-              { defaultMessage: 'About index and alias names' }
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.callout.title',
+              { defaultMessage: 'App Search has index and alias name requirements' }
             )}
             iconType="iInCircle"
           >
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.body',
+                'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.callout.body',
                 {
                   defaultMessage: `
-                    Enterprise Search requires an index or alias name to be
-                    prefixed with "search-." If you select an index whose name
-                    does not match that pattern, an alias will be generated for
-                    you and your search engine will be attached to the alias
-                    instead. If you wish to connect an alias whose name does not
-                    match the required pattern, you'll need to create a new
-                    alias on your own.
+                    App Search engines can only be created with indices or
+                    aliases prefixed with "search-". If you select an index that
+                    doesn’t start with "search-", an alias to that index will be
+                    created and used.
                   `,
                 }
               )}
@@ -209,11 +224,11 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
           <EuiFormRow
             label={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.label',
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.searchIndexSelectable.label',
               { defaultMessage: 'Select the Elasticsearch index you’d like to use' }
             )}
             helpText={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.searchIndexSelectable.helpText',
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.searchIndexSelectable.helpText',
               {
                 defaultMessage:
                   "Select an index or alias prefixed with 'search-' or create a new alias below",
@@ -226,7 +241,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               options={indicesFormatted}
               singleSelection
               aria-label={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.indexSelectorAriaLabel',
+                'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.elasticsearchIndex.indexSelectorAriaLabel',
                 {
                   defaultMessage: 'Select the Elasticsearch index you’d like to use',
                 }
@@ -235,13 +250,13 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               listProps={{ bordered: true, rowHeight: 56 }}
               onChange={onChange}
               loadingMessage={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.selectable.loading',
+                'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.elasticsearchIndex.selectable.loading',
                 {
                   defaultMessage: 'Loading Elasticsearch indices',
                 }
               )}
               emptyMessage={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.selectable.empty',
+                'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.elasticsearchIndex.selectable.empty',
                 { defaultMessage: 'No Elasticsearch indices available' }
               )}
               renderOption={renderIndexOption}
@@ -264,13 +279,13 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
               <EuiFormRow
                 data-test-subj="AliasNameFormRow"
                 label={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.form.aliasName.label',
+                  'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.label',
                   {
                     defaultMessage: 'Alias name',
                   }
                 )}
                 helpText={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.form.aliasName.helpText',
+                  'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
                   {
                     defaultMessage:
                       "Alias names must be prefixed with 'search-' in order to be used with App Search engines",
@@ -305,7 +320,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                 }}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.form.backButton.label',
+                  'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
                   {
                     defaultMessage: 'Back',
                   }
@@ -317,11 +332,11 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                 disabled={isSubmitDisabled}
                 isLoading={isLoading}
                 type="submit"
-                data-test-subj="NewEngineSubmitButton"
+                data-test-subj="NewEngineContinueButton"
                 fill
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.form.continue.label',
+                  'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.continue.label',
                   {
                     defaultMessage: 'Continue',
                   }
