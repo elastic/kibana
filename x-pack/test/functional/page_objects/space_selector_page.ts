@@ -183,7 +183,7 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async goToSpecificSpace(spaceName: string) {
-    await this.testSubjects.click(`${spaceName}-gotoSpace`);
+    await this.testSubjects.click(`${spaceName}-selectableSpaceItem`);
   }
 
   async clickSpaceAvatar(spaceId: string) {
