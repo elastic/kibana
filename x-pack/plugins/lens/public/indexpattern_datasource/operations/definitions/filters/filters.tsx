@@ -54,15 +54,17 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export const validateQuery = (input: Query, indexPattern: IndexPattern) => {
+export const validateQuery = (input: Query | undefined, indexPattern: IndexPattern) => {
   let isValid = true;
   let error: string | undefined;
 
   try {
-    if (input.language === 'kuery') {
-      toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
-    } else {
-      luceneStringToDsl(input.query);
+    if (input) {
+      if (input.language === 'kuery') {
+        toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
+      } else {
+        luceneStringToDsl(input.query);
+      }
     }
   } catch (e) {
     isValid = false;
