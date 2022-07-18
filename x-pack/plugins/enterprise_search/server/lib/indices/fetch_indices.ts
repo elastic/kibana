@@ -47,8 +47,8 @@ export const mapIndexStats = (
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  indexRegExp: RegExp,
-  returnHiddenIndices: boolean
+  returnHiddenIndices: boolean,
+  indexRegExp?: RegExp
 ): Promise<ElasticsearchIndex[]> => {
   // This call retrieves alias and settings information about indices
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
@@ -64,32 +64,36 @@ export const fetchIndices = async (
 
   const indicesNames = returnHiddenIndices
     ? Object.keys(totalIndices)
-    : Object.keys(totalIndices).filter((indexName) => {
-        return !(totalIndices[indexName]?.settings?.index?.hidden === 'true');
-      });
-
+    : Object.keys(totalIndices).filter(
+        (indexName) => !(totalIndices[indexName]?.settings?.index?.hidden === 'true')
+      );
   if (indicesNames.length === 0) {
     return [];
   }
 
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    expand_wildcards: ['open'],
+    expand_wildcards: expandWildcards,
     index: indexPattern,
     metric: ['docs', 'store'],
   });
-  return indicesNames
+  const resultIndices = indicesNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
       return mapIndexStats(indexData, indexStats, indexName);
     })
     .flatMap(({ name, aliases, ...engineData }) => {
+      // expand aliases and add to results
       const engines = [];
       engines.push({ name, ...engineData });
+
       aliases.forEach((alias) => {
         engines.push({ name: alias, ...engineData });
       });
       return engines;
-    })
-    .filter(({ name }) => name.match(indexRegExp));
+    });
+
+  // The previous step could have added indices that don't match the index pattern, so filter those out again
+  // We wildcard RegExp the pattern unless user provides a more specific regex
+  return indexRegExp ? resultIndices.filter(({ name }) => name.match(indexRegExp)) : resultIndices;
 };

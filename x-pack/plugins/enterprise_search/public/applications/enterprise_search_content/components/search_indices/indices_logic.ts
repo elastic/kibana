@@ -14,8 +14,7 @@ import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/ind
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
-import { IndicesAPILogic } from '../../logic/indices_api/indices_api_logic';
-import { SearchIndex } from '../../types';
+import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
 export const enum IngestionMethod {
   CONNECTOR,
@@ -25,15 +24,15 @@ export const enum IngestionMethod {
 
 export const enum IngestionStatus {
   CONNECTED,
-  CONNECTOR_ERROR,
+  ERROR,
   SYNC_ERROR,
-  CRAWLER_ERROR,
   INCOMPLETE,
 }
 
 export interface ViewSearchIndex extends ElasticsearchIndexWithIngestion {
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
+  lastUpdated: Date | 'never' | null;
 }
 
 function getIngestionMethod(index?: ElasticsearchIndexWithIngestion): IngestionMethod {
@@ -54,14 +53,14 @@ function getIngestionStatus(
     return IngestionStatus.CONNECTED;
   }
   if (ingestionMethod === IngestionMethod.CONNECTOR) {
+    if (index.connector?.sync_status === SyncStatus.ERROR) {
+      return IngestionStatus.SYNC_ERROR;
+    }
     if (index.connector?.status === ConnectorStatus.CONNECTED) {
       return IngestionStatus.CONNECTED;
     }
     if (index.connector?.status === ConnectorStatus.ERROR) {
-      return IngestionStatus.CONNECTOR_ERROR;
-    }
-    if (index.connector?.sync_status === SyncStatus.ERROR) {
-      return IngestionStatus.SYNC_ERROR;
+      return IngestionStatus.ERROR;
     }
   }
   return IngestionStatus.INCOMPLETE;
@@ -69,26 +68,36 @@ function getIngestionStatus(
 
 export interface IndicesActions {
   apiError(error: HttpError): HttpError;
-  apiSuccess({ indices, meta }: { indices: SearchIndex[]; meta: Meta }): {
-    indices: SearchIndex[];
+  apiSuccess({
+    indices,
+    isInitialRequest,
+    meta,
+  }: {
+    indices: ElasticsearchIndexWithIngestion[];
+    isInitialRequest: boolean;
+    meta: Meta;
+  }): {
+    indices: ElasticsearchIndexWithIngestion[];
+    isInitialRequest: boolean;
     meta: Meta;
   };
-  makeRequest: typeof IndicesAPILogic.actions.makeRequest;
+  makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
 }
 export interface IndicesValues {
-  data: typeof IndicesAPILogic.values.data;
+  data: typeof FetchIndicesAPILogic.values.data;
+  hasNoIndices: boolean;
   indices: ViewSearchIndex[];
   isLoading: boolean;
   meta: Meta;
-  status: typeof IndicesAPILogic.values.status;
+  status: typeof FetchIndicesAPILogic.values.status;
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   actions: { onPaginate: (newPageIndex) => ({ newPageIndex }) },
   connect: {
-    actions: [IndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [IndicesAPILogic, ['data', 'status']],
+    actions: [FetchIndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [FetchIndicesAPILogic, ['data', 'status']],
   },
   listeners: () => ({
     apiError: (e) => flashAPIErrors(e),
@@ -96,6 +105,15 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
+    hasNoIndices: [
+      false,
+      {
+        // We need this to show the landing page on the overview page if there are no indices
+        // We can't rely just on there being no indices, because user might have entered a search query
+        apiSuccess: (value, { indices, isInitialRequest }) =>
+          isInitialRequest ? indices.length === 0 : value,
+      },
+    ],
     meta: [
       DEFAULT_META,
       {
@@ -113,6 +131,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
               ...index,
               ingestionMethod: getIngestionMethod(index),
               ingestionStatus: getIngestionStatus(index, getIngestionMethod(index)),
+              lastUpdated: index.connector ? index.connector.last_synced ?? 'never' : null,
             }))
           : [],
     ],

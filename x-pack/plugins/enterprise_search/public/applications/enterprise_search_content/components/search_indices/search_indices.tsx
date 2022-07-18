@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { generatePath } from 'react-router-dom';
+import React, { useState } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import useDebounce from 'react-use/lib/useDebounce';
+
 import {
-  EuiBasicTable,
   EuiButton,
-  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiTitle,
-  HorizontalAlignment,
   EuiSwitch,
-  EuiText,
-  EuiBasicTableColumn,
+  EuiSearchBar,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,20 +28,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
-import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
-import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { handlePageChange } from '../../../shared/table_pagination';
 import { useLocalStorage } from '../../../shared/use_local_storage';
-import { NEW_INDEX_PATH, SEARCH_INDEX_PATH } from '../../routes';
+import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-import { IndicesLogic, IngestionMethod, IngestionStatus, ViewSearchIndex } from './indices_logic';
+import { IndicesLogic } from './indices_logic';
+import { IndicesTable } from './indices_table';
 
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
+import './search_indices.scss';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
@@ -57,172 +48,22 @@ export const baseBreadcrumbs = [
   }),
 ];
 
-function ingestionMethodToText(ingestionMethod: IngestionMethod) {
-  if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector.label',
-      {
-        defaultMessage: 'Connector',
-      }
-    );
-  }
-  if (ingestionMethod === IngestionMethod.CRAWLER) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler.label',
-      {
-        defaultMessage: 'Crawler',
-      }
-    );
-  }
-  return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api.label', {
-    defaultMessage: 'API',
-  });
-}
-
 export const SearchIndices: React.FC = () => {
   const { makeRequest, onPaginate } = useActions(IndicesLogic);
-  const { meta, indices, isLoading } = useValues(IndicesLogic);
+  const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
+  const [searchQuery, setSearchValue] = useState('');
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
     'enterprise-search-indices-callout-dismissed',
     false
   );
 
-  useEffect(() => {
-    makeRequest({ meta, returnHiddenIndices: showHiddenIndices });
-  }, [meta.page.current, showHiddenIndices]);
-
-  const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
-        defaultMessage: 'Index name',
-      }),
-      render: (name: string) => (
-        <EuiLinkTo
-          data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_PATH, { indexName: name })}
-        >
-          {name}
-        </EuiLinkTo>
-      ),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'total.docs.count',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-        defaultMessage: 'Docs count',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'health',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
-        defaultMessage: 'Index health',
-      }),
-      render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
-        <span>
-          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
-          &nbsp;{health ?? '-'}
-        </span>
-      ),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'ingestionMethod',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
-        {
-          defaultMessage: 'Ingestion method',
-        }
-      ),
-      render: (ingestionMethod: IngestionMethod) => (
-        <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
-      ),
-      truncateText: true,
-    },
-    {
-      field: 'ingestionStatus',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
-        {
-          defaultMessage: 'Ingestion status',
-        }
-      ),
-      render: (ingestionStatus: IngestionStatus) => {
-        const getBadge = (status: string, text: string) => {
-          return <EuiBadge color={status}>{text}</EuiBadge>;
-        };
-        if (ingestionStatus === IngestionStatus.CONNECTED) {
-          return getBadge(
-            'success',
-            i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
-              { defaultMessage: 'Connected' }
-            )
-          );
-        }
-        if (ingestionStatus === IngestionStatus.CONNECTOR_ERROR) {
-          return getBadge(
-            'error',
-            i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connectorError.label',
-              { defaultMessage: 'Connector failure' }
-            )
-          );
-        }
-        if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
-          return getBadge(
-            'error',
-            i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.syncError.label',
-              { defaultMessage: 'Sync failure' }
-            )
-          );
-        }
-        return getBadge(
-          'warning',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
-            { defaultMessage: 'Incomplete' }
-          )
-        );
-      },
-      truncateText: true,
-    },
-    {
-      align: 'right' as HorizontalAlignment,
-      field: 'total.store.size_in_bytes',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.storage.columnTitle', {
-        defaultMessage: 'Storage',
-      }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      actions: [
-        {
-          render: ({ name }) => (
-            <EuiButtonIconTo
-              aria-label={name}
-              iconType="eye"
-              data-test-subj="view-search-index-button"
-              to={generatePath(SEARCH_INDEX_PATH, {
-                indexName: name,
-              })}
-            />
-          ),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
-        defaultMessage: 'Actions',
-      }),
-    },
-  ];
+  useDebounce(
+    () => makeRequest({ meta, returnHiddenIndices: showHiddenIndices, searchQuery }),
+    150,
+    [searchQuery, meta.page.current, showHiddenIndices]
+  );
 
   const createNewIndexButton = (
     <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
@@ -261,7 +102,7 @@ export const SearchIndices: React.FC = () => {
       label={i18n.translate(
         'xpack.enterpriseSearch.content.searchIndices.searchIndices.includeHidden.label',
         {
-          defaultMessage: 'Include hidden indices',
+          defaultMessage: 'Show hidden indices',
         }
       )}
       onChange={(event) => setShowHiddenIndices(event.target.checked)}
@@ -291,20 +132,10 @@ export const SearchIndices: React.FC = () => {
           rightSideItems: [createNewIndexButton],
         }}
       >
-        {indices.length !== 0 || isLoading ? (
-          <>
-            <EuiTitle>
-              <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
-                  {
-                    defaultMessage: 'All indices',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
+        {!hasNoIndices ? (
+          <EuiFlexGroup direction="column">
             {!calloutDismissed && (
-              <>
+              <EuiFlexItem>
                 <EuiSpacer size="l" />
                 <EuiCallOut
                   size="m"
@@ -337,22 +168,59 @@ export const SearchIndices: React.FC = () => {
                     })}
                   </EuiButton>
                 </EuiCallOut>
-              </>
+              </EuiFlexItem>
             )}
-            <EuiSpacer size="l" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>{hiddenIndicesSwitch}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EuiBasicTable
-              items={indices}
-              columns={columns}
-              onChange={handlePageChange(onPaginate)}
-              pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
-              tableLayout="auto"
-              loading={isLoading}
-            />
-          </>
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle>
+                    <h2>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
+                        {
+                          defaultMessage: 'Available indices',
+                        }
+                      )}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                    <EuiFlexItem grow={false}>{hiddenIndicesSwitch}</EuiFlexItem>
+                    <EuiFlexItem className="entSearchIndicesSearchBar">
+                      <EuiSearchBar
+                        query={searchQuery}
+                        box={{
+                          incremental: true,
+                          placeholder: i18n.translate(
+                            'xpack.enterpriseSearch.content.searchIndices.searchIndices.searchBar.placeHolder',
+                            {
+                              defaultMessage: 'Filter Elasticsearch indices',
+                            }
+                          ),
+                        }}
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                          {
+                            defaultMessage: 'Filter Elasticsearch indices',
+                          }
+                        )}
+                        onChange={(event) => setSearchValue(event.queryText)}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <IndicesTable
+                indices={indices}
+                meta={meta}
+                onChange={handlePageChange(onPaginate)}
+                isLoading={isLoading}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
           <>
             <AddContentEmptyPrompt />

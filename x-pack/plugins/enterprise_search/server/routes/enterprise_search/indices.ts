@@ -21,7 +21,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
     async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, 'search-*', /^search-.*/, false);
+        const indices = await fetchIndices(client, 'search-*', false, /^search-.*/);
         return response.ok({
           body: indices,
           headers: { 'content-type': 'application/json' },
@@ -40,18 +40,25 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       validate: {
         query: schema.object({
           page: schema.number({ defaultValue: 0, min: 0 }),
-          returnHiddenIndices: schema.maybe(schema.boolean()),
+          return_hidden_indices: schema.maybe(schema.boolean()),
+          search_query: schema.maybe(schema.string()),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
     },
     async (context, request, response) => {
-      const { page, size, returnHiddenIndices } = request.query;
+      const {
+        page,
+        size,
+        return_hidden_indices: returnHiddenIndices,
+        search_query: searchQuery,
+      } = request.query;
       const { client } = (await context.core).elasticsearch;
       try {
-        const totalIndices = await fetchIndices(client, '*', /.*/, !!returnHiddenIndices);
+        const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
+        const totalIndices = await fetchIndices(client, indexPattern, !!returnHiddenIndices);
         const totalResults = totalIndices.length;
-        const totalPages = Math.ceil(totalResults / size);
+        const totalPages = Math.ceil(totalResults / size) || 1;
         const startIndex = (page - 1) * size;
         const endIndex = page * size;
         const selectedIndices = totalIndices.slice(startIndex, endIndex);
@@ -67,7 +74,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
             meta: {
               page: {
                 current: page,
-                size,
+                size: indices.length,
                 total_pages: totalPages,
                 total_results: totalResults,
               },
@@ -135,7 +142,6 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       }
     }
   );
-
   router.post(
     {
       path: '/internal/enterprise_search/indices',

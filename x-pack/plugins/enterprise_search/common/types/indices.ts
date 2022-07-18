@@ -31,6 +31,13 @@ export interface ElasticsearchIndex {
   uuid?: Uuid;
 }
 
+export interface ConnectorIndex extends ElasticsearchIndex {
+  connector: Connector;
+}
+
+export interface CrawlerIndex extends ElasticsearchIndex {
+  crawler: Crawler;
+}
 export interface ElasticsearchIndexWithIngestion extends ElasticsearchIndex {
   connector?: Connector;
   crawler?: Crawler;
