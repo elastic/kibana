@@ -29,9 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  const from = 'Apr 15, 2022 @ 00:00:00.000';
-  const to = 'May 22, 2022 @ 00:00:00.000';
-
   describe('Visualize Reporting Screenshots', function () {
     this.tags(['smoke']);
     before(async () => {
@@ -43,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: true,
         body: { query: { match_all: {} } },
       });
-      await PageObjects.common.unsetTime();
     });
 
     describe('Print PDF button', () => {
@@ -95,7 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
-          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          'timepicker:timeDefaults':
+            '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
+          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
@@ -103,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
 
-        await PageObjects.common.setTime({ from, to });
         log.debug('navigate to visualize');
         await PageObjects.common.navigateToApp('visualize');
       });
