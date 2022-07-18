@@ -18,6 +18,8 @@ import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -27,9 +29,7 @@ import type {
   RequestHandlerContext,
 } from '.';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
@@ -42,13 +42,12 @@ import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-export { httpServerMock } from './http/http_server.mocks';
+export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
-export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export { httpServiceMock } from './http/http_service.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
@@ -58,7 +57,7 @@ export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
-export { contextServiceMock } from './context/context_service.mock';
+export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';

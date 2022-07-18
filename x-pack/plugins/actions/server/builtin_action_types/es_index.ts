@@ -95,7 +95,7 @@ async function executor(
       document[timeField] = new Date();
     }
 
-    bulkBody.push({ index: {} });
+    bulkBody.push({ index: { op_type: 'create' } });
     bulkBody.push(document);
   }
 
