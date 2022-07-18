@@ -275,6 +275,7 @@ export const getMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.breakdownByAccessor,
+                  triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
                 },
               ]
             : [],

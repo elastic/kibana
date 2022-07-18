@@ -8,8 +8,14 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin';
-import { createMockDatasource } from '../../mocks';
-import { DatasourceLayers, DatasourcePublicAPI, OperationDescriptor } from '../../types';
+import { layerTypes } from '../..';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import {
+  DatasourceLayers,
+  DatasourcePublicAPI,
+  OperationDescriptor,
+  OperationMetadata,
+} from '../../types';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -19,30 +25,160 @@ describe('metric visualization', () => {
     paletteService,
   });
 
+  const palette: PaletteOutput<CustomPaletteParams> = {
+    type: 'palette',
+    name: 'foo',
+    params: {
+      rangeType: 'percent',
+    },
+  };
+
+  const fullState: MetricVisualizationState = {
+    layerId: 'first',
+    layerType: 'data',
+    metricAccessor: 'metric-col-id',
+    secondaryMetricAccessor: 'secondary-metric-col-id',
+    maxAccessor: 'max-metric-col-id',
+    breakdownByAccessor: 'breakdown-col-id',
+    collapseFn: 'sum',
+    subtitle: 'subtitle',
+    extraText: 'extra-text',
+    progressDirection: 'vertical',
+    maxCols: 5,
+    palette,
+  };
+
+  const mockFrameApi = createMockFramePublicAPI();
+
+  describe('initialization', () => {
+    test('returns a default state', () => {
+      expect(visualization.initialize(() => 'some-id')).toEqual({
+        layerId: 'some-id',
+        layerType: layerTypes.DATA,
+      });
+    });
+
+    test('returns persisted state', () => {
+      expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+  });
+
+  describe('dimension groups configuration', () => {
+    test('generates configuration', () => {
+      expect(
+        visualization.getConfiguration({
+          state: fullState,
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        })
+      ).toMatchSnapshot();
+    });
+
+    test('color-by-value', () => {
+      expect(
+        visualization.getConfiguration({
+          state: fullState,
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "metric-col-id",
+            "palette": Array [],
+            "triggerIcon": "colorBy",
+          },
+        ]
+      `);
+
+      expect(
+        visualization.getConfiguration({
+          state: { ...fullState, palette: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[0].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "metric-col-id",
+            "palette": undefined,
+            "triggerIcon": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('collapse function', () => {
+      expect(
+        visualization.getConfiguration({
+          state: fullState,
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[3].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "breakdown-col-id",
+            "triggerIcon": "aggregate",
+          },
+        ]
+      `);
+
+      expect(
+        visualization.getConfiguration({
+          state: { ...fullState, collapseFn: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups[3].accessors
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "breakdown-col-id",
+            "triggerIcon": undefined,
+          },
+        ]
+      `);
+    });
+
+    describe('operation filtering', () => {
+      const unsupportedDataType = 'string';
+
+      const operations: OperationMetadata[] = [
+        {
+          isBucketed: true,
+          dataType: 'number',
+        },
+        {
+          isBucketed: true,
+          dataType: unsupportedDataType,
+        },
+        {
+          isBucketed: false,
+          dataType: 'number',
+        },
+        {
+          isBucketed: false,
+          dataType: unsupportedDataType,
+        },
+      ];
+
+      const testConfig = visualization
+        .getConfiguration({
+          state: fullState,
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        })
+        .groups.map(({ groupId, filterOperations }) => [groupId, filterOperations]);
+
+      it.each(testConfig)('%s supports correct operations', (_, filterFn) => {
+        expect(
+          operations.filter(filterFn as (operation: OperationMetadata) => boolean)
+        ).toMatchSnapshot();
+      });
+    });
+  });
+
   describe('generating an expression', () => {
-    const palette: PaletteOutput<CustomPaletteParams> = {
-      type: 'palette',
-      name: 'foo',
-      params: {
-        rangeType: 'percent',
-      },
-    };
-
-    const fullState: MetricVisualizationState = {
-      layerId: 'first',
-      layerType: 'data',
-      metricAccessor: 'metric-col-id',
-      secondaryMetricAccessor: 'secondary-metric-col-id',
-      maxAccessor: 'max-metric-col-id',
-      breakdownByAccessor: 'breakdown-col-id',
-      collapseFn: 'sum',
-      subtitle: 'subtitle',
-      extraText: 'extra-text',
-      progressDirection: 'vertical',
-      maxCols: 5,
-      palette,
-    };
-
     const maxPossibleNumValues = 7;
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
