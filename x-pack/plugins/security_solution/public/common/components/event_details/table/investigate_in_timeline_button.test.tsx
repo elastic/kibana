@@ -24,7 +24,7 @@ describe('InvestigateInTimelineButton', () => {
       );
       render(
         <TestProviders>
-          <InvestigateInTimelineButton dataProviders={dataProviders} />
+          <InvestigateInTimelineButton asEmptyButton={true} dataProviders={dataProviders} />
         </TestProviders>
       );
       expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).toBeInTheDocument();
