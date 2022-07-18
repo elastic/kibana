@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable */
+/* eslint-disable no-console,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies */
 
 // / <reference types="cypress" />
 // @ts-check
@@ -15,7 +15,6 @@ const duration = require('dayjs/plugin/duration');
 // const { filterSpecsFromCoverage } = require('./support-utils');
 
 dayjs.extend(duration);
-
 
 /**
  * Sends collected code coverage object to the backend code
@@ -70,6 +69,7 @@ const filterSupportFilesFromCoverage = (totalCoverage: any) => {
       filename.startsWith(supportFolder)
     );
   }
+
   return coverage;
 };
 
@@ -207,6 +207,7 @@ const registerHooks = () => {
               return;
             }
           }
+
           sendCoverage(coverage, 'backend');
         });
     }
@@ -240,6 +241,7 @@ const registerHooks = () => {
         'coverage report folder': coverageReportFolder,
       }));
       logInstance.end();
+
       return coverageReportFolder;
     });
   });

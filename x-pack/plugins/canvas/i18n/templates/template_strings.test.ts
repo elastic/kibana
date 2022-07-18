@@ -6,7 +6,8 @@
  */
 
 import { getTemplateStrings } from './template_strings';
-import { loadTemplates } from '../../server/templates'; // eslint-disable-line
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { loadTemplates } from '../../server/templates';
 
 import { TagStrings } from '../tags';
 
