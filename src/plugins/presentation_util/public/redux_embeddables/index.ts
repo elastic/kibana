@@ -7,11 +7,10 @@
  */
 
 export {
-  ReduxEmbeddableContext,
   useReduxContainerContext,
   useReduxEmbeddableContext,
-} from './redux_embeddable_context';
-export type {
-  ReduxContainerContextServices,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from './types';
+} from './use_redux_embeddable_context';
+
+export { createReduxEmbeddableTools } from './create_redux_embeddable_tools';
+
+export type { ReduxEmbeddableState, ReduxEmbeddableTools } from './types';

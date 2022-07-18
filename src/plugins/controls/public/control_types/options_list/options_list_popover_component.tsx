@@ -23,41 +23,38 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { OptionsListEmbeddableInput } from './types';
-import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
-import { OptionsListComponentState } from './options_list_component';
+import { OptionsListStrings } from './options_list_strings';
+import { OptionsListReduxState } from './types';
 
 export const OptionsListPopover = ({
-  field,
-  loading,
-  searchString,
-  availableOptions,
-  totalCardinality,
-  invalidSelections,
-  updateSearchString,
   width,
+  searchString,
+  updateSearchString,
 }: {
-  field?: DataViewField;
-  searchString: string;
-  totalCardinality?: number;
   width: number;
-  loading: OptionsListComponentState['loading'];
-  invalidSelections?: string[];
+  searchString: string;
   updateSearchString: (newSearchString: string) => void;
-  availableOptions: OptionsListComponentState['availableOptions'];
 }) => {
   // Redux embeddable container Context
   const {
-    useEmbeddableSelector,
     useEmbeddableDispatch,
+    useEmbeddableSelector: select,
     actions: { selectOption, deselectOption, clearSelections, replaceSelection },
-  } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
+  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
-  const { selectedOptions, singleSelect, title } = useEmbeddableSelector((state) => state);
+
+  // Select current state from Redux using multiple selectors to avoid rerenders.
+  const invalidSelections = select((state) => state.componentState?.invalidSelections);
+  const totalCardinality = select((state) => state.componentState?.totalCardinality);
+  const availableOptions = select((state) => state.componentState?.availableOptions);
+  const selectedOptions = select((state) => state.input.selectedOptions);
+  const singleSelect = select((state) => state.input.singleSelect);
+  const field = select((state) => state.componentState?.field);
+  const loading = select((state) => state.output.loading);
+  const title = select((state) => state.input.title);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);

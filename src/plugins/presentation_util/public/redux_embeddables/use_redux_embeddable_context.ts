@@ -7,21 +7,19 @@
  */
 import { createContext, useContext } from 'react';
 
-import type { ContainerInput, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type {
-  GenericEmbeddableReducers,
-  ReduxContainerContextServices,
-  ReduxEmbeddableContextServices,
+  ReduxEmbeddableState,
+  ReduxContainerContext,
+  ReduxEmbeddableContext,
+  EmbeddableReducers,
 } from './types';
 
 /**
  * When creating the context, a generic EmbeddableInput as placeholder is used. This will later be cast to
- * the generic type passed in by the useReduxEmbeddableContext or useReduxContainerContext hooks
+ * the type passed in by the useReduxEmbeddableContext or useReduxContainerContext hooks
  **/
-export const ReduxEmbeddableContext = createContext<
-  | ReduxEmbeddableContextServices<EmbeddableInput>
-  | ReduxContainerContextServices<EmbeddableInput>
-  | null
+export const EmbeddableReduxContext = createContext<
+  ReduxEmbeddableContext<ReduxEmbeddableState> | ReduxContainerContext<ReduxEmbeddableState> | null
 >(null);
 
 /**
@@ -31,17 +29,17 @@ export const ReduxEmbeddableContext = createContext<
  * types of your reducers. use `typeof MyReducers` here to retain them.
  */
 export const useReduxEmbeddableContext = <
-  InputType extends EmbeddableInput = EmbeddableInput,
-  ReducerType extends GenericEmbeddableReducers<InputType> = GenericEmbeddableReducers<InputType>
->(): ReduxEmbeddableContextServices<InputType, ReducerType> => {
-  const context = useContext<ReduxEmbeddableContextServices<InputType, ReducerType>>(
-    ReduxEmbeddableContext as unknown as React.Context<
-      ReduxEmbeddableContextServices<InputType, ReducerType>
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
+  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+>(): ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType> => {
+  const context = useContext<ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType>>(
+    EmbeddableReduxContext as unknown as React.Context<
+      ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType>
     >
   );
   if (context == null) {
     throw new Error(
-      'useReduxEmbeddableContext must be used inside the useReduxEmbeddableContextProvider.'
+      'useReduxEmbeddableContext must be used inside the ReduxEmbeddableWrapper from build_redux_embeddable_context.'
     );
   }
 
@@ -56,17 +54,17 @@ export const useReduxEmbeddableContext = <
  * key which contains most of the commonly used container operations
  */
 export const useReduxContainerContext = <
-  InputType extends ContainerInput = ContainerInput,
-  ReducerType extends GenericEmbeddableReducers<InputType> = GenericEmbeddableReducers<InputType>
->(): ReduxContainerContextServices<InputType, ReducerType> => {
-  const context = useContext<ReduxContainerContextServices<InputType, ReducerType>>(
-    ReduxEmbeddableContext as unknown as React.Context<
-      ReduxContainerContextServices<InputType, ReducerType>
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
+  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+>(): ReduxContainerContext<ReduxEmbeddableStateType, ReducerType> => {
+  const context = useContext<ReduxContainerContext<ReduxEmbeddableStateType, ReducerType>>(
+    EmbeddableReduxContext as unknown as React.Context<
+      ReduxContainerContext<ReduxEmbeddableStateType, ReducerType>
     >
   );
   if (context == null) {
     throw new Error(
-      'useReduxEmbeddableContext must be used inside the useReduxEmbeddableContextProvider.'
+      'useReduxEmbeddableContext must be used inside the ReduxEmbeddableWrapper from build_redux_embeddable_context.'
     );
   }
   return context!;

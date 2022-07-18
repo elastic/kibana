@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+import { isEmpty, isEqual } from 'lodash';
+import { merge, Subject, Subscription } from 'rxjs';
+import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+
 import {
   Filter,
   compareFilters,
@@ -13,34 +21,27 @@ import {
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { isEmpty, isEqual } from 'lodash';
-import deepEqual from 'fast-deep-equal';
-import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
-import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
-
 import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
+  createReduxEmbeddableTools,
+  ReduxEmbeddableTools,
 } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { OptionsListEmbeddableInput, OptionsListField, OPTIONS_LIST_CONTROL } from './types';
-import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
+import {
+  OptionsListEmbeddableInput,
+  OptionsListField,
+  OptionsListReduxState,
+  OPTIONS_LIST_CONTROL,
+} from './types';
+import { OptionsListComponent } from './options_list_component';
 import { ControlsOptionsListService } from '../../services/options_list';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-
-const OptionsListReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
->(LazyReduxEmbeddableWrapper);
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -81,13 +82,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private field?: OptionsListField;
   private searchString = '';
 
-  // State to be passed down to component
-  private componentState: OptionsListComponentState;
-  private componentStateSubject$ = new BehaviorSubject<OptionsListComponentState>({
-    invalidSelections: [],
-    validSelections: [],
-    loading: true,
-  });
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    OptionsListReduxState,
+    typeof optionsListReducers
+  >;
 
   constructor(input: OptionsListEmbeddableInput, output: ControlOutput, parent?: IContainer) {
     super(input, output, parent); // get filters for initial output...
@@ -96,9 +94,16 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
       pluginServices.getServices());
 
-    this.componentState = { loading: true };
-    this.updateComponentState(this.componentState);
     this.typeaheadSubject = new Subject<string>();
+
+    // build redux embeddable tools
+    this.reduxEmbeddableTools = createReduxEmbeddableTools<
+      OptionsListReduxState,
+      typeof optionsListReducers
+    >({
+      embeddable: this,
+      reducers: optionsListReducers,
+    });
 
     this.initialize();
   }
@@ -149,13 +154,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
+          const {
+            actions: {
+              clearValidAndInvalidSelections,
+              setValidAndInvalidSelections,
+              publishFilters,
+            },
+            dispatch,
+          } = this.reduxEmbeddableTools;
+
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            this.updateComponentState({
-              validSelections: [],
-              invalidSelections: [],
-            });
+            dispatch(clearValidAndInvalidSelections({}));
           } else {
-            const { invalidSelections } = this.componentStateSubject$.getValue();
+            const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
             const newValidSelections: string[] = [];
             const newInvalidSelections: string[] = [];
             for (const selectedOption of newSelectedOptions) {
@@ -165,13 +176,15 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               }
               newValidSelections.push(selectedOption);
             }
-            this.updateComponentState({
-              validSelections: newValidSelections,
-              invalidSelections: newInvalidSelections,
-            });
+            dispatch(
+              setValidAndInvalidSelections({
+                validSelections: newValidSelections,
+                invalidSelections: newInvalidSelections,
+              })
+            );
           }
           const newFilters = await this.buildFilter();
-          this.updateOutput({ filters: newFilters });
+          dispatch(publishFilters(newFilters));
         })
     );
   };
@@ -180,7 +193,15 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dataView?: DataView;
     field?: OptionsListField;
   }> => {
-    const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
+    const {
+      dispatch,
+      getState,
+      actions: { setField, setDataView },
+    } = this.reduxEmbeddableTools;
+
+    const {
+      input: { dataViewId, fieldName, parentFieldName, childFieldName },
+    } = getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
@@ -190,7 +211,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       } catch (e) {
         this.onFatalError(e);
       }
-      this.updateOutput({ dataViews: this.dataView && [this.dataView] });
+      dispatch(setDataView(this.dataView));
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
@@ -211,28 +232,28 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       if (this.field === undefined) {
         this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
       }
-      this.updateComponentState({ field: this.field });
+      dispatch(setField(this.field));
     }
 
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private updateComponentState(changes: Partial<OptionsListComponentState>) {
-    this.componentState = {
-      ...this.componentState,
-      ...changes,
-    };
-    this.componentStateSubject$.next(this.componentState);
-  }
-
   private runOptionsListQuery = async () => {
     const { dataView, field } = await this.getCurrentDataViewAndField();
+
+    const {
+      dispatch,
+      getState,
+      actions: { setLoading, updateQueryResults, publishFilters },
+    } = this.reduxEmbeddableTools;
+
     if (!dataView || !field) return;
 
-    this.updateComponentState({ loading: true });
-    this.updateOutput({ loading: true, dataViews: [dataView] });
-    const { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout } =
-      this.getInput();
+    dispatch(setLoading(true));
+
+    const {
+      input: { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout },
+    } = getState();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -251,13 +272,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         this.abortController.signal
       );
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
-      this.updateComponentState({
-        availableOptions: suggestions,
-        invalidSelections: undefined,
-        validSelections: selectedOptions,
-        totalCardinality,
-        loading: false,
-      });
+      dispatch(
+        updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: undefined,
+          validSelections: selectedOptions,
+          totalCardinality,
+        })
+      );
     } else {
       const valid: string[] = [];
       const invalid: string[] = [];
@@ -266,22 +288,28 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
         else valid.push(selectedOption);
       }
-      this.updateComponentState({
-        availableOptions: suggestions,
-        invalidSelections: invalid,
-        validSelections: valid,
-        totalCardinality,
-        loading: false,
-      });
+      dispatch(
+        updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: invalid,
+          validSelections: valid,
+          totalCardinality,
+        })
+      );
     }
 
     // publish filter
     const newFilters = await this.buildFilter();
-    this.updateOutput({ loading: false, filters: newFilters });
+    batch(() => {
+      dispatch(setLoading(false));
+      dispatch(publishFilters(newFilters));
+    });
   };
 
   private buildFilter = async () => {
-    const { validSelections } = this.componentState;
+    const { getState } = this.reduxEmbeddableTools;
+    const { validSelections } = getState().componentState ?? {};
+
     if (!validSelections || isEmpty(validSelections)) {
       return [];
     }
@@ -307,20 +335,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     super.destroy();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
   };
 
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    const { Wrapper: OptionsListReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
-          <OptionsListComponent
-            componentStateSubject={this.componentStateSubject$}
-            typeaheadSubject={this.typeaheadSubject}
-          />
+        <OptionsListReduxWrapper>
+          <OptionsListComponent typeaheadSubject={this.typeaheadSubject} />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
       node

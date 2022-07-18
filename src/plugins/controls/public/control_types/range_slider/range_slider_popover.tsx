@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useRef } from 'react';
 import {
   EuiFieldNumber,
   EuiPopoverTitle,
@@ -19,39 +18,38 @@ import {
   EuiFlexItem,
   EuiDualRange,
 } from '@elastic/eui';
+import React, { useState, useRef } from 'react';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangeValue } from './types';
+import { RangeSliderReduxState, RangeValue } from './types';
+import { rangeSliderReducers } from './range_slider_reducers';
 
 const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
-export interface Props {
-  id: string;
-  isInvalid?: boolean;
-  isLoading?: boolean;
-  min: string;
-  max: string;
-  title?: string;
-  value: RangeValue;
-  onChange: (value: RangeValue) => void;
-  fieldFormatter: (value: string) => string;
-}
-
-export const RangeSliderPopover: FC<Props> = ({
-  id,
-  isInvalid,
-  isLoading,
-  min,
-  max,
-  title,
-  value,
-  onChange,
-  fieldFormatter,
-}) => {
+export const RangeSliderPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [rangeSliderMin, setRangeSliderMin] = useState<number>(-Infinity);
   const [rangeSliderMax, setRangeSliderMax] = useState<number>(Infinity);
   const rangeRef = useRef<EuiDualRange | null>(null);
+
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector: select,
+    actions: { setSelectedRange },
+  } = useReduxEmbeddableContext<RangeSliderReduxState, typeof rangeSliderReducers>();
+  const dispatch = useEmbeddableDispatch();
+
+  // Select current state from Redux using multiple selectors to avoid rerenders.
+  const id = select((state) => state.input.id);
+  const value = select((state) => state.input.value);
+  const title = select((state) => state.input.title);
+  const min = select((state) => state.componentState.min);
+  const max = select((state) => state.componentState.max);
+  const isLoading = select((state) => state.output.loading);
+  const isInvalid = select((state) => state.componentState.isInvalid);
+  const fieldFormatter = select((state) => state.componentState.fieldFormatter);
+
   let errorMessage = '';
   let helpText = '';
 
@@ -129,7 +127,12 @@ export const RangeSliderPopover: FC<Props> = ({
             }`}
             value={hasLowerBoundSelection ? lowerBoundValue : ''}
             onChange={(event) => {
-              onChange([event.target.value, isNaN(upperBoundValue) ? '' : String(upperBoundValue)]);
+              dispatch(
+                setSelectedRange([
+                  event.target.value,
+                  isNaN(upperBoundValue) ? '' : String(upperBoundValue),
+                ])
+              );
             }}
             disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMin : ''}`}
@@ -151,7 +154,12 @@ export const RangeSliderPopover: FC<Props> = ({
             }`}
             value={hasUpperBoundSelection ? upperBoundValue : ''}
             onChange={(event) => {
-              onChange([isNaN(lowerBoundValue) ? '' : String(lowerBoundValue), event.target.value]);
+              dispatch(
+                setSelectedRange([
+                  isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
+                  event.target.value,
+                ])
+              );
             }}
             disabled={isLoading}
             placeholder={`${hasAvailableRange ? roundedMax : ''}`}
@@ -209,7 +217,7 @@ export const RangeSliderPopover: FC<Props> = ({
               const updatedUpperBound =
                 typeof newUpperBound === 'number' ? String(newUpperBound) : value[1];
 
-              onChange([updatedLowerBound, updatedUpperBound]);
+              dispatch(setSelectedRange([updatedLowerBound, updatedUpperBound]));
             }}
             value={displayedValue}
             ticks={hasAvailableRange ? ticks : undefined}
@@ -233,7 +241,7 @@ export const RangeSliderPopover: FC<Props> = ({
             <EuiButtonIcon
               iconType="eraser"
               color="danger"
-              onClick={() => onChange(['', ''])}
+              onClick={() => dispatch(setSelectedRange(['', '']))}
               aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
               data-test-subj="rangeSlider__clearRangeButton"
             />

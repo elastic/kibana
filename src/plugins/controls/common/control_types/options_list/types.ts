@@ -17,7 +17,6 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   runPastTimeout?: boolean;
   singleSelect?: boolean;
-  loading?: boolean;
 }
 
 export type OptionsListField = DataViewField & {

@@ -7,20 +7,45 @@
  */
 
 import {
-  ActionCreatorWithPayload,
+  Dispatch,
   AnyAction,
   CaseReducer,
-  Dispatch,
   PayloadAction,
+  ActionCreatorWithPayload,
+  EnhancedStore,
 } from '@reduxjs/toolkit';
-import { PropsWithChildren } from 'react';
 import { TypedUseSelectorHook } from 'react-redux';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
+import { PropsWithChildren } from 'react';
+
+export interface ReduxEmbeddableSyncSettings<
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+> {
+  disableSync: boolean;
+  isInputEqual?: (
+    a: ReduxEmbeddableStateType['input'],
+    b: ReduxEmbeddableStateType['input']
+  ) => boolean;
+  isOutputEqual?: (
+    a: ReduxEmbeddableStateType['output'],
+    b: ReduxEmbeddableStateType['output']
+  ) => boolean;
+}
+
+/**
+ * The return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,
+ * but also returns the context object to allow the embeddable class to interact with the redux store.
+ */
+export interface ReduxEmbeddableTools<
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
+  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+> {
+  cleanup: () => void;
+  Wrapper: React.FC<PropsWithChildren<{}>>;
+  dispatch: EnhancedStore<ReduxEmbeddableStateType>['dispatch'];
+  getState: EnhancedStore<ReduxEmbeddableStateType>['getState'];
+  actions: ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType>['actions'];
+}
 
 /**
  * The Embeddable Redux store should contain Input, Output and State. Input is serialized and used to create the embeddable,
@@ -34,7 +59,7 @@ export interface ReduxEmbeddableState<
 > {
   input: InputType;
   output: OutputType;
-  state?: StateType;
+  componentState: StateType;
 }
 
 /**
@@ -46,20 +71,10 @@ export interface EmbeddableReducers<
 > {
   /**
    * PayloadAction of type any is strategic here because we want to allow payloads of any shape in generic reducers.
-   * This type will be overridden to remove any and be type safe when returned by buildReduxEmbeddableContext.
+   * This type will be overridden to remove any and be type safe when returned by setupReduxEmbeddable.
    */
   [key: string]: CaseReducer<ReduxEmbeddableStateType, PayloadAction<any>>;
 }
-
-export interface ReduxEmbeddableWrapperProps<InputType extends EmbeddableInput = EmbeddableInput> {
-  embeddable: IEmbeddable<InputType, EmbeddableOutput>;
-  reducers: GenericEmbeddableReducers<InputType>;
-  diffInput?: (a: InputType, b: InputType) => Partial<InputType>;
-}
-
-// export type ReduxEmbeddableWrapperPropsWithChildren<
-//   InputType extends EmbeddableInput = EmbeddableInput
-// > = PropsWithChildren<ReduxEmbeddableWrapperProps<InputType>>;
 
 /**
  * This context type contains the actions, selector, and dispatch that embeddables need to interact with their state. This
@@ -75,13 +90,11 @@ export interface ReduxEmbeddableContext<
     >;
   } & {
     // Generic reducers to interact with embeddable Input and Output.
-    updateEmbeddableReduxInput: CaseReducer<
-      ReduxEmbeddableStateType,
-      PayloadAction<Partial<ReduxEmbeddableStateType['input']>>
+    updateEmbeddableReduxInput: ActionCreatorWithPayload<
+      Partial<ReduxEmbeddableStateType['input']>
     >;
-    updateEmbeddableReduxOutput: CaseReducer<
-      ReduxEmbeddableStateType,
-      PayloadAction<Partial<ReduxEmbeddableStateType['output']>>
+    updateEmbeddableReduxOutput: ActionCreatorWithPayload<
+      Partial<ReduxEmbeddableStateType['output']>
     >;
   };
   useEmbeddableSelector: TypedUseSelectorHook<ReduxEmbeddableStateType>;
