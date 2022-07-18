@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from './alert_type';
-import { OTHER_CATEGORY } from './es_query_builder';
 
 export function getAlertId(entityName: string, boundaryName: unknown) {
   return `${entityName}-${boundaryName}`;
@@ -31,12 +30,19 @@ function splitAlertId(alertId: string): { entityName: string; boundaryName: stri
   };
 }
 
-export function getAlertContext(
-  entityName: string,
-  containment: GeoContainmentInstanceState,
-  shapesIdsNamesMap: Record<string, unknown>,
-  windowEnd: Date
-): GeoContainmentInstanceContext {
+export function getAlertContext({
+  entityName,
+  containment,
+  shapesIdsNamesMap,
+  windowEnd,
+  isRecovered,
+}: {
+  entityName: string;
+  containment: GeoContainmentInstanceState;
+  shapesIdsNamesMap: Record<string, unknown>;
+  windowEnd: Date;
+  isRecovered: boolean;
+}): GeoContainmentInstanceContext {
   const context: GeoContainmentInstanceContext = {
     entityId: entityName,
     entityDateTime: containment.dateInShape || null,
@@ -44,7 +50,7 @@ export function getAlertContext(
     entityLocation: `POINT (${containment.location[0]} ${containment.location[1]})`,
     detectionDateTime: new Date(windowEnd).toISOString(),
   };
-  if (containment.shapeLocationId !== OTHER_CATEGORY) {
+  if (!isRecovered) {
     context.containingBoundaryId = containment.shapeLocationId;
     context.containingBoundaryName =
       shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId;
@@ -72,6 +78,12 @@ export function getRecoveredAlertContext(
   }
 
   return containment
-    ? getAlertContext(entityName, containment, shapesIdsNamesMap, windowEnd)
+    ? getAlertContext({
+        entityName,
+        containment,
+        shapesIdsNamesMap,
+        windowEnd,
+        isRecovered: true,
+      })
     : null;
 }

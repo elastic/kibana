@@ -106,7 +106,13 @@ export function getEntitiesAndGenerateAlerts(
     // Generate alerts
     containtments.forEach((containment) => {
       if (containment.shapeLocationId !== OTHER_CATEGORY) {
-        const context = getAlertContext(entityName, containment, shapesIdsNamesMap, windowEnd);
+        const context = getAlertContext({
+          entityName,
+          containment,
+          shapesIdsNamesMap,
+          windowEnd,
+          isRecovered: false,
+        });
         alertFactory
           .create(getAlertId(entityName, context.containingBoundaryName))
           .scheduleActions(ActionGroupId, context);
