@@ -25,6 +25,7 @@ import {
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
+  RenderMode,
 } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -181,9 +182,15 @@ export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
+  renderMode: RenderMode;
 }
 
-const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponentProps) => {
+const MetricVisComponent = ({
+  data,
+  config,
+  renderComplete,
+  renderMode,
+}: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getFormatter(config.dimensions.metric, data.columns);
 
@@ -255,14 +262,6 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     grid.push(metricConfigs.slice(i, i + maxCols));
   }
 
-  const pixelHeight = config.metric.maxTileHeight
-    ? grid.length * config.metric.maxTileHeight
-    : undefined;
-
-  const pixelWidth = config.metric.maxTileWidth
-    ? grid[0].length * config.metric.maxTileWidth
-    : undefined;
-
   const chartTheme = getThemeService().useChartsTheme();
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -272,6 +271,15 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     },
     [renderComplete]
   );
+
+  let pixelHeight;
+  let pixelWidth;
+  if (renderMode === 'edit') {
+    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
+    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
+    pixelHeight = grid.length * maxTileSideLength;
+    pixelWidth = grid[0].length * maxTileSideLength;
+  }
 
   return (
     <div

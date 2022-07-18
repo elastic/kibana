@@ -29,8 +29,6 @@ export interface MetricArguments {
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;
-  maxTileWidth?: number;
-  maxTileHeight?: number;
 }
 
 export type MetricInput = Datatable;

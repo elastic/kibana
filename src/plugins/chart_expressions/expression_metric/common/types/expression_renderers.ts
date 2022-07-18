@@ -26,8 +26,6 @@ export interface MetricVisParam {
   progressDirection: LayoutDirection;
   maxCols: number;
   minTiles?: number;
-  maxTileWidth?: number;
-  maxTileHeight?: number;
 }
 
 export interface VisParams {

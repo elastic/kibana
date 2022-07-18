@@ -675,8 +675,8 @@ describe('MetricVisComponent', function () {
     });
   });
 
-  it('should respect size constraints', () => {
-    const getContainerStyles = (width?: number, height?: number) =>
+  it('should constrain dimensions in edit mode', () => {
+    const getContainerStyles = (editMode: boolean, multipleTiles: boolean) =>
       (
         shallow(
           <MetricVis
@@ -686,21 +686,20 @@ describe('MetricVisComponent', function () {
               metric: {
                 progressDirection: 'vertical',
                 maxCols: 5,
-                maxTileWidth: width,
-                maxTileHeight: height,
               },
               dimensions: {
                 metric: basePriceColumnId,
-                breakdownBy: dayOfWeekColumnId,
+                breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
               },
             }}
+            renderMode={editMode ? 'edit' : 'view'}
           />
         )
           .find('div')
           .props() as HtmlAttributes & { css: { styles: string } }
       ).css.styles;
 
-    expect(getContainerStyles()).toMatchInlineSnapshot(`
+    expect(getContainerStyles(false, false)).toMatchInlineSnapshot(`
       "
               height: 100%;
               width: 100%;
@@ -709,10 +708,19 @@ describe('MetricVisComponent', function () {
             "
     `);
 
-    expect(getContainerStyles(40, 50)).toMatchInlineSnapshot(`
+    expect(getContainerStyles(true, false)).toMatchInlineSnapshot(`
       "
-              height: 100px;
-              width: 200px;
+              height: 300px;
+              width: 300px;
+              max-height: 100%;
+              max-width: 100%;
+            "
+    `);
+
+    expect(getContainerStyles(true, true)).toMatchInlineSnapshot(`
+      "
+              height: 400px;
+              width: 1000px;
               max-height: 100%;
               max-width: 100%;
             "

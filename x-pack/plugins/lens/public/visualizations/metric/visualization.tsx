@@ -68,9 +68,6 @@ const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  // we constrain the tile sizes in the lens editor for aesthetic reasons
-  const sideLength = state.breakdownByAccessor ? 200 : 300;
-
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !isSuggestion && !state.collapseFn
@@ -135,8 +132,6 @@ const toExpression = (
             : [],
           maxCols: state.maxCols ? [state.maxCols] : [],
           minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
-          maxTileWidth: !isSuggestion ? [sideLength] : [],
-          maxTileHeight: !isSuggestion ? [sideLength] : [],
         },
       },
     ],

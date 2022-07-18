@@ -92,12 +92,6 @@ describe('metric visualization', () => {
                 "maxCols": Array [
                   5,
                 ],
-                "maxTileHeight": Array [
-                  300,
-                ],
-                "maxTileWidth": Array [
-                  300,
-                ],
                 "metric": Array [
                   "metric-col-id",
                 ],
@@ -155,12 +149,6 @@ describe('metric visualization', () => {
                 ],
                 "maxCols": Array [
                   5,
-                ],
-                "maxTileHeight": Array [
-                  200,
-                ],
-                "maxTileWidth": Array [
-                  200,
                 ],
                 "metric": Array [
                   "metric-col-id",
@@ -294,8 +282,6 @@ describe('metric visualization', () => {
       ) as ExpressionAstExpression;
 
       expect(expression.chain[0].arguments.minTiles).toHaveLength(0);
-      expect(expression.chain[0].arguments.maxTileWidth).toHaveLength(0);
-      expect(expression.chain[0].arguments.maxTileHeight).toHaveLength(0);
     });
 
     it('incorporates datasource expression if provided', () => {
