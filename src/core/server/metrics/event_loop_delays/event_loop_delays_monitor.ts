@@ -21,6 +21,11 @@ export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 export function nsToMs(metric: number) {
   return metric / ONE_MILLISECOND_AS_NANOSECONDS;
 }
+/**
+ * Internal contract for EventLoopDelaysMonitor
+ * @internal
+ */
+export type IEventLoopDelaysMonitor = EventLoopDelaysMonitor;
 
 export class EventLoopDelaysMonitor {
   private readonly loopMonitor: PerfIntervalHistogram;

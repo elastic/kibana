@@ -404,6 +404,7 @@ export type {
   IntervalHistogram,
 } from './metrics';
 export { EventLoopDelaysMonitor } from './metrics';
+export type { IEventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

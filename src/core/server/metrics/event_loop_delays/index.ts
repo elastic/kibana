@@ -7,3 +7,4 @@
  */
 
 export { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+export type { IEventLoopDelaysMonitor } from './event_loop_delays_monitor'; // would need to be exported from the implementation package
