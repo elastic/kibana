@@ -46,6 +46,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     useKibana<DashboardAppServices>().services;
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -75,7 +76,9 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         }
         return 0;
       })
-      .filter(({ hidden }: BaseVisType) => !hidden);
+      .filter(
+        ({ hidden, stage }: BaseVisType) => !(hidden || (!LABS_ENABLED && stage === 'experimental'))
+      );
 
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getVisTypesByGroup(VisGroups.AGGBASED);
