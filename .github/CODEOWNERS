@@ -266,6 +266,8 @@
 /test/functional/services/common @elastic/kibana-qa
 /test/functional/services/lib @elastic/kibana-qa
 /test/functional/services/remote @elastic/kibana-qa
+/test/visual_regression @elastic/kibana-qa
+/x-pack/test/visual_regression @elastic/kibana-qa
 
 # Core
 /examples/hello_world/ @elastic/kibana-core
