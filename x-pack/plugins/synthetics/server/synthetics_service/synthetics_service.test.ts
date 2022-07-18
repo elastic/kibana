@@ -35,6 +35,7 @@ describe('SyntheticsService', () => {
       service: {
         username: 'dev',
         password: '12345',
+        manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
   } as unknown as UptimeServerSetup;
@@ -109,7 +110,13 @@ describe('SyntheticsService', () => {
   });
 
   it('setup properly with locations with dev', async () => {
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    serverMock.config = {
+      service: {
+        devUrl: 'http://localhost',
+        username: 'dev',
+        password: '12345',
+      },
+    };
     const service = new SyntheticsService(serverMock);
 
     await service.setup(taskManagerSetup);

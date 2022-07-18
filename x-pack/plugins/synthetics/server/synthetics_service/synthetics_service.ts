@@ -93,13 +93,11 @@ export class SyntheticsService {
   public async setup(taskManager: TaskManagerSetupContract) {
     this.registerSyncTask(taskManager);
 
-    if (this.config?.manifestUrl) {
-      await this.registerServiceLocations();
+    await this.registerServiceLocations();
 
-      const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
-      this.isAllowed = allowed;
-      this.signupUrl = signupUrl;
-    }
+    const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
+    this.isAllowed = allowed;
+    this.signupUrl = signupUrl;
   }
 
   public start(taskManager: TaskManagerStartContract) {
