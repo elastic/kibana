@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { IntegrationsService } from './integrations_service';
+export type { IntegrationsServiceSetupDeps } from './integrations_service';
