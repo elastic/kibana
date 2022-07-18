@@ -21,6 +21,7 @@ import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './toolbar';
+import { generateId } from '../../id_generator';
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -289,13 +290,22 @@ export const getMetricVisualization = ({
     };
   },
 
-  getSupportedLayers() {
+  getSupportedLayers(state) {
     return [
       {
         type: layerTypes.DATA,
         label: i18n.translate('xpack.lens.metric.addLayer', {
           defaultMessage: 'Visualization',
         }),
+        initialDimensions: state
+          ? [
+              {
+                groupId: 'max',
+                columnId: generateId(),
+                staticValue: 0,
+              },
+            ]
+          : undefined,
       },
     ];
   },
