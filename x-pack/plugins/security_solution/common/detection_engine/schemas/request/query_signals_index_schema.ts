@@ -17,6 +17,7 @@ export const querySignalsSchema = t.exact(
     _source: t.union([t.boolean, t.string, t.array(t.string)]),
     fields: t.array(t.string),
     runtime_mappings: t.unknown,
+    sort: t.object,
   })
 );
 
