@@ -48,7 +48,7 @@ export const DeleteDomainModalLogic = kea<
 >({
   path: ['enterprise_search', 'delete_domain_modal'],
   connect: {
-    actions: [DeleteCrawlerDomainApiLogic, ['apiError ', 'apiSuccess']],
+    actions: [DeleteCrawlerDomainApiLogic, ['apiError', 'apiSuccess']],
     values: [DeleteCrawlerDomainApiLogic, ['status']],
   },
   actions: {
