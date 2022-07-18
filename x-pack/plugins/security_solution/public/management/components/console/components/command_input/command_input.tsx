@@ -278,6 +278,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
+        data-test-subj={getTestId('cmdInput-container')}
       >
         <EuiFlexGroup
           wrap={true}
