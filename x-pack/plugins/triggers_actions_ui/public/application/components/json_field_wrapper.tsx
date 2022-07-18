@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   FieldHook,
   getFieldValidityAndErrorMessage,
@@ -39,7 +40,12 @@ export const JsonFieldWrapper = ({ field, ...rest }: Props) => {
       errors={errorMessage ? [errorMessage] : []}
       helpText={<p>{helpText}</p>}
       inputTargetValue={value}
-      label={label ?? 'JSON Editor'}
+      label={
+        label ??
+        i18n.translate('xpack.triggersActionsUI.jsonFieldWrapper.defaultLabel', {
+          defaultMessage: 'JSON Editor',
+        })
+      }
       onDocumentsChange={onJsonUpdate}
       {...rest}
     />
