@@ -84,7 +84,7 @@ export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['er
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
-      body: { message: error.message },
+      body: { message: error.message, attributes: error.attributes },
     };
   }
 

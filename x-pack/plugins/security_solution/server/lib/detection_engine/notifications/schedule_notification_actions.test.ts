@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
-import {
-  NotificationRuleTypeParams,
-  scheduleNotificationActions,
-} from './schedule_notification_actions';
+import type { NotificationRuleTypeParams } from './schedule_notification_actions';
+import { scheduleNotificationActions } from './schedule_notification_actions';
 
 describe('schedule_notification_actions', () => {
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
@@ -45,6 +44,7 @@ describe('schedule_notification_actions', () => {
     severityMapping: [],
     threat: [],
     timestampOverride: undefined,
+    timestampOverrideFallbackDisabled: undefined,
     to: 'now',
     type: 'query',
     references: ['http://www.example.com'],

@@ -13,11 +13,10 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 export interface ElasticsearchIndex {
-  health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
-  name: IndexName;
   alias: boolean;
-  uuid?: Uuid;
+  health?: HealthStatus;
+  name: IndexName;
+  status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
       count: number;
@@ -27,4 +26,5 @@ export interface ElasticsearchIndex {
       size_in_bytes: string;
     };
   };
+  uuid?: Uuid;
 }

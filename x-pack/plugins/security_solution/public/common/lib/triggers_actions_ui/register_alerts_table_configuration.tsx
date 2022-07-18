@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   AlertsTableConfigurationRegistryContract,
   GetRenderCellValue,

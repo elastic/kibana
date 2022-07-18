@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';

@@ -10,20 +10,20 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { InputsModelId } from '../../store/inputs/constants';
-import { TimelineEventsType } from '../../../../common/types/timeline';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { useSourcererDataView } from '../../containers/sourcerer';
+import type { TopNOption } from './helpers';
 import {
   isDetectionsAlertsTable,
   getSourcererScopeName,
   removeIgnoredAlertFilters,
-  TopNOption,
 } from './helpers';
 import * as i18n from './translations';
-import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
   min-width: 600px;
