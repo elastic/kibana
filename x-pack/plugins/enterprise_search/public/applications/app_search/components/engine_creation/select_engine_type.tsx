@@ -100,7 +100,6 @@ export const SelectEngineType: React.FC = () => {
         </EuiText>
 
         <EuiSpacer />
-        <EuiSpacer />
 
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
@@ -115,7 +114,7 @@ export const SelectEngineType: React.FC = () => {
                 'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.appSearch.description',
                 {
                   defaultMessage: `
-                    Use App Search APIs to manage documents. App Search will manage your documents and underlying index for you. 
+                    Use App Search APIs to manage documents. App Search will manage your documents and underlying index for you.
                   `,
                 }
               )}
@@ -140,7 +139,7 @@ export const SelectEngineType: React.FC = () => {
                 'xpack.enterpriseSearch.appSearch.engineCreation.selectEngine.elasticsearch.description',
                 {
                   defaultMessage: `
-                    Use an existing index to manage your documents. 
+                    Use an existing index to manage your documents.
                     Adds search with App Search to Elasticsearch indices.
                     Some functions require specific subfields. Learn more.
                   `,
