@@ -318,16 +318,13 @@ export const standardDeviationOperation = buildMetricOperation<StandardDeviation
       'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
       {
         defaultMessage: `
-Returns the standard devation of a field. This function only works for number fields.
+Returns the amount of variation or dispersion of the field. The function works only for number fields.
 
-Example: Get the standard deviation of price:
-\`standard_deviation(price)\`
+#### Examples
 
-Example: Get the variance of price for orders from the UK:
-\`square(standard_deviation(price, kql='location:UK'))\`
+To get the standard deviation of price, use \`standard_deviation(price)\`.
 
-Example: Get the sum of squares of price
-\`square(standard_deviation(price)) * count()\`
+To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
       `,
       }
     ),
