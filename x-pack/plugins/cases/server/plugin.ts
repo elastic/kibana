@@ -50,6 +50,7 @@ import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
+import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -75,12 +76,14 @@ export class CasePlugin {
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
@@ -143,6 +146,9 @@ export class CasePlugin {
 
     return {
       attachmentFramework: {
+        registerExternalReference: (externalReferenceAttachmentType) => {
+          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
@@ -172,6 +178,7 @@ export class CasePlugin {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
     });
 
     const client = core.elasticsearch.client;

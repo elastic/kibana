@@ -10,7 +10,7 @@ import {
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 
-export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
+export const getPersistableStateAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
   inject: (state, references) => ({
     ...state,
