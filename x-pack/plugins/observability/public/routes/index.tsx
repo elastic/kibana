@@ -55,17 +55,9 @@ export const routes = {
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage routeParams={{ query }} />;
+      return <OverviewPage />;
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-        alpha: jsonRt.pipe(t.boolean),
-      }),
-    },
+    params: {},
     exact: true,
   },
   [casesPath]: {
