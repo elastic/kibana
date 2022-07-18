@@ -230,13 +230,22 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+export const BULK_EDIT_CONFIRMATION_DENIED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
     {
-      values: { elasticRulesCount },
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be edited',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationPartlyTitle',
+    {
+      values: { customRulesCount },
       defaultMessage:
-        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
     }
   );
 
@@ -247,12 +256,21 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+export const BULK_EDIT_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCloseButtonLabel',
   {
-    defaultMessage: 'Edit custom rules',
+    defaultMessage: 'Close',
   }
 );
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+    }
+  );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -272,7 +290,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -280,7 +298,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.transl
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -308,7 +326,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules index patterns',
+    defaultMessage: "Overwrite all selected rules' index patterns",
   }
 );
 
@@ -373,7 +391,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules tags',
+    defaultMessage: "Overwrite all selected rules' tags",
   }
 );
 

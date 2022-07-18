@@ -5,70 +5,67 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { RuleAlertType } from './types';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { RuleAlertType } from './types';
 
 /**
  * Returns the rules to update by doing a compare to the rules from the file system against
  * the installed rules already. This also merges exception list items between the two since
  * exception list items can exist on both rules to update and already installed rules.
- * @param rulesFromFileSystem The rules on the file system to check against installed
+ * @param latestPrePackagedRules The latest rules to check against installed
  * @param installedRules The installed rules
  */
 export const getRulesToUpdate = (
-  rulesFromFileSystem: AddPrepackagedRulesSchema[],
-  installedRules: RuleAlertType[]
+  latestPrePackagedRules: Map<string, AddPrepackagedRulesSchema>,
+  installedRules: Map<string, RuleAlertType>
 ) => {
-  return rulesFromFileSystem
-    .filter((ruleFromFileSystem) => filterInstalledRules(ruleFromFileSystem, installedRules))
-    .map((ruleFromFileSystem) => mergeExceptionLists(ruleFromFileSystem, installedRules));
+  return Array.from(latestPrePackagedRules.values())
+    .filter((latestRule) => filterInstalledRules(latestRule, installedRules))
+    .map((latestRule) => mergeExceptionLists(latestRule, installedRules));
 };
 
 /**
- * Filters rules from the file system that do not match the installed rules so you only
- * get back rules that are going to be updated
- * @param ruleFromFileSystem The rules from the file system to check if any are updates
+ * Filters latest prepackaged rules that do not match the installed rules so you
+ * only get back rules that are going to be updated
+ * @param latestPrePackagedRule The latest prepackaged rule version
  * @param installedRules The installed rules to compare against for updates
  */
 export const filterInstalledRules = (
-  ruleFromFileSystem: AddPrepackagedRulesSchema,
-  installedRules: RuleAlertType[]
+  latestPrePackagedRule: AddPrepackagedRulesSchema,
+  installedRules: Map<string, RuleAlertType>
 ): boolean => {
-  return installedRules.some((installedRule) => {
-    return (
-      ruleFromFileSystem.rule_id === installedRule.params.ruleId &&
-      ruleFromFileSystem.version > installedRule.params.version
-    );
-  });
+  const installedRule = installedRules.get(latestPrePackagedRule.rule_id);
+
+  return !!installedRule && installedRule.params.version < latestPrePackagedRule.version;
 };
 
 /**
  * Given a rule from the file system and the set of installed rules this will merge the exception lists
  * from the installed rules onto the rules from the file system.
- * @param ruleFromFileSystem The rules from the file system that might have exceptions_lists
+ * @param latestPrePackagedRule The latest prepackaged rule version that might have exceptions_lists
  * @param installedRules The installed rules which might have user driven exceptions_lists
  */
 export const mergeExceptionLists = (
-  ruleFromFileSystem: AddPrepackagedRulesSchema,
-  installedRules: RuleAlertType[]
+  latestPrePackagedRule: AddPrepackagedRulesSchema,
+  installedRules: Map<string, RuleAlertType>
 ): AddPrepackagedRulesSchema => {
-  if (ruleFromFileSystem.exceptions_list != null) {
-    const installedRule = installedRules.find(
-      (ruleToFind) => ruleToFind.params.ruleId === ruleFromFileSystem.rule_id
-    );
+  if (latestPrePackagedRule.exceptions_list != null) {
+    const installedRule = installedRules.get(latestPrePackagedRule.rule_id);
+
     if (installedRule != null && installedRule.params.exceptionsList != null) {
       const installedExceptionList = installedRule.params.exceptionsList;
-      const fileSystemExceptions = ruleFromFileSystem.exceptions_list.filter((potentialDuplicate) =>
-        installedExceptionList.every((item) => item.list_id !== potentialDuplicate.list_id)
+      const fileSystemExceptions = latestPrePackagedRule.exceptions_list.filter(
+        (potentialDuplicate) =>
+          installedExceptionList.every((item) => item.list_id !== potentialDuplicate.list_id)
       );
       return {
-        ...ruleFromFileSystem,
+        ...latestPrePackagedRule,
         exceptions_list: [...fileSystemExceptions, ...installedRule.params.exceptionsList],
       };
     } else {
-      return ruleFromFileSystem;
+      return latestPrePackagedRule;
     }
   } else {
-    return ruleFromFileSystem;
+    return latestPrePackagedRule;
   }
 };

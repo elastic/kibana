@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BoolQuery } from '@kbn/es-query';
-import { JsonObject } from '@kbn/utility-types';
+import type { BoolQuery } from '@kbn/es-query';
+import type { JsonObject } from '@kbn/utility-types';
 
 export type ESQuery =
   | ESRangeQuery

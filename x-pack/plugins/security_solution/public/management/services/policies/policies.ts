@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpStart } from '@kbn/core/public';
-import {
-  GetPackagePoliciesRequest,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import type { GetPackagePoliciesRequest } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { INGEST_API_PACKAGE_POLICIES } from './ingest';
 
 /**
