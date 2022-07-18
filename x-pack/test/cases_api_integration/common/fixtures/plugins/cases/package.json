@@ -1,11 +1,11 @@
 {
-  "name": "cases-client-user-fixture",
+  "name": "cases-fixture",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "main": "target/test/plugin_api_integration/plugins/cases_client_user_fixture",
+  "main": "target/test/plugin_api_integration/plugins/cases_fixture",
   "scripts": {
     "kbn": "node ../../../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../../../../node_modules/.bin/tsc"
