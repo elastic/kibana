@@ -90,6 +90,7 @@ export function DependenciesTable(props: Props) {
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
+      width: '30%',
     },
     ...getSpanMetricColumns({
       breakpoints,

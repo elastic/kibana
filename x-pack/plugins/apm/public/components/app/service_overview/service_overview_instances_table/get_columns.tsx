@@ -80,6 +80,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnNodeName',
         { defaultMessage: 'Node name' }
       ),
+      width: '30%',
       render: (_, item) => {
         const { serviceNodeName } = item;
         const isMissingServiceNodeName =

@@ -68,6 +68,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnName',
         { defaultMessage: 'Name' }
       ),
+      width: '30%',
       render: (_, { name, transactionType: type }) => {
         return (
           <TruncateWithTooltip
