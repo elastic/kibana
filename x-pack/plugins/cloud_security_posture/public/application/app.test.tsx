@@ -41,7 +41,6 @@ describe('getRoutesFromMapping', () => {
 
 describe('addSpyRouteComponentToRoute', () => {
   it('should add the spy route component to a csp route', () => {
-    // Create a mock SpyRoute component that renders the page name as a test ID
     const pageNameForRoute = chance.pickone<CloudSecurityPosturePageId>([
       'cloud_security_posture-dashboard',
       'cloud_security_posture-findings',
@@ -49,6 +48,7 @@ describe('addSpyRouteComponentToRoute', () => {
       'cloud_security_posture-rules',
     ]);
 
+    // Create a mock SpyRoute component that renders the page name as a test ID
     const SpyRouteMock = ({ pageName }: { pageName?: string }) => <div data-test-subj={pageName} />;
     const mockRouteComponentTestId = chance.word();
     const MockRouteComponent = () => <div data-test-subj={mockRouteComponentTestId} />;
