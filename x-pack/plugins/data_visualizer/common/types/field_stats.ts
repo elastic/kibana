@@ -102,13 +102,6 @@ export interface FieldExamples {
   examples: unknown[];
 }
 
-export interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
-
 export interface AggHistogram {
   histogram: estypes.AggregationsHistogramAggregation;
 }

@@ -15,16 +15,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { ElasticsearchClient, HistogramField } from './types';
+import type { ElasticsearchClient, HistogramField, NumericColumnStatsMap } from './types';
 
 const MAX_CHART_COLUMNS = 20;
-
-interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 /**
  * Returns aggregation intervals for the supplied document fields.

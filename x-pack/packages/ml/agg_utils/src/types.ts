@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 // TODO Temporary type definition until we can import from `@kbn/core`.
 // Copied from src/core/server/elasticsearch/client/types.ts
@@ -42,9 +43,23 @@ export interface FieldValuePair {
   fieldValue: string | number;
 }
 
+export interface NumericColumnStats {
+  interval: number;
+  min: number;
+  max: number;
+}
+export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
+
 export interface HistogramField {
   fieldName: string;
   type: string;
+}
+
+export type HistogramFieldWithNumericColumnStats = HistogramField & NumericColumnStats;
+export function isHistogramFieldWithNumericColumnStats(
+  arg: unknown
+): arg is HistogramFieldWithNumericColumnStats {
+  return isPopulatedObject(arg, ['fieldName', 'fieldValue', 'interval', 'min', 'max']);
 }
 
 export interface HistogramItem {

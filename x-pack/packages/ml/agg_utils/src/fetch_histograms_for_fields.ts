@@ -16,7 +16,14 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-import type { AggCardinality, ElasticsearchClient, HistogramField } from './types';
+import { isHistogramFieldWithNumericColumnStats } from './types';
+import type {
+  AggCardinality,
+  ElasticsearchClient,
+  HistogramField,
+  HistogramFieldWithNumericColumnStats,
+  NumericColumnStatsMap,
+} from './types';
 
 const MAX_CHART_COLUMNS = 20;
 
@@ -75,18 +82,26 @@ export const fetchHistogramsForFields = async (
   client: ElasticsearchClient,
   indexPattern: string,
   query: any,
-  fields: HistogramField[],
+  fields: Array<HistogramField | HistogramFieldWithNumericColumnStats>,
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields
 ) => {
-  const aggIntervals = await fetchAggIntervals(
-    client,
-    indexPattern,
-    query,
-    fields,
-    samplerShardSize,
-    runtimeMappings
-  );
+  const aggIntervals = {
+    ...(await fetchAggIntervals(
+      client,
+      indexPattern,
+      query,
+      fields.filter((f) => !isHistogramFieldWithNumericColumnStats(f)),
+      samplerShardSize,
+      runtimeMappings
+    )),
+    ...fields.filter(isHistogramFieldWithNumericColumnStats).reduce((p, field) => {
+      const { interval, min, max, fieldName } = field;
+      p[stringHash(fieldName)] = { interval, min, max };
+
+      return p;
+    }, {} as NumericColumnStatsMap),
+  };
 
   const chartDataAggs = fields.reduce((aggs, field) => {
     const fieldName = field.fieldName;
