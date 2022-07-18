@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { BULK_CREATE_SAVED_OBJECTS_ROUTE } from '../../../../common/constants';
 
-import { SetupPlugins } from '../../../plugin';
+import type { SetupPlugins } from '../../../plugin';
 
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 import * as savedObjectsToCreate from '../prebuilt_templates';
 
 export const bulkCreateSavedObjects = async ({

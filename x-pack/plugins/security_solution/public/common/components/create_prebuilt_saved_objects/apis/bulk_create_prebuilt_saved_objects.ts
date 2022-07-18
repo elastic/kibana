@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
+import type { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
 import { bulkCreateSavedObjects } from '../../../../../common/constants';
 
 interface Options {
