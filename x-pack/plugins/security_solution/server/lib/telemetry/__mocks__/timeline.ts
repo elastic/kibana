@@ -286,7 +286,7 @@ export const stubEndpointAlertResponse = () => {
     },
     aggregations: {
       endpoint_alert_count: {
-        value: 406
+        value: 1
       }
     }
   };
