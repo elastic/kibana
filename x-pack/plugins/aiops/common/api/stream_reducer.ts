@@ -34,6 +34,17 @@ export function streamReducer(
   switch (action.type) {
     case API_ACTION_NAME.ADD_CHANGE_POINTS:
       return { ...state, changePoints: [...state.changePoints, ...action.payload] };
+    case API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM:
+      const changePoints = state.changePoints.map((cp) => {
+        const cpHistogram = action.payload.find(
+          (h) => h.fieldName === cp.fieldName && h.fieldValue && cp.fieldName
+        );
+        if (cpHistogram) {
+          cp.histogram = cpHistogram.histogram;
+        }
+        return cp;
+      });
+      return { ...state, changePoints };
     case API_ACTION_NAME.RESET:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:

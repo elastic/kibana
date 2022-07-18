@@ -54,6 +54,7 @@ export interface ChangePoint extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
+  histogram?: HistogramItem[];
 }
 export interface ChangePointHistogram extends FieldValuePair {
   histogram: HistogramItem[];
