@@ -14,9 +14,9 @@ import {
 
 export interface ElasticsearchIndex {
   health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
+
   name: IndexName;
-  uuid?: Uuid;
+  status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
       count: number;
@@ -26,4 +26,5 @@ export interface ElasticsearchIndex {
       size_in_bytes: string;
     };
   };
+  uuid?: Uuid;
 }
