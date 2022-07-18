@@ -17,9 +17,9 @@ const stringOrArrayOfStrings = schema.oneOf([schema.string(), schema.arrayOf(sch
 const paramsSchema = schema.object({
   kind: schema.maybe(stringOrArrayOfStrings),
   name: schema.maybe(stringOrArrayOfStrings),
-  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   mimeType: schema.maybe(stringOrArrayOfStrings),
   extension: schema.maybe(stringOrArrayOfStrings),
+  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 const querySchema = schema.object({
