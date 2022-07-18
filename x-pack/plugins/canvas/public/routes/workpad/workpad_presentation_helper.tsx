@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { FC, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { LibStrings } from '../../../i18n';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
 import { setDocTitle } from '../../lib/doc_title';
 import { getWorkpad } from '../../state/selectors/workpad';
