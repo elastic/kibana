@@ -30,7 +30,7 @@ function splitAlertId(alertId: string): { entityName: string; boundaryName: stri
   };
 }
 
-export function getAlertContext({
+function getAlertContext({
   entityName,
   containment,
   shapesIdsNamesMap,
@@ -58,13 +58,28 @@ export function getAlertContext({
   return context;
 }
 
-export function getRecoveredAlertContext(
-  alertId: string,
-  activeEntities: Map<string, GeoContainmentInstanceState[]>,
-  inactiveEntities: Map<string, GeoContainmentInstanceState[]>,
-  shapesIdsNamesMap: Record<string, unknown>,
-  windowEnd: Date
-): GeoContainmentInstanceContext | null {
+export function getContainedAlertContext(args: {
+  entityName: string;
+  containment: GeoContainmentInstanceState;
+  shapesIdsNamesMap: Record<string, unknown>;
+  windowEnd: Date;
+}): GeoContainmentInstanceContext {
+  return getAlertContext({ ...args, isRecovered: false });
+}
+
+export function getRecoveredAlertContext({
+  alertId,
+  activeEntities,
+  inactiveEntities,
+  shapesIdsNamesMap,
+  windowEnd,
+}: {
+  alertId: string;
+  activeEntities: Map<string, GeoContainmentInstanceState[]>;
+  inactiveEntities: Map<string, GeoContainmentInstanceState[]>;
+  shapesIdsNamesMap: Record<string, unknown>;
+  windowEnd: Date;
+}): GeoContainmentInstanceContext | null {
   const { entityName } = splitAlertId(alertId);
 
   // recovered alert's latest entity location is either:

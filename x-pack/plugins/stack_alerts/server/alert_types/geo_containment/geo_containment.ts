@@ -19,7 +19,7 @@ import {
 } from './alert_type';
 
 import { GEO_CONTAINMENT_ID } from './alert_type';
-import { getAlertId, getAlertContext, getRecoveredAlertContext } from './get_context';
+import { getAlertId, getContainedAlertContext, getRecoveredAlertContext } from './get_context';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
@@ -106,12 +106,11 @@ export function getEntitiesAndGenerateAlerts(
     // Generate alerts
     containtments.forEach((containment) => {
       if (containment.shapeLocationId !== OTHER_CATEGORY) {
-        const context = getAlertContext({
+        const context = getContainedAlertContext({
           entityName,
           containment,
           shapesIdsNamesMap,
           windowEnd,
-          isRecovered: false,
         });
         alertFactory
           .create(getAlertId(entityName, context.containingBoundaryName))
@@ -204,13 +203,13 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     for (const recoveredAlert of getRecoveredAlerts()) {
       const recoveredAlertId = recoveredAlert.getId();
       try {
-        const context = getRecoveredAlertContext(
-          recoveredAlertId,
+        const context = getRecoveredAlertContext({
+          alertId: recoveredAlertId,
           activeEntities,
           inactiveEntities,
           shapesIdsNamesMap,
-          windowEnd
-        );
+          windowEnd,
+        });
         if (context) {
           recoveredAlert.setContext(context);
         }
