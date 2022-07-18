@@ -16,7 +16,7 @@ export type Action =
       action: 'uploading';
       payload?: undefined;
     }
-  | { action: 'uploaded'; payload: { content_ref: string; size: number } }
+  | { action: 'uploaded'; payload: { size: number } }
   | { action: 'uploadError'; payload?: undefined }
   | { action: 'updateFile'; payload: Partial<UpdatableFileAttributes> };
 
@@ -27,8 +27,8 @@ export function createDefaultFileAttributes(): Pick<
   const dateString = new Date().toISOString();
   return {
     created: dateString,
-    Updated: dateString,
     Status: 'AWAITING_UPLOAD',
+    Updated: dateString,
   };
 }
 

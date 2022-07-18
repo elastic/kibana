@@ -16,6 +16,18 @@ interface UploadOptions {
    * as it is being uploaded.
    */
   transforms?: Transform[];
+
+  /**
+   * The ID to use to derive blob IDs.
+   *
+   * If "mycoolid" is provided. The blob IDs will look like:
+   * "mycoolid.0"
+   * "mycoolid.1"
+   * "mycoolid.2"
+   *
+   * And so on.
+   */
+  id?: string;
 }
 
 /**
