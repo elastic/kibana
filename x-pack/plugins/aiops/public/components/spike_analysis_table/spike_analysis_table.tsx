@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChangePoint } from '../../../common/types';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { ImpactBar } from './impact_bar';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 

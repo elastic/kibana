@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '../types';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
 
