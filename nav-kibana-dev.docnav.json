@@ -489,7 +489,7 @@
               "id": "kibDevDocsOpsEslintPluginImports"
             },
             {
-              "id": "kibDevDocsOpsEslintPluginPackages"
+              "id": "kibDevDocsOpsEslintPluginDisable"
             }
           ]
         },
