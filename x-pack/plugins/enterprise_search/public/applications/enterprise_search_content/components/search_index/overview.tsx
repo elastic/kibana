@@ -11,14 +11,17 @@ import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
-  const { indexData, isSuccess } = useValues(OverviewLogic);
+  const { indexData } = useValues(OverviewLogic);
 
   const isCrawler = typeof indexData?.crawler !== 'undefined';
   const isConnector = typeof indexData?.connector !== 'undefined';
@@ -27,17 +30,26 @@ export const SearchIndexOverview: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      {isSuccess && (
-        <>
-          <EuiSpacer />
-          <TotalStats
-            documentCount={indexData.index.total.docs.count ?? 0}
-            indexHealth={indexData.index.health ?? ''}
-            ingestionType={
-              indexData.connector ? 'Connector' : indexData.crawler ? 'Crawler' : 'API'
-            }
-          />
-        </>
+      {isCrawler ? (
+        <CrawlerTotalStats />
+      ) : (
+        <TotalStats
+          ingestionType={
+            isConnector
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
+                  {
+                    defaultMessage: 'Connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
+                  {
+                    defaultMessage: 'API',
+                  }
+                )
+          }
+        />
       )}
       {isApi && <GenerateApiKeyPanel />}
       {isCrawler && (
