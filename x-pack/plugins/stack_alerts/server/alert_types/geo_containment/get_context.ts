@@ -46,7 +46,8 @@ export function getAlertContext(
   };
   if (containment.shapeLocationId !== OTHER_CATEGORY) {
     context.containingBoundaryId = containment.shapeLocationId;
-    context.containingBoundaryName = shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId;
+    context.containingBoundaryName =
+      shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId;
   }
   return context;
 }
