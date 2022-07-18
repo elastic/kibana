@@ -11,14 +11,18 @@ import type { BulkAction } from '../../../../../../../common/detection_engine/sc
 import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
 import type { DryRunResult } from './use_bulk_actions_dry_run';
 
-// at this point we support only 2 actions for confirmation modal
-export type EligibleBulkAction = BulkAction.export | BulkAction.edit;
+/**
+ * Only 2 bulk actions are supported for for confirmation dry run modal:
+ * * export
+ * * edit
+ */
+export type BulkActionForConfirmation = BulkAction.export | BulkAction.edit;
 
 /**
  * hook that controls bulk actions confirmation modal window and its content
  */
 export const useBulkActionsConfirmation = () => {
-  const [bulkAction, setBulkAction] = useState<EligibleBulkAction>();
+  const [bulkAction, setBulkAction] = useState<BulkActionForConfirmation>();
   const [dryRunResult, setDryRunResult] = useState<DryRunResult>();
   const [isBulkActionConfirmationVisible, showModal, hideModal] = useBoolState();
 
@@ -28,7 +32,7 @@ export const useBulkActionsConfirmation = () => {
   });
 
   const showBulkActionConfirmation = useCallback(
-    async (result: DryRunResult | undefined, action: EligibleBulkAction) => {
+    async (result: DryRunResult | undefined, action: BulkActionForConfirmation) => {
       setBulkAction(action);
       setDryRunResult(result);
 

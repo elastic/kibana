@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -313,7 +315,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
         )}
-        {isBulkActionConfirmationVisible && (
+        {isBulkActionConfirmationVisible && bulkAction && (
           <BulkActionDryRunConfirmation
             bulkAction={bulkAction}
             result={bulkActionsDryRunResult}

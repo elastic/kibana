@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DryRunResult } from './use_bulk_actions_dry_run';
-import type { EligibleBulkAction } from './use_bulk_actions_confirmation';
+import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -100,7 +100,7 @@ const BulkExportRuleErrorItem = ({
 
 interface BulkActionRuleErrorsListProps {
   ruleErrors: DryRunResult['ruleErrors'];
-  bulkAction: EligibleBulkAction;
+  bulkAction: BulkActionForConfirmation;
 }
 
 const BulkActionRuleErrorsListComponent = ({

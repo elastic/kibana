@@ -9,12 +9,15 @@ import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../translations';
-import type { EligibleBulkAction } from './use_bulk_actions_confirmation';
+import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
 import type { DryRunResult } from './use_bulk_actions_dry_run';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
-const getActionRejectedTitle = (bulkAction: EligibleBulkAction, failedRulesCount: number) => {
+const getActionRejectedTitle = (
+  bulkAction: BulkActionForConfirmation,
+  failedRulesCount: number
+) => {
   switch (bulkAction) {
     case BulkAction.edit:
       return i18n.BULK_EDIT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
@@ -23,7 +26,10 @@ const getActionRejectedTitle = (bulkAction: EligibleBulkAction, failedRulesCount
   }
 };
 
-const getActionConfirmLabel = (bulkAction: EligibleBulkAction, succeededRulesCount: number) => {
+const getActionConfirmLabel = (
+  bulkAction: BulkActionForConfirmation,
+  succeededRulesCount: number
+) => {
   switch (bulkAction) {
     case BulkAction.edit:
       return i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeededRulesCount);
@@ -33,7 +39,7 @@ const getActionConfirmLabel = (bulkAction: EligibleBulkAction, succeededRulesCou
 };
 
 interface BulkEditDryRunConfirmationProps {
-  bulkAction: EligibleBulkAction;
+  bulkAction: BulkActionForConfirmation;
   result?: DryRunResult;
   onCancel: () => void;
   onConfirm: () => void;

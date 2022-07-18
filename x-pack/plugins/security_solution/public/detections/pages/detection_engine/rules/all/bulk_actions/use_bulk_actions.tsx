@@ -30,6 +30,7 @@ import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { transformExportDetailsToDryRunResult } from './use_bulk_actions_dry_run';
 import type { ExecuteBulkActionsDryRun, DryRunResult } from './use_bulk_actions_dry_run';
+import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 import { prepareSearchParams } from './utils/prepare_search_params';
@@ -47,7 +48,7 @@ interface UseBulkActionsArgs {
   confirmDeletion: () => Promise<boolean>;
   showBulkActionConfirmation: (
     result: DryRunResult | undefined,
-    action: BulkAction
+    action: BulkActionForConfirmation
   ) => Promise<boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
