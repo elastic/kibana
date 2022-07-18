@@ -177,15 +177,10 @@ async function upgradeBatch(
     source_uri: options.sourceUri,
   };
 
-  const rollingUpgradeOptions = options?.upgradeDurationSeconds
-    ? {
-        start_time: options.startTime ?? now,
-        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment(options.startTime ?? now)
-          .add(options?.upgradeDurationSeconds, 'seconds')
-          .toISOString(),
-      }
-    : {};
+  const rollingUpgradeOptions = getRollingUpgradeOptions(
+    options?.startTime,
+    options.upgradeDurationSeconds
+  );
 
   await createAgentAction(esClient, {
     created_at: now,
@@ -351,3 +346,30 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
     }, {} as { [k: string]: CurrentUpgrade })
   );
 }
+
+const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+  const now = new Date().toISOString();
+  // Perform a rolling upgrade
+  if (upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime ?? now)
+        .add(upgradeDurationSeconds, 'seconds')
+        .toISOString(),
+    };
+  }
+  // Schedule without rolling upgrade (Immediately after start_time)
+  if (startTime && !upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime)
+        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
+        .toISOString(),
+    };
+  } else {
+    // Regular bulk upgrade (non scheduled, non rolling)
+    return {};
+  }
+};

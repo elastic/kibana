@@ -48,8 +48,26 @@ export const useStyles = () => {
       height: '500px',
     };
 
-    const percentageWidgets: CSSObject = {
-      marginBottom: size.l,
+    const widgetsBottomSpacing: CSSObject = {
+      marginBottom: size.m,
+    };
+
+    const noBottomSpacing: CSSObject = {
+      marginBottom: 0,
+    };
+
+    const countWidgetsGroup: CSSObject = {
+      ...widgetsBottomSpacing,
+      flexWrap: 'wrap',
+    };
+
+    const leftWidgetsGroup: CSSObject = {
+      ...noBottomSpacing,
+      minWidth: `calc(70% - ${size.xxxl})`,
+    };
+
+    const rightWidgetsGroup: CSSObject = {
+      minWidth: '30%',
     };
 
     const percentageChartTitle: CSSObject = {
@@ -58,16 +76,10 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
-    const countWidgets: CSSObject = {
-      marginBottom: size.l,
-    };
-
     const widgetHolder: CSSObject = {
       position: 'relative',
       width: '332px',
       height: '235px',
-      padding: size.base,
-      border: border.thin,
       borderRadius: border.radius.medium,
       fontWeight: font.weight.bold,
       fontSize: size.m,
@@ -80,9 +92,12 @@ export const useStyles = () => {
       updatedAt,
       widgetBadge,
       treeViewContainer,
-      percentageWidgets,
+      countWidgetsGroup,
+      leftWidgetsGroup,
+      rightWidgetsGroup,
+      widgetsBottomSpacing,
       percentageChartTitle,
-      countWidgets,
+      noBottomSpacing,
       widgetHolder,
     };
   }, [euiTheme]);
