@@ -28,7 +28,7 @@ function cleanUp() {
 }
 let kibanaVersion: string;
 describe('Fleet add agent flyout', () => {
-  describe('Create policies', () => {
+  describe('With a Fleet Server already setup', () => {
     beforeEach(() => {
       cleanUp();
       let policyId: string;
