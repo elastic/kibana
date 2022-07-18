@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
@@ -36,11 +36,11 @@ import {
 interface ResultSettingsActions {
   initializeResultFields(
     serverResultFields: ServerFieldResultSettingObject,
-    schema: Schema,
+    schema: AdvancedSchema,
     schemaConflicts?: SchemaConflicts
   ): {
     resultFields: FieldResultSettingObject;
-    schema: Schema;
+    schema: AdvancedSchema;
     schemaConflicts: SchemaConflicts;
   };
   clearAllFields(): void;
@@ -68,7 +68,7 @@ interface ResultSettingsValues {
   saving: boolean;
   resultFields: FieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
-  schema: Schema;
+  schema: AdvancedSchema;
   schemaConflicts: SchemaConflicts;
   // Selectors
   textResultFields: FieldResultSettingObject;
@@ -172,22 +172,25 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
   selectors: ({ selectors }) => ({
     textResultFields: [
       () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { textResultFields } = splitResultFields(resultFields, schema);
         return textResultFields;
       },
     ],
     nonTextResultFields: [
       () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { nonTextResultFields } = splitResultFields(resultFields, schema);
         return nonTextResultFields;
       },
     ],
     serverResultFields: [
-      () => [selectors.resultFields],
-      (resultFields: FieldResultSettingObject) => {
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
+          if (!!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
+            return serverResultFields;
+          }
           return {
             ...serverResultFields,
             [fieldName]: convertToServerFieldResultSetting(settings as FieldResultSetting),
@@ -222,11 +225,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
     queryPerformanceScore: [
       () => [selectors.serverResultFields, selectors.schema],
-      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+      (serverResultFields: ServerFieldResultSettingObject, schema: AdvancedSchema) => {
         return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
           let newAcc = acc;
           if (resultField.raw) {
-            if (schema[fieldName] !== 'text') {
+            if (schema[fieldName].type !== SchemaType.Text) {
               newAcc += 0.2;
             } else if (
               typeof resultField.raw === 'object' &&
@@ -301,7 +304,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           schemaConflicts,
           searchSettings: { result_fields: serverFieldResultSettings },
         } = await http.get<{
-          schema: Record<string, SchemaType>;
+          schema: AdvancedSchema;
           schemaConflicts?: SchemaConflicts;
           searchSettings: { result_fields: Record<string, ServerFieldResultSetting> };
         }>(url);

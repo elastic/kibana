@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
@@ -77,10 +77,10 @@ describe('ResultSettingsLogic', () => {
         foo: { raw: { size: 5 } },
         bar: { raw: { size: 5 } },
       };
-      const schema: Schema = {
-        foo: SchemaType.Text,
-        bar: SchemaType.Number,
-        baz: SchemaType.Text,
+      const schema: AdvancedSchema = {
+        foo: { type: SchemaType.Text, capabilities: {} },
+        bar: { type: SchemaType.Number, capabilities: {} },
+        baz: { type: SchemaType.Text, capabilities: {} },
       };
       const schemaConflicts: SchemaConflicts = {
         foo: {
@@ -213,10 +213,16 @@ describe('ResultSettingsLogic', () => {
           foo: { raw: true, snippet: true, snippetFallback: true },
           bar: { raw: true, snippet: true, snippetFallback: true },
         },
+        schema: {
+          foo: { type: SchemaType.Text, capabilities: {} },
+          bar: { type: SchemaType.Number, capabilities: {} },
+        }
       };
 
       it('should update settings for an individual field', () => {
-        mount(initialValues);
+        mount({
+          ...initialValues,
+        });
 
         ResultSettingsLogic.actions.updateField('foo', {
           raw: true,
@@ -226,6 +232,7 @@ describe('ResultSettingsLogic', () => {
 
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
+          ...initialValues,
           // the settings for foo are updated below for any *ResultFields state in which they appear
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
@@ -272,9 +279,9 @@ describe('ResultSettingsLogic', () => {
       it('should return only resultFields that have a type of "text" in the engine schema', () => {
         mount({
           schema: {
-            foo: 'text',
-            bar: 'number',
-            baz: 'text',
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
           },
           resultFields: {
             foo: { raw: true, rawSize: 5 },
@@ -294,9 +301,9 @@ describe('ResultSettingsLogic', () => {
       it('should return only resultFields that have a type other than "text" in the engine schema', () => {
         mount({
           schema: {
-            foo: 'text',
-            bar: 'number',
-            baz: 'text',
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Number, capabilities: {} },
+            baz: { type: SchemaType.Text, capabilities: {} },
           },
           resultFields: {
             foo: { raw: true, rawSize: 5 },
@@ -438,7 +445,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set (but no size) as worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -446,7 +453,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 251 } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -454,7 +461,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 250 } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
         });
@@ -462,7 +469,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with a snippet set as worth 2', () => {
           mount({
             resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
         });
@@ -470,7 +477,7 @@ describe('ResultSettingsLogic', () => {
         it('will sum raw and snippet values if both are set', () => {
           mount({
             resultFields: { foo: { snippet: true, raw: true } },
-            schema: { foo: SchemaType.Text },
+            schema: { foo: { type: SchemaType.Text, capabilities: {} } },
           });
           // 1.5 (raw) + 2 (snippet) = 3.5
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
@@ -479,7 +486,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a non-text value with raw set as 0.2', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: SchemaType.Number },
+            schema: { foo: { type: SchemaType.Number, capabilities: {} } },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
         });
@@ -492,9 +499,9 @@ describe('ResultSettingsLogic', () => {
               baz: { raw: true },
             },
             schema: {
-              foo: SchemaType.Text,
-              bar: SchemaType.Text,
-              baz: SchemaType.Number,
+              foo: { type: SchemaType.Text, capabilities: {} },
+              bar: { type: SchemaType.Number, capabilities: {} },
+              baz: { type: SchemaType.Text, capabilities: {} },
             },
           });
           // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
@@ -522,8 +529,8 @@ describe('ResultSettingsLogic', () => {
       },
     };
     const schema = {
-      foo: 'text',
-      bar: 'number',
+      foo: { type: SchemaType.Text, capabilities: {} },
+      bar: { type: SchemaType.Number, capabilities: {} },
     };
     const schemaConflicts = {
       baz: {
