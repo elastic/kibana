@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Client, { ClientStats, FlushOptions } from 'elastic-apm-http-client';
+import Client from 'elastic-apm-http-client';
 import Util from 'util';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
@@ -42,7 +42,15 @@ interface ClientState {
   sendSpan: (s: Span) => Promise<void>;
   sendTransaction: (s: Transaction) => Promise<void>;
   sendError: (e: Error) => Promise<void>;
-  flush: (o: FlushOptions) => Promise<void>;
+  flush: (o: any) => Promise<void>;
+}
+interface ClientStats {
+  numEvents: number;
+  numEventsDropped: number;
+  numEventsEnqueued: number;
+  numEventsSent: number;
+  slowWriteBatch: number;
+  backoffReconnectCount: number;
 }
 export class ApmSynthtraceApmClient {
   private readonly _serviceClients: Map<string, ClientState> = new Map<string, ClientState>();

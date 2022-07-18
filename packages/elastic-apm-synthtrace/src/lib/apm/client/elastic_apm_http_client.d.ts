@@ -9,26 +9,25 @@
 // eslint-disable-next-line max-classes-per-file
 declare module 'elastic-apm-http-client' {
   import EventEmitter from 'events';
-  import { Span } from './intake_v2/span';
-  import { Transaction } from './intake_v2/transaction';
-  import { Error } from './intake_v2/error';
-  import { Metadata } from './intake_v2/metadata';
 
   class Client extends EventEmitter {
     constructor(opts: ClientOptions);
 
     sent: number;
-    public setExtraMetadata(metadata: Metadata): void;
+    public setExtraMetadata(metadata: import('././intake_v2/metadata').Metadata): void;
 
-    public sendSpan(span: Span, callback: () => void): void;
-    public sendTransaction(transaction: Transaction, callback: () => void): void;
-    public sendError(error: Error, callback: () => void): void;
+    public sendSpan(span: import('././intake_v2/span').Span, callback: () => void): void;
+    public sendTransaction(
+      transaction: import('././intake_v2/transaction').Transaction,
+      callback: () => void
+    ): void;
+    public sendError(error: import('././intake_v2/error').Error, callback: () => void): void;
 
     public flush(opts: FlushOptions, callback: () => void): void;
     public destroy(): void;
     public _getStats(): ClientStats;
   }
-  export interface ClientStats {
+  interface ClientStats {
     numEvents: number;
     numEventsDropped: number;
     numEventsEnqueued: number;
@@ -36,7 +35,7 @@ declare module 'elastic-apm-http-client' {
     slowWriteBatch: number;
     backoffReconnectCount: number;
   }
-  export interface ClientOptions {
+  interface ClientOptions {
     /** (required) The HTTP user agent that your module should identify itself as */
     userAgent: string;
     /** The Elastic APM intake API secret token */
@@ -79,6 +78,6 @@ declare module 'elastic-apm-http-client' {
     /** An object of key/value pairs to use to label all data reported (only applied when using APM Server 7.1+) */
     globalLabels?: Record<string, string>;
   }
-  export class FlushOptions {}
+  class FlushOptions {}
   export = Client;
 }
