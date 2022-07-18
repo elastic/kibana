@@ -2944,10 +2944,23 @@ function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; mut
   // Now clear any scheduled snoozes that are currently active and never recur
   const activeSnoozes = getActiveSnoozes(attributes);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const recurringSnoozesToSkip: string[] = [];
   const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
     if (!activeSnoozeIds.includes(s.id!)) return true;
     // Check if this is a recurring snooze, and return true if so
-    if (s.rRule.freq && s.rRule.count !== 1) return true;
+    if (s.rRule.freq && s.rRule.count !== 1) {
+      recurringSnoozesToSkip.push(s.id!);
+      return true;
+    }
   });
-  return clearedNonRecurringActiveSnoozes;
+  const clearedSnoozesAndSkippedRecurringSnoozes = clearedNonRecurringActiveSnoozes.map((s) => {
+    if (s.id && !recurringSnoozesToSkip.includes(s.id)) return s;
+    const currentRecurrence = activeSnoozes?.find((a) => a.id === s.id)?.lastOccurrence;
+    if (!currentRecurrence) return s;
+    return {
+      ...s,
+      skipRecurrences: (s.skipRecurrences ?? []).concat(currentRecurrence.toISOString()),
+    };
+  });
+  return clearedSnoozesAndSkippedRecurringSnoozes;
 }
