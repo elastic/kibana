@@ -32,6 +32,7 @@ export const PROJECTS = [
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('src/core/tsconfig.json'),
   createProject('.buildkite/tsconfig.json'),
+  createProject('kbn_pm/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
