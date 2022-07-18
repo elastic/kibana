@@ -47,7 +47,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
     }
     id="headerSpacesMenuContent"
     navigateToApp={[MockFunction]}
-    onManageSpacesClick={[Function]}
+    toggleSpaceSelector={[Function]}
   />
 </EuiPopover>
 `;
