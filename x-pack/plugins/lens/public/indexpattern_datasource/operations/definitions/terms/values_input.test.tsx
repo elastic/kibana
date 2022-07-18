@@ -39,16 +39,16 @@ describe('Values', () => {
     expect(onChangeSpy.mock.calls[0][0]).toBe(7);
   });
 
-  it('should not run onChange function on update when value is out of 1-1000 range', () => {
+  it('should not run onChange function on update when value is out of 1-10000 range', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
     act(() => {
-      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '1007' } });
+      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '10007' } });
     });
     instance.update();
-    expect(instance.find(EuiFieldNumber).prop('value')).toEqual('1007');
+    expect(instance.find(EuiFieldNumber).prop('value')).toEqual('10007');
     expect(onChangeSpy.mock.calls.length).toBe(1);
-    expect(onChangeSpy.mock.calls[0][0]).toBe(1000);
+    expect(onChangeSpy.mock.calls[0][0]).toBe(10000);
   });
 
   it('should show an error message when the value is out of bounds', () => {
@@ -60,7 +60,7 @@ describe('Values', () => {
     );
 
     act(() => {
-      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '1007' } });
+      instance.find(EuiFieldNumber).simulate('change', { currentTarget: { value: '10007' } });
     });
     instance.update();
 
@@ -91,10 +91,10 @@ describe('Values', () => {
     expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
     expect(instance.find(EuiFieldNumber).prop('value')).toBe('1');
 
-    changeAndBlur('5000');
+    changeAndBlur('50000');
 
     expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
-    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1000');
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('10000');
 
     changeAndBlur('');
     // as we're not handling the onChange state, it fallbacks to the value prop
