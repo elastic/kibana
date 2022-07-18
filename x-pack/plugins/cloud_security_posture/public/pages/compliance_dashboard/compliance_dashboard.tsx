@@ -57,7 +57,7 @@ const NoData = ({ onClick }: { onClick: () => void }) => (
 
 export const ComplianceDashboard = () => {
   const getInfo = useCspSetupStatusApi();
-  const isFindingsIndexApplicable = getInfo.data?.latestFindingsIndexStatus === 'applicable';
+  const isFindingsIndexApplicable = getInfo.data?.status === 'indexed';
   const getDashboardData = useComplianceDashboardDataApi({
     enabled: isFindingsIndexApplicable,
   });

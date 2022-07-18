@@ -8,7 +8,7 @@
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineUpdateRulesConfigRoute } from './configuration/update_rules_configuration';
-import { defineGetCspSetupStatusRoute } from './setup_status/setup_status';
+import { defineGetCspSetupStatusRoute } from './status/status';
 import { defineEsPitRoute } from './es_pit/es_pit';
 import { CspAppContext } from '../plugin';
 import { CspRouter } from '../types';
