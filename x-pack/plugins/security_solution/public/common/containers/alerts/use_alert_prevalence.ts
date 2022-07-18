@@ -92,7 +92,9 @@ const generateAlertPrevalenceQuery = (
   includeAlertIds: boolean
 ) => {
   // if we don't want the alert ids included, we set size to 0 to reduce the response payload
-  const size = includeAlertIds ? {} : { size: 0 };
+  const size = includeAlertIds ? { size: DEFAULT_MAX_TABLE_QUERY_SIZE } : { size: 0 };
+  // in that case, we also want to make sure we're sorting the results by timestamp
+  const sort = includeAlertIds ? { sort: { '@timestamp': 'desc' } } : {};
 
   const actualValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
   let query;
@@ -138,6 +140,7 @@ const generateAlertPrevalenceQuery = (
 
   return {
     ...size,
+    ...sort,
     _source: false,
     aggs: {
       [ALERT_PREVALENCE_AGG]: {

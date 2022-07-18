@@ -7,6 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { noop } from 'lodash/fp';
+import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiIcon, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
@@ -17,14 +19,17 @@ interface Props {
   errorText: string;
   text: string;
   renderContent: () => ReactNode;
+  onToggle?: EuiAccordionProps['onToggle'];
 }
 
 export const InsightAccordion = React.memo<Props>(
-  ({ prefix, loading, loadingText, error, errorText, text, renderContent }) => {
+  ({ prefix, loading, loadingText, error, errorText, text, renderContent, onToggle = noop }) => {
     const accordionId = useGeneratedHtmlId({ prefix });
 
     if (loading) {
-      return <EuiAccordion id={accordionId} buttonContent={loadingText} isLoading />;
+      return (
+        <EuiAccordion id={accordionId} buttonContent={loadingText} onToggle={onToggle} isLoading />
+      );
     } else if (error) {
       return (
         <EuiAccordion
@@ -35,11 +40,12 @@ export const InsightAccordion = React.memo<Props>(
               {errorText}
             </span>
           }
+          onToggle={onToggle}
         />
       );
     } else if (renderContent) {
       return (
-        <EuiAccordion id={accordionId} buttonContent={text} paddingSize="l">
+        <EuiAccordion id={accordionId} buttonContent={text} onToggle={onToggle} paddingSize="l">
           {renderContent()}
         </EuiAccordion>
       );

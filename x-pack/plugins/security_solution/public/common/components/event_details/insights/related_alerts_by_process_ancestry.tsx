@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { DataProvider } from '../../../../../common/types';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
@@ -24,28 +25,127 @@ interface Props {
   timelineId?: string;
 }
 
+interface Cache {
+  alertIds: string[];
+}
+
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId, timelineId }) => {
-  const { loading, error, count, alertIds } = useAlertPrevalenceFromProcessTree({
+  const [showContent, setShowContent] = useState(false);
+  const [cache, setCache] = useState<Partial<Cache>>({});
+
+  const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
+
+  const renderContent = useCallback(() => {
+    if (!showContent) {
+      return null;
+    } else if (cache.alertIds) {
+      <ActualRelatedAlertsByProcessAncestry
+        data={data}
+        eventId={eventId}
+        timelineId={timelineId}
+        alertIds={cache.alertIds}
+      />;
+    }
+    return (
+      <FetchAndShowRelatedAlertsByProcessAncestry
+        data={data}
+        eventId={eventId}
+        timelineId={timelineId}
+        onCacheLoad={setCache}
+      />
+    );
+  }, [showContent, cache, data, eventId, timelineId]);
+
+  return (
+    <InsightAccordion
+      prefix="RelatedAlertsByProcessAncestry"
+      loading={false}
+      loadingText=""
+      error={false}
+      errorText=""
+      text={
+        cache.alertIds
+          ? i18n.translate(
+              'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_with_count',
+              {
+                defaultMessage:
+                  '{count} {count, plural, =1 {alert} other {alerts}} by process ancestry',
+                values: { count: cache.alertIds.length },
+              }
+            )
+          : i18n.translate(
+              'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_found',
+              {
+                defaultMessage: 'Related alerts by process ancestry',
+              }
+            )
+      }
+      renderContent={renderContent}
+      onToggle={onToggle}
+    />
+  );
+});
+
+RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
+
+const FetchAndShowRelatedAlertsByProcessAncestry = React.memo<
+  Props & { onCacheLoad: (cache: Cache) => void }
+>(({ data, eventId, timelineId, onCacheLoad }) => {
+  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     parentEntityId: data.values,
     timelineId: timelineId ?? '',
     signalIndexName: null,
   });
 
-  const dataProviders = useMemo(() => {
-    if (alertIds && alertIds.length) {
-      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-        result.push(getDataProvider('event.id', id, alertId));
-        return result;
-      }, []);
+  useEffect(() => {
+    if (alertIds) {
+      onCacheLoad({ alertIds });
     }
-    return null;
-  }, [alertIds, eventId, timelineId]);
+  }, [alertIds, onCacheLoad]);
 
-  const renderContent = useCallback(() => {
-    if (!alertIds || !dataProviders) {
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  } else if (error) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_error"
+        defaultMessage="Failed to fetch alerts."
+      />
+    );
+  } else if (alertIds) {
+    return (
+      <ActualRelatedAlertsByProcessAncestry
+        alertIds={alertIds}
+        data={data}
+        eventId={eventId}
+        timelineId={timelineId}
+      />
+    );
+  }
+
+  return null;
+});
+
+FetchAndShowRelatedAlertsByProcessAncestry.displayName =
+  'FetchAndShowRelatedAlertsByProcessAncestry';
+
+const ActualRelatedAlertsByProcessAncestry = React.memo<Props & Cache>(
+  ({ alertIds, eventId, timelineId }) => {
+    const dataProviders = useMemo(() => {
+      if (alertIds && alertIds.length) {
+        return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+          const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
+          result.push(getDataProvider('_id', id, alertId));
+          return result;
+        }, []);
+      }
+      return null;
+    }, [alertIds, eventId, timelineId]);
+
+    if (!dataProviders) {
       return null;
     }
+
     return (
       <>
         <SimpleAlertTable alertIds={alertIds} />
@@ -55,38 +155,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
         </InvestigateInTimelineButton>
       </>
     );
-  }, [alertIds, dataProviders]);
+  }
+);
 
-  return (
-    <InsightAccordion
-      prefix="RelatedAlertsByProcessAncestry"
-      loading={loading}
-      loadingText={i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_loading',
-        { defaultMessage: 'Loading related alerts by ancestry' }
-      )}
-      error={error}
-      errorText={i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_error',
-        {
-          defaultMessage: 'Failed to load related alerts by ancestry',
-        }
-      )}
-      text={
-        alertIds
-          ? i18n.translate(
-              'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_found',
-              {
-                defaultMessage:
-                  '{count} {count, plural, =1 {alert} other {alerts}} related by ancestry',
-                values: { count },
-              }
-            )
-          : ''
-      }
-      renderContent={renderContent}
-    />
-  );
-});
-
-RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
+ActualRelatedAlertsByProcessAncestry.displayName = 'ActualRelatedAlertsByProcessAncestry';

@@ -81,15 +81,18 @@ export const useAlertPrevalenceFromProcessTree = ({
   // const globalTime = useGlobalTime();
 
   // const { to, from } = timelineId === TimelineId.active ? timelineTime : globalTime;
-  const [{ loading, alertIds }, setResult] = useState({ loading: true, alertIds: [] as string[] });
+  const [{ loading, alertIds }, setResult] = useState<{ loading: boolean; alertIds?: string[] }>({
+    loading: true,
+    alertIds: undefined,
+  });
   useEffect(() => {
     const t = setTimeout(() => {
       setResult({
         loading: false,
         alertIds: [
-          '87f4dc72-3dd6-4cc3-bcd3-6faf42a21667',
-          '7619c9a5-744b-406c-b0f7-ae8b683e8c66',
-          '42db759c-39b5-4218-92cb-3629ddedf7e5',
+          '489ef2e50e7bb6366c5eaa1b17873e56fda738134685ca54b997a2546834f08c',
+          '4b8e7111166034f94f62a009fa22ad42bfbb8edc86cda03055d14a9f2dd21f48',
+          '0347030aa3593566a7fcd77769c798efaf02f84a3196fd586b4700c0c9ae5872',
         ],
       });
     }, Math.random() * 1500 + 500);
