@@ -40,7 +40,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   refreshRef,
   timelineIntegration,
 }) => {
-  const { basePath, userCanCrud } = useCasesContext();
+  const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
   useReadonlyHeader();
@@ -58,7 +58,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCreateCasePath(basePath)}>
-          {userCanCrud ? (
+          {permissions.all ? (
             <CreateCase
               onSuccess={onCreateCaseSuccess}
               onCancel={navigateToAllCases}
@@ -70,7 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {userCanCrud ? (
+          {permissions.all ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />

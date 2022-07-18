@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IconColor } from '@elastic/eui';
+import type { IconColor } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';

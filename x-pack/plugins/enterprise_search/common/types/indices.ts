@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import {
+  HealthStatus,
+  IndexName,
+  IndicesStatsIndexMetadataState,
+  Uuid,
+} from '@elastic/elasticsearch/lib/api/types';
+
 export interface ElasticsearchIndex {
-  health?: string;
-  status?: string;
-  name: string;
-  uuid?: string;
+  health?: HealthStatus;
+
+  name: IndexName;
+  status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
       count: number;
@@ -19,4 +26,5 @@ export interface ElasticsearchIndex {
       size_in_bytes: string;
     };
   };
+  uuid?: Uuid;
 }

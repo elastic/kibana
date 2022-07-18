@@ -6,7 +6,9 @@
  */
 
 import { Observable } from 'rxjs';
+import { useMemo } from 'react';
 import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 import type { Dictionary } from '../../../../common/types/common';
 import type {
@@ -396,3 +398,17 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 });
+
+export type JobsApiService = ReturnType<typeof jobsApiProvider>;
+
+/**
+ * Hooks for accessing {@link JobsApiService} in React components.
+ */
+export function useJobsApiService(): JobsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => jobsApiProvider(httpService), [httpService]);
+}

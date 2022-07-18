@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { AppContextTestRender } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../mocks';
-import { ArtifactListPageProps } from './artifact_list_page';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import type { trustedAppsAllHttpMocks } from '../../mocks';
+import type { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  getArtifactListPageRenderingSetup,
-  getDeferred,
-  ArtifactListPageRenderingSetup,
-} from './mocks';
+import type { ArtifactListPageRenderingSetup } from './mocks';
+import { getArtifactListPageRenderingSetup, getDeferred } from './mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
-describe('When using the ArtifactListPage component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/129837
+describe.skip('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;

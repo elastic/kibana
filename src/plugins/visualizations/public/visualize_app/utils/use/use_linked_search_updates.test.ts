@@ -50,6 +50,7 @@ describe('useLinkedSearchUpdates', () => {
       },
       title: 'savedSearch',
     } as unknown as SavedVisInstance['savedSearch'];
+    const searchSource = savedVisInstance.savedSearch?.searchSource;
 
     renderHook(() =>
       useLinkedSearchUpdates(mockServices, eventEmitter, mockAppState, savedVisInstance)
@@ -57,8 +58,9 @@ describe('useLinkedSearchUpdates', () => {
 
     eventEmitter.emit('unlinkFromSavedSearch');
 
-    expect(savedVisInstance.savedSearch?.searchSource?.getParent).toHaveBeenCalled();
-    expect(savedVisInstance.savedSearch?.searchSource?.getField).toHaveBeenCalledWith('index');
+    expect(searchSource?.getParent).toHaveBeenCalled();
+    expect(searchSource?.getField).toHaveBeenCalledWith('index');
+    expect(savedVisInstance.savedSearch).toBeUndefined();
     expect(mockAppState.transitions.unlinkSavedSearch).toHaveBeenCalled();
     expect(mockServices.toastNotifications.addSuccess).toHaveBeenCalled();
   });

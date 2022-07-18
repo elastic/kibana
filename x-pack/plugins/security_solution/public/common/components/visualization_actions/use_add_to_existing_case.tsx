@@ -8,10 +8,10 @@ import { useCallback, useMemo } from 'react';
 import { CommentType } from '@kbn/cases-plugin/common';
 
 import { APP_ID } from '../../../../common/constants';
-import { useKibana } from '../../lib/kibana/kibana_react';
+import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
-import { LensAttributes } from './types';
+import type { LensAttributes } from './types';
 
 const owner = APP_ID;
 
@@ -19,13 +19,12 @@ export const useAddToExistingCase = ({
   onAddToCaseClicked,
   lensAttributes,
   timeRange,
-  userCanCrud,
 }: {
   onAddToCaseClicked?: () => void;
   lensAttributes: LensAttributes | null;
   timeRange: { from: string; to: string } | null;
-  userCanCrud: boolean;
 }) => {
+  const userPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
   const attachments = useMemo(() => {
     return [
@@ -54,6 +53,6 @@ export const useAddToExistingCase = ({
 
   return {
     onAddToExistingCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userCanCrud,
+    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
   };
 };

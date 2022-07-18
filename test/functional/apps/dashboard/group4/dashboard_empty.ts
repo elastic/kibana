@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...
       await PageObjects.common.navigateToUrl('dashboard', '/create');
 
-      const button = await testSubjects.find('createDataViewButtonFlyout');
+      const button = await testSubjects.find('createDataViewButton');
       button.click();
       await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();

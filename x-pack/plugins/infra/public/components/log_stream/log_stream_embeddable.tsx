@@ -84,6 +84,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
         <EuiThemeProvider>
           <div style={{ width: '100%' }}>
             <LazyLogStreamWrapper
+              logView={{ type: 'log-view-reference', logViewId: 'default' }}
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}
               height="100%"

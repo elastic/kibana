@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
       require.resolve('./apps/dashboard_edit_panel'),
+      require.resolve('./apps/dashboard_controls'),
       require.resolve('./apps/users'),
       require.resolve('./apps/roles'),
       require.resolve('./apps/ingest_node_pipelines'),
@@ -40,8 +41,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/graph'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
+      // Please make sure that the remote clusters, snapshot and restore and
+      // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),
       require.resolve('./apps/snapshot_and_restore'),
+      require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
       require.resolve('./apps/license_management'),

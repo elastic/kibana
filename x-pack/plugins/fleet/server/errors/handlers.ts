@@ -28,6 +28,7 @@ import {
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
+  PackageFailedVerificationError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -60,6 +61,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
+  if (error instanceof PackageFailedVerificationError) {
+    return 400; // Bad Request
+  }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
   }
@@ -80,7 +84,7 @@ export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['er
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
-      body: { message: error.message },
+      body: { message: error.message, attributes: error.attributes },
     };
   }
 

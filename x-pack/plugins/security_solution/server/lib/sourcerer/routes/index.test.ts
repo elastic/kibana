@@ -13,8 +13,8 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { StartServicesAccessor } from '@kbn/core/server';
-import { StartPlugins } from '../../../plugin';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { StartPlugins } from '../../../plugin';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');

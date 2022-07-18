@@ -7,30 +7,54 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { WindowParameters } from '@kbn/aiops-utils';
 
+import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
+import { SpikeAnalysisTable } from '../spike_analysis_table';
 
 /**
  * ExplainLogRateSpikes props require a data view.
  */
-export interface ExplainLogRateSpikesProps {
+interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** Start timestamp filter */
+  earliest: number;
+  /** End timestamp filter */
+  latest: number;
+  /** Window parameters for the analysis */
+  windowParameters: WindowParameters;
 }
 
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
-  const kibana = useKibana();
-  const basePath = kibana.services.http?.basePath.get() ?? '';
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
+  dataView,
+  earliest,
+  latest,
+  windowParameters,
+}) => {
+  const { services } = useAiOpsKibana();
+  const basePath = services.http?.basePath.get() ?? '';
 
-  const { start, data, isRunning } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
+  const { cancel, start, data, isRunning, error } = useFetchStream<
+    ApiExplainLogRateSpikes,
+    typeof basePath
+  >(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
-    { index: dataView.title },
+    {
+      start: earliest,
+      end: latest,
+      // TODO Consider an optional Kuery.
+      kuery: '',
+      // TODO Handle data view without time fields.
+      timeFieldName: dataView.timeFieldName ?? '',
+      index: dataView.title,
+      ...windowParameters,
+    },
     { reducer: streamReducer, initialState }
   );
 
@@ -40,13 +64,17 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   }, []);
 
   return (
-    <EuiText>
-      <h2>{dataView.title}</h2>
-      <p>{isRunning ? 'Loading fields ...' : 'Loaded all fields.'}</p>
-      <EuiSpacer size="xs" />
-      {data.fields.map((field) => (
-        <EuiBadge>{field}</EuiBadge>
-      ))}
-    </EuiText>
+    <>
+      <ProgressControls
+        progress={data.loaded}
+        progressMessage={data.loadingState ?? ''}
+        isRunning={isRunning}
+        onRefresh={start}
+        onCancel={cancel}
+      />
+      {data?.changePoints ? (
+        <SpikeAnalysisTable changePointData={data.changePoints} loading={isRunning} error={error} />
+      ) : null}
+    </>
   );
 };

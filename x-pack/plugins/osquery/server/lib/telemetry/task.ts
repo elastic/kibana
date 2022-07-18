@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TelemetryReceiver } from './receiver';
-import { TelemetryEventsSender } from './sender';
+import type { TelemetryReceiver } from './receiver';
+import type { TelemetryEventsSender } from './sender';
 
 export interface OsqueryTelemetryTaskConfig {
   type: string;

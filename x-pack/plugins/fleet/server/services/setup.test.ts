@@ -24,6 +24,7 @@ jest.mock('./output');
 jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./managed_package_policies');
+jest.mock('./setup/upgrade_package_install_version');
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
