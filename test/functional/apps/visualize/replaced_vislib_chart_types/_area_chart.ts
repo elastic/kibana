@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
   ]);
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   const vizName = 'Visualization AreaChart Name Test - Charts library';
 

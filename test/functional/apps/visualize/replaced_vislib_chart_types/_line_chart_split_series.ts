@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'timePicker',
   ]);
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   describe('line charts - split series', function () {
     const initLineChart = async function () {

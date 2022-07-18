@@ -118,7 +118,7 @@ export const strings = {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
   getHandleEmptyXAccessorHelp: () =>
-    i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
+    i18n.translate('expressionXY.xyVis.handleEmptyXAccessor.help', {
       defaultMessage: 'Allow handling empty x accessor',
     }),
   getLayersHelp: () =>
