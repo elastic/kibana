@@ -14,12 +14,14 @@ import { SecurityPageName } from '../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../common/lib/telemetry';
+import { downloadBlob } from '../../../../../common/utils/download_blob';
 import type {
   BulkActionResponse,
   BulkActionSummary,
 } from '../../../../containers/detection_engine/rules';
 import { performBulkAction } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
+import { getExportedRulesCounts } from './helpers';
 import type { RulesTableActions } from './rules_table/rules_table_context';
 
 export const goToRuleEditPage = (
@@ -32,6 +34,12 @@ export const goToRuleEditPage = (
   });
 };
 
+type OnActionSuccessCallback = (
+  toasts: UseAppToasts,
+  action: BulkAction,
+  summary: BulkActionSummary
+) => void;
+
 interface BaseRulesBulkActionArgs {
   visibleRuleIds?: string[];
   toasts: UseAppToasts;
@@ -39,7 +47,7 @@ interface BaseRulesBulkActionArgs {
   payload?: { edit?: BulkActionEditPayload[] };
   onError?: (toasts: UseAppToasts, action: BulkAction, error: HTTPError) => void;
   onFinish?: () => void;
-  onSuccess?: (toasts: UseAppToasts, action: BulkAction, summary: BulkActionSummary) => void;
+  onSuccess?: OnActionSuccessCallback;
   setLoadingRules?: RulesTableActions['setLoadingRules'];
 }
 
@@ -86,6 +94,25 @@ export async function executeRulesBulkAction({
     setLoadingRules?.({ ids: [], action: null });
     onFinish?.();
   }
+}
+
+/**
+ * downloads exported rules, received from export action
+ * @param params.response - Blob results with exported rules
+ * @param params.toasts - {@link UseAppToasts} toasts service
+ * @param params.onSuccess - {@link OnActionSuccessCallback} optional toast to display when action successful
+ */
+export async function downloadExportedRules({
+  response,
+  toasts,
+  onSuccess = defaultSuccessHandler,
+}: {
+  response: Blob;
+  toasts: UseAppToasts;
+  onSuccess?: OnActionSuccessCallback;
+}) {
+  downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
+  onSuccess(toasts, BulkAction.export, await getExportedRulesCounts(response));
 }
 
 function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HTTPError) {

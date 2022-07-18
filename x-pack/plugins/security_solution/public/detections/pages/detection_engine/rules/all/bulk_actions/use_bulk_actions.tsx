@@ -20,12 +20,11 @@ import {
   BulkActionEditType,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
-import { downloadBlob } from '../../../../../../common/utils/download_blob';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import { executeRulesBulkAction } from '../actions';
+import { executeRulesBulkAction, downloadExportedRules } from '../actions';
 import { getExportedRulesCounts } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
@@ -220,12 +219,7 @@ export const useBulkActions = ({
           return;
         }
 
-        downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
-
-        toasts.addSuccess({
-          title: i18n.RULES_BULK_EXPORT_SUCCESS,
-          text: i18n.RULES_BULK_EXPORT_SUCCESS_DESCRIPTION(summary.succeeded, summary.total),
-        });
+        await downloadExportedRules({ response, toasts });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
