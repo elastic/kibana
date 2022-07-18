@@ -79,6 +79,7 @@ export interface SelectableTimelineProps {
     graphEventId?: string
   ) => void;
   timelineType: TimelineTypeLiteral;
+  placeholder?: string;
 }
 
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
@@ -87,6 +88,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   onClosePopover,
   onTimelineChange,
   timelineType,
+  placeholder,
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
@@ -152,7 +154,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
         <TimelineContentItem grow={true}>
-          <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
             <EuiFlexItem data-test-subj="timeline">
               <EuiToolTip content={title} anchorClassName="eui-textTruncate eui-alignMiddle">
                 <EuiHighlight search={searchValue}>{title}</EuiHighlight>
@@ -210,9 +212,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
     () => ({
       'data-test-subj': 'timeline-super-select-search-box',
-      placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
+      placeholder: placeholder ?? i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
       onSearch: onSearchTimeline,
-      incremental: true,
+      incremental: false,
       append: (
         <StyledEuiFilterButton
           data-test-subj="only-favorites-toggle"
@@ -223,7 +225,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         </StyledEuiFilterButton>
       ),
     }),
-    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType]
+    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType, placeholder]
   );
 
   const listProps: EuiSelectableProps['listProps'] = useMemo(
