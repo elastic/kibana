@@ -21,14 +21,13 @@ import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import { CspAppContext } from '../../plugin';
-import type { CspRule, CspRuleMetadata, CspRulesConfiguration } from '../../../common/schemas';
+import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
-import { BenchmarkId, getBenchmarkInputType } from '../../fleet_integration/fleet_integration';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -66,24 +65,24 @@ export const getCspRules = (
   });
 };
 
+const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
+  rules.reduce((benchmarks, rule) => {
+    const benchmarkId = rule.attributes.metadata.benchmark.id;
+    if (!rule.attributes.enabled || !benchmarkId) return benchmarks;
+
+    benchmarks[benchmarkId] = benchmarks[benchmarkId] || [];
+    benchmarks[benchmarkId].push(rule.attributes.metadata.rego_rule_id);
+
+    return benchmarks;
+  }, {} as CspRulesConfiguration['data_yaml']['activated_rules']);
+
 export const createRulesConfig = (
-  cspRules: SavedObjectsFindResponse<CspRule>,
-  benchmarkId: BenchmarkId
-): CspRulesConfiguration => {
-  const activatedRules = cspRules.saved_objects
-    .filter((cspRule) => cspRule.attributes.enabled)
-    .map((activatedRule) => activatedRule.attributes.metadata.rego_rule_id);
-
-  const config = {
-    data_yaml: {
-      activated_rules: {
-        [benchmarkId]: activatedRules,
-      } as Record<CspRuleMetadata['benchmark']['id'], string[]>,
-    },
-  };
-
-  return config;
-};
+  cspRules: SavedObjectsFindResponse<CspRule>
+): CspRulesConfiguration => ({
+  data_yaml: {
+    activated_rules: getEnabledRulesByBenchmark(cspRules.saved_objects),
+  },
+});
 
 export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string => {
   return yaml.safeDump(config);
@@ -115,7 +114,7 @@ export const updateAgentConfiguration = async (
   user: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
-  const rulesConfig = createRulesConfig(cspRules, getBenchmarkInputType(packagePolicy.inputs));
+  const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
   const options = { user: user ? user : undefined };
