@@ -48,7 +48,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
 import { useKibana } from '../../utils/kibana_react';
-import { getHealthColor } from './config';
+import { getHealthColor, OBSERVABILITY_SOLUTIONS } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';

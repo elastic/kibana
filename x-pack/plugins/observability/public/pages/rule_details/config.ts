@@ -33,3 +33,5 @@ export function hasAllPrivilege(rule: InitialRule, ruleType?: RuleType): boolean
 
 export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.execute;
+
+export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
