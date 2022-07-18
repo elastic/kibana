@@ -1,0 +1,244 @@
+[[Machine_learning_APIs]]
+== Machine learning APIs
+
+* <<ml-sync-default>>
+* <<ml-sync>>
+
+[[ml-sync-default]]
+=== Synchronize Kibana saved objects for machine learning jobs and trained models in the default space
+
+You must have `all` privileges for the *Machine Learning* feature in the *Analytics* section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
+
+
+==== Request
+
+`GET /api/ml/saved_objects/sync`
+
+==== Query parameters
+
+[options="header"]
+|==========
+|Name |Type |Required |Description
+|`simulate` |+boolean+; default: ++false++ |N |When true, simulates the synchronization by returning only the list actions that would be performed.
+
+|==========
+==== Responses
+
+`200`::
++
+--
+Indicates a successful call.
+
+--
+
+==== Request example
+
+[source,json]
+--------
+curl -XGET https://localhost:5601/api/ml/saved_objects/sync \
+-u USER:KEY
+--------
+[[ml-sync]]
+=== Synchronize Kibana saved objects for machine learning jobs and trained models
+
+You must have `all` privileges for the *Machine Learning* feature in the *Analytics* section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
+
+
+==== Request
+
+`GET /s/{spaceId}/api/ml/saved_objects/sync`
+
+==== Path parameters
+
+[options="header"]
+|==========
+|Name |Type |Required |Description
+|`spaceId` |+string+ |Y |An identifier for the space.
+
+|==========
+==== Query parameters
+
+[options="header"]
+|==========
+|Name |Type |Required |Description
+|`simulate` |+boolean+; default: ++false++ |N |When true, simulates the synchronization by returning only the list actions that would be performed.
+
+|==========
+==== Responses
+
+`200`::
++
+--
+Indicates a successful call.
+
+--
+
+==== Request example
+
+[source,json]
+--------
+curl -XGET https://localhost:5601/s/{spaceId}/api/ml/saved_objects/sync \
+-u USER:KEY
+--------
+[[definitions]]
+== Definitions
+
+* <<DatafeedsAdded>>
+* <<DatafeedsRemoved>>
+* <<SavedObjectsCreated>>
+* <<SavedObjectsDeleted>>
+* <<SyncResponse>>
+
+[[DatafeedsAdded]]
+=== `DatafeedsAdded`
+
+If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+
+
+==== Example
+
+[source,json]
+--------
+{}
+
+--------
+
+[[DatafeedsRemoved]]
+=== `DatafeedsRemoved`
+
+If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+
+
+==== Example
+
+[source,json]
+--------
+{}
+
+--------
+
+[[SavedObjectsCreated]]
+=== `SavedObjectsCreated`
+
+If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+
+
+==== Properties
+
+`anomaly-detector` (++map[string,+++object+++]++)::
+{empty}
+
+`data-frame-analytics` (++map[string,+++object+++]++)::
+{empty}
+
+`trained-model` (++map[string,+++object+++]++)::
+{empty}
+
+==== Example
+
+[source,json]
+--------
+{
+   "anomaly-detector" : {
+      "some_property" : {}
+   },
+   "data-frame-analytics" : {
+      "some_property" : {}
+   },
+   "trained-model" : {
+      "some_property" : {}
+   }
+}
+
+--------
+
+[[SavedObjectsDeleted]]
+=== `SavedObjectsDeleted`
+
+If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+
+
+==== Properties
+
+`anomaly-detector` (++map[string,+++object+++]++)::
+{empty}
+
+`data-frame-analytics` (++map[string,+++object+++]++)::
+{empty}
+
+`trained-model` (++map[string,+++object+++]++)::
+{empty}
+
+==== Example
+
+[source,json]
+--------
+{
+   "anomaly-detector" : {
+      "some_property" : {}
+   },
+   "data-frame-analytics" : {
+      "some_property" : {}
+   },
+   "trained-model" : {
+      "some_property" : {}
+   }
+}
+
+--------
+
+[[SyncResponse]]
+=== `SyncResponse`
+
+_Intentionally left blank_
+
+==== Properties
+
+`datafeedsAdded` (<<DatafeedsAdded,`DatafeedsAdded`>>)::
+If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+
+
+`datafeedsRemoved` (<<DatafeedsRemoved,`DatafeedsRemoved`>>)::
+If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+
+
+`savedObjectsCreated` (<<SavedObjectsCreated,`SavedObjectsCreated`>>)::
+If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+
+
+`savedObjectsDeleted` (<<SavedObjectsDeleted,`SavedObjectsDeleted`>>)::
+If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+
+
+==== Example
+
+[source,json]
+--------
+{
+   "datafeedsAdded" : {},
+   "datafeedsRemoved" : {},
+   "savedObjectsCreated" : {
+      "anomaly-detector" : {
+         "some_property" : {}
+      },
+      "data-frame-analytics" : {
+         "some_property" : {}
+      },
+      "trained-model" : {
+         "some_property" : {}
+      }
+   },
+   "savedObjectsDeleted" : {
+      "anomaly-detector" : {
+         "some_property" : {}
+      },
+      "data-frame-analytics" : {
+         "some_property" : {}
+      },
+      "trained-model" : {
+         "some_property" : {}
+      }
+   }
+}
+
+--------
