@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { InnerLinkPanel, LinkPanel, LinkPanelListItem } from '../link_panel';
-import { LinkPanelViewProps } from '../link_panel/types';
+import type { LinkPanelListItem } from '../link_panel';
+import { InnerLinkPanel, LinkPanel } from '../link_panel';
+import type { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { NavigateToHost } from './navigate_to_host';

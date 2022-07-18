@@ -142,7 +142,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               }}
             >
               {currentIndexPattern
-                ? currentIndexPattern.title
+                ? currentIndexPattern.getName()
                 : // This branch will be shown if the user exits the
                   // initial picker modal
                   i18n.translate('xpack.graph.bar.pickSourceLabel', {

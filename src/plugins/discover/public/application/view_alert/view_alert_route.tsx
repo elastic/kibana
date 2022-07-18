@@ -69,6 +69,7 @@ export function ViewAlertRoute() {
       displayRuleChangedWarn,
       displayPossibleDocsDiffInfoAlert,
       showDataViewFetchError,
+      showDataViewUpdatedWarning,
     } = getAlertUtils(toastNotifications, core, data);
 
     const navigateToResults = async () => {
@@ -79,9 +80,12 @@ export function ViewAlertRoute() {
       }
 
       const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
+      // rule params changed
       if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
         displayRuleChangedWarn();
-      } else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
+      }
+      // documents might be updated or deleted
+      else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
         displayPossibleDocsDiffInfoAlert();
       }
 
@@ -93,10 +97,22 @@ export function ViewAlertRoute() {
 
       const dataView = fetchedSearchSource.getField('index');
       const timeFieldName = dataView?.timeFieldName;
+      // data view fetch error
       if (!dataView || !timeFieldName) {
         showDataViewFetchError(fetchedAlert.id);
         history.push(DISCOVER_MAIN_ROUTE);
         return;
+      }
+
+      const dataViewSavedObject = await core.savedObjects.client.get('index-pattern', dataView.id!);
+      const alertUpdatedAt = fetchedAlert.updatedAt;
+      const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;
+      // data view updated after the last update of the alert rule
+      if (
+        openActualAlert &&
+        new Date(dataViewUpdatedAt).valueOf() > new Date(alertUpdatedAt).valueOf()
+      ) {
+        showDataViewUpdatedWarning();
       }
 
       const timeRange = openActualAlert

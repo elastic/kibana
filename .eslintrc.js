@@ -110,6 +110,15 @@ const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
   */
 `;
 
+const VENN_DIAGRAM_HEADER = `
+/*
+  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  */
+`;
+
 const packagePkgJsons = globby.sync('*/package.json', {
   cwd: Path.resolve(__dirname, 'packages'),
   absolute: true,
@@ -311,6 +320,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -345,6 +355,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -386,6 +397,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -417,11 +429,13 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
       },
     },
+
     {
       files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -444,6 +458,7 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -471,6 +486,7 @@ module.exports = {
               SAFER_LODASH_SET_LODASH_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -502,6 +518,7 @@ module.exports = {
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -529,6 +546,39 @@ module.exports = {
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * venn.js fork requires special license headers
+     */
+    {
+      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: VENN_DIAGRAM_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -1161,6 +1211,14 @@ module.exports = {
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
       },
+      overrides: [
+        {
+          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          rules: {
+            '@typescript-eslint/consistent-type-imports': 'error',
+          },
+        },
+      ],
     },
     {
       files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
@@ -1442,6 +1500,8 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        'sort-keys': 1, // warning
+        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
@@ -1580,6 +1640,7 @@ module.exports = {
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
@@ -1710,23 +1771,12 @@ module.exports = {
       },
     },
 
-    {
-      files: ['packages/kbn-type-summarizer/**/*.ts'],
-      rules: {
-        'no-bitwise': 'off',
-      },
-    },
-
     /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {
       files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
+      rules: require('eslint-config-prettier').rules,
     },
     /**
      * Enterprise Search Prettier override
@@ -1736,6 +1786,17 @@ module.exports = {
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      },
+    },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: '.buildkite/**/*.{js,ts}',
+      rules: {
+        'no-console': 'off',
+        '@kbn/imports/no_unresolvable_imports': 'off',
       },
     },
   ],

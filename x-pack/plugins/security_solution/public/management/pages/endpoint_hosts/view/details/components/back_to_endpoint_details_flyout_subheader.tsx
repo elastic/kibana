@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, CommonProps } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useEndpointSelector } from '../../hooks';

@@ -90,6 +90,9 @@ export default async function ({ readConfigFile }) {
       integrations: {
         pathname: '/app/integrations',
       },
+      kibana_overview: {
+        pathname: '/app/kibana_overview',
+      },
     },
     junit: {
       reportName: 'Chrome UI Functional Tests',
@@ -206,7 +209,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['context-encoded-param'],
+                names: ['context_encoded_param'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -221,7 +224,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['similar-index'],
+                names: ['similar_index'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -236,7 +239,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['similar-index-two'],
+                names: ['similar_index_two'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },

@@ -57,7 +57,7 @@ export const expectedCompleteUnitedIndexQuery = {
                             {
                               range: {
                                 'united.agent.last_checkin': {
-                                  lt: 'now-120s',
+                                  lt: 'now-300s',
                                 },
                               },
                             },

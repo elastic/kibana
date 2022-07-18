@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpStart } from '@kbn/core/public';
-import {
+import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import type {
   GetAgentStatusResponse,
   GetAgentsResponse,
   DeletePackagePoliciesResponse,
@@ -15,8 +15,8 @@ import {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { NewPolicyData } from '../../../../common/endpoint/types';
-import { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
+import type { NewPolicyData } from '../../../../common/endpoint/types';
+import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
 const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;

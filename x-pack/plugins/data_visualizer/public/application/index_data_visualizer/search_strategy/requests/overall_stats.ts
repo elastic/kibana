@@ -9,14 +9,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   buildBaseFilterCriteria,
-  buildSamplerAggregation,
   getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 

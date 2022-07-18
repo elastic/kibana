@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { AxesSettingsConfig, AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { XYLayerConfig } from '../types';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import {
   ToolbarPopover,
   useDebouncedValue,

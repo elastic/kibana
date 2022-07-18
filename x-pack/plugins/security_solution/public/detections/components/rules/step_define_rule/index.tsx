@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -12,18 +13,18 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiText,
 } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DEFAULT_INDEX_KEY,
@@ -36,13 +37,10 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
-import {
-  DefineStepRule,
-  RuleStep,
-  RuleStepProps,
-} from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
@@ -71,7 +69,8 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
+import type { BrowserField, BrowserFields } from '../../../../common/containers/source';
+import { useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -481,6 +480,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiFlexItem grow={1}>
                 <StyledButtonGroup
                   legend="Rule index pattern or data view selector"
+                  data-test-subj="dataViewIndexPatternButtonGroup"
                   idSelected={dataSourceRadioIdSelected}
                   onChange={onChangeDataSource}
                   options={dataViewIndexPatternToggleButtonOptions}

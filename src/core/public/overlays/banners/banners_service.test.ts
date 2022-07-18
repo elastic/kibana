@@ -8,8 +8,8 @@
 
 import { OverlayBannersService, OverlayBannersStart } from './banners_service';
 import { take } from 'rxjs/operators';
-import { i18nServiceMock } from '../../i18n/i18n_service.mock';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 describe('OverlayBannersService', () => {
   let service: OverlayBannersStart;

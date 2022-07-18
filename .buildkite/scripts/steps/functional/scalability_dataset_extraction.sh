@@ -13,14 +13,14 @@ GCS_BUCKET="gs://kibana-performance/scalability-tests"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+scalabilityJourneys=("login" "promotion_tracking_dashboard")
 
-for i in "${journeys[@]}"; do
+for i in "${scalabilityJourneys[@]}"; do
     JOURNEY_NAME="${i}"
     echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
 
     node scripts/extract_performance_testing_dataset \
-        --journeyName "${JOURNEY_NAME}" \
+        --config "x-pack/test/performance/journeys/${i}/config.ts" \ \
         --buildId "${BUILD_ID}" \
         --es-url "${ES_SERVER_URL}" \
         --es-username "${USER_FROM_VAULT}" \

@@ -55,12 +55,19 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  getHttpsAgent() {
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
     const config = this.config;
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
-
-      const rejectUnauthorized = process.env.NODE_ENV === 'production';
 
       return new https.Agent({
         rejectUnauthorized,
@@ -68,6 +75,8 @@ export class ServiceAPIClient {
         key: tlsConfig.key,
       });
     }
+
+    return baseHttpsAgent;
   }
 
   async post(data: ServiceData) {
@@ -92,29 +101,31 @@ export class ServiceAPIClient {
       return { allowed: true, signupUrl: null };
     }
 
-    const httpsAgent = this.getHttpsAgent();
-
-    if (this.locations.length > 0 && httpsAgent) {
+    if (this.locations.length > 0) {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
-      try {
-        const { data } = await axios({
-          method: 'GET',
-          url: url + '/allowed',
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
-          httpsAgent,
-        });
+      const httpsAgent = this.getHttpsAgent(url);
 
-        const { allowed, signupUrl } = data;
-        return { allowed, signupUrl };
-      } catch (e) {
-        this.logger.error(e);
+      if (httpsAgent) {
+        try {
+          const { data } = await axios({
+            method: 'GET',
+            url: url + '/allowed',
+            headers:
+              process.env.NODE_ENV !== 'production' && this.authorization
+                ? {
+                    Authorization: this.authorization,
+                  }
+                : undefined,
+            httpsAgent,
+          });
+
+          const { allowed, signupUrl } = data;
+          return { allowed, signupUrl };
+        } catch (e) {
+          this.logger.error(e);
+        }
       }
     }
 
@@ -151,7 +162,7 @@ export class ServiceAPIClient {
                 Authorization: this.authorization,
               }
             : undefined,
-        httpsAgent: this.getHttpsAgent(),
+        httpsAgent: this.getHttpsAgent(url),
       });
     };
 

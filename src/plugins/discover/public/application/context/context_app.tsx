@@ -15,10 +15,11 @@ import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
-import { AppState, isEqualFilters } from './services/context_state';
+import { AppState, GlobalState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../hooks/use_data_grid_columns';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
@@ -51,8 +52,9 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ services });
+  const { appState, globalState, setAppState } = useContextAppState({ services });
   const prevAppState = useRef<AppState>();
+  const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
   /**
    * Context fetched state
@@ -84,18 +86,23 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {
       fetchSurroundingRows(SurrDocType.SUCCESSORS);
-    } else if (!isEqualFilters(prevAppState.current.filters, appState.filters)) {
+    } else if (
+      !isEqualFilters(prevAppState.current.filters, appState.filters) ||
+      !isEqualFilters(prevGlobalState.current.filters, globalState.filters)
+    ) {
       fetchContextRows();
     }
 
     prevAppState.current = cloneDeep(appState);
+    prevGlobalState.current = cloneDeep(globalState);
   }, [
     appState,
+    globalState,
     anchorId,
     fetchContextRows,
     fetchAllRows,
     fetchSurroundingRows,
-    fetchedState.anchor._id,
+    fetchedState.anchor.id,
   ]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
@@ -110,7 +117,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
-      ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
+      ...(fetchedState.anchor.id ? [fetchedState.anchor] : []),
       ...(fetchedState.successors || []),
     ],
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
@@ -143,12 +150,29 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     };
   };
 
+  const contextAppTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    contextAppTitle.current?.focus();
+  }, []);
+
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
+          <h1
+            id="contextAppTitle"
+            className="euiScreenReaderOnly"
+            data-test-subj="discoverContextAppTitle"
+            tabIndex={-1}
+            ref={contextAppTitle}
+          >
+            {i18n.translate('discover.context.pageTitle', {
+              defaultMessage: 'Documents surrounding #{anchorId}',
+              values: { anchorId },
+            })}
+          </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">
@@ -181,6 +205,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
+                onFieldEdited={fetchAllRows}
               />
             </EuiPageContent>
           </EuiPage>

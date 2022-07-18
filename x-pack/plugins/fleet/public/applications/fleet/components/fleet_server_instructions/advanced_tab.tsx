@@ -63,7 +63,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
       isFleetServerReady,
       serviceToken,
       fleetServerHost: fleetServerHostForm.fleetServerHost,
-      fleetServerPolicyId,
+      fleetServerPolicyId: fleetServerPolicyId || selectedPolicyId,
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),

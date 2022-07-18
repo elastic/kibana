@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InnerLinkPanel } from './inner_link_panel';
-import { LinkPanelListItem, LinkPanelViewProps } from './types';
+import type { LinkPanelListItem, LinkPanelViewProps } from './types';
 import { LinkButton } from '../../../common/components/links';
 
 interface DisabledLinkPanelProps {

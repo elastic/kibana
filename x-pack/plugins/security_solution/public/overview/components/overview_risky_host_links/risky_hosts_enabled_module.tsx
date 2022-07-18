@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
-import { LinkPanelListItem } from '../link_panel';
+import type { LinkPanelListItem } from '../link_panel';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { HostsRiskScore } from '../../../../common/search_strategy';
+import type { HostsRiskScore } from '../../../../common/search_strategy';
 
 const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
   return items.map(({ host, risk_stats: riskStats, risk: copy }) => ({

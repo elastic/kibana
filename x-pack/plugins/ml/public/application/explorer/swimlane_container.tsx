@@ -29,6 +29,7 @@ import {
   Position,
   ScaleType,
   PartialTheme,
+  HeatmapStyle,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -155,6 +156,7 @@ export interface SwimlaneProps {
    */
   showTimeline?: boolean;
   showYAxis?: boolean;
+  yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
 }
 
 /**
@@ -180,6 +182,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showYAxis = true,
   showLegend = true,
   'data-test-subj': dataTestSubj,
+  yAxisWidth,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -301,7 +304,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         yAxisLabel: {
           visible: showYAxis,
-          width: Y_AXIS_LABEL_WIDTH,
+          width: yAxisWidth,
           textColor: euiTheme.euiTextSubduedColor,
           padding: Y_AXIS_LABEL_PADDING,
           fontSize: parseInt(euiTheme.euiFontSizeXS, 10),

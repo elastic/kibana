@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternMock } from './index_pattern';
 import { dataViewComplexMock } from './data_view_complex';
@@ -15,18 +14,18 @@ import { esHitsComplex } from './es_hits_complex';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
-import type { ElasticSearchHit } from '../types';
+import { buildDataTableRecord } from '../utils/build_data_record';
+import { EsHitRecord } from '../types';
 
-const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
-  const rowsFlattened = rows.map((hit) =>
-    flattenHit(hit, dataView, { includeIgnoredValues: true })
-  );
+const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext => {
+  const usedRows = rows.map((row) => {
+    return buildDataTableRecord(row, dataView);
+  });
 
   return {
     expanded: undefined,
     setExpanded: jest.fn(),
-    rows,
-    rowsFlattened,
+    rows: usedRows,
     onFilter: jest.fn(),
     indexPattern: dataView,
     isDarkMode: false,
@@ -37,8 +36,7 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
         rowIndex,
         columnId,
         services: discoverServiceMock,
-        rows,
-        rowsFlattened,
+        rows: usedRows,
         dataView,
         options,
       }),

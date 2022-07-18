@@ -12,11 +12,13 @@ import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout
 import { DEFAULT_VIEWPORT } from '../browsers';
 import { BaseLayout } from './base_layout';
 
+export const getPrintLayoutSelectors: () => LayoutSelectorDictionary = () => ({
+  ...DEFAULT_SELECTORS,
+  screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
+});
+
 export class PrintLayout extends BaseLayout implements Layout {
-  public readonly selectors: LayoutSelectorDictionary = {
-    ...DEFAULT_SELECTORS,
-    screenshot: '[data-shared-item]', // override '[data-shared-items-container]'
-  };
+  public readonly selectors = getPrintLayoutSelectors();
   public readonly groupCount = 2;
   private readonly viewport = DEFAULT_VIEWPORT;
   private zoom: number;

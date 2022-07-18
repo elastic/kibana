@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-import {
+import type {
   EndpointPrivileges,
   Immutable,
   MaybeImmutable,

@@ -113,11 +113,7 @@ describe('time scale utils', () => {
     it('should keep column if there is no time scale', () => {
       const column = { ...baseColumn, timeScale: undefined };
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: column } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
       ).toBe(column);
     });
 
@@ -138,14 +134,13 @@ describe('time scale utils', () => {
               } as DateHistogramIndexPatternColumn,
             },
           },
-          'col1',
-          'col2'
+          'col1'
         )
       ).toBe(baseColumn);
     });
 
     it('should remove time scale if there is no date histogram', () => {
-      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1', 'col2')).toHaveProperty(
+      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1')).toHaveProperty(
         'timeScale',
         undefined
       );
@@ -153,22 +148,14 @@ describe('time scale utils', () => {
 
     it('should remove suffix from label', () => {
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: baseColumn } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: baseColumn } }, 'col1')
       ).toHaveProperty('label', 'Count of records');
     });
 
     it('should keep custom label', () => {
       const column = { ...baseColumn, label: 'abc', customLabel: true };
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: column } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
       ).toHaveProperty('label', 'abc');
     });
   });

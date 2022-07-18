@@ -18,7 +18,8 @@ import {
   kibanaObservable,
 } from '../../../common/mock';
 import { OverviewNetwork } from '.';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';

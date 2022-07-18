@@ -11,34 +11,38 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import { Sort } from '../../components/timeline/body/sort';
-import {
+import type { Sort } from '../../components/timeline/body/sort';
+import type {
   DataProvider,
   QueryOperator,
   QueryMatch,
+} from '../../components/timeline/data_providers/data_provider';
+import {
   DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../components/timeline/data_providers/data_provider';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import {
+import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   TimelineTypeLiteral,
-  TimelineType,
   RowRendererId,
-  TimelineStatus,
-  TimelineId,
-  TimelineTabs,
   SerializedFilterQuery,
   ToggleDetailPanel,
   TimelinePersistInput,
 } from '../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { KqlMode, TimelineModel } from './model';
-import { TimelineById } from './types';
+import type { KqlMode, TimelineModel } from './model';
+import type { TimelineById } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -48,8 +52,8 @@ import {
   RESIZED_COLUMN_MIN_WITH,
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
-import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {

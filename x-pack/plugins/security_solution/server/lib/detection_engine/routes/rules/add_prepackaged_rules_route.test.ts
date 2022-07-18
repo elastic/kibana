@@ -13,10 +13,10 @@ import {
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchema } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
@@ -33,7 +33,7 @@ jest.mock('../../rules/utils', () => {
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getLatestPrepackagedRules: async (): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+    getLatestPrepackagedRules: async (): Promise<AddPrepackagedRulesSchema[]> => {
       return [
         {
           author: ['Elastic'],
@@ -58,7 +58,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
           false_positives: [],
           max_signals: 100,
           threat: [],
-          throttle: null,
+          throttle: undefined,
           exceptions_list: [],
           version: 2, // set one higher than the mocks which is set to 1 to trigger updates
         },

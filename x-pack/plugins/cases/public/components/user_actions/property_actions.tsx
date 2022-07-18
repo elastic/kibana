@@ -11,6 +11,7 @@ import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 import { PropertyActions } from '../property_actions';
 import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_lens_open_visualization';
 import { CANCEL_BUTTON, CONFIRM_BUTTON } from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface UserActionPropertyActionsProps {
   id: string;
@@ -22,7 +23,6 @@ interface UserActionPropertyActionsProps {
   onEdit: (id: string) => void;
   onDelete?: (id: string) => void;
   onQuote: (id: string) => void;
-  userCanCrud: boolean;
   commentMarkdown: string;
 }
 
@@ -36,9 +36,9 @@ const UserActionPropertyActionsComponent = ({
   onEdit,
   onDelete,
   onQuote,
-  userCanCrud,
   commentMarkdown,
 }: UserActionPropertyActionsProps) => {
+  const { permissions } = useCasesContext();
   const { canUseEditor, actionConfig } = useLensOpenVisualization({ comment: commentMarkdown });
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
@@ -62,7 +62,7 @@ const UserActionPropertyActionsComponent = ({
   const propertyActions = useMemo(
     () =>
       [
-        userCanCrud
+        permissions.all
           ? [
               {
                 iconType: 'pencil',
@@ -88,7 +88,7 @@ const UserActionPropertyActionsComponent = ({
         canUseEditor && actionConfig ? [actionConfig] : [],
       ].flat(),
     [
-      userCanCrud,
+      permissions.all,
       editLabel,
       onEditClick,
       deleteLabel,

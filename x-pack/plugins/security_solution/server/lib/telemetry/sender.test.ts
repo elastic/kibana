@@ -86,6 +86,7 @@ describe('TelemetryEventsSender', () => {
             },
             something_else: 'nope',
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             nope: 'nope',
@@ -164,6 +165,7 @@ describe('TelemetryEventsSender', () => {
               name: 'windows',
             },
           },
+          message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',

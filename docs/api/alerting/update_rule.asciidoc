@@ -15,9 +15,10 @@ Update the attributes for an existing rule.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Management* > *Stack Rules* feature or
-for the *{ml-app}*, *{observability}*, or *Security* features, depending on the
-`consumer` and `rule_type_id` of the rule you're updating. If the rule has
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rule you're updating. For example, the 
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, or *Security* features. If the rule has
 `actions`, you must also have `read` privileges for the *Management* >
 *Actions and Connectors* feature. For more details, refer to
 <<kibana-feature-privileges>>.

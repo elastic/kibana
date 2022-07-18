@@ -93,7 +93,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onEditRuntimeField: () => void;
+  onFieldEdited: () => void;
   /**
    * callback to execute on create dataview
    */
@@ -115,7 +115,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
+  const { selectedIndexPattern, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -123,7 +123,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
+    fieldCounts.current = calcFieldCounts(
+      props.documents$.getValue().result!,
+      selectedIndexPattern
+    );
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -215,7 +218,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                onEditRuntimeField();
+                onFieldEdited();
               },
             });
             if (setFieldEditorRef) {
@@ -232,7 +235,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
-      onEditRuntimeField,
+      onFieldEdited,
     ]
   );
 
@@ -266,7 +269,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result}
+            documents={documentState.result!}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}

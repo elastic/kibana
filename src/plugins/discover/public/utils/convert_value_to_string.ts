@@ -9,8 +9,8 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
-import { ElasticSearchHit, HitsFlattened } from '../types';
 import { DiscoverServices } from '../build_services';
+import { DataTableRecord } from '../types';
 
 interface ConvertedResult {
   formattedString: string;
@@ -20,15 +20,13 @@ interface ConvertedResult {
 export const convertValueToString = ({
   rowIndex,
   rows,
-  rowsFlattened,
   columnId,
   dataView,
   services,
   options,
 }: {
   rowIndex: number;
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
+  rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
   services: DiscoverServices;
@@ -37,7 +35,13 @@ export const convertValueToString = ({
   };
 }): ConvertedResult => {
   const { fieldFormats } = services;
-  const rowFlattened = rowsFlattened[rowIndex];
+  if (!rows[rowIndex]) {
+    return {
+      formattedString: '',
+      withFormula: false,
+    };
+  }
+  const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
   const field = dataView.fields.getByName(columnId);
   const valuesArray = Array.isArray(value) ? value : [value];
@@ -56,7 +60,7 @@ export const convertValueToString = ({
     .map((subValue) => {
       const formattedValue = formatFieldValue(
         subValue,
-        rows[rowIndex],
+        rows[rowIndex].raw,
         fieldFormats,
         dataView,
         field,

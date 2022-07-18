@@ -128,6 +128,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   useEffect(() => {
     if (hasAnyData !== true) {
@@ -160,6 +161,7 @@ export function OverviewPage({ routeParams }: Props) {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={Boolean(hasAnyData)}
       pageHeader={
         hasData
           ? {
@@ -198,7 +200,7 @@ export function OverviewPage({ routeParams }: Props) {
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
-                  userCanCrud={userPermissions?.crud ?? false}
+                  permissions={casesPermissions}
                   features={{ alerts: { sync: false } }}
                 >
                   <AlertsTableTGrid
@@ -307,6 +309,7 @@ function PageHeader({
         <EuiButton
           // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
           buttonRef={buttonRef}
+          id="guidedSetupButton"
           color="text"
           iconType="wrench"
           onClick={handleGuidedSetupClick}

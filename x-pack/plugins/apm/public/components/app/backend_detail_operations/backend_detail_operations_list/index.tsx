@@ -86,7 +86,9 @@ export function BackendDetailOperationsList() {
   const comparisonStatsFetch = useFetcher(
     (callApmApi) => {
       if (!comparisonEnabled) {
-        return;
+        return Promise.resolve({
+          operations: [],
+        });
       }
       return callApmApi('GET /internal/apm/backends/operations', {
         params: {

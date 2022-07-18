@@ -5,36 +5,53 @@
  * 2.0.
  */
 
+import { HttpResponse } from '@kbn/core/public';
+
 /**
  * These types track an API call's status and result
  * Each Status string corresponds to a possible status in a request's lifecycle
  */
 
-export type Status = 'IDLE' | 'PENDING' | 'SUCCESS' | 'ERROR';
-
-export interface HttpError {
-  code: number;
-  message?: string;
+export const enum Status {
+  IDLE,
+  LOADING,
+  SUCCESS,
+  ERROR,
 }
 
+export interface ErrorResponse {
+  statusCode: number;
+  error: string;
+  message: string;
+  attributes: {
+    errors: string[];
+  };
+}
+
+export type HttpError = HttpResponse<ErrorResponse>;
+
 export interface ApiSuccess<T> {
-  status: 'SUCCESS';
+  status: Status.SUCCESS;
   data: T;
+  error?: undefined;
 }
 
 export interface ApiPending<T> {
-  status: 'PENDING';
+  status: Status.LOADING;
   data?: T;
+  error?: undefined;
 }
 
 export interface ApiIdle<T> {
-  status: 'IDLE';
+  status: Status.IDLE;
   data?: T;
+  error?: undefined;
 }
 
 export interface ApiError {
-  status: Status;
+  status: Status.ERROR;
   error: HttpError;
+  data?: undefined;
 }
 
 export type ApiStatus<T> = ApiSuccess<T> | ApiPending<T> | ApiIdle<T> | ApiError;

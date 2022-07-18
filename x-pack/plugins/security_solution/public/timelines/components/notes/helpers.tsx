@@ -11,7 +11,7 @@ import React from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
-import { Note } from '../../../common/lib/note';
+import type { Note } from '../../../common/lib/note';
 
 import * as i18n from './translations';
 import { CountBadge } from '../../../common/components/page';

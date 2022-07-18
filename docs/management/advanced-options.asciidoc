@@ -374,8 +374,20 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+[[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
+preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+[[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
+Enables the comparison feature in the APM app.
+
+[[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
+Enables the Infrastructure view in the APM app.
+
 [[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
 When enabled, allows you to inspect {es} queries in API responses.
+
+[[observability-apm-enable-service-groups]]`observability:enableServiceGroups`::
+preview:[] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
 [float]
 [[kibana-reporting-settings]]

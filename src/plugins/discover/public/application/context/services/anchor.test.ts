@@ -11,7 +11,6 @@ import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { EsHitRecordList } from '../../types';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +23,7 @@ describe('context app', function () {
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 'test' }]);
     });
 
     it('should use the `fetch$` method of the SearchSource', function () {
@@ -142,7 +141,7 @@ describe('context app', function () {
     });
 
     it('should reject with an error when no hits were found', function () {
-      searchSourceStub = createSearchSourceStub([] as unknown as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([]);
 
       return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
@@ -159,15 +158,15 @@ describe('context app', function () {
 
     it('should return the first hit after adding an anchor marker', function () {
       searchSourceStub = createSearchSourceStub([
-        { property1: 'value1' },
-        { property2: 'value2' },
-      ] as unknown as EsHitRecordList);
+        { _id: '1', _index: 't' },
+        { _id: '3', _index: 't' },
+      ]);
 
       return fetchAnchor('id', indexPattern, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
-        expect(anchorDocument).toHaveProperty('property1', 'value1');
+        expect(anchorDocument).toHaveProperty('raw._id', '1');
         expect(anchorDocument).toHaveProperty('isAnchor', true);
       });
     });
@@ -175,7 +174,7 @@ describe('context app', function () {
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 't' }]);
     });
 
     it('should request fields if useNewFieldsApi set', function () {

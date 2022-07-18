@@ -15,7 +15,9 @@ import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { buildDataTableRecord } from '../utils/build_data_record';
 
+const index = 'test-index';
 const mockSearchResult = new Subject();
 const services = {
   data: {
@@ -39,16 +41,27 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, false);
+    const actual = buildSearchBody('1', index, indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "_source": true,
           "fields": Array [],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -64,7 +77,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -75,9 +88,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -94,7 +118,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true, true);
+    const actual = buildSearchBody('1', index, indexPattern, true, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -106,9 +130,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -137,7 +172,7 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -148,9 +183,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
               ],
             },
           },
@@ -195,7 +241,7 @@ describe('Test of <Doc /> helper / hook', () => {
       getComputedFields: () => [],
     };
 
-    const record = { test: 1 };
+    const record = { _id: '1', _index: 't', test: 1 };
 
     const props = {
       id: '1',
@@ -233,6 +279,9 @@ describe('Test of <Doc /> helper / hook', () => {
       await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([ElasticRequestState.Found, record]);
+    expect(hook.result.current.slice(0, 2)).toEqual([
+      ElasticRequestState.Found,
+      buildDataTableRecord(record),
+    ]);
   });
 });

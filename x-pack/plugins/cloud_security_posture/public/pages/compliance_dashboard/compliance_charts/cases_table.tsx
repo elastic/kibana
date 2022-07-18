@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import * as TEXT from '../translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const CasesTable = () => {
   return (
@@ -17,7 +17,12 @@ export const CasesTable = () => {
         <EuiIcon type="visualizeApp" size="xl" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">{TEXT.COMING_SOON}</EuiText>
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.csp.dashboard.casesTable.placeholderTitle"
+            defaultMessage="Coming soon"
+          />
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

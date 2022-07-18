@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
@@ -23,7 +23,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { catchAndWrapError, getTimeSortedActionListLogEntries } from '../../utils';
+import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
@@ -106,7 +106,7 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs } = getActionCompletionInfo(
     normalizedActionRequest.agents,
     actionResponses
   );
@@ -116,15 +116,15 @@ export const getActionDetailsById = async (
     agents: normalizedActionRequest.agents,
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
-    logEntries: getTimeSortedActionListLogEntries([
-      ...actionRequestsLogEntries,
-      ...actionResponses,
-    ]),
     isCompleted,
     completedAt,
     wasSuccessful,
     errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    outputs,
+    createdBy: normalizedActionRequest.createdBy,
+    comment: normalizedActionRequest.comment,
+    parameters: normalizedActionRequest.parameters,
   };
 
   return actionDetails;

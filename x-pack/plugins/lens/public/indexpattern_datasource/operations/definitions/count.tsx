@@ -40,7 +40,7 @@ export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
   };
 };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
@@ -52,6 +52,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
+  allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -112,50 +113,40 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CountIndexPatternColumn>) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
-        optionElement: (
-          <>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                defaultMessage: 'Hide zero values',
-              })}
-              labelProps={{
-                style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
-                },
-              }}
-              checked={Boolean(currentColumn.params?.emptyAsNull)}
-              onChange={() => {
-                updateLayer(
-                  updateColumnParam({
-                    layer,
-                    columnId,
-                    paramName: 'emptyAsNull',
-                    value: !currentColumn.params?.emptyAsNull,
-                  })
-                );
-              }}
-              compressed
-            />
-          </>
+        inlineElement: (
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+              defaultMessage: 'Hide zero values',
+            })}
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
         ),
-        title: '',
-        showInPopover: true,
-        inlineElement: null,
-        onClick: () => {},
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
-      layer,
-      thisColumnId,
-      changedColumnId
-    ),
+  onOtherColumnChanged: (layer, thisColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
       id: columnId,

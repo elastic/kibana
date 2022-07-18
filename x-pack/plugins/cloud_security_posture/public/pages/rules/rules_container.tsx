@@ -7,8 +7,12 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { cspRuleAssetSavedObjectType } from '../../../common/constants';
-import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
+import { i18n } from '@kbn/i18n';
+import {
+  extractErrorMessage,
+  createCspRuleSearchFilterByPackagePolicy,
+  isNonNullable,
+} from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
@@ -21,7 +25,7 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { DATA_UPDATE_INFO } from './translations';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -34,9 +38,6 @@ interface RulesPageData {
 }
 
 export type RulesState = RulesPageData & RulesQuery;
-
-const getSimpleQueryString = (searchValue?: string): string =>
-  searchValue ? `${searchValue}*` : '';
 
 const getChangedRules = (
   baseRules: ReadonlyMap<string, RuleSavedObject>,
@@ -93,6 +94,7 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 
 export const RulesContainer = () => {
+  const canUpdate = !!useKibana().services.application.capabilities.siem.crud;
   const params = useParams<PageUrlParams>();
   const tableRef = useRef<EuiBasicTable>(null);
   const [changedRules, setChangedRules] = useState<Map<string, RuleSavedObject>>(new Map());
@@ -100,7 +102,10 @@ export const RulesContainer = () => {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: `${cspRuleAssetSavedObjectType}.attributes.policy_id: "${params.policyId}" and ${cspRuleAssetSavedObjectType}.attributes.package_policy_id: "${params.packagePolicyId}"`,
+    filter: createCspRuleSearchFilterByPackagePolicy({
+      packagePolicyId: params.packagePolicyId,
+      policyId: params.policyId,
+    }),
     search: '',
     page: 0,
     perPage: 10,
@@ -108,7 +113,7 @@ export const RulesContainer = () => {
 
   const { data, status, error, refetch } = useFindCspRules({
     filter: rulesQuery.filter,
-    search: getSimpleQueryString(rulesQuery.search),
+    search: rulesQuery.search,
     page: 1,
     perPage: MAX_ITEMS_PER_PAGE,
   });
@@ -169,7 +174,14 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiCallOut size="m" title={DATA_UPDATE_INFO} iconType="iInCircle" />
+      <EuiCallOut
+        size="m"
+        title={i18n.translate('xpack.csp.rules.rulesContainerCallout.dataUpdateCalloutTitle', {
+          defaultMessage:
+            'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated. This can take up to ~5 hours',
+        })}
+        iconType="iInCircle"
+      />
       <EuiSpacer />
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
@@ -189,6 +201,7 @@ export const RulesContainer = () => {
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
           lastModified={rulesPageData.lastModified}
+          canUpdate={canUpdate}
         />
         <EuiSpacer />
         <RulesTable
@@ -209,6 +222,7 @@ export const RulesContainer = () => {
           }
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
+          canUpdate={canUpdate}
         />
       </EuiPanel>
       {hasChanges && (
@@ -219,6 +233,7 @@ export const RulesContainer = () => {
           rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
           onClose={() => setSelectedRuleId(null)}
           toggleRule={toggleRule}
+          canUpdate={canUpdate}
         />
       )}
     </div>
