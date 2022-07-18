@@ -1950,8 +1950,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Moving average',
       'Percentile',
       'Percentile rank',
+      'Standard deviation',
       'Sum',
       'Unique count',
+      ' ',
     ]);
   });
 

@@ -92,6 +92,7 @@ describe('getOperationTypesForField', () => {
         'min',
         'max',
         'unique_count',
+        'standard_deviation',
         'percentile',
         'percentile_rank',
         'last_value',
@@ -117,6 +118,7 @@ describe('getOperationTypesForField', () => {
         'min',
         'max',
         'unique_count',
+        'standard_deviation',
         'percentile',
         'percentile_rank',
         'last_value',
@@ -364,6 +366,11 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "unique_count",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "standard_deviation",
                 "type": "field",
               },
               Object {

@@ -59,6 +59,7 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
