@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
 
-GET _search
+# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }
 
@@ -51,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();

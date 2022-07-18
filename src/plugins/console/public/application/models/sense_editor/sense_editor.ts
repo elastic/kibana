@@ -248,7 +248,7 @@ export class SenseEditor {
 
     request.url = '';
 
-    while (t && t.type && t.type.indexOf('url') === 0) {
+    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.template')) {
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -256,6 +256,12 @@ export class SenseEditor {
       // if the url row ends with some spaces, skip them.
       t = this.parser.nextNonEmptyToken(tokenIter);
     }
+
+    // If the url row ends with a comment, skip it
+    while (this.parser.isCommentToken(t)) {
+      t = tokenIter.stepForward();
+    }
+
     let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentPosition().lineNumber; // artificially increase end of docs.
     let dataEndPos: Position;
     while (
@@ -291,7 +297,6 @@ export class SenseEditor {
     }
 
     const expandedRange = await this.expandRangeToRequestEdges(range);
-
     if (!expandedRange) {
       return [];
     }
