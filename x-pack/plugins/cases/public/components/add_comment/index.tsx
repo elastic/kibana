@@ -147,7 +147,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {permissions.all && (
+          {permissions.create && (
             <Form form={form}>
               <UseField
                 path={fieldName}
