@@ -66,15 +66,17 @@ export const getCspRules = (
 };
 
 const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
-  rules.reduce((benchmarks, rule) => {
-    const benchmarkId = rule.attributes.metadata.benchmark.id;
-    if (!rule.attributes.enabled || !benchmarkId) return benchmarks;
+  rules.reduce<CspRulesConfiguration['data_yaml']['activated_rules']>(
+    (benchmarks, rule) => {
+      const benchmark = benchmarks[rule.attributes.metadata.benchmark.id];
+      if (!rule.attributes.enabled || !benchmark) return benchmarks;
 
-    benchmarks[benchmarkId] = benchmarks[benchmarkId] || [];
-    benchmarks[benchmarkId].push(rule.attributes.metadata.rego_rule_id);
+      benchmark.push(rule.attributes.metadata.rego_rule_id);
 
-    return benchmarks;
-  }, {} as CspRulesConfiguration['data_yaml']['activated_rules']);
+      return benchmarks;
+    },
+    { cis_k8s: [], cis_eks: [] }
+  );
 
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRule>
