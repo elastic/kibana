@@ -1,92 +1,97 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "title": "Machine learning APIs",
-    "version": "0.1",
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1",
+    "title" : "Machine learning APIs",
     "description": "Kibana APIs for the machine learning feature",
+    "termsOfService" : "",
     "license": {
       "name": "Elastic License 2.0",
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "host": "localhost:5601",
-  "basePath": "/",
-  "schemes": [
-    "https"
-  ],
-  "tags": [
-    {
-      "name": "ml",
-      "description": "Machine learning"
+  "host" : "localhost:5601",
+  "basePath" : "/",
+  "tags" : [ {
+    "name" : "ml",
+    "description": "Machine learning"
+  } ],
+  "schemes" : [ "https" ],
+  "security" : [
+  {
+    "basicAuth": [ ]
     }
   ],
-  "paths": {
-    "/s/{spaceId}/api/ml/saved_objects/sync": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models.",
-        "description": "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
-        "tags": [
-          "ml"
-        ],
-        "parameters": [
-          {
-            "name": "simulate",
-            "description": "When true, simulates the synchronization by returning only the list actions that would be performed.",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-example": "true"
-          },
-          {
-            "name": "spaceId",
-            "description": "An identifier for the space.",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call",
-            "schema": {
-              "$ref": "#/definitions/SyncResponse"
+  "paths" : {
+    "/s/{spaceId}/api/ml/saved_objects/sync" : {
+      "get" : {
+        "tags" : [ "ml" ],
+        "summary" : "Synchronize Kibana saved objects for machine learning jobs and trained models",
+        "description" : "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.",
+        "operationId" : "ml-sync",
+        "parameters" : [ {
+          "name" : "spaceId",
+          "in" : "path",
+          "description" : "An identifier for the space.",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "simulate",
+          "in" : "query",
+          "description" : "When true, simulates the synchronization by returning only the list actions that would be performed.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Indicates a successful call.",
+            "schema" : {
+              "$ref" : "#/definitions/SyncResponse"
             }
           }
+        },
+        "x-doc" : {
+          "tag" : "Machine learning APIs"
         }
       }
     },
-    "/api/ml/saved_objects/sync": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Synchronizes Kibana saved objects for machine learning jobs and trained models.",
-        "description": "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.\n",
-        "tags": [
-          "ml"
-        ],
-        "parameters": [
-          {
-            "name": "simulate",
-            "description": "When true, simulates the synchronization by returning only the list actions that would be performed.",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "x-example": "true"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call",
-            "schema": {
-              "$ref": "#/definitions/SyncResponse"
+    "/api/ml/saved_objects/sync" : {
+      "get" : {
+        "tags" : [ "ml" ],
+        "summary" : "Synchronize Kibana saved objects for machine learning jobs and trained models in the default space",
+        "description" : "You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.",
+        "operationId" : "ml-sync-default",
+        "parameters" : [ {
+          "name" : "simulate",
+          "in" : "query",
+          "description" : "When true, simulates the synchronization by returning only the list actions that would be performed.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Indicates a successful call.",
+            "schema" : {
+              "$ref" : "#/definitions/SyncResponse"
             }
           }
+        },
+        "x-doc" : {
+          "tag" : "Machine learning APIs"
         }
       }
+    }
+  },
+  "securityDefinitions" : {
+    "apiKey" : {
+      "type" : "apiKey",
+      "name" : "Authorization",
+      "in" : "header"
+    },
+    "basicAuth": {
+      "type": "basic"
     }
   },
   "definitions": {
