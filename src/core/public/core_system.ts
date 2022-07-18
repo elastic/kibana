@@ -164,7 +164,7 @@ export class CoreSystem {
       key1: LOAD_START,
       value1: timing[LOAD_START],
       key2: LOAD_BOOTSTRAP_START,
-      value2: timing[LOAD_CORE_CREATED],
+      value2: timing[LOAD_BOOTSTRAP_START],
       key3: LOAD_CORE_CREATED,
       value3: timing[LOAD_CORE_CREATED],
       key4: LOAD_SETUP_DONE,

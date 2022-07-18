@@ -37,11 +37,18 @@ import {
   AnalyticsServiceConstructor,
   MockAnalyticsService,
   analyticsServiceStartMock,
-  fetchOptionalMemoryInfoMock,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
-import { KIBANA_LOADED_EVENT } from './utils';
+import {
+  KIBANA_LOADED_EVENT,
+  LOAD_START,
+  LOAD_BOOTSTRAP_START,
+  LOAD_CORE_CREATED,
+  LOAD_FIRST_NAV,
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
+} from './utils';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -76,12 +83,28 @@ beforeEach(() => {
   window.performance.clearMarks = jest.fn();
   window.performance.getEntriesByName = jest.fn().mockReturnValue([
     {
-      detail: 'load_started',
-      startTime: 456,
+      detail: LOAD_START,
+      startTime: 111,
     },
     {
-      detail: 'bootstrap_started',
-      startTime: 123,
+      detail: LOAD_BOOTSTRAP_START,
+      startTime: 222,
+    },
+    {
+      detail: LOAD_CORE_CREATED,
+      startTime: 333,
+    },
+    {
+      detail: LOAD_SETUP_DONE,
+      startTime: 444,
+    },
+    {
+      detail: LOAD_START_DONE,
+      startTime: 555,
+    },
+    {
+      detail: LOAD_FIRST_NAV,
+      startTime: 666,
     },
   ]);
 });
@@ -263,23 +286,21 @@ describe('#start()', () => {
   });
 
   it('reports the event Loaded Kibana (with memory)', async () => {
-    fetchOptionalMemoryInfoMock.mockReturnValue({
-      load_started: 456,
-      bootstrap_started: 123,
-      memory_js_heap_size_limit: 3,
-      memory_js_heap_size_total: 2,
-      memory_js_heap_size_used: 1,
-    });
-
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
-      load_started: 456,
-      bootstrap_started: 123,
       kibana_version: '1.2.3',
-      memory_js_heap_size_limit: 3,
-      memory_js_heap_size_total: 2,
-      memory_js_heap_size_used: 1,
+      duration: 666,
+      key1: LOAD_START,
+      key2: LOAD_BOOTSTRAP_START,
+      key3: LOAD_CORE_CREATED,
+      key4: LOAD_SETUP_DONE,
+      key5: LOAD_START_DONE,
+      value1: 111,
+      value2: 222,
+      value3: 333,
+      value4: 444,
+      value5: 555,
       protocol: 'http:',
     });
   });
