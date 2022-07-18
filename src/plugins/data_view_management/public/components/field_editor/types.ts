@@ -9,6 +9,7 @@
 import { ReactText } from 'react';
 import { Query } from '@kbn/es-query';
 import { HttpStart } from '@kbn/core/public';
+import { estypes } from '@elastic/elasticsearch';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;
 export interface Sample {
@@ -27,8 +28,8 @@ export interface ExecuteScriptParams {
 
 export interface ExecuteScriptResult {
   status: number;
-  hits?: { hits: any[] };
-  error?: any;
+  hits?: { hits: Array<estypes.SearchHit<object>> };
+  error?: unknown;
 }
 
 export type ExecuteScript = (params: ExecuteScriptParams) => Promise<ExecuteScriptResult>;
