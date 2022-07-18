@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RuleStatus } from '../../../types';
 
 export const mapFilterToKueryNode = ({
@@ -30,13 +30,17 @@ export const mapFilterToKueryNode = ({
       nodeBuilder.or(typesFilter.map((tf) => nodeBuilder.is('alert.attributes.alertTypeId', tf)))
     );
   }
+
   if (actionTypesFilter && actionTypesFilter.length) {
     filterKueryNode.push(
       nodeBuilder.or(
-        actionTypesFilter.map((atf) => nodeBuilder.is('alert.attributes.actions.actionTypeId', atf))
+        actionTypesFilter.map((atf) =>
+          fromKueryExpression(`alert.attributes.actions:{ actionTypeId: ${atf} }`)
+        )
       )
     );
   }
+
   if (ruleExecutionStatusesFilter && ruleExecutionStatusesFilter.length) {
     filterKueryNode.push(
       nodeBuilder.or(
@@ -49,14 +53,14 @@ export const mapFilterToKueryNode = ({
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const snoozedFilter = nodeBuilder.or([
-      nodeBuilder.is('alert.attributes.muteAll', 'true'),
-      nodeTypes.function.buildNode('range', 'alert.attributes.isSnoozedUntil', 'lt', 'now'),
+      fromKueryExpression('alert.attributes.muteAll: true'),
+      nodeTypes.function.buildNode('range', 'alert.attributes.isSnoozedUntil', 'gt', 'now'),
     ]);
     const enabledFilter = nodeBuilder.and([
-      nodeBuilder.is('alert.attributes.enabled', 'true'),
+      fromKueryExpression('alert.attributes.enabled: true'),
       nodeTypes.function.buildNode('not', snoozedFilter),
     ]);
-    const disabledFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
+    const disabledFilter = fromKueryExpression('alert.attributes.enabled: false');
 
     const ruleStatusesFilterKueryNode = [];
 
@@ -74,6 +78,12 @@ export const mapFilterToKueryNode = ({
       );
     }
     filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
+  }
+
+  if (tagsFilter && tagsFilter.length) {
+    filterKueryNode.push(
+      nodeBuilder.or(tagsFilter.map((tag) => nodeBuilder.is('alert.attributes.tags', tag)))
+    );
   }
 
   if (searchText && searchText !== '') {
