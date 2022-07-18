@@ -1045,7 +1045,6 @@ export const ECSMappingEditorField = React.memo(
 
         if (itemKey) {
           const serializedFormData = formDataSerializer();
-          console.error('serializedFormData', serializedFormData);
           const itemValue =
             serializedFormData[path] &&
             (serializedFormData[path][`${itemKey}`]?.field ||
