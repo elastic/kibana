@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const NEW_INDEX_TEMPLATE_TYPES: { [key: string]: string } = {
@@ -60,9 +61,11 @@ export const DOCUMENTS_API_JSON_EXAMPLE = [
   },
 ];
 
-export const SUPPORTED_LANGUAGES = [
+export const UNIVERSAL_LANGUAGE_VALUE = '';
+
+export const SUPPORTED_LANGUAGES: EuiSelectOption[] = [
   {
-    value: 'Universal',
+    value: UNIVERSAL_LANGUAGE_VALUE,
     text: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.supportedLanguages.universalDropDownOptionLabel',
       {
@@ -201,5 +204,3 @@ export const SUPPORTED_LANGUAGES = [
     ),
   },
 ];
-
-export const DEFAULT_LANGUAGE = 'Universal';
