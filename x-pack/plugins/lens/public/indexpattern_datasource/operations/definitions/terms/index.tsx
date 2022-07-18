@@ -924,6 +924,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               }
               data-test-subj="indexPattern-terms-advanced"
             >
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
                   <EuiText size="xs">

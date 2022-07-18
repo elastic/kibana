@@ -1589,7 +1589,7 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field-0"]').at(1).prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({

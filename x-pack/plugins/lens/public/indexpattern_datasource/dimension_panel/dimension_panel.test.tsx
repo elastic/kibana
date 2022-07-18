@@ -1798,23 +1798,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-      'Average',
-      'Count',
-      'Counter rate',
-      'Cumulative sum',
-      'Differences',
-      'Last value',
-      'Maximum',
-      'Median',
-      'Minimum',
-      'Moving average',
-      'Percentile',
-      'Percentile rank',
-      'Standard deviation',
-      'Sum',
-      'Unique count',
-      ' ',
+    expect(items.map(({ id }) => id)).toEqual([
+      'average',
+      'count',
+      'counter_rate',
+      'cumulative_sum',
+      'differences',
+      'last_value',
+      'max',
+      'median',
+      'min',
+      'moving_average',
+      'percentile',
+      'percentile_rank',
+      'standard_deviation',
+      'sum',
+      'unique_count',
+      undefined,
     ]);
   });
 

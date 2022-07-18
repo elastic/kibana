@@ -325,13 +325,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
-      // let color: EuiListGroupItemProps['color'] = 'primary';
-      // if (isActive) {
-      //   color = 'text';
-      // } else if (!compatibleWithCurrentField) {
-      //   color = 'subdued';
-      // }
-
       let label: EuiListGroupItemProps['label'] = operationDisplay[operationType].displayName;
       if (isActive && disabledStatus) {
         label = (

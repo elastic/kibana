@@ -151,7 +151,7 @@ export const DimensionEditorButtonGroups = ({
       <EuiText
         size="s"
         css={css`
-          margin: ${euiTheme.size.s} ${euiTheme.size.base} 0;
+          margin: ${euiTheme.size.base} ${euiTheme.size.base} 8px;
         `}
       >
         <h5>

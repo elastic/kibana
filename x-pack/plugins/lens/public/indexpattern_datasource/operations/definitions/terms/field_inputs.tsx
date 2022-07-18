@@ -180,7 +180,11 @@ export function FieldInputs({
                           onFieldSelectChange(choice, index);
                         }}
                         isInvalid={shouldShowError}
-                        data-test-subj={`indexPattern-dimension-field-${index}`}
+                        data-test-subj={
+                          localValues.length !== 1
+                            ? `indexPattern-dimension-field-${index}`
+                            : undefined
+                        }
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
