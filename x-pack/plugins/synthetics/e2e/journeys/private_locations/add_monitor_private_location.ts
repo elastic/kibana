@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { assertText } from '@kbn/observability-plugin/e2e/utils';
+import { assertText, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
 
 journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => {
@@ -38,7 +38,7 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
     expect(page.url()).toBe(`${kibanaUrl}/app/uptime/add-monitor`);
     await page.click('input[name="name"]');
     await page.fill('input[name="name"]', 'Private location monitor');
-    await page.click('label:has-text("Test private location Private")');
+    await page.click('label:has-text("Test private location Private")', TIMEOUT_60_SEC);
     await page.selectOption('select', 'http');
     await page.click(
       'text=Monitor nameMonitor locationsTest private location Private Monitor TypeBrowser ( >> :nth-match(input[type="text"], 2)'
