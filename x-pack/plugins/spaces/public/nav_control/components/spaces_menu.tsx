@@ -37,11 +37,12 @@ interface Props {
   spaces: Space[];
   isLoading: boolean;
   serverBasePath: string;
-  onManageSpacesClick: () => void;
+  toggleSpaceSelector: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  readonly activeSpace: Space | null;
 }
 
 // interface State {
@@ -132,6 +133,9 @@ class SpacesMenuUI extends Component<Props> {
 
   private getSpaceOptions = (): EuiSelectableOption[] => {
     return this.props.spaces.map((space) => {
+      // const strLabel = space.name.concat(
+      //   this.props.activeSpace?.id === space.id ? ' (active)' : ''
+      // );
       return {
         'aria-label': space.name,
         'aria-roledescription': 'space',
@@ -156,8 +160,6 @@ class SpacesMenuUI extends Component<Props> {
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
     if (!!selectedSpaceItem) {
-      // ToDo: check if the selected space is already the active space, find a way to gracefully close the popover
-
       const urlToSelectedSpace = addSpaceIdToPath(
         this.props.serverBasePath,
         selectedSpaceItem.key, // the key is the unique space id
@@ -169,20 +171,26 @@ class SpacesMenuUI extends Component<Props> {
       // console.log(`**** Native Event: ${event.nativeEvent}`);
       // console.log(`**** Event Type: ${event.type}`);
       // console.log(`**** Event Default Prevented: ${event.defaultPrevented}`);
+      let middleClick = false;
+      if (event.type === 'click') {
+        middleClick = (event as React.MouseEvent).button === 1;
+      }
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
         // console.log(`**** SHIFT CLICK`);
+        this.props.toggleSpaceSelector();
         window.open(urlToSelectedSpace);
-      } else if (event.ctrlKey || event.metaKey) {
+      } else if (event.ctrlKey || event.metaKey || middleClick) {
         // Open in new tab - either a ctrl click or middle mouse button
         // console.log(`**** CTRL/CMD CLICK`);
         window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
-        // console.log(`**** URL: ${urlToSelectedSpace}`);
         // console.log(`**** NORMAL CLICK`);
-        this.props.navigateToUrl(urlToSelectedSpace);
+        // If the selected space is already the active space, gracefully close the popover
+        if (this.props.activeSpace?.id === selectedSpaceItem.key) this.props.toggleSpaceSelector();
+        else this.props.navigateToUrl(urlToSelectedSpace);
       }
     }
   };
@@ -193,7 +201,7 @@ class SpacesMenuUI extends Component<Props> {
         key="manageSpacesButton"
         className="spcMenu__manageButton"
         size="s"
-        onClick={this.props.onManageSpacesClick}
+        onClick={this.props.toggleSpaceSelector}
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}
       />

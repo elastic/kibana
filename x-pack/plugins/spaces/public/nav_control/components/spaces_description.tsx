@@ -18,7 +18,7 @@ import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
   id: string;
-  onManageSpacesClick: () => void;
+  toggleSpaceSelector: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
@@ -39,7 +39,7 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}
-          onClick={props.onManageSpacesClick}
+          onClick={props.toggleSpaceSelector}
           capabilities={props.capabilities}
           navigateToApp={props.navigateToApp}
         />

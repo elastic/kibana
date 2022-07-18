@@ -79,7 +79,7 @@ export class NavControlPopover extends Component<Props, State> {
       element = (
         <SpacesDescription
           id={popoutContentId}
-          onManageSpacesClick={this.toggleSpaceSelector}
+          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
         />
@@ -91,10 +91,11 @@ export class NavControlPopover extends Component<Props, State> {
           spaces={this.state.spaces}
           isLoading={this.state.loading}
           serverBasePath={this.props.serverBasePath}
-          onManageSpacesClick={this.toggleSpaceSelector}
+          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
           navigateToUrl={this.props.navigateToUrl}
+          activeSpace={this.state.activeSpace}
         />
       );
     }
@@ -177,7 +178,7 @@ export class NavControlPopover extends Component<Props, State> {
     );
   };
 
-  private toggleSpaceSelector = () => {
+  protected toggleSpaceSelector = () => {
     const isOpening = !this.state.showSpaceSelector;
     if (isOpening) {
       this.loadSpaces();
