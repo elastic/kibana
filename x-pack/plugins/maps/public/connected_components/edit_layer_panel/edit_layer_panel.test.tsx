@@ -92,6 +92,9 @@ const mockLayer = {
   getDescriptor: () => {
     return {};
   },
+  getStyleForEditing: () => {
+    return {};
+  },
 } as unknown as ILayer;
 
 const defaultProps = {
