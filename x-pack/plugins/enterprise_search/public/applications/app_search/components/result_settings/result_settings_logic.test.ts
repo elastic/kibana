@@ -57,7 +57,7 @@ describe('ResultSettingsLogic', () => {
     isSnippetAllowed: (_: string) => true,
   };
 
-  const FUNCTIONAL_SELECTORS = ['fieldCapabilities', 'isSnippetAllowed']
+  const FUNCTIONAL_SELECTORS = ['isSnippetAllowed']
 
   // Values without selectors
   const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
@@ -329,6 +329,10 @@ describe('ResultSettingsLogic', () => {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: false, snippetFallback: false },
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Text, capabilities: {} },
+          }
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(true);
@@ -340,6 +344,10 @@ describe('ResultSettingsLogic', () => {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: true, snippetFallback: false },
           },
+          schema: {
+            foo: { type: SchemaType.Text, capabilities: {} },
+            bar: { type: SchemaType.Text, capabilities: {} },
+          }
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(false);

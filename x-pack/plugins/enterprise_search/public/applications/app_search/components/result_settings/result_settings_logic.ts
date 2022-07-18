@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { AdvancedSchema, SchemaConflicts, SchemaFieldCapabilities, SchemaType } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
@@ -80,7 +80,6 @@ interface ResultSettingsValues {
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
-  fieldCapabilities: (fieldName: string) => SchemaFieldCapabilities;
   isSnippetAllowed: (fieldName: string) => boolean;
 }
 

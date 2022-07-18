@@ -10,7 +10,6 @@ import { isEqual } from 'lodash';
 import { AdvancedSchema, SchemaType } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
-import { ResultSettings } from './result_settings';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
