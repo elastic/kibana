@@ -1176,9 +1176,17 @@ export const tasks: TelemetryTask[] = [
                     size: 1000,
                   },
                   aggs: {
-                    top_hits: {
-                      top_hits: {
-                        size: 1,
+                    top_metrics: {
+                      top_metrics: {
+                        sort: '_score',
+                        metrics: [
+                          {
+                            field: 'agent.name',
+                          },
+                          {
+                            field: 'agent.version',
+                          },
+                        ],
                       },
                     },
                     cloud_region: {
@@ -1230,8 +1238,9 @@ export const tasks: TelemetryTask[] = [
                 ) ?? [],
             },
             agent: {
-              name: serviceBucket.top_hits?.hits.hits[0].agent.name,
-              version: serviceBucket.top_hits?.hits.hits[0].agent.version,
+              name: serviceBucket.top_metrics?.top[0].metrics['agent.name'],
+              version:
+                serviceBucket.top_metrics?.top[0].metrics['agent.version'],
             },
           };
         });
