@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDataGrid,
   EuiDataGridStyle,
   Pagination,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
+  EuiDataGridColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiBadge,
+  EuiDataGridCellPopoverElementProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -21,176 +29,11 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
+import { RuleActionErrorBadge } from './rule_action_error_badge';
 
 const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
 };
-
-const columns = [
-  {
-    id: 'id',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.id',
-      {
-        defaultMessage: 'Id',
-      }
-    ),
-    isSortable: getIsColumnSortable('id'),
-  },
-  {
-    id: 'timestamp',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timestamp',
-      {
-        defaultMessage: 'Timestamp',
-      }
-    ),
-    isSortable: getIsColumnSortable('timestamp'),
-    initialWidth: 250,
-  },
-  {
-    id: 'execution_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.duration',
-      {
-        defaultMessage: 'Duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('execution_duration'),
-    initialWidth: 100,
-  },
-  {
-    id: 'status',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.status',
-      {
-        defaultMessage: 'Status',
-      }
-    ),
-    isSortable: getIsColumnSortable('status'),
-    initialWidth: 100,
-  },
-  {
-    id: 'message',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
-      {
-        defaultMessage: 'Message',
-      }
-    ),
-    isSortable: getIsColumnSortable('message'),
-  },
-  {
-    id: 'num_active_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.activeAlerts',
-      {
-        defaultMessage: 'Active alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_active_alerts'),
-  },
-  {
-    id: 'num_new_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.newAlerts',
-      {
-        defaultMessage: 'New alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_new_alerts'),
-  },
-  {
-    id: 'num_recovered_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.recoveredAlerts',
-      {
-        defaultMessage: 'Recovered alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_recovered_alerts'),
-  },
-  {
-    id: 'num_triggered_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
-      {
-        defaultMessage: 'Triggered actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_triggered_actions'),
-  },
-  {
-    id: 'num_generated_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
-      {
-        defaultMessage: 'Generated actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_generated_actions'),
-  },
-  {
-    id: 'num_succeeded_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActions',
-      {
-        defaultMessage: 'Succeeded actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_succeeded_actions'),
-  },
-  {
-    id: 'num_errored_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
-      {
-        defaultMessage: 'Errored actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_errored_actions'),
-  },
-  {
-    id: 'total_search_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.totalSearchDuration',
-      {
-        defaultMessage: 'Total search duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('total_search_duration'),
-  },
-  {
-    id: 'es_search_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.esSearchDuration',
-      {
-        defaultMessage: 'ES search duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('es_search_duration'),
-  },
-  {
-    id: 'schedule_delay',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduleDelay',
-      {
-        defaultMessage: 'Schedule delay',
-      }
-    ),
-    isSortable: getIsColumnSortable('schedule_delay'),
-  },
-  {
-    id: 'timed_out',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timedOut',
-      {
-        defaultMessage: 'Timed out',
-      }
-    ),
-    isSortable: getIsColumnSortable('timed_out'),
-  },
-];
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
@@ -208,6 +51,7 @@ export interface RuleEventLogDataGrid {
   pageSizeOptions?: number[];
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
+  onModalOpen: (runLog: IExecutionLog) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
 }
@@ -224,7 +68,205 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     setSortingColumns,
     onChangeItemsPerPage,
     onChangePage,
+    onModalOpen,
   } = props;
+
+  const { euiTheme } = useEuiTheme();
+
+  const getPaginatedRowIndex = useCallback(
+    (rowIndex: number) => {
+      const { pageIndex, pageSize } = pagination;
+      return rowIndex - pageIndex * pageSize;
+    },
+    [pagination]
+  );
+
+  const columns: EuiDataGridColumn[] = useMemo(
+    () => [
+      {
+        id: 'id',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.id',
+          {
+            defaultMessage: 'Id',
+          }
+        ),
+        isSortable: getIsColumnSortable('id'),
+      },
+      {
+        id: 'timestamp',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
+        isSortable: getIsColumnSortable('timestamp'),
+        initialWidth: 250,
+      },
+      {
+        id: 'execution_duration',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.duration',
+          {
+            defaultMessage: 'Duration',
+          }
+        ),
+        isSortable: getIsColumnSortable('execution_duration'),
+        initialWidth: 100,
+      },
+      {
+        id: 'status',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.status',
+          {
+            defaultMessage: 'Status',
+          }
+        ),
+        isSortable: getIsColumnSortable('status'),
+        initialWidth: 100,
+      },
+      {
+        id: 'message',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
+          {
+            defaultMessage: 'Message',
+          }
+        ),
+        isSortable: getIsColumnSortable('message'),
+        cellActions: [
+          ({ rowIndex, Component }) => {
+            const pagedRowIndex = getPaginatedRowIndex(rowIndex);
+            const runLog = logs[pagedRowIndex];
+            const actionErrors = runLog?.num_errored_actions as number;
+            if (actionErrors) {
+              return (
+                <Component onClick={() => onModalOpen(runLog)} iconType="alert">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.viewActionErrors"
+                    defaultMessage="View action errors"
+                  />
+                </Component>
+              );
+            }
+            return null;
+          },
+        ],
+      },
+      {
+        id: 'num_active_alerts',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.activeAlerts',
+          {
+            defaultMessage: 'Active alerts',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_active_alerts'),
+      },
+      {
+        id: 'num_new_alerts',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.newAlerts',
+          {
+            defaultMessage: 'New alerts',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_new_alerts'),
+      },
+      {
+        id: 'num_recovered_alerts',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.recoveredAlerts',
+          {
+            defaultMessage: 'Recovered alerts',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_recovered_alerts'),
+      },
+      {
+        id: 'num_triggered_actions',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
+          {
+            defaultMessage: 'Triggered actions',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_triggered_actions'),
+      },
+      {
+        id: 'num_generated_actions',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
+          {
+            defaultMessage: 'Generated actions',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_generated_actions'),
+      },
+      {
+        id: 'num_succeeded_actions',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActions',
+          {
+            defaultMessage: 'Succeeded actions',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_succeeded_actions'),
+      },
+      {
+        id: 'num_errored_actions',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
+          {
+            defaultMessage: 'Errored actions',
+          }
+        ),
+        isSortable: getIsColumnSortable('num_errored_actions'),
+      },
+      {
+        id: 'total_search_duration',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.totalSearchDuration',
+          {
+            defaultMessage: 'Total search duration',
+          }
+        ),
+        isSortable: getIsColumnSortable('total_search_duration'),
+      },
+      {
+        id: 'es_search_duration',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.esSearchDuration',
+          {
+            defaultMessage: 'ES search duration',
+          }
+        ),
+        isSortable: getIsColumnSortable('es_search_duration'),
+      },
+      {
+        id: 'schedule_delay',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduleDelay',
+          {
+            defaultMessage: 'Schedule delay',
+          }
+        ),
+        isSortable: getIsColumnSortable('schedule_delay'),
+      },
+      {
+        id: 'timed_out',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timedOut',
+          {
+            defaultMessage: 'Timed out',
+          }
+        ),
+        isSortable: getIsColumnSortable('timed_out'),
+      },
+    ],
+    [getPaginatedRowIndex, onModalOpen, logs]
+  );
 
   const columnVisibilityProps = useMemo(
     () => ({
@@ -252,20 +294,90 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     [pagination, pageSizeOptions, onChangeItemsPerPage, onChangePage]
   );
 
+  const renderMessageWithActionError = (columnId: string, errors: number) => {
+    if (columnId !== 'message') {
+      return null;
+    }
+    if (!errors) {
+      return null;
+    }
+
+    return (
+      <EuiFlexItem grow={false}>
+        <RuleActionErrorBadge totalErrors={errors} showIcon />
+      </EuiFlexItem>
+    );
+  };
+
+  // Renders the cell popover for runs with errored actions
+  const renderCellPopover = (cellPopoverProps: EuiDataGridCellPopoverElementProps) => {
+    const { columnId, rowIndex, cellActions, DefaultCellPopover } = cellPopoverProps;
+
+    if (columnId !== 'message') {
+      return <DefaultCellPopover {...cellPopoverProps} />;
+    }
+
+    const pagedRowIndex = getPaginatedRowIndex(rowIndex);
+    const runLog = logs[pagedRowIndex];
+
+    if (!runLog) {
+      return null;
+    }
+
+    const value = runLog[columnId as keyof IExecutionLog] as string;
+    const actionErrors = runLog.num_errored_actions || (0 as number);
+
+    return (
+      <div style={{ width: '100%' }}>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {renderMessageWithActionError(columnId, actionErrors)}
+          </EuiFlexItem>
+          <EuiFlexItem>{value}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+        {cellActions}
+      </div>
+    );
+  };
+
   // Main cell renderer, renders durations, statuses, etc.
   const renderCell = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-    const { pageIndex, pageSize } = pagination;
-    const pagedRowIndex = rowIndex - pageIndex * pageSize;
+    const pagedRowIndex = getPaginatedRowIndex(rowIndex);
 
+    const runLog = logs[pagedRowIndex];
     const value = logs[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
+    const actionErrors = logs[pagedRowIndex]?.num_errored_actions || (0 as number);
     const version = logs?.[pagedRowIndex]?.version;
+
+    if (columnId === 'num_errored_actions' && runLog) {
+      return (
+        <EuiBadge
+          style={{
+            cursor: 'pointer',
+            borderRadius: euiTheme.border.radius.medium,
+          }}
+          color="hollow"
+          onClick={() => onModalOpen(runLog)}
+          onClickAriaLabel="Open action errors modal"
+        >
+          {value}
+        </EuiBadge>
+      );
+    }
     return (
-      <RuleEventLogListCellRenderer
-        columnId={columnId as ColumnId}
-        value={value}
-        version={version}
-        dateFormat={dateFormat}
-      />
+      <EuiFlexGroup gutterSize="s">
+        {renderMessageWithActionError(columnId, actionErrors)}
+        <EuiFlexItem>
+          <RuleEventLogListCellRenderer
+            columnId={columnId as ColumnId}
+            value={value}
+            version={version}
+            dateFormat={dateFormat}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -286,6 +398,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         sorting={sortingProps}
         pagination={paginationProps}
         gridStyle={gridStyles}
+        renderCellPopover={renderCellPopover}
       />
     </>
   );

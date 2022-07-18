@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -24,6 +25,7 @@ import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constan
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RuleActionErrorLogModal } from './rule_action_error_log_modal';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -44,6 +46,13 @@ const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
   {
     defaultMessage: 'Failed to fetch execution history',
+  }
+);
+
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.searchPlaceholder',
+  {
+    defaultMessage: 'Search event log message',
   }
 );
 
@@ -73,6 +82,11 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     props.customLoadExecutionLogAggregations || props.loadExecutionLogAggregations;
 
   const { uiSettings, notifications } = useKibana().services;
+
+  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | null>(null);
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -131,6 +145,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         id: rule.id,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
+        message: searchText,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
@@ -198,6 +213,35 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination, setFilter]
   );
 
+  const onModalOpen = useCallback((runLog: IExecutionLog) => {
+    setIsModalOpen(true);
+    setSelectedRunLog(runLog);
+  }, []);
+
+  const onModalClose = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedRunLog(null);
+  }, []);
+
+  const onSearchChange = useCallback(
+    (e) => {
+      if (e.target.value === '') {
+        setSearchText('');
+      }
+      setSearch(e.target.value);
+    },
+    [setSearchText, setSearch]
+  );
+
+  const onKeyUp = useCallback(
+    (e) => {
+      if (e.key === 'Enter') {
+        setSearchText(search);
+      }
+    },
+    [search, setSearchText]
+  );
+
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -215,6 +259,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           dateFormat={dateFormat}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
+          onModalOpen={onModalOpen}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
         />
@@ -225,7 +270,15 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    sortingColumns,
+    dateStart,
+    dateEnd,
+    filter,
+    pagination.pageIndex,
+    pagination.pageSize,
+    searchText,
+  ]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -243,6 +296,16 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     <div style={ruleEventListContainerStyle}>
       <EuiSpacer />
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            value={search}
+            onChange={onSearchChange}
+            onKeyUp={onKeyUp}
+            placeholder={SEARCH_PLACEHOLDER}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
         </EuiFlexItem>
@@ -268,6 +331,14 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           documentSize={actualTotalItemCount}
           visibleDocumentSize={MAX_RESULTS}
           backToTopAnchor="rule_event_log_list"
+        />
+      )}
+      {isModalOpen && selectedRunLog && (
+        <RuleActionErrorLogModal
+          rule={rule}
+          runLog={selectedRunLog}
+          refreshToken={refreshToken}
+          onClose={onModalClose}
         />
       )}
     </div>
