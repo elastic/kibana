@@ -19,14 +19,14 @@ export const PolicyHostNeeded = () => {
         <EuiLink href="#">{READ_THE_DOCS}</EuiLink>.
       </p>
       <EuiButton href={`${basePath}/app/fleet/policies?create`} color="primary">
-        {ADD_AGENT_POLICY}
+        {CREATE_AGENT_POLICY}
       </EuiButton>
     </EuiCallOut>
   );
 };
 
-const ADD_AGENT_POLICY = i18n.translate('xpack.synthetics.monitorManagement.addAgentPolicy', {
-  defaultMessage: 'Add an agent policy',
+const CREATE_AGENT_POLICY = i18n.translate('xpack.synthetics.monitorManagement.createAgentPolicy', {
+  defaultMessage: 'Create agent policy',
 });
 
 const ADD_AGENT_POLICY_DESCRIPTION = i18n.translate(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiAccordion,
@@ -47,23 +47,29 @@ export const PrivateLocationsList = ({
 
   const { locations } = useLocationMonitors();
 
+  const [openLocationMap, setOpenLocationMap] = useState<Record<string, boolean>>({});
+
   if (loading) {
     return <EuiLoadingSpinner />;
   }
 
   return (
     <Wrapper>
-      {privateLocations.map((location) => {
+      {privateLocations.map((location, index) => {
         const monCount = locations?.find((l) => l.id === location.id)?.count ?? 0;
         const canDelete = monCount === 0;
         const policy = policies?.items.find((policyT) => policyT.id === location.policyHostId);
         return (
           <div key={location.id}>
             <EuiAccordion
+              data-test-subj={`location-accordion-` + index}
               id={location.id}
               element="fieldset"
               className="euiAccordionForm"
               buttonClassName="euiAccordionForm__button"
+              onToggle={(val) => {
+                setOpenLocationMap((prevState) => ({ [location.id]: val, ...prevState }));
+              }}
               buttonContent={
                 <div>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -126,7 +132,14 @@ export const PrivateLocationsList = ({
               }
               paddingSize="l"
             >
-              <LocationForm onSubmit={onSubmit} loading={loading} location={location} />
+              {openLocationMap[location.id] && (
+                <LocationForm
+                  onSubmit={onSubmit}
+                  loading={loading}
+                  location={location}
+                  privateLocations={privateLocations}
+                />
+              )}
             </EuiAccordion>
             <EuiSpacer />
           </div>

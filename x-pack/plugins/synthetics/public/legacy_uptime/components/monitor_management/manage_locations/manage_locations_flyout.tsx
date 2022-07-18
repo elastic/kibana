@@ -30,13 +30,15 @@ export const ManageLocationsFlyout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI();
+  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({ isOpen });
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAgentPoliciesAction.get());
-  }, [dispatch]);
+    if (isOpen) {
+      dispatch(getAgentPoliciesAction.get());
+    }
+  }, [dispatch, isOpen]);
 
   const closeFlyout = () => {
     setIsOpen(false);
@@ -64,6 +66,7 @@ export const ManageLocationsFlyout = () => {
         <EuiSpacer />
         {isAddingNew && (
           <LocationForm
+            privateLocations={privateLocations}
             onSubmit={(val) => {
               onSubmit(val);
               setIsAddingNew(false);

@@ -14,7 +14,7 @@ import {
   getSyntheticsPrivateLocations,
 } from '../../../../state/private_locations/api';
 
-export const useLocationsAPI = () => {
+export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
 
@@ -23,7 +23,7 @@ export const useLocationsAPI = () => {
   const { data: currentPrivateLocations, loading: fetchLoading } = useFetcher(() => {
     if (!formData) return getSyntheticsPrivateLocations(savedObjects?.client!);
     return Promise.resolve(null);
-  }, [formData, deleteId]);
+  }, [formData, deleteId, isOpen]);
 
   const { loading } = useFetcher(async () => {
     if (currentPrivateLocations && formData) {

@@ -6,17 +6,18 @@
  */
 
 import { getServiceLocations } from '../../synthetics_service/get_service_locations';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { API_URLS } from '../../../common/constants';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 
-export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
+export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SERVICE_LOCATIONS,
   validate: {},
-  handler: async ({ server, savedObjectsClient }): Promise<any> => {
+  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+    const { syntheticsService, privateLocationAPI } = syntheticsMonitorClient;
     const privateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
-    const agentPolicies = await server.syntheticsService.privateLocationAPI.getAgentPolicies();
+    const agentPolicies = await privateLocationAPI.getAgentPolicies();
 
     const privateLocs =
       privateLocations?.map((loc) => ({
@@ -26,8 +27,8 @@ export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
         ...loc,
       })) ?? [];
 
-    if (server.syntheticsService.locations.length > 0) {
-      const { throttling, locations } = server.syntheticsService;
+    if (syntheticsService.locations.length > 0) {
+      const { throttling, locations } = syntheticsService;
 
       return {
         throttling,

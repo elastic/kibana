@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, sortBy } from 'lodash';
+import expect from '@kbn/expect';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 
-export const testSyntheticsPolicy = {
+export const testSyntheticsPolicy: PackagePolicy = {
   id: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
   version: 'WzMyNTcsMV0=',
   name: '5863efe0-0368-11ed-8df7-a7424c6f5167-5347cd10-0368-11ed-8df7-a7424c6f5167',
@@ -238,19 +240,21 @@ export const testSyntheticsPolicy = {
   updated_by: 'system',
 };
 
-export const omitIds = (policy: any) => {
-  policy.inputs[0].streams[0].id = undefined;
-  policy.inputs[1].streams[0].id = undefined;
-  policy.inputs[2].streams[0].id = undefined;
-  policy.inputs[3].streams[0].id = undefined;
-  policy.inputs[3].streams[1].id = undefined;
-  policy.inputs[3].streams[2].id = undefined;
+export const omitIds = (policy: PackagePolicy) => {
+  policy.inputs = sortBy(policy.inputs, 'type');
 
-  // network and browser order changes somehow, so setting them undefined
-  policy.inputs[3].streams[1].data_stream = undefined;
-  policy.inputs[3].streams[2].data_stream = undefined;
+  policy.inputs.forEach((input) => {
+    input.streams = sortBy(input.streams, 'data_stream.dataset');
+    input.streams.forEach((stream) => {
+      stream.id = '';
+    });
+  });
 
   return omit(policy, ignoreTestFields);
+};
+
+export const comparePolicies = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) => {
+  expect(omitIds(aPolicy)).eql(omitIds(bPolicy));
 };
 
 export const ignoreTestFields = [

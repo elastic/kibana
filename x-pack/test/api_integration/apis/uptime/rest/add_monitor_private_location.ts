@@ -12,7 +12,7 @@ import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_mana
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { omitIds, testSyntheticsPolicy } from './sample_data/test_policy';
+import { comparePolicies, testSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      expect(omitIds(packagePolicy)).eql(omitIds(testSyntheticsPolicy));
+      comparePolicies(packagePolicy, testSyntheticsPolicy);
     });
 
     let testFleetPolicyID2: string;
@@ -130,14 +130,15 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-      expect(omitIds(packagePolicy)).eql(omitIds(testSyntheticsPolicy));
+
+      comparePolicies(packagePolicy, testSyntheticsPolicy);
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
-      expect(omitIds(packagePolicy)).eql(omitIds(testSyntheticsPolicy));
+      comparePolicies(packagePolicy, testSyntheticsPolicy);
     });
 
     it('deletes integration for a removed location from monitor', async () => {
@@ -160,7 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-      expect(omitIds(packagePolicy)).eql(omitIds(testSyntheticsPolicy));
+
+      comparePolicies(packagePolicy, testSyntheticsPolicy);
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID2

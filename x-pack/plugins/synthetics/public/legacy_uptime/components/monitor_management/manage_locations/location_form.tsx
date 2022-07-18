@@ -29,11 +29,13 @@ export const LocationForm = ({
   loading,
   location,
   onDiscard,
+  privateLocations,
 }: {
   onSubmit: (val: PrivateLocation) => void;
   onDiscard?: () => void;
   loading?: boolean;
   location?: PrivateLocation;
+  privateLocations: PrivateLocation[];
 }) => {
   const {
     control,
@@ -42,7 +44,7 @@ export const LocationForm = ({
     reset,
     formState: { errors, isValid, isSubmitted, isDirty },
   } = useFormWrapped({
-    mode: 'onSubmit',
+    mode: 'onTouched',
     reValidateMode: 'onChange',
     shouldFocusError: true,
     defaultValues: location || {
@@ -67,15 +69,34 @@ export const LocationForm = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label={LOCATION_NAME_LABEL}>
+            <EuiFormRow
+              label={LOCATION_NAME_LABEL}
+              isInvalid={Boolean(errors?.name)}
+              error={errors?.name?.message}
+            >
               <EuiFieldText
                 aria-label={LOCATION_NAME_LABEL}
-                {...register('name', { required: true })}
+                {...register('name', {
+                  required: {
+                    value: true,
+                    message: NAME_REQUIRED,
+                  },
+                  validate: (val: string) => {
+                    return privateLocations.some((loc) => loc.name === val)
+                      ? NAME_ALREADY_EXISTS
+                      : undefined;
+                  },
+                })}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <PolicyHostsField errors={errors} control={control} isDisabled={Boolean(location)} />
+            <PolicyHostsField
+              errors={errors}
+              control={control}
+              isDisabled={Boolean(location)}
+              privateLocations={privateLocations}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -117,4 +138,12 @@ const UPDATE_LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement
 
 const CREATE_LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',
+});
+
+const NAME_ALREADY_EXISTS = i18n.translate('xpack.synthetics.monitorManagement.alreadyExists', {
+  defaultMessage: 'Location name already exists.',
+});
+
+const NAME_REQUIRED = i18n.translate('xpack.synthetics.monitorManagement.nameRequired', {
+  defaultMessage: 'Location name is required',
 });

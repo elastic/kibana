@@ -34,13 +34,13 @@ export class ServiceAPIClient {
   private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
-  private readonly config: ServiceConfig;
+  private readonly config?: ServiceConfig;
   private readonly kibanaVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
-    const { username, password } = config;
+    const { username, password } = config ?? {};
     this.username = username;
     this.kibanaVersion = server.kibanaVersion;
 
@@ -56,8 +56,8 @@ export class ServiceAPIClient {
   }
 
   getHttpsAgent(url: string) {
-    const config = this.config;
-    if (url !== this.config.devUrl && this.authorization && this.server.isDev) {
+    const config = this.config ?? {};
+    if (url !== config.devUrl && this.authorization && this.server.isDev) {
       return;
     }
     if (config.tls && config.tls.certificate && config.tls.key) {

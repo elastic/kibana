@@ -36,7 +36,7 @@ export class SyntheticsPrivateLocation {
     );
 
     if (!newPolicy) {
-      throw new Error('Could not create new policy');
+      throw new Error('Could not create new synthetics policy');
     }
 
     newPolicy.is_managed = true;
@@ -55,19 +55,23 @@ export class SyntheticsPrivateLocation {
   }
 
   async createMonitor(config: SyntheticsMonitorWithId) {
-    const { locations } = config;
+    try {
+      const { locations } = config;
 
-    const privateLocations = await getSyntheticsPrivateLocations(
-      this.server.authSavedObjectsClient!
-    );
+      const privateLocations = await getSyntheticsPrivateLocations(
+        this.server.authSavedObjectsClient!
+      );
 
-    const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
+      const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-    for (const privateLocation of fleetManagedLocations) {
-      const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
-      const newPolicy = await this.generateNewPolicy(config, location);
+      for (const privateLocation of fleetManagedLocations) {
+        const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
+        const newPolicy = await this.generateNewPolicy(config, location);
 
-      await this.createPolicy(newPolicy, getPolicyId(config, location));
+        await this.createPolicy(newPolicy, getPolicyId(config, location));
+      }
+    } catch (e) {
+      this.server.logger.error(e);
     }
   }
 
@@ -159,25 +163,29 @@ export class SyntheticsPrivateLocation {
   }
 
   async deleteMonitor(config: SyntheticsMonitorWithId) {
-    const { locations } = config;
-
-    const fleetManagedLocationIds = locations.filter((loc) => !loc.isServiceManaged);
-
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && fleetManagedLocationIds.length > 0) {
-      const privateLocations = await getSyntheticsPrivateLocations(soClient);
+    if (soClient && esClient) {
+      const { locations } = config;
 
-      for (const privateLocation of fleetManagedLocationIds) {
-        const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
-        await this.server.fleet.packagePolicyService.delete(
-          soClient,
-          esClient,
-          [getPolicyId(config, location)],
-          {
-            force: true,
+      const allPrivateLocations = await getSyntheticsPrivateLocations(soClient);
+
+      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+      if (monitorPrivateLocations.length > 0) {
+        for (const privateLocation of monitorPrivateLocations) {
+          const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
+          if (location) {
+            await this.server.fleet.packagePolicyService.delete(
+              soClient,
+              esClient,
+              [getPolicyId(config, location)],
+              {
+                force: true,
+              }
+            );
           }
-        );
+        }
       }
     }
   }

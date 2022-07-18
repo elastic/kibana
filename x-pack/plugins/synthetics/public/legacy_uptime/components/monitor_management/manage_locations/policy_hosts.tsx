@@ -26,14 +26,17 @@ export const PolicyHostsField = ({
   isDisabled,
   errors,
   control,
+  privateLocations,
 }: {
   isDisabled: boolean;
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
+  privateLocations: PrivateLocation[];
 }) => {
   const { data } = useSelector(selectAgentPolicies);
 
   const policyHostsOptions = data?.items.map((item) => ({
+    disabled: privateLocations.some((location) => location.policyHostId === item.id),
     value: item.id,
     inputDisplay: (
       <EuiHealth
@@ -43,6 +46,7 @@ export const PolicyHostsField = ({
         {item.name}
       </EuiHealth>
     ),
+    'data-test-subj': item.name,
     dropdownDisplay: (
       <>
         <EuiHealth
