@@ -16,7 +16,8 @@ interface DisabledLinkPanelProps {
   bodyCopy: string;
   buttonCopy?: string;
   dataTestSubjPrefix: string;
-  docLink: string;
+  docLink?: string;
+  learnMoreUrl?: string;
   LinkPanelViewComponent: React.ComponentType<LinkPanelViewProps>;
   listItems: LinkPanelListItem[];
   moreButtons?: React.ReactElement;
@@ -28,6 +29,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   buttonCopy,
   dataTestSubjPrefix,
   docLink,
+  learnMoreUrl,
   LinkPanelViewComponent,
   listItems,
   moreButtons,
@@ -48,7 +50,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
           body={bodyCopy}
           button={
             <EuiFlexGroup>
-              {buttonCopy && (
+              {buttonCopy && docLink && (
                 <EuiFlexItem>
                   <LinkButton
                     color="warning"
@@ -65,7 +67,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
           }
           color="warning"
           dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
-          learnMoreLink={docLink}
+          learnMoreLink={learnMoreUrl}
           title={titleCopy}
         />
       }

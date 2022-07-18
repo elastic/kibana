@@ -36,10 +36,10 @@ export const DANGER_BODY = i18n.translate(
   }
 );
 
-export const DANGER_BUTTON = i18n.translate(
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardDangerPanelButton',
   {
-    defaultMessage: 'Enable Risk Score',
+    defaultMessage: 'Enable via Dev Tools',
   }
 );
 

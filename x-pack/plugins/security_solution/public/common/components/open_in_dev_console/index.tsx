@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 interface OpenInDevConsoleButtonProps {
-  dataTestSubjPrefix?: string;
   enableButton: boolean;
   learnMoreUrl?: string;
   loadFromUrl: string;
@@ -30,7 +29,6 @@ const PopoverWrapper = styled.div`
 `;
 
 const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = ({
-  dataTestSubjPrefix = 'open-in-dev-console',
   enableButton,
   learnMoreUrl,
   loadFromUrl,
@@ -53,7 +51,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
           color="warning"
           target="_self"
           isDisabled={false}
-          data-test-subj={`${dataTestSubjPrefix}-enabled-module-button`}
+          data-test-subj="open-in-console-button"
         >
           {title}
         </EuiButton>
@@ -78,7 +76,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
             href={href}
             color="warning"
             isDisabled={true}
-            data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
+            data-test-subj="disabled-open-in-console-button-with-popover"
           >
             {title}
           </EuiButton>
@@ -88,7 +86,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
           href={href}
           color="warning"
           isDisabled={true}
-          data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
+          data-test-subj="disabled-open-in-console-button"
           onMouseEnter={onMouseEnter}
         >
           {title}

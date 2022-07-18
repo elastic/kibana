@@ -9,7 +9,7 @@ import { EuiButton, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { SavedObjectsImportSuccess } from '@kbn/core/public';
+import type { SavedObjectsImportSuccess } from '@kbn/core/public';
 import { useKibana, useToasts } from '../../../lib/kibana';
 import { bulkCreatePrebuiltSavedObjects } from '../apis/bulk_create_prebuilt_saved_objects';
 import { IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
@@ -98,7 +98,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
     <EuiButton
       href={href ?? undefined}
       isDisabled={!href}
-      data-test-subj="risky-hosts-view-dashboard-button"
+      data-test-subj="view-dashboard-button"
       target="_blank"
     >
       {successTitle}
@@ -109,7 +109,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
       color="warning"
       target="_blank"
       isDisabled={status === 'loading'}
-      data-test-subj={`risky-host-import-module-button`}
+      data-test-subj="create-saved-object-button"
     >
       {status === 'loading' && <EuiLoadingSpinner size="m" />} {title}
     </EuiButton>
@@ -124,7 +124,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
         color="warning"
         target="_blank"
         isDisabled={true}
-        data-test-subj={`risky-host-disabled-import-module-button`}
+        data-test-subj="disabled-create-saved-object-button-with-popover"
       >
         {title}
       </EuiButton>
@@ -134,7 +134,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
       color="warning"
       target="_blank"
       isDisabled={true}
-      data-test-subj={`risky-host-disabled-import-module-button`}
+      data-test-subj="disabled-create-saved-object-button"
     >
       {title}
     </EuiButton>

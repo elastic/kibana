@@ -160,8 +160,15 @@ export const OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL =
   '[data-test-subj="risky-hosts-inner-panel-warning"]';
 export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
   '[data-test-subj="risky-hosts-view-dashboard-button"]';
+export const OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON =
+  '[data-test-subj="create-saved-object-button"]';
+
+export const OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON =
+  '[data-test-subj="disabled-create-saved-object-button-with-popover"]';
+export const OVERVIEW_RISKY_HOSTS_DOC_LINK =
+  '[data-test-subj="risky-hosts-inner-panel-danger-learn-more"]';
 export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON =
-  '[data-test-subj="risky-hosts-enable-module-button"]';
+  '[data-test-subj="disabled-open-in-console-button-with-popover"]';
 
 export const OVERVIEW_ALERTS_HISTOGRAM = '[data-test-subj="alerts-histogram-panel"]';

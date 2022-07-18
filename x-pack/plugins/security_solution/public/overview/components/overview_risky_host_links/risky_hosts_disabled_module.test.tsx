@@ -47,7 +47,9 @@ describe('RiskyHostsModule', () => {
     );
 
     expect(screen.getByTestId('risky-hosts-dashboard-links')).toBeInTheDocument();
-    expect(screen.getByTestId('risky-hosts-view-dashboard-button')).toBeInTheDocument();
-    expect(screen.getByTestId('risky-hosts-enable-module-button')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('disabled-create-saved-object-button-with-popover')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('disabled-open-in-console-button-with-popover')).toBeInTheDocument();
   });
 });
