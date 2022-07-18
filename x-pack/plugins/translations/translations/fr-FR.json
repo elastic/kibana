@@ -22528,7 +22528,6 @@
     "xpack.observability.ruleDetails.rule.eventLogTabText": "Historique d'exécution",
     "xpack.observability.ruleDetails.ruleLoadError": "Impossible de charger la règle. Raison : {message}",
     "xpack.observability.ruleDetails.tagsTitle": "Balises",
-    "xpack.observability.ruleDetails.triggreAction.status": "Statut",
     "xpack.observability.rules.addRuleButtonLabel": "Créer une règle",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.cancelButtonLabel": "Annuler",
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel": "Supprimer {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ",
