@@ -30,8 +30,12 @@ export class SyntheticsPrivateLocation {
     config: SyntheticsMonitorWithId,
     privateLocation: PrivateLocation
   ): Promise<NewPackagePolicy> {
+    if (!this.server.authSavedObjectsClient) {
+      throw new Error('Could not find authSavedObjectsClient');
+    }
+
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      this.server.savedObjectsClient!,
+      this.server.authSavedObjectsClient,
       'synthetics'
     );
 
