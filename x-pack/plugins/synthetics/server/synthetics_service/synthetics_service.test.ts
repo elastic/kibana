@@ -48,7 +48,7 @@ describe('SyntheticsService', () => {
       return {
         id: `loc-${n}`,
         label: `Location ${n}`,
-        url: `example.com/${n}`,
+        url: `https://example.com/${n}`,
         geo: {
           lat: 0,
           lon: 0,
