@@ -15,7 +15,7 @@ import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { useUrlState } from '../../hooks/url_state';
 import { useAiOpsKibana } from '../../kibana_context';
-import { aiOpsRefresh$ } from '../../application/services/timefilter_refresh_service';
+import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
   from: string;
@@ -47,7 +47,7 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
 }
 
 function updateLastRefresh(timeRange: OnRefreshProps) {
-  aiOpsRefresh$.next({ lastRefresh: Date.now(), timeRange });
+  aiopsRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
 export const DatePickerWrapper: FC = () => {
