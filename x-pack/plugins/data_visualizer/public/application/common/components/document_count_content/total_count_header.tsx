@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
+
 export const TotalCountHeader = ({
   totalCount,
   approximate,
@@ -30,21 +32,27 @@ export const TotalCountHeader = ({
                 <FormattedMessage
                   id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
                   defaultMessage="{totalCount, plural, one {#} other {#}}"
-                  values={{ totalCount }}
+                  values={{
+                    totalCount: approximate
+                      ? totalCount.toPrecision(SIGFIGS_IF_ROUNDING)
+                      : totalCount,
+                  }}
                 />
               </strong>
             ),
           }}
         />
       </EuiText>{' '}
-      <EuiIconTip
-        content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
-          defaultMessage:
-            'Random sampler is being used for the total document count and the chart. Values shown are estimated. Adjust the slider to a higher percentage for better accuracy, or 100% to exact values.',
-        })}
-        position="right"
-        type="iInCircle"
-      />
+      {approximate ? (
+        <EuiIconTip
+          content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
+            defaultMessage:
+              'Random sampler is being used for the total document count and the chart. Values shown are estimated. Adjust the slider to a higher percentage for better accuracy, or 100% to exact values.',
+          })}
+          position="right"
+          type="iInCircle"
+        />
+      ) : null}
     </EuiFlexItem>
   );
 };
