@@ -39,7 +39,7 @@ describe('collapse_fn', () => {
     expect(result.rows).toEqual([{ val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 }]);
   });
 
-  it('can use different functions for each different metrics', async () => {
+  it('can use different functions for each different metric', async () => {
     const result = await runFn(
       {
         type: 'datatable',
