@@ -9,9 +9,9 @@
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
-import { contextServiceMock, coreMock } from '../../../mocks';
-import { SavedObjectsType } from '../../../saved_objects/types';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import { contextServiceMock, coreMock } from '../../mocks';
+import { SavedObjectsType } from '../types';
+import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 
 const defaultCoreId = Symbol('core');
 

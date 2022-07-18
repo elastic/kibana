@@ -12,7 +12,7 @@ import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from './test_utils';
+import { setupServer } from '../../../saved_objects/routes/test_utils';
 import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

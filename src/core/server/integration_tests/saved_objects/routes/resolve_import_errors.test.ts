@@ -14,7 +14,7 @@ import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '../../../saved_objects/routes/test_utils';
 import { SavedObjectConfig } from '../../../saved_objects/saved_objects_config';
 import { SavedObjectsImporter } from '../../../saved_objects/import';
 import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';

@@ -36,7 +36,7 @@ import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
 import { registerLegacyExportRoute } from '../../../../saved_objects/routes/legacy_import_export/export';
-import { setupServer } from '../test_utils';
+import { setupServer } from '../../../../saved_objects/routes/test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InternalSavedObjectsRequestHandlerContext } from '../../../../saved_objects/internal_types';
 

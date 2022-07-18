@@ -18,7 +18,7 @@ import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_da
 import { savedObjectsExporterMock } from '../../../saved_objects/export/saved_objects_exporter.mock';
 import { SavedObjectConfig } from '../../../saved_objects/saved_objects_config';
 import { registerExportRoute } from '../../../saved_objects/routes/export';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '../../../saved_objects/routes/test_utils';
 import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
