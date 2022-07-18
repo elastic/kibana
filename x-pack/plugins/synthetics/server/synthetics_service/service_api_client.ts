@@ -55,15 +55,19 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  getHttpsAgent(url: string) {
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
     const config = this.config;
-    if (url !== this.config.devUrl && this.authorization && this.server.isDev) {
-      return;
-    }
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
-
-      const rejectUnauthorized = process.env.NODE_ENV === 'production';
 
       return new https.Agent({
         rejectUnauthorized,
@@ -71,6 +75,8 @@ export class ServiceAPIClient {
         key: tlsConfig.key,
       });
     }
+
+    return baseHttpsAgent;
   }
 
   async post(data: ServiceData) {
