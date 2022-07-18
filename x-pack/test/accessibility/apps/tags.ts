@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Kibana Tags Page Accessibility', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/135339
+  describe.skip('Kibana Tags Page Accessibility', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
