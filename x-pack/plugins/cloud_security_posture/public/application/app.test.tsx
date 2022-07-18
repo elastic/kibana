@@ -8,6 +8,7 @@ import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
+import type { CloudSecurityPosturePageId } from '../common/navigation/types';
 import { createPageNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { addSpyRouteComponentToRoute, getRoutesFromMapping } from './app';
 
@@ -41,7 +42,13 @@ describe('getRoutesFromMapping', () => {
 describe('addSpyRouteComponentToRoute', () => {
   it('should add the spy route component to a csp route', () => {
     // Create a mock SpyRoute component that renders the page name as a test ID
-    const pageNameForRoute = chance.word();
+    const pageNameForRoute = chance.pickone<CloudSecurityPosturePageId>([
+      'cloud_security_posture-dashboard',
+      'cloud_security_posture-findings',
+      'cloud_security_posture-benchmarks',
+      'cloud_security_posture-rules',
+    ]);
+
     const SpyRouteMock = ({ pageName }: { pageName?: string }) => <div data-test-subj={pageName} />;
     const mockRouteComponentTestId = chance.word();
     const MockRouteComponent = () => <div data-test-subj={mockRouteComponentTestId} />;

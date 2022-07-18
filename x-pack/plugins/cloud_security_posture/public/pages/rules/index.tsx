@@ -13,15 +13,15 @@ import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { CspNavigationItem } from '../../common/navigation/types';
+import { CspPageNavigationItem } from '../../common/navigation/types';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 
-const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
+const getRulesBreadcrumbs = (name?: string): CspPageNavigationItem[] =>
   [cloudPosturePages.benchmarks, { ...cloudPosturePages.rules, name }].filter(
-    (breadcrumb): breadcrumb is CspNavigationItem => !!breadcrumb.name
+    (breadcrumb): breadcrumb is CspPageNavigationItem => !!breadcrumb.name
   );
 
 export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
