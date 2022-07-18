@@ -61,24 +61,24 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
-      defaultMessage: 'Number of rows',
+      defaultMessage: 'Maximum rows per table',
     }),
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
-      defaultMessage: 'The number of rows to show in the table',
+      defaultMessage: 'Sets the maximum number of rows for the entire document table.',
     }),
     category: ['discover'],
     schema: schema.number(),
   },
   [SAMPLE_ROWS_PER_PAGE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleRowsPerPageTitle', {
-      defaultMessage: 'Number of rows per page',
+      defaultMessage: 'Rows per page',
     }),
     value: DEFAULT_ROWS_PER_PAGE,
     options: ROWS_PER_PAGE_OPTIONS,
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
-      defaultMessage: 'The number of rows to display per page of the document table.',
+      defaultMessage: 'Limits the number of rows per page in the document table.',
     }),
     category: ['discover'],
     schema: schema.number(),
