@@ -39,7 +39,6 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { prepareEcsFieldsToValidate } from '../../common/helpers';
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
