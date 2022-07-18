@@ -7,44 +7,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
-export function getListBreadcrumbs() {
+export function getListBreadcrumbs(withLink?: boolean) {
   return [
     {
       text: i18n.translate('indexPatternManagement.dataViews.listBreadcrumb', {
         defaultMessage: 'Data views',
       }),
-      href: `/`,
+      href: withLink ? `/` : '',
     },
   ];
 }
 
-export function getCreateBreadcrumbs() {
+export function getCreateBreadcrumbs(withLink?: boolean) {
   return [
-    ...getListBreadcrumbs(),
+    ...getListBreadcrumbs(true),
     {
       text: i18n.translate('indexPatternManagement.dataViews.createBreadcrumb', {
         defaultMessage: 'Create data view',
       }),
-      href: `/create`,
+      href: withLink ? `/create` : '',
     },
   ];
 }
 
-export function getEditBreadcrumbs(indexPattern: DataView) {
+export function getEditBreadcrumbs(indexPattern: DataView, withLink?: boolean) {
   return [
-    ...getListBreadcrumbs(),
+    ...getListBreadcrumbs(true),
     {
-      text: indexPattern.title,
-      href: `/patterns/${indexPattern.id}`,
+      text: indexPattern.getName(),
+      href: withLink ? `/patterns/${indexPattern.id}` : '',
     },
   ];
 }
 
 export function getEditFieldBreadcrumbs(indexPattern: DataView, fieldName: string) {
   return [
-    ...getEditBreadcrumbs(indexPattern),
+    ...getEditBreadcrumbs(indexPattern, true),
     {
       text: fieldName,
     },
@@ -53,7 +53,7 @@ export function getEditFieldBreadcrumbs(indexPattern: DataView, fieldName: strin
 
 export function getCreateFieldBreadcrumbs(indexPattern: DataView) {
   return [
-    ...getEditBreadcrumbs(indexPattern),
+    ...getEditBreadcrumbs(indexPattern, true),
     {
       text: i18n.translate('indexPatternManagement.indexPatterns.createFieldBreadcrumb', {
         defaultMessage: 'Create field',

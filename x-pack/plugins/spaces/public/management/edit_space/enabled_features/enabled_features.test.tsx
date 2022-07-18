@@ -8,10 +8,10 @@
 import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 
-import type { KibanaFeatureConfig } from '../../../../../features/public';
 import { EnabledFeatures } from './enabled_features';
 
 const features: KibanaFeatureConfig[] = [

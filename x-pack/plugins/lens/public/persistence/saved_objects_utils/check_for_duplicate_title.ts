@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { OverlayStart, SavedObjectsClientContract } from 'kibana/public';
-import type { SavedObject } from 'src/plugins/saved_objects/public';
+import type { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/saved-objects-plugin/public';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';

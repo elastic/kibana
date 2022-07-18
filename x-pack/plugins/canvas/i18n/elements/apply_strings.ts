@@ -6,7 +6,7 @@
  */
 
 import { ElementFactory } from '../../types';
-import { getElementStrings } from './index';
+import { getElementStrings } from '.';
 
 /**
  * This function takes a set of Canvas Element specification factories, runs them,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { unit } from '../../../../utils/style';
 import { tint } from 'polished';
@@ -36,7 +36,7 @@ const Description = euiStyled.div`
     span {
       font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
       color: ${({ theme }) => theme.eui.euiColorFullShade};
-      padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+      padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
       display: inline-block;
     }
   }
@@ -75,7 +75,7 @@ const Icon = euiStyled.div`
 const TextValue = euiStyled.div`
   flex: 0 0 ${unit * 16}px;
   color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 function getEuiIconType(type) {

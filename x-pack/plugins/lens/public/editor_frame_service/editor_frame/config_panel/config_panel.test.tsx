@@ -17,7 +17,7 @@ import {
 import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
@@ -156,6 +156,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -179,6 +183,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -200,6 +208,10 @@ describe('ConfigPanel', () => {
         .instance();
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
@@ -422,6 +434,7 @@ describe('ConfigPanel', () => {
           datasourceLayers: {
             a: expect.anything(),
           },
+          dateRange: expect.anything(),
         },
         groupId: 'a',
         layerId: 'newId',

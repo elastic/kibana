@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
-import { PACKAGE_POLICY_API_ROUTES } from '../../../../../fleet/common/constants/routes';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common/constants/routes';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 
 describe('ingest service', () => {

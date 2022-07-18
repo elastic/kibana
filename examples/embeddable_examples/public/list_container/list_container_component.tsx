@@ -16,7 +16,7 @@ import {
   ContainerOutput,
   EmbeddableStart,
   EmbeddableChildPanel,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
 interface Props {
   embeddable: IContainer;

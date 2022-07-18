@@ -7,10 +7,10 @@
  */
 
 import { uiActionsPluginMock } from '../mocks';
-import { createHelloWorldAction } from '../tests/test_samples';
+import { createHelloWorldAction } from './test_samples';
 import { Action, createAction } from '../actions';
 import { Trigger } from '../triggers';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 
 let action: Action<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;

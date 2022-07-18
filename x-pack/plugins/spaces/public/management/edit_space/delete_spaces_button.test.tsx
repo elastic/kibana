@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { notificationServiceMock } from 'src/core/public/mocks';
 
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';

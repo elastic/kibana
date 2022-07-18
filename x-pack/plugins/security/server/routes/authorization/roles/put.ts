@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 
-import type { KibanaFeature } from '../../../../../features/common';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
+import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import {
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-  validateKibanaPrivileges,
-} from './model';
+import type { RolePayloadSchemaType } from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
-const roleGrantsSubFeaturePrivileges = (
-  features: KibanaFeature[],
-  role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
-) => {
+const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
   if (!role.kibana) {
     return false;
   }
@@ -53,6 +47,7 @@ export function definePutRolesRoutes({
       path: '/api/security/role/{name}',
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
+        query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
         body: getPutPayloadSchema(() => {
           const privileges = authz.privileges.get();
           return {
@@ -64,14 +59,12 @@ export function definePutRolesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { name } = request.params;
-
+      const { createOnly } = request.query;
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const [features, rawRoles] = await Promise.all([
           getFeatures(),
-          context.core.elasticsearch.client.asCurrentUser.security.getRole(
-            { name: request.params.name },
-            { ignore: [404] }
-          ),
+          esClient.asCurrentUser.security.getRole({ name: request.params.name }, { ignore: [404] }),
         ]);
 
         const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
@@ -85,13 +78,21 @@ export function definePutRolesRoutes({
           });
         }
 
+        if (createOnly && !!rawRoles[name]) {
+          return response.conflict({
+            body: {
+              message: `Role already exists and cannot be created: ${name}`,
+            },
+          });
+        }
+
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        await context.core.elasticsearch.client.asCurrentUser.security.putRole({
+        await esClient.asCurrentUser.security.putRole({
           name: request.params.name,
           // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
           body,

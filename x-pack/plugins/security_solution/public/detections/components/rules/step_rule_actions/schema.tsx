@@ -9,17 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   RuleAction,
   ActionTypeRegistryContract,
-} from '../../../../../../triggers_actions_ui/public';
-import {
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type {
   FormSchema,
   ValidationFunc,
   ERROR_CODE,
   ValidationError,
 } from '../../../../shared_imports';
-import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = async (

@@ -19,7 +19,7 @@
         "label": "getPluginSearchPaths",
         "description": [],
         "signature": [
-          "({ rootDir, oss, examples }: ",
+          "({ rootDir, oss, examples, testPlugins }: ",
           {
             "pluginId": "@kbn/plugin-discovery",
             "scope": "server",
@@ -37,7 +37,7 @@
             "id": "def-server.getPluginSearchPaths.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ rootDir, oss, examples }",
+            "label": "{ rootDir, oss, examples, testPlugins }",
             "description": [],
             "signature": [
               {
@@ -291,6 +291,19 @@
           },
           {
             "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.enabledOnAnonymousPages",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabledOnAnonymousPages",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
             "id": "def-server.KibanaPlatformPluginManifest.serviceFolders",
             "type": "Object",
             "tags": [],
@@ -394,6 +407,19 @@
             "tags": [],
             "label": "examples",
             "description": [],
+            "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.SearchOptions.testPlugins",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "testPlugins",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
             "deprecated": false
           }

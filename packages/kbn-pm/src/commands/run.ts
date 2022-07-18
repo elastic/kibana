@@ -11,7 +11,7 @@ import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const RunCommand: ICommand = {
   description:

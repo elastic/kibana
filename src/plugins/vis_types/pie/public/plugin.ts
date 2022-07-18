@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, DocLinksStart, ThemeServiceStart } from 'src/core/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { CoreSetup, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '../common';
 import { pieVisType } from './vis_type';
 

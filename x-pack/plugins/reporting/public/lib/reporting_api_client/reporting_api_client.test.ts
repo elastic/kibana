@@ -8,8 +8,8 @@
 jest.mock('moment', () => ({ tz: { guess: jest.fn() } }));
 
 import { tz } from 'moment';
-import { HttpSetup, IUiSettingsClient } from 'src/core/public';
-import { httpServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
+import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { Job } from '../job';
 import { ReportingAPIClient } from './reporting_api_client';
 

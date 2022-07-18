@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkTlsRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkQueries,
   NetworkTlsFields,
-  NetworkTlsRequestOptions,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkTlsRequestOptions = {

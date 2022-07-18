@@ -20,7 +20,7 @@ import {
 } from './es_index';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 const ACTION_TYPE_ID = '.index';
 
@@ -188,7 +188,9 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "jim": "bob",
@@ -228,7 +230,9 @@ describe('execute()', () => {
             Object {
               "body": Array [
                 Object {
-                  "index": Object {},
+                  "index": Object {
+                    "op_type": "create",
+                  },
                 },
                 Object {
                   "jimbob": "jr",
@@ -262,7 +266,9 @@ describe('execute()', () => {
           Object {
             "body": Array [
               Object {
-                "index": Object {},
+                "index": Object {
+                  "op_type": "create",
+                },
               },
               Object {
                 "jim": "bob",
@@ -295,13 +301,17 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "a": 1,
                   },
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "b": 2,

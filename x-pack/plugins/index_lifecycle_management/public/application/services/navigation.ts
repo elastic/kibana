@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { getIndexListUri } from '../../../../index_management/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { getIndexListUri } from '@kbn/index-management-plugin/public';
 
 export const ROUTES = {
   list: '/policies',

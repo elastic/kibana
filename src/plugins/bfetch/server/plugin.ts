@@ -14,7 +14,7 @@ import type {
   Logger,
   KibanaRequest,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
 import {

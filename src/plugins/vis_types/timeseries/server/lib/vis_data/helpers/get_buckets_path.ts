@@ -7,8 +7,8 @@
  */
 
 import { startsWith } from 'lodash';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../../data/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 

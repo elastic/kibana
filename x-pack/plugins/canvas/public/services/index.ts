@@ -7,7 +7,7 @@
 
 export * from './legacy';
 
-import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasCustomElementService } from './custom_element';
 import { CanvasEmbeddablesService } from './embeddables';

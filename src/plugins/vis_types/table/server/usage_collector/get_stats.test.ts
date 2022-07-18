@@ -7,7 +7,7 @@
  */
 
 import { getStats } from './get_stats';
-import type { SavedObjectsClientContract } from '../../../../../core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 const mockVisualizations = {
   saved_objects: [

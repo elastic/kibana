@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 const applications = new Map();
 

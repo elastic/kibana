@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LicenseType } from '../../../licensing/common/types';
-import { LICENSE_TYPE } from '../../../licensing/server';
-import { KibanaFeature } from '../';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/server';
+import { KibanaFeature } from '..';
 import { SubFeaturePrivilegeConfig } from '../../common';
 import type { FeaturePrivilegeIteratorOptions } from './feature_privilege_iterator';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
@@ -72,7 +72,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -137,7 +141,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -201,7 +209,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -267,7 +279,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -303,7 +319,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -360,7 +380,11 @@ describe('featurePrivilegeIterator', () => {
                   },
                   cases: {
                     all: ['cases-all-sub-type'],
+                    create: ['cases-create-sub-type'],
                     read: ['cases-read-sub-type'],
+                    update: ['cases-update-sub-type'],
+                    delete: ['cases-delete-sub-type'],
+                    push: ['cases-push-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -402,7 +426,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -465,7 +493,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -522,7 +554,11 @@ describe('featurePrivilegeIterator', () => {
                   },
                   cases: {
                     all: ['cases-all-sub-type'],
+                    create: ['cases-create-sub-type'],
                     read: ['cases-read-sub-type'],
+                    update: ['cases-update-sub-type'],
+                    delete: ['cases-delete-sub-type'],
+                    push: ['cases-push-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -564,7 +600,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -627,7 +667,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -685,7 +729,11 @@ describe('featurePrivilegeIterator', () => {
                   },
                   cases: {
                     all: ['cases-all-sub-type'],
+                    create: ['cases-create-sub-type'],
                     read: ['cases-read-sub-type'],
+                    update: ['cases-update-sub-type'],
+                    delete: ['cases-delete-sub-type'],
+                    push: ['cases-push-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -730,7 +778,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type', 'cases-all-sub-type'],
+            create: ['cases-create-type', 'cases-create-sub-type'],
             read: ['cases-read-type', 'cases-read-sub-type'],
+            update: ['cases-update-type', 'cases-update-sub-type'],
+            delete: ['cases-delete-type', 'cases-delete-sub-type'],
+            push: ['cases-push-type', 'cases-push-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -762,6 +814,10 @@ describe('featurePrivilegeIterator', () => {
           cases: {
             all: ['cases-all-sub-type'],
             read: ['cases-read-type', 'cases-read-sub-type'],
+            create: ['cases-create-sub-type'],
+            update: ['cases-update-sub-type'],
+            delete: ['cases-delete-sub-type'],
+            push: ['cases-push-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -799,7 +855,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -899,7 +959,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -929,7 +993,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: [],
+            create: [],
             read: ['cases-read-type'],
+            update: [],
+            delete: [],
+            push: [],
           },
           ui: ['ui-action'],
         },
@@ -965,7 +1033,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -1024,6 +1096,10 @@ describe('featurePrivilegeIterator', () => {
                   cases: {
                     all: ['cases-all-sub-type'],
                     read: ['cases-read-sub-type'],
+                    create: ['cases-create-sub-type'],
+                    update: ['cases-update-sub-type'],
+                    delete: ['cases-delete-sub-type'],
+                    push: ['cases-push-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -1068,7 +1144,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type', 'cases-all-sub-type'],
+            create: ['cases-create-type', 'cases-create-sub-type'],
             read: ['cases-read-type', 'cases-read-sub-type'],
+            update: ['cases-update-type', 'cases-update-sub-type'],
+            delete: ['cases-delete-type', 'cases-delete-sub-type'],
+            push: ['cases-push-type', 'cases-push-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -1256,7 +1336,11 @@ describe('featurePrivilegeIterator', () => {
                   },
                   cases: {
                     all: ['cases-all-sub-type'],
+                    create: ['cases-create-sub-type'],
                     read: ['cases-read-sub-type'],
+                    update: ['cases-update-sub-type'],
+                    delete: ['cases-delete-sub-type'],
+                    push: ['cases-push-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -1301,7 +1385,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-sub-type'],
+            create: ['cases-create-sub-type'],
             read: ['cases-read-sub-type'],
+            update: ['cases-update-sub-type'],
+            delete: ['cases-delete-sub-type'],
+            push: ['cases-push-sub-type'],
           },
           ui: ['ui-sub-type'],
         },
@@ -1332,7 +1420,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-sub-type'],
+            create: ['cases-create-sub-type'],
             read: ['cases-read-sub-type'],
+            update: ['cases-update-sub-type'],
+            delete: ['cases-delete-sub-type'],
+            push: ['cases-push-sub-type'],
           },
           ui: ['ui-sub-type'],
         },
@@ -1368,7 +1460,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -1454,7 +1550,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: ['cases-all-type'],
+            create: ['cases-create-type'],
             read: ['cases-read-type'],
+            update: ['cases-update-type'],
+            delete: ['cases-delete-type'],
+            push: ['cases-push-type'],
           },
           ui: ['ui-action'],
         },
@@ -1484,7 +1584,11 @@ describe('featurePrivilegeIterator', () => {
           },
           cases: {
             all: [],
+            create: [],
             read: ['cases-read-type'],
+            update: [],
+            delete: [],
+            push: [],
           },
           ui: ['ui-action'],
         },

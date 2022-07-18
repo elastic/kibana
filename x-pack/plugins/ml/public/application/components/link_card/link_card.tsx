@@ -39,7 +39,7 @@ export const LinkCard: FC<Props> = ({
   onClick,
   href,
   isDisabled,
-  'data-test-subj': dateTestSubj,
+  'data-test-subj': dataTestSubj,
 }) => {
   const linkHrefAndOnClickProps = {
     ...(href ? { href } : {}),
@@ -58,7 +58,7 @@ export const LinkCard: FC<Props> = ({
           background: 'transparent',
           outline: 'none',
         }}
-        data-test-subj={dateTestSubj}
+        data-test-subj={dataTestSubj}
         color="subdued"
         {...linkHrefAndOnClickProps}
       >

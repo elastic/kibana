@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -16,8 +16,14 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
-import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import {
+  State,
+  XYState,
+  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
+} from './types';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -32,6 +38,7 @@ const columnSortOrder = {
   histogram: 6,
   geo_point: 7,
   geo_shape: 8,
+  murmur3: 9,
 };
 
 /**
@@ -550,6 +557,8 @@ function buildSuggestion({
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
+    yLeftScale: currentState?.yLeftScale,
+    yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,

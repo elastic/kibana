@@ -14,12 +14,10 @@ import {
   RowItemOverflowComponent,
   getRowItemDraggable,
   OverflowFieldComponent,
-  OverflowItemComponent,
 } from './helpers';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
 
 jest.mock('../../lib/kibana');
 
@@ -58,7 +56,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 
@@ -119,7 +117,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 
@@ -211,17 +209,22 @@ describe('Table Helpers', () => {
     });
 
     test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
-      const wrapper = shallow(
-        <RowItemOverflowComponent
-          rowItems={items}
-          attrName="attrName"
-          idPrefix="idPrefix"
-          maxOverflowItems={5}
-          overflowIndexStart={1}
-        />
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            rowItems={items}
+            attrName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
       );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
       expect(
-        wrapper.find('[data-test-subj="overflow-items"]').prop<JSX.Element[]>('children')?.length
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
       ).toEqual(2);
     });
 
@@ -258,36 +261,6 @@ describe('Table Helpers', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
       const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is exact');
-    });
-  });
-
-  describe('OverflowItemComponent', () => {
-    const id = 'mock id';
-    const rowItem = 'endpoint-dev-es.app.elstc.co';
-    const field = 'destination.ip';
-    const dataProvider = {
-      and: [],
-      enabled: true,
-      id,
-      name: rowItem,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field,
-        value: rowItem,
-        displayValue: rowItem,
-        operator: IS_OPERATOR as QueryOperator,
-      },
-    };
-    const props = {
-      dataProvider,
-      field,
-      rowItem,
-    };
-
-    test('Renders Hover Actions', () => {
-      const wrapper = shallow(<OverflowItemComponent {...props} />);
-      expect(wrapper.find('[data-test-subj="hover-actions"]').exists()).toBeTruthy();
     });
   });
 });

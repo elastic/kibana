@@ -10,7 +10,7 @@ exports[`alias 1`] = `
 exports[`alias with error status 1`] = `
 <div>
   <span
-    class="euiTextColor euiTextColor--danger"
+    class="emotion-euiTextColor-danger"
   >
      NOT 
   </span>
@@ -27,7 +27,7 @@ exports[`alias with error status 1`] = `
 exports[`alias with warning status 1`] = `
 <div>
   <span
-    class="euiTextColor euiTextColor--danger"
+    class="emotion-euiTextColor-danger"
   >
      NOT 
   </span>
@@ -51,6 +51,13 @@ exports[`error 1`] = `
   >
     Error
   </span>
+</div>
+`;
+
+exports[`field custom label 1`] = `
+<div>
+  
+  geo.coordinates in US
 </div>
 `;
 

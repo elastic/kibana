@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
@@ -29,7 +30,7 @@ interface Props {
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';
@@ -136,7 +137,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     (callApmApi) => {
       if (requestId && items.length && start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
               path: { serviceName },
@@ -146,10 +147,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 start,
                 end,
                 numBuckets: 20,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
+              },
+              body: {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }

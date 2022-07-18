@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
 import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';

@@ -11,7 +11,7 @@ import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 import { CanvasPluginServices } from '..';
 import { customElementServiceFactory } from './custom_element';

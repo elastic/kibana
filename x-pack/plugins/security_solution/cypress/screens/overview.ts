@@ -55,7 +55,7 @@ export const STAT_PACKAGE = {
   domId: '[data-test-subj="host-stat-auditbeatPackage"]',
 };
 export const STAT_PROCESS = {
-  value: '1',
+  value: '2',
   domId: '[data-test-subj="host-stat-auditbeatProcess"]',
 };
 export const STAT_USER = {

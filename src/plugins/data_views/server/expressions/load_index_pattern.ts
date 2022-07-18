@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 
 import {
   getIndexPatternLoadMeta,
@@ -80,10 +80,10 @@ export function getIndexPatternLoad({
 }) {
   return getFunctionDefinition({
     getStartDependencies: async (request: KibanaRequest) => {
-      const [{ elasticsearch, savedObjects }, , { indexPatternsServiceFactory }] =
+      const [{ elasticsearch, savedObjects }, , { dataViewsServiceFactory }] =
         await getStartServices();
       return {
-        indexPatterns: await indexPatternsServiceFactory(
+        indexPatterns: await dataViewsServiceFactory(
           savedObjects.getScopedClient(request),
           elasticsearch.client.asScoped(request).asCurrentUser,
           request

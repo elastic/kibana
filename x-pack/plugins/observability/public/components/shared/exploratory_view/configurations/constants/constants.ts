@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OperationType } from '../../../../../../../lens/public';
+import { OperationType } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -56,6 +57,7 @@ import {
   STEP_DURATION_LABEL,
   EVENT_DATASET_LABEL,
   MESSAGE_LABEL,
+  SINGLE_METRIC_LABEL,
 } from './labels';
 import {
   MONITOR_DURATION_US,
@@ -67,12 +69,12 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from './field_names/synthetics';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
 export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
 export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
+export const FORMULA_COLUMN = 'FORMULA_COLUMN';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': BROWSER_FAMILY_LABEL,
@@ -131,6 +133,7 @@ export const DataViewLabels: Record<ReportViewType, string> = {
   'kpi-over-time': KPI_OVER_TIME_LABEL,
   'core-web-vitals': CORE_WEB_VITALS_LABEL,
   'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
+  'single-metric': SINGLE_METRIC_LABEL,
 };
 
 export enum ReportTypes {
@@ -138,6 +141,7 @@ export enum ReportTypes {
   DISTRIBUTION = 'data-distribution',
   CORE_WEB_VITAL = 'core-web-vitals',
   DEVICE_DISTRIBUTION = 'device-data-distribution',
+  SINGLE_METRIC = 'single-metric',
 }
 
 export enum DataTypes {
@@ -162,6 +166,9 @@ export const PERCENTILE_RANKS = [
   '90th' as OperationType,
   '75th' as OperationType,
   '50th' as OperationType,
+  '25th' as OperationType,
 ];
 export const LABEL_FIELDS_FILTER = 'LABEL_FIELDS_FILTER';
 export const LABEL_FIELDS_BREAKDOWN = 'LABEL_FIELDS_BREAKDOWN';
+
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';

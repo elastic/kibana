@@ -13,7 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import { IQueryPayload } from './types';
+import type { IQueryPayload } from './types';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
@@ -46,6 +46,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',

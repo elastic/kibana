@@ -25,7 +25,7 @@ import {
   getContentSourcePath as sourcePath,
   getSourcesPath,
 } from '../../routes';
-import { NotFound } from '../../views/not_found';
+import { NotFound } from '../not_found';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';

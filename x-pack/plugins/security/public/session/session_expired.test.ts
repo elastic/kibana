@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';

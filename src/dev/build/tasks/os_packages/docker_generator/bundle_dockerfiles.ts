@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import Mustache from 'mustache';
 

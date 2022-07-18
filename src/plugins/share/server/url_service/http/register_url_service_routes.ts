@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, IRouter } from 'kibana/server';
+import { CoreSetup, IRouter } from '@kbn/core/server';
 import { ServerUrlService } from '../types';
 import { registerCreateRoute } from './short_urls/register_create_route';
 import { registerGetRoute } from './short_urls/register_get_route';

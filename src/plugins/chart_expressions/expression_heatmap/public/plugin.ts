@@ -5,13 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ChartsPluginSetup } from '../../../charts/public';
-import { CoreSetup, CoreStart } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
-import { setFormatService, setPaletteService, setUISettings, setThemeService } from './services';
+import {
+  setDatatableUtilities,
+  setFormatService,
+  setPaletteService,
+  setUISettings,
+  setThemeService,
+} from './services';
 import { heatmapRenderer } from './expression_renderers';
-import type { FieldFormatsStart } from '../../../field_formats/public';
 
 /** @internal */
 export interface ExpressionHeatmapPluginSetup {
@@ -21,6 +28,7 @@ export interface ExpressionHeatmapPluginSetup {
 
 /** @internal */
 export interface ExpressionHeatmapPluginStart {
+  data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
 }
 
@@ -38,7 +46,8 @@ export class ExpressionHeatmapPlugin {
     expressions.registerRenderer(heatmapRenderer({ theme: core.theme }));
   }
 
-  public start(core: CoreStart, { fieldFormats }: ExpressionHeatmapPluginStart) {
+  public start(core: CoreStart, { data, fieldFormats }: ExpressionHeatmapPluginStart) {
     setFormatService(fieldFormats);
+    setDatatableUtilities(data.datatableUtilities);
   }
 }

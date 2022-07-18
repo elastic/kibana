@@ -5,91 +5,194 @@
  * 2.0.
  */
 
-// @ts-ignore
-// eslint-disable-next-line import/no-extraneous-dependencies
-import argsplit from 'argsplit';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-// FIXME:PT use a 3rd party lib for arguments parsing
-//        For now, just using what I found in kibana package.json devDependencies, so this will NOT work for production
+import type { CommandDefinition } from '..';
+import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
 
-// FIXME:PT Type `ParsedCommandInput` should be a generic that allows for the args's keys to be defined
+export type ParsedArgData = string[];
 
-export interface ParsedArgData {
-  /** For arguments that were used only once. Will be `undefined` if multiples were used */
-  value: undefined | string;
-  /** For arguments that were used multiple times */
-  values: undefined | string[];
-}
-
-export interface ParsedCommandInput {
-  input: string;
+interface ParsedCommandInput<TArgs extends object = any> {
   name: string;
   args: {
-    [argName: string]: ParsedArgData;
+    [key in keyof TArgs]: ParsedArgData;
   };
-  unknownArgs: undefined | string[];
-  hasArgs(): boolean;
-  hasArg(argName: string): boolean;
 }
+const parseInputString = (rawInput: string): ParsedCommandInput => {
+  const input = rawInput.trim();
+  const response: ParsedCommandInput = {
+    name: getCommandNameFromTextInput(input),
+    args: {},
+  };
 
-const PARSED_COMMAND_INPUT_PROTOTYPE: Pick<ParsedCommandInput, 'hasArgs'> = Object.freeze({
-  hasArgs(this: ParsedCommandInput) {
-    return Object.keys(this.args).length > 0 || Array.isArray(this.unknownArgs);
-  },
+  if (!input) {
+    return response;
+  }
 
-  hasArg(argName: string): boolean {
-    // @ts-ignore
-    return Object.prototype.hasOwnProperty.call(this.args, argName);
-  },
-});
+  const inputFirstSpacePosition = input.indexOf(' ');
+  const rawArguments =
+    inputFirstSpacePosition === -1
+      ? []
+      : input.substring(inputFirstSpacePosition).trim().split(/--/);
 
-export const parseCommandInput = (input: string): ParsedCommandInput => {
-  const inputTokens: string[] = argsplit(input) || [];
-  const name: string = inputTokens.shift() || '';
-  const args: ParsedCommandInput['args'] = {};
-  let unknownArgs: ParsedCommandInput['unknownArgs'];
+  for (const rawArg of rawArguments) {
+    const argNameAndValueTrimmedString = rawArg.trim();
 
-  // All options start with `--`
-  let argName = '';
+    if (argNameAndValueTrimmedString) {
+      // rawArgument possible values here are:
+      //    'option=something'
+      //    'option'
+      //    'option something
+      // These all having possible spaces before and after
 
-  for (const inputToken of inputTokens) {
-    if (inputToken.startsWith('--')) {
-      argName = inputToken.substr(2);
+      const firstSpaceOrEqualSign = /[ =]/.exec(argNameAndValueTrimmedString);
 
-      if (!args[argName]) {
-        args[argName] = {
-          value: undefined,
-          values: undefined,
-        };
-      }
+      // Grab the argument name
+      const argName = (
+        firstSpaceOrEqualSign
+          ? argNameAndValueTrimmedString.substring(0, firstSpaceOrEqualSign.index).trim()
+          : argNameAndValueTrimmedString
+      ).trim();
 
-      // eslint-disable-next-line no-continue
-      continue;
-    } else if (!argName) {
-      (unknownArgs = unknownArgs || []).push(inputToken);
+      if (argName) {
+        if (!response.args[argName]) {
+          response.args[argName] = [];
+        }
 
-      // eslint-disable-next-line no-continue
-      continue;
-    }
+        // if this argument name as a value, then process that
+        if (argName !== argNameAndValueTrimmedString && firstSpaceOrEqualSign) {
+          let newArgValue = argNameAndValueTrimmedString
+            .substring(firstSpaceOrEqualSign.index + 1)
+            .trim()
+            .replace(/\\/g, '');
 
-    if (Array.isArray(args[argName].values)) {
-      // @ts-ignore
-      args[argName].values.push(inputToken);
-    } else {
-      // Do we have multiple values for this argumentName, then create array for values
-      if (args[argName].value !== undefined) {
-        args[argName].values = [args[argName].value ?? '', inputToken];
-        args[argName].value = undefined;
-      } else {
-        args[argName].value = inputToken;
+          if (newArgValue.charAt(0) === '"') {
+            newArgValue = newArgValue.substring(1);
+          }
+
+          if (newArgValue.charAt(newArgValue.length - 1) === '"') {
+            newArgValue = newArgValue.substring(0, newArgValue.length - 1);
+          }
+
+          response.args[argName].push(newArgValue);
+        }
       }
     }
   }
 
-  return Object.assign(Object.create(PARSED_COMMAND_INPUT_PROTOTYPE), {
-    input,
-    name,
-    args,
-    unknownArgs,
-  });
+  return response;
+};
+
+export interface ParsedCommandInterface<TArgs extends object = any>
+  extends ParsedCommandInput<TArgs> {
+  input: string;
+
+  /**
+   * Checks if the given argument name was entered by the user
+   * @param argName
+   */
+  hasArg(argName: string): boolean;
+
+  /**
+   * if any argument was entered
+   */
+  hasArgs: boolean;
+}
+
+class ParsedCommand implements ParsedCommandInterface {
+  public readonly name: string;
+  public readonly args: Record<string, string[]>;
+  public readonly hasArgs: boolean;
+
+  constructor(public readonly input: string) {
+    const parseInput = parseInputString(input);
+    this.name = parseInput.name;
+    this.args = parseInput.args;
+    this.hasArgs = Object.keys(this.args).length > 0;
+  }
+
+  hasArg(argName: string): boolean {
+    return argName in this.args;
+  }
+}
+
+export const parseCommandInput = (input: string): ParsedCommandInterface => {
+  return new ParsedCommand(input);
+};
+
+export const getCommandNameFromTextInput = (input: string): string => {
+  const trimmedInput = input.trimStart();
+
+  if (!trimmedInput) {
+    return '';
+  }
+
+  const firstSpacePosition = input.indexOf(' ');
+
+  if (firstSpacePosition === -1) {
+    return trimmedInput;
+  }
+
+  return trimmedInput.substring(0, firstSpacePosition);
+};
+
+export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
+  let requiredArgs = '';
+  let optionalArgs = '';
+  const exclusiveOrArgs = [];
+
+  if (command.args) {
+    for (const [argName, argDefinition] of Object.entries(command.args)) {
+      if (argDefinition.required) {
+        if (requiredArgs.length) {
+          requiredArgs += ' ';
+        }
+        requiredArgs += `--${argName}`;
+      } else if (argDefinition.exclusiveOr) {
+        exclusiveOrArgs.push(`--${argName}`);
+      } else {
+        if (optionalArgs.length) {
+          optionalArgs += ' ';
+        }
+        optionalArgs += `--${argName}`;
+      }
+    }
+  }
+
+  const buildArgumentText = ({
+    required,
+    exclusive,
+    optional,
+  }: {
+    required?: string;
+    exclusive?: string;
+    optional?: string;
+  }) => {
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
+      optional && optional.length > 0 ? `[${optional}]` : ''
+    }`.trim();
+  };
+
+  return exclusiveOrArgs.length > 0
+    ? exclusiveOrArgs.map((exclusiveArg) => {
+        return buildArgumentText({
+          required: requiredArgs,
+          exclusive: exclusiveArg,
+          optional: optionalArgs,
+        });
+      })
+    : [buildArgumentText({ required: requiredArgs, optional: optionalArgs })];
+};
+
+export const parsedPidOrEntityIdParameter = (parameters: {
+  pid?: ParsedArgData;
+  entityId?: ParsedArgData;
+}): EndpointActionDataParameterTypes => {
+  if (parameters.pid) {
+    return { pid: Number(parameters.pid[0]) };
+  } else if (parameters.entityId) {
+    return { entity_id: parameters.entityId[0] };
+  }
+
+  return undefined;
 };

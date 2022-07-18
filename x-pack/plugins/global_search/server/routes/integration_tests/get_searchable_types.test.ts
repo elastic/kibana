@@ -6,7 +6,7 @@
  */
 
 import supertest from 'supertest';
-import { setupServer } from '../../../../../../src/core/server/test_utils';
+import { setupServer } from '@kbn/core/server/test_utils';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalSearchableTypesRoute } from '../get_searchable_types';
 

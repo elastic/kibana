@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { FileUploadStartDependencies } from './plugin';
 
 let coreStart: CoreStart;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Observable } from 'rxjs';
-import { Capabilities } from 'src/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { showPublicUrlSwitch, getTopNavConfig, TopNavConfigParams } from './get_top_nav_config';
 import type {
   VisualizeEditorVisInstance,
@@ -14,8 +14,8 @@ import type {
   VisualizeServices,
 } from '../types';
 import { createVisualizeServicesMock } from './mocks';
-import { sharePluginMock } from '../../../../share/public/mocks';
-import { createEmbeddableStateTransferMock } from '../../../../embeddable/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import { visualizeAppStateStub } from './stubs';
 
 describe('showPublicUrlSwitch', () => {

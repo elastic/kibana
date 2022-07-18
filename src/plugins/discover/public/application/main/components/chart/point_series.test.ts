@@ -8,7 +8,7 @@
 
 import { buildPointSeriesData } from './point_series';
 import moment from 'moment';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 
 describe('buildPointSeriesData', () => {
   test('with valid data', () => {

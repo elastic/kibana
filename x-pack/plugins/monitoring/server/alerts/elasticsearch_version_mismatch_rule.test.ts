@@ -9,7 +9,7 @@ import { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismat
 import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 

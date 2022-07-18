@@ -8,10 +8,11 @@
 import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldFormat } from '../../../../field_formats/common';
-import type { CustomPaletteState, PaletteOutput } from '../../../../charts/public';
-import { EmptyPlaceholder } from '../../../../charts/public';
-import { isVisDimension } from '../../../../visualizations/common/utils';
+import type { PaletteOutput } from '@kbn/coloring';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -202,7 +203,7 @@ const getPreviousSectionValue = (value: number, bands: number[]) => {
 };
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService }) => {
+  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
     const {
       shape: gaugeType,
       palette,
@@ -277,6 +278,15 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [uiState]
     );
 
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
+        if (isRendered) {
+          renderComplete();
+        }
+      },
+      [renderComplete]
+    );
+
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
 
@@ -299,7 +309,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
-      return <EmptyPlaceholder icon={icon} />;
+      return <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />;
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
@@ -316,6 +326,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum and maximum values may not be equal"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
@@ -330,6 +341,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum value may not be greater than maximum value"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
@@ -383,10 +395,12 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       <div className="gauge__wrapper">
         <Chart>
           <Settings
+            noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
+            onRenderChange={onRenderChange}
           />
           <Goal
             id="goal"
@@ -398,6 +412,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
             bands={bands}
             ticks={ticks}
+            domain={{ min, max }}
             bandFillColor={
               colorMode === GaugeColorModes.PALETTE
                 ? (val) => {

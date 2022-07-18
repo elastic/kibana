@@ -9,7 +9,7 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 import dedent from 'dedent';
-import type { SavedObjectsImportFailure } from 'src/core/server';
+import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createConflictError = (

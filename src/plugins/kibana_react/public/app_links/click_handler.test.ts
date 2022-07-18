@@ -7,7 +7,7 @@
  */
 
 import { MouseEvent } from 'react';
-import { ApplicationStart } from 'src/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 const createLink = ({

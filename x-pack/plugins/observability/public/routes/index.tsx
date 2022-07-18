@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
@@ -16,6 +17,8 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { AlertingPages } from '../config';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -60,14 +63,22 @@ export const routes = {
   },
   [casesPath]: {
     handler: () => {
-      return <CasesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.cases}>
+          <CasesPage />
+        </TrackApplicationView>
+      );
     },
     params: {},
     exact: false,
   },
   '/alerts': {
     handler: () => {
-      return <AlertsPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.alerts}>
+          <AlertsPage />
+        </TrackApplicationView>
+      );
     },
     params: {
       // Technically gets a '_a' param by using Kibana URL state sync helpers
@@ -90,7 +101,18 @@ export const routes = {
   },
   '/alerts/rules': {
     handler: () => {
-      return <RulesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.rules}>
+          <RulesPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
     },
     params: {},
     exact: true,

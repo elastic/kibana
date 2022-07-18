@@ -9,10 +9,12 @@ import {
   ADD_EXCEPTION_BTN,
   ALERT_RISK_SCORE_HEADER,
   ALERT_CHECKBOX,
+  CHART_SELECT,
   CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   CLOSED_ALERTS_FILTER_BTN,
   EXPAND_ALERT_BTN,
+  GROUP_BY_TOP_INPUT,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
@@ -20,6 +22,7 @@ import {
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
+  SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
@@ -64,6 +67,7 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
 };
 
@@ -92,8 +96,8 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 
 export const goToClosedAlerts = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -103,13 +107,13 @@ export const goToManageAlertsDetectionRules = () => {
 
 export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const refreshAlerts = () => {
   // ensure we've refetched fields the first time index is defined
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
@@ -123,10 +127,20 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
+export const selectCountTable = () => {
+  cy.get(CHART_SELECT).click({ force: true });
+  cy.get(SELECT_TABLE).click();
+};
+
+export const clearGroupByTopInput = () => {
+  cy.get(GROUP_BY_TOP_INPUT).focus();
+  cy.get(GROUP_BY_TOP_INPUT).type('{backspace}');
+};
+
 export const goToAcknowledgedAlerts = () => {
   cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -152,7 +166,7 @@ export const investigateFirstAlertInTimeline = () => {
 };
 
 export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

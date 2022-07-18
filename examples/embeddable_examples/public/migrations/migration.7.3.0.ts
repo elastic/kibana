@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { MigrateFunction } from '../../../../src/plugins/kibana_utils/common/persistable_state';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { SimpleEmbeddableInput } from './migrations_embeddable_factory';
-import { EmbeddableInput } from '../../../../src/plugins/embeddable/common';
 
 // before 7.3.0 this embeddable received a very simple input with a variable named `number`
 // eslint-disable-next-line @typescript-eslint/naming-convention

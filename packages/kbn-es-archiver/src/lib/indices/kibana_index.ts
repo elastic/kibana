@@ -9,7 +9,7 @@
 import { inspect } from 'util';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';

@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSpacesService } = deps;

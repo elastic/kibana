@@ -216,7 +216,7 @@
         "label": "Language",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\""
+          "\"eql\" | \"kuery\" | \"lucene\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -230,7 +230,7 @@
         "label": "LanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -622,7 +622,7 @@
         "label": "ThreatLanguage",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -636,7 +636,7 @@
         "label": "ThreatLanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -932,7 +932,7 @@
         ],
         "label": "action_group",
         "description": [
-          "\nParams is an \"object\", since it is a type of AlertActionParams which is action templates."
+          "\nParams is an \"object\", since it is a type of RuleActionParams which is action templates."
         ],
         "signature": [
           "StringC"

@@ -10,28 +10,33 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import {
-  FillStyle,
-  SeriesType,
-  YAxisMode,
+  State,
+  visualizationTypes,
+  XYSuggestion,
+  XYLayerConfig,
+  XYDataLayerConfig,
   YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
+  YAxisMode,
+  SeriesType,
+} from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -44,6 +49,7 @@ import {
   getAnnotationsSupportedLayer,
   setAnnotationsDimension,
   getUniqueLabels,
+  onAnnotationDrop,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -66,18 +72,21 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const getXyVisualization = ({
+  datatableUtilities,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
+  datatableUtilities: DatatableUtilitiesService;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -276,10 +285,12 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: 'colorBy' as const,
-                  palette: paletteService
-                    .get(dataLayer.palette?.name || 'default')
-                    .getCategoricalColors(10, dataLayer.palette?.params),
+                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  palette: dataLayer.collapseFn
+                    ? undefined
+                    : paletteService
+                        .get(dataLayer.palette?.name || 'default')
+                        .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],
@@ -298,8 +309,23 @@ export const getXyVisualization = ({
     return getFirstDataLayer(state.layers)?.palette;
   },
 
+  onDrop(props) {
+    const targetLayer: XYLayerConfig | undefined = props.prevState.layers.find(
+      (l) => l.layerId === props.target.layerId
+    );
+    if (!targetLayer) {
+      throw new Error('target layer should exist');
+    }
+
+    if (isAnnotationsLayer(targetLayer)) {
+      return onAnnotationDrop?.(props) || props.prevState;
+    }
+    return onDropForVisualization(props, this);
+  },
+
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
+
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
     );
@@ -331,7 +357,7 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
@@ -350,6 +376,7 @@ export const getXyVisualization = ({
       ...foundLayer,
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
+      collapseFn,
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     } as XYLayerConfig;
@@ -449,7 +476,7 @@ export const getXyVisualization = ({
     const groupsAvailable = getGroupsAvailableInData(
       getDataLayers(prevState.layers),
       frame.datasourceLayers,
-      frame?.activeData
+      frame.activeData
     );
 
     if (
@@ -493,6 +520,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
+      datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
@@ -513,10 +541,24 @@ export const getXyVisualization = ({
     );
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes, eventAnnotationService),
-  toPreviewExpression: (state, layers) =>
-    toPreviewExpression(state, layers, paletteService, eventAnnotationService),
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(
+      state,
+      layers,
+      paletteService,
+      attributes,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
+    toPreviewExpression(
+      state,
+      layers,
+      paletteService,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
 
   getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
@@ -597,10 +639,12 @@ export const getXyVisualization = ({
       ...getDataLayers(state.layers),
       ...getReferenceLayers(state.layers),
     ].filter(({ accessors }) => accessors.length > 0);
+
     const accessorsWithArrayValues = [];
+
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      const rows = frame.activeData?.[layerId] && frame.activeData[layerId].rows;
       if (!rows) {
         break;
       }
@@ -612,6 +656,7 @@ export const getXyVisualization = ({
         }
       }
     }
+
     return accessorsWithArrayValues.map((label) => (
       <FormattedMessage
         key={label}
@@ -663,7 +708,7 @@ const getMappedAccessors = ({
   layer,
 }: {
   accessors: string[];
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   state: XYState;
@@ -679,7 +724,7 @@ const getMappedAccessors = ({
       { tables: frame.activeData },
       fieldFormats.deserialize
     );
-    mappedAccessors = getAccessorColorConfig(
+    mappedAccessors = getAccessorColorConfigs(
       colorAssignments,
       frame,
       {

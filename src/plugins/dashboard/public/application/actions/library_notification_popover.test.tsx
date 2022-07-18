@@ -10,14 +10,14 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
-import { CoreStart } from '../../../../../core/public';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
 import { isErrorEmbeddable } from '../../services/embeddable';
@@ -28,8 +28,8 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../../services/embeddable_test_samples';
-import { getStubPluginServices } from '../../../../presentation_util/public';
-import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 export const testDashboardInput = {
   panels: {
@@ -116,9 +116,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('pie charts', async () => {
-      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
-        await elasticChart.setNewChartUiDebugFlag();
-      }
+      await elasticChart.setNewChartUiDebugFlag();
       await pieChart.expectPieSliceCount(5);
     });
 

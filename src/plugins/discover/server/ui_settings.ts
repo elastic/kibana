@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -286,5 +286,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 });

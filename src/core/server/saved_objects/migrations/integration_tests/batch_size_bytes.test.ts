@@ -14,7 +14,7 @@ import { Root } from '../../../root';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../../../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 

@@ -11,6 +11,7 @@
 export * from './constants';
 export * from './services';
 export * from './types';
+export * from './experimental_features';
 export type { FleetAuthz } from './authz';
 export { calculateAuthz } from './authz';
 export { createFleetAuthzMock } from './mocks';

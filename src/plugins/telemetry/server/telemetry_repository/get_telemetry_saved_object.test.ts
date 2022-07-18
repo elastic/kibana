@@ -7,8 +7,8 @@
  */
 
 import { getTelemetrySavedObject } from './get_telemetry_saved_object';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
-import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('getTelemetrySavedObject', () => {
   it('returns null when saved object not found', async () => {

@@ -17,5 +17,4 @@ export {
 } from './color_maps';
 
 export { ColorMode, LabelRotation, defaultCountLabel } from './components';
-export { checkIsMaxContinuity, checkIsMinContinuity } from './palette';
 export * from './styles';

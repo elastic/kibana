@@ -30,8 +30,8 @@ jest.mock('./add_percentage_column', () => ({
   })),
 }));
 
-import { Datatable } from 'src/plugins/expressions';
-import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
+import { Datatable } from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import { AggTypes } from '../../common';
 import { TableGroup, TableVisConfig } from '../types';
 import { addPercentageColumn } from './add_percentage_column';

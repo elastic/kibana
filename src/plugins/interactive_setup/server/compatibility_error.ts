@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { NodesVersionCompatibility } from 'src/core/server';
+import type { NodesVersionCompatibility } from '@kbn/core/server';
 
 export class CompatibilityError extends Error {
   constructor(private meta: NodesVersionCompatibility) {

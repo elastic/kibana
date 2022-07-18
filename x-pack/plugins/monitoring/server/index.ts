@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { MonitoringPlugin } from './plugin';
 import { configSchema } from './config';
 import { deprecations } from './deprecations';
@@ -27,6 +27,11 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
       container: true,
       ccs: {
         enabled: true,
+      },
+      kibana: {
+        reporting: {
+          stale_status_threshold_seconds: true,
+        },
       },
     },
     kibana: true,

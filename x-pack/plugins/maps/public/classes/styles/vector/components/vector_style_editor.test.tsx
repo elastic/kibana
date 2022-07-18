@@ -49,6 +49,9 @@ function createLayerMock(numFields: number, supportedShapeTypes: VECTOR_SHAPE_TY
         getSupportedShapeTypes: async () => {
           return supportedShapeTypes;
         },
+        isMvt: () => {
+          return false;
+        },
       } as unknown as IVectorSource;
     },
   } as unknown as IVectorLayer;

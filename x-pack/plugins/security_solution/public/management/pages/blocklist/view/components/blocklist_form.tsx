@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
+import type { EuiSuperSelectOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
   EuiFormRow,
@@ -15,27 +16,21 @@ import {
   EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
-import {
-  OperatingSystem,
-  BlocklistConditionEntryField,
-  isPathValid,
-  hasSimpleExecutableName,
-} from '@kbn/securitysolution-utils';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
-import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -53,21 +48,22 @@ import {
   ERRORS,
   VALUE_LABEL_HELPER,
 } from '../../translations';
-import {
-  EffectedPolicySelect,
-  EffectedPolicySelection,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
   GLOBAL_ARTIFACT_TAG,
   BY_POLICY_ARTIFACT_TAG_PREFIX,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
+import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
-interface BlocklistEntry {
+const testIdPrefix = 'blocklist-form';
+
+export interface BlocklistEntry {
   field: BlocklistConditionEntryField;
   operator: 'included';
   type: 'match_any';
@@ -104,8 +100,8 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
-export const BlockListForm = memo(
-  ({ item, policies, policiesIsLoading, onChange, mode }: ArtifactFormComponentProps) => {
+export const BlockListForm = memo<ArtifactFormComponentProps>(
+  ({ item, policies, policiesIsLoading, onChange, mode }) => {
     const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
       name: false,
       value: false,
@@ -142,6 +138,8 @@ export const BlockListForm = memo(
       setSelectedPolicies(policiesData);
     }, [hasFormChanged, item.tags, policies]);
 
+    const getTestId = useTestIdGenerator(testIdPrefix);
+
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
         return {
@@ -163,8 +161,11 @@ export const BlockListForm = memo(
     }, [item?.os_types]);
 
     const selectedValues = useMemo(() => {
-      return blocklistEntry.value.map((label) => ({ label }));
-    }, [blocklistEntry.value]);
+      return blocklistEntry.value.map((label) => ({
+        label,
+        'data-test-subj': getTestId(`values-input-${label}`),
+      }));
+    }, [blocklistEntry.value, getTestId]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () =>
@@ -182,17 +183,19 @@ export const BlockListForm = memo(
         value: field,
         inputDisplay: CONDITION_FIELD_TITLE[field],
         dropdownDisplay: getDropdownDisplay(field),
+        'data-test-subj': getTestId(field),
       }));
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
           value: 'file.Ext.code_signature',
           inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
           dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
+          'data-test-subj': getTestId('file.Ext.code_signature'),
         });
       }
 
       return selectableFields;
-    }, [selectedOs]);
+    }, [selectedOs, getTestId]);
 
     const valueLabel = useMemo(() => {
       return (
@@ -238,15 +241,6 @@ export const BlockListForm = memo(
       // warn if invalid path
       if (field !== 'file.hash.*' && isInvalidPath) {
         newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
-      }
-
-      // warn if wildcard
-      if (
-        field !== 'file.hash.*' &&
-        !isInvalidPath &&
-        values.some((value) => !hasSimpleExecutableName({ os, type, value }))
-      ) {
-        newValueWarnings.WILDCARD_PRESENT = createValidationMessage(ERRORS.WILDCARD_PRESENT);
       }
 
       // warn if duplicates
@@ -437,7 +431,7 @@ export const BlockListForm = memo(
         </EuiTitle>
         <EuiSpacer size="xs" />
         {mode === 'create' && (
-          <EuiText size="s">
+          <EuiText size="s" data-test-subj={getTestId('header-description')}>
             <p>{DETAILS_HEADER_DESCRIPTION}</p>
           </EuiText>
         )}
@@ -456,6 +450,7 @@ export const BlockListForm = memo(
             onBlur={handleOnNameBlur}
             required={visited.name}
             maxLength={256}
+            data-test-subj={getTestId('name-input')}
             fullWidth
           />
         </EuiFormRow>
@@ -464,6 +459,7 @@ export const BlockListForm = memo(
             name="description"
             value={item.description}
             onChange={handleOnDescriptionChange}
+            data-test-subj={getTestId('description-input')}
             fullWidth
             compressed
             maxLength={256}
@@ -485,6 +481,7 @@ export const BlockListForm = memo(
             options={osOptions}
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
             fullWidth
           />
         </EuiFormRow>
@@ -499,6 +496,7 @@ export const BlockListForm = memo(
                   options={fieldOptions}
                   valueOfSelected={blocklistEntry.field}
                   onChange={handleOnFieldChange}
+                  data-test-subj={getTestId('field-select')}
                   fullWidth
                 />
               </EuiFormRow>
@@ -524,6 +522,7 @@ export const BlockListForm = memo(
             onSearchChange={handleOnValueTextChange}
             onChange={handleOnValueChange}
             onCreateOption={handleOnValueAdd}
+            data-test-subj={getTestId('values-input')}
             fullWidth
             noSuggestions
           />

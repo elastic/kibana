@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FrameHeadingRendererProps } from './';
+import { FrameHeadingRendererProps } from '.';
 import { DefaultFrameHeadingRenderer } from './default_frame_heading_renderer';
 
 export function CSharpFrameHeadingRenderer({

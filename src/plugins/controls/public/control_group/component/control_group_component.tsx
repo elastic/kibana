@@ -28,11 +28,11 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
-import { ViewMode } from '../../../../embeddable/public';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context
@@ -115,7 +115,6 @@ export const ControlGroup = () => {
             responsive={false}
             alignItems="center"
             data-test-subj="controls-group"
-            data-shared-items-count={idsInOrder.length}
           >
             <EuiFlexItem>
               <DndContext
@@ -144,6 +143,7 @@ export const ControlGroup = () => {
                             isEditable={isEditable}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
+                            embeddableType={panels[controlId].type}
                             key={controlId}
                           />
                         )

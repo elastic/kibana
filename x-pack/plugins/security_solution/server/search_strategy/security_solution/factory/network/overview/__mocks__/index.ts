@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
-  NetworkOverviewRequestOptions,
-  NetworkQueries,
-} from '../../../../../../../common/search_strategy';
+import type { NetworkOverviewRequestOptions } from '../../../../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkOverviewRequestOptions = {
   defaultIndex: [

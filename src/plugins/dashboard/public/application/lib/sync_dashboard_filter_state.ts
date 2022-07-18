@@ -20,7 +20,7 @@ import {
   Filter,
   Query,
   waitUntilNextSessionCompletes$,
-  QueryState,
+  GlobalQueryStateFromUrl,
 } from '../../services/data';
 import { cleanFiltersForSerialize } from '.';
 
@@ -103,13 +103,14 @@ export const syncDashboardFilterState = ({
     .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
-    ...[timefilterService.getRefreshIntervalUpdate$(), timefilterService.getTimeUpdate$()]
+    timefilterService.getRefreshIntervalUpdate$(),
+    timefilterService.getTimeUpdate$()
   ).subscribe(() => {
-    $triggerDashboardRefresh.next();
+    $triggerDashboardRefresh.next({});
 
     // manually check for unsaved changes here because the time range is not stored on the dashboardState,
     // but it could trigger the unsaved changes badge.
-    $checkForUnsavedChanges.next();
+    $checkForUnsavedChanges.next(undefined);
   });
 
   const forceRefreshSubscription = timefilterService
@@ -165,7 +166,7 @@ export const applyDashboardFilterState = ({
    * time range and refresh interval to the query service.
    */
   if (currentDashboardState.timeRestore) {
-    const globalQueryState = kbnUrlStateStorage.get<QueryState>('_g');
+    const globalQueryState = kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
     if (!globalQueryState?.time) {
       if (savedDashboard.timeFrom && savedDashboard.timeTo) {
         timefilterService.setTime({

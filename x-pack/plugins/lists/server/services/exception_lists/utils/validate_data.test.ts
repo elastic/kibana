@@ -15,7 +15,7 @@ import { getCreateExceptionListItemOptionsMock } from '../exception_list_client.
 import { validateData } from './validate_data';
 import { DataValidationError } from './errors';
 
-import { transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema } from './index';
+import { transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema } from '.';
 
 describe('when using `validateData()` utility', () => {
   let data: CreateExceptionListItemSchema;

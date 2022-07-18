@@ -20,9 +20,9 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import { ExpressionsStart } from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { ExpressionEditor } from './editor/expression_editor';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
 interface Props {
   expressions: ExpressionsStart;

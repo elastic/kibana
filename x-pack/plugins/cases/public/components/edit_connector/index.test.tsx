@@ -10,13 +10,17 @@ import { mount } from 'enzyme';
 import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { EditConnector, EditConnectorProps } from './index';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import { EditConnector, EditConnectorProps } from '.';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../containers/mock';
 import { CaseConnector } from '../../containers/configure/types';
 
 const onSubmit = jest.fn();
-const updateCase = jest.fn();
 const caseServices = {
   '123': {
     ...basicPush,
@@ -36,9 +40,7 @@ const getDefaultProps = (): EditConnectorProps => {
     isLoading: false,
     isValidConnector: true,
     onSubmit,
-    updateCase,
     userActions: caseUserActions,
-    userCanCrud: true,
   };
 };
 
@@ -203,11 +205,9 @@ describe('EditConnector ', () => {
   });
 
   it('does not allow the connector to be edited when the user does not have write permissions', async () => {
-    const defaultProps = getDefaultProps();
-    const props = { ...defaultProps, userCanCrud: false };
     const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
+      <TestProviders permissions={readCasesPermissions()}>
+        <EditConnector {...getDefaultProps()} />
       </TestProviders>
     );
     await waitFor(() =>
@@ -359,6 +359,21 @@ describe('EditConnector ', () => {
     const result = appMockRender.render(<EditConnector {...defaultProps} />);
     await waitFor(() => {
       expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
+    });
+  });
+
+  it('does not show the edit connectors pencil if the user does not have read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
+      expect(result.queryByTestId('connector-edit')).toBe(null);
     });
   });
 });

@@ -20,10 +20,8 @@ export class InfraFieldsDomain {
     sourceId: string,
     indexType: 'METRICS'
   ): Promise<InfraSourceIndexField[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
+    const soClient = (await requestContext.core).savedObjects.client;
+    const { configuration } = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
 
     const fields = await this.adapter.getIndexFields(requestContext, configuration.metricAlias);
 

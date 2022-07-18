@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export interface RouteDependencies {
   router: IRouter;

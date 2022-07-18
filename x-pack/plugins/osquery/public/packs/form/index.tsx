@@ -19,7 +19,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { OsqueryManagerPackagePolicy } from '../../../common/types';
+import type { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
   Form,
   useForm,
@@ -162,6 +162,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         policyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+
           return acc + (agentPolicy?.agents ?? 0);
         },
         0
@@ -177,6 +178,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const handleSaveClick = useCallback(() => {
     if (agentCount) {
       setShowConfirmationModal(true);
+
       return;
     }
 

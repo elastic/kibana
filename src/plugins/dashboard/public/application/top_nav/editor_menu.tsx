@@ -11,11 +11,14 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardAppServices } from '../../types';
@@ -124,9 +127,30 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const { name, title, titleInWizard, description, icon = 'empty', group } = visType;
+    const {
+      name,
+      title,
+      titleInWizard,
+      description,
+      icon = 'empty',
+      group,
+      isDeprecated,
+    } = visType;
     return {
-      name: titleInWizard || title,
+      name: !isDeprecated ? (
+        titleInWizard || title
+      ) : (
+        <EuiFlexGroup wrap responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">
+              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
+                defaultMessage: 'Deprecated',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       icon: icon as string,
       onClick:
         // not all the agg-based visualizations need to be created via the wizard

@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Command Shell Activity Started via RunDLL32",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n process.name : (\"cmd.exe\", \"powershell.exe\") and\n  process.parent.name : \"rundll32.exe\" and process.parent.command_line != null and\n  /* common FPs can be added here */\n  not process.parent.args : (\"C:\\\\Windows\\\\System32\\\\SHELL32.dll,RunAsNewUser_RunDLL\",\n                             \"C:\\\\WINDOWS\\\\*.tmp,zzzzInvokeManagedCustomActionOutOfProc\")\n",
   "risk_score": 21,
   "rule_id": "9ccf3ce0-0057-440a-91f5-870c6ad39093",
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

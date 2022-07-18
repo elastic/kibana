@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
-import { CounterRateArgs } from './index';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { CounterRateArgs } from '.';
 
 export type CounterRateExpressionFunction = ExpressionFunctionDefinition<
   'lens_counter_rate',

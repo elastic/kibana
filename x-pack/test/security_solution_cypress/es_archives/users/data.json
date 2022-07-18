@@ -1,0 +1,87 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_F",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",
+      "event": {
+        "category": "authentication",
+        "outcome": "failure"
+      },
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "host": {
+        "name": "test-host"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5qwBOpWiDweSth_F",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-05T19:41:33.045Z",
+      "event": {
+        "category": "authentication",
+        "outcome": "success"
+      },
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "host": {
+        "name": "test-host"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { UI_SETTINGS, AggTypesDependencies } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -15,7 +17,7 @@ import {
   getAggTypes,
   getAggTypesFunctions,
   getCalculateAutoTimeExpression,
-} from './';
+} from '.';
 import { AggsCommonSetup, AggsCommonStart } from './types';
 
 /** @internal */
@@ -36,9 +38,10 @@ export interface AggsCommonSetupDependencies {
 }
 
 export interface AggsCommonStartDependencies {
+  getIndexPattern(id: string): Promise<DataView>;
   getConfig: GetConfigFn;
-  getIndexPattern(id: string): Promise<IndexPattern>;
-  isDefaultTimezone: () => boolean;
+  fieldFormats: FieldFormatsStartCommon;
+  calculateBounds: AggTypesDependencies['calculateBounds'];
 }
 
 /**
@@ -48,6 +51,8 @@ export interface AggsCommonStartDependencies {
  */
 export class AggsCommonService {
   private readonly aggTypesRegistry = new AggTypesRegistry();
+
+  constructor(private aggExecutionContext?: AggTypesDependencies['aggExecutionContext']) {}
 
   public setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup {
     const aggTypesSetup = this.aggTypesRegistry.setup();
@@ -66,23 +71,32 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
-    const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
-
-    const createAggConfigs = (
-      indexPattern: IndexPattern,
-      configStates?: CreateAggConfigParams[]
-    ) => {
-      return new AggConfigs(indexPattern, configStates, {
-        typesRegistry: aggTypesStart,
-      });
-    };
+  public start({
+    getConfig,
+    fieldFormats,
+    calculateBounds,
+  }: AggsCommonStartDependencies): AggsCommonStart {
+    const aggTypesStart = this.aggTypesRegistry.start({
+      getConfig,
+      getFieldFormatsStart: () => fieldFormats,
+      aggExecutionContext: this.aggExecutionContext,
+      calculateBounds,
+    });
 
     return {
-      calculateAutoTimeExpression,
-      createAggConfigs,
       types: aggTypesStart,
+      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
+      createAggConfigs: (indexPattern, configStates, options) =>
+        new AggConfigs(
+          indexPattern,
+          configStates,
+          {
+            ...options,
+            typesRegistry: aggTypesStart,
+            aggExecutionContext: this.aggExecutionContext,
+          },
+          getConfig
+        ),
     };
   }
 }

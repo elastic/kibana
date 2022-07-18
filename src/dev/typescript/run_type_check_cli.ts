@@ -12,8 +12,8 @@ import Os from 'os';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import execa from 'execa';
-import { run, createFailError } from '@kbn/dev-utils';
-import { lastValueFrom } from '@kbn/std';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { PROJECTS } from './projects';
 import { buildTsRefs } from './build_ts_refs';
@@ -65,7 +65,7 @@ export async function runTypeCheckCli() {
           : ['--skipLibCheck', 'false']),
       ];
 
-      const failureCount = await lastValueFrom(
+      const failureCount = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (p) => {
             const relativePath = Path.relative(process.cwd(), p.tsConfigPath);

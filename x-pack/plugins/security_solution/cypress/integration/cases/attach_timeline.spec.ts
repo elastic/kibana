@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForTimeline } from '../../tasks/login';
+import { login, visitTimeline } from '../../tasks/login';
 import {
   attachTimelineToNewCase,
   attachTimelineToExistingCase,
@@ -16,20 +16,24 @@ import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../screens/create_new_c
 import { getCase1 } from '../../objects/case';
 import { getTimeline } from '../../objects/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 import { createCase } from '../../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {
-    beforeEach(() => {
+    before(() => {
       cleanKibana();
+      login();
+    });
+    beforeEach(() => {
+      deleteTimelines();
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
       });
     });
 
     it('attach timeline to a new case', function () {
-      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
+      visitTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
@@ -41,7 +45,7 @@ describe('attach timeline to case', () => {
     });
 
     it('attach timeline to an existing case with no case', function () {
-      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
+      visitTimeline(this.myTimeline.savedObjectId);
       attachTimelineToExistingCase();
       addNewCase();
 
@@ -56,7 +60,7 @@ describe('attach timeline to case', () => {
 
   context('with cases created', () => {
     before(() => {
-      cleanKibana();
+      deleteTimelines();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
@@ -64,7 +68,7 @@ describe('attach timeline to case', () => {
     });
 
     it('attach timeline to an existing case', function () {
-      loginAndWaitForTimeline(this.timelineId);
+      visitTimeline(this.timelineId);
       attachTimelineToExistingCase();
       selectCase(this.caseId);
 

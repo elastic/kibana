@@ -13,24 +13,23 @@ import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 
 import { DashboardSessionStorage } from '../lib';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
-import { createKbnUrlStateStorage, defer } from '../../../../kibana_utils/public';
+import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 import {
   getSampleDashboardInput,
   getSavedDashboardMock,
   makeDefaultServices,
 } from '../test_helpers';
-import { DataViewsContract } from '../../services/data';
 import { DataView } from '../../services/data_views';
 import type { Filter } from '@kbn/es-query';
 
@@ -54,14 +53,20 @@ const createDashboardAppStateProps = (): UseDashboardStateProps => ({
   savedDashboardId: 'testDashboardId',
   history: createBrowserHistory(),
   isEmbeddedExternally: false,
+  showNoDataPage: false,
+  setShowNoDataPage: () => {},
 });
 
 const createDashboardAppStateServices = () => {
   const defaults = makeDefaultServices();
-  const dataViews = {} as DataViewsContract;
   const defaultDataView = { id: 'foo', fields: [{ name: 'bar' }] } as DataView;
-  dataViews.ensureDefaultDataView = jest.fn().mockImplementation(() => Promise.resolve(true));
-  dataViews.getDefault = jest.fn().mockImplementation(() => Promise.resolve(defaultDataView));
+  defaults.dataViews.getDefaultDataView = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(defaultDataView));
+
+  defaults.dataViews.getDefault = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(defaultDataView));
 
   const data = dataPluginMock.createStartContract();
   data.query.filterManager.getUpdates$ = jest.fn().mockImplementation(() => of(void 0));
@@ -71,7 +76,7 @@ const createDashboardAppStateServices = () => {
     .fn()
     .mockImplementation(() => of(void 0));
 
-  return { ...defaults, dataViews, data };
+  return { ...defaults, data };
 };
 
 const setupEmbeddableFactory = (

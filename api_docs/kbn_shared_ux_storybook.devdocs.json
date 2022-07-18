@@ -29,13 +29,60 @@
           "\nA factory function for creating for creating a storybook implementation of `SharedUXApplicationService`."
         ],
         "signature": [
-          "() => { navigateToUrl: () => Promise<void>; currentAppId$: ",
+          "() => { navigateToUrl: (url: string) => Promise<void>; currentAppId$: ",
           "BehaviorSubject",
           "<string>; }"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/services/application.ts",
         "deprecated": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.dataServiceFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "dataServiceFactory",
+        "description": [
+          "\nA factory function for creating a Storybook implementation of `SharedUxDataService`."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookPluginApi",
+            "section": "def-common.DataServiceFactoryConfig",
+            "text": "DataServiceFactoryConfig"
+          },
+          ") => { hasESData: () => Promise<boolean>; hasDataView: () => Promise<boolean>; hasUserDataView: () => Promise<boolean>; }"
+        ],
+        "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.dataServiceFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-storybook",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookPluginApi",
+                "section": "def-common.DataServiceFactoryConfig",
+                "text": "DataServiceFactoryConfig"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -49,7 +96,7 @@
           "\nA factory function for creating a Storybook implementation of `SharedUxDocLinksService`."
         ],
         "signature": [
-          "() => { dataViewsDocLink: string; }"
+          "() => { dataViewsDocLink: string; kibanaGuideDocLink: string; }"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/services/doc_links.ts",
         "deprecated": false,
@@ -67,7 +114,9 @@
           "\nA factory function for creating a Storybook implementation of `SharedUxEditorsService`."
         ],
         "signature": [
-          "() => { openDataViewEditor: (options: DataViewEditorOptions) => () => void; }"
+          "() => { openDataViewEditor: (options: ",
+          "DataViewEditorOptions",
+          ") => () => void; }"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/services/editors.ts",
         "deprecated": false,
@@ -125,8 +174,10 @@
         "signature": [
           "(storyFn: ",
           "PartialStoryFn",
-          "<",
+          "<ReturnTypeFramework<",
           "StoryFnReactReturnType",
+          ">, ",
+          "Args",
           ">) => JSX.Element"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/decorators.tsx",
@@ -141,8 +192,10 @@
             "description": [],
             "signature": [
               "PartialStoryFn",
-              "<",
+              "<ReturnTypeFramework<",
               "StoryFnReactReturnType",
+              ">, ",
+              "Args",
               ">"
             ],
             "path": "packages/kbn-shared-ux-storybook/src/decorators.tsx",
@@ -175,6 +228,8 @@
           "SharedUxUserPermissionsService",
           "; platform: ",
           "SharedUxPlatformService",
+          "; data: ",
+          "SharedUxDataService",
           "; }"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/services/index.ts",
@@ -217,7 +272,51 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook",
+        "id": "def-common.DataServiceFactoryConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataServiceFactoryConfig",
+        "description": [],
+        "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.DataServiceFactoryConfig.hasESData",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasESData",
+            "description": [],
+            "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.DataServiceFactoryConfig.hasDataView",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasDataView",
+            "description": [],
+            "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-storybook",
+            "id": "def-common.DataServiceFactoryConfig.hasUserDataView",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasUserDataView",
+            "description": [],
+            "path": "packages/kbn-shared-ux-storybook/src/services/data.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

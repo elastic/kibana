@@ -19,16 +19,17 @@ import { sortOrderSchema } from './common_schemas';
  * - nested
  * - reverse_nested
  * - terms
+ * - multi_terms
  *
  * Not fully supported:
  * - filter
  * - filters
+ * - composite
  *
  * Not implemented:
  * - adjacency_matrix
  * - auto_date_histogram
  * - children
- * - composite
  * - date_histogram
  * - diversified_sampler
  * - geo_distance
@@ -37,7 +38,6 @@ import { sortOrderSchema } from './common_schemas';
  * - global
  * - ip_range
  * - missing
- * - multi_terms
  * - parent
  * - range
  * - rare_terms
@@ -63,6 +63,71 @@ const boolSchema = s.object({
   }),
 });
 
+const orderSchema = s.oneOf([
+  sortOrderSchema,
+  s.recordOf(s.string(), sortOrderSchema),
+  s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
+]);
+
+const termsSchema = s.object({
+  field: s.maybe(s.string()),
+  collect_mode: s.maybe(s.string()),
+  exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+  include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
+  execution_hint: s.maybe(s.string()),
+  missing: s.maybe(s.number()),
+  min_doc_count: s.maybe(s.number({ min: 1 })),
+  size: s.maybe(s.number()),
+  show_term_doc_count_error: s.maybe(s.boolean()),
+  order: s.maybe(orderSchema),
+});
+
+const multiTermsSchema = s.object({
+  terms: s.arrayOf(termsSchema),
+  size: s.maybe(s.number()),
+  shard_size: s.maybe(s.number()),
+  show_term_doc_count_error: s.maybe(s.boolean()),
+  min_doc_count: s.maybe(s.number()),
+  shard_min_doc_count: s.maybe(s.number()),
+  collect_mode: s.maybe(s.oneOf([s.literal('depth_first'), s.literal('breadth_first')])),
+  order: s.maybe(s.recordOf(s.string(), orderSchema)),
+});
+
+const histogramSchema = s.object({
+  field: s.maybe(s.string()),
+  interval: s.maybe(s.number()),
+  min_doc_count: s.maybe(s.number({ min: 1 })),
+  extended_bounds: s.maybe(
+    s.object({
+      min: s.number(),
+      max: s.number(),
+    })
+  ),
+  hard_bounds: s.maybe(
+    s.object({
+      min: s.number(),
+      max: s.number(),
+    })
+  ),
+  missing: s.maybe(s.number()),
+  keyed: s.maybe(s.boolean()),
+  order: s.maybe(
+    s.object({
+      _count: s.string(),
+      _key: s.string(),
+    })
+  ),
+});
+
+const compositeSchema = s.object({
+  sources: s.arrayOf(
+    s.recordOf(
+      s.string(),
+      s.oneOf([s.object({ terms: termsSchema }), s.object({ histogram: histogramSchema })])
+    )
+  ),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   date_range: s.object({
     field: s.string(),
@@ -73,53 +138,14 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   filters: s.object({
     filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
-  histogram: s.object({
-    field: s.maybe(s.string()),
-    interval: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number({ min: 1 })),
-    extended_bounds: s.maybe(
-      s.object({
-        min: s.number(),
-        max: s.number(),
-      })
-    ),
-    hard_bounds: s.maybe(
-      s.object({
-        min: s.number(),
-        max: s.number(),
-      })
-    ),
-    missing: s.maybe(s.number()),
-    keyed: s.maybe(s.boolean()),
-    order: s.maybe(
-      s.object({
-        _count: s.string(),
-        _key: s.string(),
-      })
-    ),
-  }),
+  histogram: histogramSchema,
   nested: s.object({
     path: s.string(),
   }),
   reverse_nested: s.object({
     path: s.maybe(s.string()),
   }),
-  terms: s.object({
-    field: s.maybe(s.string()),
-    collect_mode: s.maybe(s.string()),
-    exclude: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-    include: s.maybe(s.oneOf([s.string(), s.arrayOf(s.string())])),
-    execution_hint: s.maybe(s.string()),
-    missing: s.maybe(s.number()),
-    min_doc_count: s.maybe(s.number({ min: 1 })),
-    size: s.maybe(s.number()),
-    show_term_doc_count_error: s.maybe(s.boolean()),
-    order: s.maybe(
-      s.oneOf([
-        sortOrderSchema,
-        s.recordOf(s.string(), sortOrderSchema),
-        s.arrayOf(s.recordOf(s.string(), sortOrderSchema)),
-      ])
-    ),
-  }),
+  multi_terms: multiTermsSchema,
+  terms: termsSchema,
+  composite: compositeSchema,
 };

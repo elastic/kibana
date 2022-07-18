@@ -9,7 +9,9 @@
   "include": [
     "public/**/*",
     "config.ts",
-    "public/**/*.json"
+    "public/**/*.json",
+    "server/**/*",
+    "config.ts",
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

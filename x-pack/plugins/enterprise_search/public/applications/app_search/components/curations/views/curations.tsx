@@ -9,7 +9,6 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -32,8 +31,6 @@ export const Curations: React.FC = () => {
   const {
     engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
   } = useValues(EngineLogic);
-
-  const suggestionsEnabled = adaptiveRelevanceSuggestionsActive;
 
   const OVERVIEW_TAB = {
     label: i18n.translate(
@@ -63,13 +60,6 @@ export const Curations: React.FC = () => {
     ),
     isSelected: selectedPageTab === 'settings',
     onClick: () => onSelectPageTab('settings'),
-    append: suggestionsEnabled ? undefined : (
-      <EuiBadge color="success">
-        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel', {
-          defaultMessage: 'New!',
-        })}
-      </EuiBadge>
-    ),
   };
 
   const pageTabs = adaptiveRelevanceSuggestionsActive

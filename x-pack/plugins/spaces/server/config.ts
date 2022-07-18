@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { PluginInitializerContext } from 'src/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const ConfigSchema = schema.object({
   maxSpaces: schema.number({ defaultValue: 1000 }),

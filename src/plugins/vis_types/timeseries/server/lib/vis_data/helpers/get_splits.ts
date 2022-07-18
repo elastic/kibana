@@ -8,7 +8,7 @@
 
 import Color from 'color';
 import { get, isPlainObject } from 'lodash';
-import { overwrite } from '../helpers';
+import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
@@ -25,6 +25,7 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   id: string;
   splitByLabel: string;
   label: string;
+  termsSplitKey?: string | string[];
   color: string;
   meta: TMeta;
   timeseries: {
@@ -70,9 +71,9 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
-        bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = color.string();
         bucket.meta = meta;
+        bucket.termsSplitKey = bucket.key;
         return bucket;
       });
     }

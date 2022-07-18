@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { DemoRows } from './demo_rows_types';
 import { getDemoRows } from './get_demo_rows';

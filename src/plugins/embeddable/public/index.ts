@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export type {
@@ -19,6 +19,8 @@ export type {
   ContainerOutput,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddablePhaseEvent,
+  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
@@ -30,7 +30,7 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
       ]
     : [];
 
-export const filterHostExternalAlertData: Filter[] = [
+export const hostNameExistsFilter: Filter[] = [
   {
     query: {
       bool: {

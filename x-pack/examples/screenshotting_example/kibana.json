@@ -1,0 +1,19 @@
+{
+  "id": "screenshottingExample",
+  "version": "0.1.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Kibana Reporting Services",
+    "githubTeam": "kibana-reporting-services"
+  },
+  "description": "An example integration with the screenshotting plugin.",
+  "optionalPlugins": [],
+  "requiredPlugins": [
+    "screenshotting",
+    "developerExamples",
+    "kibanaReact",
+    "navigation"
+  ]
+}

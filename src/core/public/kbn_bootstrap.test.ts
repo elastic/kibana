@@ -7,7 +7,7 @@
  */
 
 import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
-import { __kbnBootstrap__ } from './';
+import { __kbnBootstrap__ } from '.';
 
 describe('kbn_bootstrap', () => {
   beforeAll(() => {
@@ -22,6 +22,7 @@ describe('kbn_bootstrap', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.performance.mark = jest.fn();
   });
 
   it('does not report a fatal error if apm load fails', async () => {

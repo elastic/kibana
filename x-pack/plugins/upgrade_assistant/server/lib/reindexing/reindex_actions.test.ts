@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import moment from 'moment';
 
 import {

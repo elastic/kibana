@@ -16,6 +16,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -27,7 +28,6 @@ import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;

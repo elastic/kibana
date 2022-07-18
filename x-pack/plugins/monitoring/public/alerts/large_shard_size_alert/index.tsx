@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RuleTypeParams } from '../../../../alerting/common';
-import type { RuleTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_LARGE_SHARD_SIZE,

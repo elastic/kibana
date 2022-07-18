@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { SessionInfo } from '../../../common/types';
 

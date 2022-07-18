@@ -17,7 +17,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../test_helpers';
 
-import { CurationLogic } from './';
+import { CurationLogic } from '.';
 
 describe('CurationLogic', () => {
   const { mount } = new LogicMounter(CurationLogic);

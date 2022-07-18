@@ -10,10 +10,11 @@
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -23,35 +24,32 @@ import {
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 
+import { lastValueFrom } from 'rxjs';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
-import {
-  TimelineId,
-  TimelineResult,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../common/types/timeline';
+import type { TimelineResult } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
-import {
+import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
   UpdateAlertStatusActionProps,
   CreateTimelineProps,
 } from './types';
-import { Ecs } from '../../../../common/ecs';
-import {
+import type { Ecs } from '../../../../common/ecs';
+import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsQueries,
 } from '../../../../common/search_strategy/timeline';
+import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   omitTypenameInTimeline,
@@ -64,7 +62,7 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import {
+import type {
   DataProvider,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
@@ -157,16 +155,6 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
 
   return { to, from };
 };
-
-const getFiltersFromRule = (filters: string[]): Filter[] =>
-  filters.reduce((acc, filterString) => {
-    try {
-      const objFilter: Filter = JSON.parse(filterString);
-      return [...acc, objFilter];
-    } catch (e) {
-      return acc;
-    }
-  }, [] as Filter[]);
 
 const calculateFromTimeFallback = (thresholdData: Ecs, originalTime: moment.Moment) => {
   // relative time that the rule's time range starts at (e.g. now-1h)
@@ -396,6 +384,10 @@ const buildEqlDataProviderOrFilter = (
   return { filters: [], dataProviders: [] };
 };
 
+interface MightHaveFilters {
+  filters?: Filter[];
+}
+
 const createThresholdTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
@@ -425,7 +417,15 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
-    const filters = getFiltersFromRule(params.filters ?? alertDoc.signal?.rule?.filters) ?? [];
+    const filters: Filter[] =
+      (params as MightHaveFilters).filters ??
+      (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
+      [];
+    // https://github.com/elastic/kibana/issues/126574 - if the provided filter has no `meta` field
+    // we expect an empty object to be inserted before calling `createTimeline`
+    const augmentedFilters = filters.map((filter) => {
+      return filter.meta != null ? filter : { ...filter, meta: {} };
+    });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
     const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
@@ -439,7 +439,7 @@ const createThresholdTimeline = async (
         chunkSize: 10000,
         alias: 'Exceptions',
       }) ?? [];
-    const allFilters = (templateValues.filters ?? filters).concat(exceptionsFilter);
+    const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
 
     return createTimeline({
       from: thresholdFrom,
@@ -535,11 +535,13 @@ export const sendAlertToTimelineAction = async ({
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
         getTimelineTemplate(timelineId),
-        searchStrategyClient
-          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+        lastValueFrom(
+          searchStrategyClient.search<
+            TimelineEventsDetailsRequestOptions,
+            TimelineEventsDetailsStrategyResponse
+          >(
             {
               defaultIndex: [],
-              docValueFields: [],
               indexName: ecsData._index ?? '',
               eventId: ecsData._id,
               factoryQueryType: TimelineEventsQueries.details,
@@ -548,7 +550,7 @@ export const sendAlertToTimelineAction = async ({
               strategy: 'timelineSearchStrategy',
             }
           )
-          .toPromise(),
+        ),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleAction } from '../../../../../alerting/common';
-import { RuleExecutorServices } from '../../../../../alerting/server';
+import type { Logger } from '@kbn/core/server';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';

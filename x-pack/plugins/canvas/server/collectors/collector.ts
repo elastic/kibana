@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { TelemetryCollector } from '../../types';
 
 import { workpadCollector, workpadSchema, WorkpadTelemetry } from './workpad_collector';

@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+  GetAgentsResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec';
+import type {
   GetHostPolicyResponse,
   HostInfo,
   HostPolicyResponse,
-  HostStatus,
   MetadataListResponse,
   PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/services/ingest';
-import {
-  GetAgentPoliciesResponse,
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-  GetAgentsResponse,
-} from '../../../../../../fleet/common/types/rest_spec';
-import { GetPolicyListResponse } from '../../policy/types';
+} from '../../../services/policies/ingest';
+import type { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import {
   ACTION_STATUS_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import { TransformStats, TransformStatsResponse } from '../types';
+import type { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
 

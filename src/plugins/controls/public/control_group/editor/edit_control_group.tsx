@@ -9,10 +9,10 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupEditor } from './control_group_editor';
-import { OverlayRef } from '../../../../../core/public';
 import { pluginServices } from '../../services';
 import { ControlGroupContainer } from '..';
 import { setFlyoutRef } from '../embeddable/control_group_container';
@@ -26,12 +26,11 @@ export const EditControlGroup = ({
   controlGroupContainer,
   closePopover,
 }: EditControlGroupButtonProps) => {
-  const { overlays } = pluginServices.getServices();
-  const { openConfirm, openFlyout } = overlays;
+  const { overlays, theme } = pluginServices.getHooks();
+  const { openConfirm, openFlyout } = overlays.useService();
+  const themeService = theme.useService();
 
   const editControlGroup = () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
-
     const onDeleteAll = (ref: OverlayRef) => {
       openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
         confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -49,15 +48,14 @@ export const EditControlGroup = ({
 
     const flyoutInstance = openFlyout(
       toMountPoint(
-        <PresentationUtilProvider>
-          <ControlGroupEditor
-            initialInput={controlGroupContainer.getInput()}
-            updateInput={(changes) => controlGroupContainer.updateInput(changes)}
-            controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
-            onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={() => flyoutInstance.close()}
-          />
-        </PresentationUtilProvider>
+        <ControlGroupEditor
+          initialInput={controlGroupContainer.getInput()}
+          updateInput={(changes) => controlGroupContainer.updateInput(changes)}
+          controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
+          onDeleteAll={() => onDeleteAll(flyoutInstance)}
+          onClose={() => flyoutInstance.close()}
+        />,
+        { theme$: themeService.theme$ }
       ),
       {
         outsideClickCloses: false,

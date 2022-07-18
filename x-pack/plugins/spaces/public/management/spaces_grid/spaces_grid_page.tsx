@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ApplicationStart,
   Capabilities,
   NotificationsStart,
   ScopedHistory,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
-import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';

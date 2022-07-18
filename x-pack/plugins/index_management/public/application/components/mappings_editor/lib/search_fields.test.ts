@@ -7,7 +7,7 @@
 
 import { searchFields } from './search_fields';
 import { NormalizedField } from '../types';
-import { getUniqueId } from '../lib';
+import { getUniqueId } from '.';
 
 const irrelevantProps = {
   canHaveChildFields: false,

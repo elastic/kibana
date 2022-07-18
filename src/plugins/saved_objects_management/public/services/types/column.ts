@@ -7,7 +7,7 @@
  */
 
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
 interface ColumnContext {

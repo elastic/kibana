@@ -14,12 +14,14 @@ import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_packag
 import { FleetIntegrations } from './fleet_integrations_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
+import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   endpoint: EndpointPageProvider,
   policy: EndpointPolicyPageProvider,
   trustedApps: TrustedAppsPageProvider,
+  artifactEntriesList: ArtifactEntriesListPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
   fleetIntegrations: FleetIntegrations,

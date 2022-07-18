@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+import { SavedObject, SavedObjectAttributes } from '../../../..';
 import { savedObjectsClientMock } from '../../../../mocks';
 import { collectReferencesDeep } from './collect_references_deep';
 

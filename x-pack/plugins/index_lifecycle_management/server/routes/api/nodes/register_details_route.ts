@@ -42,7 +42,8 @@ export function registerDetailsRoute({
       const { nodeAttrs } = params;
 
       try {
-        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
+        const esClient = (await context.core).elasticsearch.client;
+        const statsResponse = await esClient.asCurrentUser.nodes.stats();
         const okResponse = { body: findMatchingNodes(statsResponse, nodeAttrs) };
         return response.ok(okResponse);
       } catch (error) {

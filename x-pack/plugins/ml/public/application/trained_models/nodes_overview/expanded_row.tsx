@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeItem } from './nodes_list';
 import { useListItemsFormatter } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface ExpandedRowProps {
   item: NodeItem;

@@ -74,6 +74,12 @@ export function MapSettingsPanel({
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
+          <CustomIconsPanel
+            customIcons={customIcons}
+            updateCustomIcons={updateCustomIcons}
+            deleteCustomIcon={deleteCustomIcon}
+          />
+          <EuiSpacer size="s" />
           <DisplayPanel settings={settings} updateMapSetting={updateMapSetting} />
           <EuiSpacer size="s" />
           <NavigationPanel
@@ -84,12 +90,6 @@ export function MapSettingsPanel({
           />
           <EuiSpacer size="s" />
           <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
-          <EuiSpacer size="s" />
-          <CustomIconsPanel
-            customIcons={customIcons}
-            updateCustomIcons={updateCustomIcons}
-            deleteCustomIcon={deleteCustomIcon}
-          />
         </div>
       </div>
 

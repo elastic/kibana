@@ -7,10 +7,10 @@
  */
 
 import { createTickFormatter } from './tick_formatter';
-import { getFieldFormatsRegistry } from '../../../../../../data/public/test_utils';
+import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { setFieldFormats } from '../../../services';
-import { UI_SETTINGS } from '../../../../../../data/public';
-import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 
 const mockUiSettings = {
   get: (item) => {

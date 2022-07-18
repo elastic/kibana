@@ -11,14 +11,14 @@ import type {
   SavedObjectsExportByObjectOptions,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
   savedObjectsTypeRegistryMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 

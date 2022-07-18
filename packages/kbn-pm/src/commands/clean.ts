@@ -10,11 +10,12 @@ import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
+import { runBazel } from '@kbn/bazel-runner';
 
-import { isBazelBinAvailable, runBazel } from '../utils/bazel';
+import { isBazelBinAvailable } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const CleanCommand: ICommand = {
   description: 'Deletes output directories and resets internal caches.',
@@ -25,7 +26,7 @@ export const CleanCommand: ICommand = {
     id: 'total',
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, { kbn }) {
     log.warning(dedent`
       This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
@@ -53,8 +54,11 @@ export const CleanCommand: ICommand = {
     }
 
     // Runs Bazel soft clean
-    if (await isBazelBinAvailable()) {
-      await runBazel(['clean']);
+    if (await isBazelBinAvailable(kbn.getAbsolute())) {
+      await runBazel({
+        bazelArgs: ['clean'],
+        log,
+      });
       log.success('Soft cleaned bazel');
     }
 

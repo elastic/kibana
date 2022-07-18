@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
-  const [item, setItem] = useState<T>(getFromStorage(key, defaultValue));
+  // This is necessary to fix a race condition issue.
+  // It guarantees that the latest value will be always returned after the value is updated
+  const [storageUpdate, setStorageUpdate] = useState(0);
 
-  const updateFromStorage = () => {
-    const storedItem = getFromStorage(key, defaultValue);
-    setItem(storedItem);
-  };
+  const item = useMemo(() => {
+    return getFromStorage(key, defaultValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, storageUpdate, defaultValue]);
 
   const saveToStorage = (value: T) => {
     if (value === undefined) {
       window.localStorage.removeItem(key);
     } else {
       window.localStorage.setItem(key, JSON.stringify(value));
-      updateFromStorage();
+      setStorageUpdate(storageUpdate + 1);
     }
   };
 
   useEffect(() => {
-    window.addEventListener('storage', (event: StorageEvent) => {
+    function onUpdate(event: StorageEvent) {
       if (event.key === key) {
-        updateFromStorage();
+        setStorageUpdate(storageUpdate + 1);
       }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // item state must be updated with a new key or default value
-  useEffect(() => {
-    setItem(getFromStorage(key, defaultValue));
-  }, [key, defaultValue]);
+    }
+    window.addEventListener('storage', onUpdate);
+    return () => {
+      window.removeEventListener('storage', onUpdate);
+    };
+  }, [key, setStorageUpdate, storageUpdate]);
 
   return [item, saveToStorage] as const;
 }

@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import $ from 'jquery';
-import { stringify } from 'query-string';
-
-interface SendOptions {
-  asSystemRequest?: boolean;
-}
+import type { HttpResponse, HttpSetup } from '@kbn/core/public';
+import { trimStart, trimEnd } from 'lodash';
+import { API_BASE_PATH, KIBANA_API_PREFIX } from '../../../common/constants';
 
 const esVersion: string[] = [];
 
@@ -24,48 +21,81 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
-export function send(
-  method: string,
-  path: string,
-  data: string | object,
-  { asSystemRequest }: SendOptions = {},
-  withProductOrigin: boolean = false
-) {
-  const wrappedDfd = $.Deferred();
-
-  const options: JQuery.AjaxSettings = {
-    url:
-      '../api/console/proxy?' +
-      stringify({ path, method, ...(withProductOrigin && { withProductOrigin }) }, { sort: false }),
-    headers: {
-      'kbn-xsrf': 'kibana',
-      ...(asSystemRequest && { 'kbn-system-request': 'true' }),
-    },
-    data,
-    contentType: getContentType(data),
-    cache: false,
-    crossDomain: true,
-    type: 'POST',
-    dataType: 'text', // disable automatic guessing
-  };
-
-  $.ajax(options).then(
-    (responseData, textStatus: string, jqXHR: unknown) => {
-      wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
-    },
-    ((jqXHR: { status: number; responseText: string }, textStatus: string, errorThrown: Error) => {
-      if (jqXHR.status === 0) {
-        jqXHR.responseText =
-          "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
-      }
-      wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
-    }) as any
-  );
-  return wrappedDfd;
+interface SendConfig {
+  http: HttpSetup;
+  method: string;
+  path: string;
+  data?: string;
+  asSystemRequest?: boolean;
+  withProductOrigin?: boolean;
+  asResponse?: boolean;
 }
 
-export function constructESUrl(baseUri: string, path: string) {
-  baseUri = baseUri.replace(/\/+$/, '');
-  path = path.replace(/^\/+/, '');
-  return baseUri + '/' + path;
+type Method = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
+
+export async function send({
+  http,
+  method,
+  path,
+  data,
+  asSystemRequest = false,
+  withProductOrigin = false,
+  asResponse = false,
+}: SendConfig) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
+
+  if (kibanaRequestUrl) {
+    const httpMethod = method.toLowerCase() as Method;
+    const url = new URL(kibanaRequestUrl);
+    const { pathname, searchParams } = url;
+    const query = Object.fromEntries(searchParams.entries());
+    const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
+
+    return await http[httpMethod]<HttpResponse>(pathname, {
+      body,
+      query,
+      asResponse,
+      asSystemRequest,
+    });
+  }
+
+  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, {
+    query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
+    body: data,
+    asResponse,
+    asSystemRequest,
+  });
 }
+
+function getKibanaRequestUrl(path: string) {
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
+  const kibanaBasePath = window.location.origin;
+
+  if (isKibanaApiRequest) {
+    // window.location.origin is used as a Kibana public base path for sending requests in cURL commands. E.g. "Copy as cURL".
+    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_PREFIX, ''), '/')}`;
+  }
+}
+
+export function constructUrl(baseUri: string, path: string) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
+  let url = `${trimEnd(baseUri, '/')}/${trimStart(path, '/')}`;
+
+  if (kibanaRequestUrl) {
+    url = kibanaRequestUrl;
+  }
+
+  const { origin, pathname, search } = new URL(url);
+  return `${origin}${encodePathname(pathname)}${search ?? ''}`;
+}
+
+const encodePathname = (path: string) => {
+  const decodedPath = new URLSearchParams(`path=${path}`).get('path') ?? '';
+
+  // Skip if it is valid
+  if (path === decodedPath) {
+    return path;
+  }
+
+  return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
+};

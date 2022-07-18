@@ -7,10 +7,10 @@
 
 // See: https://github.com/elastic/kibana/issues/117255, this creates mocks to avoid memory leaks from kibana core.
 
-import { parseDuration } from '../../../alerting/common/parse_duration';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ReadOperations, WriteOperations } from '../../../alerting/server/authorization';
+import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server/authorization';
 
 module.exports = {
   parseDuration,

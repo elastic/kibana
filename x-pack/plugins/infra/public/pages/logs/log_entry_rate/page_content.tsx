@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {

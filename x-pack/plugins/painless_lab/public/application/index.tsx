@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from 'src/core/public';
+import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from '@kbn/core/public';
 
 import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
 

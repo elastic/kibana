@@ -12,6 +12,7 @@
   "license": "Elastic License v2",
   "max_signals": 33,
   "name": "Timestomping using Touch Command",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n process.name : \"touch\" and user.id != \"0\" and\n process.args : (\"-r\", \"-t\", \"-a*\",\"-m*\") and\n not process.args : (\"/usr/lib/go-*/bin/go\", \"/usr/lib/dracut/dracut-functions.sh\", \"/tmp/KSInstallAction.*/m/.patch/*\")\n",
   "risk_score": 47,
   "rule_id": "b0046934-486e-462f-9487-0d4cf9e429c6",
@@ -50,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

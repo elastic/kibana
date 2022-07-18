@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SharePluginStart } from '../../../../src/plugins/share/public';
 
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;

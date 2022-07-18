@@ -15,7 +15,7 @@ import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } fro
 import { asTaskClaimEvent, ClaimTaskErr, TaskClaimErrorType, TaskEvent } from '../task_events';
 import { asOk, asErr } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import type { MustNotCondition } from '../queries/query_clauses';
+import type { MustNotCondition } from './query_clauses';
 import { mockLogger } from '../test_utils';
 import {
   TaskClaiming,

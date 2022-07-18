@@ -7,7 +7,7 @@
  */
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { isErrorLogged, markErrorLogged } from './errors';
 import { Build } from './build';
@@ -67,7 +67,7 @@ export function createRunner({ config, log }: Options) {
   /**
    * Run a task by calling its `run()` method with three arguments:
    *    `config`: an object with methods for determining top-level config values, see `./config.js`
-   *    `log`: an instance of the `ToolingLog`, see `../../tooling_log/tooling_log.js`
+   *    `log`: an instance of the `ToolingLog`
    *    `builds?`: If task does is not defined as `global: true` then it is called for each build and passed each one here.
    */
   return async function run(task: Task | GlobalTask) {

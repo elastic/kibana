@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspPageTemplate } from './csp_page_template';
-import * as TEXT from './translations';
 
 export const UnknownRoute = React.memo(() => (
   <CspPageTemplate template="centeredContent">
@@ -16,7 +16,14 @@ export const UnknownRoute = React.memo(() => (
       data-test-subj="unknownRoute"
       iconColor="default"
       iconType="logoElastic"
-      title={<p>{TEXT.PAGE_NOT_FOUND}</p>}
+      title={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.unknownRoute.pageNotFoundTitle"
+            defaultMessage="Page not found"
+          />
+        </p>
+      }
     />
   </CspPageTemplate>
 ));

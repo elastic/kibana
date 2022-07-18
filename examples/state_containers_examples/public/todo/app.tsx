@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { createHashHistory } from 'history';

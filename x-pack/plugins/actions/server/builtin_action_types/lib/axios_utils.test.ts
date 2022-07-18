@@ -9,7 +9,7 @@ import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   addTimeZoneToDate,
   request,
@@ -18,7 +18,7 @@ import {
   throwIfResponseIsNotValid,
   createAxiosResponse,
 } from './axios_utils';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 

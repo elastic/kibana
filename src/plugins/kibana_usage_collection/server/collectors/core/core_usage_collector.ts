@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreUsageData, CoreUsageDataStart } from '../../../../../core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreUsageData, CoreUsageDataStart } from '@kbn/core/server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,

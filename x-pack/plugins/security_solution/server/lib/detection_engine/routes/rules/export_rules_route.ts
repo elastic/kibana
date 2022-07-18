@@ -6,17 +6,19 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
+import type {
+  ExportRulesQuerySchemaDecoded,
+  ExportRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/export_rules_schema';
 import {
   exportRulesQuerySchema,
-  ExportRulesQuerySchemaDecoded,
   exportRulesSchema,
-  ExportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/export_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../../config';
+import type { ConfigType } from '../../../../config';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
@@ -25,8 +27,7 @@ import { buildSiemResponse } from '../utils';
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
@@ -45,9 +46,9 @@ export const exportRulesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting.getRulesClient();
-      const exceptionsClient = context.lists?.getExceptionListClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = (await context.alerting).getRulesClient();
+      const exceptionsClient = (await context.lists)?.getExceptionListClient();
+      const savedObjectsClient = (await context.core).savedObjects.client;
 
       try {
         const exportSizeLimit = config.maxRuleImportExportSize;
@@ -58,7 +59,6 @@ export const exportRulesRoute = (
           });
         } else {
           const nonPackagedRulesCount = await getNonPackagedRulesCount({
-            isRuleRegistryEnabled,
             rulesClient,
           });
           if (nonPackagedRulesCount > exportSizeLimit) {
@@ -76,16 +76,9 @@ export const exportRulesRoute = (
                 exceptionsClient,
                 savedObjectsClient,
                 request.body.objects,
-                logger,
-                isRuleRegistryEnabled
+                logger
               )
-            : await getExportAll(
-                rulesClient,
-                exceptionsClient,
-                savedObjectsClient,
-                logger,
-                isRuleRegistryEnabled
-              );
+            : await getExportAll(rulesClient, exceptionsClient, savedObjectsClient, logger);
 
         const responseBody = request.query.exclude_export_details
           ? exportedRulesAndExceptions.rulesNdjson

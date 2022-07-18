@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
   setKibanaVersion,
   setLicensingPluginStart,
   setMapConfig,
   getIsEnterprisePlus,
 } from './kibana_services';
-import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
+import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
 import type { MapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
-import type { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
 interface MapsEmsStartPublicDependencies {

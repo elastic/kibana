@@ -6,7 +6,7 @@
  */
 
 import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import { getLogsAppAlertUrl } from '../../../common/formatters/alert_link';
 
 export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {

@@ -15,11 +15,11 @@ import {
   Datum,
 } from '@elastic/charts';
 
-import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { Datatable } from '../../../../expressions/public';
+import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 export interface ClickTriggerEvent {
-  name: 'filterBucket';
+  name: 'filter';
   data: ValueClickContext['data'];
 }
 
@@ -214,7 +214,7 @@ export const getFilterFromChartClickEventFn =
     });
 
     return {
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         negate,
         data,
@@ -250,7 +250,7 @@ export const getFilterFromSeriesFn =
     }));
 
     return {
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         negate,
         data,

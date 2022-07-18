@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { setTheme } from './services';
-import type { VisualizationsSetup } from '../../visualizations/public';
 
 export interface VisDefaultEditorSetupDependencies {
   visualizations: VisualizationsSetup;

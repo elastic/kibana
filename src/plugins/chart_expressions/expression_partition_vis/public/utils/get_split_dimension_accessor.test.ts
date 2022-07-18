@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { DatatableColumn } from '../../../../expressions';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { createMockVisData } from '../mocks';
 import { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 import { BucketColumns } from '../../common/types';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 describe('getSplitDimensionAccessor', () => {
   const visData = createMockVisData();

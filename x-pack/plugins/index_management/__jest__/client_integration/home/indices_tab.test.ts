@@ -18,7 +18,7 @@ import { createDataStreamPayload, createNonDataStreamIndex } from './data_stream
 // mocking the returned instance of the editor to always have the same values.
 const mockGetAceEditorValue = jest.fn().mockReturnValue(`{}`);
 
-jest.mock('../../../public/application/lib/ace.js', () => {
+jest.mock('../../../public/application/lib/ace', () => {
   const createAceEditor = () => {
     return {
       getValue: mockGetAceEditorValue,
@@ -206,7 +206,8 @@ describe('<IndexManagementHome />', () => {
     });
   });
 
-  describe('index actions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132780
+  describe.skip('index actions', () => {
     const indexNameA = 'testIndexA';
     const indexNameB = 'testIndexB';
     const indexMockA = createNonDataStreamIndex(indexNameA);

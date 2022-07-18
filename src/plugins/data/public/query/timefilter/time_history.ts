@@ -8,9 +8,9 @@
 
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { PersistedLog } from '../persisted_log';
-import { TimeRange } from '../../../common';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;

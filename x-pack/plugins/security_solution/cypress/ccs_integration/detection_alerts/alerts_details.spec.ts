@@ -12,7 +12,7 @@ import { openJsonView } from '../../tasks/alerts_details';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverCCSLoad } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { getUnmappedCCSRule } from '../../objects/rule';
 
@@ -20,11 +20,11 @@ import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alert details with unmapped fields', () => {
   beforeEach(() => {
+    login();
     cleanKibana();
     esArchiverCCSLoad('unmapped_fields');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     createCustomRuleEnabled(getUnmappedCCSRule());
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    visitWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
   });
@@ -36,7 +36,7 @@ describe('Alert details with unmapped fields', () => {
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed._source.unmapped).to.equal(expectedUnmappedValue);
+      expect(parsed.fields.unmapped[0]).to.equal(expectedUnmappedValue);
     });
   });
 });

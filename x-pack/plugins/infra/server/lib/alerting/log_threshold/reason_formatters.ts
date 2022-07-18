@@ -6,13 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   Comparator,
   ComparatorToi18nSymbolsMap,
   TimeUnit,
 } from '../../../../common/alerting/logs/log_threshold/types';
-
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../../observability/common';
 
 export const getReasonMessageForUngroupedCountAlert = (
   actualCount: number,

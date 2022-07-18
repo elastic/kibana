@@ -10,7 +10,7 @@ import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';

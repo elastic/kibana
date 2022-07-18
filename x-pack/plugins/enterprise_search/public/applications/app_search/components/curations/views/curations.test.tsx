@@ -98,26 +98,6 @@ describe('Curations', () => {
     expect(tabs.length).toBe(2);
   });
 
-  it('renders a New! badge  when suggestions are not active', () => {
-    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, values));
-    const wrapper = shallow(<Curations />);
-
-    expect(getPageTitle(wrapper)).toEqual('Curated results');
-
-    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
-    expect(tabs.at(1).prop('append')).not.toBeUndefined();
-  });
-
-  it('hides the badge when suggestions are active', () => {
-    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, values));
-    const wrapper = shallow(<Curations />);
-
-    expect(getPageTitle(wrapper)).toEqual('Curated results');
-
-    const tabs = getPageHeaderTabs(wrapper).find(EuiTab);
-    expect(tabs.at(2).prop('append')).toBeUndefined();
-  });
-
   it('renders an overview view', () => {
     setMockValues({ ...values, selectedPageTab: 'overview' });
     const wrapper = shallow(<Curations />);

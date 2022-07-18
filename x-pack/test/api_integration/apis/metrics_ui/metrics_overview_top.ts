@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import {
   TopNodesRequestRT,
   TopNodesResponseRT,
-} from '../../../../plugins/infra/common/http_api/overview_api';
-import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
+} from '@kbn/infra-plugin/common/http_api/overview_api';
+import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 

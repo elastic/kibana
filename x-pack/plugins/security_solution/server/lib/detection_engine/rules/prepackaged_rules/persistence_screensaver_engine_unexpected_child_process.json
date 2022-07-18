@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unexpected Child Process of macOS Screensaver Engine",
-  "note": "## Triage and analysis\n\n- Analyze the descendant processes of the ScreenSaverEngine process for malicious code and suspicious behavior such\nas a download of a payload from a server\n- Review the installed and activated screensaver on the host. Triage the screensaver (.saver) file that was triggered to\nidentify whether the file is malicious or not.\n",
+  "note": "## Triage and analysis\n\n- Analyze the descendant processes of the ScreenSaverEngine process for malicious code and suspicious behavior such\nas a download of a payload from a server.\n- Review the installed and activated screensaver on the host. Triage the screensaver (.saver) file that was triggered to\nidentify whether the file is malicious or not.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and process.parent.name == \"ScreenSaverEngine\"\n",
   "references": [
     "https://posts.specterops.io/saving-your-access-d562bf5bf90b",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

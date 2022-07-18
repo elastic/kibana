@@ -7,11 +7,11 @@
 
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { License } from '../../../../../licensing/common/license';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { License } from '@kbn/licensing-plugin/common/license';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';

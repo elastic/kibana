@@ -18,10 +18,10 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';
-import { AppMountParameters, IUiSettingsClient } from '../../../src/core/public';
+import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardEmbeddableByValue } from './by_value/embeddable';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
-import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
 
 interface PageDef {
   title: string;

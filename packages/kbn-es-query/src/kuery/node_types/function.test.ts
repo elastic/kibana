@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from './index';
+import { nodeTypes } from '.';
 
 import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
 import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';

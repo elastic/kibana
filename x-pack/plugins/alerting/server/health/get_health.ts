@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
+import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (

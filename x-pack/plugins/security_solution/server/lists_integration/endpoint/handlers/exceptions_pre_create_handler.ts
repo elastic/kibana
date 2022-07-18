@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemOptions,
   ExceptionsListPreCreateItemServerExtension,
-} from '../../../../../lists/server';
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+} from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   EventFilterValidator,
   TrustedAppValidator,

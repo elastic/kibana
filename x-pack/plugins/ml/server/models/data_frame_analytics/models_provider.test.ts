@@ -6,7 +6,7 @@
  */
 
 import { MemoryStatsResponse, ModelService, modelsProvider } from './models_provider';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
 

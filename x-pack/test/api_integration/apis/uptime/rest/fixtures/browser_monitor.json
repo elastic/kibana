@@ -1,6 +1,8 @@
 {
   "type": "browser",
   "enabled": true,
+  "journey_id": "",
+  "project_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"
@@ -25,6 +27,8 @@
   "source.zip_url.folder": "",
   "source.zip_url.proxy_url": "",
   "source.inline.script": "step(\"Visit /users api route\", async () => {\\n  const response = await page.goto('https://nextjs-test-synthetics.vercel.app/api/users');\\n  expect(response.status()).toEqual(200);\\n});",
+  "source.project.content": "",
+  "is_push_monitor": false,
   "params": "",
   "screenshots": "on",
   "synthetics_args": [],
@@ -38,5 +42,8 @@
   "throttling.config": "5d/3u/20l",
   "locations": [],
   "name": "Test HTTP Monitor 03",
-  "namespace": "testnamespace"
+  "namespace": "testnamespace",
+  "origin": "ui",
+  "urls": null,
+  "url.port": null
 }

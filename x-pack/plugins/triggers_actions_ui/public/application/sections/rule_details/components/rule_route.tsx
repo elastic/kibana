@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {

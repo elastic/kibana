@@ -9,34 +9,36 @@
 import { omit, pick } from 'lodash';
 
 import {
-  MockedPluginInitializer,
+  type MockedPluginInitializer,
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName, PluginType } from 'src/core/server';
+import { type PluginName, PluginType } from '../../server';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { coreMock } from '../mocks';
+
 import {
   PluginsService,
-  PluginsServiceStartDeps,
-  PluginsServiceSetupDeps,
+  type PluginsServiceStartDeps,
+  type PluginsServiceSetupDeps,
 } from './plugins_service';
 
-import { InjectedPluginMetadata } from '../injected_metadata';
+import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { i18nServiceMock } from '../i18n/i18n_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
-import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
-import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
-import { themeServiceMock } from '../theme/theme_service.mock';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -44,7 +46,7 @@ mockPluginInitializerProvider.mockImplementation(
   (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
-let plugins: InjectedPluginMetadata[];
+let plugins: InjectedMetadataPlugin[];
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
@@ -84,6 +86,7 @@ describe('PluginsService', () => {
       },
     ];
     mockSetupDeps = {
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       application: applicationServiceMock.createInternalSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createSetupContract(),
@@ -100,6 +103,7 @@ describe('PluginsService', () => {
       injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       application: applicationServiceMock.createInternalStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       executionContext: executionContextServiceMock.createStartContract(),

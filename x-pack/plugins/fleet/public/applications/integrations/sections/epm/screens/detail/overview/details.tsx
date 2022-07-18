@@ -18,7 +18,9 @@ import {
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
+import { withSuspense, LazyReplacementCard } from '@kbn/custom-integrations-plugin/public';
 
 import type {
   PackageInfo,
@@ -29,11 +31,6 @@ import type {
 import { entries } from '../../../../../types';
 import { useGetCategories } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
-
-import {
-  withSuspense,
-  LazyReplacementCard,
-} from '../../../../../../../../../../../src/plugins/custom_integrations/public';
 
 import { NoticeModal } from './notice_modal';
 

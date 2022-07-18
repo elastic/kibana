@@ -12,11 +12,11 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
+import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import type { ToastInput } from 'src/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 import type { SessionState } from './session_timeout';
 

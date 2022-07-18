@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import type { MlPluginSetup } from '../../../../ml/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { DetectionMetrics } from './types';
 
 import { getMlJobMetrics } from './ml_jobs/get_metrics';

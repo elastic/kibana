@@ -6,15 +6,13 @@
  */
 
 import { isEmpty, pickBy } from 'lodash';
-import { IRouter } from '../../../../../../src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import {
-  createSavedQueryRequestSchema,
-  CreateSavedQueryRequestSchemaDecoded,
-} from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
+import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
+import { createSavedQueryRequestSchema } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -30,7 +28,8 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { id, description, platform, query, version, interval, ecs_mapping } = request.body;

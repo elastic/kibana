@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from 'src/core/public';
+import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
-} from '../../../plugins/data/public';
-import type { ISearchSource } from '../../data/common';
-import { ExpressionAstExpression } from '../../expressions/public';
+} from '@kbn/data-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export { UI_SETTINGS };
 

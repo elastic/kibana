@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious WerFault Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"WerFault.exe\" and\n  not process.name : (\"cofire.exe\",\n                      \"psr.exe\",\n                      \"VsJITDebugger.exe\",\n                      \"TTTracer.exe\",\n                      \"rundll32.exe\",\n                      \"LogiOptionsMgr.exe\") and\n  not process.args : (\"/LOADSAVEDWINDOWS\",\n                      \"/restore\",\n                      \"RestartByRestartManager*\",\n                      \"--restarted\",\n                      \"createdump\",\n                      \"dontsend\",\n                      \"/watson\")\n",
   "references": [
     "https://www.hexacorn.com/blog/2019/09/19/silentprocessexit-quick-look-under-the-hood/",
@@ -50,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import { MapsXPackConfig } from '../config';
 
@@ -34,7 +34,11 @@ export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './e
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 
-export type { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
+export type {
+  GetFeatureActionsArgs,
+  IVectorSource,
+  GeoJsonWithMeta,
+} from './classes/sources/vector_source/vector_source';
 export type { ImmutableSourceProperty, SourceEditorArgs } from './classes/sources/source';
 export type { Attribution } from '../common/descriptor_types';
 export type {

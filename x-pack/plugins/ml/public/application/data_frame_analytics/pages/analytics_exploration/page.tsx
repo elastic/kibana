@@ -18,7 +18,11 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
+import {
+  AnalyticsIdSelector,
+  AnalyticsSelectorIds,
+  AnalyticsIdSelectorControls,
+} from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { useUrlState } from '../../../util/url_state';
 
@@ -27,6 +31,7 @@ export const Page: FC<{
   analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);
   const {
     services: { docLinks },
@@ -74,7 +79,6 @@ export const Page: FC<{
     }
     return (
       <>
-        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
         <EuiEmptyPrompt
           iconType="alert"
           title={
@@ -93,6 +97,16 @@ export const Page: FC<{
 
   return (
     <>
+      <AnalyticsIdSelectorControls
+        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        selectedId={jobIdToUse}
+      />
+      {isIdSelectorFlyoutVisible ? (
+        <AnalyticsIdSelector
+          setAnalyticsId={setAnalyticsId}
+          setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        />
+      ) : null}
       {jobIdToUse !== undefined && (
         <MlPageHeader>
           <FormattedMessage

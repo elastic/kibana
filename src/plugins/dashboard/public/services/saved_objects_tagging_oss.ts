@@ -11,4 +11,4 @@ export type {
   TagDecoratedSavedObject,
   SavedObjectTagDecoratorTypeGuard,
   SavedObjectTaggingOssPluginStart,
-} from '../../../saved_objects_tagging_oss/public';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';

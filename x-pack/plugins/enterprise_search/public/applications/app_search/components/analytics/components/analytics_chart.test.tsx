@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { Chart, Settings, LineSeries, Axis } from '@elastic/charts';
 
-import { AnalyticsChart } from './';
+import { AnalyticsChart } from '.';
 
 describe('AnalyticsChart', () => {
   const MOCK_DATA = [

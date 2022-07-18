@@ -55,7 +55,7 @@ const getTestUtils = (
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
         ...(describeType === 'internal'
-          ? { monitoring: response.body.monitoring, snooze_end_time: response.body.snooze_end_time }
+          ? { monitoring: response.body.monitoring, snooze_schedule: response.body.snooze_schedule }
           : {}),
       });
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);

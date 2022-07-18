@@ -14,7 +14,7 @@ import {
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import { TimelineStatus, TimelineType } from '../../../../../../common/types/timeline';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
   mockUniqueParsedObjects,
@@ -152,37 +152,37 @@ describe('import timelines', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('should use given timelineId to check if the timeline savedObject already exist', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetTimeline.mock.calls[0][1]).toEqual(mockUniqueParsedObjects[0].savedObjectId);
     });
 
     test('should Create a new timeline savedObject', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
     test('should Create a new timeline savedObject without timelineId', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][1]).toBeNull();
     });
 
     test('should Create a new timeline savedObject without timeline version', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
     });
 
     test('should Create a new timeline savedObject with given timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
         ...mockParsedTimelineObject,
         status: TimelineStatus.active,
@@ -202,7 +202,7 @@ describe('import timelines', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -222,13 +222,13 @@ describe('import timelines', () => {
 
     test('should Create new pinned events', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistPinnedEventOnTimeline).toHaveBeenCalled();
     });
 
     test('should Create a new pinned event with new timeline id', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistPinnedEventOnTimeline.mock.calls[0][1]).toEqual(
         mockCreatedTimeline.savedObjectId
       );
@@ -236,7 +236,7 @@ describe('import timelines', () => {
 
     test('should Create a new pinned event with pinnedEventId', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistPinnedEventOnTimeline.mock.calls[0][2]).toEqual(
         mockUniqueParsedObjects[0].pinnedEventIds
       );
@@ -244,7 +244,7 @@ describe('import timelines', () => {
 
     test('should Check if note exists', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetNote.mock.calls[0][1]).toEqual(
         mockUniqueParsedObjects[0].globalNotes[0].noteId
       );
@@ -252,19 +252,19 @@ describe('import timelines', () => {
 
     test('should Create notes', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote).toHaveBeenCalled();
     });
 
     test('should provide no noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should provide new notes with original author info when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: 'original note',
@@ -299,7 +299,7 @@ describe('import timelines', () => {
       mockGetNote.mockRejectedValue(new Error());
 
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         created: mockUniqueParsedObjects[0].globalNotes[0].created,
         createdBy: mockUniqueParsedObjects[0].globalNotes[0].createdBy,
@@ -331,7 +331,7 @@ describe('import timelines', () => {
 
     test('returns 200 when import timeline successfully', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
     });
   });
@@ -358,13 +358,13 @@ describe('import timelines', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('returns error message', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -393,7 +393,7 @@ describe('import timelines', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -422,7 +422,7 @@ describe('import timelines', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -472,7 +472,7 @@ describe('import timelines', () => {
         path: TIMELINE_EXPORT_URL,
         body: { id: 'someId' },
       });
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);
@@ -576,13 +576,13 @@ describe('import timeline templates', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('should use given timelineId to check if the timeline savedObject already exist', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetTimeline.mock.calls[0][1]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].savedObjectId
       );
@@ -590,7 +590,7 @@ describe('import timeline templates', () => {
 
     test('should use given templateTimelineId to check if the timeline savedObject already exist', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetTemplateTimeline.mock.calls[0][1]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId
       );
@@ -598,25 +598,25 @@ describe('import timeline templates', () => {
 
     test('should Create a new timeline savedObject', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
     test('should Create a new timeline savedObject without timelineId', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][1]).toBeNull();
     });
 
     test('should Create a new timeline savedObject without timeline version', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
     });
 
     test('should Create a new timeline savedObject witn given timeline and skip the omitted fields', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
         ...mockParsedTemplateTimelineObject,
         status: TimelineStatus.active,
@@ -625,19 +625,19 @@ describe('import timeline templates', () => {
 
     test('should NOT Create new pinned events', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
     });
 
     test('should provide no noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should exclude event notes when creating notes', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
@@ -651,7 +651,7 @@ describe('import timeline templates', () => {
 
     test('returns 200 when import timeline successfully', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
     });
 
@@ -666,7 +666,7 @@ describe('import timeline templates', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3].templateTimelineId).toEqual(
         mockNewTemplateTimelineId
       );
@@ -684,7 +684,7 @@ describe('import timeline templates', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const result = await server.inject(mockRequest, context);
+      const result = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(result.body).toEqual({
         errors: [],
         success: true,
@@ -721,13 +721,13 @@ describe('import timeline templates', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('should use given timelineId to check if the timeline savedObject already exist', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetTimeline.mock.calls[0][1]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].savedObjectId
       );
@@ -735,7 +735,7 @@ describe('import timeline templates', () => {
 
     test('should use given templateTimelineId to check if the timeline savedObject already exist', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockGetTemplateTimeline.mock.calls[0][1]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].templateTimelineId
       );
@@ -743,13 +743,13 @@ describe('import timeline templates', () => {
 
     test('should UPDATE timeline savedObject', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
     test('should UPDATE timeline savedObject with timelineId', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][1]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].savedObjectId
       );
@@ -757,7 +757,7 @@ describe('import timeline templates', () => {
 
     test('should UPDATE timeline savedObject without timeline version', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][2]).toEqual(
         mockUniqueParsedTemplateTimelineObjects[0].version
       );
@@ -765,25 +765,25 @@ describe('import timeline templates', () => {
 
     test('should UPDATE a new timeline savedObject witn given timeline and skip the omitted fields', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTemplateTimelineObject);
     });
 
     test('should NOT Create new pinned events', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
     });
 
     test('should provide noteSavedObjectId when Creating notes for a timeline', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].noteId).toBeNull();
     });
 
     test('should exclude event notes when creating notes', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      await server.inject(mockRequest, context);
+      await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistNote.mock.calls[0][0].note).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
@@ -797,7 +797,7 @@ describe('import timeline templates', () => {
 
     test('returns 200 when import timeline successfully', async () => {
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
     });
 
@@ -812,7 +812,7 @@ describe('import timeline templates', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -841,7 +841,7 @@ describe('import timeline templates', () => {
         ],
       ]);
       const mockRequest = await getImportTimelinesRequest();
-      const response = await server.inject(mockRequest, context);
+      const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
@@ -891,7 +891,7 @@ describe('import timeline templates', () => {
         path: TIMELINE_EXPORT_URL,
         body: { id: 'someId' },
       });
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);

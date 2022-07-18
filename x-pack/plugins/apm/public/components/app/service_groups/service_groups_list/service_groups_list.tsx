@@ -12,7 +12,7 @@ import { ServiceGroupsCard } from './service_group_card';
 import { SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
 
 interface Props {
   items: SavedServiceGroup[];
@@ -22,6 +22,9 @@ interface Props {
 export function ServiceGroupsListItems({ items }: Props) {
   const router = useApmRouter();
   const { query } = useApmParams('/service-groups');
+
+  const environment = useDefaultEnvironment();
+
   return (
     <EuiFlexGrid gutterSize="m">
       {items.map((item) => (
@@ -31,7 +34,7 @@ export function ServiceGroupsListItems({ items }: Props) {
             query: {
               ...query,
               serviceGroup: item.id,
-              environment: ENVIRONMENT_ALL.value,
+              environment,
               kuery: '',
             },
           })}
@@ -57,7 +60,7 @@ export function ServiceGroupsListItems({ items }: Props) {
           query: {
             ...query,
             serviceGroup: '',
-            environment: ENVIRONMENT_ALL.value,
+            environment,
             kuery: '',
           },
         })}

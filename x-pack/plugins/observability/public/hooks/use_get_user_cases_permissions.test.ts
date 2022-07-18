@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { casesFeatureId } from '../../common';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 import { kibanaStartMock } from '../utils/kibana_react.mock';

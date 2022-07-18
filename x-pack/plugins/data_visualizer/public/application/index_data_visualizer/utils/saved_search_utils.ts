@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
@@ -16,13 +16,13 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { SearchSource } from '../../../../../../../src/plugins/data/common';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { SearchSource } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 
 const DEFAULT_QUERY = {
   bool: {

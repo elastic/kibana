@@ -23,7 +23,7 @@ const errorDetailsPageHref = url.format({
 
 describe('Error details', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('when data is loaded', () => {
@@ -87,9 +87,9 @@ describe('Error details', () => {
       });
 
       describe('when clicking on View x occurences in discover', () => {
-        it('should redirects the user to discover', () => {
+        it.skip('should redirects the user to discover', () => {
           cy.visit(errorDetailsPageHref);
-          cy.contains('View 1 occurrence in Discover.').click();
+          cy.contains('View 1 occurrence in Discover').click();
           cy.url().should('include', 'app/discover');
         });
       });

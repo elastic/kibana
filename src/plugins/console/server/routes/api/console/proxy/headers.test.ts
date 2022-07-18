@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../../../../core/server/http/router/request', () => ({
-  ensureRawRequest: jest.fn(),
-}));
+jest.mock('@kbn/core-http-router-server-internal', () => {
+  const realModule = jest.requireActual('@kbn/core-http-router-server-internal');
+  return {
+    ...realModule,
+    ensureRawRequest: jest.fn(),
+  };
+});
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router/request';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 

@@ -10,7 +10,7 @@ import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { LinkDescriptor } from '../../../../observability/public';
+import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';

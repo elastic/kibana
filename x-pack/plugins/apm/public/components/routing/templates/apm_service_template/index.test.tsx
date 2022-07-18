@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isMetricsTabHidden, isJVMsTabHidden } from './';
+import { isMetricsTabHidden, isJVMsTabHidden } from '.';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {

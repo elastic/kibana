@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { countBy } from 'lodash';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { MlSystem, MlAnomalyDetectors } from '../../../types';

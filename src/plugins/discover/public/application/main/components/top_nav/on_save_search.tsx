@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../../../saved_objects/public';
+import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
-import { DataView } from '../../../../../../data_views/public';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
@@ -88,12 +88,14 @@ export async function onSaveSearch({
   savedSearch,
   services,
   state,
+  onClose,
 }: {
   indexPattern: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onClose?: () => void;
 }) {
   const onSave = async ({
     newTitle,
@@ -136,7 +138,7 @@ export async function onSaveSearch({
   const saveModal = (
     <SavedObjectSaveModal
       onSave={onSave}
-      onClose={() => {}}
+      onClose={onClose ?? (() => {})}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}

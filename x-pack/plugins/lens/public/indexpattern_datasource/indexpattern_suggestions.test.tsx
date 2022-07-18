@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
@@ -1638,6 +1638,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id3: expect.objectContaining({
                     operationType: 'terms',
                     sourceField: 'source',
+                    label: 'Top 10 values of source',
                     params: expect.objectContaining({
                       size: 10,
                       otherBucket: false,

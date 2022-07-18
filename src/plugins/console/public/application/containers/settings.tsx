@@ -10,10 +10,9 @@ import React from 'react';
 
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
-// @ts-ignore
-import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
+import type { SenseEditor } from '../models';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
@@ -25,56 +24,60 @@ const getAutocompleteDiff = (
   }) as AutocompleteOptions[];
 };
 
-const refreshAutocompleteSettings = (
-  settings: SettingsService,
-  selectedSettings: DevToolsSettings['autocomplete']
-) => {
-  retrieveAutoCompleteInfo(settings, selectedSettings);
-};
-
-const fetchAutocompleteSettingsIfNeeded = (
-  settings: SettingsService,
-  newSettings: DevToolsSettings,
-  prevSettings: DevToolsSettings
-) => {
-  // We'll only retrieve settings if polling is on. The expectation here is that if the user
-  // disables polling it's because they want manual control over the fetch request (possibly
-  // because it's a very expensive request given their cluster and bandwidth). In that case,
-  // they would be unhappy with any request that's sent automatically.
-  if (newSettings.polling) {
-    const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
-
-    const isSettingsChanged = autocompleteDiff.length > 0;
-    const isPollingChanged = prevSettings.polling !== newSettings.polling;
-
-    if (isSettingsChanged) {
-      // If the user has changed one of the autocomplete settings, then we'll fetch just the
-      // ones which have changed.
-      const changedSettings: DevToolsSettings['autocomplete'] = autocompleteDiff.reduce(
-        (changedSettingsAccum, setting) => {
-          changedSettingsAccum[setting] = newSettings.autocomplete[setting];
-          return changedSettingsAccum;
-        },
-        {} as DevToolsSettings['autocomplete']
-      );
-      retrieveAutoCompleteInfo(settings, changedSettings);
-    } else if (isPollingChanged && newSettings.polling) {
-      // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
-    }
-  }
-};
-
 export interface Props {
   onClose: () => void;
+  editorInstance: SenseEditor | null;
 }
 
-export function Settings({ onClose }: Props) {
+export function Settings({ onClose, editorInstance }: Props) {
   const {
-    services: { settings },
+    services: { settings, autocompleteInfo },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
+
+  const refreshAutocompleteSettings = (
+    settingsService: SettingsService,
+    selectedSettings: DevToolsSettings['autocomplete']
+  ) => {
+    autocompleteInfo.retrieve(settingsService, selectedSettings);
+  };
+
+  const fetchAutocompleteSettingsIfNeeded = (
+    settingsService: SettingsService,
+    newSettings: DevToolsSettings,
+    prevSettings: DevToolsSettings
+  ) => {
+    // We'll only retrieve settings if polling is on. The expectation here is that if the user
+    // disables polling it's because they want manual control over the fetch request (possibly
+    // because it's a very expensive request given their cluster and bandwidth). In that case,
+    // they would be unhappy with any request that's sent automatically.
+    if (newSettings.polling) {
+      const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
+
+      const isSettingsChanged = autocompleteDiff.length > 0;
+      const isPollingChanged = prevSettings.polling !== newSettings.polling;
+
+      if (isSettingsChanged) {
+        // If the user has changed one of the autocomplete settings, then we'll fetch just the
+        // ones which have changed.
+        const changedSettings: DevToolsSettings['autocomplete'] = autocompleteDiff.reduce(
+          (changedSettingsAccum, setting) => {
+            changedSettingsAccum[setting] = newSettings.autocomplete[setting];
+            return changedSettingsAccum;
+          },
+          {} as DevToolsSettings['autocomplete']
+        );
+        autocompleteInfo.retrieve(settingsService, {
+          ...settingsService.getAutocomplete(),
+          ...changedSettings,
+        });
+      } else if (isPollingChanged && newSettings.polling) {
+        // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
+        autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
+      }
+    }
+  };
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
@@ -99,6 +102,7 @@ export function Settings({ onClose }: Props) {
         refreshAutocompleteSettings(settings, selectedSettings)
       }
       settings={settings.toJSON()}
+      editorInstance={editorInstance}
     />
   );
 }

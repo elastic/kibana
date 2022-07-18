@@ -48,5 +48,29 @@ describe('Users Table Component', () => {
       expect(getAllByRole('columnheader').length).toBe(3);
       expect(getByText(userName)).toBeInTheDocument();
     });
+
+    test('it renders empty string token when users name is empty', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <UsersTable
+            users={[{ name: '', lastSeen: '2019-04-08T18:35:45.064Z', domain: 'test domain' }]}
+            fakeTotalCount={50}
+            id="users"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={usersModel.UsersType.page}
+            sort={{
+              field: UsersFields.name,
+              direction: Direction.asc,
+            }}
+            setQuerySkip={() => {}}
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId('table-allUsers-loading-false')).toHaveTextContent('(Empty string)');
+    });
   });
 });

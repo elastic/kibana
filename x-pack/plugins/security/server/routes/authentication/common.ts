@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { parseNext } from '../../../common/parse_next';
 import {
   BasicAuthenticationProvider,

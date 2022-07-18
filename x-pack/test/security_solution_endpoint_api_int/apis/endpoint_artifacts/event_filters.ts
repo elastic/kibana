@@ -8,20 +8,20 @@
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import {
+  getImportExceptionsListSchemaMock,
+  toNdJsonString,
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
-import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import {
-  getImportExceptionsListSchemaMock,
-  toNdJsonString,
-} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

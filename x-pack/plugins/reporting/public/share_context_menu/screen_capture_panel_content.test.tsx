@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
@@ -43,7 +43,7 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).not.toMatch('Full page layout');
   expect(component.text()).not.toMatch('Optimize for printing');
 });
@@ -63,7 +63,7 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).toMatch('Full page layout');
 });
 
@@ -121,7 +121,7 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm')).toMatchSnapshot();
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
   expect(component.text()).toMatch('Optimize for printing');
 });
 

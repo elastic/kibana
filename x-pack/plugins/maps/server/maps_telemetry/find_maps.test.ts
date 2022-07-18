@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 // @ts-ignore
-import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
+import mapSavedObjects from '../../common/telemetry/test_resources/sample_map_saved_objects.json';
 import { findMaps } from './find_maps';
 
 function getMockSavedObjectsClient(perPage: number) {

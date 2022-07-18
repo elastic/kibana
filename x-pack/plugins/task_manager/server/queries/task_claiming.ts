@@ -15,7 +15,7 @@ import { map, mergeScan } from 'rxjs/operators';
 import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
 import { some, none } from 'fp-ts/lib/Option';
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { asOk, asErr, Result } from '../lib/result_type';
 import { ConcreteTaskInstance, TaskStatus } from '../task';

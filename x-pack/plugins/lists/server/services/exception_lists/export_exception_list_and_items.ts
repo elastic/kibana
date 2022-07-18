@@ -14,7 +14,7 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';

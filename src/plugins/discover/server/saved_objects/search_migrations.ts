@@ -13,11 +13,11 @@ import type {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-} from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/server';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
-import type { SerializedSearchSourceFields } from '../../../data/common';
+} from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {
@@ -135,27 +135,31 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
 /**
  * This creates a migration map that applies search source migrations
  */
-const getSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+const getSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: SavedSearchMigrationAttributes };
+        const _state = state as { attributes: SavedSearchMigrationAttributes };
 
-        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-
-        if (!parsedSearchSourceJSON) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            kibanaSavedObjectMeta: {
-              ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+        const parsedSearchSourceJSON = JSON.parse(
+          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        if (isSerializedSearchSource(parsedSearchSourceJSON)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              kibanaSavedObjectMeta: {
+                ..._state.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 
@@ -171,6 +175,6 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap => {
   return mergeSavedObjectMigrationMaps(
     searchMigrations,
-    getSearchSourceMigrations(searchSourceMigrations) as unknown as SavedObjectMigrationMap
+    getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
   );
 };

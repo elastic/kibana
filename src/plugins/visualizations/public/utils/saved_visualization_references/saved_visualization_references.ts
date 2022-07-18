@@ -10,13 +10,13 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../core/public';
-import { SavedVisState, VisSavedObject } from '../../types';
+} from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   SerializedSearchSourceFields,
-} from '../../../../data/public';
+} from '@kbn/data-plugin/public';
+import { SavedVisState, VisSavedObject } from '../../types';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';

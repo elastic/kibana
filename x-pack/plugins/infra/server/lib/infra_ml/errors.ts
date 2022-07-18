@@ -11,7 +11,7 @@ import {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
-} from '../../../../ml/server';
+} from '@kbn/ml-plugin/server';
 
 export class NoLogAnalysisMlJobError extends Error {
   constructor(message?: string) {

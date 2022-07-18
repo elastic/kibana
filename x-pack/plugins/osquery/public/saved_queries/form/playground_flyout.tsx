@@ -6,7 +6,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,10 +26,11 @@ interface PlaygroundFlyoutProps {
 }
 
 const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, onClose }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [{ query, ecs_mapping, id }] = useFormData({
-    watch: ['query', 'ecs_mapping', 'savedQueryId'],
-  });
+  const [{ query, ecs_mapping: ecsMapping, id }, formDataSerializer] = useFormData();
+
+  /* recalculate the form data when ecs_mapping changes */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const serializedFormData = useMemo(() => formDataSerializer(), [ecsMapping, formDataSerializer]);
 
   return (
     <EuiFlyout type="push" size="m" onClose={onClose}>
@@ -48,7 +49,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
           enabled={enabled && query !== ''}
           formType="simple"
           query={query}
-          ecs_mapping={ecs_mapping}
+          ecs_mapping={serializedFormData.ecs_mapping}
           savedQueryId={id}
           queryField={false}
           ecsMappingField={false}

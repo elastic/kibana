@@ -7,9 +7,9 @@
 import { useKibana } from '../../common/lib/kibana';
 import { useIsOsqueryAvailableSimple } from './use_is_osquery_available_simple';
 import { renderHook } from '@testing-library/react-hooks';
-import { createStartServicesMock } from '../../../../triggers_actions_ui/public/common/lib/kibana/kibana_react.mock';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../common/lib/kibana');
 

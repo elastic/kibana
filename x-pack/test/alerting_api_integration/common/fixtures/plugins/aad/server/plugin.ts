@@ -12,10 +12,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;

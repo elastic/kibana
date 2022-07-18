@@ -8,10 +8,12 @@
 import expect from '@kbn/expect';
 import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
+import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
+import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { Environment } from '@kbn/apm-plugin/common/environment_rt';
+import { last } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
-import { ServiceAnomalyTimeseries } from '../../../../plugins/apm/common/anomaly_detection/service_anomaly_timeseries';
-import { ApmMlDetectorType } from '../../../../plugins/apm/common/anomaly_detection/apm_ml_detectors';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -40,11 +42,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end,
       transactionType,
       serviceName,
+      environment,
     }: {
       start: string;
       end: string;
       transactionType: string;
       serviceName: string;
+      environment: Environment;
     },
     user = apmApiClient.readUser
   ) {
@@ -58,6 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start,
           end,
           transactionType,
+          environment,
         },
       },
     });
@@ -74,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionType: 'request',
             start: '2021-01-01T00:00:00.000Z',
             end: '2021-01-01T00:15:00.000Z',
+            environment: 'ENVIRONMENT_ALL',
           })
         );
 
@@ -103,7 +109,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
           .rate(1)
-          .spans((timestamp) => {
+          .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
             const count = isInSpike ? 4 : NORMAL_RATE;
             const duration = isInSpike ? 1000 : NORMAL_DURATION;
@@ -116,14 +122,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
-                  .serialize()
               ),
-              ...serviceB
+              serviceB
                 .transaction('tx', 'Worker')
                 .timestamp(timestamp)
                 .duration(duration)
-                .success()
-                .serialize(),
+                .success(),
             ];
           });
 
@@ -143,6 +147,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start,
                 end,
+                environment: 'ENVIRONMENT_ALL',
               },
               apmApiClient.noMlAccessUser
             )
@@ -158,6 +163,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               start,
               end,
+              environment: 'ENVIRONMENT_ALL',
             })
           );
 
@@ -184,6 +190,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               start,
               end,
+              environment: 'ENVIRONMENT_ALL',
             })
           );
 
@@ -196,6 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let latencySeries: ServiceAnomalyTimeseries | undefined;
           let throughputSeries: ServiceAnomalyTimeseries | undefined;
           let failureRateSeries: ServiceAnomalyTimeseries | undefined;
+          const endTimeMs = new Date(end).getTime();
 
           before(async () => {
             allAnomalyTimeseries = (
@@ -204,6 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start,
                 end,
+                environment: 'ENVIRONMENT_ALL',
               })
             ).body.allAnomalyTimeseries;
 
@@ -224,6 +233,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               allAnomalyTimeseries.every((spec) => spec.bounds.some((bound) => bound.y0 ?? 0 > 0))
             );
+          });
+
+          it('returns model plots with bounds for x range within start and end', () => {
+            expect(allAnomalyTimeseries.length).to.eql(3);
+
+            expect(
+              allAnomalyTimeseries.every((spec) =>
+                spec.bounds.every(
+                  (bound) => bound.x >= new Date(start).getTime() && bound.x <= endTimeMs
+                )
+              )
+            );
+          });
+          it('returns model plots with latest bucket matching the end time', () => {
+            expect(allAnomalyTimeseries.every((spec) => last(spec.bounds)?.x === endTimeMs));
           });
 
           it('returns the correct metadata', () => {

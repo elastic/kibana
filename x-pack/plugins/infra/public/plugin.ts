@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, PluginInitializerContext } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -98,7 +98,7 @@ export class Plugin implements InfraClientPluginClass {
             ...(capabilities.infrastructure.show
               ? [
                   {
-                    label: 'Metrics',
+                    label: 'Infrastructure',
                     sortKey: 300,
                     entries: [
                       { label: 'Inventory', app: 'metrics', path: '/inventory' },
@@ -169,7 +169,7 @@ export class Plugin implements InfraClientPluginClass {
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
-        defaultMessage: 'Metrics',
+        defaultMessage: 'Infrastructure',
       }),
       euiIconType: 'logoObservability',
       order: 8200,

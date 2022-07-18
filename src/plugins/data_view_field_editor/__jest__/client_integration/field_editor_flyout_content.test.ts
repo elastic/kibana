@@ -15,7 +15,7 @@ import { setup } from './field_editor_flyout_content.helpers';
 import { mockDocuments, createPreviewError } from './helpers/mocks';
 
 describe('<FieldEditorFlyoutContent />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -23,7 +23,6 @@ describe('<FieldEditorFlyoutContent />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {

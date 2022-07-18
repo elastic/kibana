@@ -11,7 +11,11 @@ import { defaultConfig } from '@kbn/storybook';
 module.exports = {
   ...defaultConfig,
   stories: [
+    '../../../shared-ux/**/*.stories.+(tsx|mdx)',
     '../../../kbn-shared-ux*/**/*.stories.+(tsx|mdx)',
     '../../../../src/plugins/shared_ux/**/*.stories.+(tsx|mdx)',
   ],
+  reactOptions: {
+    strictMode: true,
+  },
 };

@@ -12,7 +12,7 @@ import {
   mockIsNotFoundFromUnsupportedServer,
 } from './internal_bulk_resolve.test.mock';
 
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';

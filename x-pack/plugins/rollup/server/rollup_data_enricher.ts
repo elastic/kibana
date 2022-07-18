@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { Index } from '../../../plugins/index_management/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { Index } from '@kbn/index-management-plugin/server';
 
 export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
   if (!indicesList || !indicesList.length) {

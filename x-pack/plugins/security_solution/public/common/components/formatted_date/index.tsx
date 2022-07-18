@@ -97,16 +97,18 @@ interface FormattedDateProps {
   className?: string;
   fieldName: string;
   value?: string | number | null;
+  dateFormat?: string;
 }
 export const FormattedDate = React.memo<FormattedDateProps>(
-  ({ value, fieldName, className = '' }): JSX.Element => {
+  ({ value, fieldName, className = '', dateFormat }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);
     }
+
     const maybeDate = getMaybeDate(value);
     return maybeDate.isValid() ? (
       <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
-        <PreferenceFormattedDate value={maybeDate.toDate()} />
+        <PreferenceFormattedDate value={maybeDate.toDate()} dateFormat={dateFormat} />
       </LocalizedDateTooltip>
     ) : (
       getOrEmptyTagFromValue(value)

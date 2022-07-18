@@ -11,7 +11,7 @@ import {
   DeprecationsDetails,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { DataViewAttributes } from '../../common';
 

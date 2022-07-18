@@ -6,19 +6,16 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
-import {
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
 } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
-import { OsqueryFactory } from './factory/types';
+import type { OsqueryFactory } from './factory/types';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart
@@ -30,6 +27,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
+
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
 

@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  ExecutionLogTableSortColumns,
   RuleExecutionEvent,
+  RuleExecutionStatus,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 export interface GetAggregateExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
   queryText: string;
-  statusFilters: string[];
+  statusFilters: RuleExecutionStatus[];
   page: number;
   perPage: number;
-  sortField: string;
-  sortOrder: string;
+  sortField: ExecutionLogTableSortColumns;
+  sortOrder: estypes.SortOrder;
 }
 
 /**

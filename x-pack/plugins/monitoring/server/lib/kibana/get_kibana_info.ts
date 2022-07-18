@@ -6,27 +6,26 @@
  */
 
 import { merge } from 'lodash';
-// @ts-ignore
-import { checkParam, MissingRequiredError } from '../error_missing_required';
-// @ts-ignore
-import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const hit = resp.hits?.hits[0];
   const legacySource = hit?._source.kibana_stats;
   const mbSource = hit?._source.kibana?.stats;
-  const availabilityTimestamp = hit?._source['@timestamp'] ?? legacySource?.timestamp;
-  if (!availabilityTimestamp) {
+  const lastSeenTimestamp = hit?._source['@timestamp'] ?? legacySource?.timestamp;
+  if (!lastSeenTimestamp) {
     throw new MissingRequiredError('timestamp');
   }
 
   return merge(buildKibanaInfo(hit!), {
-    availability: calculateAvailability(availabilityTimestamp),
+    statusIsStale: isKibanaStatusStale(lastSeenTimestamp),
+    lastSeenTimestamp,
     os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
     uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
   });

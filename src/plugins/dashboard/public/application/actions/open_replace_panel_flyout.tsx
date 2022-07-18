@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '../../services/kibana_react';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import {

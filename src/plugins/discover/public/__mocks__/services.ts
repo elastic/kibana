@@ -7,8 +7,8 @@
  */
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DiscoverServices } from '../build_services';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { chromeServiceMock, coreMock, docLinksServiceMock } from '../../../../core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -16,12 +16,13 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  HIDE_ANNOUNCEMENTS,
 } from '../../common';
-import { UI_SETTINGS } from '../../../data/public';
-import { TopNavMenu } from '../../../navigation/public';
-import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TopNavMenu } from '@kbn/navigation-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { LocalStorageMock } from './local_storage_mock';
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = {
@@ -68,6 +69,8 @@ export const discoverServiceMock = {
         return 250;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
+      } else if (key === HIDE_ANNOUNCEMENTS) {
+        return false;
       }
     }),
     isDefault: (key: string) => {
@@ -76,6 +79,11 @@ export const discoverServiceMock = {
   },
   http: {
     basePath: '/',
+  },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: () => true,
+    },
   },
   dataViewFieldEditor: {
     openEditor: jest.fn(),
@@ -95,4 +103,8 @@ export const discoverServiceMock = {
   },
   storage: new LocalStorageMock({}) as unknown as Storage,
   addBasePath: jest.fn(),
+  toastNotifications: {
+    addInfo: jest.fn(),
+    addWarning: jest.fn(),
+  },
 } as unknown as DiscoverServices;

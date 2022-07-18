@@ -7,18 +7,18 @@
 
 import expect from '@kbn/expect';
 import { JsonObject } from '@kbn/utility-types';
-import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
+import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   eventIDSafeVersion,
   parentEntityIDSafeVersion,
   timestampAsDateSafeVersion,
-} from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { ResolverPaginatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/endpoint/models/event';
+import { ResolverPaginatedEvents } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   Tree,
   RelatedEventCategory,
-} from '../../../../plugins/security_solution/common/endpoint/generate_data';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { compareArrays } from './common';
 

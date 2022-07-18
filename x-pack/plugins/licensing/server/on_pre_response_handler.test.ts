@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
-import { httpServiceMock, httpServerMock } from '../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '../common/licensing.mock';
 
 describe('createOnPreResponseHandler', () => {

@@ -8,10 +8,11 @@
 
 import supertest from 'supertest';
 import { registerDeleteUnknownTypesRoute } from '../deprecations';
-import { elasticsearchServiceMock } from '../../../../../core/server/elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '../../../elasticsearch/elasticsearch_service.mock';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { setupServer } from '../test_utils';
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '../../..';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -37,7 +38,9 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     handlerContext.elasticsearch.client.asCurrentUser = elasticsearchClient.asCurrentUser;
     handlerContext.elasticsearch.client.asInternalUser = elasticsearchClient.asInternalUser;
 
-    const router = httpSetup.createRouter('/internal/saved_objects/');
+    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>(
+      '/internal/saved_objects/'
+    );
     registerDeleteUnknownTypesRoute(router, {
       kibanaVersion,
       kibanaIndex,

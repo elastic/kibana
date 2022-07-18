@@ -259,7 +259,7 @@ export const myEnhancedSearchStrategyProvider = (
       await ese.cancel(id, options, deps);
     },
     extend: async (id, keepAlive, options, deps) => {
-      // async search results are not stored indefinitely. By default, they expire after 7 days (or as defined by xpack.data_enhanced.search.sessions.defaultExpiration setting in kibana.yml).
+      // async search results are not stored indefinitely. By default, they expire after 7 days (or as defined by data.search.sessions.defaultExpiration setting in kibana.yml).
       // call the extend method of the async strategy you are using or implement your own extend function.
       await ese.extend(id, options, deps);
     },

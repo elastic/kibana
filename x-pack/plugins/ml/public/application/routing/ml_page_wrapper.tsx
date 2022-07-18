@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { FC } from 'react';
-import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 export const MlPageWrapper: FC<{ path: string }> = ({ path, children }) => {
   return <TrackApplicationView viewId={path}>{children}</TrackApplicationView>;

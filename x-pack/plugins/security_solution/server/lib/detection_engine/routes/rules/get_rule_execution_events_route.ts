@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -38,25 +38,25 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
       const {
         start,
         end,
-        query_text: queryText = '',
-        status_filters: statusFilters = '',
+        query_text: queryText,
+        status_filters: statusFilters,
         page,
         per_page: perPage,
-        sort_field: sortField = 'timestamp',
-        sort_order: sortOrder = 'desc',
+        sort_field: sortField,
+        sort_order: sortOrder,
       } = request.query;
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const executionLog = context.securitySolution.getRuleExecutionLog();
+        const executionLog = (await context.securitySolution).getRuleExecutionLog();
         const { events, total } = await executionLog.getAggregateExecutionEvents({
           ruleId,
           start,
           end,
           queryText,
-          statusFilters: statusFilters.length ? statusFilters.split(',') : [],
-          page: page != null ? parseInt(page, 10) : 0,
-          perPage: perPage != null ? parseInt(perPage, 10) : 10,
+          statusFilters,
+          page,
+          perPage,
           sortField,
           sortOrder,
         });

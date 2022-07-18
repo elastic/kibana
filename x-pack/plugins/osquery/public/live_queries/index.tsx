@@ -28,7 +28,8 @@ interface LiveQueryProps {
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
-  hideFullscreen?: true;
+  hideAgentsField?: boolean;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -40,12 +41,12 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   savedQueryId,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
-  agentsField,
   queryField,
   ecsMappingField,
   formType,
   enabled,
-  hideFullscreen,
+  hideAgentsField,
+  addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -108,14 +109,14 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
   return (
     <LiveQueryForm
-      agentsField={agentId ? !agentId : agentsField}
       queryField={queryField}
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
-      hideFullscreen={hideFullscreen}
+      hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };

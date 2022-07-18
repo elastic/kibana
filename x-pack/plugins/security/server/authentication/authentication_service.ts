@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
@@ -14,7 +13,9 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
@@ -25,6 +26,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
+import type { UserProfileServiceStart } from '../user_profile';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
@@ -47,8 +49,12 @@ interface AuthenticationServiceStartParams {
   clusterClient: IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStart;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
+  applicationName: string;
+  kibanaFeatures: KibanaFeature[];
+  isElasticCloudDeployment: () => boolean;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -293,14 +299,20 @@ export class AuthenticationService {
     config,
     clusterClient,
     featureUsageService,
+    userProfileService,
     http,
     loggers,
     session,
+    applicationName,
+    kibanaFeatures,
+    isElasticCloudDeployment,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
+      applicationName,
+      kibanaFeatures,
     });
 
     /**
@@ -326,9 +338,11 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      userProfileService,
       getServerBaseURL,
       license: this.license,
       session,
+      isElasticCloudDeployment,
     });
 
     return {

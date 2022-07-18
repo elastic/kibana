@@ -27,7 +27,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   STORAGE_KEY,
   ELASTICSEARCH_SYSTEM_ID,

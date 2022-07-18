@@ -8,7 +8,7 @@
 
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
-import { IIndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {
@@ -37,7 +37,7 @@ describe('SearchSource#normalizeSortRequest', function () {
   };
   const indexPattern = {
     fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
-  } as IIndexPattern;
+  } as DataView;
 
   it('should return an array', function () {
     const sortable = { someField: SortDirection.desc };

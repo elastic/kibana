@@ -7,16 +7,18 @@
  */
 
 import React from 'react';
+import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 
-import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../../data/common';
-import { IDataPluginServices } from '../../../../data/public';
+import { getAutocomplete } from '../../services';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPattern: IIndexPattern;
-  field: IFieldType;
+  indexPattern: DataView;
+  field: DataViewField;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
@@ -78,8 +80,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       return;
     }
     this.setState({ isLoading: true });
-
-    const suggestions = await this.services.data.autocomplete.getValueSuggestions({
+    const suggestions = await getAutocomplete().getValueSuggestions({
       indexPattern,
       field,
       query,

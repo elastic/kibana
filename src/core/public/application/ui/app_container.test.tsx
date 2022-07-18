@@ -10,7 +10,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { themeServiceMock } from '../../theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
 import { createMemoryHistory } from 'history';

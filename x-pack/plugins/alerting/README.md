@@ -104,7 +104,7 @@ The following table describes the properties of the `options` object.
 
 ### Executor
 
-This is the primary function for a rule type. Whenever the rule needs to execute, this function will perform the execution. It receives a variety of parameters. The following table describes the properties the executor receives.
+This is the primary function for a rule type. Whenever the rule needs to execute, this function will perform the execution. This function is for running a custom query that returns documents meeting a condition and report them to the framework using the `services.alertFactory`. The function receives a variety of parameters. The following table describes the properties the executor receives.
 
 **executor(options)**
 

@@ -6,7 +6,7 @@
  */
 import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { ActionsPlugin } from './plugin';
 import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
@@ -55,8 +55,15 @@ export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 
+export { SubActionConnector } from './sub_action_framework/sub_action_connector';
+export { CaseConnector } from './sub_action_framework/case';
+export type { ServiceParams } from './sub_action_framework/types';
+
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    email: { domain_allowlist: true },
+  },
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.actions.whitelistedHosts', 'xpack.actions.allowedHosts', {
       level: 'warning',

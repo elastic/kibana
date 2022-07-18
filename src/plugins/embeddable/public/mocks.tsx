@@ -7,6 +7,14 @@
  */
 
 import React from 'react';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { UiActionsService } from './lib/ui_actions';
+import { EmbeddablePublicPlugin } from './plugin';
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -19,14 +27,6 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
 } from '.';
-import { EmbeddablePublicPlugin } from './plugin';
-import { coreMock, themeServiceMock } from '../../../core/public/mocks';
-import { UiActionsService } from './lib/ui_actions';
-import { CoreStart } from '../../../core/public';
-import { Start as InspectorStart } from '../../inspector/public';
-
-import { inspectorPluginMock } from '../../inspector/public/mocks';
-import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;

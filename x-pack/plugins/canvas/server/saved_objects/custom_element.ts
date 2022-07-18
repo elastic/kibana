@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 import { customElementMigrationsFactory, CanvasSavedObjectTypeMigrationsDeps } from './migrations';
 
@@ -32,7 +32,7 @@ export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): Sa
       '@created': { type: 'date' },
     },
   },
-  migrations: customElementMigrationsFactory(deps),
+  migrations: () => customElementMigrationsFactory(deps),
   management: {
     icon: 'canvasApp',
     defaultSearchField: 'name',

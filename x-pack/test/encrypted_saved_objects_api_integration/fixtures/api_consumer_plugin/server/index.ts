@@ -11,12 +11,14 @@ import {
   PluginInitializer,
   SavedObjectsNamespaceType,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../src/core/server';
+  SavedObject,
+} from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../../../../plugins/encrypted_saved_objects/server';
-import { SpacesPluginSetup } from '../../../../../plugins/spaces/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -108,6 +110,40 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
             return response.badRequest({ body: 'Failed to encrypt attributes' });
           }
 
+          return response.customError({ body: err, statusCode: 500 });
+        }
+      }
+    );
+
+    router.get(
+      {
+        path: '/api/saved_objects/create-point-in-time-finder-decrypted-as-internal-user',
+        validate: { query: schema.object({ type: schema.string() }) },
+      },
+      async (context, request, response) => {
+        const [, { encryptedSavedObjects }] = await core.getStartServices();
+        const spaceId = deps.spaces.spacesService.getSpaceId(request);
+        const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
+
+        const { type } = request.query;
+
+        let savedObjects: SavedObject[] = [];
+        const finder = await encryptedSavedObjects
+          .getClient()
+          .createPointInTimeFinderDecryptedAsInternalUser({
+            type,
+            ...(namespace ? { namespaces: [namespace] } : undefined),
+          });
+
+        for await (const result of finder.find()) {
+          savedObjects = [...savedObjects, ...result.saved_objects];
+        }
+
+        try {
+          return response.ok({
+            body: { saved_objects: savedObjects },
+          });
+        } catch (err) {
           return response.customError({ body: err, statusCode: 500 });
         }
       }

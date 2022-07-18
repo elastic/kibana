@@ -17,6 +17,7 @@ require('@kbn/flot-charts');
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
 export const KbnI18nReact = require('@kbn/i18n-react');
+export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
@@ -41,7 +42,7 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
-export const ElasticDatemath = require('@elastic/datemath');
+export const KbnDatemath = require('@kbn/datemath');
 export const ReactBeautifulDnD = require('react-beautiful-dnd');
 
 export const Lodash = require('lodash');

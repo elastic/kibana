@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,

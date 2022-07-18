@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../../licensing/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
 

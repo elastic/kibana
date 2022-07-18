@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe, TimerangeInput } from '../../common';
-import { AuthenticationHit, RequestBasicOptions } from '../';
-import { AlertsGroupData } from './alerts';
-import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
-import { DnsHistogramGroupData } from './dns';
-import { AuthenticationsActionGroupData } from './authentications';
-import { EventsActionGroupData, EventHit } from './events';
-import { PreviewHistogramGroupData } from './preview';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { Inspect, Maybe, TimerangeInput } from '../../common';
+import type { AuthenticationHit, RequestBasicOptions } from '..';
+import type { AlertsGroupData } from './alerts';
+import type { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
+import type { DnsHistogramGroupData } from './dns';
+import type { AuthenticationsActionGroupData } from './authentications';
+import type { EventsActionGroupData, EventHit } from './events';
+import type { PreviewHistogramGroupData } from './preview';
 
 export * from './alerts';
 export * from './anomalies';
@@ -25,11 +25,9 @@ export * from './events';
 export * from './preview';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
-export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
-  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',
@@ -41,7 +39,6 @@ export const MatrixHistogramTypeToAggName = {
   [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
   [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
   [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
-  [MatrixHistogramType.authenticationsEntities]: 'aggregations.events.buckets',
   [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
   [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
   [MatrixHistogramType.preview]: 'aggregations.preview.buckets',

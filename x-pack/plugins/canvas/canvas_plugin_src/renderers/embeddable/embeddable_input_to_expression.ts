@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
 import { toExpression as mapToExpression } from './input_type_to_expression/map';
 import { toExpression as visualizationToExpression } from './input_type_to_expression/visualization';

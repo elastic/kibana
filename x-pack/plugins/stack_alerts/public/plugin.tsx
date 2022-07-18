@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerAlertTypes } from './alert_types';
 import { Config } from '../common';
-import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 
 export type Setup = void;
 export type Start = void;

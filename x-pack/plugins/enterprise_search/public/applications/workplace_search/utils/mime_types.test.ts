@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mimeType } from './';
+import { mimeType } from '.';
 
 describe('mimeType', () => {
   it('should return correct mimeType when present', () => {

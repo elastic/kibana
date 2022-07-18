@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense, LicenseType } from '../../licensing/common/types';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 
 function isActiveLicense(licenseType: LicenseType, license?: ILicense) {
   return license && license.isActive && license.hasAtLeast(licenseType);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { createStaticDataView } from './create_static_data_view';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getDynamicDataView } from './get_dynamic_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { ISavedObjectsRepository } from '../../../../../../src/core/server';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',

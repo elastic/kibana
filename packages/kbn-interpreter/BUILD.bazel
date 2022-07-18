@@ -42,6 +42,13 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
+)
+
 peggy(
   name = "grammar",
   data = [
@@ -73,6 +80,7 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
@@ -82,7 +90,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { ShortUrlRecord } from '..';
 import { UrlServiceError } from '../..';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../../common/url_service/locators/legacy_short_url_locator';

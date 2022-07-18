@@ -13,7 +13,7 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';

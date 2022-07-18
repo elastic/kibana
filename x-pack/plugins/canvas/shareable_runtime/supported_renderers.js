@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
-import { pie } from '../canvas_plugin_src/renderers/pie';
-import { plot } from '../canvas_plugin_src/renderers/plot';
-import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
+import { getImageRenderer } from '@kbn/expression-image-plugin/public';
+import { getErrorRenderer, getDebugRenderer } from '@kbn/expression-error-plugin/public';
+import { getRevealImageRenderer } from '@kbn/expression-reveal-image-plugin/public';
+import { getRepeatImageRenderer } from '@kbn/expression-repeat-image-plugin/public';
+import { getShapeRenderer, getProgressRenderer } from '@kbn/expression-shape-plugin/public';
+import { getMetricRenderer } from '@kbn/expression-metric-plugin/public';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
-import { getImageRenderer } from '../../../../src/plugins/expression_image/public';
-import {
-  getErrorRenderer,
-  getDebugRenderer,
-} from '../../../../src/plugins/expression_error/public';
-import { getRevealImageRenderer } from '../../../../src/plugins/expression_reveal_image/public';
-import { getRepeatImageRenderer } from '../../../../src/plugins/expression_repeat_image/public';
-import {
-  getShapeRenderer,
-  getProgressRenderer,
-} from '../../../../src/plugins/expression_shape/public';
-import { getMetricRenderer } from '../../../../src/plugins/expression_metric/public';
+import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
+import { plot } from '../canvas_plugin_src/renderers/plot';
+import { pie } from '../canvas_plugin_src/renderers/pie';
+import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 
 const unboxFactory = (factory) => factory();
 

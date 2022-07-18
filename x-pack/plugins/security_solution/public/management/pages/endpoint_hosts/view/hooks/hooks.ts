@@ -7,14 +7,14 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { EndpointState } from '../../types';
-import { State } from '../../../../../common/store';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { EndpointState } from '../../types';
+import type { State } from '../../../../../common/store';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../../common/constants';
 import { useAppUrl } from '../../../../../common/lib/kibana';
-import { pagePathGetters } from '../../../../../../../fleet/public';
 
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {

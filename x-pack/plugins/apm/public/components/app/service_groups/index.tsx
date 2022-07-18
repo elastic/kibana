@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ServiceGroupsList } from './service_groups_list/.';
-export { ServiceGroupSaveButton } from './service_group_save/.';
+export { ServiceGroupsList } from './service_groups_list';
+export { ServiceGroupSaveButton } from './service_group_save';

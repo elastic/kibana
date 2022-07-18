@@ -33,20 +33,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
-import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type {
+  FieldFormat,
+  FieldFormatInstanceType,
+  FieldFormatParams,
+} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  DataView,
+  DataViewField,
+  DataViewsPublicPluginStart,
+  FieldSpec,
+} from '@kbn/data-views-plugin/public';
+import { context as contextType, CodeEditor } from '@kbn/kibana-react-plugin/public';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
-import {
-  DataView,
-  DataViewField,
-  DataViewsPublicPluginStart,
-} from '../../../../../plugins/data_views/public';
-import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -101,14 +106,14 @@ export interface FieldEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
   fieldFormatId?: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams?: FieldFormatParams;
   showScriptingHelp: boolean;
   showDeleteModal: boolean;
   hasFormatError: boolean;
   hasScriptError: boolean;
   isSaving: boolean;
   errors?: string[];
-  format: any;
+  format: FieldFormat;
   spec: DataViewField['spec'];
   customLabel: string;
 }
@@ -200,9 +205,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   }
 
-  onFieldChange = (fieldName: string, value: string | number) => {
+  onFieldChange = (fieldName: keyof FieldSpec, value: string | number) => {
     const { spec } = this.state;
-    (spec as any)[fieldName] = value;
+    (spec[fieldName] as string | number) = value;
     this.forceUpdate();
   };
 
@@ -231,7 +236,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onFormatChange = (formatId: string, params?: any) => {
+  onFormatChange = (formatId: string, params?: FieldFormatParams) => {
     const { fieldTypeFormats } = this.state;
     const { uiSettings, fieldFormats } = this.context.services;
 
@@ -248,7 +253,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onFormatParamsChange = (newParams: { [key: string]: any }) => {
+  onFormatParamsChange = (newParams: FieldFormatParams) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };

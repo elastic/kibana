@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from 'src/core/public';
-import type { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';

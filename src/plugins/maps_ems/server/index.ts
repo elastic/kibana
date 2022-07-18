@@ -11,11 +11,11 @@ import {
   PluginInitializerContext,
   Plugin,
   PluginConfigDescriptor,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { MapConfig, mapConfigSchema } from '../config';
 import { EMSSettings, LICENSE_CHECK_ID } from '../common';
-import { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/server';
-import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 export type { EMSSettings } from '../common';
 
 export const config: PluginConfigDescriptor<MapConfig> = {

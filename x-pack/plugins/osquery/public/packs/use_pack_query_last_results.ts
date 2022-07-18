@@ -7,7 +7,9 @@
 
 import { useQuery } from 'react-query';
 import moment from 'moment-timezone';
-import { DataView, SortDirection } from '../../../../../src/plugins/data/common';
+import { lastValueFrom } from 'rxjs';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryLastResultsProps {
@@ -48,7 +50,7 @@ export const usePackQueryLastResults = ({
 
       lastResultsSearchSource.setField('index', logsDataView);
 
-      const lastResultsResponse = await lastResultsSearchSource.fetch$().toPromise();
+      const lastResultsResponse = await lastValueFrom(lastResultsSearchSource.fetch$());
       const timestamp = lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'][0];
 
       if (timestamp) {

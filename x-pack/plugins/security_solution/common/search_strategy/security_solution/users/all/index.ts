@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
-import { SortableUsersFields } from '../common';
+import type { Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
+import type { SortableUsersFields } from '../common';
 
 export interface User {
   name: string;

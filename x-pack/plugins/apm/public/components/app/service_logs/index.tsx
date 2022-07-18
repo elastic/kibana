@@ -10,9 +10,9 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { LogStream } from '@kbn/infra-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { LogStream } from '../../../../../infra/public';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {
@@ -36,7 +36,7 @@ export function ServiceLogs() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure',
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
           {
             params: {
               path: { serviceName },
@@ -55,10 +55,7 @@ export function ServiceLogs() {
   );
 
   const noInfrastructureData = useMemo(() => {
-    return (
-      isEmpty(data?.serviceInfrastructure?.containerIds) &&
-      isEmpty(data?.serviceInfrastructure?.hostNames)
-    );
+    return isEmpty(data?.containerIds) && isEmpty(data?.hostNames);
   }, [data]);
 
   if (status === FETCH_STATUS.LOADING) {
@@ -85,23 +82,25 @@ export function ServiceLogs() {
 
   return (
     <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
       columns={[{ type: 'timestamp' }, { type: 'message' }]}
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
       query={getInfrastructureKQLFilter(data, serviceName)}
+      showFlyoutAction
     />
   );
 }
 
 export const getInfrastructureKQLFilter = (
   data:
-    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes'>
     | undefined,
   serviceName: string
 ) => {
-  const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
-  const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
+  const containerIds = data?.containerIds ?? [];
+  const hostNames = data?.hostNames ?? [];
 
   const infraAttributes = containerIds.length
     ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)

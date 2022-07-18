@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeStart, DocLinksStart } from 'kibana/public';
+import { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({

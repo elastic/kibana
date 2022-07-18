@@ -8,6 +8,7 @@
 /* eslint @typescript-eslint/no-var-requires: 0 */
 
 jest.mock('../selectors/map_selectors', () => ({}));
+jest.mock('../reducers/non_serializable_instances', () => ({}));
 jest.mock('./data_request_actions', () => {
   return {
     syncDataForAllLayers: () => {},
@@ -25,6 +26,9 @@ import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
+const vectorTileAdapterMock = {
+  setTiles: jest.fn(),
+};
 
 describe('map_actions', () => {
   afterEach(() => {
@@ -43,6 +47,12 @@ describe('map_actions', () => {
         require('../selectors/map_selectors').getLayerList = () => {
           return [];
         };
+
+        require('../reducers/non_serializable_instances').getInspectorAdapters = () => {
+          return {
+            vectorTiles: vectorTileAdapterMock,
+          };
+        };
       });
 
       it('should set buffer', () => {
@@ -60,6 +70,8 @@ describe('map_actions', () => {
           zoom: 5,
         });
         action(dispatchMock, getStoreMock);
+
+        expect(vectorTileAdapterMock.setTiles.mock.calls[0]).toEqual([[{ x: 24, y: 15, z: 5 }]]);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
@@ -101,6 +113,12 @@ describe('map_actions', () => {
               minLon: 92.5,
             },
           };
+
+          require('../reducers/non_serializable_instances').getInspectorAdapters = () => {
+            return {
+              vectorTiles: vectorTileAdapterMock,
+            };
+          };
         };
       });
 
@@ -119,6 +137,8 @@ describe('map_actions', () => {
           },
         });
         action(dispatchMock, getStoreMock);
+
+        expect(vectorTileAdapterMock.setTiles.mock.calls.length).toBe(0);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
@@ -162,6 +182,8 @@ describe('map_actions', () => {
         });
         action(dispatchMock, getStoreMock);
 
+        expect(vectorTileAdapterMock.setTiles.mock.calls.length).toBe(1);
+
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
             mapViewContext: {
@@ -203,6 +225,8 @@ describe('map_actions', () => {
           },
         });
         action(dispatchMock, getStoreMock);
+
+        expect(vectorTileAdapterMock.setTiles.mock.calls.length).toBe(1);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {

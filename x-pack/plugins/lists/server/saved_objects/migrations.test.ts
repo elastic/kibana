@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import uuid from 'uuid';
 import {
   ENDPOINT_LIST_ID,

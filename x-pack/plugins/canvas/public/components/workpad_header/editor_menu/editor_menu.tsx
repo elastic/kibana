@@ -7,21 +7,14 @@
 
 import React, { FC, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { trackCanvasUiMetric, METRIC_TYPE } from '../../../../public/lib/ui_metric';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { EmbeddableFactoryDefinition, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   useEmbeddablesService,
   usePlatformService,
   useVisualizationsService,
 } from '../../../services';
-import {
-  BaseVisType,
-  VisGroups,
-  VisTypeAlias,
-} from '../../../../../../../src/plugins/visualizations/public';
-import {
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '../../../../../../../src/plugins/embeddable/public';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';
@@ -36,7 +29,7 @@ interface Props {
 
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const platformService = usePlatformService();
   const stateTransferService = embeddablesService.getStateTransfer();
   const visualizationsService = useVisualizationsService();
@@ -68,11 +61,11 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         path,
         state: {
           originatingApp: CANVAS_APP,
-          originatingPath: `#/${pathname}${search}`,
+          originatingPath: `${pathname}${search}${hash}`,
         },
       });
     },
-    [stateTransferService, pathname, search]
+    [stateTransferService, pathname, search, hash]
   );
 
   const createNewEmbeddable = useCallback(

@@ -12,7 +12,7 @@ import { setupValidationTestBed, ValidationTestBed } from './validation.helpers'
 
 describe('<EditPolicy /> warm phase validation', () => {
   let testBed: ValidationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -20,7 +20,6 @@ describe('<EditPolicy /> warm phase validation', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
@@ -28,7 +27,7 @@ describe('<EditPolicy /> warm phase validation', () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
 
     await act(async () => {
-      testBed = await setupValidationTestBed();
+      testBed = await setupValidationTestBed(httpSetup);
     });
 
     const { component, actions } = testBed;

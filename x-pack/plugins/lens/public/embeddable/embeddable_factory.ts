@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup, ThemeServiceStart } from 'kibana/public';
+import type {
+  Capabilities,
+  HttpSetup,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { FilterManager, TimefilterContract } from '../../../../../src/plugins/data/public';
-import type { DataViewsContract } from '../../../../../src/plugins/data_views/public';
-import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { Document } from '../persistence/saved_object_store';
 import { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
-import type { SpacesPluginStart } from '../../../spaces/public';
 import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
+  data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
   inspector: InspectorStart;
@@ -46,6 +49,7 @@ export interface LensEmbeddableStartServices {
   datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -88,6 +92,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
     const {
+      data,
       timefilter,
       expressionRenderer,
       documentToExpression,
@@ -103,6 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       theme,
       inspector,
       spaces,
+      uiSettings,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -110,6 +116,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       {
         attributeService,
+        data,
         indexPatternService,
         timefilter,
         inspector,
@@ -130,6 +137,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         usageCollection,
         theme,
         spaces,
+        uiSettings,
       },
       input,
       parent

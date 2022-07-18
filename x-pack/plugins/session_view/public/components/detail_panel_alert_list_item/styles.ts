@@ -50,10 +50,21 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       }
     `;
 
-    const alertTitle: CSSObject = {
+    const alertGroupItem = css`
+      ${alertItem}
+
+      & .euiAccordion__childWrapper {
+        overflow: hidden;
+      }
+    `;
+
+    const alertTitleContainer: CSSObject = {
       display: minimal ? 'none' : 'initial',
       color: alertTitleColor,
       fontWeight: font.weight.semiBold,
+    };
+
+    const alertTitle: CSSObject = {
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
@@ -66,6 +77,10 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
     const alertAccordionButton: CSSObject = {
       width: `calc(100% - ${size.l})`,
       minWidth: 0,
+    };
+
+    const alertCountArrowPad: CSSObject = {
+      marginRight: size.xs,
     };
 
     const processPanel: CSSObject = {
@@ -92,18 +107,28 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       float: 'right',
     };
 
+    const firstAlertPad: CSSObject = {
+      '&:first-child': {
+        paddingTop: size.base,
+      },
+    };
+
     const minimalHR: CSSObject = {
       marginBottom: 0,
     };
 
     return {
       alertItem,
+      alertGroupItem,
+      alertTitleContainer,
       alertTitle,
       alertIcon,
       alertAccordionButton,
+      alertCountArrowPad,
       processPanel,
       investigatedLabel,
       minimalContextMenu,
+      firstAlertPad,
       minimalHR,
     };
   }, [euiTheme, isInvestigated, minimal]);

@@ -7,7 +7,7 @@
  */
 
 import { pick } from 'lodash';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
@@ -35,7 +35,18 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
 }
 
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
-  private readonly expressions: ExpressionsService = new ExpressionsService();
+  private static logger = {
+    ...console,
+    // eslint-disable-next-line no-console
+    fatal: console.error,
+    get() {
+      return this;
+    },
+  };
+
+  private readonly expressions: ExpressionsService = new ExpressionsService({
+    logger: ExpressionsPublicPlugin.logger,
+  });
 
   constructor(initializerContext: PluginInitializerContext) {}
 

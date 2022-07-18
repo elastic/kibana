@@ -8,16 +8,13 @@
 export * from './all';
 export * from './common';
 export * from './details';
-export * from './first_last_seen';
 export * from './kpi';
 export * from './overview';
 export * from './uncommon_processes';
 
 export enum HostsQueries {
   details = 'hostDetails',
-  firstOrLastSeen = 'firstOrLastSeen',
   hosts = 'hosts',
-  hostsEntities = 'hostsEntities',
   overview = 'overviewHost',
   uncommonProcesses = 'uncommonProcesses',
 }

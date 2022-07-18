@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 export let documentationLinks: DocLinksStart['links'];
 

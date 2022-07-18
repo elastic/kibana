@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchServerSearchableTypes } from './fetch_server_searchable_types';
 
 describe('fetchServerSearchableTypes', () => {

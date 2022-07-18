@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi } from '@kbn/core/public';
 import { ActionConnector } from '../../../../types';
 import { getSeverity } from './api';
 import * as i18n from './translations';

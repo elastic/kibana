@@ -8,7 +8,7 @@
 import { eventsMatrixHistogramConfig } from '.';
 import { buildEventsHistogramQuery } from './query.events_histogram.dsl';
 
-jest.mock('./query.events_histogram.dsl.ts', () => ({
+jest.mock('./query.events_histogram.dsl', () => ({
   buildEventsHistogramQuery: jest.fn(),
 }));
 

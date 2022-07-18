@@ -10,7 +10,7 @@ import React, { ReactNode } from 'react';
 import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from './';
+import { Mark } from '.';
 import { LastTickValue } from './last_tick_value';
 import { Marker } from './marker';
 import { PlotValues } from './plot_utils';
@@ -88,14 +88,14 @@ export function TimelineAxis({
 
         {topTraceDuration > 0 && (
           <LastTickValue
-            x={xScale(topTraceDuration)}
+            x={xScale(topTraceDuration) ?? 0}
             value={topTraceDurationFormatted}
             marginTop={28}
           />
         )}
 
         {marks.map((mark) => (
-          <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+          <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
         ))}
       </XYPlot>
     </div>

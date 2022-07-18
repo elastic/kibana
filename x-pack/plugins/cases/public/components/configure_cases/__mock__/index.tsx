@@ -7,9 +7,7 @@
 
 import { ActionTypeConnector, ConnectorTypes } from '../../../../common/api';
 import { ActionConnector } from '../../../containers/configure/types';
-import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
-import { UseActionTypesResponse } from '../../../containers/configure/use_action_types';
 import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';
 export { mappings } from '../../../containers/configure/mock';
 
@@ -50,14 +48,14 @@ export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   id: '',
 };
 
-export const useConnectorsResponse: UseConnectorsResponse = {
-  loading: false,
-  connectors,
-  refetchConnectors: jest.fn(),
+export const useConnectorsResponse = {
+  isLoading: false,
+  data: connectors,
+  refetch: jest.fn(),
 };
 
-export const useActionTypesResponse: UseActionTypesResponse = {
-  loading: false,
-  actionTypes: actionTypesMock,
-  refetchActionTypes: jest.fn(),
+export const useActionTypesResponse = {
+  isLoading: false,
+  data: actionTypesMock,
+  refetch: jest.fn(),
 };

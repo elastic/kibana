@@ -9,7 +9,7 @@
 import { updateRuntimeField } from './update_runtime_field';
 import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from 'src/plugins/data_views/common';
+import { DataView } from '../../../common';
 
 describe('update runtime field', () => {
   it('call usageCollection', () => {

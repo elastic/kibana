@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useFieldFormatter } from '../../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../../src/plugins/field_formats/common';
 import { IngestStatsResponse } from './pipelines';
 import { HelpIcon } from '../../../components/help_icon';
 

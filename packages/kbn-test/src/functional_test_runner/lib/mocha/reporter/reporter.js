@@ -9,7 +9,8 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
-import { ToolingLogTextWriter, CiStatsReporter } from '@kbn/dev-utils';
+import { ToolingLogTextWriter } from '@kbn/tooling-log';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import moment from 'moment';
 
 import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
@@ -23,7 +24,6 @@ export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
-  const testMetadata = getService('testMetadata');
   let originalLogWriters;
   let reporterCaptureStartTime;
 
@@ -60,7 +60,6 @@ export function MochaReporterProvider({ getService }) {
             config,
             lifecycle,
             runner,
-            testMetadata,
           });
         }
       }

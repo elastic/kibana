@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -65,6 +64,54 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
+  deleteAlertsAndRules();
+  deleteCases();
+  deleteTimelines();
+};
+
+export const cleanPackages = () => {
+  deletePolicies();
+  deletePackages();
+};
+
+export const deletePolicies = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/agent_policies',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { id: string }) => {
+      cy.request({
+        method: 'POST',
+        url: `api/fleet/agent_policies/delete`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        body: {
+          agentPolicyId: item.id,
+        },
+      });
+    });
+  });
+};
+
+export const deletePackages = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/epm/packages',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { status: string; name: string; version: string }) => {
+      if (item.status === 'installed') {
+        cy.request({
+          method: 'DELETE',
+          url: `api/fleet/epm/packages/${item.name}/${item.version}`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
+        });
+      }
+    });
+  });
+};
+
+export const deleteAlertsAndRules = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request({
@@ -74,6 +121,7 @@ export const cleanKibana = () => {
       query: '',
       action: 'delete',
     },
+    failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 
@@ -84,22 +132,6 @@ export const cleanKibana = () => {
           {
             match: {
               type: 'alert',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  deleteCases();
-
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'siem-ui-timeline',
             },
           },
         ],
@@ -118,8 +150,23 @@ export const cleanKibana = () => {
       },
     }
   );
+};
 
-  esArchiverResetKibana();
+export const deleteTimelines = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
 };
 
 export const deleteCases = () => {

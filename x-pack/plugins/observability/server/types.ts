@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export type {
   ObservabilityRouteCreateOptions,
@@ -20,10 +20,10 @@ export type {
 /**
  * @internal
  */
-export interface ObservabilityRequestHandlerContext extends RequestHandlerContext {
+export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

@@ -13,7 +13,8 @@ import { setTimeout } from 'timers/promises';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import Axios from 'axios';
-import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests

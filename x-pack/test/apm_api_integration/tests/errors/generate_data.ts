@@ -41,19 +41,18 @@ export async function generateData({
     return timerange(start, end)
       .interval(interval)
       .rate(transaction.successRate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
           .transaction(transaction.name)
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       )
-      .concat(
+      .merge(
         timerange(start, end)
           .interval(interval)
           .rate(transaction.failureRate)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             serviceGoProdInstance
               .transaction(transaction.name)
               .errors(
@@ -62,7 +61,6 @@ export async function generateData({
               .duration(1000)
               .timestamp(timestamp)
               .failure()
-              .serialize()
           )
       );
   });

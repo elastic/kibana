@@ -10,7 +10,14 @@ import React from 'react';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { noop } from 'lodash/fp';
 
-// TODO: Replace snapshot test with base test cases
+/**
+ * NOTE: This component is currently not shown in the UI as custom search queries
+ * are not yet fully supported by the Rule Execution Log aggregation API since
+ * certain queries could result in missing data or inclusion of wrong events.
+ * Please see this comment for history/details: https://github.com/elastic/kibana/pull/127339/files#r825240516
+ *
+ * Not expanding test coverage until component is complete/in-use.
+ */
 
 describe('ExecutionLogSearchBar', () => {
   describe('snapshots', () => {

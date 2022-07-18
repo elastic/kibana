@@ -8,8 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { ThemeServiceStart, ToastInput } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export const getGeneralErrorToast = (
   errorText: string,

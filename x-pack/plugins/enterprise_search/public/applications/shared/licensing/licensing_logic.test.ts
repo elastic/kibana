@@ -8,7 +8,7 @@
 import { resetContext } from 'kea';
 import { BehaviorSubject } from 'rxjs';
 
-import { licensingMock } from '../../../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { LicensingLogic, mountLicensingLogic } from './licensing_logic';
 

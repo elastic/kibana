@@ -5,10 +5,10 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { ReportingCore } from '../../';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingCore } from '../..';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { Report, ReportDocument, ReportingStore, SavedReport } from './';
+import { Report, ReportDocument, ReportingStore, SavedReport } from '.';
 
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();
@@ -216,6 +216,7 @@ describe('ReportingStore', () => {
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
+        "execution_time_ms": undefined,
         "jobtype": "csv_searchsource",
         "kibana_id": undefined,
         "kibana_name": undefined,
@@ -237,6 +238,7 @@ describe('ReportingStore', () => {
           "testPayload": "payload",
         },
         "process_expiration": undefined,
+        "queue_time_ms": undefined,
         "started_at": undefined,
         "status": "pending",
         "timeout": 30000,

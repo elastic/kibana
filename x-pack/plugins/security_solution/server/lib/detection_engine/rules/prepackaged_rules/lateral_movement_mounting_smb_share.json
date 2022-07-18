@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Attempt to Mount SMB Share via Command Line",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n    process.name : \"mount_smbfs\" or\n    (process.name : \"open\" and process.args : \"smb://*\") or\n    (process.name : \"mount\" and process.args : \"smbfs\") or\n    (process.name : \"osascript\" and process.command_line : \"osascript*mount volume*smb://*\")\n  )\n",
   "references": [
     "https://www.freebsd.org/cgi/man.cgi?mount_smbfs",
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

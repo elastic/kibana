@@ -13,6 +13,7 @@ import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 import { BaseParamType, FieldTypes } from '../param_types';
 import { AggGroupNames } from '../agg_groups';
+import { createMetricFilter } from './lib/create_filter';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -48,6 +49,9 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
   getKey = () => {};
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
+    if (!config.createFilter) {
+      config.createFilter = createMetricFilter;
+    }
     super(config);
 
     this.params.push(

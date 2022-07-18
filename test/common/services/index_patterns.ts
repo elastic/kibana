@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataViewSpec } from '@kbn/data-plugin/common';
 import { FtrService } from '../ftr_provider_context';
-import { DataViewSpec } from '../../../src/plugins/data/common';
 
 export class IndexPatternsService extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');

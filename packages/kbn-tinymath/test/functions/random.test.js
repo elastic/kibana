@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { random } = require('../../src/functions/random.js');
+const { random } = require('../../src/functions/random');
 
 describe('Random', () => {
   it('numbers', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { asset } from './asset';
 import { filtersFunctionFactory } from './filters';
 import { timelionFunctionFactory } from './timelion';

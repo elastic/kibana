@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { MutableRefObject } from 'react';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
-import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
 import { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
@@ -17,8 +18,7 @@ import {
   dataVisualizerRefresh$,
   Refresh,
 } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../../../../../src/plugins/ui_actions/public';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { APP_ID } from '../../../../../../common/constants';
 
 export function getActions(
@@ -80,7 +80,10 @@ export function getActions(
       type: 'icon',
       icon: 'gisApp',
       available: (item: FieldVisConfig) => {
-        return item.type === JOB_FIELD_TYPES.GEO_POINT || item.type === JOB_FIELD_TYPES.GEO_SHAPE;
+        return (
+          item.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
+          item.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE
+        );
       },
       onClick: async (item: FieldVisConfig) => {
         if (services?.uiActions && dataView) {

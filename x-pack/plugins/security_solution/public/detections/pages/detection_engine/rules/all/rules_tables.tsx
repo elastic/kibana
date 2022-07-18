@@ -14,47 +14,43 @@ import {
   EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { partition } from 'lodash/fp';
-
-import { AllRulesTabs } from './rules_table_toolbar';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
+import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-import {
-  CreatePreBuiltRules,
-  Rule,
-  RulesSortingFields,
-} from '../../../../containers/detection_engine/rules';
-import { useRulesTableContext } from './rules_table/rules_table_context';
-import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
+import type { Rule, RulesSortingFields } from '../../../../containers/detection_engine/rules';
+import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
-import { EuiBasicTableOnChange } from '../types';
-import { useMonitoringColumns, useRulesColumns } from './use_columns';
-import { showRulesTable } from './helpers';
-import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesUtilityBar } from './utility_bar';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
-import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
-import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
-import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
+import type { EuiBasicTableOnChange } from '../types';
 import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
+import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
+import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
+import { showRulesTable } from './helpers';
+import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
+import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
+import { AllRulesTabs } from './rules_table_toolbar';
+import { useMonitoringColumns, useRulesColumns } from './use_columns';
+import { AllRulesUtilityBar } from './utility_bar';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
 interface RulesTableProps {
-  createPrePackagedRules: CreatePreBuiltRules | null;
+  createPrePackagedRules: () => void;
   hasPermissions: boolean;
-  loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
-  rulesNotInstalled: number | null;
-  rulesNotUpdated: number | null;
+  rulesCustomInstalled?: number;
+  rulesInstalled?: number;
+  rulesNotInstalled?: number;
+  rulesNotUpdated?: number;
   selectedTab: AllRulesTabs;
 }
 
@@ -74,7 +70,6 @@ export const RulesTables = React.memo<RulesTableProps>(
   ({
     createPrePackagedRules,
     hasPermissions,
-    loading,
     loadingCreatePrePackagedRules,
     rulesCustomInstalled,
     rulesInstalled,
@@ -82,6 +77,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     rulesNotUpdated,
     selectedTab,
   }) => {
+    const { startTransaction } = useStartTransaction();
     const tableRef = useRef<EuiBasicTable>(null);
     const rulesTableContext = useRulesTableContext();
 
@@ -198,10 +194,16 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.LOAD_PREBUILT });
         await createPrePackagedRules();
         await reFetchRules();
       }
-    }, [createPrePackagedRules, reFetchRules]);
+    }, [createPrePackagedRules, reFetchRules, startTransaction]);
+
+    const handleRefreshRules = useCallback(() => {
+      startTransaction({ name: RULES_TABLE_ACTIONS.REFRESH });
+      reFetchRules();
+    }, [reFetchRules, startTransaction]);
 
     const isSelectAllCalled = useRef(false);
 
@@ -349,7 +351,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               paginationTotal={pagination.total ?? 0}
               numberSelectedItems={selectedItemsCount}
               onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
-              onRefresh={reFetchRules}
+              onRefresh={handleRefreshRules}
               isAutoRefreshOn={isRefreshOn}
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}

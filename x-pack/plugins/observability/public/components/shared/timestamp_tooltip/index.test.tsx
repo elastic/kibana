@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
-import { TimestampTooltip } from './index';
+import { TimestampTooltip } from '.';
 
 function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();

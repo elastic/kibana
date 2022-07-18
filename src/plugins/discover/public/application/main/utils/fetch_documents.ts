@@ -7,7 +7,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
+import { lastValueFrom } from 'rxjs';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 
@@ -17,7 +18,7 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services, savedSearch }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ) => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
@@ -55,5 +56,5 @@ export const fetchDocuments = (
       map((res) => res.rawResponse.hits.hits)
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$);
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class CorePluginChromelessPlugin
   implements Plugin<CorePluginChromelessPluginSetup, CorePluginChromelessPluginStart>

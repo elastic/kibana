@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "UAC Bypass via ICMLuaUtil Elevated COM Interface",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"dllhost.exe\" and\n process.parent.args in (\"/Processid:{3E5FC7F9-9A51-4367-9063-A120244FBEC7}\", \"/Processid:{D2E7041B-2927-42FB-8E9F-7CE93B6DC937}\") and\n process.pe.original_file_name != \"WerFault.exe\"\n",
   "risk_score": 73,
   "rule_id": "68d56fdc-7ffa-4419-8e95-81641bd6f845",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

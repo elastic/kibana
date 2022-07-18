@@ -9,8 +9,8 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Space } from '../../common';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
@@ -81,7 +81,7 @@ describe('SpaceListInternal', () => {
     return wrapper.find('EuiButtonEmpty');
   }
   async function getListClickTarget(wrapper: ReactWrapper) {
-    return (await wrapper.find('[data-test-subj="space-avatar-alpha"]')).first();
+    return (await wrapper.find('[data-test-subj="space-avatar-alpha"]')).last();
   }
 
   describe('using default properties', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getContextFactory } from './context';
 
 describe('getContextFactory', () => {

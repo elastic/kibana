@@ -19,29 +19,37 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
-import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
 import {
   useCspBenchmarkIntegrations,
   UseCspBenchmarkIntegrationsProps,
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-import { SEARCH_PLACEHOLDER } from './translations';
+import * as TEST_SUBJ from './test_subjects';
 
 const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
 const SEARCH_DEBOUNCE_MS = 300;
-export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
 
 const AddCisIntegrationButton = () => {
   const cisIntegrationLink = useCISIntegrationLink();
 
   return (
-    <EuiButton fill iconType="plusInCircle" href={cisIntegrationLink}>
-      {ADD_A_CIS_INTEGRATION}
+    <EuiButton
+      data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
+      fill
+      iconType="plusInCircle"
+      href={cisIntegrationLink}
+      isDisabled={!cisIntegrationLink}
+    >
+      <FormattedMessage
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
+        defaultMessage="Add a CIS integration"
+      />
     </EuiButton>
   );
 };
@@ -53,12 +61,12 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
       <EuiText>
         <strong>
           <FormattedMessage
-            id="xpack.csp.benchmarks.integrationsNotFoundMessage"
+            id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle"
             defaultMessage="No benchmark integrations found"
           />
           {name && (
             <FormattedMessage
-              id="xpack.csp.benchmarks.integrationsNotFoundForNameMessage"
+              id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundForNameTitle"
               defaultMessage=' for "{name}"'
               values={{ name }}
             />
@@ -70,8 +78,8 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
     <EuiText>
       <EuiTextColor color="subdued">
         <FormattedMessage
-          id="xpack.csp.benchmarks.integrationsNotFoundWithFiltersMessage"
-          defaultMessage="We weren’t able to find any benchmark integrations with the above filters."
+          id="xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundWithFiltersTitle"
+          defaultMessage="We weren't able to find any benchmark integrations with the above filters."
         />
       </EuiTextColor>
     </EuiText>
@@ -108,7 +116,10 @@ const BenchmarkSearchField = ({
         <EuiFieldSearch
           onSearch={setLocalValue}
           isLoading={isLoading}
-          placeholder={SEARCH_PLACEHOLDER}
+          placeholder={i18n.translate(
+            'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
+            { defaultMessage: 'e.g. benchmark name' }
+          )}
           incremental
         />
       </EuiFlexItem>
@@ -117,7 +128,11 @@ const BenchmarkSearchField = ({
 };
 
 const PAGE_HEADER: EuiPageHeaderProps = {
-  pageTitle: BENCHMARK_INTEGRATIONS,
+  'data-test-subj': TEST_SUBJ.BENCHMARKS_PAGE_HEADER,
+  pageTitle: i18n.translate(
+    'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
+    { defaultMessage: 'Benchmark Integrations' }
+  ),
   rightSideItems: [<AddCisIntegrationButton />],
 };
 
@@ -125,7 +140,7 @@ export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 5,
+    perPage: 10,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
@@ -150,7 +165,7 @@ export const Benchmarks = () => {
       <EuiSpacer size="s" />
       <BenchmarksTable
         benchmarks={queryResult.data?.items || []}
-        data-test-subj={BENCHMARKS_TABLE_DATA_TEST_SUBJ}
+        data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
         pageIndex={query.page}

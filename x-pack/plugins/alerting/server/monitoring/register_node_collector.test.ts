@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { monitoringCollectionMock } from '../../../monitoring_collection/server/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { Metric } from '../../../monitoring_collection/server';
+import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerNodeCollector } from './register_node_collector';
 import { NodeRulesMetric } from './types';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';

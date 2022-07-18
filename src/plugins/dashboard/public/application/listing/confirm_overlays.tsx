@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '../../services/kibana_react';
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
 

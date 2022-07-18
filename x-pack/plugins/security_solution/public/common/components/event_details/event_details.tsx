@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiHorizontalRule,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiSpacer,
   EuiLoadingContent,
   EuiNotificationBadge,
@@ -26,10 +26,10 @@ import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
-import { BrowserFields } from '../../containers/source';
+import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
@@ -40,7 +40,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
-import { HostRisk } from '../../../risk_score/containers';
+import type { HostRisk } from '../../../risk_score/containers';
 import { RelatedCases } from './related_cases';
 
 type EventViewTab = EuiTabbedContentTab;
@@ -159,6 +159,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
+            'data-test-subj': 'overviewTab',
             content: (
               <>
                 <EuiSpacer size="m" />
@@ -174,7 +175,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
-                <RelatedCases eventId={id} />
+                <RelatedCases eventId={id} isReadOnly={isReadOnly} />
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{

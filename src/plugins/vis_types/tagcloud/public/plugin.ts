@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { ConfigSchema } from '../config';

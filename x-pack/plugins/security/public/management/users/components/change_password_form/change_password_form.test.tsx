@@ -9,8 +9,8 @@ import { EuiFieldPassword } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { User } from '../../../../../common/model';
 import { userAPIClientMock } from '../../index.mock';

@@ -9,8 +9,8 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { APP_ID } from '../../../common/constants';
-import { useNavigation } from '../../common/lib/kibana';
-import { TestProviders } from '../../common/mock';
+import { useNavigation } from '../lib/kibana';
+import { TestProviders } from '../mock';
 import {
   useCasesNavigation,
   useAllCasesNavigation,
@@ -21,7 +21,7 @@ import {
 import { CasesDeepLinkId } from './deep_links';
 
 const useNavigationMock = useNavigation as jest.Mock;
-jest.mock('../../common/lib/kibana');
+jest.mock('../lib/kibana');
 
 const navigateTo = jest.fn();
 const getAppUrl = jest.fn();

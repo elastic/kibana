@@ -7,21 +7,23 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
+import {
+  IScopedClusterClient,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 export * from '../common';
-import {
-  IScopedClusterClient,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-} from '../../../../src/core/server';
 import {
   Rule,
   RuleTypeParams,
@@ -40,13 +42,11 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleSnooze,
 } from '../common';
-import { LicenseType } from '../../licensing/server';
-import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
-import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
+export type { RuleTypeParams };
 /**
  * @public
  */
@@ -60,9 +60,9 @@ export interface AlertingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
@@ -74,7 +74,7 @@ export interface RuleExecutorServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  searchSourceClient: Promise<ISearchStartSearchSource>;
+  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -126,6 +126,7 @@ export type ExecutorType<
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
+  validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
 export interface RuleType<
@@ -172,7 +173,6 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -252,7 +252,8 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
 }
 
 export interface AlertingPlugin {
@@ -279,3 +280,5 @@ export interface InvalidatePendingApiKey {
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;

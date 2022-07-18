@@ -8,7 +8,7 @@
 import type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';

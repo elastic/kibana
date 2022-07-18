@@ -27,7 +27,7 @@ interface EuiTextPropsCss extends EuiTextProps {
 export const DetailPanelListItem = ({
   children,
   copy,
-  display = 'flex',
+  display = 'grid',
 }: DetailPanelListItemDeps) => {
   const [isHovered, setIsHovered] = useState(false);
   const styles = useStyles({ display });

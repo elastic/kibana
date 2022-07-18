@@ -8,8 +8,6 @@
 
 import { ColorSchemas, LabelRotation } from './static';
 
-export type PaletteContinuity = 'above' | 'below' | 'none' | 'all';
-
 export interface ColorSchemaParams {
   colorSchema: ColorSchemas;
   invertColors: boolean;

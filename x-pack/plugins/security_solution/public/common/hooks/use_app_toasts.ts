@@ -7,19 +7,16 @@
 
 import { useCallback, useRef, useMemo } from 'react';
 import { isString } from 'lodash/fp';
-import {
-  AppError,
-  isAppError,
-  isKibanaError,
-  isSecurityAppError,
-} from '@kbn/securitysolution-t-grid';
+import type { AppError } from '@kbn/securitysolution-t-grid';
+import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { IEsError, isEsError } from '../../../../../../src/plugins/data/public';
+import type { IEsError } from '@kbn/data-plugin/public';
+import { isEsError } from '@kbn/data-plugin/public';
 
-import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/core/public';
+import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
 
-export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
+export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'remove'> & {
   api: ToastsStart;
   addError: (error: unknown, options: ErrorToastOptions) => Toast;
 };
@@ -36,6 +33,7 @@ export const useAppToasts = (): UseAppToasts => {
   const addError = useRef(toasts.addError.bind(toasts)).current;
   const addSuccess = useRef(toasts.addSuccess.bind(toasts)).current;
   const addWarning = useRef(toasts.addWarning.bind(toasts)).current;
+  const remove = useRef(toasts.remove.bind(toasts)).current;
 
   const _addError = useCallback(
     (error: unknown, options: ErrorToastOptions) => {
@@ -46,8 +44,8 @@ export const useAppToasts = (): UseAppToasts => {
   );
 
   return useMemo(
-    () => ({ api: toasts, addError: _addError, addSuccess, addWarning }),
-    [_addError, addSuccess, addWarning, toasts]
+    () => ({ api: toasts, addError: _addError, addSuccess, addWarning, remove }),
+    [_addError, addSuccess, addWarning, remove, toasts]
   );
 };
 

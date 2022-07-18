@@ -12,6 +12,9 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TAGS_FILTER_BTN,
+  RULE_CHECKBOX,
+  RULES_TAGS_POPOVER_BTN,
+  RULES_TABLE_REFRESH_INDICATOR,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -29,6 +32,8 @@ import {
   waitForRulesTableToBeRefreshed,
   selectNumberOfRules,
   testAllTagsBadges,
+  testTagsBadge,
+  testMultipleSelectedRulesLabel,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -46,11 +51,11 @@ import {
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns } from '../../tasks/rule_details';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
@@ -58,6 +63,7 @@ import {
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
 } from '../../objects/rule';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -73,17 +79,20 @@ const customRule = {
 };
 
 describe('Detection rules, bulk edit', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-
+    login();
+  });
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    esArchiverResetKibana();
     createCustomRule(customRule, '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');
     createCustomRule(getNewThresholdRule(), '4');
     createCustomRule({ ...getNewRule(), name: 'rule # 5' }, '5');
     createCustomRule({ ...getNewRule(), name: 'rule # 6' }, '6');
-
-    loginAndWaitForPageWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
     waitForRulesTableToBeLoaded();
   });
 
@@ -115,6 +124,8 @@ describe('Detection rules, bulk edit', () => {
 
     // check if rule has been updated
     cy.get(CUSTOM_RULES_BTN).click();
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
@@ -155,7 +166,7 @@ describe('Detection rules, bulk edit', () => {
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
     openBulkEditAddIndexPatternsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules index patterns')
+      .should('have.text', "Overwrite all selected rules' index patterns")
       .click();
     cy.get(RULES_BULK_EDIT_INDEX_PATTERNS_WARNING).should(
       'have.text',
@@ -205,7 +216,7 @@ describe('Detection rules, bulk edit', () => {
     cy.log('Overwrite all tags');
     openBulkEditAddTagsForm();
     cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
-      .should('have.text', 'Overwrite all selected rules tags')
+      .should('have.text', "Overwrite all selected rules' tags")
       .click();
     cy.get(RULES_BULK_EDIT_TAGS_WARNING).should(
       'have.text',
@@ -216,5 +227,29 @@ describe('Detection rules, bulk edit', () => {
     waitForBulkEditActionToFinish({ rulesCount: 6 });
 
     testAllTagsBadges(['overwrite-tag']);
+  });
+
+  it('should not lose rules selection after edit action', () => {
+    const rulesCount = 4;
+    // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
+    changeRowsPerPageTo(5);
+    selectNumberOfRules(rulesCount);
+
+    // open add tags form and add 2 new tags
+    openBulkEditAddTagsForm();
+    typeTags(TAGS);
+    confirmBulkEditForm();
+    waitForBulkEditActionToFinish({ rulesCount });
+
+    testMultipleSelectedRulesLabel(rulesCount);
+    // check if first four(rulesCount) rules still selected and tags are updated
+    for (let i = 0; i < rulesCount; i += 1) {
+      cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+      cy.get(RULES_TAGS_POPOVER_BTN)
+        .eq(i)
+        .each(($el) => {
+          testTagsBadge($el, TAGS);
+        });
+    }
   });
 });

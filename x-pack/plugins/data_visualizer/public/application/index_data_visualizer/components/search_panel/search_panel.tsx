@@ -9,11 +9,11 @@ import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ShardSizeFilter } from './shard_size_select';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { TimeRange } from '../../../../../../../../src/plugins/data/common';
-import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { JobFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -120,7 +120,6 @@ export const SearchPanel: FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="s"
-      alignItems="flexStart"
       data-test-subj="dataVisualizerSearchPanel"
       className={'dvSearchPanel__container'}
       responsive={false}

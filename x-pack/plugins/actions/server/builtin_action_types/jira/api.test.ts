@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { externalServiceMock, apiParams } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';

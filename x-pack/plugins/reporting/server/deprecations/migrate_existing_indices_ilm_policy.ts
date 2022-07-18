@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DeprecationsDetails, GetDeprecationsContext } from 'src/core/server';
+import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { API_MIGRATE_ILM_POLICY_URL, ILM_POLICY_NAME } from '../../common/constants';
 import { ReportingCore } from '../core';
 import { deprecations } from '../lib/deprecations';

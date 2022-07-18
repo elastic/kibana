@@ -6,8 +6,8 @@
  */
 
 import { useState, useMemo } from 'react';
-import { HttpHandler } from 'kibana/public';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { HttpHandler } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -16,7 +16,7 @@ import {
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
 } from '../../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts/';
+import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts';
 
 interface Options {
   sourceId: string;

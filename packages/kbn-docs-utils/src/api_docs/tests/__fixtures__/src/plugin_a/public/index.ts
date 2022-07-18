@@ -24,6 +24,11 @@ export interface InterfaceWithIndexSignature {
   [key: string]: { foo: string };
 }
 
+export interface ClassConstructorWithStaticProperties {
+  staticProperty1: string;
+  new (config: { foo: string }): InterfaceWithIndexSignature;
+}
+
 export function plugin() {
   return new PluginA();
 }

@@ -10,7 +10,7 @@ import {
   PluginServiceProvider,
   PluginServiceRegistry,
   KibanaPluginServiceParams,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 import { CanvasPluginServices } from '..';
 import { CanvasStartDeps } from '../../plugin';

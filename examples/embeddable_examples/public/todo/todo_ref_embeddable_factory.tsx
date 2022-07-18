@@ -7,15 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   IContainer,
   EmbeddableStart,
   ErrorEmbeddable,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { TodoSavedObjectAttributes } from '../../common';
 import {
   TodoRefEmbeddable,
   TODO_REF_EMBEDDABLE,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { externalServiceSIRMock, sirParams } from './mocks';
 import { ExternalServiceSIR, ObservableTypes } from './types';
 import { apiSIR, combineObservables, formatObservables, prepareParams } from './api_sir';

@@ -9,9 +9,9 @@ import { merge, omit, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { IEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { IEvent } from '../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

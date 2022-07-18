@@ -24,11 +24,11 @@ import { schema } from './schema';
 import { useGetTags } from '../../containers/use_get_tags';
 
 import { Tags } from './tags';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const CommonUseField = getUseField({ component: Field });
 
 export interface TagListProps {
-  userCanCrud?: boolean;
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
@@ -55,142 +55,143 @@ const ColumnFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(
-  ({ userCanCrud = true, isLoading, onSubmit, tags }: TagListProps) => {
-    const initialState = { tags };
-    const { form } = useForm({
-      defaultValue: initialState,
-      options: { stripEmptyFields: false },
-      schema,
-    });
-    const { submit } = form;
-    const [isEditTags, setIsEditTags] = useState(false);
+export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) => {
+  const { permissions } = useCasesContext();
+  const initialState = { tags };
+  const { form } = useForm({
+    defaultValue: initialState,
+    options: { stripEmptyFields: false },
+    schema,
+  });
+  const { submit } = form;
+  const [isEditTags, setIsEditTags] = useState(false);
 
-    const onSubmitTags = useCallback(async () => {
-      const { isValid, data: newData } = await submit();
-      if (isValid && newData.tags) {
-        onSubmit(newData.tags);
-        setIsEditTags(false);
-      }
-    }, [onSubmit, submit]);
+  const onSubmitTags = useCallback(async () => {
+    const { isValid, data: newData } = await submit();
+    if (isValid && newData.tags) {
+      onSubmit(newData.tags);
+      form.reset({ defaultValue: newData });
+      setIsEditTags(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onSubmit, submit]);
 
-    const { tags: tagOptions } = useGetTags();
-    const [options, setOptions] = useState(
-      tagOptions.map((label) => ({
-        label,
-      }))
-    );
+  const { data: tagOptions = [] } = useGetTags();
+  const [options, setOptions] = useState(
+    tagOptions.map((label) => ({
+      label,
+    }))
+  );
 
-    useEffect(
-      () =>
-        setOptions(
-          tagOptions.map((label) => ({
-            label,
-          }))
-        ),
-      [tagOptions]
-    );
-    return (
-      <EuiText>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xs"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <h4>{i18n.TAGS}</h4>
+  useEffect(
+    () =>
+      setOptions(
+        tagOptions.map((label) => ({
+          label,
+        }))
+      ),
+    [tagOptions]
+  );
+  return (
+    <EuiText data-test-subj="case-view-tag-list">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <h4>{i18n.TAGS}</h4>
+        </EuiFlexItem>
+        {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
+        {!isLoading && permissions.all && (
+          <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
+            <EuiButtonIcon
+              data-test-subj="tag-list-edit-button"
+              aria-label={i18n.EDIT_TAGS_ARIA}
+              iconType={'pencil'}
+              onClick={setIsEditTags.bind(null, true)}
+            />
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-          {!isLoading && userCanCrud && (
-            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
-              <EuiButtonIcon
-                data-test-subj="tag-list-edit-button"
-                aria-label={i18n.EDIT_TAGS_ARIA}
-                iconType={'pencil'}
-                onClick={setIsEditTags.bind(null, true)}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
-          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {!isEditTags && (
+        )}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
+      <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
+        {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
+        {!isEditTags && (
+          <EuiFlexItem>
+            <Tags tags={tags} color="hollow" />
+          </EuiFlexItem>
+        )}
+        {isEditTags && (
+          <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
             <EuiFlexItem>
-              <Tags tags={tags} color="hollow" />
-            </EuiFlexItem>
-          )}
-          {isEditTags && (
-            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
-              <EuiFlexItem>
-                <Form form={form}>
-                  <CommonUseField
-                    path="tags"
-                    componentProps={{
-                      idAria: 'caseTags',
-                      'data-test-subj': 'caseTags',
-                      euiFieldProps: {
-                        fullWidth: true,
-                        placeholder: '',
-                        options,
-                        noSuggestions: false,
-                      },
-                    }}
-                  />
-                  <FormDataProvider pathsToWatch="tags">
-                    {({ tags: anotherTags }) => {
-                      const current: string[] = options.map((opt) => opt.label);
-                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-                        if (!acc.includes(item)) {
-                          return [...acc, item];
-                        }
-                        return acc;
-                      }, current);
-                      if (!isEqual(current, newOptions)) {
-                        setOptions(
-                          newOptions.map((label: string) => ({
-                            label,
-                          }))
-                        );
+              <Form form={form}>
+                <CommonUseField
+                  path="tags"
+                  componentProps={{
+                    idAria: 'caseTags',
+                    'data-test-subj': 'caseTags',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      placeholder: '',
+                      options,
+                      noSuggestions: false,
+                    },
+                  }}
+                />
+                <FormDataProvider pathsToWatch="tags">
+                  {({ tags: anotherTags }) => {
+                    const current: string[] = options.map((opt) => opt.label);
+                    const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+                      if (!acc.includes(item)) {
+                        return [...acc, item];
                       }
-                      return null;
-                    }}
-                  </FormDataProvider>
-                </Form>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="success"
-                      data-test-subj="edit-tags-submit"
-                      fill
-                      iconType="save"
-                      onClick={onSubmitTags}
-                      size="s"
-                    >
-                      {i18n.SAVE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="edit-tags-cancel"
-                      iconType="cross"
-                      onClick={setIsEditTags.bind(null, false)}
-                      size="s"
-                    >
-                      {i18n.CANCEL}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </ColumnFlexGroup>
-          )}
-        </MyFlexGroup>
-      </EuiText>
-    );
-  }
-);
+                      return acc;
+                    }, current);
+                    if (!isEqual(current, newOptions)) {
+                      setOptions(
+                        newOptions.map((label: string) => ({
+                          label,
+                        }))
+                      );
+                    }
+                    return null;
+                  }}
+                </FormDataProvider>
+              </Form>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="success"
+                    data-test-subj="edit-tags-submit"
+                    fill
+                    iconType="save"
+                    onClick={onSubmitTags}
+                    size="s"
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="edit-tags-cancel"
+                    iconType="cross"
+                    onClick={setIsEditTags.bind(null, false)}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </ColumnFlexGroup>
+        )}
+      </MyFlexGroup>
+    </EuiText>
+  );
+});
 
 TagList.displayName = 'TagList';

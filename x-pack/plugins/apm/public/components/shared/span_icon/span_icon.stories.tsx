@@ -15,7 +15,7 @@ import {
 import type { Story } from '@storybook/react';
 import React from 'react';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
-import { SpanIcon } from './index';
+import { SpanIcon } from '.';
 
 const spanTypes = Object.keys(spanTypeIcons);
 

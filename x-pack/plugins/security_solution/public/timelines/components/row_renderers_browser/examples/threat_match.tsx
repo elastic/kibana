@@ -14,7 +14,6 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 const ThreatMatchExampleComponent: React.FC = () => (
   <>
     {threatMatchRowRenderer.renderRow({
-      browserFields: {},
       data: mockTimelineData[31].ecs,
       isDraggable: false,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

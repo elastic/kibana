@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteMethod } from 'src/core/server';
-import { AuthenticatedUser } from '../../../../security/server';
+import { RequestHandler, RouteMethod } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../../core';
 import { getUser } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';

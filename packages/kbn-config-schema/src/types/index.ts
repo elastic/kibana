@@ -7,6 +7,7 @@
  */
 
 export type { TypeOptions } from './type';
+export type { SchemaStructureEntry } from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';

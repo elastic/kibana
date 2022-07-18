@@ -10,9 +10,9 @@ import type {
   IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
-} from 'src/core/public';
-import { ILicense } from '../../../licensing/public';
-import type { LayoutParams } from '../../../screenshotting/common';
+} from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface ExportPanelShareOpts {

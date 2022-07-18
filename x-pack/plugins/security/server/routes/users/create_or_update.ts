@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -30,7 +30,8 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.putUser({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.putUser({
           username: request.params.username,
           body: request.body,
         });

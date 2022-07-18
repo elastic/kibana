@@ -14,6 +14,7 @@ import { editorsServiceFactory } from './editors';
 import { httpServiceFactory } from './http';
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
+import { dataServiceFactory } from './data';
 
 /**
  * A factory function for creating simple stubbed implementations of all `SharedUxServices`.
@@ -25,6 +26,7 @@ export const stubServicesFactory: ServiceFactory<SharedUxServices> = () => ({
   http: httpServiceFactory(),
   permissions: userPermissionsServiceFactory(),
   platform: platformServiceFactory(),
+  data: dataServiceFactory(),
 });
 
 /**
@@ -37,4 +39,5 @@ export const stubServiceFactories = {
   httpServiceFactory,
   platformServiceFactory,
   userPermissionsServiceFactory,
+  dataServiceFactory,
 };

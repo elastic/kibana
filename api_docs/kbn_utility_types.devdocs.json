@@ -14,6 +14,36 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.DeepPartialArray",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeepPartialArray",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.DeepPartialArray",
+            "text": "DeepPartialArray"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.DeepPartial",
+            "text": "DeepPartial"
+          },
+          "<T>[]"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.JsonArray",
         "type": "Interface",
         "tags": [],
@@ -251,6 +281,22 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.AwaitedProperties",
+        "type": "Type",
+        "tags": [],
+        "label": "AwaitedProperties",
+        "description": [
+          "\nUnwrap all promise attributes of the given type"
+        ],
+        "signature": [
+          "{ [K in keyof T]: Awaited<T[K]>; }"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.Class",
         "type": "Type",
         "tags": [
@@ -265,6 +311,60 @@
           "new (...args: any[]) => T"
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.DeepPartial",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepPartial",
+        "description": [
+          "\nDeep partial version of a type."
+        ],
+        "signature": [
+          "T extends any[] ? ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.DeepPartialArray",
+            "text": "DeepPartialArray"
+          },
+          "<T[number]> : T extends object ? ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.DeepPartialObject",
+            "text": "DeepPartialObject"
+          },
+          "<T> : T"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.DeepPartialObject",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepPartialObject",
+        "description": [],
+        "signature": [
+          "{ [P in keyof T]+?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.DeepPartial",
+            "text": "DeepPartial"
+          },
+          "<T[P]> | undefined; }"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -341,6 +441,22 @@
         ],
         "signature": [
           "{ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never; }[keyof T]"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.OneOf",
+        "type": "Type",
+        "tags": [],
+        "label": "OneOf",
+        "description": [
+          "\nXOR for some properties applied to a type\n(XOR is one of these but not both or neither)\n\nUsage: OneOf<typeToExtend, one | but | not | multiple | of | these | are | required>\n\nTo require aria-label or aria-labelledby but not both\nExample: OneOf<Type, 'aria-label' | 'aria-labelledby'>"
+        ],
+        "signature": [
+          "Omit<T, K> & { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: undefined; }; }[K]"
         ],
         "path": "packages/kbn-utility-types/src/index.ts",
         "deprecated": false,

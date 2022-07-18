@@ -18,7 +18,7 @@ const paramsSchema = schema.object({
 export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   // Get all pipelines
   router.get({ path: API_BASE_PATH, validate: false }, async (ctx, req, res) => {
-    const { client: clusterClient } = ctx.core.elasticsearch;
+    const { client: clusterClient } = (await ctx.core).elasticsearch;
 
     try {
       const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
@@ -44,17 +44,18 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
 
       try {
-        const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline({
-          id: name,
-        });
-
+        const pipelines = deserializePipelines(
+          await clusterClient.asCurrentUser.ingest.getPipeline({
+            id: name,
+          })
+        );
         return res.ok({
           body: {
-            ...pipelines[name],
+            ...pipelines!.find((pipeline) => pipeline.name),
             name,
           },
         });

@@ -8,15 +8,15 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
-import {
+import type {
   DataProvider,
   DataProviderType,
   QueryOperator,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+} from '../../components/timeline/data_providers/data_provider';
 
-import { KqlMode, TimelineModel } from './model';
-import { InsertTimeline } from './types';
-import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
+import type { KqlMode, TimelineModel } from './model';
+import type { InsertTimeline } from './types';
+import type { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   RowRendererId,
@@ -44,8 +44,9 @@ export {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-} from '../../../../../timelines/public';
-import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+} from '@kbn/timelines-plugin/public';
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -83,10 +84,10 @@ export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEvent
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
 );
 
-export const updateTimelineSessionViewSessionId = actionCreator<{
+export const updateTimelineSessionViewConfig = actionCreator<{
   id: string;
-  eventId: string | null;
-}>('UPDATE_TIMELINE_SESSION_VIEW_SESSION_ID');
+  sessionViewConfig: SessionViewConfig | null;
+}>('UPDATE_TIMELINE_SESSION_VIEW_CONFIG');
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 
@@ -224,5 +225,5 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | null;
+  value: string | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');

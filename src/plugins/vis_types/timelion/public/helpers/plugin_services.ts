@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchStart } from 'src/plugins/data/public';
-import type { DataViewsContract } from 'src/plugins/data_views/public';
-import type { ChartsPluginStart } from 'src/plugins/charts/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { createGetterSetter } from '../../../../kibana_utils/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('dataViews');

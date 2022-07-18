@@ -11,9 +11,9 @@ jest.mock('jsonwebtoken', () => ({
   },
 }));
 
-import { httpServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { kibanaResponseFactory } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { registerChatRoute } from './chat';
 
 describe('chat route', () => {

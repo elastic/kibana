@@ -6,35 +6,41 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import moment from 'moment';
+import type moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import {
+import type {
   RuleType,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutorOptions as AlertingRuleExecutorOptions,
   RuleExecutorServices,
-} from '../../../../../alerting/server';
-import { TermAggregationBucket } from '../../types';
-import {
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import type { TermAggregationBucket } from '../../types';
+import type {
   BaseHit,
   RuleAlertAction,
   SearchTypes,
   EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { BuildRuleMessage } from './rule_messages';
-import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse } from '../rule_types/factories';
-import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import { BuildReasonMessage } from './reason_formatters';
-import {
+import type { BuildRuleMessage } from './rule_messages';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type {
+  CompleteRule,
+  QueryRuleParams,
+  ThreatRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+} from '../schemas/rule_schemas';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { BuildReasonMessage } from './reason_formatters';
+import type {
   BaseFieldsLatest,
   DetectionAlert,
   WrappedFieldsLatest,
@@ -277,7 +283,7 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
-export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
+export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
   docs: Array<WrappedFieldsLatest<T>>
@@ -301,7 +307,10 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule: CompleteRule<RuleParams>;
+  completeRule:
+    | CompleteRule<QueryRuleParams>
+    | CompleteRule<SavedQueryRuleParams>
+    | CompleteRule<ThreatRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -318,6 +327,9 @@ export interface SearchAfterAndBulkCreateParams {
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

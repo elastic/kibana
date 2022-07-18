@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = {

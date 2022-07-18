@@ -37,7 +37,7 @@ export function registerSaveRoute({ router, license, lib: { handleEsError } }: R
       const { id } = request.params;
       const { type, isNew, isActive, ...watchConfig } = request.body;
 
-      const dataClient = ctx.core.elasticsearch.client;
+      const dataClient = (await ctx.core).elasticsearch.client;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {

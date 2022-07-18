@@ -10,9 +10,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineId } from '../../../../../common/types/timeline';
 import { GraphOverlay } from '../../graph_overlay';
-import { useSessionView } from '../session_tab_content/use_session_view';
+import { useSessionViewNavigation, useSessionView } from '../session_tab_content/use_session_view';
 
 interface GraphTabContentProps {
   timelineId: TimelineId;
@@ -35,7 +35,11 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
     (state) => getTimeline(state, timelineId)?.graphEventId
   );
 
-  const { shouldShowDetailsPanel, DetailsPanel, Navigation, SessionView } = useSessionView({
+  const { Navigation } = useSessionViewNavigation({
+    timelineId,
+  });
+
+  const { shouldShowDetailsPanel, DetailsPanel, SessionView } = useSessionView({
     timelineId,
   });
 

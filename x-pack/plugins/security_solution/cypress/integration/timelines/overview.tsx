@@ -19,7 +19,7 @@ import {
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
@@ -33,7 +33,8 @@ describe('timeline overview search', () => {
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
     createTimeline(getTimeline());
 
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
   });
 
   beforeEach(() => {

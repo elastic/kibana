@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '../../../../../features/public';
-import { KibanaFeature } from '../../../../../features/public';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
+import { KibanaFeature } from '@kbn/features-plugin/public';
 
 export const createFeature = (
   config: Pick<

@@ -12,7 +12,7 @@ import {
   ConnectorTypes,
 } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   SavedObject,
   SavedObjectReference,
@@ -20,8 +20,8 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
 import { ESCasesConfigureAttributes } from './types';

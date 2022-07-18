@@ -8,14 +8,12 @@
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsClientContract, SavedObjectsUpdateResponse } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
 import { signalsMigrationSOClient } from './saved_objects_client';
-import {
-  SignalsMigrationSOUpdateAttributes,
-  signalsMigrationSOUpdateAttributes,
-} from './saved_objects_schema';
+import type { SignalsMigrationSOUpdateAttributes } from './saved_objects_schema';
+import { signalsMigrationSOUpdateAttributes } from './saved_objects_schema';
 import { getIsoDateString } from './helpers';
 
 export const updateMigrationSavedObject = async ({

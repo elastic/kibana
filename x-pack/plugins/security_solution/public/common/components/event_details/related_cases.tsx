@@ -15,11 +15,12 @@ import { APP_ID } from '../../../../common/constants';
 
 interface Props {
   eventId: string;
+  isReadOnly?: boolean;
 }
 
 type RelatedCaseList = Array<{ id: string; title: string }>;
 
-export const RelatedCases: React.FC<Props> = React.memo(({ eventId }) => {
+export const RelatedCases: React.FC<Props> = React.memo(({ eventId, isReadOnly }) => {
   const {
     services: { cases },
   } = useKibana();
@@ -28,7 +29,7 @@ export const RelatedCases: React.FC<Props> = React.memo(({ eventId }) => {
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList>([]);
   const [areCasesLoading, setAreCasesLoading] = useState(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const hasCasesReadPermissions = casePermissions?.read ?? false;
+  const hasCasesReadPermissions = casePermissions.read;
 
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];
@@ -56,7 +57,7 @@ export const RelatedCases: React.FC<Props> = React.memo(({ eventId }) => {
     getRelatedCases();
   }, [eventId, getRelatedCases]);
 
-  if (hasError || !hasCasesReadPermissions) return null;
+  if (hasError || !hasCasesReadPermissions || isReadOnly) return null;
 
   return areCasesLoading ? (
     <EuiLoadingContent lines={2} />

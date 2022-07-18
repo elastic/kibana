@@ -6,19 +6,18 @@
  */
 
 import { FeatureRegistry } from '../feature_registry';
-import { defineRoutes } from './index';
+import { defineRoutes } from '.';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../src/core/server/mocks';
-import { LicenseType } from '../../../licensing/server/';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { RequestHandler } from '../../../../../src/core/server';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { LicenseType } from '@kbn/licensing-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { RequestHandler } from '@kbn/core/server';
 import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'platinum') {
-  return {
-    core: coreMock.createRequestHandlerContext(),
+  return coreMock.createCustomRequestHandlerContext({
     licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
-  };
+  });
 }
 
 function createPrivilege(partial: Partial<FeatureKibanaPrivileges> = {}): FeatureKibanaPrivileges {
@@ -138,7 +137,7 @@ describe('GET /api/features', () => {
 
   it('returns a list of available features, sorted by their configured order', async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(createContextMock(), { query: {} } as any, mockResponse);
+    await routeHandler(createContextMock(), { query: {} } as any, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
@@ -173,7 +172,7 @@ describe('GET /api/features', () => {
 
   it(`by default does not return features that arent allowed by current license`, async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(createContextMock('basic'), { query: {} } as any, mockResponse);
+    await routeHandler(createContextMock('basic'), { query: {} } as any, mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
@@ -204,7 +203,7 @@ describe('GET /api/features', () => {
 
   it(`ignoreValidLicenses=false does not return features that arent allowed by current license`, async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(
+    await routeHandler(
       createContextMock('basic'),
       { query: { ignoreValidLicenses: false } } as any,
       mockResponse
@@ -239,7 +238,7 @@ describe('GET /api/features', () => {
 
   it(`ignoreValidLicenses=true returns features that arent allowed by current license`, async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    routeHandler(
+    await routeHandler(
       createContextMock('basic'),
       { query: { ignoreValidLicenses: true } } as any,
       mockResponse

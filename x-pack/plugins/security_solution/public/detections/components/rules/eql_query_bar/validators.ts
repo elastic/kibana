@@ -7,12 +7,12 @@
 
 import { isEmpty } from 'lodash';
 
-import { FieldHook, ValidationError, ValidationFunc } from '../../../../shared_imports';
+import type { FieldHook, ValidationError, ValidationFunc } from '../../../../shared_imports';
 import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { validateEql } from '../../../../common/hooks/eql/api';
-import { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 
 export enum ERROR_CODES {
@@ -57,7 +57,7 @@ export const eqlValidator = async (
   const [{ value, formData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
-  const { index, ruleType } = formData as DefineStepRule;
+  const { dataViewId, index, ruleType } = formData as DefineStepRule;
 
   const needsValidation =
     (ruleType === undefined && !isEmpty(query)) || (isEqlRule(ruleType) && !isEmpty(query));
@@ -67,8 +67,17 @@ export const eqlValidator = async (
 
   try {
     const { data } = KibanaServices.get();
+    let dataViewTitle = index?.join();
+    let runtimeMappings = {};
+    if (dataViewId != null) {
+      const dataView = await data.dataViews.get(dataViewId);
+
+      dataViewTitle = dataView.title;
+      runtimeMappings = dataView.getRuntimeMappings();
+    }
+
     const signal = new AbortController().signal;
-    const response = await validateEql({ data, query, signal, index });
+    const response = await validateEql({ data, query, signal, dataViewTitle, runtimeMappings });
 
     if (response?.valid === false) {
       return {

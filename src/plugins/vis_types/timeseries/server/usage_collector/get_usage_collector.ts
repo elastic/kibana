@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { TIME_RANGE_DATA_MODES } from '../../common/enums';
-import { findByValueEmbeddables } from '../../../../dashboard/server';
+import { findByValueEmbeddables } from '@kbn/dashboard-plugin/server';
 
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsFindResult,
-} from '../../../../../core/server';
-import type { HomeServerPluginSetup } from '../../../../home/server';
-import type { SavedVisState } from '../../../../visualizations/common';
+} from '@kbn/core/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { SavedVisState } from '@kbn/visualizations-plugin/common';
+import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 import type { Panel } from '../../common/types';
 
 export interface TimeseriesUsage {

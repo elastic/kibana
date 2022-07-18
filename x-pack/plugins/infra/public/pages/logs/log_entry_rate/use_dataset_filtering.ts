@@ -7,8 +7,8 @@
 
 import { Filter } from '@kbn/es-query';
 import { useEffect, useReducer, useCallback } from 'react';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../../../../ml/public';
 
 interface ReducerState {
   selectedDatasets: string[];

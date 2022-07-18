@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublicUiSettingsParams } from 'src/core/public';
+import { PublicUiSettingsParams } from '@kbn/core/public';
 import expect from '@kbn/expect';
 import { toEditableConfig } from './to_editable_config';
 

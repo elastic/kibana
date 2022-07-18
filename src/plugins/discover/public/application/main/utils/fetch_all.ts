@@ -5,6 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -12,27 +17,22 @@ import {
   sendNoResultsFoundMsg,
   sendPartialMsg,
   sendResetMsg,
-} from './use_saved_search_messages';
+} from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
-import { ISearchSource } from '../../../../../data/public';
-import { Adapters } from '../../../../../inspector';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
-import { DataPublicPluginStart } from '../../../../../data/public';
 import {
   DataCharts$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
   SavedSearchData,
-} from './use_saved_search';
+} from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { DataViewType } from '../../../../../data_views/public';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -45,6 +45,7 @@ export interface FetchDeps {
   services: DiscoverServices;
   useNewFieldsApi: boolean;
 }
+
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
  * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
@@ -139,10 +140,13 @@ export function fetchAll(
             result: docs.length,
           });
         }
+        const dataView = searchSource.getField('index')!;
+
+        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          result: docs,
+          result: resultDocs,
         });
 
         checkHitCount(docs.length);

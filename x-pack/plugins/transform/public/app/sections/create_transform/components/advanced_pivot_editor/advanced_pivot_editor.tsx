@@ -12,7 +12,7 @@ import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { StepDefineFormHook } from '../step_define';
 

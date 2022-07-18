@@ -9,8 +9,8 @@ import React, { Fragment, Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataViewField, DataView } from 'src/plugins/data/common';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';

@@ -8,14 +8,13 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { TIME_SLIDER_CONTROL } from '../../';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { TIME_SLIDER_CONTROL } from '../..';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
-import { TimeSliderEditor } from './time_slider_editor';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -39,8 +38,8 @@ export class TimesliderEmbeddableFactory
   ) => {
     if (
       embeddable &&
-      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
-        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+      ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
+        (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
       newInput.value = undefined;
@@ -48,7 +47,11 @@ export class TimesliderEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = TimeSliderEditor;
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (dataControlField.field.type === 'date') {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
+  };
 
   public isEditable = () => Promise.resolve(false);
 

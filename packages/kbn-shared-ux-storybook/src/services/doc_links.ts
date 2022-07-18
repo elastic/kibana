@@ -18,4 +18,5 @@ export type SharedUxDocLinksServiceFactory = ServiceFactory<SharedUxDocLinksServ
  */
 export const docLinksServiceFactory: SharedUxDocLinksServiceFactory = () => ({
   dataViewsDocLink: 'https://www.elastic.co/guide/en/kibana/master/data-views.html',
+  kibanaGuideDocLink: 'https://www.elastic.co/guide/en/kibana/master/index.html',
 });

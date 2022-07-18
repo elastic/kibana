@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ResolverNode } from '../../../../common/endpoint/types';
+import type { ResolverNode } from '../../../../common/endpoint/types';
 import { isometricTaxiLayoutFactory } from './isometric_taxi_layout';
-import { factory } from './index';
+import { factory } from '.';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { genResolverNode } from '../../mocks/generator';
-import { IsometricTaxiLayout } from '../../types';
+import type { IsometricTaxiLayout } from '../../types';
 
 function layout(events: ResolverNode[]) {
   return isometricTaxiLayoutFactory(factory(events, 'A'));

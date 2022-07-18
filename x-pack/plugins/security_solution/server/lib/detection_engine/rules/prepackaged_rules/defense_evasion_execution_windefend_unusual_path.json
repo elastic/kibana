@@ -16,6 +16,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential DLL Side-Loading via Microsoft Antimalware Service Executable",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n  (process.pe.original_file_name == \"MsMpEng.exe\" and not process.name : \"MsMpEng.exe\") or\n  (process.name : \"MsMpEng.exe\" and not\n        process.executable : (\"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\*.exe\",\n                              \"?:\\\\Program Files\\\\Windows Defender\\\\*.exe\",\n                              \"?:\\\\Program Files (x86)\\\\Windows Defender\\\\*.exe\",\n                              \"?:\\\\Program Files\\\\Microsoft Security Client\\\\*.exe\",\n                              \"?:\\\\Program Files (x86)\\\\Microsoft Security Client\\\\*.exe\"))\n",
   "references": [
     "https://news.sophos.com/en-us/2021/07/04/independence-day-revil-uses-supply-chain-exploit-to-attack-hundreds-of-businesses/"
@@ -56,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

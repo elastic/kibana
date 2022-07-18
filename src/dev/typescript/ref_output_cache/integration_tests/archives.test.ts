@@ -12,13 +12,12 @@ import { Readable } from 'stream';
 
 import del from 'del';
 import cpy from 'cpy';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import {
-  ToolingLog,
   createAbsolutePathSerializer,
   createRecursiveSerializer,
-  ToolingLogCollectingWriter,
   createStripAnsiSerializer,
-} from '@kbn/dev-utils';
+} from '@kbn/jest-serializers';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createStripAnsiSerializer());

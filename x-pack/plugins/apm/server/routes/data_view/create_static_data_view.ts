@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
-import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
+import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { Setup } from '../../lib/helpers/setup_request';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../typings';
 import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
@@ -55,7 +55,7 @@ export async function createStaticDataView({
           'index-pattern',
           getApmDataViewAttributes(apmDataViewTitle),
           {
-            id: APM_STATIC_INDEX_PATTERN_ID,
+            id: APM_STATIC_DATA_VIEW_ID,
             overwrite: forceOverwrite,
             namespace: spaceId,
           }
@@ -86,7 +86,7 @@ async function getForceOverwrite({
     const existingDataView =
       await savedObjectsClient.get<ApmDataViewAttributes>(
         'index-pattern',
-        APM_STATIC_INDEX_PATTERN_ID
+        APM_STATIC_DATA_VIEW_ID
       );
 
     // if the existing data view does not matches the new one, force an update

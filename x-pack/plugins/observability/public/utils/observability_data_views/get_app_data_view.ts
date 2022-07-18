@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AppDataType } from '../../components/shared/exploratory_view/types';
-import type { DataViewsPublicPluginStart } from '../../../../../../src/plugins/data_views/public';
 
 const getAppDataView = (data: DataViewsPublicPluginStart) => {
   return async (appId: AppDataType, indexPattern?: string) => {

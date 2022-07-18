@@ -20,9 +20,9 @@ import {
   XYBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../../../src/plugins/charts/common';
 
 export interface DocumentCountChartPoint {
   time: number | string;

@@ -8,7 +8,7 @@
 import { Duration } from 'moment';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { Tag, TagAttributes } from '../../../common/types';
 
 export type { ITagsCache };
@@ -46,7 +46,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
     this.refreshHandler = refreshHandler;
     this.refreshInterval = refreshInterval;
 
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
     this.internal$ = new BehaviorSubject<Tag[]>([]);
     this.public$ = this.internal$.pipe(takeUntil(this.stop$));
   }

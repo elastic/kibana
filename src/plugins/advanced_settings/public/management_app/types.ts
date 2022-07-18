@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UiSettingsType } from '../../../../core/public';
+import { UiSettingsType } from '@kbn/core/public';
 
 export interface FieldSetting {
   displayName: string;

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseResponse, CasesByAlertId } from '../../../../plugins/cases/common/api';
+import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
 
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.

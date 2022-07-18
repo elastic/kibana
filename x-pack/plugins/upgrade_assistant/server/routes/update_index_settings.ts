@@ -23,42 +23,35 @@ export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { indexName } = request.params;
-          const { settings } = request.body;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const { indexName } = request.params;
+        const { settings } = request.body;
 
-          const settingsToDelete = settings.reduce((settingsBody, currentSetting) => {
-            settingsBody[currentSetting] = null;
-            return settingsBody;
-          }, {} as { [key: string]: null });
+        const settingsToDelete = settings.reduce((settingsBody, currentSetting) => {
+          settingsBody[currentSetting] = null;
+          return settingsBody;
+        }, {} as { [key: string]: null });
 
-          const settingsResponse = await client.asCurrentUser.indices.putSettings({
-            index: indexName,
-            body: settingsToDelete,
-          });
+        const settingsResponse = await client.asCurrentUser.indices.putSettings({
+          index: indexName,
+          body: settingsToDelete,
+        });
 
-          return response.ok({
-            body: settingsResponse,
-          });
-        } catch (e) {
-          const status = e.status || e.statusCode;
-          if (status === 403) {
-            return response.forbidden({ body: e });
-          }
-
-          throw e;
+        return response.ok({
+          body: settingsResponse,
+        });
+      } catch (e) {
+        const status = e.status || e.statusCode;
+        if (status === 403) {
+          return response.forbidden({ body: e });
         }
+
+        throw e;
       }
-    )
+    })
   );
 }

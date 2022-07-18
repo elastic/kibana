@@ -20,8 +20,8 @@ import {
 import React, { Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';

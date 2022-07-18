@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -23,6 +23,10 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
         `/endpoints${searchParams ? `?${searchParams}` : ''}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async ensureIsOnEndpointListPage() {
+      await testSubjects.existOrFail('endpointPage');
     },
 
     async waitForTableToHaveData(dataTestSubj: string, timeout = 2000) {

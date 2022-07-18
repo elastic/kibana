@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 
 import { PipelinesCreateFromCsv } from '../../../public/application/sections/pipelines_create_from_csv';

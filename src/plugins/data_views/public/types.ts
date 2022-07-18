@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 
@@ -56,17 +56,36 @@ export interface IndicesResponse {
   data_streams?: IndicesResponseItemDataStream[];
 }
 
+export interface IndicesViaSearchResponse {
+  total: number;
+}
+
 export interface HasDataViewsResponse {
   hasDataView: boolean;
   hasUserDataView: boolean;
 }
 
+/**
+ * Data views public setup dependencies
+ */
 export interface DataViewsPublicSetupDependencies {
+  /**
+   * Expressions
+   */
   expressions: ExpressionsSetup;
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsSetup;
 }
 
+/**
+ * Data views public start dependencies
+ */
 export interface DataViewsPublicStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
 }
 

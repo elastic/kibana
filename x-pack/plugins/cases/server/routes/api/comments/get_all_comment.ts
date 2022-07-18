@@ -23,9 +23,10 @@ export const getAllCommentsRoute = createCasesRoute({
     }),
   },
   options: { deprecated: true },
-  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+  handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
 
       return response.ok({
         body: await client.attachments.getAll({

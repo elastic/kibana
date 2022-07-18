@@ -11,7 +11,7 @@ import {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects';
 import { getExceptionListsItemFilter } from '../get_exception_lists_item_filter';

@@ -7,8 +7,8 @@
 
 import { useState, useCallback } from 'react';
 import { EuiTableSortingType } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { euiTableStorageGetter, euiTableStorageSetter } from '../../components/table';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { EUI_SORT_ASCENDING } from '../../../common/constants';
 
 interface Pagination {

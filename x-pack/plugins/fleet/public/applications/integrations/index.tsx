@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { Redirect, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 
-import type { CoreStart, AppMountParameters } from 'src/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from '../../hooks';

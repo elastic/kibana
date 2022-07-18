@@ -6,19 +6,18 @@
  */
 
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { endpointPageHttpMock } from '../../mocks';
 import { act, waitFor, cleanup } from '@testing-library/react';
 import { getEndpointListPath } from '../../../../common/routing';
 import { AdminSearchBar } from './search_bar';
 import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../store/selectors';
-import { EndpointIndexUIQueryParams } from '../../types';
+import type { EndpointIndexUIQueryParams } from '../../types';
 
-describe('when rendering the endpoint list `AdminSearchBar`', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/132398
+describe.skip('when rendering the endpoint list `AdminSearchBar`', () => {
   let render: (
     urlParams?: EndpointIndexUIQueryParams
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -99,10 +98,18 @@ describe('when rendering the endpoint list `AdminSearchBar`', () => {
     }
   );
 
-  it('should reset the `page_index` to zero', async () => {
+  it('should reset the `page_index` to zero if query changes', async () => {
     await render({ page_index: '10' });
     await submitQuery('foo');
 
     expect(getQueryParamsFromStore().page_index).toBe('0');
+  });
+
+  it('should not reset the `page_index` if query unchanged', async () => {
+    const pageIndex = '10';
+    await render({ admin_query: "(language:kuery,query:'foo')", page_index: pageIndex });
+    await submitQuery('foo');
+
+    expect(getQueryParamsFromStore().page_index).toBe(pageIndex);
   });
 });

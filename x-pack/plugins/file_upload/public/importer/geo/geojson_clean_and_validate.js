@@ -8,6 +8,13 @@
 import * as jsts from 'jsts';
 import rewind from '@mapbox/geojson-rewind';
 
+// The GeoJSON specification suggests limiting coordinate precision to six decimal places
+// See https://datatracker.ietf.org/doc/html/rfc7946#section-11.2
+// We can enforce rounding to six decimal places by setting the PrecisionModel scale
+// scale = 10^n where n = maximum number of decimal places
+const precisionModel = new jsts.geom.PrecisionModel(Math.pow(10, 6));
+const geometryPrecisionReducer = new jsts.precision.GeometryPrecisionReducer(precisionModel);
+geometryPrecisionReducer.setChangePrecisionModel(true);
 const geoJSONReader = new jsts.io.GeoJSONReader();
 const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
@@ -36,6 +43,8 @@ export function cleanGeometry({ geometry }) {
   if (!geometry) {
     return null;
   }
-  const geometryToWrite = geometry.isSimple() || geometry.isValid() ? geometry : geometry.buffer(0);
+
+  // GeometryPrecisionReducer will automatically clean invalid geometries
+  const geometryToWrite = geometryPrecisionReducer.reduce(geometry);
   return geoJSONWriter.write(geometryToWrite);
 }

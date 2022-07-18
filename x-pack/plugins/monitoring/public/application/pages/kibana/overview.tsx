@@ -17,8 +17,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
@@ -32,6 +32,11 @@ const KibanaOverview = ({ data }: { data: any }) => {
   const { zoomInfo, onBrush } = useCharts();
 
   if (!data) return null;
+
+  const showRules =
+    data.metrics.kibana_cluster_rule_overdue_count &&
+    data.metrics.kibana_cluster_rule_overdue_count.length &&
+    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.metricbeat;
 
   return (
     <EuiPage>
@@ -57,6 +62,42 @@ const KibanaOverview = ({ data }: { data: any }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {showRules && (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

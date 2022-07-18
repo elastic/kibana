@@ -8,7 +8,7 @@
 
 import { DataView } from './data_view';
 
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 

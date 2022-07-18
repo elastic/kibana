@@ -23,7 +23,7 @@ jest.mock('./utils', () => ({
 }));
 import { readUploadedFileAsText } from './utils';
 
-import { DocumentCreationLogic } from './';
+import { DocumentCreationLogic } from '.';
 
 describe('DocumentCreationLogic', () => {
   const { mount } = new LogicMounter(DocumentCreationLogic);

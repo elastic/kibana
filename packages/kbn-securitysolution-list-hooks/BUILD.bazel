@@ -49,7 +49,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
-  "@npm//@types/testing-library__react-hooks",
   "@npm//fp-ts",
   "@npm//tslib",
 ]
@@ -82,6 +81,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

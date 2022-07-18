@@ -145,3 +145,10 @@ export const ENRICHED_DATA = i18n.translate(
     defaultMessage: 'Enriched data',
   }
 );
+
+export const HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.hostRiskClassification',
+  {
+    defaultMessage: 'Host risk classification',
+  }
+);

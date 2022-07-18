@@ -63,6 +63,10 @@ export const EMPTY_ACTION_ENDPOINT_DESCRIPTION = i18n.translate(
   }
 );
 
+export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
+  defaultMessage: 'Beta',
+});
+
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
     values: { conflicts },

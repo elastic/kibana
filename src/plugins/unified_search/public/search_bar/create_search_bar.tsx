@@ -8,24 +8,26 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from '../../../../core/public';
-import { IStorageWrapper } from '../../../kibana_utils/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '../../../data/public';
-import { Filter, Query, TimeRange } from '../../../data/common';
+import { CoreStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
+  isScreenshotMode?: boolean;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -110,7 +112,13 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data, usageCollection }: StatefulSearchBarDeps) {
+export function createSearchBar({
+  core,
+  storage,
+  data,
+  usageCollection,
+  isScreenshotMode = false,
+}: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -191,11 +199,13 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
-          nonKqlModeHelpText={props.nonKqlModeHelpText}
           customSubmitButton={props.customSubmitButton}
           isClearable={props.isClearable}
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
+          dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+          displayStyle={props.displayStyle}
+          isScreenshotMode={isScreenshotMode}
         />
       </KibanaContextProvider>
     );

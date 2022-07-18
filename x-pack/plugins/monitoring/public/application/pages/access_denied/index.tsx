@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiCallOut, EuiButton } from '@elastic/eui';
 import useInterval from 'react-use/lib/useInterval';
 import { Redirect } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../../../types';
 
 export const AccessDeniedPage: React.FC<ComponentProps> = () => {

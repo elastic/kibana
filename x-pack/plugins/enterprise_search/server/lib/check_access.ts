@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+import { ConfigType } from '..';
 import { ProductAccess } from '../../common/types';
-import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
@@ -97,6 +98,6 @@ export const checkAccess = async ({
 
   // When enterpriseSearch.host is defined in kibana.yml,
   // make a HTTP call which returns product access
-  const { access } = (await callEnterpriseSearchConfigAPI({ request, config, log })) || {};
-  return access || DENY_ALL_PLUGINS;
+  const response = (await callEnterpriseSearchConfigAPI({ request, config, log })) || {};
+  return 'access' in response ? response.access || DENY_ALL_PLUGINS : DENY_ALL_PLUGINS;
 };

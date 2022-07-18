@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, times } from 'lodash';
-import { ES_TEST_INDEX_NAME } from '../../../../lib';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   RuleType,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeState,
   RuleTypeParams,
-} from '../../../../../../../plugins/alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
+import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',

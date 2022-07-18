@@ -9,7 +9,7 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { MAJOR_VERSION } from '../../../common/constants';
 
 import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';

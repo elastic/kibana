@@ -7,7 +7,7 @@
 
 import type * as React from 'react';
 
-import type { CoreStart, StartServicesAccessor } from 'src/core/public';
+import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';

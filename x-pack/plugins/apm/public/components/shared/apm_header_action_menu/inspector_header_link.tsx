@@ -8,11 +8,11 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   enableInspectEsQueries,
   useInspectorContext,
-} from '../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function InspectorHeaderLink() {

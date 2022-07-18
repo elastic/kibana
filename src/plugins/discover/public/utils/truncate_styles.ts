@@ -18,12 +18,19 @@ const TRUNCATE_GRADIENT_HEIGHT = 15;
 const globalThemeCache = createCache({ key: 'truncation' });
 
 const buildStylesheet = (maxHeight: number) => {
+  if (!maxHeight) {
+    return [
+      `
+    .dscTruncateByHeight {
+      max-height: none;
+    }`,
+    ];
+  }
   return [
     `
     .dscTruncateByHeight {
       overflow: hidden;
       max-height: ${maxHeight}px !important;
-      display: inline-block;
     }
     .dscTruncateByHeight:before {
       top: ${maxHeight - TRUNCATE_GRADIENT_HEIGHT}px;
@@ -32,18 +39,7 @@ const buildStylesheet = (maxHeight: number) => {
   ];
 };
 
-const flushThemedGlobals = () => {
-  globalThemeCache.sheet.flush();
-  globalThemeCache.inserted = {};
-  globalThemeCache.registered = {};
-};
-
 export const injectTruncateStyles = (maxHeight: number) => {
-  if (maxHeight <= 0) {
-    flushThemedGlobals();
-    return;
-  }
-
   const serialized = serializeStyles(buildStylesheet(maxHeight), cache.registered);
   if (!globalThemeCache.inserted[serialized.name]) {
     globalThemeCache.insert('', serialized, globalThemeCache.sheet, true);

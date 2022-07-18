@@ -203,7 +203,7 @@ describe('GraphOverlay', () => {
         </TestProviders>
       );
 
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames);
+      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames.sort());
     });
 
     test('it renders session view controls', () => {
@@ -226,7 +226,9 @@ describe('GraphOverlay', () => {
                 timelineById: {
                   [timelineId]: {
                     ...mockGlobalState.timeline.timelineById[timelineId],
-                    sessionViewId: 'testId',
+                    sessionViewConfig: {
+                      sessionEntityId: 'testId',
+                    },
                   },
                 },
               },

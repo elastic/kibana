@@ -14,18 +14,18 @@ import type {
   IUiSettingsClient,
   HttpSetup,
   ThemeServiceStart,
-} from 'kibana/public';
-import type { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
+} from '@kbn/core/public';
+import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   TimefilterContract,
-} from 'src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import type { VisualizationsSetup } from 'src/plugins/visualizations/public';
-import type { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+} from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
 import {

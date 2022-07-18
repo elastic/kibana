@@ -14,14 +14,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './key_ux_metrics';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/use_ux_query';
-import { getCoreVitalsComponent } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../csm_shared_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
+import { useCoreWebVitalsQuery } from '../../../../hooks/use_core_web_vitals_query';
 
 export function UXMetrics() {
   const {
@@ -30,19 +30,9 @@ export function UXMetrics() {
 
   const uxQuery = useUxQuery();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (uxQuery) {
-        return callApmApi('GET /internal/apm/ux/web-core-vitals', {
-          params: {
-            query: uxQuery,
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    [uxQuery]
-  );
+  const { data, loading: loadingResponse } = useCoreWebVitalsQuery(uxQuery);
+
+  const loading = loadingResponse ?? true;
 
   const {
     sharedData: { totalPageViews },
@@ -53,11 +43,11 @@ export function UXMetrics() {
       getCoreVitalsComponent({
         data,
         totalPageViews,
-        loading: status !== 'success',
+        loading,
         displayTrafficMetric: true,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [status]
+    [loading]
   );
 
   return (
@@ -70,7 +60,7 @@ export function UXMetrics() {
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <KeyUXMetrics data={data} loading={status !== 'success'} />
+          <KeyUXMetrics data={data} loading={loading} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />

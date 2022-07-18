@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { truncate, truncateBeginning } from './';
+import { truncate, truncateBeginning } from '.';
 
 import './truncated_content.scss';
 

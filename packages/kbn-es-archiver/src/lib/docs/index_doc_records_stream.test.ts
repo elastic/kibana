@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createRecursiveSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
@@ -240,6 +241,55 @@ describe('bulk helper onDocument param', () => {
     await createPromiseFromStreams([
       createListStream(testRecords),
       createIndexDocRecordsStream(client as any, stats, progress, true),
+    ]);
+  });
+
+  it('returns create ops for data stream documents', async () => {
+    const records = [
+      {
+        type: 'doc',
+        value: {
+          index: '.ds-foo-ds',
+          data_stream: 'foo-ds',
+          id: '0',
+          source: {
+            hello: 'world',
+          },
+        },
+      },
+      {
+        type: 'doc',
+        value: {
+          index: '.ds-foo-ds',
+          data_stream: 'foo-ds',
+          id: '1',
+          source: {
+            hello: 'world',
+          },
+        },
+      },
+    ];
+    expect.assertions(records.length);
+
+    const client = new MockClient();
+    client.helpers.bulk.mockImplementation(async ({ datasource, onDocument }) => {
+      for (const d of datasource) {
+        const op = onDocument(d);
+        expect(op).toEqual({
+          create: {
+            _index: 'foo-ds',
+            _id: expect.stringMatching(/^\d$/),
+          },
+        });
+      }
+    });
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    await createPromiseFromStreams([
+      createListStream(records),
+      createIndexDocRecordsStream(client as any, stats, progress),
     ]);
   });
 });

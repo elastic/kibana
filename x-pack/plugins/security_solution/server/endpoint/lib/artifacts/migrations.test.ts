@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { ManifestConstants } from './common';
-import { migrations, OldInternalManifestSchema } from './migrations';
+import type { OldInternalManifestSchema } from './migrations';
+import { migrations } from './migrations';
 
 describe('7.12.0 manifest migrations', () => {
   const ARTIFACT_ID_0 =

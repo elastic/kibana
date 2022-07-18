@@ -39,7 +39,7 @@ describe('EmptyValue', () => {
           <p>{getEmptyString()}</p>
         </ThemeProvider>
       );
-      expect(wrapper.text()).toBe('(Empty String)');
+      expect(wrapper.text()).toBe('(Empty string)');
     });
   });
 

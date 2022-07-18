@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export const getShare = () => {
   const share: SharePluginStart = {

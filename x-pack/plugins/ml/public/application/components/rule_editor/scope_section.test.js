@@ -6,7 +6,7 @@
  */
 
 // Mock the mlJobService that is imported for saving rules.
-jest.mock('../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../services/job_service', () => 'mlJobService');
 
 // Create a mock for the canGetFilters privilege check.
 // The mock is hoisted to the top, so need to prefix the mock function

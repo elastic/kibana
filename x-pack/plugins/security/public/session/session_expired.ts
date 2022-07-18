@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import {
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,

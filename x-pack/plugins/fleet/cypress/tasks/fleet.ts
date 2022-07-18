@@ -18,7 +18,6 @@ export function createAgentPolicy() {
   cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
   cy.getBySel(STANDALONE_TAB).click();
   cy.getBySel(CREATE_POLICY_BUTTON).click();
-  cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
   cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 }
 

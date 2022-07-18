@@ -6,11 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  DataView,
-  DataViewsContract,
-  FieldSpec,
-} from '../../../../../src/plugins/data_views/common';
+import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { ResolveLogViewError } from './errors';
 import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } from './types';

@@ -7,9 +7,9 @@
 
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { PageTemplate } from '../page_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';

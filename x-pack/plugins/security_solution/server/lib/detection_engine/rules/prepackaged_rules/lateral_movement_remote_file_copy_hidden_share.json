@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote File Copy to a Hidden Share",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"robocopy.exe\", \"xcopy.exe\") and \n  process.args : (\"copy*\", \"move*\", \"cp\", \"mv\") and process.args : \"*$*\"\n",
   "risk_score": 47,
   "rule_id": "fa01341d-6662-426b-9d0c-6d81e33c8a9d",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

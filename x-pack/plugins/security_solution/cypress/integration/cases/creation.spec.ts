@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getCase1, TestCase } from '../../objects/case';
+import type { TestCase } from '../../objects/case';
+import { getCase1 } from '../../objects/case';
 
 import {
   ALL_CASES_CLOSED_CASES_STATS,
@@ -49,12 +50,12 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
 describe('Cases', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy
@@ -70,7 +71,8 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    login();
+    visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);
@@ -86,7 +88,7 @@ describe('Cases', () => {
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
-    cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
+    cy.get(ALL_CASES_REPORTER).should('have.text', 'e');
     (this.mycase as TestCase).tags.forEach((tag) => {
       cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
     });

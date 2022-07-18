@@ -9,8 +9,8 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Link } from 'react-router-dom';
-import { CoreSetup, Plugin } from 'kibana/public';
-import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 
 export class ManagementTestPlugin
   implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart>

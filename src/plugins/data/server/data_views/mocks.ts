@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../data_views/server/mocks';
+export * from '@kbn/data-views-plugin/server/mocks';

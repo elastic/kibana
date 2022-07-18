@@ -8,7 +8,7 @@
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import {
   openTimelineUsingToggle,
   enterFullScreenMode,
@@ -21,7 +21,8 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('Toggle full screen', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
   });

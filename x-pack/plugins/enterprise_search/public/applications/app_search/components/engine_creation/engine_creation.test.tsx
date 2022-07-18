@@ -14,7 +14,7 @@ import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { EngineCreation } from './';
+import { EngineCreation } from '.';
 
 describe('EngineCreation', () => {
   const DEFAULT_VALUES = {

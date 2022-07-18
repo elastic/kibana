@@ -7,12 +7,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, SavedObject } from '../../..';
+import type { Logger } from '@kbn/logging';
+import type { SavedObject } from '../../..';
 import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';
 
 export const registerLegacyImportRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   {
     maxImportPayloadBytes,
     coreUsageData,
@@ -46,7 +48,7 @@ export const registerLegacyImportRoute = (
         "The import dashboard API '/api/kibana/dashboards/import' is deprecated. Use the saved objects import objects API '/api/saved_objects/_import' instead."
       );
 
-      const { client } = ctx.core.savedObjects;
+      const { client } = (await ctx.core).savedObjects;
       const objects = req.body.objects as SavedObject[];
       const { force, exclude } = req.query;
 

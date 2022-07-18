@@ -11,7 +11,7 @@ import { setupValidationTestBed, ValidationTestBed } from './validation.helpers'
 
 describe('<EditPolicy /> error indicators', () => {
   let testBed: ValidationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -19,14 +19,13 @@ describe('<EditPolicy /> error indicators', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupValidationTestBed();
+      testBed = await setupValidationTestBed(httpSetup);
     });
 
     const { component } = testBed;

@@ -10,7 +10,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { RouteDependencies } from '../../types';
 
 export const licensePreRoutingFactory = (

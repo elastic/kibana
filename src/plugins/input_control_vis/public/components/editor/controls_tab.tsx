@@ -19,8 +19,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { DataView } from '../../../../data_views/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ControlEditor } from './control_editor';
 import {
   addControl,

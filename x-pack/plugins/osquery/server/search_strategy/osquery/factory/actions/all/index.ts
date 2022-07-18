@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   ActionsStrategyResponse,
   ActionsRequestOptions,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
 import { inspectStringifyObject } from '../../../../../../common/utils/build_query';
-import { OsqueryFactory } from '../../types';
+import type { OsqueryFactory } from '../../types';
 import { buildActionsQuery } from './query.all_actions.dsl';
 
 export const allActions: OsqueryFactory<OsqueryQueries.actions> = {
@@ -21,6 +21,7 @@ export const allActions: OsqueryFactory<OsqueryQueries.actions> = {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildActionsQuery(options);
   },
   parse: async (

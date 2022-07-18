@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
@@ -64,7 +64,7 @@ export const updateAlertRoute = (
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
         trackLegacyRouteUsage('update', usageCounter);
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {

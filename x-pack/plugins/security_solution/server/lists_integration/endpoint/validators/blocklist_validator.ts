@@ -7,16 +7,17 @@
 
 import { cloneDeep, uniq } from 'lodash';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { schema, Type, TypeOf } from '@kbn/config-schema';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { BaseValidator } from './base_validator';
-import { ExceptionItemLikeOptions } from '../types';
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
-import { isValidHash } from '../../../../common/endpoint/service/trusted_apps/validations';
+} from '@kbn/lists-plugin/server';
+import { BaseValidator } from './base_validator';
+import type { ExceptionItemLikeOptions } from '../types';
+import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];

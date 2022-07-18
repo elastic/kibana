@@ -66,7 +66,7 @@
         "signature": [
           "(id?: string | undefined) => string"
         ],
-        "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+        "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -79,7 +79,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+            "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -97,7 +97,7 @@
         "signature": [
           "(id?: string | undefined) => string"
         ],
-        "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+        "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -110,7 +110,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+            "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -289,13 +289,7 @@
               "\nOptionally set the time range in the time picker."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -777,7 +771,15 @@
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
-              "[]; }; }"
+              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; }"
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
@@ -1224,13 +1226,13 @@
     "misc": [
       {
         "parentPluginId": "discover",
-        "id": "def-common.APP_ID",
+        "id": "def-common.APP_ICON",
         "type": "string",
         "tags": [],
-        "label": "APP_ID",
+        "label": "APP_ICON",
         "description": [],
         "signature": [
-          "\"discover\""
+          "\"discoverApp\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
@@ -1336,6 +1338,20 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
         "type": "string",
         "tags": [],
@@ -1357,6 +1373,20 @@
         "description": [],
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"discover\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

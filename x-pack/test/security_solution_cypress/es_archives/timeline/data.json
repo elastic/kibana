@@ -1,0 +1,727 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE6nwBOpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:35.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5kw7OpWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ8OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:40:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7OpWiDwezth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-05T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwB1pWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-06T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OzWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-03-07T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZx5nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-08T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4zQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-09T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwB1pWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-10T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OxWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-03-11T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDwiSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-12T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ8OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-13T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBO1WiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T10:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw8OpWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:51:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWjDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:25.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nl7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWsDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWlDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-01-01T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OlWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-02T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-03T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_lZE5nwBOpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE6nw7OpWiDweSth_D",
+    "index": "auditbeat-2022",
+    "source": {
+      "@timestamp" : "2022-01-05T19:41:00.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BlE5nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-06T19:41:23.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7apWiDweSth_D",
+    "index": "auditbeat-2022-timeline",
+    "source": {
+      "@timestamp" : "2022-01-07T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}

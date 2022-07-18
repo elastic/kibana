@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExpViewActionMenuContent } from './action_menu';
 import HeaderMenuPortal from '../../../header_menu_portal';
-import { TypedLensByValueInput } from '../../../../../../../lens/public';
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {

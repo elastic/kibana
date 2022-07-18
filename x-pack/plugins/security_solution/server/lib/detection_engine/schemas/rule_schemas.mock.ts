@@ -8,17 +8,18 @@
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
-import {
+import type {
   BaseRuleParams,
   CompleteRule,
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
+  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
-import { SanitizedRuleConfig } from '../../../../../alerting/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../signals/__mocks__/es_results';
 
 const getBaseRuleParams = (): BaseRuleParams => {
@@ -45,12 +46,16 @@ const getBaseRuleParams = (): BaseRuleParams => {
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
     timestampOverride: undefined,
+    timestampOverrideFallbackDisabled: undefined,
     meta: {
       someMeta: 'someField',
     },
     threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
+    relatedIntegrations: [],
+    requiredFields: [],
+    setup: '',
   };
 };
 
@@ -60,6 +65,7 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
     type: 'threshold',
     language: 'kuery',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
     query: 'user.name: root or user.name: admin',
     filters: undefined,
     savedId: undefined,
@@ -84,7 +90,10 @@ export const getEqlRuleParams = (): EqlRuleParams => {
     index: ['some-index'],
     query: 'any where true',
     filters: undefined,
+    timestampField: undefined,
     eventCategoryOverride: undefined,
+    dataViewId: undefined,
+    tiebreakerField: undefined,
   };
 };
 
@@ -104,6 +113,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
     filters: [
       {
         query: {
@@ -117,6 +127,27 @@ export const getQueryRuleParams = (): QueryRuleParams => {
   };
 };
 
+export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'saved_query',
+    language: 'kuery',
+    query: 'user.name: root or user.name: admin',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    dataViewId: undefined,
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
+    savedId: 'some-id',
+  };
+};
+
 export const getThreatRuleParams = (): ThreatRuleParams => {
   return {
     ...getBaseRuleParams(),
@@ -124,6 +155,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
     language: 'kuery',
     query: '*:*',
     index: ['some-index'],
+    dataViewId: undefined,
     filters: undefined,
     savedId: undefined,
     threatQuery: 'threat-query',

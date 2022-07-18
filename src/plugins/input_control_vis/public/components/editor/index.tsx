@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { InputControlVisDependencies } from '../../plugin';
 import { InputControlVisParams } from '../../types';
 

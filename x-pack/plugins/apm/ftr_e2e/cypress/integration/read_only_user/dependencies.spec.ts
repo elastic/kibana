@@ -31,7 +31,7 @@ describe('Dependencies', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('top-level dependencies page', () => {
@@ -57,7 +57,7 @@ describe('Dependencies', () => {
     });
   });
 
-  describe('dependency overview page', () => {
+  describe.skip('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
       cy.visit(
         `/app/apm/backends/overview?${new URLSearchParams({

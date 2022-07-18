@@ -7,32 +7,16 @@
  */
 
 import {
-  getSavedSearchUrl,
-  getSavedSearchFullPathUrl,
   fromSavedSearchAttributes,
   toSavedSearchAttributes,
   throwErrorOnSavedSearchUrlConflict,
 } from './saved_searches_utils';
 
-import { createSearchSourceMock } from '../../../../data/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
 describe('saved_searches_utils', () => {
-  describe('getSavedSearchUrl', () => {
-    test('should return valid saved search url', () => {
-      expect(getSavedSearchUrl()).toBe('#/');
-      expect(getSavedSearchUrl('id')).toBe('#/view/id');
-    });
-  });
-
-  describe('getSavedSearchFullPathUrl', () => {
-    test('should return valid full path url', () => {
-      expect(getSavedSearchFullPathUrl()).toBe('/app/discover#/');
-      expect(getSavedSearchFullPathUrl('id')).toBe('/app/discover#/view/id');
-    });
-  });
-
   describe('fromSavedSearchAttributes', () => {
     test('should convert attributes into SavedSearch', () => {
       const attributes: SavedSearchAttributes = {
@@ -60,6 +44,9 @@ describe('saved_searches_utils', () => {
           "rowHeight": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
+              "aggs": Object {
+                "createAggConfigs": [MockFunction],
+              },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "search": [MockFunction],

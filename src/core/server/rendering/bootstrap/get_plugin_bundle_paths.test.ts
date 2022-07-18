@@ -50,6 +50,7 @@ describe('getPluginsBundlePaths', () => {
         a: ['b', 'c'],
         b: ['d'],
       }),
+      isAnonymousPage: false, // This parameter is passed to filterUiPlugins, we have separate tests for that function
     });
 
     expect([...pluginBundlePaths.keys()].sort()).toEqual(['a', 'b', 'c', 'd']);
@@ -61,6 +62,7 @@ describe('getPluginsBundlePaths', () => {
       uiPlugins: createUiPlugins({
         a: ['b'],
       }),
+      isAnonymousPage: false,
     });
 
     expect(pluginBundlePaths.get('a')).toEqual({

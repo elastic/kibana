@@ -10,10 +10,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpServer } from '../../http/test_utils';
-import { HttpService, IRouter } from '../../http';
-import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
+import type { IRouter } from '@kbn/core-http-server';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import type { HttpService } from '@kbn/core-http-server-internal';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
@@ -76,8 +77,8 @@ describe('ServerMetricsCollector', () => {
 
   it('collect disconnects requests infos', async () => {
     const never = new Promise((resolve) => undefined);
-    const disconnectRequested$ = new Subject(); // Controls the number of requests in the /disconnect endpoint
-    const disconnectAborted$ = new Subject(); // Controls the abort event in the /disconnect endpoint
+    const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
+    const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });

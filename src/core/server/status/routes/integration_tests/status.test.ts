@@ -6,22 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 
-import { createCoreContext, createHttpServer } from '../../../http/test_utils';
-import { ContextService } from '../../../context';
+import { ContextService } from '@kbn/core-http-context-server-internal';
+import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
-import { MetricsServiceSetup } from '../../../metrics';
-import { HttpService, InternalHttpServiceSetup } from '../../../http';
+import type { MetricsServiceSetup } from '../../../metrics';
 
 import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
-import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
-import { contextServiceMock } from '../../../context/context_service.mock';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 const coreId = Symbol('core');
 
@@ -144,7 +143,7 @@ describe('GET /api/status', () => {
       build_number: 1234,
       build_snapshot: true,
     });
-    const metricsMockValue = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+    const metricsMockValue = await firstValueFrom(metrics.getOpsMetrics$());
     expect(result.body.metrics).toEqual({
       last_updated: expect.any(String),
       collection_interval_in_millis: metrics.collectionInterval,

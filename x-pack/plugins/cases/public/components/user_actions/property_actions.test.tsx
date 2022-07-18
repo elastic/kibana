@@ -8,6 +8,9 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { UserActionPropertyActions } from './property_actions';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 
@@ -22,21 +25,24 @@ const props = {
   isLoading: false,
   onEdit,
   onQuote,
-  userCanCrud: true,
 };
 
 describe('UserActionPropertyActions ', () => {
   let wrapper: ReactWrapper;
 
   beforeAll(() => {
-    wrapper = mount(<UserActionPropertyActions {...props} />);
+    wrapper = mount(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('it renders', async () => {
+  it('renders', async () => {
     expect(
       wrapper.find('[data-test-subj="user-action-title-loading"]').first().exists()
     ).toBeFalsy();
@@ -44,7 +50,7 @@ describe('UserActionPropertyActions ', () => {
     expect(wrapper.find('[data-test-subj="property-actions"]').first().exists()).toBeTruthy();
   });
 
-  it('it shows the edit and quote buttons', async () => {
+  it('shows the edit and quote buttons', async () => {
     wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('[data-test-subj="property-actions-pencil"]').exists();
     wrapper.find('[data-test-subj="property-actions-quote"]').exists();
@@ -62,12 +68,79 @@ describe('UserActionPropertyActions ', () => {
     expect(onEdit).toHaveBeenCalledWith(props.id);
   });
 
-  it('it shows the spinner when loading', async () => {
-    wrapper = mount(<UserActionPropertyActions {...props} isLoading={true} />);
+  it('shows the spinner when loading', async () => {
+    wrapper = mount(
+      <TestProviders>
+        <UserActionPropertyActions {...props} isLoading={true} />
+      </TestProviders>
+    );
     expect(
       wrapper.find('[data-test-subj="user-action-title-loading"]').first().exists()
     ).toBeTruthy();
 
     expect(wrapper.find('[data-test-subj="property-actions"]').first().exists()).toBeFalsy();
+  });
+
+  describe('Delete button', () => {
+    const onDelete = jest.fn();
+    const deleteProps = {
+      ...props,
+      onDelete,
+      deleteLabel: 'delete me',
+      deleteConfirmlabel: 'confirm delete me',
+    };
+    it('shows the delete button', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      expect(renderResult.getByTestId('property-actions-trash')).toBeTruthy();
+    });
+
+    it('shows a confirm dialog when the delete button is clicked', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+    });
+
+    it('closes the confirm dialog when the cancel button is clicked', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+
+      userEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
+      expect(renderResult.queryByTestId('property-actions-confirm-modal')).toBe(null);
+    });
+
+    it('calls onDelete when the confirm is pressed', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+
+      userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
+      expect(onDelete).toHaveBeenCalledWith(deleteProps.id);
+    });
   });
 });

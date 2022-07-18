@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type { AlertStatus } from '../../../timelines/common/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AlertStatus } from '../../common/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   RAC_ALERTS_BULK_UPDATE_URL,

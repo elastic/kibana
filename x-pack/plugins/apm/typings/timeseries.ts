@@ -15,7 +15,7 @@ import {
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import { Maybe } from '../typings/common';
+import { Maybe } from './common';
 
 export interface Coordinate {
   x: number;

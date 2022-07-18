@@ -221,7 +221,10 @@ export interface SavedObjectsCheckConflictsResponse {
  * @public
  */
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used for implementing optimistic concurrency control.
+   */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
@@ -229,6 +232,11 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   refresh?: MutatingOperationRefreshSetting;
   /** If specified, will be used to perform an upsert if the document doesn't exist */
   upsert?: Attributes;
+  /**
+   * The Elasticsearch `retry_on_conflict` setting for this operation.
+   * Defaults to `0` when `version` is provided, `3` otherwise.
+   */
+  retryOnConflict?: number;
 }
 
 /**

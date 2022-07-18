@@ -42,7 +42,8 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
 
   const onCreateComboOption = (value: string) => {
     // Note: for now, all validations for a comboBox array item have to be synchronous
-    // If there is a need to support asynchronous validation, we'll work on it (and will need to update the <EuiComboBox /> logic).
+    // If there is a need to support asynchronous validation, we'll need to update this handler and
+    // make the <EuiComboBox /> "onCreateOption" handler async).
     const { isValid } = field.validate({
       value,
       validationType: VALIDATION_TYPES.ARRAY_ITEM,
@@ -84,7 +85,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
-        selectedOptions={(field.value as any[]).map((v) => ({ label: v }))}
+        selectedOptions={(field.value as string[]).map((v) => ({ label: v }))}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
         onSearchChange={onSearchComboChange}

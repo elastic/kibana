@@ -45,6 +45,7 @@ describe('ExternalConnectorConfig', () => {
 
     expect(wrapper.find(EuiFormRow)).toHaveLength(2);
     expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+    expect(fetchExternalSource).toHaveBeenCalled();
   });
   it('handles url change', () => {
     const wrapper = shallow(<ExternalConnectorFormFields />);

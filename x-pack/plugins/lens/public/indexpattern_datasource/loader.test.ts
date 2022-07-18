@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler } from '@kbn/core/public';
 import { last } from 'lodash';
 import {
   loadInitialState,
@@ -16,8 +16,8 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { DataViewsContract } from '../../../../../src/plugins/data_views/public';
-import { HttpFetchError } from '../../../../../src/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -1158,14 +1158,13 @@ describe('loader', () => {
       const setState = jest.fn();
       const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
-          reject(
-            new HttpFetchError(
-              'timeout',
-              'name',
-              {} as unknown as Request,
-              { status: 408 } as unknown as Response
-            )
+          const error = createHttpFetchError(
+            'timeout',
+            'error',
+            {} as Request,
+            { status: 408 } as Response
           );
+          reject(error);
         });
       }) as unknown as HttpHandler;
 

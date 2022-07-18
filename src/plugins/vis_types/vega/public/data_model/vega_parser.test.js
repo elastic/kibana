@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -18,7 +19,7 @@ describe(`VegaParser.parseAsync`, () => {
   function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       const searchApiStub = {
-        search: jest.fn(() => ({ toPromise: jest.fn(() => Promise.resolve({})) })),
+        search: jest.fn(() => of({})),
         resetSearchStats: jest.fn(),
       };
       expectedSpec = expectedSpec || cloneDeep(spec);

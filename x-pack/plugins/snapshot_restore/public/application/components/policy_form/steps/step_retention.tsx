@@ -20,7 +20,7 @@ import {
 
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { StepProps } from './';
+import { StepProps } from '.';
 import { textService } from '../../../services/text';
 import { useCore } from '../../../app_context';
 

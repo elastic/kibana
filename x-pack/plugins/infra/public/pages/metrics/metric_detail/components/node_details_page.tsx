@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState, useContext } from 'react';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Source } from '../../../../containers/metrics_source';

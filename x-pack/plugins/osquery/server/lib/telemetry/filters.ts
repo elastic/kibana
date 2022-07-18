@@ -49,18 +49,21 @@ export function copyAllowlistedFields(
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
         const subValues = eventValue.filter((v) => typeof v === 'object');
+
         return {
           ...newEvent,
           [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
         };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
         const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
+
         return {
           ...newEvent,
           ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
         };
       }
     }
+
     return newEvent;
   }, {});
 }

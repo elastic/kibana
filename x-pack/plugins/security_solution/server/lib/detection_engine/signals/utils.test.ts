@@ -8,17 +8,17 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
-import { listMock } from '../../../../../lists/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ExceptionListClient } from '../../../../../lists/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
-// @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
 moment.suppressDeprecationWarnings = true;
 
 import {
@@ -981,7 +981,7 @@ describe('utils', () => {
       const searchResult = sampleEmptyDocSearchResults();
       const newSearchResult = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
@@ -1001,7 +1001,7 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsWithSortId();
       const newSearchResult = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
@@ -1024,7 +1024,7 @@ describe('utils', () => {
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1036,7 +1036,7 @@ describe('utils', () => {
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1052,7 +1052,7 @@ describe('utils', () => {
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1062,7 +1062,7 @@ describe('utils', () => {
       searchResult._shards.failed = 0;
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(true);
     });
@@ -1078,7 +1078,7 @@ describe('utils', () => {
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: 'event.ingested',
+        primaryTimestamp: 'event.ingested',
       });
       expect(success).toEqual(true);
     });
@@ -1091,7 +1091,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1104,7 +1104,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1117,7 +1117,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1130,7 +1130,7 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1140,7 +1140,7 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1150,13 +1150,13 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
     test('It returns normal date time if set', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
     });
 
@@ -1172,7 +1172,7 @@ describe('utils', () => {
           '@timestamp': [timestamp],
         },
       };
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(timestamp);
     });
 
@@ -1180,7 +1180,7 @@ describe('utils', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
       searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
-      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1196,7 +1196,7 @@ describe('utils', () => {
           different_timestamp: [override],
         },
       };
-      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
   });
@@ -1208,7 +1208,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = null;
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1218,7 +1218,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = undefined;
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1228,13 +1228,13 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = ['invalid value'];
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
     test('It returns normal date time if set', () => {
       const doc = sampleDocNoSortId();
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
     });
 
@@ -1250,7 +1250,7 @@ describe('utils', () => {
           '@timestamp': [timestamp],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(timestamp);
     });
 
@@ -1258,7 +1258,7 @@ describe('utils', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const doc = sampleDocNoSortId();
       doc._source.different_timestamp = new Date(override).toISOString();
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1274,7 +1274,7 @@ describe('utils', () => {
           different_timestamp: [override],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1286,7 +1286,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         doc.fields['@timestamp'] = [testDate];
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(testDateString);
     });
 
@@ -1296,7 +1296,7 @@ describe('utils', () => {
       const testDate = `${new Date(testDateString).valueOf()}`;
       doc._source['@timestamp'] = testDate;
       doc.fields = undefined;
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(testDateString);
     });
 
@@ -1313,7 +1313,7 @@ describe('utils', () => {
           different_timestamp: [testDate],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
   });

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
   urlDrilldownGlobalScopeProvider,
-} from '../../../ui_actions_enhanced/public';
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UrlDrilldown } from './lib';
-import { createStartServicesGetter } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;

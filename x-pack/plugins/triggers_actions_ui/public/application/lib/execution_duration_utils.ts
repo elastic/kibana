@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { padStart } from 'lodash';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { RuleType } from '../../types';
-import { parseDuration } from '../../../../alerting/common';
 
 export function formatMillisForDisplay(value: number | undefined) {
   if (!value) {

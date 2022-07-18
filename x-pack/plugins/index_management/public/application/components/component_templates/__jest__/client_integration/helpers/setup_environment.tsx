@@ -7,15 +7,12 @@
 
 import React from 'react';
 
-import { HttpSetup } from 'kibana/public';
-import {
-  notificationServiceMock,
-  docLinksServiceMock,
-  applicationServiceMock,
-  executionContextServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { notificationServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
-import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { AppContextProvider } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';

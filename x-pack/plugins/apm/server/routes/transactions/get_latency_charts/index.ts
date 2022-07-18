@@ -6,17 +6,17 @@
  */
 
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

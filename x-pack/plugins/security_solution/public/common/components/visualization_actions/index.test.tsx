@@ -15,12 +15,14 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../mock';
-import { createStore, State } from '../../store';
-import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
+import type { State } from '../../store';
+import { createStore } from '../../store';
+import type { UpdateQueryParams } from '../../store/inputs/helpers';
+import { upsertQuery } from '../../store/inputs/helpers';
 import { cloneDeep } from 'lodash';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -95,6 +97,7 @@ describe('VisualizationActions', () => {
             addError: jest.fn(),
             addSuccess: jest.fn(),
             addWarning: jest.fn(),
+            remove: jest.fn(),
           },
         },
         http: jest.fn(),

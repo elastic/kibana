@@ -12,7 +12,7 @@ import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type {
   GetAllSpacesOptions,

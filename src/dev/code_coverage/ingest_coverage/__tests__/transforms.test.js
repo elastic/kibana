@@ -14,7 +14,7 @@ import {
   teamAssignment,
   last,
 } from '../transforms';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe(`Transform fns`, () => {
   describe(`ciRunUrl`, () => {

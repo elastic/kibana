@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { of } from 'rxjs';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createResolvedLogViewMock } from '../../common/log_views/resolved_log_view.mock';
 import { createInfraPluginStartMock } from '../mocks';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';

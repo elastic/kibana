@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common/lib';
 import { getImageRenderer } from '../image_renderer';
-import { getElasticLogo } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { ImageMode } from '../../../common';
 
 const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {

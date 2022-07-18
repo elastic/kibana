@@ -32,7 +32,7 @@ export async function generateData({
   const traceEvents = timerange(start, end)
     .interval('1m')
     .rate(coldStartRate)
-    .spans((timestamp) =>
+    .generator((timestamp) =>
       instance
         .transaction(transactionName)
         .defaults({
@@ -41,13 +41,12 @@ export async function generateData({
         .timestamp(timestamp)
         .duration(duration)
         .success()
-        .serialize()
     )
-    .concat(
+    .merge(
       timerange(start, end)
         .interval('1m')
         .rate(warmStartRate)
-        .spans((timestamp) =>
+        .generator((timestamp) =>
           instance
             .transaction(transactionName)
             .defaults({
@@ -56,7 +55,6 @@ export async function generateData({
             .timestamp(timestamp)
             .duration(duration)
             .success()
-            .serialize()
         )
     );
 

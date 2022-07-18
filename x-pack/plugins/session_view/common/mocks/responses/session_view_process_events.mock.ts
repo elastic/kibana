@@ -24,8 +24,8 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           architecture: 'x86_64',
           hostname: 'james-fleet-714-2',
           id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-          ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-          mac: '42:01:0a:84:00:32',
+          ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+          mac: ['42:01:0a:84:00:32'],
           name: 'james-fleet-714-2',
           os: {
             Ext: {
@@ -427,8 +427,8 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           architecture: 'x86_64',
           hostname: 'james-fleet-714-2',
           id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-          ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-          mac: '42:01:0a:84:00:32',
+          ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+          mac: ['42:01:0a:84:00:32'],
           name: 'james-fleet-714-2',
           os: {
             Ext: {
@@ -836,8 +836,8 @@ export const sessionViewProcessEventsMock: ProcessEventResults = {
           architecture: 'x86_64',
           hostname: 'james-fleet-714-2',
           id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
-          ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
-          mac: '42:01:0a:84:00:32',
+          ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+          mac: ['42:01:0a:84:00:32'],
           name: 'james-fleet-714-2',
           os: {
             Ext: {

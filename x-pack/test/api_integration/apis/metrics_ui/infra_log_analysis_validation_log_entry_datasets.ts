@@ -10,8 +10,8 @@ import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
   validateLogEntryDatasetsRequestPayloadRT,
   validateLogEntryDatasetsResponsePayloadRT,
-} from '../../../../plugins/infra/common/http_api/log_analysis/validation/datasets';
-import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
+} from '@kbn/infra-plugin/common/http_api/log_analysis/validation/datasets';
+import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

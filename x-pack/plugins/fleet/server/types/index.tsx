@@ -12,10 +12,7 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
-  AgentPolicyAction,
-  BaseAgentActionSOAttributes,
-  AgentActionSOAttributes,
-  AgentPolicyActionSOAttributes,
+  CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -77,6 +74,12 @@ export type {
   FleetServerAgentAction,
   FleetServerPolicy,
   FullAgentPolicyInputStream,
+  DownloadSourceBase,
+  DownloadSource,
+  DownloadSourceAttributes,
+  PackageVerificationStatus,
+  BulkInstallPackageInfo,
+  PackageAssetReference,
 } from '../../common';
 export {
   ElasticsearchAssetType,
@@ -94,6 +97,12 @@ export interface BulkActionResult {
   id: string;
   success: boolean;
   error?: Error;
+}
+
+import type { PackageVerificationStatus } from '../../common';
+export interface PackageVerificationResult {
+  verificationKeyId?: string;
+  verificationStatus: PackageVerificationStatus;
 }
 
 export * from './models';

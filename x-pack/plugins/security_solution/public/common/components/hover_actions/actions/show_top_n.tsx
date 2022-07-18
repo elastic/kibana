@@ -6,13 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { EuiPopover, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { StatefulTopN } from '../../top_n';

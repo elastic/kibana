@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { enableInspectEsQueries } from '../../../../observability/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(

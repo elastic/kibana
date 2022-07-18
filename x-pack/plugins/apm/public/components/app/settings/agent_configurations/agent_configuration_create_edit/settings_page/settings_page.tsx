@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiTracker } from '../../../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {

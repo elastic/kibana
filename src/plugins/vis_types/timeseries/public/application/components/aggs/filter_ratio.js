@@ -24,7 +24,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';

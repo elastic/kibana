@@ -274,6 +274,7 @@ const DragInner = memo(function DragInner({
   );
   const modifierHandlers = useMemo(() => {
     const onKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
+      e.preventDefault();
       if (activeDropTarget?.id && ['Shift', 'Alt', 'Control'].includes(e.key)) {
         if (e.altKey) {
           setTargetOfIndex(activeDropTarget.id, 1);
@@ -292,6 +293,7 @@ const DragInner = memo(function DragInner({
       }
     };
     const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+      e.preventDefault();
       if (e.key === 'Alt' && activeDropTarget?.id) {
         setTargetOfIndex(activeDropTarget.id, 1);
       } else if (e.key === 'Shift' && activeDropTarget?.id) {
@@ -410,7 +412,7 @@ const DragInner = memo(function DragInner({
           aria-describedby={ariaDescribedBy || `lnsDragDrop-keyboardInstructions`}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
-          onBlur={() => {
+          onBlur={(e) => {
             if (activeDraggingProps) {
               dragEnd();
             }

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+  const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('discover data grid doc link', function () {
     before(async () => {
@@ -54,37 +54,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // no longer relevant as null field won't be returned in the Fields API response
-    xit('add filter should create an exists filter if value is null (#7189)', async function () {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      // Filter special document
-      await filterBar.addFilter('agent', 'is', 'Missing/Fields');
+    it('should create an exists filter from doc view of the selected document', async function () {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await retry.try(async () => {
-        // navigate to the doc view
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const details = await dataGrid.getDetailsRow();
-        await dataGrid.addInclusiveFilter(details, 'referer');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.click('openFieldActionsButton-@timestamp');
+      await testSubjects.click('addExistsFilterButton-@timestamp');
 
-        const hasInclusiveFilter = await filterBar.hasFilter(
-          'referer',
-          'exists',
-          true,
-          false,
-          true
-        );
-        expect(hasInclusiveFilter).to.be(true);
-
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-        const detailsExcluding = await dataGrid.getDetailsRow();
-        await dataGrid.removeInclusiveFilter(detailsExcluding, 'referer');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
-        expect(hasExcludeFilter).to.be(true);
-      });
+      const hasExistsFilter = await filterBar.hasFilter('@timestamp', 'exists', true, false, false);
+      expect(hasExistsFilter).to.be(true);
     });
   });
 }

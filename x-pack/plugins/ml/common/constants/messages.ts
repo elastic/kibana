@@ -8,7 +8,7 @@
 import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 

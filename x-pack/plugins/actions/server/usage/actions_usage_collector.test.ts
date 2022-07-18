@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerActionsUsageCollector } from './actions_usage_collector';
 import { configSchema, ActionsConfig } from '../config';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 

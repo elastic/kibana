@@ -12,11 +12,12 @@ jest.mock('../../../../lib/proxy_request', () => ({
 }));
 
 import { duration } from 'moment';
+import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { MAJOR_VERSION } from '../../../../../common/constants';
 import { ProxyConfigCollection } from '../../../../lib';
-import { RouteDependencies, ProxyDependencies } from '../../../../routes';
+import { RouteDependencies, ProxyDependencies } from '../../..';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
-import { coreMock, httpServiceMock } from '../../../../../../../core/server/mocks';
+import { handleEsError } from '../../../../shared_imports';
 
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
@@ -65,5 +66,6 @@ export const getProxyRouteHandlerDeps = ({
       : defaultProxyValue,
     log,
     kibanaVersion,
+    lib: { handleEsError },
   };
 };

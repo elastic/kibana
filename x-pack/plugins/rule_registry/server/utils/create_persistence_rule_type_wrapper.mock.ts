@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock } from '../../../alerting/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { PersistenceServices } from './persistence_types';
 
 export const createPersistenceServicesMock = (): jest.Mocked<PersistenceServices> => {

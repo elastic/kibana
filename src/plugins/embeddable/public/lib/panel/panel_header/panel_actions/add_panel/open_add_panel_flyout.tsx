@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { NotificationsStart, OverlayRef, OverlayStart, ThemeServiceStart } from 'src/core/public';
+import { NotificationsStart, OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EmbeddableStart } from '../../../../../plugin';
-import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 export function openAddPanelFlyout(options: {
   embeddable: IContainer;

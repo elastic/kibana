@@ -25,11 +25,12 @@
     {
       "groupName": "@elastic/charts",
       "matchPackageNames": ["@elastic/charts"],
-      "reviewers": ["team:datavis"],
+      "reviewers": ["team:datavis", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis", "v8.1.0", "v7.17.0"],
+      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
       "draftPR": true,
       "enabled": true,
+      "assignAutomerge": true,
       "prCreation": "immediate"
     },
     {
@@ -113,8 +114,8 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
-        "broadcast-channel",
         "node-forge",
+        "formik",
         "@types/node-forge",
         "require-in-the-middle",
         "tough-cookie",
@@ -139,6 +140,29 @@
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@testing-library",
+      "packageNames": [
+        "@testing-library/dom",
+        "@testing-library/jest-dom",
+        "@testing-library/react",
+        "@testing-library/react-hooks",
+        "@testing-library/user-event",
+        "@types/testing-library__jest-dom"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@storybook",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "matchPackagePatterns": ["^@storybook"],
       "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
     }

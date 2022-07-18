@@ -10,7 +10,7 @@ import { RULE_CLUSTER_HEALTH } from '../../common/constants';
 import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 

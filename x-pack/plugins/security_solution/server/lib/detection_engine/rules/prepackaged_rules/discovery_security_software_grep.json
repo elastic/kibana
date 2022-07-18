@@ -14,6 +14,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Security Software Discovery via Grep",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\nprocess.name : \"grep\" and user.id != \"0\" and\n not process.parent.executable : \"/Library/Application Support/*\" and\n   process.args :\n         (\"Little Snitch*\",\n          \"Avast*\",\n          \"Avira*\",\n          \"ESET*\",\n          \"BlockBlock*\",\n          \"360Sec*\",\n          \"LuLu*\",\n          \"KnockKnock*\",\n          \"kav\",\n          \"KIS\",\n          \"RTProtectionDaemon*\",\n          \"Malware*\",\n          \"VShieldScanner*\",\n          \"WebProtection*\",\n          \"webinspectord*\",\n          \"McAfee*\",\n          \"isecespd*\",\n          \"macmnsvc*\",\n          \"masvc*\",\n          \"kesl*\",\n          \"avscan*\",\n          \"guard*\",\n          \"rtvscand*\",\n          \"symcfgd*\",\n          \"scmdaemon*\",\n          \"symantec*\",\n          \"sophos*\",\n          \"osquery*\",\n          \"elastic-endpoint*\"\n          ) and\n   not (process.args : \"Avast\" and process.args : \"Passwords\")\n",
   "risk_score": 47,
   "rule_id": "870aecc0-cea4-4110-af3f-e02e9b373655",
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

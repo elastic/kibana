@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ExpressionFunction } from '@kbn/expressions-plugin';
 import { metricFunction } from '../common/expression_functions';
-import { ExpressionFunction } from '../../../../src/plugins/expressions';
 
 export const functionSpecs = [metricFunction].map((fn) => new ExpressionFunction(fn()));

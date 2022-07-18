@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetDeprecationsContext } from 'src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { GetDeprecationsContext } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { getPrivilegeDeprecationsService } from '.';
 import { licenseMock } from '../../common/licensing/index.mock';

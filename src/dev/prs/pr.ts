@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
 
 const isNum = (input: string) => {
   return /^\d+$/.test(input);

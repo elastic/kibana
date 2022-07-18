@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreSingleListFindServerExtension } from '../../../../../lists/server';
+import type { ExceptionsListPreSingleListFindServerExtension } from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,

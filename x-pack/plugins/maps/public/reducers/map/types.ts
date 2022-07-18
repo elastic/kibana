@@ -7,8 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import {
   CustomIcon,
   DrawState,
@@ -21,7 +22,6 @@ import {
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
 
 export interface MapExtentState {
   zoom: number;
@@ -34,7 +34,6 @@ export type MapViewContext = MapExtentState & {
 };
 
 export type MapContext = Partial<MapViewContext> & {
-  scrollZoom: boolean;
   mouseCoordinates?: {
     lat: number;
     lon: number;
@@ -67,6 +66,7 @@ export type MapSettings = {
   browserLocation: {
     zoom: number;
   };
+  keydownScrollZoom: boolean;
   maxZoom: number;
   minZoom: number;
   showScaleControl: boolean;

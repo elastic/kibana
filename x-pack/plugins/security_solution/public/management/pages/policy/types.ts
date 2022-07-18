@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ILicense } from '../../../../../licensing/common/types';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type {
   AppLocation,
   Immutable,
   ProtectionFields,
@@ -18,15 +24,9 @@ import {
   TrustedApp,
   PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
-import { ImmutableMiddlewareAPI } from '../../../common/store';
-import { AppAction } from '../../../common/store/actions';
+import type { ServerApiError } from '../../../common/types';
+import type { ImmutableMiddlewareAPI } from '../../../common/store';
+import type { AppAction } from '../../../common/store/actions';
 
 export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 

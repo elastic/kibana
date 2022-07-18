@@ -44,7 +44,7 @@ export const registerUpdateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { id } = request.params;
 
       // We need to first pause the follower and then resume it by passing the advanced settings

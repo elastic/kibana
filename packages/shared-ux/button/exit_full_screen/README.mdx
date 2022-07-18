@@ -1,0 +1,28 @@
+---
+id: sharedUX/Components/ExitFullScreenButton
+slug: /shared-ux/components/exit-full-screen-button
+title: Exit Full Screen Button
+summary: A button that floats over the plugin workspace and allows someone to exit "full screen" mode.
+tags: ['shared-ux', 'component']
+date: 2021-12-28
+---
+
+## Description
+
+Many plugins have a "full screen mode", where the chrome is hidden and the workspace of the plugin is maximized.  This button is meant to appear when the plugin is in full screen mode to allow the user to exit that state and return the relevant Kibana Chrome.
+
+## Pure Component: `ExitFullScreenButtonComponent`
+
+The pure component is a simple button representing the style and text of a button to exit full screen mode.  It does not interact with Kibana or browser chrome in any way, nor does it respond to global key presses.  You can use this component with your own logic and positioning, if necessary.
+
+## Connected Component: `ExitFullScreenButton`
+
+The connected component:
+
+- uses the `setIsVisible` API from `coreStart.chrome` to enter and exit full screen;
+- monitors relevant external key presses to exit full screen mode;
+- allows provides the `toggleChrome` prop, which provides the ability to call `setIsVisible` on render, which allows a consumer to enter full screen simply by rendering the component and exit full screen by interacting with it.
+
+## EUI Promotion Status
+
+This component is not currently considered for promotion to EUI.

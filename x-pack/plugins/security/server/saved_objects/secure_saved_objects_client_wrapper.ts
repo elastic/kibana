@@ -27,9 +27,9 @@ import type {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent } from '../audit';
@@ -655,8 +655,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const uniqueTypes = this.getUniqueObjectTypes(response.objects);
     const uniqueSpaces = this.getUniqueSpaces(
       currentSpaceId,
-      ...response.objects.flatMap(({ spaces, spacesWithMatchingAliases = [] }) =>
-        spaces.concat(spacesWithMatchingAliases)
+      ...response.objects.flatMap(
+        ({ spaces, spacesWithMatchingAliases = [], spacesWithMatchingOrigins = [] }) => [
+          ...spaces,
+          ...spacesWithMatchingAliases,
+          ...spacesWithMatchingOrigins,
+        ]
       )
     );
 
@@ -770,7 +774,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     const filteredAndRedactedObjects = [...filteredObjectsMap.values()].map((obj) => {
-      const { type, id, spaces, spacesWithMatchingAliases, inboundReferences } = obj;
+      const {
+        type,
+        id,
+        spaces,
+        spacesWithMatchingAliases,
+        spacesWithMatchingOrigins,
+        inboundReferences,
+      } = obj;
       // Redact the inbound references so we don't leak any info about other objects that the user is not authorized to access
       const redactedInboundReferences = inboundReferences.filter((inbound) => {
         if (inbound.type === type && inbound.id === id) {
@@ -783,11 +794,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       const redactedSpacesWithMatchingAliases =
         spacesWithMatchingAliases &&
         getRedactedSpaces(type, 'bulk_get', typeActionMap, spacesWithMatchingAliases);
+      const redactedSpacesWithMatchingOrigins =
+        spacesWithMatchingOrigins &&
+        getRedactedSpaces(type, 'bulk_get', typeActionMap, spacesWithMatchingOrigins);
       return {
         ...obj,
         spaces: redactedSpaces,
         ...(redactedSpacesWithMatchingAliases && {
           spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
+        }),
+        ...(redactedSpacesWithMatchingOrigins && {
+          spacesWithMatchingOrigins: redactedSpacesWithMatchingOrigins,
         }),
         inboundReferences: redactedInboundReferences,
       };

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute } from 'kibana/public';
+import { SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { RuleActionParam, IntervalSchedule } from '../../../../../alerting/common';
+import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
 import { Rule, RuleAction } from '../../../types';
 
 export type InitialRule = Partial<Rule> &

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { defineAnonymousAccessGetCapabilitiesRoutes } from './get_capabilities';
 import { defineAnonymousAccessGetStateRoutes } from './get_state';
 

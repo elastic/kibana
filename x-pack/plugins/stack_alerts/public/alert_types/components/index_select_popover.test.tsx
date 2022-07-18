@@ -19,8 +19,8 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {
@@ -92,7 +92,7 @@ describe('IndexSelectPopover', () => {
     expect(wrapper.find('[data-test-subj="thresholdIndexesComboBox"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="thresholdAlertTimeFieldSelect"]').exists()).toBeFalsy();
 
-    wrapper.find('[data-test-subj="selectIndexExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -106,7 +106,7 @@ describe('IndexSelectPopover', () => {
     const wrapper = mountWithIntl(<IndexSelectPopover {...props} />);
 
     expect(wrapper.find('[data-test-subj="selectIndexExpression"]').exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="selectIndexExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -166,7 +166,7 @@ describe('IndexSelectPopover', () => {
       `index ${index}`
     );
 
-    wrapper.find('[data-test-subj="selectIndexExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="selectIndexExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

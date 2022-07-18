@@ -1921,7 +1921,6 @@ export const AWS_PACKAGE = {
     },
   ],
   latestVersion: '0.5.3',
-  removable: true,
   status: 'not_installed',
 };
 

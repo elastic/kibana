@@ -19,7 +19,7 @@ import { rerender, getPageHeaderActions } from '../../../test_helpers';
 
 import { SynonymCard, SynonymModal } from './components';
 
-import { Synonyms } from './';
+import { Synonyms } from '.';
 
 describe('Synonyms', () => {
   const MOCK_SYNONYM_SET = {

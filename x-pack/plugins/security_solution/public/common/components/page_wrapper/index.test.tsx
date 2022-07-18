@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { SecuritySolutionPageWrapper } from './index';
+import { SecuritySolutionPageWrapper } from '.';
 
 describe('SecuritySolutionPageWrapper', () => {
   test('it renders', () => {

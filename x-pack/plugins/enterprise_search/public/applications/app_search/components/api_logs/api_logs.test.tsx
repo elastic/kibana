@@ -18,7 +18,7 @@ import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
 import { ApiLogsTable, NewApiEventsPrompt } from './components';
 
-import { ApiLogs } from './';
+import { ApiLogs } from '.';
 
 describe('ApiLogs', () => {
   const values = {

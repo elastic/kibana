@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
-import type { Map as MbMap, AnyLayer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
+import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import { getIsTextLayer, syncLayerOrder } from './sort_layers';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import { ILayer } from '../../classes/layers/layer';
@@ -16,9 +16,9 @@ import { ILayer } from '../../classes/layers/layer';
 let moveCounter = 0;
 
 class MockMbMap {
-  private _style: MbStyle;
+  private _style: StyleSpecification;
 
-  constructor(style: MbStyle) {
+  constructor(style: StyleSpecification) {
     this._style = _.cloneDeep(style);
   }
 
@@ -88,24 +88,24 @@ test('getIsTextLayer', () => {
     id: `mylayer_text`,
     type: 'symbol',
     paint: { 'text-color': 'red' },
-  } as MbLayer;
+  } as LayerSpecification;
   expect(getIsTextLayer(paintLabelMbLayer)).toBe(true);
 
   const layoutLabelMbLayer = {
     id: `mylayer_text`,
     type: 'symbol',
     layout: { 'text-size': 'red' },
-  } as MbLayer;
+  } as unknown as LayerSpecification;
   expect(getIsTextLayer(layoutLabelMbLayer)).toBe(true);
 
   const iconMbLayer = {
     id: `mylayer_text`,
     type: 'symbol',
     paint: { 'icon-color': 'house' },
-  } as MbLayer;
+  } as LayerSpecification;
   expect(getIsTextLayer(iconMbLayer)).toBe(false);
 
-  const circleMbLayer = { id: `mylayer_text`, type: 'circle' } as MbLayer;
+  const circleMbLayer = { id: `mylayer_text`, type: 'circle' } as LayerSpecification;
   expect(getIsTextLayer(circleMbLayer)).toBe(false);
 });
 
@@ -128,22 +128,23 @@ describe('sortLayer', () => {
   // Initial order that styles are added to mapbox is non-deterministic and depends on the order of data fetches.
   test('Should sort initial layer load order to expected order', () => {
     const initialMbStyle = {
-      version: 0,
+      version: 8 as 8,
       layers: [
-        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
-        { id: `gl-draw-polygon-fill-active.cold`, type: 'fill' } as MbLayer,
+        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
+        { id: `gl-draw-polygon-fill-active.cold`, type: 'fill' } as LayerSpecification,
         {
           id: `${CHARLIE_LAYER_ID}_text`,
           type: 'symbol',
           paint: { 'text-color': 'red' },
-        } as MbLayer,
-        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        } as LayerSpecification,
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
       ],
+      sources: {},
     };
     const mbMap = new MockMbMap(initialMbStyle);
     syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
@@ -167,21 +168,22 @@ describe('sortLayer', () => {
   // Test case testing when layer is moved in Table of Contents
   test('Should sort single layer single move to expected order', () => {
     const initialMbStyle = {
-      version: 0,
+      version: 8 as 8,
       layers: [
-        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
-        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
+        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
         {
           id: `${CHARLIE_LAYER_ID}_text`,
           type: 'symbol',
           paint: { 'text-color': 'red' },
-        } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
       ],
+      sources: {},
     };
     const mbMap = new MockMbMap(initialMbStyle);
     syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
@@ -205,11 +207,12 @@ describe('sortLayer', () => {
   test('Should sort with missing mblayers to expected order', () => {
     // Notice there are no bravo mbLayers in initial style.
     const initialMbStyle = {
-      version: 0,
+      version: 8 as 8,
       layers: [
-        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
       ],
+      sources: {},
     };
     const mbMap = new MockMbMap(initialMbStyle);
     syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);
@@ -222,21 +225,22 @@ describe('sortLayer', () => {
 
   test('Should not call move layers when layers are in expected order', () => {
     const initialMbStyle = {
-      version: 0,
+      version: 8 as 8,
       layers: [
-        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
-        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as LayerSpecification,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
         {
           id: `${CHARLIE_LAYER_ID}_text`,
           type: 'symbol',
           paint: { 'text-color': 'red' },
-        } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
-        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as LayerSpecification,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as LayerSpecification,
       ],
+      sources: {},
     };
     const mbMap = new MockMbMap(initialMbStyle);
     syncLayerOrder(mbMap as unknown as MbMap, spatialFilterLayer, mapLayers);

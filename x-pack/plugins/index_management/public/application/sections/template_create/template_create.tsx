@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';

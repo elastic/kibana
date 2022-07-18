@@ -6,12 +6,13 @@
  */
 
 import { map, reduce } from 'rxjs/operators';
-import { Plugin, CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { lastValueFrom } from 'rxjs';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResult,
-} from '../../../../../plugins/global_search/public';
+} from '@kbn/global-search-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}
@@ -56,13 +57,12 @@ export class GlobalSearchTestPlugin
   ): GlobalSearchTestPluginStart {
     return {
       find: (term) =>
-        globalSearch
-          .find({ term }, {})
-          .pipe(
+        lastValueFrom(
+          globalSearch.find({ term }, {}).pipe(
             map((batch) => batch.results),
             reduce((memo, results) => [...memo, ...results])
           )
-          .toPromise(),
+        ),
     };
   }
 }

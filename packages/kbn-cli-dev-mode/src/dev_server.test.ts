@@ -72,6 +72,7 @@ const defaultOptions: Options = {
   processExit$,
   sigint$,
   sigterm$,
+  forceColor: true,
 };
 
 expect.addSnapshotSerializer(extendedEnvSerializer);
@@ -80,7 +81,6 @@ beforeEach(() => {
   jest.clearAllMocks();
   log.messages.length = 0;
   process.execArgv = ['--inheritted', '--exec', '--argv'];
-  process.env.FORCE_COLOR = process.env.FORCE_COLOR || '1';
   currentProc = undefined;
 });
 

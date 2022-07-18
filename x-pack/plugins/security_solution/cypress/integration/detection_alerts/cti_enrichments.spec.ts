@@ -6,9 +6,9 @@
  */
 
 import { getNewThreatIndicatorRule } from '../../objects/rule';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -21,16 +21,11 @@ import {
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import {
-  expandFirstAlert,
-  goToManageAlertsDetectionRules,
-  setEnrichmentDates,
-  viewThreatIntelTab,
-} from '../../tasks/alerts';
+import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
 describe('CTI Enrichment', () => {
@@ -38,10 +33,8 @@ describe('CTI Enrichment', () => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('suspicious_source_event');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    login();
     createCustomIndicatorRule(getNewThreatIndicatorRule());
-    reload();
   });
 
   after(() => {
@@ -50,8 +43,7 @@ describe('CTI Enrichment', () => {
   });
 
   beforeEach(() => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
   });
 
@@ -75,32 +67,26 @@ describe('CTI Enrichment', () => {
   it('Displays persisted enrichments on the JSON view', () => {
     const expectedEnrichment = [
       {
-        feed: {
-          name: 'AbuseCH malware',
-        },
-        indicator: {
-          first_seen: '2021-03-10T08:02:14.000Z',
-          file: {
-            size: 80280,
-            pe: {},
-            type: 'elf',
-            hash: {
-              sha256: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-              tlsh: '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
-              ssdeep:
-                '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
-              md5: '9b6c3518a91d23ed77504b5416bfb5b3',
-            },
-          },
-          type: 'file',
-        },
-        matched: {
-          atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-          field: 'myhash.mysha256',
-          id: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
-          index: 'logs-ti_abusech.malware',
-          type: 'indicator_match_rule',
-        },
+        'indicator.file.hash.md5': ['9b6c3518a91d23ed77504b5416bfb5b3'],
+        'matched.index': ['logs-ti_abusech.malware'],
+        'indicator.file.type': ['elf'],
+        'indicator.file.hash.tlsh': [
+          '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
+        ],
+        'feed.name': ['AbuseCH malware'],
+        'indicator.file.hash.ssdeep': [
+          '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
+        ],
+        'indicator.file.hash.sha256': [
+          'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+        ],
+        'indicator.first_seen': ['2021-03-10T08:02:14.000Z'],
+        'matched.field': ['myhash.mysha256'],
+        'indicator.type': ['file'],
+        'matched.type': ['indicator_match_rule'],
+        'matched.id': ['84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f'],
+        'matched.atomic': ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
+        'indicator.file.size': [80280],
       },
     ];
 
@@ -109,7 +95,7 @@ describe('CTI Enrichment', () => {
 
     cy.get(JSON_TEXT).then((x) => {
       const parsed = JSON.parse(x.text());
-      expect(parsed._source.threat.enrichments).to.deep.equal(expectedEnrichment);
+      expect(parsed.fields['threat.enrichments']).to.deep.equal(expectedEnrichment);
     });
   });
 

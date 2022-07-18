@@ -16,7 +16,15 @@ export {
   enableInfrastructureView,
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
+  apmProgressiveLoading,
+  apmTraceExplorerTab,
+  apmOperationsTab,
 } from './ui_settings_keys';
+
+export {
+  ProgressiveLoadingQuality,
+  getProbabilityFromProgressiveLoadingQuality,
+} from './progressive_loading';
 
 export const casesFeatureId = 'observabilityCases';
 

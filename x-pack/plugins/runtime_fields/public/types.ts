@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { OpenRuntimeFieldEditorProps } from './load_editor';
 
@@ -24,9 +22,8 @@ export interface PluginStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
-export interface StartPlugins {
-  data: DataPublicPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartPlugins {}
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 

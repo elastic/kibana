@@ -12,7 +12,7 @@ import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { InputControlVisParams } from '../../types';
 
 export type OptionsTabProps = VisEditorOptionsProps<InputControlVisParams>;

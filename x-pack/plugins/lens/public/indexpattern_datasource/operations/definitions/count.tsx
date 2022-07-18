@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch } from '@elastic/eui';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition, ParamEditorProps } from './index';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField } from '../../types';
 import {
@@ -40,7 +40,7 @@ export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
   };
 };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
@@ -52,6 +52,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
+  allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -112,7 +113,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CountIndexPatternColumn>) => {
     return [
       {
@@ -130,7 +131,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
               onChange={() => {
-                updateLayer(
+                paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,
@@ -150,12 +151,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
-      layer,
-      thisColumnId,
-      changedColumnId
-    ),
+  onOtherColumnChanged: (layer, thisColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
       id: columnId,

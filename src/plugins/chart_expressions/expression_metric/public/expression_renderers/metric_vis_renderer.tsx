@@ -9,14 +9,14 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
-import { VisualizationContainer } from '../../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { css } from '@emotion/react';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
 
-// @ts-ignore
-const MetricVisComponent = lazy(() => import('../components/metric_component'));
+const MetricVis = lazy(() => import('../components/metric_vis'));
 
 export const getMetricVisRenderer = (
   theme: ThemeServiceStart
@@ -34,16 +34,14 @@ export const getMetricVisRenderer = (
         <KibanaThemeProvider theme$={theme.theme$}>
           <VisualizationContainer
             data-test-subj="mtrVis"
-            className="mtrVis"
-            showNoResult={!visData.rows?.length}
+            css={css`
+              height: 100%;
+              width: 100%;
+            `}
+            showNoResult={!visData.rows.length}
             handlers={handlers}
           >
-            <MetricVisComponent
-              visData={visData}
-              visParams={visConfig}
-              renderComplete={handlers.done}
-              fireEvent={handlers.event}
-            />
+            <MetricVis data={visData} config={visConfig} renderComplete={() => handlers.done()} />
           </VisualizationContainer>
         </KibanaThemeProvider>,
         domNode

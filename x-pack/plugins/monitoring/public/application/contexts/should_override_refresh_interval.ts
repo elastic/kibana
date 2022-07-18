@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 export const shouldOverrideRefreshInterval = (
   uiSettings: MonitoringStartServices['uiSettings'],

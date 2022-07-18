@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   AggFieldNamePair,
   EVENT_RATE_FIELD_ID,
@@ -63,7 +63,7 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       indicesOptions
     );
 
-    const body = await asCurrentUser.search(json);
+    const body = await asCurrentUser.search(json, { maxRetries: 0 });
     return processSearchResults(
       body,
       aggFieldNamePairs.map((af) => af.field)

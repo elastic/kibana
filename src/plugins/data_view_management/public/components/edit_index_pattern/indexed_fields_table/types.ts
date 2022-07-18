@@ -7,7 +7,7 @@
  */
 
 import { DataViewFieldBase } from '@kbn/es-query';
-import { DataViewField } from '../../../../../../plugins/data_views/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 type IndexedFieldItemBase = Partial<DataViewField> & DataViewFieldBase;
 

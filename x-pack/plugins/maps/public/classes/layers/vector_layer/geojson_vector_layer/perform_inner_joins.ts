@@ -9,18 +9,11 @@ import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
-import { InnerJoin } from '../../../joins/inner_join';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { JoinState } from '../types';
 
 interface SourceResult {
   refreshed: boolean;
   featureCollection: FeatureCollection;
-}
-
-export interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
 }
 
 export async function performInnerJoins(
@@ -85,9 +78,9 @@ export async function performInnerJoins(
   }
 
   const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    return (
-      !joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined
-    );
+    const hasTerms =
+      joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
+    return !joinStatus.joinedWithAtLeastOneFeature && hasTerms;
   });
 
   if (joinStatusesWithoutAnyMatches.length) {

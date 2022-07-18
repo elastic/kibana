@@ -7,24 +7,22 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
-import { MountPoint } from '../types';
-import { HttpSetup, HttpStart } from '../http';
-import { OverlayStart } from '../overlays';
-import { PluginOpaqueId } from '../plugins';
-import type { ThemeServiceStart } from '../theme';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { MountPoint } from '../types';
+import type { OverlayStart } from '../overlays';
 import { AppRouter } from './ui';
-import { Capabilities, CapabilitiesService } from './capabilities';
-import {
+import { type Capabilities, CapabilitiesService } from './capabilities';
+import type {
   App,
   AppDeepLink,
   AppLeaveHandler,
   AppMount,
-  AppNavLinkStatus,
-  AppStatus,
   AppUpdatableFields,
   AppUpdater,
   InternalApplicationSetup,
@@ -33,6 +31,7 @@ import {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './types';
+import { AppStatus, AppNavLinkStatus } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
@@ -73,6 +72,7 @@ const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) =>
   return flattenedLinks[deepLinkId];
 };
 
+const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 const allApplicationsFilter = '__ALL__';
 
 interface AppUpdaterWrapper {
@@ -98,7 +98,7 @@ export class ApplicationService {
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
@@ -119,7 +119,7 @@ export class ApplicationService {
       createBrowserHistory({
         basename,
         getUserConfirmation: getUserConfirmationHandler({
-          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+          overlayPromise: firstValueFrom(this.overlayStart$.pipe(take(1))),
         }),
       });
 
@@ -150,26 +150,36 @@ export class ApplicationService {
 
     const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
       return async (params) => {
+        const currentAppId = this.currentAppId$.value;
+        if (currentAppId && currentAppId !== app.id) {
+          this.appInternalStates.delete(currentAppId);
+        }
         this.currentAppId$.next(app.id);
         return app.mount(params);
       };
+    };
+
+    const validateApp = (app: App<unknown>) => {
+      if (this.registrationClosed) {
+        throw new Error(`Applications cannot be registered after "setup"`);
+      } else if (!applicationIdRegexp.test(app.id)) {
+        throw new Error(
+          `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
+        );
+      } else if (this.apps.has(app.id)) {
+        throw new Error(`An application is already registered with the id "${app.id}"`);
+      } else if (findMounter(this.mounters, app.appRoute)) {
+        throw new Error(`An application is already registered with the appRoute "${app.appRoute}"`);
+      } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
+        throw new Error('Cannot register an application route that includes HTTP base path');
+      }
     };
 
     return {
       register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
-        if (this.registrationClosed) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        } else if (this.apps.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (findMounter(this.mounters, app.appRoute)) {
-          throw new Error(
-            `An application is already registered with the appRoute "${app.appRoute}"`
-          );
-        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
-          throw new Error('Cannot register an application route that includes HTTP base path');
-        }
+        validateApp(app);
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -264,11 +274,7 @@ export class ApplicationService {
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
         } else {
-          if (!navigatingToSameApp) {
-            this.appInternalStates.delete(this.currentAppId$.value!);
-          }
           this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
-          this.currentAppId$.next(appId);
         }
       }
     };
@@ -313,7 +319,7 @@ export class ApplicationService {
       navigateToApp,
       navigateToUrl: async (
         url: string,
-        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+        { skipAppLeave = false, forceRedirect = false, state }: NavigateToUrlOptions = {}
       ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
         if ((forceRedirect || !appInfo) === true) {
@@ -323,7 +329,7 @@ export class ApplicationService {
           return this.redirectTo!(url);
         }
         if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave, state });
         }
       },
       getComponent: () => {

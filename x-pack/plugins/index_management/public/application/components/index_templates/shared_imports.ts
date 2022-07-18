@@ -10,6 +10,6 @@ export {
   Form,
   getUseField,
   FormDataProvider,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-export { CheckBoxField } from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
+export { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';

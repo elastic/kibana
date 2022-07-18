@@ -47,6 +47,6 @@ Delete {a-data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/saved_objects/index-pattern/my-pattern
+$ curl -X DELETE api/index_patterns/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA

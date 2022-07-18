@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { Project } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { PluginApi, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
@@ -38,7 +38,7 @@ beforeAll(() => {
 });
 
 test('foo service has all exports', () => {
-  expect(doc?.client.length).toBe(37);
+  expect(doc?.client.length).toBe(38);
   const split = splitApisByFolder(doc);
   expect(split.length).toBe(2);
 
@@ -47,5 +47,5 @@ test('foo service has all exports', () => {
 
   expect(fooDoc?.common.length).toBe(1);
   expect(fooDoc?.client.length).toBe(2);
-  expect(mainDoc?.client.length).toBe(35);
+  expect(mainDoc?.client.length).toBe(36);
 });

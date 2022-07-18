@@ -154,6 +154,12 @@ export function getResolvedModuleSourceFile(
   importedModuleName: string
 ) {
   const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
+  if (!resolvedModule) {
+    throw new Error(
+      `Import for [${importedModuleName}] in [${originalSource.fileName}] could not be resolved by TypeScript`
+    );
+  }
+
   const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
   if (!resolvedModuleSourceFile) {
     throw new Error(`Unable to find resolved module ${importedModuleName}`);

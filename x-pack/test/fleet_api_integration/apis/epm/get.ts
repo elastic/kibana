@@ -88,6 +88,26 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(testPkgName, testPkgVersion);
     });
 
+    it('returns correct package info from upload if a uploaded version is not in registry', async function () {
+      const testPkgArchiveZipV9999 = path.join(
+        path.dirname(__filename),
+        '../fixtures/direct_upload_packages/apache_9999.0.0.zip'
+      );
+      const buf = fs.readFileSync(testPkgArchiveZipV9999);
+      await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+
+      const res = await supertest.get(`/api/fleet/epm/packages/apache/9999.0.0`).expect(200);
+      const packageInfo = res.body.item;
+      expect(packageInfo.description).to.equal('Apache Uploaded Test Integration');
+      expect(packageInfo.download).to.equal(undefined);
+      await uninstallPackage(testPkgName, '9999.0.0');
+    });
+
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });

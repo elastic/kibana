@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { mod } = require('../../src/functions/mod.js');
+const { mod } = require('../../src/functions/mod');
 
 describe('Mod', () => {
   it('number, number', () => {

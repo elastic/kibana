@@ -11,7 +11,7 @@ import { BucketAggType } from './bucket_agg_type';
 import { migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggSignificantTextFnName } from './significant_text_fn';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 import { createFilterTerms } from './create_filter/terms';
 

@@ -15,7 +15,7 @@ Webhook connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Method::    HTTP request method, either `POST`(default) or `PUT`.
+Method::    HTTP request method, either `post`(default) or `put`.
 Headers::   A set of key-value pairs sent as headers with the request
 Require authentication:: If true, a username and password for login type authentication must be provided.
 Username::      Username for HTTP basic authentication.
@@ -38,7 +38,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    actionTypeId: .webhook
    config:
      url: https://test.host
-     method: POST
+     method: post
      headers:
        testheader: testvalue
    secrets:

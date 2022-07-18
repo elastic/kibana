@@ -8,7 +8,7 @@
 
 import path from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   deleteAll,

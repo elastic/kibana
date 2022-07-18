@@ -9,6 +9,7 @@ export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
 export const CREATE_POLICY_BUTTON = 'createPolicyBtn';
 export const AGENT_FLYOUT_CLOSE_BUTTON = 'euiFlyoutCloseButton';
+export const AGENT_POLICY_CODE_BLOCK = 'agentPolicyCodeBlock';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
