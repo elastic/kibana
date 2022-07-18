@@ -9,15 +9,15 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { registerImportRoute } from '../import';
+import { registerImportRoute } from '../../../saved_objects/routes/import';
 import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { SavedObjectConfig } from '../../saved_objects_config';
-import { setupServer, createExportableType } from '../test_utils';
-import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
+import { SavedObjectConfig } from '../../../saved_objects/saved_objects_config';
+import { setupServer, createExportableType } from './test_utils';
+import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../../../saved_objects';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

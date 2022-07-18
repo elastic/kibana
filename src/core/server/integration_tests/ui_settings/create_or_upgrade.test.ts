@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '../../..';
+import { SavedObjectsClientContract } from '../../saved_objects/types';
 
 import {
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../test_helpers/kbn_server';
-import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
+} from '../../../test_helpers/kbn_server';
+import { createOrUpgradeSavedConfig } from '../../ui_settings/create_or_upgrade_saved_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 

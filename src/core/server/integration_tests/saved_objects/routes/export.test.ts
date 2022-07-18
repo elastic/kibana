@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../export', () => ({
+jest.mock('../../../saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
 }));
 
@@ -15,11 +15,11 @@ import { createListStream } from '@kbn/utils';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { savedObjectsExporterMock } from '../../export/saved_objects_exporter.mock';
-import { SavedObjectConfig } from '../../saved_objects_config';
-import { registerExportRoute } from '../export';
-import { setupServer, createExportableType } from '../test_utils';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
+import { savedObjectsExporterMock } from '../../../saved_objects/export/saved_objects_exporter.mock';
+import { SavedObjectConfig } from '../../../saved_objects/saved_objects_config';
+import { registerExportRoute } from '../../../saved_objects/routes/export';
+import { setupServer, createExportableType } from './test_utils';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];

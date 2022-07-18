@@ -17,7 +17,7 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { LogRecord } from '@kbn/logging';
-import { retryAsync } from '../test_helpers/retry_async';
+import { retryAsync } from '../../../saved_objects/migrations/test_helpers/retry_async';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

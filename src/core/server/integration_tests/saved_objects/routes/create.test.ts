@@ -7,13 +7,13 @@
  */
 
 import supertest from 'supertest';
-import { registerCreateRoute } from '../create';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import { registerCreateRoute } from '../../../saved_objects/routes/create';
+import { savedObjectsClientMock } from '../../../saved_objects/service/saved_objects_client.mock';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from '../test_utils';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
+import { setupServer } from './test_utils';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

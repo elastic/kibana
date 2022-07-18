@@ -27,7 +27,7 @@ const exportObjects = [
   },
 ];
 
-jest.mock('../lib/export_dashboards', () => ({
+jest.mock('../../../../saved_objects/routes/legacy_import_export/lib/export_dashboards', () => ({
   exportDashboards: jest.fn().mockResolvedValue({ version: 'mockversion', objects: exportObjects }),
 }));
 
@@ -35,10 +35,10 @@ import supertest from 'supertest';
 import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
-import { registerLegacyExportRoute } from '../export';
-import { setupServer } from '../../test_utils';
+import { registerLegacyExportRoute } from '../../../../saved_objects/routes/legacy_import_export/export';
+import { setupServer } from '../test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../internal_types';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../../../saved_objects/internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;

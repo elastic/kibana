@@ -17,12 +17,12 @@ import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { PluginsService } from '../plugins_service';
+import { PluginsService } from '../../plugins/plugins_service';
 import { BehaviorSubject, from } from 'rxjs';
-import { config } from '../plugins_config';
+import { config } from '../../plugins/plugins_config';
 import { coreMock } from '../../mocks';
-import { AsyncPlugin, PluginType } from '../types';
-import { PluginWrapper } from '../plugin';
+import { AsyncPlugin, PluginType } from '../../plugins/types';
+import { PluginWrapper } from '../../plugins/plugin';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();

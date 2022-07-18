@@ -15,4 +15,4 @@ jest.doMock('load-json-file', () => ({
 }));
 
 export const mockDiscover = jest.fn();
-jest.mock('../discovery/plugins_discovery', () => ({ discover: mockDiscover }));
+jest.mock('../../plugins/discovery/plugins_discovery', () => ({ discover: mockDiscover }));
