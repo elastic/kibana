@@ -5,70 +5,109 @@
  * 2.0.
  */
 
-/* This method flattens fields in documents returned from the ent-search backend.
- * If a field in the document contains "raw" key, it's already flat.
- * If it doesn't, we want to pull properties from it, and move them to the top level.
- * This field is already flat:
- * 'country', { raw: 'United States' }
- * This field is not flat:
- * 'address', {
- *     country: { raw: 'United States' },
- *     city: { raw: 'Los Angeles' }
- * }
- * It will be transformed into:
- * [
- *   ['address.country', { raw: 'United States' }],
- *   ['address.city', { raw: 'Los Angeles' }]
- * ]
- */
-export const flattenDocumentField = (
-  fieldName: string,
-  fieldValue: object
-): Array<[string, object]> => {
-  const flattened: Array<[string, object]> = [];
+import {
+  FieldValue,
+  NestedFieldValue,
+  ResultMeta,
+  SimpleFieldValue,
+  Snippet,
+} from '../../components/result/types';
 
-  if (typeof fieldValue === 'object' && !fieldValue.hasOwnProperty('raw')) {
-    for (const [propName, value] of Object.entries(fieldValue)) {
-      flattenDocumentField(fieldName + '.' + propName, value).map(([flatKey, flatVal]) => {
-        flattened.push([flatKey, flatVal]);
-      });
-    }
-  } else {
-    flattened.push([fieldName, fieldValue]);
-  }
+interface SearchApiWrappedFieldValue {
+  raw?: SimpleFieldValue;
+  snippet?: Snippet;
+}
+type SearchApiNestedFieldValue =
+  | { [key: string]: SearchApiNestedFieldValue | SearchApiWrappedFieldValue }
+  | SearchApiNestedFieldValue[];
+type SearchApiFieldValue = ResultMeta | SearchApiWrappedFieldValue | SearchApiNestedFieldValue;
 
-  return flattened;
-};
+function isResultMeta(fieldName: string, _: SearchApiFieldValue): _ is ResultMeta {
+  return fieldName === '_meta';
+}
 
-/* This method flattens documents returned from the ent-search backend.
- * Example document:
- * {
- *   id: { raw: '123' },
- *   _meta: { engine: 'Test', id: '1' },
- *   title: { raw: 'Getty Museum' },
- *   address: { city: { raw: 'Los Angeles' }, state: { raw: 'California' } },
- * }
- * Will be transformed to:
- * {
- *   id: { raw: '123' },
- *   _meta: { engine: 'Test', id: '1' },
- *   title: { raw: 'Getty Museum' },
- *   'address.city': { raw: 'Los Angeles' },
- *   'address.state': { raw: 'California' },
- * }
- */
-export const flattenDocument = (result: object): object => {
-  const flattened: { [index: string]: object } = {};
-
-  for (const [key, value] of Object.entries(result)) {
-    if (key === 'id' || key === '_meta') {
-      flattened[key] = value;
-    } else {
-      for (const [flatName, flatValue] of flattenDocumentField(key, value)) {
-        flattened[flatName] = flatValue;
+function isFieldValueWrapper(
+  fieldValue: SearchApiFieldValue
+): fieldValue is SearchApiWrappedFieldValue {
+  return (
+    fieldValue &&
+    Object.entries(fieldValue).reduce((isValueWrapper: boolean, [k, v]) => {
+      if (k !== 'raw' && k !== 'snippet') {
+        return false;
       }
-    }
+
+      if (v === null) {
+        return isValueWrapper;
+      }
+
+      return (Array.isArray(v) ? v : [v]).reduce((isScalar, currentValue) => {
+        return isScalar && currentValue !== null && typeof currentValue !== 'object';
+      }, isValueWrapper);
+    }, true)
+  );
+}
+
+function isNestedFieldValue(
+  fieldValue: SearchApiFieldValue
+): fieldValue is SearchApiNestedFieldValue {
+  if (Array.isArray(fieldValue)) {
+    return fieldValue.reduce(
+      (isNested: boolean, current) => isNested || isNestedFieldValue(current),
+      false
+    );
   }
 
-  return flattened;
-};
+  return fieldValue != null && typeof fieldValue === 'object' && !isFieldValueWrapper(fieldValue);
+}
+
+function formatNestedFieldValue(
+  fieldValue: SearchApiNestedFieldValue | SearchApiWrappedFieldValue
+): NestedFieldValue {
+  if (Array.isArray(fieldValue)) {
+    return fieldValue.map(formatNestedFieldValue);
+  }
+
+  if (fieldValue !== null && typeof fieldValue === 'object') {
+    return Object.entries(fieldValue).reduce(
+      (formattedFieldValue, [nestedFieldName, currentValue]) => {
+        return {
+          ...formattedFieldValue,
+          [nestedFieldName]: isFieldValueWrapper(currentValue)
+            ? currentValue.raw
+            : formatNestedFieldValue(currentValue),
+        };
+      },
+      {}
+    );
+  }
+
+  return fieldValue;
+}
+
+export function formatResult(
+  result: Record<string, SearchApiFieldValue>
+): Record<string, ResultMeta | FieldValue> {
+  return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
+    if (!isResultMeta(fieldName, fieldValue) && isNestedFieldValue(fieldValue)) {
+      return { ...acc, [fieldName]: { raw: formatNestedFieldValue(fieldValue) } };
+    }
+
+    return { ...acc, [fieldName]: fieldValue };
+  }, {});
+}
+
+export function formatResultWithoutMeta(
+  result: Record<string, SearchApiFieldValue>
+): Record<string, FieldValue> {
+  return Object.entries(result).reduce((acc, [fieldName, fieldValue]) => {
+    if (isResultMeta(fieldName, fieldValue)) {
+      return { ...acc };
+    }
+
+    if (isNestedFieldValue(fieldValue)) {
+      return { ...acc, [fieldName]: { raw: formatNestedFieldValue(fieldValue) } };
+    }
+
+    return { ...acc, [fieldName]: fieldValue };
+  }, {});
+}
