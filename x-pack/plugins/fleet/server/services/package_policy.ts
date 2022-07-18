@@ -879,6 +879,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         }
         return packageToPackagePolicy(packageInfo, '', defaultOutputId);
       }
+    } else {
+      throw new Error(pkgName + ' Package is not installed.');
     }
   }
 
