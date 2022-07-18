@@ -7,14 +7,13 @@
  */
 
 import { Server as HapiServer } from '@hapi/hapi';
-import { OpsMetrics } from '@kbn/core-metrics-server';
+import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,
-  OpsMetricsCollectorOptions,
   ServerMetricsCollector,
-  MetricsCollector,
-} from './collectors';
+} from '@kbn/core-metrics-collectors-server-internal';
+import type { OpsMetricsCollectorOptions } from '@kbn/core-metrics-collectors-server-internal';
 
 export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly processCollector: ProcessMetricsCollector;

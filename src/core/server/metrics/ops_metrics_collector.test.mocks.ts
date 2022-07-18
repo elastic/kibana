@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 // move to public mocks
-import { collectorMock } from './collectors/mocks';
+import { collectorMock } from './collectors/mocks'; // will move to `@kbn/core-metrics-collectors-server-mocks`
 
 export const mockOsCollector = collectorMock.create();
-jest.doMock('./collectors/os', () => ({
-  OsMetricsCollector: jest.fn().mockImplementation(() => mockOsCollector),
-}));
 
 export const mockProcessCollector = collectorMock.create();
-jest.doMock('./collectors/process', () => ({
-  ProcessMetricsCollector: jest.fn().mockImplementation(() => mockProcessCollector),
-}));
 
 export const mockServerCollector = collectorMock.create();
-jest.doMock('./collectors/server', () => ({
-  ServerMetricsCollector: jest.fn().mockImplementation(() => mockServerCollector),
-}));
+
+jest.doMock('@kbn/core-metrics-collectors-server-internal', () => {
+  return {
+    OsMetricsCollector: jest.fn().mockImplementation(() => mockOsCollector),
+    ProcessMetricsCollector: jest.fn().mockImplementation(() => mockProcessCollector),
+    ServerMetricsCollector: jest.fn().mockImplementation(() => mockServerCollector),
+  };
+});

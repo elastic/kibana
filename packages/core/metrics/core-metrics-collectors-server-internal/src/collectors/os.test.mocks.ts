@@ -7,7 +7,6 @@
  */
 
 import { metricsCollectorMock } from './mocks_internal';
-// move to public mocks
 export const cgroupCollectorMock = metricsCollectorMock.create();
 jest.doMock('./cgroup', () => ({
   OsCgroupMetricsCollector: jest.fn(() => cgroupCollectorMock),

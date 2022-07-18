@@ -63,7 +63,6 @@ export const collectorMock = {
   createOpsProcessMetrics: createMockOpsProcessMetrics,
 };
 
-// internal duplicate of EventLoopDelay mocks
 // internal duplicate of EventLoopDelay mocks exposed in @kbn/core-metrics-collectors-server-mocks for unit tests
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}
