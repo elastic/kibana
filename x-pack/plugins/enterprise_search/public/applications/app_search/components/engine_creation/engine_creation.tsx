@@ -16,12 +16,12 @@ import { parseQueryParams } from '../../../shared/query_params';
 import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
 
-import { ENGINE_CREATION_TITLE } from './constants';
-import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
-import { SelectEngineType } from './select_engine_type';
 import { ConfigureAppSearchEngine } from './configure_app_search_engine';
 import { ConfigureElasticsearchEngine } from './configure_elasticsearch_engine';
+import { ENGINE_CREATION_TITLE } from './constants';
+import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 import { ReviewElasticsearchEngine } from './review_elasticsearch_engine';
+import { SelectEngineType } from './select_engine_type';
 
 export const EngineCreation: React.FC = () => {
   const { search } = useLocation() as Location;

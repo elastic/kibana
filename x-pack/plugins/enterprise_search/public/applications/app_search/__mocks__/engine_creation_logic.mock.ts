@@ -7,8 +7,8 @@
 
 import dedent from 'dedent';
 
-import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 import { EngineCreationSteps } from '../components/engine_creation/engine_creation_logic';
+import { SearchIndexSelectableOption } from '../components/engine_creation/search_index_selectable';
 
 export const DEFAULT_VALUES = {
   ingestionMethod: '',

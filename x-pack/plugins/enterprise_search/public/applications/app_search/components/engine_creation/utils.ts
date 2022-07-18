@@ -37,7 +37,10 @@ export const formatIndicesToSelectable = (
   selectedIndexName: string
 ): SearchIndexSelectableOption[] => {
   return indices.map((index) => {
-    let icon, color, toolTipTitle, toolTipContent;
+    let icon;
+    let color;
+    let toolTipTitle;
+    let toolTipContent;
 
     if (index.name.startsWith('search-')) {
       color = 'success';

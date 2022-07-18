@@ -9,6 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 export const DEFAULT_LANGUAGE = 'Universal';
 
+export const ENGINE_CREATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.title',
+  {
+    defaultMessage: 'Create an engine',
+  }
+);
+
 export const ENGINE_CREATION_FORM_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.form.title',
   {
