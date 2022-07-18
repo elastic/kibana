@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
 
@@ -13,10 +13,6 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
-  });
-
-  after(async () => {
-    await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {

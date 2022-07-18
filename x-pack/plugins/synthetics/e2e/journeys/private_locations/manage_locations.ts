@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
@@ -12,10 +12,6 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
-  });
-
-  after(async () => {
-    await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {
