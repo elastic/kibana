@@ -26429,8 +26429,6 @@
     "xpack.securitySolution.endpointManagemnet.noPermissionsText": "Elastic Security Administrationを使用するために必要なKibana権限がありません。",
     "xpack.securitySolution.endpointPolicyStatus.revisionNumber": "rev. {revNumber}",
     "xpack.securitySolution.endpointPolicyStatus.tooltipTitleLabel": "ポリシーが適用されました",
-    "xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle": "失敗",
-    "xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle": "成功",
     "xpack.securitySolution.endpointResponseActions.status.agentStatus": "エージェントステータス",
     "xpack.securitySolution.endpointResponseActions.status.lastActive": "前回のアーカイブ",
     "xpack.securitySolution.endpointResponseActions.status.policyStatus": "ポリシーステータス",
