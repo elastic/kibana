@@ -29,11 +29,8 @@ For more details, refer to <<kibana-feature-privileges>>.
 Each rule type includes a list of authorized consumer features. For each feature,
 users are authorized to perform either `read` or `all` operations on rules of
 that type. This enables you to determine which rule types you can read, create,
-or modify.
-
-// TBD: What is the purpose of this note? Since we're not creating/defining rules in this API, can it be removed?
-NOTE: Some rule types are limited to specific features, which might not be
-available when <<create-edit-rules,defining rules>> in *{stack-manage-app}*. 
+or modify. If you want to create or edit a rule in {kib}, some rule types are
+limited to specific features and apps.
 
 [[list-rule-types-api-params]]
 === {api-path-parms-title}
@@ -51,19 +48,13 @@ Each rule type has the following properties in the API response:
 (array of objects) An explicit list of groups for which the rule type can
 schedule actions, each with the action group's unique ID and human readable name.
 Rule `actions` validation uses this configuration to ensure that groups are
-valid. Use `kbn-i18n` to translate the names of the action group when
-registering the rule type.
-//TBD: The kbn-i18n phrase doesn't seem appropriate for this context. Can we remove it?
+valid.
 
 `action_variables`::
-(object) An explicit list of action variables that the rule type makes available
-via context and state in action parameter templates, and a short human readable
-description. The Rule UI uses this information to prompt users for these
-variables in action parameter editors. Use `kbn-i18n` to translate the
-descriptions.
-//TBD: What is the intent of "explicit list"? Can we drop "explicit"?
-//TBD: Which "Rule UI" does this refer to? Is it only the "Rules and Connectors" UI in Stack Management? Or do all apps use this information?
-//TBD: The kbn-i18n sentence seems out of context here too. Can we remove it?
+(object) A list of action variables that the rule type makes available via
+context and state in action parameter templates, and a short human readable
+description. When you create a rule in {kib}, it uses this information to prompt
+you for these variables in action parameter editors.
 
 `authorized_consumers`::
 (object) The list of the plugins IDs that have access to the rule type.
@@ -72,8 +63,8 @@ descriptions.
 (string) The default ID for the rule type group.
 
 `does_set_recovery_context`::
-(boolean) 
-// TBD: What does this property mean?
+(boolean) Indicates whether the rule passes context variables to its recovery
+action.
 
 `enabled_in_license`::
 (boolean) Indicates whether the rule type is enabled or disabled based on the
@@ -97,9 +88,7 @@ subscription.
 
 `recovery_action_group`::
 (object) An action group to use when an alert goes from an active state to an
-inactive one. Do not specify this action group under the `action_groups`
-property. If `recovery_action_group` is not specified, the default `recovered` action group is used.
-//TBD: The "Do not use..." phrase doesn't seem appropriate here, since we're listing not setting these properties. Can we remove it?
+inactive one. 
 
 [[list-rule-types-api-codes]]
 === {api-response-codes-title}
