@@ -31,11 +31,6 @@ jest.doMock('@kbn/core-analytics-browser-internal', () => ({
   AnalyticsService: AnalyticsServiceConstructor,
 }));
 
-export const fetchOptionalMemoryInfoMock = jest.fn();
-jest.doMock('./fetch_optional_memory_info', () => ({
-  fetchOptionalMemoryInfo: fetchOptionalMemoryInfoMock,
-}));
-
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
   .fn()

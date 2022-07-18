@@ -12,7 +12,7 @@ export const KBN_LOAD_MARKS = 'kbnLoad';
 export { KIBANA_LOADED_EVENT } from '../../utils';
 
 export const LOAD_START = 'load-started';
-export const LOAD_BOOTSTRAP_START = 'bootstrap-start';
+export const LOAD_BOOTSTRAP_START = 'bootstrap-started';
 export const LOAD_CORE_CREATED = 'core-created';
 export const LOAD_SETUP_DONE = 'setup-done';
 export const LOAD_START_DONE = 'start-done';

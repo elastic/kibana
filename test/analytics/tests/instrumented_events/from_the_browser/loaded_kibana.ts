@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const { common } = getPageObjects(['common']);
-  const browser = getService('browser');
 
   describe('Loaded kibana', () => {
     beforeEach(async () => {
@@ -29,8 +28,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.protocol).to.be.a('string');
 
       // Kibana Loaded timings
-      expect(event.properties).to.have.property('load_started');
-      expect(event.properties.load_started).to.be.a('number');
+      expect(event.properties).to.have.property('duration');
+      expect(event.properties.duration).to.be.a('number');
+
+      expect(event.properties).to.have.property('key1', 'load-started');
+      expect(event.properties).to.have.property('key2', 'bootstrap-started');
+      expect(event.properties).to.have.property('key3', 'core-created');
+      expect(event.properties).to.have.property('key4', 'setup-done');
+      expect(event.properties).to.have.property('key5', 'start-done');
+
+      expect(event.properties.value1).to.be.a('number');
+      expect(event.properties.value2).to.be.a('number');
+      expect(event.properties.value3).to.be.a('number');
+      expect(event.properties.value4).to.be.a('number');
+      expect(event.properties.value5).to.be.a('number');
+
       expect(event.properties).to.have.property('bootstrap_started');
       expect(event.properties.bootstrap_started).to.be.a('number');
       expect(event.properties).to.have.property('core_created');
@@ -41,16 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.start_done).to.be.a('number');
       expect(event.properties).to.have.property('first_app_nav');
       expect(event.properties.start_done).to.be.a('number');
-
-      if (browser.isChromium) {
-        // Kibana Loaded memory
-        expect(event.properties).to.have.property('memory_js_heap_size_limit');
-        expect(event.properties.memory_js_heap_size_limit).to.be.a('number');
-        expect(event.properties).to.have.property('memory_js_heap_size_total');
-        expect(event.properties.memory_js_heap_size_total).to.be.a('number');
-        expect(event.properties).to.have.property('memory_js_heap_size_used');
-        expect(event.properties.memory_js_heap_size_used).to.be.a('number');
-      }
     });
   });
 }
