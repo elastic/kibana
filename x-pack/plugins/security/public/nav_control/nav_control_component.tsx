@@ -93,11 +93,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   }
 
   const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
-  const isCloudUser = currentUser.value?.elastic_cloud_user;
+  const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
 
-  if (!isAnonymous && !isCloudUser) {
-    const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
-
+  if (!isAnonymous && !hasCustomProfileLinks) {
     const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
         <FormattedMessage
@@ -114,11 +112,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     };
 
     // Set this as the first link if there is no user-defined profile link
-    if (!hasCustomProfileLinks) {
-      items.unshift(profileMenuItem);
-    } else {
-      items.push(profileMenuItem);
-    }
+    items.unshift(profileMenuItem);
   }
 
   items.push({
