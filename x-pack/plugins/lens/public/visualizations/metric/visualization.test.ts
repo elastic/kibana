@@ -15,11 +15,11 @@ import { getMetricVisualization, MetricVisualizationState } from './visualizatio
 const paletteService = chartPluginMock.createPaletteRegistry();
 
 describe('metric visualization', () => {
-  describe('generating an expression', () => {
-    const visualization = getMetricVisualization({
-      paletteService,
-    });
+  const visualization = getMetricVisualization({
+    paletteService,
+  });
 
+  describe('generating an expression', () => {
     const palette: PaletteOutput<CustomPaletteParams> = {
       type: 'palette',
       name: 'foo',
@@ -304,6 +304,13 @@ describe('metric visualization', () => {
 
       expect(ast.chain).toHaveLength(3);
       expect(ast.chain[0]).toEqual(datasourceFn);
+    });
+  });
+
+  it('implements custom display options', () => {
+    expect(visualization.getDisplayOptions!()).toEqual({
+      noPanelTitle: true,
+      noPadding: true,
     });
   });
 });

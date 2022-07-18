@@ -41,6 +41,7 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -71,7 +72,7 @@ import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
-import { SharingSavedObjectProps } from '../types';
+import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 
@@ -210,7 +211,9 @@ function getViewUnderlyingDataArgs({
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>,
+    SelfStyledEmbeddable
 {
   type = DOC_TYPE;
 
@@ -566,6 +569,7 @@ export class Embeddable
           onRuntimeError={() => {
             this.logError('runtime');
           }}
+          noPadding={this.visDisplayOptions?.noPadding}
         />
       </KibanaThemeProvider>,
       domNode
@@ -850,5 +854,21 @@ export class Embeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  public getSelfStyledOptions() {
+    return {
+      hideTitle: this.visDisplayOptions?.noPanelTitle,
+    };
+  }
+
+  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
+    if (
+      !this.savedVis?.visualizationType ||
+      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
+    ) {
+      return;
+    }
+    return this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
   }
 }

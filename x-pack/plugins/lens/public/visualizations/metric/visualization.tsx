@@ -385,4 +385,11 @@ export const getMetricVisualization = ({
     // Is it possible to break it?
     return undefined;
   },
+
+  getDisplayOptions() {
+    return {
+      noPanelTitle: true,
+      noPadding: true,
+    };
+  },
 });

@@ -763,6 +763,11 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
+export interface VisualizationDisplayOptions {
+  noPanelTitle?: boolean;
+  noPadding?: boolean;
+}
+
 export interface Visualization<T = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -959,6 +964,11 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Gets custom display options for showing the visualization.
+   */
+  getDisplayOptions?: () => VisualizationDisplayOptions;
 }
 
 // Use same technique as TriggerContext

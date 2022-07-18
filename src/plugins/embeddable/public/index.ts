@@ -14,6 +14,7 @@ import { EmbeddablePublicPlugin } from './plugin';
 export type {
   Adapters,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
