@@ -130,6 +130,9 @@ The `fields` directory contains YML files that define the [mappings](https://www
 contain a `base-fields.yml` file for common mappings, an `ecs.yml` file for [ECS](https://www.elastic.co/guide/en/ecs/current/index.html)-compliant fields, an
 `agent.yml` file for mappings specific to the actual agent process, and a `fields.yml` file for everything else.
 
+The mappings defined by `fields` files are used by Fleet to generate an [index template](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html) for each data stream. This index template composes all of the mappings and settings and ensures that all documents ingested by
+the data stream are indexed as configured.
+
 ## `docs` directory
 
 Contains the README file rendered on the integrations detail page for the integration.
