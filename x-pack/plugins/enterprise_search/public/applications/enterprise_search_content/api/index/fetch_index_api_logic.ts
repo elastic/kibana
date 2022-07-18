@@ -9,6 +9,8 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { IndexData } from '../../types';
 
+export type { IndexData } from '../../types';
+
 export const fetchIndex = async ({ indexName }: { indexName: string }) => {
   const route = `/internal/enterprise_search/indices/${indexName}`;
 
