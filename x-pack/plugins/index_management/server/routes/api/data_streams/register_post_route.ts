@@ -36,6 +36,7 @@ export function registerPostOneApplyLatestMappings({
       const { client } = (await context.core).elasticsearch;
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
+        // That API is mean to be used to apply mapping to one specific datastream
         if (dataStreams[0]) {
           const { template } = dataStreams[0];
           const simulateResult = await client.asCurrentUser.indices.simulateTemplate({
