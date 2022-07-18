@@ -412,6 +412,8 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
+      this.dataViewCache.clear(id);
+    } else {
       this.dataViewCache.clearAll();
     }
   };
