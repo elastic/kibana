@@ -22,7 +22,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { tourConfig } from './tour_config';
+import { useKibana } from '../../lib/kibana';
+
+import type { TourConfig, StepConfig } from './tour_config';
+import { getTourConfig } from './tour_config';
 
 export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
 export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
@@ -45,11 +48,14 @@ const maxWidth: EuiTourStepProps['maxWidth'] = 360;
 const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 
-const getSteps = (tourControls: {
-  activeStep: number;
-  incrementStep: () => void;
-  resetTour: () => void;
-}) => {
+const getSteps = (
+  tourConfig: TourConfig,
+  tourControls: {
+    activeStep: number;
+    incrementStep: () => void;
+    resetTour: () => void;
+  }
+) => {
   const { activeStep, incrementStep, resetTour } = tourControls;
   const footerAction = (
     <EuiFlexGroup alignItems="center">
@@ -94,7 +100,7 @@ const getSteps = (tourControls: {
       />
     </EuiButtonEmpty>
   );
-  return tourConfig.map((stepConfig) => {
+  return tourConfig.map((stepConfig: StepConfig) => {
     const { content, imageConfig, ...rest } = stepConfig;
     return (
       <EuiTourStep
@@ -134,6 +140,13 @@ const TourContext = createContext<TourContextValue>({
 } as TourContextValue);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
+  const { services } = useKibana();
+  const isGroupedNavEnabled = Boolean(
+    services.uiSettings?.get('securitySolution:enableGroupedNav')
+  );
+
+  const tourConfig = getTourConfig(isGroupedNavEnabled);
+
   const [isTourActive, _setIsTourActive] = useState<boolean>(getIsTourActiveFromLocalStorage());
   const setIsTourActive = useCallback((value: boolean) => {
     _setIsTourActive(value);
@@ -148,7 +161,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
       saveTourStepToLocalStorage(nextStep);
       return nextStep;
     });
-  }, []);
+  }, [tourConfig.length]);
 
   const resetStep = useCallback(() => {
     _setActiveStep(1);
@@ -167,7 +180,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     <TourContext.Provider value={context}>
       <>
         {children}
-        {showTour && <>{getSteps({ activeStep, incrementStep, resetTour })}</>}
+        {showTour && <>{getSteps(tourConfig, { activeStep, incrementStep, resetTour })}</>}
       </>
     </TourContext.Provider>
   );
