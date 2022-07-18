@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Redirect, Route, RouteComponentProps, RouteProps, Switch } from 'react-router-dom';
-import { CLOUD_SECURITY_POSTURE_BASE_PATH, CspSecuritySolutionContext } from '..';
+import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'react-router-dom';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
 import { cloudPosturePages } from '../common/navigation/constants';
-import { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
+import type { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
 import { UnknownRoute } from '../components/unknown_route';
 import { pageToComponentMappingNoPageTemplate } from './constants';
 import { SecuritySolutionContext } from './security_solution_context';
