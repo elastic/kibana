@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import numeral from '@elastic/numeral';
 
+import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+
 import type { TimelineId } from '../../../../common/types/timeline';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { eventsDefaultModel } from '../events_viewer/default_model';
-
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as i18n from '../../../hosts/pages/translations';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { SHOWING, UNIT } from '../alerts_viewer/translations';
+import { histogramConfigs as alertsHistogramConfig } from '../alerts_viewer/histogram_configs';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -30,8 +37,12 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
+import { alertsDefaultModel } from '../alerts_viewer/default_headers';
+import { useUiSetting$ } from '../../lib/kibana';
+import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
+const ALERT_HISTOGRAM_ID = 'alertsHistogramQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -68,6 +79,7 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
   pageFilters?: Filter[];
+  externalAlertPageFilters?: Filter[];
   setQuery: GlobalTimeArgs['setQuery'];
   timelineId: TimelineId;
 };
@@ -77,6 +89,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   endDate,
   filterQuery,
   indexNames,
+  externalAlertPageFilters,
   pageFilters,
   setQuery,
   startDate,
@@ -86,6 +99,52 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const { globalFullScreen } = useGlobalFullScreen();
   const ACTION_BUTTON_COUNT = 5;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const [showExternalAlerts, setShowExternalAlerts] = useState<boolean>(false);
+  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+
+  const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
+
+  const getSubtitle = useCallback(
+    (totalCount: number) =>
+      `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
+    [defaultNumberFormat]
+  );
+
+  const histogramExtraProps = useMemo(
+    () => ({
+      ...(showExternalAlerts
+        ? {
+            ...alertsHistogramConfig,
+            id: ALERT_HISTOGRAM_ID,
+            defaultModel: alertsDefaultModel,
+            pageFilters: externalAlertPageFilters,
+            subtitle: getSubtitle,
+          }
+        : {
+            ...histogramConfigs,
+            id: EVENTS_HISTOGRAM_ID,
+            defaultModel: eventsDefaultModel,
+            pageFilters,
+            unit,
+          }),
+    }),
+    [externalAlertPageFilters, getSubtitle, pageFilters, showExternalAlerts]
+  );
+
+  const statefulEventsViewerExtraProps = useMemo(
+    () => ({
+      ...(showExternalAlerts
+        ? {
+            pageFilters: [defaultAlertsFilters, ...(externalAlertPageFilters || [])],
+          }
+        : {
+            pageFilters,
+            unit,
+          }),
+    }),
+    [showExternalAlerts, externalAlertPageFilters, pageFilters]
+  );
 
   useEffect(() => {
     dispatch(
@@ -99,9 +158,12 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
               }
             : c
         ),
+        excludedRowRendererIds: showExternalAlerts
+          ? alertsDefaultModel.excludedRowRendererIds
+          : undefined,
       })
     );
-  }, [dispatch, tGridEnabled, timelineId]);
+  }, [dispatch, showExternalAlerts, tGridEnabled, timelineId]);
 
   useEffect(() => {
     return () => {
@@ -111,8 +173,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     };
   }, [deleteQuery]);
 
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
-
   return (
     <>
       {!globalFullScreen && (
@@ -121,24 +181,36 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           filterQuery={filterQuery}
           setQuery={setQuery}
           startDate={startDate}
-          id={EVENTS_HISTOGRAM_ID}
           indexNames={indexNames}
-          {...histogramConfigs}
+          {...histogramExtraProps}
         />
       )}
       <StatefulEventsViewer
+        additionalFilters={
+          <EuiCheckbox
+            id="showExternalAlertsCheckbox"
+            aria-label="Show external alerts"
+            onChange={toggleExternalAlerts}
+            checked={showExternalAlerts}
+            color="text"
+            data-test-subj="showExternalAlertsCheckbox"
+            label={i18n.SHOW_EXTERNAL_ALERTS}
+          />
+        }
         defaultCellActions={defaultCellActions}
-        defaultModel={eventsDefaultModel}
         end={endDate}
-        entityType="events"
-        id={timelineId}
+        entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
-        pageFilters={pageFilters}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
-        unit={unit}
+        id={timelineId}
+        defaultModel={{
+          ...eventsDefaultModel,
+          excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
+        }}
+        {...statefulEventsViewerExtraProps}
       />
     </>
   );

@@ -98,14 +98,6 @@ export const UsersTabs = memo<UsersTabsProps>(
             pageFilters={pageFilters}
           />
         </Route>
-        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.alerts})`}>
-          <AlertsView
-            entityType="events"
-            timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={pageFilters ?? []}
-            {...tabProps}
-          />
-        </Route>
       </Switch>
     );
   }

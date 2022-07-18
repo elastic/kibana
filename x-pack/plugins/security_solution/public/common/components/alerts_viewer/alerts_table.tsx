@@ -89,7 +89,6 @@ const AlertsTableComponent: React.FC<Props> = ({
       timelineActions.initializeTGridSettings({
         id: timelineId,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        filterManager,
         defaultColumns: alertsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -99,8 +98,6 @@ const AlertsTableComponent: React.FC<Props> = ({
             : c
         ),
         excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds,
-        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-        title: i18n.ALERTS_TABLE_TITLE,
         // TODO: avoid passing this through the store
       })
     );

@@ -31,6 +31,10 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
+    id: 'agent.type',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
     id: 'event.dataset',
   },
   {

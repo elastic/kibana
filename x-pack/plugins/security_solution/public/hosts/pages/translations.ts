@@ -104,3 +104,10 @@ export const HOST_RISK_SCORE_OVER_TIME = i18n.translate(
     defaultMessage: 'Host risk score over time',
   }
 );
+
+export const SHOW_EXTERNAL_ALERTS = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.showExternalAlerts',
+  {
+    defaultMessage: 'Show only external alerts',
+  }
+);
