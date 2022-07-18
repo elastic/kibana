@@ -39,9 +39,6 @@ export interface MetricsServiceSetup {
  */
 export type MetricsServiceStart = MetricsServiceSetup;
 
-export type InternalMetricsServiceSetup = MetricsServiceSetup;
-export type InternalMetricsServiceStart = MetricsServiceStart;
-
 /**
  * Regroups metrics gathered by all the collectors.
  * This contains metrics about the os/runtime, the kibana process and the http server.
