@@ -8,7 +8,7 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import { RuleAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { LoadRuleAggregationsProps, rewriteBodyRes } from './aggregate_helpers';
-import { mapFilterToKueryNode } from './map_filters_to_kql';
+import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
 export async function loadRuleAggregationsWithKueryFilter({
   http,
@@ -19,7 +19,7 @@ export async function loadRuleAggregationsWithKueryFilter({
   ruleStatusesFilter,
   tagsFilter,
 }: LoadRuleAggregationsProps): Promise<RuleAggregations> {
-  const filtersKueryNode = mapFilterToKueryNode({
+  const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
     actionTypesFilter,
     tagsFilter,

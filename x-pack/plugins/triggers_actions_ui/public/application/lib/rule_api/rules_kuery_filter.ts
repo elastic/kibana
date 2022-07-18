@@ -8,7 +8,7 @@
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule } from '../../../types';
-import { mapFilterToKueryNode } from './map_filters_to_kql';
+import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 import { LoadRulesProps, rewriteRulesResponseRes } from './rules_helpers';
 
 export async function loadRulesWithKueryFilter({
@@ -27,7 +27,7 @@ export async function loadRulesWithKueryFilter({
   total: number;
   data: Rule[];
 }> {
-  const filtersKueryNode = mapFilterToKueryNode({
+  const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
     actionTypesFilter,
     tagsFilter,
