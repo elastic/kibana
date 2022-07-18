@@ -105,6 +105,7 @@ export function EditorFrame(props: EditorFrameProps) {
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               framePublicAPI={framePublicAPI}
+              uiActions={props.plugins.uiActions}
             />
           )
         }

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedSearchPublicPlugin } from './plugin';
-import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
+import type { UnifiedSearchPublicPlugin } from '../plugin';
+import type { AutocompleteStart, AutocompleteSetup } from '../autocomplete';
 
 export type Setup = jest.Mocked<ReturnType<UnifiedSearchPublicPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<UnifiedSearchPublicPlugin['start']>>;

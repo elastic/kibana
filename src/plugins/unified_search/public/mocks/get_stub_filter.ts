@@ -8,7 +8,8 @@
 
 import { type Filter, FilterStateStore } from '@kbn/es-query';
 
-export function getFilter(
+export function mockFilter(
+  index: string,
   store: FilterStateStore,
   disabled: boolean,
   negated: boolean,
@@ -20,7 +21,7 @@ export function getFilter(
       store,
     },
     meta: {
-      index: 'logstash-*',
+      index,
       disabled,
       negate: negated,
       alias: null,
