@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
@@ -39,19 +39,24 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  const spacesSharedObjectsArchive =
-    'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces';
-
   describe('Exports and Spaces', () => {
+    const ids = ['non_default_space', 'non_timezone_space'];
     before(async () => {
-      await esArchiver.load(spacesSharedObjectsArchive); // multiple spaces with different config settings
+      for (const id of ids) {
+        await spacesService.create({ id, name: id });
+        await kibanaServer.importExport.load(
+          `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_${id}`,
+          { space: id }
+        );
+      }
       await reportingAPI.initEcommerce();
     });
 
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await esArchiver.unload(spacesSharedObjectsArchive);
+      for (const id of ids) await spacesService.delete(id);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     /*
