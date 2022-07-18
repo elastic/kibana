@@ -671,7 +671,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       prebuilt_rule_alert_count: { value: number };
     }
 
-    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value };
+    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
   public async fetchTimelineEndpointAlerts(interval: number) {
