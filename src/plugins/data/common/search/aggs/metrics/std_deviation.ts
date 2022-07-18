@@ -110,6 +110,10 @@ export const getStdDeviationMetricAgg = () => {
       return [new ValueAggConfig('std_lower'), new ValueAggConfig('std_upper')];
     },
 
+    getValueBucketPath(aggConfig) {
+      return `${aggConfig.id}.std_deviation`;
+    },
+
     getValue(agg, bucket) {
       const showBounds = agg.getParam('showBounds');
       if (showBounds === false) {
