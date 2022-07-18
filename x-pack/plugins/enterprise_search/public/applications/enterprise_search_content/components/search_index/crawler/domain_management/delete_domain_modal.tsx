@@ -55,7 +55,7 @@ export const DeleteDomainModal: React.FC = () => {
       <EuiModalBody>
         <EuiText>
           <FormattedMessage
-            id="xpack.enterpriseSearch.crawler.crawlRulesTable.description"
+            id="xpack.enterpriseSearch.crawler.deleteDomainModal.description"
             defaultMessage="Remove the domain {domainUrl} from your crawler. This will also delete all entry points and crawl rules you have set up. Any documents related to this domain will be removed on the next crawl. {thisCannotBeUndoneMessage}"
             values={{
               domainUrl: <strong>{domain?.url}</strong>,
