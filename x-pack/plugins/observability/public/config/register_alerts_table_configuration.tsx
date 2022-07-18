@@ -7,7 +7,7 @@
 
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { observabilityFeatureId } from '../../common';
-import { useJSXBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
+import { useBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
 import { addDisplayNames } from '../pages/alerts/containers/alerts_table_t_grid/add_display_names';
@@ -26,9 +26,7 @@ const getO11yAlertsTableConfiguration = (
   getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
     return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
   }) as unknown as GetRenderCellValue,
-  useBulkActions: () => ({
-    render: useJSXBulkAddToCaseActions,
-  }),
+  useBulkActions: useBulkAddToCaseActions,
 });
 
 export { getO11yAlertsTableConfiguration };

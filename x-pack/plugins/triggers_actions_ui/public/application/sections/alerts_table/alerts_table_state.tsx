@@ -55,7 +55,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-  cases?: CaseUi;
+  cases: CaseUi;
 }
 
 interface AlertsTableStorage {
@@ -243,13 +243,7 @@ const AlertsTableState = ({
     ]
   );
 
-  console.log('alerts_table booom');
-  console.log(cases?.ui);
-  const CasesContext = cases?.ui?.getCasesContext();
-
-  if (!cases?.ui) {
-    return null;
-  }
+  const CasesContext = cases.ui.getCasesContext();
 
   return hasAlertsTableConfiguration ? (
     <>

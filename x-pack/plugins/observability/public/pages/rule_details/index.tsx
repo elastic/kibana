@@ -155,9 +155,6 @@ export function RuleDetailsPage() {
 
   const userPermissions = useGetUserCasesPermissions();
   const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
-
-  console.log('rule_details boooom');
-  console.log(cases.ui);
   const alertStateProps = {
     cases: {
       ui: cases.ui,

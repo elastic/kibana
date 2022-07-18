@@ -424,13 +424,16 @@ export type AlertTableFlyoutComponent =
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
 
-export type RenderBulkActions =
-  | ((isAllSelected: boolean, selectedAlertIds: string[]) => JSX.Element[])
-  | undefined;
+export interface BulkActionsConfig {
+  label: string;
+  key: string;
+  'data-test-subj': string;
+  disableOnQuery: boolean;
+  disabledLabel: string;
+  onClick: (selectedIds: Array<{ id: string; index: string }>, isAllSelected: boolean) => void;
+}
 
-export type UseBulkActionsRegistry = () => {
-  render: RenderBulkActions;
-};
+export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
 export interface AlertsTableConfigurationRegistry {
   id: string;

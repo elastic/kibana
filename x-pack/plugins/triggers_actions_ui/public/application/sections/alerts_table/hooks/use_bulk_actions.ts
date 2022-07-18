@@ -7,9 +7,9 @@
 import { useContext, useEffect } from 'react';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
+  BulkActionsConfig,
   BulkActionsState,
   BulkActionsVerbs,
-  RenderBulkActions,
   UseBulkActionsRegistry,
 } from '../../../../types';
 import { BulkActionsContext } from '../bulk_actions/context';
@@ -27,17 +27,17 @@ export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
-  renderBulkActions: RenderBulkActions;
+  bulkActions: BulkActionsConfig[];
 }
 
 export function useBulkActions({
   alerts,
-  useBulkActionsConfig = () => ({ render: undefined }),
+  useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const { render: renderBulkActions } = useBulkActionsConfig();
+  const bulkActions = useBulkActionsConfig();
 
-  const isBulkActionsColumnActive = Boolean(renderBulkActions);
+  const isBulkActionsColumnActive = Boolean(bulkActions);
 
   useEffect(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
@@ -47,6 +47,6 @@ export function useBulkActions({
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
-    renderBulkActions,
+    bulkActions,
   };
 }

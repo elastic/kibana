@@ -8,22 +8,22 @@
 import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React from 'react';
-import { RenderBulkActions } from '../../../../types';
+import { BulkActionsConfig } from '../../../../types';
 import { BulkActions } from '../bulk_actions/components/toolbar';
 
 export const getToolbarVisibility = ({
-  renderBulkActions: useBulkActions,
+  bulkActions,
   alertsCount,
   rowSelection,
   alerts,
 }: {
-  renderBulkActions: RenderBulkActions;
+  bulkActions: BulkActionsConfig[];
   alertsCount: number;
   rowSelection: Set<number>;
   alerts: EcsFieldsResponse[];
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined || useBulkActions === undefined)
+  if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions === undefined)
     return {};
 
   const options = {
@@ -31,9 +31,7 @@ export const getToolbarVisibility = ({
     showSortSelector: false,
     additionalControls: {
       left: {
-        append: (
-          <BulkActions totalItems={alertsCount} useBulkActions={useBulkActions} alerts={alerts} />
-        ),
+        append: <BulkActions totalItems={alertsCount} items={bulkActions} alerts={alerts} />,
       },
     },
   };

@@ -59,7 +59,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
-    renderBulkActions,
+    bulkActions,
   } = useBulkActions({
     alerts,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
@@ -68,12 +68,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
     return getToolbarVisibility({
-      renderBulkActions,
+      bulkActions,
       alertsCount,
       rowSelection,
       alerts: alertsData.alerts,
     });
-  }, [alertsCount, alertsData.alerts, renderBulkActions, bulkActionsState])();
+  }, [bulkActionsState, bulkActions, alertsCount, alertsData.alerts])();
 
   const {
     pagination,

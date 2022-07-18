@@ -5,39 +5,31 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 // import styled from 'styled-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { BulkActionsVerbs } from '../../../../../types';
+import { BulkActionsConfig, BulkActionsVerbs } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
-  useBulkActions: (isAllSelected: boolean, selectedIds: string[]) => JSX.Element[];
+  items: BulkActionsConfig[];
   alerts: EcsFieldsResponse[];
 }
 
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({
-  totalItems,
-  useBulkActions,
-  alerts,
-}) => {
-  const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const [showClearSelection, setShowClearSelectiong] = useState(false);
+const useBulkActionsToMenuItemMapper = (
+  items: BulkActionsConfig[],
+  alerts: EcsFieldsResponse[]
+) => {
+  const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
+  const isDisabled = isAllSelected;
 
-  useEffect(() => {
-    setShowClearSelectiong(isAllSelected);
-  }, [isAllSelected]);
-
-  // [{id, index}] => in observability [{ecs: {_id, _index}}]
   const selectedAlertIds = useMemo(
     () =>
       Array.from(rowSelection.values()).map((rowIndex: number) => ({
@@ -46,6 +38,31 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
       })),
     [rowSelection, alerts]
   );
+
+  return items.map((item) => (
+    <EuiContextMenuItem
+      key={item.key}
+      data-test-subj={item['data-test-subj']}
+      disabled={isDisabled}
+      onClick={() => {
+        item.onClick(selectedAlertIds, isAllSelected);
+      }}
+    >
+      {isDisabled ? item.disabledLabel : item.label}
+    </EuiContextMenuItem>
+  ));
+};
+
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, alerts }) => {
+  const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const [showClearSelection, setShowClearSelectiong] = useState(false);
+  const bulkActionItems = useBulkActionsToMenuItemMapper(items, alerts);
+
+  useEffect(() => {
+    setShowClearSelectiong(isAllSelected);
+  }, [isAllSelected]);
 
   const selectedCount = rowSelection.size;
 
@@ -101,8 +118,6 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
         : i18n.SELECT_ALL_ALERTS(formattedTotalCount, totalItems),
     [showClearSelection, formattedTotalCount, totalItems]
   );
-
-  const bulkActionItems = useBulkActions(isAllSelected, selectedAlertIds);
 
   return (
     <div
