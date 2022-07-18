@@ -61,7 +61,7 @@ export function useLastXChecks<Fields>({
   });
 
   const { data } = useEsSearch<Ping, typeof params>(params, [lastRefresh], {
-    name: 'getLast50MonitorRunsByLocation',
+    name: 'getLastXMonitorRunsByLocation',
   });
 
   const dataAsJSON = JSON.stringify(data?.hits?.hits);
