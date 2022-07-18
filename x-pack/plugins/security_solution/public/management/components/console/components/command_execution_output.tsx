@@ -28,7 +28,7 @@ export interface CommandExecutionOutputProps {
   item: CommandHistoryItem;
 }
 export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
-  ({ item: { command, state, id, enteredAt } }) => {
+  ({ item: { command, state, id, enteredAt, isValid } }) => {
     const dispatch = useConsoleStateDispatch();
     const RenderComponent = command.commandDefinition.RenderComponent;
     const [isLongRunningCommand, setIsLongRunningCommand] = useState(false);
@@ -92,7 +92,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
     return (
       <CommandOutputContainer>
         <div>
-          <UserCommandInput input={command.input} />
+          <UserCommandInput input={command.input} isValid={isValid} />
         </div>
         <div>
           <EuiSpacer size="s" />
