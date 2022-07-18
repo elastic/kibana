@@ -36,6 +36,8 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
   step('Click text=Add monitor', async () => {
     await page.click('text=Add monitor');
     expect(page.url()).toBe(`${kibanaUrl}/app/uptime/add-monitor`);
+    await uptime.waitForLoadingToFinish();
+
     await page.click('input[name="name"]');
     await page.fill('input[name="name"]', 'Private location monitor');
     await page.click('label:has-text("Test private location Private")', TIMEOUT_60_SEC);
