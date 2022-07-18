@@ -39,7 +39,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onConnectorCreated,
   onTestConnector,
 }) => {
-  // console.log(`CreateConnectorFlyoutComponent featureId - ${featureId}`);
   const {
     application: { capabilities },
   } = useKibana().services;

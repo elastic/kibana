@@ -188,7 +188,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns a list of registered action types [{ id, name, enabled }]
+   * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
     return Array.from(this.actionTypes)
