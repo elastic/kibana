@@ -231,6 +231,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.metricAccessor,
           filterOperations: isSupportedMetricOperation,
           enableDimensionEditor: true,
+          supportFieldFormat: false,
           required: true,
         },
         {
@@ -249,6 +250,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedMetricOperation,
           enableDimensionEditor: false,
+          supportFieldFormat: false,
           required: false,
         },
         {
@@ -265,6 +267,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetricOperation,
           enableDimensionEditor: false,
+          supportFieldFormat: false,
           supportStaticValue: true,
           required: false,
         },
@@ -284,6 +287,7 @@ export const getMetricVisualization = ({
           supportsMoreColumns: !props.state.breakdownByAccessor,
           filterOperations: isBucketed,
           enableDimensionEditor: true,
+          supportFieldFormat: false,
           required: false,
         },
       ],
