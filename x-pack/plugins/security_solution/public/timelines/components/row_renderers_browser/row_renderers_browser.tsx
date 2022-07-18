@@ -10,8 +10,9 @@ import React, { useMemo, useCallback } from 'react';
 import { xor } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { RowRendererId } from '../../../../common/types/timeline';
-import { renderers, RowRendererOption } from './catalog';
+import type { RowRendererId } from '../../../../common/types/timeline';
+import type { RowRendererOption } from './catalog';
+import { renderers } from './catalog';
 
 interface RowRenderersBrowserProps {
   excludedRowRendererIds: RowRendererId[];

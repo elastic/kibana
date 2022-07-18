@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CameraAction } from './action';
+import type { CameraAction } from './action';
 import { cameraReducer } from './reducer';
-import { createStore, Store } from 'redux';
-import { CameraState, AABB } from '../../types';
+import type { Store } from 'redux';
+import { createStore } from 'redux';
+import type { CameraState, AABB } from '../../types';
 import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
 import { expectVectorsToBeClose } from './test_helpers';
 import { scaleToZoom } from './scale_to_zoom';

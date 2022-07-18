@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EntryList, entriesList } from '@kbn/securitysolution-io-ts-list-types';
+import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
+import { entriesList } from '@kbn/securitysolution-io-ts-list-types';
 import { createSetToFilterAgainst } from './create_set_to_filter_against';
-import { CreateFieldAndSetTuplesOptions, FieldSet } from './types';
+import type { CreateFieldAndSetTuplesOptions, FieldSet } from './types';
 
 export const createFieldAndSetTuples = async <T>({
   events,

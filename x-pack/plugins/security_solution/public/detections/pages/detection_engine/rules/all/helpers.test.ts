@@ -13,8 +13,8 @@ describe('AllRulesTable Helpers', () => {
   describe('showRulesTable', () => {
     test('returns false when rulesCustomInstalled and rulesInstalled are null', () => {
       const result = showRulesTable({
-        rulesCustomInstalled: null,
-        rulesInstalled: null,
+        rulesCustomInstalled: undefined,
+        rulesInstalled: undefined,
       });
       expect(result).toBeFalsy();
     });
@@ -30,7 +30,7 @@ describe('AllRulesTable Helpers', () => {
     test('returns false when both rulesCustomInstalled and rulesInstalled checks return false', () => {
       const result = showRulesTable({
         rulesCustomInstalled: 0,
-        rulesInstalled: null,
+        rulesInstalled: undefined,
       });
       expect(result).toBeFalsy();
     });
@@ -38,14 +38,14 @@ describe('AllRulesTable Helpers', () => {
     test('returns true if rulesCustomInstalled is not null or 0', () => {
       const result = showRulesTable({
         rulesCustomInstalled: 5,
-        rulesInstalled: null,
+        rulesInstalled: undefined,
       });
       expect(result).toBeTruthy();
     });
 
     test('returns true if rulesInstalled is not null or 0', () => {
       const result = showRulesTable({
-        rulesCustomInstalled: null,
+        rulesCustomInstalled: undefined,
         rulesInstalled: 5,
       });
       expect(result).toBeTruthy();

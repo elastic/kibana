@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { getEmailConnector, EmailConnector } from '../objects/connector';
-import {
+import type { EmailConnector } from '../objects/connector';
+import { getEmailConnector } from '../objects/connector';
+import type {
   CustomRule,
   MachineLearningRule,
-  getMachineLearningRule,
   OverrideRule,
   ThreatIndicatorRule,
   ThresholdRule,
 } from '../objects/rule';
+import { getMachineLearningRule } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,

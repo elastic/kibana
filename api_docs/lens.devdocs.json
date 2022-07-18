@@ -161,6 +161,21 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.supportedTriggers",
             "type": "Function",
             "tags": [],
@@ -992,10 +1007,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.DataLayerArgs.hide",
+            "id": "def-public.DataLayerArgs.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -1005,13 +1020,13 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.DataLayerArgs.splitAccessor",
-            "type": "CompoundType",
+            "id": "def-public.DataLayerArgs.splitAccessors",
+            "type": "Array",
             "tags": [],
-            "label": "splitAccessor",
+            "label": "splitAccessors",
             "description": [],
             "signature": [
-              "string | ",
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -1019,7 +1034,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              " | undefined"
+              ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -5387,10 +5402,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.hide",
+            "id": "def-public.XYAnnotationLayerConfig.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5874,10 +5889,10 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.XYDataLayerConfig.hide",
+            "id": "def-public.XYDataLayerConfig.simpleView",
             "type": "CompoundType",
             "tags": [],
-            "label": "hide",
+            "label": "simpleView",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -8962,7 +8977,13 @@
         "description": [],
         "signature": [
           "(id: string | undefined, timeRange: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined) => string"
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
@@ -8990,7 +9011,13 @@
             "label": "timeRange",
             "description": [],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/constants.ts",
@@ -9917,7 +9944,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined) => ",
           {
@@ -9947,7 +9974,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined"
             ],

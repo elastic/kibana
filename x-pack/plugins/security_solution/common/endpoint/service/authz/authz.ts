@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FleetAuthz } from '@kbn/fleet-plugin/common';
-import { LicenseService } from '../../../license';
-import { EndpointAuthz } from '../../types/authz';
-import { MaybeImmutable } from '../../types';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { LicenseService } from '../../../license';
+import type { EndpointAuthz } from '../../types/authz';
+import type { MaybeImmutable } from '../../types';
 
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related

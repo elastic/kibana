@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
-import { CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
@@ -20,11 +20,12 @@ const additionalProps = {
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
-    return getArgumentsForCommand(commandDef).map((usage) => {
+    return getArgumentsForCommand(commandDef).map((usage, index) => {
       return (
-        <EuiText size="s">
+        <>
+          {index > 0 && <EuiSpacer size="xs" />}
           <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
-        </EuiText>
+        </>
       );
     });
   }, [commandDef]);
@@ -139,7 +140,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     ));
     return (
       <>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         {commandDef.args && (
           <EuiDescriptionList
             compressed

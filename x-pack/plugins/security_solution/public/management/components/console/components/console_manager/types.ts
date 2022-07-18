@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ComponentType } from 'react';
-import { ConsoleProps } from '../../types';
+import type { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   id: string;
@@ -18,6 +18,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    * (ex. could hold the details data for the Host that the console is opened against)
    */
   meta?: TMeta;
+
+  /** An optional component used to render the modal body on console exit when actions are pending */
+  ExitPendingActionComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /** An optional component used to render the Overlay page title where the console will be displayed */
   PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;

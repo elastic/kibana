@@ -13,7 +13,7 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { LensAttributes, GetLensAttributes } from './types';
+import type { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
   filterNetworkExternalAlertData,

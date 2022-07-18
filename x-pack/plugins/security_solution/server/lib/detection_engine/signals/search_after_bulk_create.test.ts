@@ -15,11 +15,12 @@ import {
   sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
+import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types';
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
@@ -29,10 +30,10 @@ import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas
 import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
 import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
-import { BuildReasonMessage } from './reason_formatters';
-import { QueryRuleParams } from '../schemas/rule_schemas';
+import type { BuildReasonMessage } from './reason_formatters';
+import type { QueryRuleParams } from '../schemas/rule_schemas';
 import { createPersistenceServicesMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
-import { PersistenceServices } from '@kbn/rule-registry-plugin/server';
+import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -46,7 +47,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { SERVER_APP_ID } from '../../../../common/constants';
-import { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 const buildRuleMessage = mockBuildRuleMessage;
 
@@ -216,6 +217,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -309,6 +311,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -384,6 +387,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -444,6 +448,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -513,6 +518,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -569,6 +575,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -638,6 +645,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -709,6 +717,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -757,6 +766,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -804,6 +814,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -929,6 +940,7 @@ describe('searchAfterAndBulkCreate', () => {
         bulkCreate,
         wrapHits,
         runtimeMappings: undefined,
+        primaryTimestamp: '@timestamp',
       });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1014,6 +1026,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

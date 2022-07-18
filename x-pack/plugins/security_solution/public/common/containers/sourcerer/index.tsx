@@ -10,12 +10,12 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import {
+import type {
   SelectedDataView,
   SourcererDataView,
-  SourcererScopeName,
   SourcererUrlState,
 } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {

@@ -8,17 +8,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { HostsUncommonProcessesEdges } from '../../../../common/search_strategy';
+import type { HostsUncommonProcessesEdges } from '../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
-import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Columns, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '../../../../common/ecs/host';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {

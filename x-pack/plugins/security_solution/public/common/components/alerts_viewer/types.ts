@@ -7,10 +7,10 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
-import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
-import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
-import { MatrixHistogramOption } from '../matrix_histogram/types';
+import type { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
+import type { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
+import type { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
 

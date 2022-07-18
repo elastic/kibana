@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
-import { ConsoleProps } from '../../../types';
+import type { ConsoleProps } from '../../../types';
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -34,7 +34,8 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
         // `+2` to account for builtin commands
-        commands.length + 2
+        // `+2` to account for builtin generic args
+        commands.length + 4
       );
     });
   });

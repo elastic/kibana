@@ -33,7 +33,7 @@ import {
 } from '../types';
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
-import { findByTitle } from '../utils';
+import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -123,10 +123,15 @@ export interface DataViewsServiceDeps {
  */
 export interface DataViewsServicePublicMethods {
   /**
-   * Clear the cache of data views.
-   * @param id
+   * Clear the cache of data view saved objects.
    */
-  clearCache: (id?: string | undefined) => void;
+  clearCache: () => void;
+
+  /**
+   * Clear the cache of data view instances.
+   */
+  clearInstanceCache: (id?: string) => void;
+
   /**
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
@@ -396,11 +401,16 @@ export class DataViewsService {
   };
 
   /**
-   * Clear index pattern list cache.
-   * @param id optionally clear a single id
+   * Clear index pattern saved objects cache.
    */
-  clearCache = (id?: string) => {
+  clearCache = () => {
     this.savedObjectsCache = null;
+  };
+
+  /**
+   * Clear index pattern instance cache
+   */
+  clearInstanceCache = (id?: string) => {
     if (id) {
       this.dataViewCache.clear(id);
     } else {
@@ -772,12 +782,17 @@ export class DataViewsService {
    * @param skipFetchFields if true, will not fetch fields
    * @returns DataView
    */
-  async create({ id, ...restOfSpec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
+  async create(
+    { id, name, title, ...restOfSpec }: DataViewSpec,
+    skipFetchFields = false
+  ): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(META_FIELDS);
 
     const spec = {
       id: id ?? uuid.v4(),
+      title,
+      name: name || title,
       ...restOfSpec,
     };
 
@@ -791,6 +806,8 @@ export class DataViewsService {
     if (!skipFetchFields) {
       await this.refreshFields(indexPattern);
     }
+
+    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
 
     return indexPattern;
   }
@@ -819,12 +836,13 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByTitle(this.savedObjectsClient, dataView.title);
+    const dupe = await findByName(this.savedObjectsClient, dataView.getName());
+
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
 
@@ -838,7 +856,6 @@ export class DataViewsService {
     )) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response);
-    this.dataViewCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
