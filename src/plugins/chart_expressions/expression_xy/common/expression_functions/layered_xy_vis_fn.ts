@@ -8,7 +8,7 @@
 
 import { XY_VIS_RENDERER } from '../constants';
 import { LayeredXyVisFn } from '../types';
-import { logDatatables } from '../utils';
+import { logDatatables, logDatatable } from '../utils';
 import {
   validateMarkSizeRatioLimits,
   validateAddTimeMarker,
@@ -22,7 +22,12 @@ import { appendLayerIds, getDataLayers } from '../helpers';
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
 
-  logDatatables(layers, handlers);
+  // for visialize we should log one datable for all layers
+  if (handlers.getExecutionContext()?.name === 'visualize') {
+    logDatatable(data, layers, handlers);
+  } else {
+    logDatatables(layers, handlers);
+  }
 
   const dataLayers = getDataLayers(layers);
   const hasBar = hasBarLayer(dataLayers);

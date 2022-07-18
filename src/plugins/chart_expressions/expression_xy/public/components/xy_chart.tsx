@@ -316,7 +316,7 @@ export function XYChart({
     [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
   );
 
-  const allDocs = i18n.translate('visTypeXy.aggResponse.allDocsTitle', {
+  const allDocs = i18n.translate('expressionXY.xyVis.allDocsTitle', {
     defaultMessage: 'All docs',
   });
 
@@ -504,11 +504,12 @@ export function XYChart({
     };
   };
 
-  const shouldShowValueLabels =
-    // No stacked bar charts
-    dataLayers.every((layer) => !layer.isStacked) &&
-    // No histogram charts
-    !isHistogramViz;
+  const shouldShowValueLabels = uiState
+    ? valueLabels !== ValueLabelModes.HIDE
+    : // No stacked bar charts
+      dataLayers.every((layer) => !layer.isStacked) &&
+      // No histogram charts
+      !isHistogramViz;
 
   const valueLabelsStyling =
     shouldShowValueLabels &&
@@ -862,7 +863,6 @@ export function XYChart({
                 domain={getYAxisDomain(axis)}
                 showOverlappingLabels={axis.showOverlappingLabels}
                 showDuplicatedTicks={axis.showDuplicates}
-                ticks={5}
               />
             );
           })}

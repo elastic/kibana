@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
@@ -28,6 +28,28 @@ export const logDatatables = (layers: CommonXYLayerConfig[], handlers: Execution
     const logTable = prepareLogTable(layer.table, getLayerDimensions(layer), true);
     handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
   });
+};
+
+export const logDatatable = (
+  data: Datatable,
+  layers: CommonXYLayerConfig[],
+  handlers: ExecutionContext
+) => {
+  if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
+    const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
+      if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
+        return dimensions;
+      }
+
+      return [...dimensions, ...getLayerDimensions(layer)];
+    }, []);
+
+    const logTable = prepareLogTable(data, layerDimensions, true);
+    handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+  }
 };
 
 export const getLayerDimensions = (

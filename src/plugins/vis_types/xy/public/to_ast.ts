@@ -59,6 +59,7 @@ const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
     maxLines: params.maxLegendLines,
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend,
+    showSingleSeries: true,
     legendSize,
   });
 
@@ -452,6 +453,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
     handleEmptyXAccessor: true,
+    valueLabels: vis.params.labels.show ? 'show' : 'hide',
   });
 
   const ast = buildExpression([visTypeXy]);
