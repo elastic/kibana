@@ -81,7 +81,7 @@ const getTransformedHits = (
             ? [
                 {
                   field: threshold.cardinality[0].field,
-                  value: (bucket.cardinality_count as AggregationsCardinalityAggregate).value,
+                  value: bucket.cardinality_count?.value,
                 },
               ]
             : undefined,
