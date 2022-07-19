@@ -37,7 +37,7 @@ const properties: Properties = {
     type: 'long',
   },
   Meta: {
-    type: 'object',
+    type: 'flattened',
   },
   FileKind: {
     type: 'keyword',
@@ -49,7 +49,7 @@ const properties: Properties = {
     type: 'keyword',
   },
   hash: {
-    type: 'object',
+    type: 'flattened',
   },
 };
 
