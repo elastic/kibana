@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../translations';
-import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
-import type { DryRunResult } from './use_bulk_actions_dry_run';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+
+import type { BulkActionForConfirmation, DryRunResult } from './types';
 
 const getActionRejectedTitle = (
   bulkAction: BulkActionForConfirmation,

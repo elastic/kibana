@@ -28,9 +28,8 @@ import { executeRulesBulkAction, downloadExportedRules } from '../actions';
 import { getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { transformExportDetailsToDryRunResult } from './use_bulk_actions_dry_run';
-import type { ExecuteBulkActionsDryRun, DryRunResult } from './use_bulk_actions_dry_run';
-import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
+import { transformExportDetailsToDryRunResult } from './utils/dry_run';
+import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 import { prepareSearchParams } from './utils/prepare_search_params';
@@ -42,6 +41,8 @@ import {
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
+
+import type { DryRunResult, BulkActionForConfirmation } from './types';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;

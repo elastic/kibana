@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { DryRunResult } from './use_bulk_actions_dry_run';
-import type { BulkActionForConfirmation } from './use_bulk_actions_confirmation';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+
+import type { DryRunResult, BulkActionForConfirmation } from './types';
 
 interface BulkActionRuleErrorItemProps {
   errorCode: BulkActionsDryRunErrCode | undefined;

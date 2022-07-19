@@ -7,16 +7,9 @@
 import { useState, useCallback } from 'react';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
-import type { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
-import type { DryRunResult } from './use_bulk_actions_dry_run';
 
-/**
- * Only 2 bulk actions are supported for for confirmation dry run modal:
- * * export
- * * edit
- */
-export type BulkActionForConfirmation = BulkAction.export | BulkAction.edit;
+import type { DryRunResult, BulkActionForConfirmation } from './types';
 
 /**
  * hook that controls bulk actions confirmation modal window and its content
