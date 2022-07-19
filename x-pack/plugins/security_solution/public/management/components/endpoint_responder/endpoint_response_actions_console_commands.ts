@@ -23,6 +23,17 @@ const emptyArgumentValidator = (argData: ParsedArgData) => {
   }
 };
 
+const positiveNumberArgumentValidator = (argData: ParsedArgData) => {
+  const emptyResult = emptyArgumentValidator(argData);
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (Number.isInteger(Number(argData)) && Number(argData) > 0) {
+    return true;
+  } else {
+    return 'Argument must be a positive number representing the PID of a process';
+  }
+};
+
 const HELP_GROUPS = Object.freeze({
   responseActions: {
     position: 0,
@@ -114,7 +125,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage: 'A PID representing the process to kill',
           }),
-          validate: emptyArgumentValidator,
+          validate: positiveNumberArgumentValidator,
         },
         entityId: {
           required: false,
@@ -164,7 +175,7 @@ export const getEndpointResponseActionsConsoleCommands = (
               defaultMessage: 'A PID representing the process to suspend',
             }
           ),
-          validate: emptyArgumentValidator,
+          validate: positiveNumberArgumentValidator,
         },
         entityId: {
           required: false,
