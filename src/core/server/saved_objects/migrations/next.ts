@@ -136,7 +136,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.waitForPickupUpdatedMappingsTask({
         client,
         taskId: state.updateTargetMappingsTaskId,
-        timeout: '60s',
+        timeout: 60_000,
       }),
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
       Actions.openPit({ client, index: state.targetIndex }),
@@ -190,7 +190,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
       }),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
-      Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: '60s' }),
+      Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: 60_000 }),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
       Actions.updateAliases({ client, aliasActions: state.legacyPreMigrationDoneActions }),
   };

@@ -19,7 +19,7 @@ import { DEFAULT_TIMEOUT } from './constants';
 export interface WaitForIndexStatusParams {
   client: ElasticsearchClient;
   index: string;
-  timeout?: string;
+  timeout?: number;
   status: 'yellow' | 'green';
 }
 
@@ -81,9 +81,15 @@ export function waitForIndexStatus({
           wait_for_status: status,
           timeout,
         },
-        // Don't reject on status code 408 so that we can handle the timeout
-        // explicitly with a custom response type and provide more context in the error message
-        { ignore: [408] }
+        {
+          // Don't reject on status code 408 so that we can handle the timeout
+          // explicitly with a custom response type and provide more context in the error message
+          ignore: [408],
+          // The client defaults to a 30s timeout whereas we use a default wait_for_status timeout
+          // of 50s so we need to make sure the client doesn't timeout the connection before the
+          // ES server responds
+          requestTimeout: timeout + 5,
+        }
       )
       .then((res) => {
         if (res.timed_out === true) {
@@ -97,9 +103,12 @@ export function waitForIndexStatus({
               type: 'index_not_yellow_timeout' as const,
               message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
             });
+          } else {
+            throw new Error(`Invalid index status: ${status}. Must be one of 'green' or 'yellow'`);
           }
+        } else {
+          return Either.right({});
         }
-        return Either.right({});
       })
       .catch(catchRetryableEsClientErrors);
   };
