@@ -11,26 +11,17 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
 interface DataViewSelectorProps {
   kibanaDataViews: { [dataViewId: string]: DataViewListItem };
   field: FieldHook<DefineStepRule['dataViewId']>;
-  onChangeSelectedDataSource: (val: string, indexPattern: DataViewBase) => void;
 }
 
-export const DataViewSelector = ({
-  kibanaDataViews,
-  field,
-  onChangeSelectedDataSource,
-}: DataViewSelectorProps) => {
-  const { data } = useKibana().services;
-
+export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorProps) => {
   let isInvalid;
   let errorMessage;
   let dataViewId: string | null | undefined;
@@ -62,8 +53,6 @@ export const DataViewSelector = ({
       : []
   );
 
-  const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
-
   useEffect(() => {
     if (!selectedDataViewNotFound && dataViewId != null && dataViewId !== '') {
       setSelectedOption([
@@ -85,17 +74,6 @@ export const DataViewSelector = ({
       : [];
   }, [kibanaDataViewsDefined, kibanaDataViews]);
 
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
-      if (selectedDataView != null) {
-        const dv = await data.dataViews.get(selectedDataView.id);
-        onChangeSelectedDataSource(selectedDataView.id, dv);
-      }
-    };
-
-    fetchSingleDataView();
-  }, [data.dataViews, selectedDataView, onChangeSelectedDataSource]);
-
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
 
@@ -106,10 +84,9 @@ export const DataViewSelector = ({
       selectedDataViewOption.length > 0 &&
       selectedDataViewOption[0].id != null
     ) {
-      setSelectedDataView(kibanaDataViews[selectedDataViewOption[0].id]);
-      field?.setValue(selectedDataViewOption[0].id);
+      const selectedDataViewId = selectedDataViewOption[0].id;
+      field?.setValue(selectedDataViewId);
     } else {
-      setSelectedDataView(undefined);
       field?.setValue(undefined);
     }
   };

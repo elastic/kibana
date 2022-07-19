@@ -9,6 +9,7 @@ import { has, isEmpty } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
+import omit from 'lodash/omit';
 
 import type {
   ExceptionListType,
@@ -39,6 +40,7 @@ import type {
   RuleStepsFormData,
   RuleStep,
 } from '../types';
+import { DataSourceType } from '../types';
 import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
@@ -275,8 +277,23 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+  let stepData: Omit<DefineStepRule, 'dataViewId' | 'index' | 'dataSourceType'> & {
+    index?: string[];
+    dataViewId?: string;
+  } = {
+    ...defineStepData,
+  };
+
+  if (defineStepData.dataSourceType === DataSourceType.DataView) {
+    stepData = omit(stepData, 'index');
+  } else if (defineStepData.dataSourceType === DataSourceType.IndexPatterns) {
+    stepData = omit(stepData, 'dataViewId');
+  }
+  stepData = omit(stepData, 'dataSourceType');
+
+  const ruleFields = filterRuleFieldsForType(stepData, stepData.ruleType);
   const { ruleType, timeline } = ruleFields;
+
   const baseFields = {
     type: ruleType,
     ...(timeline.id != null &&
