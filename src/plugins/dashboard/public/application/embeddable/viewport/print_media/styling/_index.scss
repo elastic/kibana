@@ -45,8 +45,9 @@ Observations:
   }
 
   * {
-    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
-    color-adjust: exact !important;                 /*Firefox*/
+    // requires upgrade to stylint 14
+    // stylelint-disable-next-line property-no-unknown
+    print-color-adjust: exact !important;
   }
 
 }
