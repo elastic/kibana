@@ -6,17 +6,23 @@
  */
 
 import React, { useState } from 'react';
-import { RuleStatusFilterProps } from '../../../types';
-import { getRuleStatusFilterLazy } from '../../../common/get_rule_status_filter';
+import {
+  TriggersAndActionsUIPublicPluginStart,
+  RuleStatusFilterProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
-export const RuleStatusFilterSandbox = () => {
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
+export const RuleStatusFilterSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const [selectedStatuses, setSelectedStatuses] = useState<
     RuleStatusFilterProps['selectedStatuses']
   >([]);
 
   return (
     <div style={{ flex: 1 }}>
-      {getRuleStatusFilterLazy({
+      {triggersActionsUi.getRuleStatusFilter({
         selectedStatuses,
         onChange: setSelectedStatuses,
       })}

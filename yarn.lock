@@ -11818,10 +11818,15 @@ cookie-signature@1.0.6:
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
   integrity sha1-4wOogrNCzD7oylE6eZmXNNqzriw=
 
-cookie@0.4.0, cookie@^0.4.0:
+cookie@0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.0.tgz#beb437e7022b3b6d49019d088665303ebe9c14ba"
   integrity sha512-+Hp8fLp57wnUSt0tY0tHEXh4voZRDnoIrZPqlo3DPiI4y9lwg/jqx+1Om94/W6ZaPDOUbnjOt/99w66zk+l1Xg==
+
+cookie@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
+  integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
 cookiejar@^2.1.0:
   version "2.1.1"
@@ -13881,10 +13886,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.36.0:
-  version "3.36.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.36.0.tgz#8f2cb5eac1653eb8abc88e32851a57fc32fb1064"
-  integrity sha512-4BDfLjfBHDQbXOyj8Ef//w31Cpvzh8z/tofNDPRDUsqpp/Nkt7KFNmHKgVCMxYi9e3Sd/2Mj+K4CoIuSriW9+Q==
+elastic-apm-node@^3.37.0:
+  version "3.37.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.37.0.tgz#475cdd38f6c51992952fa00e9be86f01c0e03eb5"
+  integrity sha512-WjfhMXK3l3aMO/vOSD4LFn9ActPrujOqjQUO4vEFQu5+HGNJIYW+zT4Mqvq0dIZAsdaat0NX/dzzAkBHaQu21Q==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
@@ -13892,7 +13897,7 @@ elastic-apm-node@^3.36.0:
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
     basic-auth "^2.0.1"
-    cookie "^0.4.0"
+    cookie "^0.5.0"
     core-util-is "^1.0.2"
     elastic-apm-http-client "11.0.1"
     end-of-stream "^1.4.4"
