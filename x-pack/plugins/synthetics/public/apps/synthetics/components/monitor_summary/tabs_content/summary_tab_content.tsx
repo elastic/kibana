@@ -14,6 +14,7 @@ import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
+import { AvailabilitySparklines } from './availability_sparklines';
 
 export const SummaryTabContent = () => {
   return (
@@ -28,19 +29,21 @@ export const SummaryTabContent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel style={{ paddingBottom: 0 }}>
+          <EuiPanel style={{ paddingBottom: 0, height: 150 }}>
             <EuiTitle size="xs">
               <h3>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <AvailabilityPanel />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add availability sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <AvailabilitySparklines />
+              </EuiFlexItem>
               <EuiFlexItem>
                 <DurationPanel />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>{/* TODO: Add error metric and sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="s" />
