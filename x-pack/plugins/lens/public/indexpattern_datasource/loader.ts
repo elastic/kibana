@@ -10,7 +10,15 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import { isNestedField } from '@kbn/data-views-plugin/common';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import {
+  ActionExecutionContext,
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDataPanelProps,
   InitializationOptions,
@@ -338,6 +346,7 @@ export async function changeLayerIndexPattern({
   replaceIfPossible,
   storage,
   indexPatternsService,
+  uiActions,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -347,7 +356,22 @@ export async function changeLayerIndexPattern({
   replaceIfPossible?: boolean;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
+  uiActions: UiActionsStart;
 }) {
+  const fromDataView = state.layers[layerId].indexPatternId;
+  const toDataView = indexPatternId;
+
+  const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+  action?.execute({
+    trigger,
+    fromDataView,
+    toDataView,
+    defaultDataView: toDataView,
+    usedDataViews: Object.values(Object.values(state.layers).map((layer) => layer.indexPatternId)),
+  } as ActionExecutionContext);
+
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: state.indexPatterns,
