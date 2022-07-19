@@ -19,6 +19,7 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
+import { inspect } from '@xstate/inspect';
 import {
   SavedSearch,
   getSavedSearch,
@@ -43,10 +44,9 @@ interface Props {
   isDev: boolean;
 }
 
-export function DiscoverLogExplorerRoute(props: Props) {
+export function DiscoverLogExplorerRoute({ isDev }: Props) {
   const history = useHistory();
   const services = useDiscoverServices();
-  const { isDev } = props;
   const {
     core,
     chrome,
@@ -72,6 +72,14 @@ export function DiscoverLogExplorerRoute(props: Props) {
     page: 'app',
     id: id || 'new',
   });
+
+  useEffect(() => {
+    const xstateInspector = inspect({
+      iframe: false,
+    });
+
+    return xstateInspector?.disconnect;
+  }, []);
 
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
