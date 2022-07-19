@@ -75,6 +75,7 @@ export const LocationForm = ({
               error={errors?.name?.message}
             >
               <EuiFieldText
+                disabled={Boolean(location)}
                 aria-label={LOCATION_NAME_LABEL}
                 {...register('name', {
                   required: {

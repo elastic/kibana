@@ -112,7 +112,7 @@ export const PrivateLocationsList = ({
               }
               extraAction={
                 <EuiToolTip
-                  title={
+                  content={
                     canDelete
                       ? DELETE_LABEL
                       : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete', {
