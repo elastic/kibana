@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { contextMock } from './context.mock';
+import { contextMock, MOCK_RETRY_DELAY } from './context.mock';
 import { initializeEs, parseIndexAliases } from './init';
 
 describe('initializeEs', () => {
@@ -452,5 +452,93 @@ describe('parseIndexAliases', () => {
         is_write_index: true,
       },
     ]);
+  });
+});
+
+describe('retries', () => {
+  let esContext = contextMock.create();
+  // set up context APIs to return defaults indicating already created
+  beforeEach(() => {
+    esContext = contextMock.create();
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue({});
+    esContext.esAdapter.getExistingIndices.mockResolvedValue({});
+    esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({});
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(true);
+    esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(true);
+    esContext.esAdapter.doesAliasExist.mockResolvedValue(true);
+  });
+
+  test('createIlmPolicyIfNotExists with 1 retry', async () => {
+    esContext.esAdapter.doesIlmPolicyExist.mockRejectedValueOnce(new Error('retry 1'));
+
+    const timeStart = Date.now();
+    await initializeEs(esContext);
+    const timeElapsed = Date.now() - timeStart;
+
+    expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
+
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(2);
+    expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(1);
+
+    const prefix = `eventLog initialization operation failed and will be retried: createIlmPolicyIfNotExists`;
+    expect(esContext.logger.warn).toHaveBeenCalledTimes(1);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 4 more times; error: retry 1`);
+  });
+
+  test('createIndexTemplateIfNotExists with 2 retries', async () => {
+    esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2a'));
+    esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2b'));
+
+    const timeStart = Date.now();
+    await initializeEs(esContext);
+    const timeElapsed = Date.now() - timeStart;
+
+    expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2));
+
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(3);
+    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(1);
+
+    const prefix = `eventLog initialization operation failed and will be retried: createIndexTemplateIfNotExists`;
+    expect(esContext.logger.warn).toHaveBeenCalledTimes(2);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 4 more times; error: retry 2a`);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 3 more times; error: retry 2b`);
+  });
+
+  test('createInitialIndexIfNotExists', async () => {
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5a'));
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5b'));
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5c'));
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5d'));
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5e'));
+    // make sure it only tries 5 times - this one should not be reported
+    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5f'));
+
+    const timeStart = Date.now();
+    await initializeEs(esContext);
+    const timeElapsed = Date.now() - timeStart;
+
+    expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2 + 4 + 8));
+
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(5);
+
+    const prefix = `eventLog initialization operation failed and will be retried: createInitialIndexIfNotExists`;
+    expect(esContext.logger.warn).toHaveBeenCalledTimes(5);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 4 more times; error: retry 5a`);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 3 more times; error: retry 5b`);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 2 more times; error: retry 5c`);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 1 more times; error: retry 5d`);
+    expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 0 more times; error: retry 5e`);
+
+    expect(esContext.logger.error).toHaveBeenCalledTimes(1);
+    expect(esContext.logger.error).toHaveBeenCalledWith(
+      `error initializing elasticsearch resources: retry 5e`
+    );
   });
 });
