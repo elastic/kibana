@@ -16,7 +16,8 @@ type InputWithFilters = Partial<EmbeddableInput> & { filters: Filter[] };
 export const stateContainsFilters = (
   state: Partial<EmbeddableInput>
 ): state is InputWithFilters => {
-  if ((state as InputWithFilters).filters) return true;
+  if ((state as InputWithFilters).filters && (state as InputWithFilters).filters.length > 0)
+    return true;
   return false;
 };
 

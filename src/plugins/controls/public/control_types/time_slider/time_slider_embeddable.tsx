@@ -214,7 +214,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         this.updateInternalOutput({ filters: [rangeFilter] }, true);
         this.updateComponentState({ loading: false });
       } else {
-        this.updateInternalOutput({ filters: undefined, dataViews: [dataView] }, true);
+        this.updateInternalOutput({ filters: undefined, dataViewId: dataView.id }, true);
         this.updateComponentState({ loading: false });
       }
     });
