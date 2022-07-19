@@ -13,8 +13,8 @@ import { filter } from 'rxjs/operators';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
   ExpressionAstExpression,
-  ExpressionValueError,
   IInterpreterRenderHandlers,
+  isExpressionValueError,
 } from '../../common';
 import { ExpressionLoader } from '../loader';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
@@ -43,11 +43,6 @@ interface ExpressionRendererState {
   isLoading: boolean;
   error: null | ExpressionRenderError;
 }
-
-const isExpressionError = (result: unknown): result is ExpressionValueError => {
-  const { type } = (result ?? {}) as { type?: string };
-  return type === 'error';
-};
 
 export function useExpressionRenderer(
   nodeRef: RefObject<HTMLElement>,
@@ -131,12 +126,12 @@ export function useExpressionRenderer(
 
   useEffect(() => {
     const subscription = expressionLoaderRef.current?.data$.subscribe(({ partial, result }) => {
-      const newState: Partial<ExpressionRendererState> = { isEmpty: false };
-      if (!isExpressionError(result)) {
-        newState.error = null;
-      }
+      setState({
+        isEmpty: false,
+        ...(!isExpressionValueError(result) ? { error: null } : {}),
+      });
+
       onData$?.(result, expressionLoaderRef.current?.inspect(), partial);
-      setState(newState);
     });
 
     return () => subscription?.unsubscribe();
