@@ -16,7 +16,7 @@ import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
 import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, Query, AggregateQuery } from '../../services/data';
+import { RefreshInterval, Query } from '../../services/data';
 import {
   ViewMode,
   Container,
@@ -72,7 +72,7 @@ interface IndexSignature {
 
 export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
-  query: Query | AggregateQuery;
+  query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;

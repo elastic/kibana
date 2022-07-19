@@ -9,7 +9,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { Filter, Query, TimeRange, AggregateQuery } from '../../services/data';
+import { Filter, Query, TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
@@ -84,10 +84,7 @@ export const dashboardStateSlice = createSlice({
     setViewMode: (state, action: PayloadAction<ViewMode>) => {
       state.viewMode = action.payload;
     },
-    setFiltersAndQuery: (
-      state,
-      action: PayloadAction<{ filters: Filter[]; query: Query | AggregateQuery }>
-    ) => {
+    setFiltersAndQuery: (state, action: PayloadAction<{ filters: Filter[]; query: Query }>) => {
       state.filters = action.payload.filters;
       state.query = action.payload.query;
     },
@@ -100,7 +97,7 @@ export const dashboardStateSlice = createSlice({
     setTitle: (state, action: PayloadAction<string>) => {
       state.description = action.payload;
     },
-    setQuery: (state, action: PayloadAction<Query | AggregateQuery>) => {
+    setQuery: (state, action: PayloadAction<Query>) => {
       state.query = action.payload;
     },
   },
