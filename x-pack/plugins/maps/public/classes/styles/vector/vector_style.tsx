@@ -255,6 +255,8 @@ export class VectorStyle implements IVectorStyle {
     this._labelVisibilityProperty = new LabelVisibilityProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_VISIBILITY].options,
       VECTOR_STYLES.LABEL_VISIBILITY,
+      layer.getMinZoom(),
+      layer.getMaxZoom(),
     );
     this._labelSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],

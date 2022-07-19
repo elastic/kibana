@@ -309,8 +309,6 @@ export class VectorStyleEditor extends Component<Props, State> {
           disabled={!hasLabel}
           disabledBy={VECTOR_STYLES.LABEL_TEXT}
           handlePropertyChange={this.props.handlePropertyChange}
-          layerMinZoom={this.props.layer.getMinZoom()}
-          layerMaxZoom={this.props.layer.getMaxZoom()}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_VISIBILITY]}
           
         />
