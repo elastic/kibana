@@ -75,8 +75,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('./postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config.js'),
               },
             },
           },
@@ -108,8 +108,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('@kbn/optimizer/postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('@kbn/optimizer/postcss.config.js'),
               },
             },
           },
@@ -139,8 +139,8 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               sourceMap: !isProd,
-              config: {
-                path: require.resolve('./postcss.config'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config'),
               },
             },
           },
