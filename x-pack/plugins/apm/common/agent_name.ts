@@ -68,7 +68,10 @@ export function isRumAgentName(
 export function isMobileAgentName(
   agentName?: string
 ): agentName is 'iOS/swift' | 'android/java' {
-  return isIosAgentName(agentName! as AgentName) || isAndroidAgentName(agentName! as AgentName);
+  return (
+    isIosAgentName(agentName! as AgentName) ||
+    isAndroidAgentName(agentName! as AgentName)
+  );
 }
 
 export function normalizeAgentName<T extends string | undefined>(
