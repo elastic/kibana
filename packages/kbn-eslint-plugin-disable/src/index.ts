@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import { NoNakedESLintDisableRule } from './rules/no_naked_eslint_disable';
+
+/**
+ * Custom ESLint rules, add `'@kbn/eslint-plugin-disable'` to your eslint config to use them
+ * @internal
+ */
+export const rules = {
+  no_naked_eslint_disable: NoNakedESLintDisableRule,
+};
