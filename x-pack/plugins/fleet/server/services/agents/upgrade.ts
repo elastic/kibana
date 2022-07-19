@@ -21,13 +21,8 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import {
-  getAgentDocuments,
-  getAgents,
-  updateAgent,
-  bulkUpdateAgents,
-  getAgentPolicyForAgent,
-} from './crud';
+import { errorsToResults, processAgentsInBatches } from './crud';
+import { getAgentDocuments, updateAgent, bulkUpdateAgents, getAgentPolicyForAgent } from './crud';
 import { searchHitToAgent } from './helpers';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
@@ -85,6 +80,7 @@ export async function sendUpgradeAgentsActions(
     force?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
+    batchSize?: number;
   }
 ) {
   // Full set of agents
@@ -104,8 +100,36 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    return await processAgentsInBatches(
+      esClient,
+      {
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        batchSize: options.batchSize,
+      },
+      async (agents: Agent[], skipSuccess: boolean) =>
+        await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)
+    );
   }
+
+  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+}
+
+async function upgradeBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  outgoingErrors: Record<Agent['id'], Error>,
+  options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    version: string;
+    sourceUri?: string | undefined;
+    force?: boolean;
+    upgradeDurationSeconds?: number;
+    startTime?: string;
+  },
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
+  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
 
@@ -141,7 +165,7 @@ export async function sendUpgradeAgentsActions(
       agents.push(result.value);
     } else {
       const id = givenAgents[index].id;
-      outgoingErrors[id] = result.reason;
+      errors[id] = result.reason;
     }
     return agents;
   }, []);
@@ -153,15 +177,10 @@ export async function sendUpgradeAgentsActions(
     source_uri: options.sourceUri,
   };
 
-  const rollingUpgradeOptions = options?.upgradeDurationSeconds
-    ? {
-        start_time: options.startTime ?? now,
-        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-        expiration: moment(options.startTime ?? now)
-          .add(options?.upgradeDurationSeconds, 'seconds')
-          .toISOString(),
-      }
-    : {};
+  const rollingUpgradeOptions = getRollingUpgradeOptions(
+    options?.startTime,
+    options.upgradeDurationSeconds
+  );
 
   await createAgentAction(esClient, {
     created_at: now,
@@ -183,22 +202,14 @@ export async function sendUpgradeAgentsActions(
     }))
   );
 
-  const givenOrder =
-    'agentIds' in options ? options.agentIds : agentsToCheckUpgradeable.map((agent) => agent.id);
-
-  const orderedOut = givenOrder.map((agentId) => {
-    const hasError = agentId in outgoingErrors;
-    const result: BulkActionResult = {
-      id: agentId,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agentId];
-    }
-    return result;
-  });
-
-  return { items: orderedOut };
+  return {
+    items: errorsToResults(
+      givenAgents,
+      errors,
+      'agentIds' in options ? options.agentIds : undefined,
+      skipSuccess
+    ),
+  };
 }
 
 /**
@@ -335,3 +346,30 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
     }, {} as { [k: string]: CurrentUpgrade })
   );
 }
+
+const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+  const now = new Date().toISOString();
+  // Perform a rolling upgrade
+  if (upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime ?? now)
+        .add(upgradeDurationSeconds, 'seconds')
+        .toISOString(),
+    };
+  }
+  // Schedule without rolling upgrade (Immediately after start_time)
+  if (startTime && !upgradeDurationSeconds) {
+    return {
+      start_time: startTime ?? now,
+      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+      expiration: moment(startTime)
+        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
+        .toISOString(),
+    };
+  } else {
+    // Regular bulk upgrade (non scheduled, non rolling)
+    return {};
+  }
+};

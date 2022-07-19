@@ -12,6 +12,8 @@ import { fields } from '../../filters/stubs';
 import * as is from './is';
 import { DataViewBase } from '../..';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
+import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');
 
@@ -32,9 +34,9 @@ describe('kuery functions', () => {
           arguments: [fieldName, value],
         } = is.buildNodeParams('response', 200);
 
-        expect(fieldName).toHaveProperty('type', 'literal');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(fieldName).toHaveProperty('value', 'response');
-        expect(value).toHaveProperty('type', 'literal');
+        expect(value).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(value).toHaveProperty('value', 200);
       });
 
@@ -43,8 +45,8 @@ describe('kuery functions', () => {
           arguments: [fieldName, value],
         } = is.buildNodeParams('machine*', 'win*');
 
-        expect(fieldName).toHaveProperty('type', 'wildcard');
-        expect(value).toHaveProperty('type', 'wildcard');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
+        expect(value).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
       });
 
       test('should default to a non-phrase query', () => {

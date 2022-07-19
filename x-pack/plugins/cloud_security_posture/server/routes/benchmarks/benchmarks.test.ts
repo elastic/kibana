@@ -14,17 +14,18 @@ import {
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server/elasticsearch/client/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '@kbn/core/server/http/router/request';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
-  benchmarksInputSchema,
+  benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
 import {
-  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
-  getAgentPolicies,
+  getCspAgentPolicies,
+} from '../../lib/fleet_util';
+import {
+  defineGetBenchmarksRoute,
   createBenchmarkEntry,
   addPackagePolicyCspRules,
 } from './benchmarks';
@@ -146,7 +147,7 @@ describe('benchmarks API', () => {
 
   describe('test input schema', () => {
     it('expect to find default values', async () => {
-      const validatedQuery = benchmarksInputSchema.validate({});
+      const validatedQuery = benchmarksQueryParamsSchema.validate({});
 
       expect(validatedQuery).toMatchObject({
         page: 1,
@@ -155,7 +156,7 @@ describe('benchmarks API', () => {
     });
 
     it('expect to find benchmark_name', async () => {
-      const validatedQuery = benchmarksInputSchema.validate({
+      const validatedQuery = benchmarksQueryParamsSchema.validate({
         benchmark_name: 'my_cis_benchmark',
       });
 
@@ -168,50 +169,50 @@ describe('benchmarks API', () => {
 
     it('should throw when page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksInputSchema.validate({ page: -2 });
+        benchmarksQueryParamsSchema.validate({ page: -2 });
       }).toThrow();
     });
 
     it('should throw when per_page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksInputSchema.validate({ per_page: -2 });
+        benchmarksQueryParamsSchema.validate({ per_page: -2 });
       }).toThrow();
     });
   });
 
   it('should throw when sort_field is not string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: true });
+      benchmarksQueryParamsSchema.validate({ sort_field: true });
     }).toThrow();
   });
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
+      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
   it('should throw when sort_order is not `asc` or `desc`', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'Other Direction' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'Other Direction' });
     }).toThrow();
   });
 
   it('should not throw when `asc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'asc' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'asc' });
     }).not.toThrow();
   });
 
   it('should not throw when `desc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'desc' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'desc' });
     }).not.toThrow();
   });
 
   it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
+      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -308,7 +309,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -321,7 +322,7 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
       });
@@ -357,7 +358,6 @@ describe('benchmarks API', () => {
       it('should build benchmark entry agent policy and package policy', async () => {
         const packagePolicy = createPackagePolicyMock();
         const agentPolicy = createMockAgentPolicy();
-        // @ts-expect-error
         agentPolicy.agents = 3;
 
         const cspRulesStatus = {

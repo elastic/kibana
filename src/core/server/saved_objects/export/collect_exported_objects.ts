@@ -7,8 +7,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObject } from '../../../types';
-import type { KibanaRequest } from '../../http';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';

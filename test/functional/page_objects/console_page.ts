@@ -7,6 +7,7 @@
  */
 
 import { Key } from 'selenium-webdriver';
+import { asyncForEach } from '@kbn/std';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -45,6 +46,54 @@ export class ConsolePageObject extends FtrService {
 
   public async openSettings() {
     await this.testSubjects.click('consoleSettingsButton');
+  }
+
+  public async openVariablesModal() {
+    await this.testSubjects.click('consoleVariablesButton');
+  }
+
+  public async closeVariablesModal() {
+    await this.testSubjects.click('variablesCancelButton');
+  }
+
+  public async addNewVariable({ name, value }: { name: string; value: string }) {
+    await this.openVariablesModal();
+
+    // while the variables form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      await this.testSubjects.click('variablesAddButton');
+
+      const variableNameInputs = await this.testSubjects.findAll('variablesNameInput');
+      await variableNameInputs[variableNameInputs.length - 1].type(name);
+
+      const variableValueInputs = await this.testSubjects.findAll('variablesValueInput');
+      await variableValueInputs[variableValueInputs.length - 1].type(value);
+    });
+
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async removeVariables() {
+    await this.openVariablesModal();
+
+    // while the variables form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const buttons = await this.testSubjects.findAll('variablesRemoveButton');
+      await asyncForEach(buttons, async (button) => {
+        await button.click();
+      });
+    });
+    await this.testSubjects.click('variablesSaveButton');
+  }
+
+  public async getVariables() {
+    await this.openVariablesModal();
+    const inputs = await this.testSubjects.findAll('variablesNameInput');
+    const variables = await Promise.all(
+      inputs.map(async (input) => await input.getAttribute('value'))
+    );
+    await this.closeVariablesModal();
+    return variables;
   }
 
   public async setFontSizeSetting(newSize: number) {
@@ -186,5 +235,44 @@ export class ConsolePageObject extends FtrService {
     } catch (e) {
       return false;
     }
+  }
+
+  public async hasInvalidSyntax() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasErrorMarker() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async clickFoldWidget() {
+    const widget = await this.find.byCssSelector('.ace_fold-widget');
+    await widget.click();
+  }
+
+  public async hasFolds() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
+      return folds.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async getResponseStatus() {
+    const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
+    const text = await statusBadge.getVisibleText();
+    return text.replace(/[^\d.]+/, '');
   }
 }

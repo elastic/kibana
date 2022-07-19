@@ -15,7 +15,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { FORMULA_COLUMN } from '../constants';
-import { ColumnFilter } from '../../types';
+import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
 import {
   buildNumberColumn,
@@ -26,8 +26,7 @@ import {
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;
-  colorMode?: MetricState['colorMode'];
-  palette?: MetricState['palette'];
+  metricStateOptions?: MetricOption['metricStateOptions'];
 
   constructor(
     layerConfigs: LayerConfig[],
@@ -50,13 +49,10 @@ export class SingleMetricLensAttributes extends LensAttributes {
   getSingleMetricLayer() {
     const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel, columnType, formula, stateOptions } =
+    const { columnFilter, columnField, columnLabel, columnType, formula, metricStateOptions } =
       parseCustomFieldName(seriesConfig, selectedMetricField);
 
-    if (stateOptions) {
-      this.colorMode = stateOptions.colorMode;
-      this.palette = stateOptions.palette;
-    }
+    this.metricStateOptions = metricStateOptions;
 
     if (columnType === FORMULA_COLUMN && formula) {
       return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
@@ -116,7 +112,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         format: {
           id: 'percent',
           params: {
-            decimals: 2,
+            decimals: 1,
           },
         },
       },
@@ -125,7 +121,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     );
 
     return {
-      layer0: layer,
+      layer0: layer!,
     };
   }
 
@@ -162,9 +158,8 @@ export class SingleMetricLensAttributes extends LensAttributes {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
-      colorMode: this.colorMode,
-      titlePosition: 'bottom',
-      palette: this.palette,
+      ...(this.metricStateOptions ?? {}),
+      size: 's',
     };
   }
 

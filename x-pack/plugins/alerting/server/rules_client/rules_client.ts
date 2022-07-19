@@ -111,6 +111,7 @@ import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveSnoozes } from '../lib/is_rule_snoozed';
+import { isSnoozeExpired } from '../lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -1024,10 +1025,8 @@ export class RulesClient {
           terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
         },
         snoozed: {
-          date_range: {
-            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
-            format: 'strict_date_time',
-            ranges: [{ from: 'now' }],
+          terms: {
+            field: 'alert.attributes.isSnoozedUntil',
           },
         },
       },
@@ -2287,6 +2286,40 @@ export class RulesClient {
     );
   }
 
+  public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const snoozeSchedule = attributes.snoozeSchedule
+      ? attributes.snoozeSchedule.filter((s) => {
+          try {
+            return !isSnoozeExpired(s);
+          } catch (e) {
+            this.logger.error(`Error checking for expiration of snooze ${s.id}: ${e}`);
+            return true;
+          }
+        })
+      : [];
+
+    if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
+
+    const updateAttributes = this.updateMeta({
+      snoozeSchedule,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    ).then(() => this.updateSnoozedUntilTime({ id }));
+  }
+
   public async muteAll({ id }: { id: string }): Promise<void> {
     return await retryIfConflicts(
       this.logger,
@@ -2663,7 +2696,7 @@ export class RulesClient {
         ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
       },
     }));
-    const includeSnoozeSchedule = snoozeSchedule !== undefined;
+    const includeSnoozeSchedule = snoozeSchedule !== undefined && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -2911,10 +2944,23 @@ function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; mut
   // Now clear any scheduled snoozes that are currently active and never recur
   const activeSnoozes = getActiveSnoozes(attributes);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const recurringSnoozesToSkip: string[] = [];
   const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
     if (!activeSnoozeIds.includes(s.id!)) return true;
     // Check if this is a recurring snooze, and return true if so
-    if (s.rRule.freq && s.rRule.count !== 1) return true;
+    if (s.rRule.freq && s.rRule.count !== 1) {
+      recurringSnoozesToSkip.push(s.id!);
+      return true;
+    }
   });
-  return clearedNonRecurringActiveSnoozes;
+  const clearedSnoozesAndSkippedRecurringSnoozes = clearedNonRecurringActiveSnoozes.map((s) => {
+    if (s.id && !recurringSnoozesToSkip.includes(s.id)) return s;
+    const currentRecurrence = activeSnoozes?.find((a) => a.id === s.id)?.lastOccurrence;
+    if (!currentRecurrence) return s;
+    return {
+      ...s,
+      skipRecurrences: (s.skipRecurrences ?? []).concat(currentRecurrence.toISOString()),
+    };
+  });
+  return clearedSnoozesAndSkippedRecurringSnoozes;
 }

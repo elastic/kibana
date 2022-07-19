@@ -7,11 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { get } from 'lodash';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
-import { Subject, Subscription } from 'rxjs';
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
+import type { AppDeepLink, AppUpdater, Capabilities } from '@kbn/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import type { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -37,6 +44,7 @@ import {
   GETTING_STARTED,
   DASHBOARDS,
   CREATE_NEW_RULE,
+  RESPONSE_ACTIONS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -60,22 +68,39 @@ import {
   USERS_PATH,
   KUBERNETES_PATH,
   RULES_CREATE_PATH,
+  RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { subscribeAppLinks } from '../../common/links';
-import { AppLinkItems } from '../../common/links/types';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { hasCapabilities, subscribeAppLinks } from '../../common/links';
+import type { AppLinkItems } from '../../common/links/types';
 
-const FEATURE = {
+export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
-  casesRead: `${CASES_FEATURE_ID}.read_cases`,
-  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
+  casesCreate: `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+  casesRead: `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+  casesUpdate: `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+  casesDelete: `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+  casesPush: `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
 } as const;
 
-type Feature = typeof FEATURE[keyof typeof FEATURE];
+type FeatureKey = typeof FEATURE[keyof typeof FEATURE];
+
+/**
+ * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
+ * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
+ * is satisfied the deeplinks would be included. To require that the features be AND'd together a second level array
+ * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify
+ * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
+ * operation feature1 && feature2.
+ *
+ * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
+ * features: [feature1]
+ */
+type Features = FeatureKey | Array<FeatureKey | FeatureKey[]>;
 
 type SecuritySolutionDeepLink = AppDeepLink & {
   isPremium?: boolean;
-  features?: Feature[];
+  features?: Features;
   /**
    * Displays deep link when feature flag is enabled.
    */
@@ -414,11 +439,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
-            features: [FEATURE.casesCrud],
+            features: [FEATURE.casesUpdate],
             isPremium: true,
           },
           [SecurityPageName.caseCreate]: {
-            features: [FEATURE.casesCrud],
+            features: [FEATURE.casesCreate],
           },
         },
       }),
@@ -469,6 +494,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: BLOCKLIST,
         path: BLOCKLIST_PATH,
       },
+      {
+        id: SecurityPageName.responseActions,
+        title: RESPONSE_ACTIONS,
+        path: RESPONSE_ACTIONS_PATH,
+      },
     ],
   },
 ];
@@ -517,14 +547,15 @@ export function getDeepLinks(
   return filterDeepLinks(securitySolutionsDeepLinks);
 }
 
-function hasFeaturesCapability(
-  features: Feature[] | undefined,
+export function hasFeaturesCapability(
+  features: Features | undefined,
   capabilities: Capabilities
 ): boolean {
   if (!features) {
     return true;
   }
-  return features.some((featureKey) => get(capabilities, featureKey, false));
+
+  return hasCapabilities(features, capabilities);
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {

@@ -332,7 +332,7 @@ describe('Lens Attribute', () => {
       formulaHelper
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
-      x: true,
+      x: false,
       yLeft: false,
       yRight: false,
     });
@@ -345,7 +345,7 @@ describe('Lens Attribute', () => {
       formulaHelper
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
-      x: true,
+      x: false,
       yLeft: true,
       yRight: true,
     });
@@ -357,10 +357,10 @@ describe('Lens Attribute', () => {
 
   it('should return expected XYState', function () {
     expect(lnsAttr.getXyState()).toEqual({
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
@@ -497,8 +497,16 @@ describe('Lens Attribute', () => {
             operationType: 'terms',
             params: {
               missingBucket: false,
+              orderAgg: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Count of records',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
               orderBy: {
-                type: 'alphabetical',
+                type: 'custom',
               },
               orderDirection: 'desc',
               otherBucket: true,

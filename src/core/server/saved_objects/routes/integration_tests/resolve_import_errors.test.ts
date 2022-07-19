@@ -17,6 +17,7 @@ import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_da
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { SavedObjectsImporter } from '../..';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -76,7 +77,8 @@ describe(`POST ${URL}`, () => {
       .fn()
       .mockImplementation(() => importer as jest.Mocked<SavedObjectsImporter>);
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
+    const router =
+      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsResolveImportErrors.mockRejectedValue(
       new Error('Oh no!') // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
@@ -396,13 +398,11 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'new-id-1',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
-            originId: undefined,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
-            originId: undefined,
           }),
         ],
         expect.any(Object) // options

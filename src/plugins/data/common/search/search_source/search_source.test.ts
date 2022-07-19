@@ -117,6 +117,130 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('#getActiveIndexFilter()', () => {
+    test('pase _index from query', () => {
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: `_INDEX : fakebeat and _index : "mybeat-*"`,
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['mybeat-*'],
+        `
+        Array [
+          "mybeat-*",
+        ]
+      `
+      );
+    });
+
+    test('pase _index from filter', () => {
+      const filter = [
+        {
+          query: { match_phrase: { _index: 'auditbeat-*' } },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: false,
+            params: {
+              query: 'auditbeat-*',
+            },
+            type: 'phrase',
+          },
+        },
+        {
+          query: {
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    _index: 'auditbeat-*',
+                  },
+                },
+              ],
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: false,
+            params: ['auditbeat-*'],
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['auditbeat-*'],
+        `
+        Array [
+          "auditbeat-*",
+        ]
+      `
+      );
+    });
+
+    test('pase _index from query and filter with negate equals to true', () => {
+      const filter = [
+        {
+          query: {
+            match_phrase: {
+              _index: 'auditbeat-*',
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: false,
+            negate: true,
+            params: { query: 'auditbeat-*' },
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: '_index : auditbeat-*',
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot([], `Array []`);
+    });
+
+    test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
+      const filter = [
+        {
+          query: {
+            match_phrase: {
+              _index: 'auditbeat-*',
+            },
+          },
+          meta: {
+            key: '_index',
+            alias: null,
+            disabled: true,
+            negate: true,
+            params: { query: 'auditbeat-*' },
+            type: 'phrase',
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      searchSource.setField('query', {
+        language: 'kuery',
+        query: '_index : auditbeat-*',
+      });
+      expect(searchSource.getActiveIndexFilter()).toMatchInlineSnapshot(
+        ['auditbeat-*'],
+        `
+        Array [
+          "auditbeat-*",
+        ]
+      `
+      );
+    });
+  });
+
   describe('#removeField()', () => {
     test('remove property', () => {
       searchSource = new SearchSource({}, searchSourceDependencies);
@@ -808,13 +932,29 @@ describe('SearchSource', () => {
   });
 
   describe('#serialize', () => {
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
     test('should reference index patterns', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
       expect(references[0].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+    });
+
+    test('should contain persisted data view by value', () => {
+      const localDataView = {
+        id: 'local-123',
+        isPersisted: () => false,
+        toSpec: () => ({ id: 'local-123' }),
+      } as DataView;
+      searchSource.setField('index', localDataView);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references.length).toEqual(0);
+      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
+        Object {
+          "id": "local-123",
+        }
+      `);
     });
 
     test('should add other fields', () => {
@@ -851,7 +991,6 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
@@ -908,8 +1047,9 @@ describe('SearchSource', () => {
       },
     ];
 
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+
     test('should return serialized fields', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('filter', () => {
         return filter;
@@ -941,7 +1081,6 @@ describe('SearchSource', () => {
     });
 
     test('should support nested search sources', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('from', 123);
       const childSearchSource = searchSource.createChild();

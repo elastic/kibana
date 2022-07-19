@@ -56,7 +56,7 @@ export const PageViewLogInContext: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <LogStream
-              sourceId={sourceId}
+              logView={{ type: 'log-view-reference', logViewId: sourceId }}
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}
               query={contextQuery}

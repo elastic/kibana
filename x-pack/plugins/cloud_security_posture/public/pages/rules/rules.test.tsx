@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
@@ -17,6 +16,7 @@ import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
@@ -31,9 +31,20 @@ const queryClient = new QueryClient({
 
 const getTestComponent =
   (params: PageUrlParams): React.FC =>
-  () =>
-    (
-      <TestProvider>
+  () => {
+    const coreStart = coreMock.createStart();
+    const core = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          siem: { crud: true },
+        },
+      },
+    };
+    return (
+      <TestProvider core={core}>
         <Rules
           {...({
             match: { params },
@@ -41,11 +52,13 @@ const getTestComponent =
         />
       </TestProvider>
     );
+  };
 
 describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       data: { item: { status: 'installed' } },
     }));
@@ -63,33 +76,6 @@ describe('<Rules />', () => {
     render(<Component />);
 
     expect(useCspIntegrationInfo).toHaveBeenCalledWith(params);
-  });
-
-  it('displays error state when request had an error', async () => {
-    const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
-    const request = createReactQueryResponse({
-      status: 'error',
-      error: new Error('some error message'),
-    });
-
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(await screen.findByText(request.error?.message!)).toBeInTheDocument();
-  });
-
-  it('displays loading state when request is pending', () => {
-    const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = createReactQueryResponse({
-      status: 'loading',
-    });
-
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {

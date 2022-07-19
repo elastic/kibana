@@ -20,10 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should emit the "Loaded Kibana" event', async () => {
-      const [event] = await ebtUIHelper.getEvents(1, ['Loaded Kibana']);
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
       expect(event.event_type).to.eql('Loaded Kibana');
       expect(event.properties).to.have.property('kibana_version');
       expect(event.properties.kibana_version).to.be.a('string');
+      expect(event.properties).to.have.property('protocol');
+      expect(event.properties.protocol).to.be.a('string');
 
       // Kibana Loaded timings
       expect(event.properties).to.have.property('load_started');

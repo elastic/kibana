@@ -401,7 +401,7 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async getMetric() {
     const elements = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis__container'
     );
     const values = await Promise.all(
       elements.map(async (element) => {

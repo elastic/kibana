@@ -22,11 +22,11 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -34,19 +34,20 @@ import { i18n } from '@kbn/i18n';
 
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
+import { LanguageForOptimization } from './types';
 
-interface SearchIndex {
+export interface Props {
   title: React.ReactNode;
   description: React.ReactNode;
   docsUrl: string;
   type: string;
   onNameChange?(name: string): void;
-  onSubmit(name: string): void;
+  onSubmit(name: string, language: LanguageForOptimization): void;
   buttonLoading?: boolean;
   formDisabled?: boolean;
 }
 
-export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
+export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
   title,
   description,
@@ -55,8 +56,8 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
   formDisabled,
   buttonLoading,
 }) => {
-  const { name, language, rawName } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguage } = useActions(NewSearchIndexLogic);
+  const { name, language, rawName, languageSelectValue } = useValues(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -66,7 +67,7 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
   };
 
   const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
+    setLanguageSelectValue(e.target.value);
   };
 
   return (
@@ -74,7 +75,7 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(name);
+          onSubmit(name, language);
         }}
         component="form"
         id="enterprise-search-add-connector"
@@ -98,7 +99,6 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
               </p>
             </EuiText>
           </EuiFlexItem>
-
           <EuiFlexItem grow>
             <EuiFlexGroup>
               <EuiFlexItem grow>
@@ -132,6 +132,7 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
                     isInvalid={false}
                     value={rawName}
                     onChange={handleNameChange}
+                    autoFocus
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -153,13 +154,12 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
                   <EuiSelect
                     options={SUPPORTED_LANGUAGES}
                     onChange={handleLanguageChange}
-                    value={language}
+                    value={languageSelectValue}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow>{children}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
@@ -190,82 +190,8 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
-      <EuiSpacer />
-
-      <EuiSteps
-        steps={[
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.title',
-              {
-                defaultMessage: 'Create an Elasticsearch index',
-              }
-            ),
-
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional language analyzer.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
-              }
-            ),
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.content',
-                    {
-                      defaultMessage:
-                        'Generate an API key and view the documentation for posting documents to the Elasticsearch API endpoint. Language clients are available for streamlined integration.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.title',
-              {
-                defaultMessage: 'Build a search experience',
-              }
-            ),
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.content',
-                    {
-                      defaultMessage:
-                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-        ]}
-      />
+      <EuiHorizontalRule />
+      {children}
     </EuiPanel>
   );
 };

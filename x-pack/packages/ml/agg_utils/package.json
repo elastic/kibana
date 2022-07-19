@@ -1,13 +1,10 @@
 {
   "name": "@kbn/ml-agg-utils",
+  "description": "This package includes utility functions related to creating elasticsearch aggregation queries, data manipulation and verification.",
+  "author": "Machine Learning UI",
+  "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-ml-agg-utils",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "devDependencies": {
-    "ts-readme": "^1.1.3"
-  },
-  "scripts": {
-    "generate-docs": "ts-readme src/index.ts"
-  }
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

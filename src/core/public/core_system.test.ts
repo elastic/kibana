@@ -255,6 +255,7 @@ describe('#start()', () => {
       kibana_version: '1.2.3',
       load_started: 456,
       bootstrap_started: 123,
+      protocol: 'http:',
     });
 
     expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
@@ -278,6 +279,7 @@ describe('#start()', () => {
       memory_js_heap_size_limit: 3,
       memory_js_heap_size_total: 2,
       memory_js_heap_size_used: 1,
+      protocol: 'http:',
     });
   });
 

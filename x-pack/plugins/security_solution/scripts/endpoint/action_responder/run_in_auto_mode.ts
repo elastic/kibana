@@ -8,8 +8,9 @@
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { set } from 'lodash';
 import { SUPPORTED_TOKENS } from './constants';
-import { ActionDetails } from '../../../common/endpoint/types';
-import { createRuntimeServices, RuntimeServices } from '../common/stack_services';
+import type { ActionDetails } from '../../../common/endpoint/types';
+import type { RuntimeServices } from '../common/stack_services';
+import { createRuntimeServices } from '../common/stack_services';
 
 import {
   fetchEndpointActionList,
@@ -126,19 +127,5 @@ const parseCommentTokens = (comment: string): CommentTokens => {
 };
 
 const getActionComment = (action: ActionDetails): string => {
-  const actionRequest = action.logEntries.find(
-    (entry) => entry.type === 'fleetAction' || entry.type === 'action'
-  );
-
-  if (actionRequest) {
-    if (actionRequest.type === 'fleetAction') {
-      return actionRequest.item.data.data.comment ?? '';
-    }
-
-    if (actionRequest.type === 'action') {
-      return actionRequest.item.data.EndpointActions.data.comment ?? '';
-    }
-  }
-
-  return '';
+  return action.comment ?? '';
 };

@@ -116,10 +116,11 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
         <dt
           class="euiDescriptionList__title"
@@ -130,10 +131,11 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           class="euiDescriptionList__description"
         >
           <span
-            class="c3"
-          >
-            —
-          </span>
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            data-test-subj="loading-spinner"
+            role="progressbar"
+          />
         </dd>
       </dl>
     </div>
@@ -327,7 +329,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />

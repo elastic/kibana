@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
@@ -170,6 +171,17 @@ describe('When using the release action from response actions console', () => {
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+    });
+
+    it('should show exit modal when action still pending', async () => {
+      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+        path: '/api/endpoint/action/1.2.3',
+      });
+      pendingDetailResponse.data.isCompleted = false;
+      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+      await render();
+      await consoleManagerMockAccess.openRunningConsole();
+      await consoleManagerMockAccess.hideOpenedConsole();
     });
   });
 });

@@ -52,6 +52,100 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.PackagePolicyEditorDatastreamMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "PackagePolicyEditorDatastreamMappings",
+        "description": [],
+        "signature": [
+          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackagePolicyEditorDatastreamMappingsProps",
+            "text": "PackagePolicyEditorDatastreamMappingsProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ packageInputStream, packageInfo }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.PackagePolicyEditorDatastreamMappingsProps",
+                "text": "PackagePolicyEditorDatastreamMappingsProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackagePolicyEditorDatastreamPipelines",
+        "type": "Function",
+        "tags": [],
+        "label": "PackagePolicyEditorDatastreamPipelines",
+        "description": [],
+        "signature": [
+          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.PackagePolicyEditorDatastreamPipelinesProps",
+            "text": "PackagePolicyEditorDatastreamPipelinesProps"
+          },
+          ">) => JSX.Element | null"
+        ],
+        "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ packageInputStream, packageInfo }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.PackagePolicyEditorDatastreamPipelinesProps",
+                "text": "PackagePolicyEditorDatastreamPipelinesProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.pkgKeyFromPackageInfo",
         "type": "Function",
         "tags": [],
@@ -467,6 +561,19 @@
             "tags": [],
             "label": "enabled",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NewPackagePolicy.is_managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false
           },
@@ -1248,7 +1355,7 @@
                       "The updated Integration Policy to be merged back and included in the API call"
                     ],
                     "signature": [
-                      "{ id?: string | number | undefined; name?: string | undefined; description?: string | undefined; namespace?: string | undefined; enabled?: boolean | undefined; policy_id?: string | undefined; output_id?: string | undefined; package?: ",
+                      "{ id?: string | number | undefined; name?: string | undefined; description?: string | undefined; namespace?: string | undefined; enabled?: boolean | undefined; is_managed?: boolean | undefined; policy_id?: string | undefined; output_id?: string | undefined; package?: ",
                       {
                         "pluginId": "fleet",
                         "scope": "common",
@@ -1281,6 +1388,178 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackagePolicyEditorDatastreamMappingsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackagePolicyEditorDatastreamMappingsProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.packageInfo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "packageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installable",
+                "text": "Installable"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installable",
+                "text": "Installable"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">>"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.packageInputStream",
+            "type": "Object",
+            "tags": [],
+            "label": "packageInputStream",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackagePolicyEditorDatastreamPipelinesProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.packageInfo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "packageInfo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installable",
+                "text": "Installable"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryPackage",
+                "text": "RegistryPackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">> | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.Installable",
+                "text": "Installable"
+              },
+              "<Merge<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
+              },
+              ", ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.EpmPackageAdditions",
+                "text": "EpmPackageAdditions"
+              },
+              ">>"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.packageInputStream",
+            "type": "Object",
+            "tags": [],
+            "label": "packageInputStream",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2717,10 +2996,57 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_edit_download_sources",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_edit_download_sources",
+            "description": [],
+            "signature": [
+              "({ downloadSourceId }: ",
+              "DynamicPagePathValues",
+              ") => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.settings_edit_download_sources.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ downloadSourceId }",
+                "description": [],
+                "signature": [
+                  "DynamicPagePathValues"
+                ],
+                "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.pagePathGetters.settings_create_outputs",
             "type": "Function",
             "tags": [],
             "label": "settings_create_outputs",
+            "description": [],
+            "signature": [
+              "() => [string, string]"
+            ],
+            "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.settings_create_download_sources",
+            "type": "Function",
+            "tags": [],
+            "label": "settings_create_download_sources",
             "description": [],
             "signature": [
               "() => [string, string]"
@@ -4790,13 +5116,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "fleet",
@@ -4817,13 +5137,7 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
@@ -7218,13 +7532,7 @@
                 "text": "RequestHandlerContext"
               },
               ", request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<A extends \"postPackagePolicyDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
               {
                 "pluginId": "fleet",
@@ -7325,13 +7633,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
@@ -7481,13 +7783,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "fleet",
@@ -7508,13 +7804,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
@@ -7581,7 +7871,7 @@
         "signature": [
           "any"
         ],
-        "path": "x-pack/plugins/fleet/server/index.ts",
+        "path": "x-pack/plugins/fleet/server/config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7624,13 +7914,7 @@
             "text": "RequestHandlerContext"
           },
           ", request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7691,13 +7975,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -7780,13 +8058,7 @@
             "text": "RequestHandlerContext"
           },
           ", request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7847,13 +8119,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -7887,13 +8153,7 @@
             "text": "RequestHandlerContext"
           },
           ", request: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) => Promise<",
           {
             "pluginId": "fleet",
@@ -7954,13 +8214,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -8024,13 +8278,7 @@
           "description": [],
           "signature": [
             "{ fromRequest(request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>): Promise<",
             {
               "pluginId": "fleet",
@@ -8772,6 +9020,135 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.getComponentTemplateNameForDatastream",
+        "type": "Function",
+        "tags": [],
+        "label": "getComponentTemplateNameForDatastream",
+        "description": [
+          "\nReturn the name for a component template"
+        ],
+        "signature": [
+          "(dataStream: { dataset: string; type: string; hidden?: boolean | undefined; }, suffix: \"@package\" | \"@custom\" | undefined) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getComponentTemplateNameForDatastream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getComponentTemplateNameForDatastream.$1.dataset",
+                "type": "string",
+                "tags": [],
+                "label": "dataset",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getComponentTemplateNameForDatastream.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getComponentTemplateNameForDatastream.$1.hidden",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hidden",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getComponentTemplateNameForDatastream.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "suffix",
+            "description": [],
+            "signature": [
+              "\"@package\" | \"@custom\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.getCustomPipelineNameForDatastream",
+        "type": "Function",
+        "tags": [],
+        "label": "getCustomPipelineNameForDatastream",
+        "description": [
+          "\nReturn the custom user ingest pipeline name for a datastream"
+        ],
+        "signature": [
+          "(dataStream: { dataset: string; type: string; }) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getCustomPipelineNameForDatastream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getCustomPipelineNameForDatastream.$1.dataset",
+                "type": "string",
+                "tags": [],
+                "label": "dataset",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getCustomPipelineNameForDatastream.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.getExperimentalAllowedValues",
         "type": "Function",
         "tags": [],
@@ -8888,6 +9265,124 @@
             "path": "x-pack/plugins/fleet/common/services/get_min_max_version.ts",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.getPipelineNameForDatastream",
+        "type": "Function",
+        "tags": [],
+        "label": "getPipelineNameForDatastream",
+        "description": [
+          "\nReturn the ingest pipeline name for a datastream"
+        ],
+        "signature": [
+          "({ dataStream, packageVersion, }: { dataStream: { dataset: string; type: string; }; packageVersion: string; }) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getPipelineNameForDatastream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataStream,\n  packageVersion,\n}",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getPipelineNameForDatastream.$1.dataStream",
+                "type": "Object",
+                "tags": [],
+                "label": "dataStream",
+                "description": [],
+                "signature": [
+                  "{ dataset: string; type: string; }"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getPipelineNameForDatastream.$1.packageVersion",
+                "type": "string",
+                "tags": [],
+                "label": "packageVersion",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.getRegistryDataStreamAssetBaseName",
+        "type": "Function",
+        "tags": [],
+        "label": "getRegistryDataStreamAssetBaseName",
+        "description": [
+          "\nCreates the base name for Elasticsearch assets in the form of\n{type}-{dataset}"
+        ],
+        "signature": [
+          "(dataStream: { dataset: string; type: string; hidden?: boolean | undefined; }) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getRegistryDataStreamAssetBaseName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getRegistryDataStreamAssetBaseName.$1.dataset",
+                "type": "string",
+                "tags": [],
+                "label": "dataset",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getRegistryDataStreamAssetBaseName.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.getRegistryDataStreamAssetBaseName.$1.hidden",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hidden",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/datastream_es_name.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -9433,7 +9928,7 @@
           "\nParses the string value used in `xpack.fleet.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ createPackagePolicyMultiPageLayout: boolean; }>"
+          "(configValue: string[]) => Readonly<{ createPackagePolicyMultiPageLayout: boolean; packageVerification: boolean; }>"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,
@@ -9811,6 +10306,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.Agent.default_api_key_history",
+            "type": "Array",
+            "tags": [],
+            "label": "default_api_key_history",
+            "description": [],
+            "signature": [
+              "{ id: string; retired_at: string; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.Agent.status",
             "type": "CompoundType",
             "tags": [],
@@ -9838,6 +10346,19 @@
             "description": [],
             "signature": [
               "string[]"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Agent.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "(string | number | null)[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false
@@ -10082,6 +10603,19 @@
             "tags": [],
             "label": "revision",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.agents",
+            "type": "number",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
           }
@@ -10563,7 +11097,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ description?: string | undefined; name: string; }"
+              "{ name: string; description?: string | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
             "deprecated": false
@@ -11065,6 +11599,29 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.DeleteDownloadSourceResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteDownloadSourceResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DeleteDownloadSourceResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.DeleteEnrollmentAPIKeyRequest",
         "type": "Interface",
         "tags": [],
@@ -11235,6 +11792,49 @@
               "[]"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DownloadSourceBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "DownloadSourceBase",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DownloadSourceBase.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DownloadSourceBase.host",
+            "type": "string",
+            "tags": [],
+            "label": "host",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DownloadSourceBase.is_default",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_default",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
             "deprecated": false
           }
         ],
@@ -11649,15 +12249,74 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FleetConfigType.packageVerification",
+            "type": "Object",
+            "tags": [],
+            "label": "packageVerification",
+            "description": [],
+            "signature": [
+              "{ gpgKeyPath?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FleetConfigType.developer",
             "type": "Object",
             "tags": [],
             "label": "developer",
             "description": [],
             "signature": [
-              "{ disableRegistryVersionCheck?: boolean | undefined; allowAgentUpgradeSourceUri?: boolean | undefined; bundledPackageLocation?: string | undefined; } | undefined"
+              "{ disableRegistryVersionCheck?: boolean | undefined; bundledPackageLocation?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FleetErrorResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FleetErrorResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetErrorResponse.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ type?: \"verification_failed\" | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
             "deprecated": false
           }
         ],
@@ -12057,6 +12716,21 @@
             ],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.default_api_key_history",
+            "type": "Array",
+            "tags": [],
+            "label": "default_api_key_history",
+            "description": [
+              "\nDefault API Key History"
+            ],
+            "signature": [
+              "{ id: string; retired_at: string; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false
@@ -12662,7 +13336,7 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { source_uri: string; }; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
@@ -13465,6 +14139,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/fleet_setup.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetFleetStatusResponse.package_verification_key_id",
+            "type": "string",
+            "tags": [],
+            "label": "package_verification_key_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/fleet_setup.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -13842,6 +14529,64 @@
               }
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.GetOneDownloadSourceRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetOneDownloadSourceRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetOneDownloadSourceRequest.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ outputId: string; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.GetOneDownloadSourceResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetOneDownloadSourceResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetOneDownloadSourceResponse.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.DownloadSourceBase",
+                "text": "DownloadSourceBase"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
             "deprecated": false
           }
         ],
@@ -14636,6 +15381,45 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.install_format_schema_version",
+            "type": "string",
+            "tags": [],
+            "label": "install_format_schema_version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.verification_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verification_status",
+            "description": [],
+            "signature": [
+              "\"unknown\" | \"verified\" | \"unverified\""
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.verification_key_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verification_key_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -14972,6 +15756,32 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.isUnverified",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isUnverified",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.IntegrationCardItem.showLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showLabels",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -15058,13 +15868,7 @@
             "text": "ListWithKuery"
           },
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpFetchQuery",
-            "text": "HttpFetchQuery"
-          }
+          "HttpFetchQuery"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/common.ts",
         "deprecated": false,
@@ -15299,6 +16103,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentAction.source_uri",
+            "type": "string",
+            "tags": [],
+            "label": "source_uri",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -15469,6 +16286,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "monitoring_output_id",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.download_source_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "download_source_id",
             "description": [],
             "signature": [
               "string | null | undefined"
@@ -15681,6 +16511,19 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicy.is_managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicy.policy_id",
             "type": "string",
             "tags": [],
@@ -15785,6 +16628,19 @@
         "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInput.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInput.type",
@@ -15904,6 +16760,19 @@
         "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInputStream.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInputStream.enabled",
@@ -16920,6 +17789,58 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PostBulkUpdateAgentTagsRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PostBulkUpdateAgentTagsRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PostBulkUpdateAgentTagsRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ agents: string | string[]; tagsToAdd?: string[] | undefined; tagsToRemove?: string[] | undefined; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PostDownloadSourceRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PostDownloadSourceRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PostDownloadSourceRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; name: string; host: string; is_default?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PostEnrollmentAPIKeyRequest",
         "type": "Interface",
         "tags": [],
@@ -17393,6 +18314,77 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PutDownloadSourceRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PutDownloadSourceRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PutDownloadSourceRequest.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ outputId: string; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PutDownloadSourceRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ name: string; host: string; is_default?: boolean | undefined; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PutDownloadSourceResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "PutDownloadSourceResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PutDownloadSourceResponse.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.DownloadSourceBase",
+                "text": "DownloadSourceBase"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PutOutputRequest",
         "type": "Interface",
         "tags": [],
@@ -17481,7 +18473,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ has_seen_add_data_notice?: boolean | undefined; has_seen_fleet_migration_notice?: boolean | undefined; fleet_server_hosts?: string[] | undefined; }"
+              "{ fleet_server_hosts?: string[] | undefined; preconfigured_fields?: \"fleet_server_hosts\"[] | undefined; has_seen_add_data_notice?: boolean | undefined; has_seen_fleet_migration_notice?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/settings.ts",
             "deprecated": false
@@ -18267,7 +19259,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"yaml\" | \"password\" | \"integer\" | \"bool\""
+              "\"string\" | \"text\" | \"yaml\" | \"textarea\" | \"password\" | \"integer\" | \"bool\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -18397,6 +19389,19 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Settings.preconfigured_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "preconfigured_fields",
+            "description": [],
+            "signature": [
+              "\"fleet_server_hosts\"[] | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/settings.ts",
             "deprecated": false
           }
@@ -18546,7 +19551,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ user_provided_metadata: Record<string, any>; }"
+              "{ user_provided_metadata?: Record<string, any> | undefined; tags?: string[] | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false
@@ -19303,7 +20308,7 @@
             "section": "def-common.ValueOf",
             "text": "ValueOf"
           },
-          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; description?: string | undefined; name: string; updated_at: string; namespace: string; updated_by: string; is_default?: boolean | undefined; is_default_fleet_server?: boolean | undefined; has_fleet_server?: boolean | undefined; is_managed: boolean; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | null | undefined; monitoring_output_id?: string | null | undefined; package_policies: string[] | ",
+          "<{ readonly Active: \"active\"; readonly Inactive: \"inactive\"; }>; name: string; description?: string | undefined; updated_at: string; namespace: string; updated_by: string; is_managed: boolean; is_default?: boolean | undefined; is_default_fleet_server?: boolean | undefined; has_fleet_server?: boolean | undefined; monitoring_enabled?: (\"metrics\" | \"logs\")[] | undefined; unenroll_timeout?: number | undefined; is_preconfigured?: boolean | undefined; data_output_id?: string | null | undefined; monitoring_output_id?: string | null | undefined; download_source_id?: string | null | undefined; package_policies: string[] | ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -19311,7 +20316,7 @@
             "section": "def-common.PackagePolicy",
             "text": "PackagePolicy"
           },
-          "[]; revision: number; }"
+          "[]; revision: number; agents?: number | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
@@ -19367,7 +20372,7 @@
         "label": "AgentStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"offline\" | \"online\" | \"warning\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"updating\" | \"degraded\""
+          "\"error\" | \"warning\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"updating\" | \"degraded\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
         "deprecated": false,
@@ -19424,7 +20429,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"internal\" | \"data_streams\" | \"elasticsearch\" | \"assets\" | \"readme\">"
+          ", \"internal\" | \"data_streams\" | \"assets\" | \"readme\" | \"elasticsearch\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -19685,6 +20690,34 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.DEFAULT_DOWNLOAD_SOURCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_DOWNLOAD_SOURCE_ID",
+        "description": [],
+        "signature": [
+          "\"fleet-default-download-source\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DEFAULT_DOWNLOAD_SOURCE_URI",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_DOWNLOAD_SOURCE_URI",
+        "description": [],
+        "signature": [
+          "\"https://artifacts.elastic.co/downloads/beats/elastic-agent\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.DEFAULT_OUTPUT_ID",
         "type": "string",
         "tags": [],
@@ -19744,6 +20777,73 @@
           "\"notice\" | \"doc\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DOWNLOAD_SOURCE_API_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "DOWNLOAD_SOURCE_API_ROOT",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ingest-download-sources\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/download_source.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DownloadSource",
+        "type": "Type",
+        "tags": [],
+        "label": "DownloadSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.DownloadSourceBase",
+            "text": "DownloadSourceBase"
+          },
+          " & { id: string; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DownloadSourceAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "DownloadSourceAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.DownloadSourceBase",
+            "text": "DownloadSourceBase"
+          },
+          " & { source_id?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/download_sources.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -19952,7 +21052,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly createPackagePolicyMultiPageLayout: boolean; }"
+          "{ readonly createPackagePolicyMultiPageLayout: boolean; readonly packageVerification: boolean; }"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,
@@ -20156,6 +21256,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FleetErrorType",
+        "type": "Type",
+        "tags": [],
+        "label": "FleetErrorType",
+        "description": [],
+        "signature": [
+          "\"verification_failed\""
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/error.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FullAgentPolicyOutput",
         "type": "Type",
         "tags": [],
@@ -20223,6 +21337,35 @@
           " & { agents?: number | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.GetDownloadSourceResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetDownloadSourceResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ListResult",
+            "text": "ListResult"
+          },
+          "<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.DownloadSource",
+            "text": "DownloadSource"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/download_sources.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21014,6 +22157,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PACKAGE_TEMPLATE_SUFFIX",
+        "type": "string",
+        "tags": [],
+        "label": "PACKAGE_TEMPLATE_SUFFIX",
+        "description": [],
+        "signature": [
+          "\"@package\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PackageAssetReference",
         "type": "Type",
         "tags": [],
@@ -21198,7 +22355,7 @@
         "label": "PackagePolicySOAttributes",
         "description": [],
         "signature": [
-          "{ package?: ",
+          "{ name: string; package?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -21206,15 +22363,7 @@
             "section": "def-common.PackagePolicyPackage",
             "text": "PackagePolicyPackage"
           },
-          " | undefined; description?: string | undefined; name: string; enabled: boolean; updated_at: string; namespace: string; created_at: string; created_by: string; updated_by: string; inputs: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicyInput",
-            "text": "PackagePolicyInput"
-          },
-          "[]; policy_id: string; output_id: string; vars?: ",
+          " | undefined; description?: string | undefined; enabled: boolean; updated_at: string; namespace: string; created_at: string; created_by: string; updated_by: string; vars?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -21222,7 +22371,15 @@
             "section": "def-common.PackagePolicyConfigRecord",
             "text": "PackagePolicyConfigRecord"
           },
-          " | undefined; elasticsearch?: { privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; revision: number; }"
+          " | undefined; elasticsearch?: { privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; inputs: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicyInput",
+            "text": "PackagePolicyInput"
+          },
+          "[]; is_managed?: boolean | undefined; policy_id: string; output_id: string; revision: number; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
         "deprecated": false,
@@ -21325,7 +22482,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"custom\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,
@@ -21342,6 +22499,20 @@
           "{ kibana: { version: string; }; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PackageVerificationStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "PackageVerificationStatus",
+        "description": [],
+        "signature": [
+          "\"unknown\" | \"verified\" | \"unverified\""
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -21393,6 +22564,20 @@
         "type": "Type",
         "tags": [],
         "label": "PostBulkAgentUpgradeResponse",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { success: boolean; error?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PostBulkUpdateAgentTagsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostBulkUpdateAgentTagsResponse",
         "description": [],
         "signature": [
           "{ [x: string]: { success: boolean; error?: string | undefined; }; }"
@@ -21500,7 +22685,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ download: string; title: string; type?: \"integration\" | undefined; description: string; icons?: (",
+          "{ type?: \"integration\" | undefined; name: string; path: string; version: string; title: string; download: string; description: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -21524,7 +22709,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; name: string; version: string; path: string; internal?: boolean | undefined; data_streams?: ",
+          " | undefined)[] | undefined; internal?: boolean | undefined; data_streams?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -21575,7 +22760,7 @@
         "label": "RegistryVarType",
         "description": [],
         "signature": [
-          "\"string\" | \"text\" | \"yaml\" | \"password\" | \"integer\" | \"bool\""
+          "\"string\" | \"text\" | \"yaml\" | \"textarea\" | \"password\" | \"integer\" | \"bool\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -21855,6 +23040,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.USER_SETTINGS_TEMPLATE_SUFFIX",
+        "type": "string",
+        "tags": [],
+        "label": "USER_SETTINGS_TEMPLATE_SUFFIX",
+        "description": [],
+        "signature": [
+          "\"@custom\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.UUID_V5_NAMESPACE",
         "type": "string",
         "tags": [],
@@ -21921,6 +23120,16 @@
             "type": "string",
             "tags": [],
             "label": "UPDATE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UPDATE_AGENT_TAGS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false
@@ -22556,6 +23765,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getBulkUpdateTagsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkUpdateTagsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.agentRouteService.getUnenrollPath",
             "type": "Function",
             "tags": [],
@@ -22855,7 +24079,7 @@
           "\nA list of allowed values that can be used in `xpack.fleet.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly createPackagePolicyMultiPageLayout: boolean; }"
+          "{ readonly createPackagePolicyMultiPageLayout: boolean; readonly packageVerification: boolean; }"
         ],
         "path": "x-pack/plugins/fleet/common/experimental_features.ts",
         "deprecated": false,
@@ -23110,6 +24334,202 @@
             ],
             "path": "x-pack/plugins/fleet/common/constants/output.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "DOWNLOAD_SOURCE_API_ROUTES",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "LIST_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "CREATE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "UPDATE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.downloadSourceRoutesService",
+        "type": "Object",
+        "tags": [],
+        "label": "downloadSourceRoutesService",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/services/routes.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getInfoPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getInfoPath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getInfoPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getUpdatePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getUpdatePath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getUpdatePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getListPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getListPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getDeletePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeletePath",
+            "description": [],
+            "signature": [
+              "(downloadSourceId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.downloadSourceRoutesService.getDeletePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "downloadSourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.downloadSourceRoutesService.getCreatePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreatePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

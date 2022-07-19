@@ -6,21 +6,19 @@
  */
 
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { CoreStart, HttpStart } from '@kbn/core/public';
-import { Dispatch } from 'redux';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
-  ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import {
-  ActivityLog,
+import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
@@ -32,8 +30,8 @@ import {
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
-import { AppAction } from '../../../../common/store/actions';
+import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
@@ -47,29 +45,22 @@ import {
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
-import { GetPolicyListResponse } from '../../policy/types';
-import {
+import type { GetPolicyListResponse } from '../../policy/types';
+import type {
   AgentIdsPendingActions,
   EndpointState,
   PolicyIds,
   TransformStats,
   TransformStatsResponse,
 } from '../types';
-import { getIsInvalidDateRange } from '../utils';
-import { EndpointPackageInfoStateChanged } from './action';
+import type { EndpointPackageInfoStateChanged } from './action';
 import {
   detailsData,
   endpointPackageInfo,
   endpointPackageVersion,
-  getActivityLogData,
-  getActivityLogDataPaging,
-  getActivityLogError,
-  getActivityLogIsUninitializedOrHasSubsequentAPIError,
   getCurrentIsolationRequestState,
   getIsEndpointPackageInfoUninitialized,
   getIsIsolationRequestPending,
-  getIsOnEndpointDetailsActivityLog,
-  getLastLoadedActivityLogData,
   getMetadataTransformStats,
   hasSelectedEndpoint,
   isMetadataTransformStatsLoading,
@@ -78,7 +69,6 @@ import {
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  selectedAgent,
   uiQueryParams,
 } from './selectors';
 
@@ -139,25 +129,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     if (action.type === 'endpointDetailsLoad') {
       await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
-    }
-
-    // get activity log API
-    if (
-      action.type === 'userChangedUrl' &&
-      hasSelectedEndpoint(getState()) === true &&
-      getIsOnEndpointDetailsActivityLog(getState()) &&
-      getActivityLogIsUninitializedOrHasSubsequentAPIError(getState())
-    ) {
-      await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
-    }
-
-    // page activity log API
-    if (
-      action.type === 'endpointDetailsActivityLogUpdatePaging' &&
-      !getActivityLogError(getState()) &&
-      hasSelectedEndpoint(getState())
-    ) {
-      await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -640,130 +611,6 @@ async function endpointDetailsMiddleware({
     return;
   }
   await loadEndpointDetails({ store, coreStart, selectedEndpoint });
-}
-
-async function endpointDetailsActivityLogChangedMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  dispatch({
-    type: 'endpointDetailsActivityLogChanged',
-    payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
-  });
-
-  try {
-    const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
-    });
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createLoadedResourceState<ActivityLog>(activityLog),
-    });
-  } catch (error) {
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-    });
-  }
-}
-
-async function endpointDetailsActivityLogPagingMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  try {
-    const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    // don't page when paging is disabled or when date ranges are invalid
-    if (disabled) {
-      return;
-    }
-    if (getIsInvalidDateRange({ startDate, endDate })) {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-        payload: {
-          isInvalidDateRange: true,
-        },
-      });
-      return;
-    }
-
-    dispatch({
-      type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-      payload: {
-        isInvalidDateRange: false,
-      },
-    });
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createLoadingResourceState(asStaleResourceState(getActivityLogData(getState()))),
-    });
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: {
-        page,
-        page_size: pageSize,
-        start_date: startDate,
-        end_date: endDate,
-      },
-    });
-
-    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
-    if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = (
-        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
-      ).sort((a, b) =>
-        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-      );
-
-      const updatedLogData = {
-        page: activityLog.page,
-        pageSize: activityLog.pageSize,
-        startDate: activityLog.startDate,
-        endDate: activityLog.endDate,
-        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
-      };
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
-      });
-      if (!activityLog.data.length) {
-        dispatch({
-          type: 'endpointDetailsActivityLogUpdatePaging',
-          payload: {
-            disabled: true,
-            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
-            pageSize: activityLog.pageSize,
-            startDate: activityLog.startDate,
-            endDate: activityLog.endDate,
-          },
-        });
-      }
-    } else {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(activityLog),
-      });
-    }
-  } catch (error) {
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-    });
-  }
 }
 
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {

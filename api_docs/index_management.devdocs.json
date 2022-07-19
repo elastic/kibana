@@ -853,6 +853,32 @@
       },
       {
         "parentPluginId": "indexManagement",
+        "id": "def-common.ComponentTemplateDatastreams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateDatastreams",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateDatastreams.data_streams",
+            "type": "Array",
+            "tags": [],
+            "label": "data_streams",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
         "id": "def-common.ComponentTemplateDeserialized",
         "type": "Interface",
         "tags": [],

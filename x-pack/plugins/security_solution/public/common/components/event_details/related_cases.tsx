@@ -25,11 +25,11 @@ export const RelatedCases: React.FC<Props> = React.memo(({ eventId, isReadOnly }
     services: { cases },
   } = useKibana();
   const toasts = useToasts();
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const [relatedCases, setRelatedCases] = useState<RelatedCaseList>([]);
   const [areCasesLoading, setAreCasesLoading] = useState(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const hasCasesReadPermissions = casePermissions?.read ?? false;
+  const hasCasesReadPermissions = userCasesPermissions.read;
 
   const getRelatedCases = useCallback(async () => {
     let relatedCaseList: RelatedCaseList = [];

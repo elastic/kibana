@@ -49,6 +49,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('static_value', () => {
@@ -340,7 +348,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -371,7 +379,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={zeroLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -387,7 +395,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -428,7 +436,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />

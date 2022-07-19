@@ -8,6 +8,8 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
   node: string;
@@ -81,7 +83,7 @@ const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDsl
   };
 };
 
-export function initClient(options: ClientOptions) {
+export function initClient(options: ClientOptions, log: ToolingLog) {
   const client = new Client({
     node: options.node,
     auth: {
@@ -114,18 +116,20 @@ export function initClient(options: ClientOptions) {
         { field: 'processor.event', value: 'transaction' },
         { field: 'labels.testBuildId', value: buildId },
         { field: 'labels.journeyName', value: journeyName },
+        { field: 'labels.performancePhase', value: 'TEST' },
       ];
       const queryFilters = filters.map((filter) => addBooleanFilter(filter));
       return await this.getTransactions(queryFilters);
     },
+
     async getTransactions(queryFilters: QueryDslQueryContainer[]) {
-      const result = await client.search<Document>({
+      const searchRequest: SearchRequest = {
         body: {
           track_total_hits: true,
           sort: [
             {
               '@timestamp': {
-                order: 'desc',
+                order: 'asc',
                 unmapped_type: 'boolean',
               },
             },
@@ -148,7 +152,11 @@ export function initClient(options: ClientOptions) {
             },
           },
         },
-      });
+      };
+
+      log.debug(`Search request: ${JSON.stringify(searchRequest)}`);
+      const result = await client.search<Document>(searchRequest);
+      log.debug(`Search result: ${JSON.stringify(result)}`);
       return result?.hits?.hits;
     },
   };

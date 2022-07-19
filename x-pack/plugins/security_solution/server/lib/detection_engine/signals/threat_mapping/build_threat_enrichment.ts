@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SignalsEnrichment } from '../types';
+import type { SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
+import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
@@ -22,6 +22,7 @@ export const buildThreatEnrichment = ({
   threatQuery,
   pitId,
   reassignPitId,
+  listClient,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -51,6 +52,7 @@ export const buildThreatEnrichment = ({
       pitId,
       reassignPitId,
       runtimeMappings: undefined,
+      listClient,
     });
 
     return threatResponse.hits.hits;

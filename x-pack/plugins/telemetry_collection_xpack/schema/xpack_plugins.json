@@ -5832,6 +5832,34 @@
                 }
               }
             },
+            "es_ml_anomalies": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es machine learning anomaly layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es machine learning anomaly layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es machine learning anomaly layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
             "es_point_to_point": {
               "properties": {
                 "min": {
@@ -6759,6 +6787,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6849,6 +6890,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6936,6 +6990,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7060,6 +7127,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -7178,6 +7258,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7331,6 +7424,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7986,6 +8092,19 @@
             }
           }
         },
+        "queue_times": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -8043,6 +8162,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8136,6 +8268,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8223,6 +8368,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8347,6 +8505,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8465,6 +8636,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8618,6 +8802,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -9270,6 +9467,19 @@
                 },
                 "99.0": {
                   "type": "long"
+                }
+              }
+            },
+            "queue_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             }

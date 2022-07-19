@@ -33,27 +33,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   async function callApi<TMetricName extends 'latency' | 'throughput' | 'error_rate'>({
-    backendName,
+    dependencyName,
     searchServiceDestinationMetrics,
     spanName = '',
     metric,
     kuery = '',
     environment = ENVIRONMENT_ALL.value,
   }: {
-    backendName: string;
+    dependencyName: string;
     searchServiceDestinationMetrics: boolean;
     spanName?: string;
     metric: TMetricName;
     kuery?: string;
     environment?: string;
-  }): Promise<SupertestReturnType<`GET /internal/apm/backends/charts/${TMetricName}`>> {
+  }): Promise<SupertestReturnType<`GET /internal/apm/dependencies/charts/${TMetricName}`>> {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/backends/charts/${
+      endpoint: `GET /internal/apm/dependencies/charts/${
         metric as 'latency' | 'throughput' | 'error_rate'
       }`,
       params: {
         query: {
-          backendName,
+          dependencyName,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           environment,
@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state', async () => {
         const { body, status } = await callApi({
-          backendName: 'elasticsearch',
+          dependencyName: 'elasticsearch',
           metric: 'latency',
           searchServiceDestinationMetrics: true,
         });
@@ -110,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('without a kuery or environment', () => {
           it('returns the correct latency', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'latency',
@@ -131,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct throughput', async () => {
             const response = await callApi({
-              backendName: 'redis',
+              dependencyName: 'redis',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'throughput',
@@ -142,7 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct failure rate', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'error_rate',
@@ -158,7 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('with a kuery', () => {
           it('returns the correct latency', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'latency',
@@ -179,7 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct throughput', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'throughput',
@@ -194,7 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct failure rate', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'error_rate',
@@ -208,7 +208,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('with an environment', () => {
           it('returns the correct latency', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'latency',
@@ -229,7 +229,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct throughput', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'throughput',
@@ -245,7 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns the correct failure rate', async () => {
             const response = await callApi({
-              backendName: 'elasticsearch',
+              dependencyName: 'elasticsearch',
               searchServiceDestinationMetrics: true,
               spanName: '',
               metric: 'error_rate',
@@ -260,7 +260,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with spanName', () => {
         it('returns the correct latency', async () => {
           const response = await callApi({
-            backendName: 'elasticsearch',
+            dependencyName: 'elasticsearch',
             searchServiceDestinationMetrics: false,
             spanName: '/_search',
             metric: 'latency',
@@ -281,7 +281,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the correct throughput', async () => {
           const response = await callApi({
-            backendName: 'redis',
+            dependencyName: 'redis',
             searchServiceDestinationMetrics: false,
             spanName: 'SET',
             metric: 'throughput',
@@ -292,7 +292,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the correct failure rate', async () => {
           const response = await callApi({
-            backendName: 'elasticsearch',
+            dependencyName: 'elasticsearch',
             searchServiceDestinationMetrics: false,
             spanName: '/_bulk',
             metric: 'error_rate',

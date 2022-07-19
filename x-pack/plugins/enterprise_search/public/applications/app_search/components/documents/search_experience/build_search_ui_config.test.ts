@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { APIConnector } from '@elastic/search-ui';
+
 import { SchemaType } from '../../../../shared/schema/types';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
@@ -13,15 +15,27 @@ describe('buildSearchUIConfig', () => {
   it('builds a configuration object for Search UI', () => {
     const connector = {};
     const schema = {
-      foo: SchemaType.Text,
-      bar: SchemaType.Number,
+      foo: {
+        type: SchemaType.Text,
+        capabilities: {
+          snippet: true,
+          facet: true,
+        },
+      },
+      bar: {
+        type: SchemaType.Number,
+        capabilities: {
+          snippet: false,
+          facet: false,
+        },
+      },
     };
     const fields = {
-      filterFields: ['fieldA', 'fieldB'],
+      filterFields: ['foo', 'bar'],
       sortFields: [],
     };
 
-    const config = buildSearchUIConfig(connector, schema, fields);
+    const config = buildSearchUIConfig(connector as APIConnector, schema, fields);
     expect(config).toEqual({
       alwaysSearchOnInitialLoad: true,
       apiConnector: connector,
@@ -30,13 +44,9 @@ describe('buildSearchUIConfig', () => {
         sortField: 'id',
       },
       searchQuery: {
-        disjunctiveFacets: ['fieldA', 'fieldB'],
+        disjunctiveFacets: ['foo'],
         facets: {
-          fieldA: {
-            size: 30,
-            type: 'value',
-          },
-          fieldB: {
+          foo: {
             size: 30,
             type: 'value',
           },
@@ -44,15 +54,10 @@ describe('buildSearchUIConfig', () => {
         result_fields: {
           bar: {
             raw: {},
-            snippet: {
-              fallback: true,
-              size: 300,
-            },
           },
           foo: {
             raw: {},
             snippet: {
-              fallback: true,
               size: 300,
             },
           },
