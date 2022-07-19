@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './metric-events';
+export * from './metric_events';
