@@ -51,6 +51,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
+  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from './services/embeddable';
 import {
@@ -80,7 +81,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
-import { FiltersNotificationAction } from './application/actions/filters_notification_action';
+import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -389,6 +390,18 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
+    // const dateFormat = core.uiSettings.get('dateFormat') as string;
+    // const commonlyUsedRanges = core.uiSettings.get(
+    //   UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+    // ) as CommonlyUsedRange[];
+    // const { openModal } = createReactOverlays(core);
+    // const timeRangeBadge = new CustomTimeRangeBadge({
+    //   openModal,
+    //   dateFormat,
+    //   commonlyUsedRanges,
+    // });
+    // uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
+
     if (share) {
       const ExportCSVPlugin = new ExportCSVAction({ core, data });
       uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
@@ -413,9 +426,9 @@ export class DashboardPlugin
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
-      const panelLevelFiltersAction = new FiltersNotificationAction(theme, unlinkFromLibraryAction);
+      const panelLevelFiltersAction = new FiltersNotificationBadge(theme, overlays);
       uiActions.registerAction(panelLevelFiltersAction);
-      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersAction.id);
+      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersAction.id);
 
       const copyToDashboardAction = new CopyToDashboardAction(
         theme,
