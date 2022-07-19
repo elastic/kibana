@@ -74,6 +74,8 @@ export const RelatedAlertsBySourceEvent = React.memo<Props>(
       );
     }, [alertIds, cellData?.dataProviders]);
 
+    const isEmpty = count === 0;
+
     return (
       <InsightAccordion
         prefix="RelatedAlertsBySourceEvent"
@@ -101,6 +103,7 @@ export const RelatedAlertsBySourceEvent = React.memo<Props>(
               )
             : ''
         }
+        empty={isEmpty}
         renderContent={renderContent}
       />
     );

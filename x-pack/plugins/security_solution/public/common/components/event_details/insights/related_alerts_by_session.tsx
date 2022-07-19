@@ -74,6 +74,8 @@ export const RelatedAlertsBySession = React.memo<Props>(
       );
     }, [alertIds, cellData?.dataProviders]);
 
+    const isEmpty = count == 0;
+
     return (
       <InsightAccordion
         prefix="RelatedAlertsBySession"
@@ -101,6 +103,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
               )
             : ''
         }
+        empty={isEmpty}
         renderContent={renderContent}
       />
     );

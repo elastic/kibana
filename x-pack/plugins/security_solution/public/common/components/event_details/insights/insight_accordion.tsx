@@ -9,7 +9,20 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { noop } from 'lodash/fp';
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiAccordion, EuiIcon, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiAccordion, EuiIcon, useGeneratedHtmlId, hexToRgb } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
+const StyledAccordion = euiStyled(EuiAccordion)`
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 10px 8px;
+  border-radius: 6px;
+`;
+
+const EmptyAccordion = euiStyled(StyledAccordion)`
+  background-color: rgba(${({ theme }) => hexToRgb(theme.eui.euiColorDisabled).join(',')}, 0.15);
+  color: ${({ theme }) => theme.eui.euiColorDisabledText};
+  pointer-events: none;
+`;
 
 interface Props {
   prefix: string;
@@ -18,21 +31,37 @@ interface Props {
   error: boolean;
   errorText: string;
   text: string;
+  empty: boolean;
   renderContent: () => ReactNode;
   onToggle?: EuiAccordionProps['onToggle'];
 }
 
 export const InsightAccordion = React.memo<Props>(
-  ({ prefix, loading, loadingText, error, errorText, text, renderContent, onToggle = noop }) => {
+  ({
+    prefix,
+    loading,
+    loadingText,
+    error,
+    errorText,
+    text,
+    empty,
+    renderContent,
+    onToggle = noop,
+  }) => {
     const accordionId = useGeneratedHtmlId({ prefix });
 
     if (loading) {
       return (
-        <EuiAccordion id={accordionId} buttonContent={loadingText} onToggle={onToggle} isLoading />
+        <StyledAccordion
+          id={accordionId}
+          buttonContent={loadingText}
+          onToggle={onToggle}
+          isLoading
+        />
       );
     } else if (error) {
       return (
-        <EuiAccordion
+        <StyledAccordion
           id={accordionId}
           buttonContent={
             <span>
@@ -43,11 +72,24 @@ export const InsightAccordion = React.memo<Props>(
           onToggle={onToggle}
         />
       );
+    } else if (empty) {
+      return (
+        <EmptyAccordion
+          id={accordionId}
+          buttonContent={
+            <span>
+              <EuiIcon type="arrowRight" style={{ margin: '0px 8px 0 4px' }} />
+              {text}
+            </span>
+          }
+          arrowDisplay="none"
+        />
+      );
     } else if (renderContent) {
       return (
-        <EuiAccordion id={accordionId} buttonContent={text} onToggle={onToggle} paddingSize="l">
+        <StyledAccordion id={accordionId} buttonContent={text} onToggle={onToggle} paddingSize="l">
           {renderContent()}
-        </EuiAccordion>
+        </StyledAccordion>
       );
     } else {
       return null;

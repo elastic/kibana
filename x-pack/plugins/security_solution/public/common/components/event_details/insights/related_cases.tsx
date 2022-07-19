@@ -58,6 +58,9 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
     getRelatedCases();
   }, [eventId, getRelatedCases]);
 
+  const caseCount = relatedCases.length;
+  const isEmpty = !areCasesLoading && caseCount === 0;
+
   return (
     <InsightAccordion
       prefix="RelatedCases"
@@ -80,9 +83,10 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
         {
           defaultMessage:
             '{caseCount} {caseCount, plural, =1 {case} other {cases}} related to this alert',
-          values: { caseCount: relatedCases.length },
+          values: { caseCount },
         }
       )}
+      empty={isEmpty}
       renderContent={renderContent}
     />
   );
