@@ -23,7 +23,6 @@ import {
   NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
-  UptimeCell,
 } from '../shared';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
@@ -126,14 +125,15 @@ function podNodeColumns(
         );
       },
     },
-    {
-      name: i18n.translate('xpack.infra.metricsTable.pod.uptimeColumnHeader', {
-        defaultMessage: 'Uptime',
-      }),
-      field: 'uptime',
-      align: 'right',
-      render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
-    },
+    // Hidden as part of https://github.com/elastic/kibana/issues/136047
+    // {
+    //   name: i18n.translate('xpack.infra.metricsTable.pod.uptimeColumnHeader', {
+    //     defaultMessage: 'Uptime',
+    //   }),
+    //   field: 'uptime',
+    //   align: 'right',
+    //   render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
+    // },
     {
       name: i18n.translate('xpack.infra.metricsTable.pod.averageCpuUsagePercentColumnHeader', {
         defaultMessage: 'CPU usage (avg.)',
