@@ -220,14 +220,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
   };
 
+  const isLoadingVar = useRef<boolean>(false);
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
     ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
       async function fetchDataAsync() {
+        if (isLoadingVar.current) {
+          return;
+        }
         currentRequestRef.current++;
         const currentRequest = currentRequestRef.current;
-
+        isLoadingVar.current = true;
         try {
           setIsLoading(true);
           const [agentsRequest, agentsStatusRequest] = await Promise.all([
@@ -244,7 +249,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
           ]);
-          // Return if a newer request as been triggered
+          isLoadingVar.current = false;
+          // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
           }
