@@ -66,10 +66,7 @@ export function isRumAgentName(
 }
 
 export function isMobileAgentName(agentName?: string) {
-  return (
-    isIosAgentName(agentName) || 
-    isAndroidAgentName(agentName)
-  );
+  return isIosAgentName(agentName) || isAndroidAgentName(agentName);
 }
 
 export function isIosAgentName(agentName?: string) {
