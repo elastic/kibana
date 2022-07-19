@@ -12,8 +12,9 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { NavigateToAppOptions } from '@kbn/core/public';
+import type { CasesPermissions } from '@kbn/cases-plugin/common/ui';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -21,7 +22,7 @@ import {
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
@@ -146,21 +147,37 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-export interface UseGetUserCasesPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
 export const useGetUserCasesPermissions = () => {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
+    all: false,
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+    push: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[CASES_FEATURE_ID]
+  );
 
   useEffect(() => {
     setCasesPermissions({
-      crud: !!uiCapabilities[CASES_FEATURE_ID]?.crud_cases,
-      read: !!uiCapabilities[CASES_FEATURE_ID]?.read_cases,
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
+      push: casesCapabilities.push,
     });
-  }, [uiCapabilities]);
+  }, [
+    casesCapabilities.all,
+    casesCapabilities.create,
+    casesCapabilities.read,
+    casesCapabilities.update,
+    casesCapabilities.delete,
+    casesCapabilities.push,
+  ]);
 
   return casesPermissions;
 };

@@ -512,10 +512,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableTimeShift() {
-      await testSubjects.click('indexPattern-advanced-popover');
-      await retry.try(async () => {
-        await testSubjects.click('indexPattern-time-shift-enable');
-      });
+      await testSubjects.click('indexPattern-advanced-accordion');
     },
 
     async setTimeShift(shift: string) {
@@ -523,9 +520,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableFilter() {
-      await testSubjects.click('indexPattern-advanced-popover');
+      await testSubjects.click('indexPattern-advanced-accordion');
       await retry.try(async () => {
-        await testSubjects.click('indexPattern-filter-by-enable');
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       });
     },
 
@@ -1215,7 +1212,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer() {
-      await testSubjects.click('lnsLayerRemove');
+      await retry.try(async () => {
+        await testSubjects.click('lnsLayerRemove');
+        if (await testSubjects.exists('lnsLayerRemoveModal')) {
+          await testSubjects.exists('lnsLayerRemoveConfirmButton');
+          await testSubjects.click('lnsLayerRemoveConfirmButton');
+        }
+      });
     },
 
     /**

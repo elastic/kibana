@@ -21,7 +21,7 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import './_markdown.scss';
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
+  const { backgroundColor, model, visData, getConfig, fieldFormatMap, initialRender } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, getConfig, fieldFormatMap);
 
@@ -70,6 +70,7 @@ function MarkdownVisualization(props) {
               <div>
                 {!markdownError && (
                   <Markdown
+                    onRender={initialRender}
                     markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
                   />

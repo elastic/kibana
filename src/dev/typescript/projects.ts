@@ -32,6 +32,7 @@ export const PROJECTS = [
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('src/core/tsconfig.json'),
   createProject('.buildkite/tsconfig.json'),
+  createProject('kbn_pm/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -93,7 +94,6 @@ export const PROJECTS = [
     'test/plugin_functional/plugins/*/tsconfig.json',
     'test/interpreter_functional/plugins/*/tsconfig.json',
     'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
-    'packages/kbn-type-summarizer/tests/tsconfig.json',
     ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
   ]),
 ];

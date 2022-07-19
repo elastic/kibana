@@ -12,6 +12,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
@@ -36,4 +37,5 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   paletteService: PaletteRegistry;
   uiState: PersistedState;
   interactive: boolean;
+  renderComplete: IInterpreterRenderHandlers['done'];
 };

@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 
@@ -17,7 +18,8 @@ import {
   CreateCrawlerIndexArgs,
   CreateCrawlerIndexResponse,
 } from '../../../api/crawler/create_crawler_index_api_logic';
-import { SEARCH_INDEX_PATH } from '../../../routes';
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { SearchIndexTabId } from '../../search_index/search_index';
 
 type MethodCrawlerActions = Pick<
   Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>,
@@ -25,7 +27,6 @@ type MethodCrawlerActions = Pick<
 >;
 
 export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
-  path: ['enterprise_search', 'method_crawler'],
   connect: {
     actions: [CreateCrawlerIndexApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
   },
@@ -34,8 +35,14 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
       flashAPIErrors(error);
     },
     apiSuccess: ({ created }) => {
-      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexSlug', encodeURI(created)));
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName: created,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+        })
+      );
     },
     makeRequest: () => clearFlashMessages(),
   },
+  path: ['enterprise_search', 'method_crawler'],
 });

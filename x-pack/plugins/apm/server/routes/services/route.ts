@@ -16,6 +16,7 @@ import {
 } from '@kbn/ml-plugin/server';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
@@ -33,7 +34,6 @@ import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getThroughput } from './get_throughput';
 import { getServiceProfilingStatistics } from './profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from './profiling/get_service_profiling_timeline';
-import { getServiceInfrastructure } from './get_service_infrastructure';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -1130,43 +1130,6 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
-// TODO: remove this endpoint in favour of
-const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    serviceInfrastructure: { containerIds: string[]; hostNames: string[] };
-  }> => {
-    const setup = await setupRequest(resources);
-
-    const { params } = resources;
-
-    const {
-      path: { serviceName },
-      query: { environment, kuery, start, end },
-    } = params;
-
-    const serviceInfrastructure = await getServiceInfrastructure({
-      setup,
-      serviceName,
-      environment,
-      kuery,
-      start,
-      end,
-    });
-    return { serviceInfrastructure };
-  },
-});
-
 const serviceAnomalyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
   params: t.type({
@@ -1258,14 +1221,17 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       };
     }
 
-    const savedObjectsClient = (await resources.context.core).savedObjects
-      .client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await resources.context.core;
 
-    const [setup, serviceGroup] = await Promise.all([
+    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
         ? getServiceGroup({ savedObjectsClient, serviceGroupId })
         : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
     return {
       services: await getSortedAndFilteredServices({
@@ -1275,6 +1241,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
         environment,
         logger: resources.logger,
         serviceGroup,
+        maxNumberOfServices,
       }),
     };
   },
@@ -1298,7 +1265,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceProfilingTimelineRoute,
   ...serviceProfilingStatisticsRoute,
-  ...serviceInfrastructureRoute,
   ...serviceAnomalyChartsRoute,
   ...sortedAndFilteredServicesRoute,
 };

@@ -8,7 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
-import { connect, ConnectedProps } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
@@ -16,9 +17,10 @@ import { AddExceptionFlyoutWrapper } from '../../../../../detections/components/
 import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useEventFilterModal } from '../../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
-import { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs } from '../../../../../../common/ecs';
-import { inputsModel, inputsSelectors, State } from '../../../../../common/store';
+import type { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import type { Ecs } from '../../../../../../common/ecs';
+import type { inputsModel, State } from '../../../../../common/store';
+import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 import { TimelineId } from '../../../../../../common/types';
 

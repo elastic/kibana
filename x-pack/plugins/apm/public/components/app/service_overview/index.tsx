@@ -11,7 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   isRumAgentName,
-  isIosAgentName,
+  isMobileAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
@@ -78,7 +78,7 @@ export function ServiceOverview() {
     : chartHeight;
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
-  const isIosAgent = isIosAgentName(agentName);
+  const isMobileAgent = isMobileAgentName(agentName);
   const isServerless = isServerlessAgent(runtimeName);
   const router = useApmRouter();
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
@@ -199,7 +199,7 @@ export function ServiceOverview() {
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!isRumAgent && !isIosAgent && !isServerless && (
+          {!isRumAgent && !isMobileAgent && !isServerless && (
             <EuiFlexItem>
               <EuiFlexGroup
                 direction="column"

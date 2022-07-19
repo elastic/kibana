@@ -12,6 +12,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 
 import { AlertsTable } from './alerts_table';
 import { AlertsField } from '../../../types';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -127,6 +128,104 @@ describe('AlertsTable', () => {
         const wrapper = render(<AlertsTable {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
         expect(wrapper.queryByTestId('testCell')).not.toBe(null);
+      });
+    });
+
+    describe('actions column', () => {
+      it('should load actions set in config', () => {
+        const customTableProps = {
+          ...tableProps,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                renderCustomActionsRow: () => {
+                  return (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn2"
+                        />
+                      </EuiFlexItem>
+                    </>
+                  );
+                },
+              };
+            },
+          },
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('testActionColumn')).not.toBe(null);
+        expect(queryByTestId('testActionColumn2')).not.toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
+      });
+
+      it('should not add expansion action when not set', () => {
+        const customTableProps = {
+          ...tableProps,
+          showExpandToDetails: false,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                renderCustomActionsRow: () => {
+                  return (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn2"
+                        />
+                      </EuiFlexItem>
+                    </>
+                  );
+                },
+              };
+            },
+          },
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('testActionColumn')).not.toBe(null);
+        expect(queryByTestId('testActionColumn2')).not.toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
+      });
+
+      it('should render no action column if there is neither the action nor the expand action config is set', () => {
+        const customTableProps = {
+          ...tableProps,
+          showExpandToDetails: false,
+        };
+
+        const { queryByTestId } = render(<AlertsTable {...customTableProps} />);
+        expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
+        expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });
     });
   });

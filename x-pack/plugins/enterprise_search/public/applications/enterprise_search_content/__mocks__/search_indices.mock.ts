@@ -5,39 +5,59 @@
  * 2.0.
  */
 
-import { SearchIndex } from '../types';
+import { ConnectorStatus, SyncStatus } from '../../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
-export const searchIndices = [
+export const indices: ElasticsearchIndexWithIngestion[] = [
   {
-    name: 'Our API Index',
-    indexSlug: 'index-1',
-    source_type: 'API',
-    elasticsearch_index_name: 'ent-search-api-one',
-    search_engines: 'Search Engine One, Search Engine Two',
-    document_count: 100,
+    name: 'api',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Customer Feedback',
-    indexSlug: 'index-2',
-    source_type: 'Elasticsearch Index',
-    elasticsearch_index_name: 'es-index-two',
-    search_engines: 'Search Engine One',
-    document_count: 100,
+    connector: {
+      api_key_id: null,
+      configuration: {},
+      id: '2',
+      index_name: 'connector',
+      last_seen: null,
+      last_synced: null,
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: null,
+      status: ConnectorStatus.CONFIGURED,
+      sync_error: null,
+      sync_now: false,
+      sync_status: SyncStatus.COMPLETED,
+    },
+    name: 'connector',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Dharma Crawler',
-    indexSlug: 'index-3',
-    source_type: 'Crawler',
-    elasticsearch_index_name: 'ent-search-crawler-one',
-    search_engines: 'Search Engine One, Search Engine Two',
-    document_count: 100,
+    crawler: {
+      id: '3',
+      index_name: 'crawler',
+    },
+    name: 'crawler',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
-  {
-    name: 'My Custom Source',
-    indexSlug: 'index-4',
-    source_type: 'Content Source',
-    elasticsearch_index_name: 'ent-search-custom-source-one',
-    search_engines: '--',
-    document_count: 1,
-  },
-] as SearchIndex[];
+];

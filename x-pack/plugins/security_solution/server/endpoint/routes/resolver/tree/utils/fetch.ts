@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   firstNonNullValue,
   values,
 } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import {
+import type {
   ECSField,
   ResolverNode,
   FieldsObject,
   ResolverSchema,
 } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
-import { NodeID } from '.';
+import type { NodeID } from '.';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
 

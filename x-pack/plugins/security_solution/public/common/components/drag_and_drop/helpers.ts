@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DropResult } from 'react-beautiful-dnd';
-import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import type { DropResult } from 'react-beautiful-dnd';
+import type { Dispatch } from 'redux';
+import type { ActionCreator } from 'typescript-fsa';
 import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
 import { dragAndDropActions } from '../../store/actions';
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export {
   draggableIdPrefix,

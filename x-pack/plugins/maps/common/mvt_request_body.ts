@@ -10,11 +10,15 @@ import rison from 'rison-node';
 import { RENDER_AS } from './constants';
 
 export function decodeMvtResponseBody(encodedRequestBody: string): object {
-  return rison.decode(decodeURIComponent(encodedRequestBody)) as object;
+  return rison.decode(decodeURIComponent(encodedRequestBody).replace('%25', '%')) as object;
 }
 
 export function encodeMvtResponseBody(unencodedRequestBody: object): string {
-  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue));
+  // URL encoding replaces unsafe ASCII characters with a '%' followed by two hexadecimal digits
+  // encodeURIComponent does not encode '%'
+  // This causes preexisting '%' to break decoding because they are not valid URL encoding
+  // To prevent this, properly url encode '%' before calling encodeURIComponent
+  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue).replace('%', '%25'));
 }
 
 export function getAggsTileRequest({

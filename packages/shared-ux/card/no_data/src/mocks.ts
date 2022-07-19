@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import {
   getRedirectAppLinksMockServices,
   getRedirectAppLinksStoryArgTypes,
@@ -19,13 +18,14 @@ import { NoDataCardServices } from './services';
  * Parameters drawn from the Storybook arguments collection that customize a component story.
  */
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
+type ActionFn = (name: string) => any;
 
 /**
  * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
  */
-export const getStoryServices = (params: Params) => {
+export const getStoryServices = (params: Params, action: ActionFn = () => {}) => {
   const services: NoDataCardServices = {
-    ...getRedirectAppLinksStoryServices(),
+    ...getRedirectAppLinksStoryServices(action),
     ...params,
     addBasePath: (path) => {
       action('addBasePath')(path);

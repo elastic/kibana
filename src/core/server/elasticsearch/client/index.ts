@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
-  ElasticsearchClient,
-  ShardsResponse,
-  ShardsInfo,
-  CountResponse,
-  SearchResponse,
-  GetResponse,
-  DeleteDocumentResponse,
-  ElasticsearchErrorDetails,
-} from './types';
+export type { ElasticsearchClient } from './types';
 export { ScopedClusterClient } from './scoped_cluster_client';
 export type { IScopedClusterClient } from './scoped_cluster_client';
 export type { ElasticsearchClientConfig } from './client_config';
@@ -33,4 +24,3 @@ export type {
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
 } from './retry_unauthorized';
-export type { UnauthorizedError } from './errors';

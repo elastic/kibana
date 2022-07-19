@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { buildLastAlertsQuery } from './query.dsl';
-import { Aggs } from './types';
+import type { Aggs } from './types';
 
 interface AlertInfo {
   ruleId?: string | null;
