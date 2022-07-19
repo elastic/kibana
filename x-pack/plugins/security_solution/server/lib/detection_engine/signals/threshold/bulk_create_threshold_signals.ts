@@ -6,11 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  AggregationsCardinalityAggregate,
-  AggregationsMaxAggregate,
-  AggregationsMinAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { Logger } from '@kbn/core/server';
@@ -86,10 +81,9 @@ const getTransformedHits = (
               ]
             : undefined,
           count: bucket.doc_count,
-          from:
-            bucket.min_timestamp.value_as_string ? new Date(
-              bucket.min_timestamp.value_as_string
-            ) : from,
+          from: bucket.min_timestamp.value_as_string
+            ? new Date(bucket.min_timestamp.value_as_string)
+            : from,
           terms: Object.entries(thresholdTerms).map(([key, val]) => ({ field: key, value: val })),
         },
       },
