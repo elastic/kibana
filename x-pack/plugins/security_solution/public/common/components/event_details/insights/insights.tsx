@@ -83,21 +83,21 @@ export const Insights = React.memo<Props>(
             </EuiFlexItem>
           )}
 
-          {processEntityField && processEntityField.values && (
+          {processSessionField && processSessionField.values && (
             <EuiFlexItem>
-              <RelatedAlertsByProcessAncestry
-                data={processEntityField}
+              <RelatedAlertsBySession
+                browserFields={browserFields}
+                data={processSessionField}
                 eventId={eventId}
                 timelineId={timelineId}
               />
             </EuiFlexItem>
           )}
 
-          {processSessionField && processSessionField.values && (
+          {processEntityField && processEntityField.values && (
             <EuiFlexItem>
-              <RelatedAlertsBySession
-                browserFields={browserFields}
-                data={processSessionField}
+              <RelatedAlertsByProcessAncestry
+                data={processEntityField}
                 eventId={eventId}
                 timelineId={timelineId}
               />
