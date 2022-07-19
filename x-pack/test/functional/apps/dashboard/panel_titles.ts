@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('panel titles - by reference', () => {
+    describe('by reference', () => {
       it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
         await dashboardPanelActions.setCustomPanelTitle(CUSTOM_TITLE);
         await dashboardPanelActions.saveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
