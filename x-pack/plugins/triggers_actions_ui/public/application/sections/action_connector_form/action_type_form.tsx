@@ -24,7 +24,7 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { partition } from 'lodash';
+import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   IErrorObject,
@@ -164,6 +164,10 @@ export const ActionTypeForm = ({
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
+  const showActionGroupErrorIcon = (): boolean => {
+    return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
+  };
+
   const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
   const checkEnabledResult = checkActionFormActionTypeEnabled(
     actionTypesIndex[actionConnector.actionTypeId],
@@ -274,13 +278,18 @@ export const ActionTypeForm = ({
       data-test-subj={`alertActionAccordion-${index}`}
       buttonContent={
         <EuiFlexGroup gutterSize="l" alignItems="center">
+          {showActionGroupErrorIcon() && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="alert" color="danger" size="m" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
               <div>
-                <EuiFlexGroup gutterSize="s">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
                       defaultMessage="{actionConnectorName}"
