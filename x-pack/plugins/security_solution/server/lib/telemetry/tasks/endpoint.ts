@@ -20,6 +20,7 @@ import type {
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import {
+  addDefaultAdvancedPolicySettings,
   batchTelemetryRecords,
   createUsageCounterLabel,
   extractEndpointPolicyConfig,
@@ -271,6 +272,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             event_filter: eventFilter,
           } = endpoint.endpoint_metrics.Endpoint.metrics;
           const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
+          endpointPolicyDetail.value = addDefaultAdvancedPolicySettings(endpointPolicyDetail.value);
 
           return {
             '@timestamp': taskExecutionPeriod.current,
