@@ -6,3 +6,4 @@
  */
 
 export { setupIntegrationEnvironment } from './setup_integration_environment';
+export type { TestEnvironmentUtils } from './setup_integration_environment';

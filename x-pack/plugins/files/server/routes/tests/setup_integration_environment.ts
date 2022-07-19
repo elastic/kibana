@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { defaults } from 'lodash';
 import {
   createRootWithCorePlugins,
   createTestServers,
   request,
 } from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
+import { FileJSON } from '../../../common';
 import { fileKindsRegistry } from '../../file_kinds_registry';
+
+export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
 
 export async function setupIntegrationEnvironment() {
   const fileKind: string = 'test-file-kind';
@@ -20,6 +24,35 @@ export async function setupIntegrationEnvironment() {
     xpack: {
       reporting: { enabled: false },
     },
+  };
+
+  let disposables: Array<() => Promise<void>> = [];
+  const createFile = async (
+    fileAttrs: Partial<{
+      name: string;
+      alt: string;
+      meta: Record<string, any>;
+      mimeType: string;
+    }> = {}
+  ): Promise<FileJSON> => {
+    const result = await request
+      .post(root, `/api/files/files/${fileKind}`)
+      .send(
+        defaults(fileAttrs, {
+          name: 'myFile',
+          alt: 'a picture of my dog',
+          meta: {},
+          mimeType: 'image/png',
+        })
+      )
+      .expect(200);
+    disposables.push(async () => {
+      await request
+        .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
+        .send()
+        .expect(200);
+    });
+    return result.body.file;
   };
 
   fileKindsRegistry.register({
@@ -45,12 +78,25 @@ export async function setupIntegrationEnvironment() {
       },
     },
   });
+
+  const cleanupAfterEach = async () => {
+    await Promise.all(disposables.map((dispose) => dispose()));
+    disposables = [];
+    await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
+  };
+
+  const cleanupAfterAll = async () => {
+    await root.shutdown();
+    await manageES.stop();
+  };
+
   const manageES = await startES();
+
   const root = createRootWithCorePlugins(testConfig, { oss: false });
-  const coreStart = await root.start();
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
   await root.preboot();
   await root.setup();
+  const coreStart = await root.start();
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   await pRetry(() => request.get(root, '/api/licensing/info').expect(200), { retries: 5 });
 
@@ -61,5 +107,9 @@ export async function setupIntegrationEnvironment() {
     coreStart,
     fileKind,
     testIndex,
+    request,
+    createFile,
+    cleanupAfterEach,
+    cleanupAfterAll,
   };
 }
