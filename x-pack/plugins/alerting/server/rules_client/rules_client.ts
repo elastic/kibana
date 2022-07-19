@@ -399,6 +399,7 @@ export class RulesClient {
     'monitoring',
     'mapped_params',
     'snoozeSchedule',
+    'activeSnoozes',
   ];
 
   constructor({
