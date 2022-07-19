@@ -28,7 +28,7 @@ describe('areValidFeatures', () => {
 
 describe('getConnectorFeatureName', () => {
   it('returns the feature name for valid feature ids', () => {
-    expect(getConnectorFeatureName('siem')).toEqual('Security Solutions');
+    expect(getConnectorFeatureName('siem')).toEqual('Security Solution');
   });
 
   it('returns the id for invalid feature ids', () => {

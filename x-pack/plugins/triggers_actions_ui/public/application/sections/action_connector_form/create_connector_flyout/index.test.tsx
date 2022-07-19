@@ -266,7 +266,7 @@ describe('CreateConnectorFlyout', () => {
 
       expect(getByTestId('create-connector-flyout-header-availability')).toBeInTheDocument();
       expect(getByText('Alerting')).toBeInTheDocument();
-      expect(getByText('Security Solutions')).toBeInTheDocument();
+      expect(getByText('Security Solution')).toBeInTheDocument();
     });
 
     it('shows the icon when the connector type is selected', async () => {
