@@ -106,6 +106,7 @@ export const MAX_ALERTS_PER_CASE = 1000 as const;
  */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
+export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
@@ -115,6 +116,10 @@ export const OWNER_INFO = {
   [OBSERVABILITY_OWNER]: {
     label: 'Observability',
     iconType: 'logoObservability',
+  },
+  [GENERAL_CASES_OWNER]: {
+    label: 'Stack',
+    iconType: 'casesApp',
   },
 } as const;
 
@@ -150,3 +155,12 @@ export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
  */
 export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
 export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';
+
+/**
+ * Cases UI Capabilities
+ */
+export const CREATE_CASES_CAPABILITY = 'create_cases' as const;
+export const READ_CASES_CAPABILITY = 'read_cases' as const;
+export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
+export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
+export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
