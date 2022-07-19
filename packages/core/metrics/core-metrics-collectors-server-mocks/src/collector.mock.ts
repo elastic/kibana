@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { MetricsCollector } from '@kbn/core-metrics-server';
-// move to public mocks
+import type { MetricsCollector } from '@kbn/core-metrics-server';
+
 const createCollector = <T = any>(
   collectReturnValue: any = {}
 ): jest.Mocked<MetricsCollector<T>> => {
