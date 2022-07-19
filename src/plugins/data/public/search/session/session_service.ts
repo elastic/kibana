@@ -152,20 +152,23 @@ export class SessionService {
 
   public readonly sessionMeta$: Observable<SessionMeta>;
 
+  private readonly _disableSaveAfterSessionCompleteTimedOut$ = new BehaviorSubject<boolean>(false);
   /**
    * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed
    * Used to stop keeping searches alive after some times and disabled "save session" button
    */
-  public readonly disableSaveAfterSessionCompleteTimedOut$ = new BehaviorSubject<boolean>(false);
+  public readonly disableSaveAfterSessionCompleteTimedOut$ =
+    this._disableSaveAfterSessionCompleteTimedOut$.asObservable();
 
+  private readonly _disableSaveAfterSessionContinuedFromDifferentApp$ =
+    new BehaviorSubject<boolean>(false);
   /**
    * Emits `true` for session that was continued from another app
    * Need to separate search caching from search session to remove this limitation:
    * https://github.com/elastic/kibana/issues/121543
    */
-  public readonly disableSaveAfterSessionContinuedFromDifferentApp$ = new BehaviorSubject<boolean>(
-    false
-  );
+  public readonly disableSaveAfterSessionContinuedFromDifferentApp$ =
+    this._disableSaveAfterSessionContinuedFromDifferentApp$.asObservable();
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
@@ -217,7 +220,7 @@ export class SessionService {
             if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
           })
         )
-        .subscribe(this.disableSaveAfterSessionCompleteTimedOut$)
+        .subscribe(this._disableSaveAfterSessionCompleteTimedOut$)
     );
 
     this.subscription.add(
@@ -268,8 +271,9 @@ export class SessionService {
           switchMap((sessionId) => {
             if (!sessionId) return EMPTY;
             if (this.isStored()) return EMPTY; // no need to keep searches alive because session and searches are already stored
+            if (!this.hasAccess()) return EMPTY; // don't need to keep searches alive if the user can't save session
             if (!this.isSessionStorageReady()) return EMPTY; // don't need to keep searches alive if app doesn't allow saving session
-            if (this.disableSaveAfterSessionContinuedFromDifferentApp$.getValue()) return EMPTY; // don't poll searches because it won't be possible to save this session
+            if (this._disableSaveAfterSessionContinuedFromDifferentApp$.getValue()) return EMPTY; // don't poll searches because it won't be possible to save this session
 
             const schedulePollSearches = () => {
               return timer(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
@@ -411,7 +415,7 @@ export class SessionService {
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
-    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
+    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.start({ appName: this.currentApp });
 
     return this.getSessionId()!;
@@ -422,7 +426,7 @@ export class SessionService {
    * @param sessionId
    */
   public restore(sessionId: string) {
-    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
+    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
   }
@@ -442,7 +446,7 @@ export class SessionService {
    */
   public continue(sessionId: string) {
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
-      this.disableSaveAfterSessionContinuedFromDifferentApp$.next(true);
+      this._disableSaveAfterSessionContinuedFromDifferentApp$.next(true);
       this.state.set({
         ...this.lastSessionSnapshot,
         // have to change a name, so that current app can cancel a session that it continues
@@ -480,7 +484,7 @@ export class SessionService {
     if (this.getSessionId()) {
       this.lastSessionSnapshot = this.state.get();
     }
-    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
+    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

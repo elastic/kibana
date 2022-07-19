@@ -36,6 +36,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
       state: SearchSessionState.None,
     }).asObservable(),
     disableSaveAfterSessionCompleteTimedOut$: of(false),
+    disableSaveAfterSessionContinuedFromDifferentApp$: of(false),
     renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => ({
       complete: jest.fn(),
