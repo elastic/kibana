@@ -251,11 +251,3 @@ export const unsetPolicyFeaturesAccordingToLicenseLevel = (
   return policyFactoryWithoutPaidFeatures(policy);
 };
 
-export const getDefaultPolicyConfigAccordingToLicenseLevel = (
-  license: ILicense | null
-): PolicyConfig => {
-  if (isAtLeast(license, 'platinum')) {
-    return policyFactoryWithSupportedFeatures();
-  }
-  return policyFactoryWithoutPaidFeatures();
-};
