@@ -94,7 +94,7 @@ export const discoverServiceMock = {
     },
   },
   navigation: {
-    ui: { TopNavMenu },
+    ui: { TopNavMenu, AggregateQueryTopNavMenu: TopNavMenu },
   },
   metadata: {
     branch: 'test',
