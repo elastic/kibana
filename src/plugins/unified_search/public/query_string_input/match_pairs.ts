@@ -29,6 +29,7 @@ interface MatchPairsOptions {
   selectionEnd: number;
   key: string;
   metaKey: boolean;
+  deadKeyLastPressed: boolean;
   updateQuery: (query: string, selectionStart: number, selectionEnd: number) => void;
   preventDefault: () => void;
 }
@@ -39,6 +40,7 @@ export function matchPairs({
   selectionEnd,
   key,
   metaKey,
+  deadKeyLastPressed,
   updateQuery,
   preventDefault,
 }: MatchPairsOptions) {
@@ -48,15 +50,19 @@ export function matchPairs({
   } else if (shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd)) {
     preventDefault();
     const newValue =
-      value.substr(0, selectionStart) +
+      value.substring(0, deadKeyLastPressed ? selectionStart - 1 : selectionStart) +
       key +
       value.substring(selectionStart, selectionEnd) +
       closers[openers.indexOf(key)] +
-      value.substr(selectionEnd);
-    updateQuery(newValue, selectionStart + 1, selectionEnd + 1);
+      value.substring(selectionEnd);
+    updateQuery(
+      newValue,
+      deadKeyLastPressed ? selectionStart - 1 : selectionStart + 1,
+      deadKeyLastPressed ? selectionEnd : selectionEnd + 1
+    );
   } else if (shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd)) {
     preventDefault();
-    const newValue = value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1);
+    const newValue = value.substring(0, selectionEnd - 1) + value.substring(selectionEnd + 1);
     updateQuery(newValue, selectionStart - 1, selectionEnd - 1);
   }
 }

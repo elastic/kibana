@@ -108,6 +108,7 @@ interface State {
    * Part of state because passed down to child components
    */
   queryBarInputDiv: HTMLDivElement | null;
+  deadKeyLastPressed: boolean;
 }
 
 const KEY_CODES = {
@@ -140,6 +141,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     selectionEnd: null,
     indexPatterns: [],
     queryBarInputDiv: null,
+    deadKeyLastPressed: false,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -326,7 +328,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
   private onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.target instanceof HTMLTextAreaElement) {
-      const { isSuggestionsVisible, index } = this.state;
+      const { isSuggestionsVisible, index, deadKeyLastPressed } = this.state;
       const preventDefault = event.preventDefault.bind(event);
       const { target, key, metaKey } = event;
       const { value, selectionStart, selectionEnd } = target;
@@ -340,9 +342,17 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           this.setState({
             selectionStart: newSelectionStart,
             selectionEnd: newSelectionEnd,
+            deadKeyLastPressed: false,
           });
         }
       };
+
+      if (key === 'Dead') {
+        this.setState((prevState) => ({
+          ...prevState,
+          deadKeyLastPressed: true,
+        }));
+      }
 
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
@@ -391,6 +401,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
               selectionEnd,
               key,
               metaKey,
+              deadKeyLastPressed,
               updateQuery,
               preventDefault,
             });
