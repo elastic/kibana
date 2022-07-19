@@ -179,6 +179,11 @@ export const getPieVisualization = ({
       dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
         defaultMessage: 'Size',
       }),
+      paramEditorCustomProps: {
+        headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
+          defaultMessage: 'Value',
+        }),
+      },
       accessors: layer.metric ? [{ columnId: layer.metric }] : [],
       supportsMoreColumns: !layer.metric,
       filterOperations: numberMetricOperations,

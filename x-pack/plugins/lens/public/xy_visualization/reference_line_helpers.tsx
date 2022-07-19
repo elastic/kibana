@@ -470,6 +470,9 @@ export const getReferenceConfiguration = ({
             defaultMessage: 'Reference line value',
           }),
         ],
+        headingLabel: i18n.translate('xpack.lens.staticValue.headingLabel', {
+          defaultMessage: 'Placement',
+        }),
       },
       supportFieldFormat: false,
       dataTestSubj,

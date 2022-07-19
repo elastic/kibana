@@ -853,9 +853,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
         `}
       >
         <h4>
-          {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
-            defaultMessage: 'Data',
-          })}
+          {paramEditorCustomProps?.headingLabel ??
+            i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingData', {
+              defaultMessage: 'Data',
+            })}
         </h4>
       </EuiText>
       {hasButtonGroups ? (

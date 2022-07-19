@@ -254,6 +254,11 @@ export const getDatatableVisualization = ({
           dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.metric', {
             defaultMessage: 'Metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.datatable.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)

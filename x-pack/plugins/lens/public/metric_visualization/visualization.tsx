@@ -239,6 +239,11 @@ export const getMetricVisualization = ({
         {
           groupId: 'metric',
           groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.metric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.accessor
             ? [

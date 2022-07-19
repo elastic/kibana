@@ -251,6 +251,11 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: metricAccessor
             ? [
                 palette
@@ -285,6 +290,9 @@ export const getGaugeVisualization = ({
                 defaultMessage: 'Minimum value',
               }),
             ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
           },
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
@@ -308,6 +316,9 @@ export const getGaugeVisualization = ({
                 defaultMessage: 'Maximum value',
               }),
             ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
           },
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
@@ -331,6 +342,9 @@ export const getGaugeVisualization = ({
                 defaultMessage: 'Goal value',
               }),
             ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
           },
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,

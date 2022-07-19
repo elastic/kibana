@@ -182,7 +182,7 @@ const BaseRangeEditor = ({
         <EuiSwitch
           label={
             <EuiText size="xs">
-              {i18n.translate('xpack.lens.indexPattern.dateHistogram.includeEmptyRows', {
+              {i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
                 defaultMessage: 'Include empty rows',
               })}
             </EuiText>
