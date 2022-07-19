@@ -130,7 +130,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));
   } catch (ex) {
