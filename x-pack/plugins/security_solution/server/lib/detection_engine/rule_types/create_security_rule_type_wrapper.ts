@@ -14,6 +14,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { ResponseAction } from '../notifications/schedule_notification_response_actions';
 import { scheduleNotificationResponseActions } from '../notifications/schedule_notification_response_actions';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
@@ -403,7 +404,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               scheduleNotificationResponseActions(
                 {
                   signals: result.createdSignals,
-                  responseActions,
+                  responseActions: responseActions as ResponseAction[],
                 },
                 osqueryCreateAction
               );

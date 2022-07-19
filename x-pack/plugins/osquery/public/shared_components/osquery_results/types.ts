@@ -9,8 +9,8 @@ import type React from 'react';
 
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
-  ruleName?: string;
-  ruleActions?: Array<Record<'action_type_id', string>>;
+  ruleName?: string[];
+  ruleActions?: string[];
   eventDetailId: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }

@@ -35,16 +35,14 @@ export const useOsqueryTab = ({
     return;
   }
 
-  console.error('rawEventData', rawEventData);
-
   const { OsqueryResults } = osquery;
-  const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
-    (action: { action_type_id: string }) => action.action_type_id === '.osquery'
-  )?.length;
+  const osqueryActionsLength = rawEventData?.fields[
+    'kibana.alert.rule.response_actions.action_type_id'
+  ]?.filter((action: string) => action === '.osquery')?.length;
 
   const agentIds = rawEventData?.fields['agent.id'];
-  const ruleName = rawEventData?._source['kibana.alert.rule.name'];
-  const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
+  const ruleName = rawEventData?.fields['kibana.alert.rule.name'];
+  const ruleActions = rawEventData?.fields['kibana.alert.rule.response_actions.params.id'];
 
   return osqueryActionsLength
     ? {

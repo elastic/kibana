@@ -8,8 +8,10 @@
 import { uniq } from 'lodash';
 
 interface OsqueryResponseAction {
-  type: string;
+  actionTypeId: string;
   params: {
+    id: string;
+    savedQueryId: string;
     query: string;
     ecs_mapping?: Record<string, Record<'field', string>>;
   };
@@ -22,7 +24,7 @@ export interface OsqueryActionPayload {
   id?: string;
 }
 
-type ResponseAction = OsqueryResponseAction;
+export type ResponseAction = OsqueryResponseAction;
 
 interface ScheduleNotificationActions {
   signals: unknown[];
@@ -41,7 +43,7 @@ export const scheduleNotificationResponseActions = (
 ) => {
   const agentIds = uniq((signals as IAlert[]).map((alert: IAlert) => alert.agent?.id));
   responseActions.forEach((responseActionParam) => {
-    if (responseActionParam.type === 'osquery' && osqueryCreateAction) {
+    if (responseActionParam.actionTypeId === '.osquery' && osqueryCreateAction) {
       osqueryCreateAction({ ...responseActionParam.params, agentIds: agentIds as string[] });
     }
   });

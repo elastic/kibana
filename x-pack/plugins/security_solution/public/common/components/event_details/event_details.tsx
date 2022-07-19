@@ -50,12 +50,12 @@ type EventViewTab = EuiTabbedContentTab;
 export interface AlertRawEventData {
   fields: {
     ['agent.id']?: string[];
+    ['kibana.alert.rule.response_actions.action_type_id']: string[];
+    ['kibana.alert.rule.name']: string[];
+    ['kibana.alert.rule.response_actions.params.id']: string[];
+    ['kibana.alert.rule.response_actions.params.query']: string[];
+    ['kibana.alert.rule.response_actions.params.ecs_mapping']: unknown[];
   };
-  _source: {
-    ['kibana.alert.rule.name']?: string;
-    ['kibana.alert.rule.actions']?: Array<Record<'action_type_id', string>>;
-  };
-
   [key: string]: unknown;
 }
 

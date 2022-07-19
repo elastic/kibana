@@ -11,6 +11,7 @@ import { QueryClientProvider } from 'react-query';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 
+import uuid from 'uuid';
 import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { UseField, useFormContext } from '../../shared_imports';
@@ -30,6 +31,7 @@ interface IProps {
 // eslint-disable-next-line react/display-name
 export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = React.memo(
   ({ item }) => {
+    const uniqueId = useMemo(() => uuid.v4(), []);
     const permissions = useKibana().services.application.capabilities.osquery;
     const [advancedContentState, setAdvancedContentState] =
       useState<EuiAccordionProps['forceState']>('closed');
@@ -108,6 +110,12 @@ export const OsqueryResponseActionParamsForm: React.FunctionComponent<IProps> = 
           path={`${item.path}.params.savedQueryId`}
           component={GhostFormField}
           readDefaultValueOnForm={!item.isNew}
+        />
+        <UseField
+          path={`${item.path}.params.id`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+          defaultValue={uniqueId}
         />
         <>
           <EuiSpacer size="m" />

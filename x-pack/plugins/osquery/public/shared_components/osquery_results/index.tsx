@@ -21,7 +21,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useInView } from 'react-intersection-observer';
 
-import { map } from 'lodash';
 import styled from 'styled-components';
 import { AGENT, AGENT_QUERY, ATTACHED_QUERY } from '../../agents/translations';
 import type { OsqueryActionType } from '../../../common/types';
@@ -60,7 +59,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     sortField: '@timestamp',
     eventDetailId,
     // @ts-expect-error terms is fine
-    filterQuery: { terms: { 'data.id': map(ruleActions, 'params.id') } },
+    filterQuery: { terms: { 'data.id': ruleActions } },
   });
 
   useEffect(() => {
@@ -90,7 +89,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
 
           return (
             <EuiComment
-              username={ruleName}
+              username={ruleName && ruleName[0]}
               timestamp={<FormattedRelative value={startDate} />}
               event={ATTACHED_QUERY}
               data-test-subj={'osquery-results-comment'}
