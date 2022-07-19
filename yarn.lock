@@ -7138,7 +7138,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__ebt-tools@link:bazel-bin/packages/kbn-kbn__ebt-tools/npm_module_types":
+"@types/kbn__ebt-tools@link:bazel-bin/packages/kbn-ebt-tools/npm_module_types":
   version "0.0.0"
   uid ""
 
