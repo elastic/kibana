@@ -76,7 +76,7 @@ describe('agent name helpers', () => {
 
     describe('when the agent name is opentelemetry/swift', () => {
       it('returns true', () => {
-        expect(isIosAgentName('opentelemetry/swift')).toEqual(true);
+        expect(isIosAgentName('opentelemetry/swift')).toEqual(false);
       });
     });
 
@@ -128,7 +128,7 @@ describe('agent name helpers', () => {
 
     describe('when the agent name is opentelemetry/swift', () => {
       it('returns true', () => {
-        expect(isMobileAgentName('opentelemetry/swift')).toEqual(true);
+        expect(isMobileAgentName('opentelemetry/swift')).toEqual(false);
       });
     });
 
