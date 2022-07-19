@@ -35,6 +35,8 @@ interface Props {
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;
+  supportsMvt: boolean;
+  mvtDisabledReason?: string | null;
   numberOfJoins: number;
 }
 
@@ -186,6 +188,26 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
+  _renderMvtRadio() {
+    const radio = (
+      <EuiRadio
+        id={SCALING_TYPES.MVT}
+        label={this._getMvtOptionLabel()}
+        checked={this.props.scalingType === SCALING_TYPES.MVT}
+        onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
+        disabled={!this.props.supportsMvt}
+      />
+    );
+
+    return this.props.mvtDisabledReason ? (
+      <EuiToolTip position="left" content={this.props.mvtDisabledReason}>
+        {radio}
+      </EuiToolTip>
+    ) : (
+      radio
+    );
+  }
+
   _renderClusteringRadio() {
     const clusteringRadio = (
       <EuiRadio
@@ -242,12 +264,7 @@ export class ScalingForm extends Component<Props, State> {
 
         <EuiFormRow>
           <div>
-            <EuiRadio
-              id={SCALING_TYPES.MVT}
-              label={this._getMvtOptionLabel()}
-              checked={this.props.scalingType === SCALING_TYPES.MVT}
-              onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
-            />
+            {this._renderMvtRadio()}
             {this._renderClusteringRadio()}
             <EuiRadio
               id={SCALING_TYPES.LIMIT}

@@ -25,6 +25,7 @@ const defaultProps = {
   onChange: () => {},
   scalingType: SCALING_TYPES.LIMIT,
   supportsClustering: true,
+  supportsMvt: true,
   termFields: [],
   numberOfJoins: 0,
 };

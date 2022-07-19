@@ -42,8 +42,9 @@ export class UpdateSourceEditor extends Component {
     sourceFields: null,
     sortFields: null,
     supportsClustering: false,
-    mvtDisabledReason: null,
     clusteringDisabledReason: null,
+    supportMvt: false,
+    mvtDisabledReason: null,
   };
 
   componentDidMount() {
@@ -95,7 +96,13 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
-      mvtDisabledReason: null,
+      supportsMvt: !geoField.isRuntimeField,
+      mvtDisabledReason: geoField.isRuntimeField
+        ? i18n.translate('xpack.maps.source.esSearch.mvtDisableReason', {
+            defaultMessage: 'Vector tile API does not support for runtime {type} field',
+            values: { type: geoField.type }
+          })
+        : null,
       sourceFields: sourceFields,
       sortFields: indexPattern.fields.filter(
         (field) => field.sortable && !indexPatterns.isNestedField(field)
@@ -206,6 +213,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          supportsMvt={this.state.supportsMvt}
+          mvtDisabledReason={this.state.mvtDisabledReason}
           numberOfJoins={this.props.numberOfJoins}
         />
       </EuiPanel>

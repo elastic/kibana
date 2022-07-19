@@ -66,12 +66,14 @@ export class CreateSourceEditor extends Component {
   _previewLayer = () => {
     const { indexPattern, geoFieldName } = this.state;
 
+    const field = indexPattern.getFieldByName(geoFieldName);
+
     const sourceConfig =
       indexPattern && geoFieldName
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
-            scalingType: SCALING_TYPES.MVT,
+            scalingType: field && field.isRuntimeField ? SCALING_TYPES.LIMIT : SCALING_TYPES.MVT,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
