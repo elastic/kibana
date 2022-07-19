@@ -21,15 +21,15 @@ export const useTimefilter = ({
   const { timefilter } = services.data.query.timefilter;
 
   useEffect(() => {
-    if (timeRangeSelector === true) {
+    if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {
       timefilter.enableTimeRangeSelector();
-    } else if (timeRangeSelector === false) {
+    } else if (timeRangeSelector === false && timefilter.isTimeRangeSelectorEnabled()) {
       timefilter.disableTimeRangeSelector();
     }
 
-    if (autoRefreshSelector === true) {
+    if (autoRefreshSelector === true && !timefilter.isAutoRefreshSelectorEnabled()) {
       timefilter.enableAutoRefreshSelector();
-    } else if (autoRefreshSelector === false) {
+    } else if (autoRefreshSelector === false && timefilter.isAutoRefreshSelectorEnabled()) {
       timefilter.disableAutoRefreshSelector();
     }
   }, [timeRangeSelector, autoRefreshSelector, timefilter]);
