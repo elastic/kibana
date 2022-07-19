@@ -22,7 +22,7 @@ export const RUNTIME_FIELD_TYPES = [
 ] as const;
 
 /**
- * Used to determine if the instance has any user created index patterns by filtering index patterns
+ * Used to determine if the instance has some user created index patterns by filtering index patterns
  * that are created and backed only by Fleet server data
  * Should be revised after https://github.com/elastic/kibana/issues/82851 is fixed
  * For more background see: https://github.com/elastic/kibana/issues/107020

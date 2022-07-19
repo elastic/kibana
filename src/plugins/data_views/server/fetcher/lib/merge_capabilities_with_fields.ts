@@ -11,7 +11,7 @@
 import { FieldDescriptor } from '../index_patterns_fetcher';
 
 export const mergeCapabilitiesWithFields = (
-  rollupIndexCapabilities: { [key: string]: any },
+  rollupIndexCapabilities: Record<string, {}>,
   fieldsFromFieldCapsApi: Record<string, FieldDescriptor>,
   previousFields: FieldDescriptor[] = []
 ) => {

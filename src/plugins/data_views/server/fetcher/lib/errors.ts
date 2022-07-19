@@ -7,6 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { CustomHttpResponseOptions } from '@kbn/core/server';
 import { get } from 'lodash';
 
 const ERR_ES_INDEX_NOT_FOUND = 'index_not_found_exception';
@@ -15,10 +16,10 @@ const ERR_NO_MATCHING_INDICES = 'no_matching_indices';
 /**
  *  Determines if an error is an elasticsearch error that's
  *  describing a failure caused by missing index/indices
- *  @param  {Any}  err
+ *  @param  err
  *  @return {Boolean}
  */
-export function isEsIndexNotFoundError(err: any) {
+export function isEsIndexNotFoundError(err: unknown) {
   return get(err, ['body', 'error', 'type']) === ERR_ES_INDEX_NOT_FOUND;
 }
 
@@ -30,17 +31,17 @@ export function isEsIndexNotFoundError(err: any) {
  */
 export function createNoMatchingIndicesError(pattern: string[] | string) {
   const err = Boom.notFound(`No indices match "${pattern}"`);
-  (err.output.payload as any).code = ERR_NO_MATCHING_INDICES;
+  (err as Boom.Boom).output.payload.code = ERR_NO_MATCHING_INDICES;
   return err;
 }
 
 /**
  *  Determines if an error is produced by `createNoMatchingIndicesError()`
  *
- *  @param  {Any} err
+ *  @param  err
  *  @return {Boolean}
  */
-export function isNoMatchingIndicesError(err: any) {
+export function isNoMatchingIndicesError(err: unknown) {
   return get(err, ['output', 'payload', 'code']) === ERR_NO_MATCHING_INDICES;
 }
 
@@ -48,18 +49,23 @@ export function isNoMatchingIndicesError(err: any) {
  *  Wrap "index_not_found_exception" errors in custom Boom errors
  *  automatically
  *  @param  {Array<String>|String} indices
+ *  @param  {Boom.Boom|CustomHttpResponseOptions} error
  *  @return {Boom}
  */
-export function convertEsError(indices: string[] | string, error: any) {
+export function convertEsError(indices: string[] | string, error: unknown) {
   if (isEsIndexNotFoundError(error)) {
     return createNoMatchingIndicesError(indices);
   }
 
-  if (error.isBoom) {
+  if ((error as Boom.Boom).isBoom) {
     return error;
   }
 
-  const statusCode = error.statusCode;
-  const message = error.body ? error.body.error : undefined;
-  return Boom.boomify(error, { statusCode, message });
+  const custom = error as CustomHttpResponseOptions<{ error: string; message: string }>;
+  const options = {
+    statusCode: custom.statusCode,
+    message: custom.body?.error ?? undefined,
+  };
+
+  return Boom.boomify(error as Error, options);
 }

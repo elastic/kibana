@@ -41,7 +41,7 @@ export class HasData {
         return hasLocalESData;
       },
       /**
-       * Check to see if any data view exists
+       * Check to see if a data view exists
        */
       hasDataView: async (): Promise<boolean> => {
         const dataViewsCheck = await this.findDataViews(http);

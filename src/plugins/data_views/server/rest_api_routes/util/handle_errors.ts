@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Boom from '@hapi/boom';
 import type { RequestHandler, RouteMethod, RequestHandlerContext } from '@kbn/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
 
@@ -47,7 +48,8 @@ export const handleErrors =
         }
 
         const is404 =
-          (error as ErrorIndexPatternNotFound).is404 || (error as any)?.output?.statusCode === 404;
+          (error as ErrorIndexPatternNotFound).is404 ||
+          (error as Boom.Boom)?.output?.statusCode === 404;
 
         if (is404) {
           return response.notFound({
