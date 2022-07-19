@@ -271,6 +271,8 @@
       "@kbn/embedded-lens-example-plugin/*": ["x-pack/examples/embedded_lens_example/*"],
       "@kbn/exploratory-view-example-plugin": ["x-pack/examples/exploratory_view_example"],
       "@kbn/exploratory-view-example-plugin/*": ["x-pack/examples/exploratory_view_example/*"],
+      "@kbn/map-custom-raster-source-plugin": ["x-pack/examples/map_custom_raster_source"],
+      "@kbn/map-custom-raster-source-plugin/*": ["x-pack/examples/map_custom_raster_source/*"],
       "@kbn/reporting-example-plugin": ["x-pack/examples/reporting_example"],
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
       "@kbn/screenshotting-example-plugin": ["x-pack/examples/screenshotting_example"],
