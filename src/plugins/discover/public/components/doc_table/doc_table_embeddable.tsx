@@ -12,11 +12,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { usePager } from '../../hooks/use_pager';
-import { ToolBarPagination } from './components/pager/tool_bar_pagination';
+import {
+  ToolBarPagination,
+  MAX_ROWS_PER_PAGE_OPTION,
+} from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
@@ -29,7 +31,6 @@ const DocTableWrapperMemoized = memo(DocTableWrapper);
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const services = useDiscoverServices();
   const onUpdateRowsPerPage = props.onUpdateRowsPerPage;
-  const initialPageSize = useMemo(() => getDefaultRowsPerPage(services, 50), [services]);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
     curPageIndex,
@@ -40,7 +41,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     changePageIndex,
     changePageSize,
   } = usePager({
-    initialPageSize: props.rowsPerPageState ?? initialPageSize,
+    initialPageSize: Math.min(props.rowsPerPageState ?? 50, MAX_ROWS_PER_PAGE_OPTION),
     totalItems: props.rows.length,
   });
   const showPagination = totalPages !== 0;

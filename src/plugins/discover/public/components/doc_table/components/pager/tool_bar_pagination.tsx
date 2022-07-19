@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getRowsPerPageOptions } from '../../../../utils/rows_per_page';
 
+export const MAX_ROWS_PER_PAGE_OPTION = 100;
+
 interface ToolBarPaginationProps {
   pageSize: number;
   pageCount: number;
@@ -54,18 +56,20 @@ export const ToolBarPagination = ({
     return size === pageSize ? 'check' : 'empty';
   };
 
-  const rowsPerPageOptions = getRowsPerPageOptions(pageSize).map((cur) => (
-    <EuiContextMenuItem
-      key={`${cur} rows`}
-      icon={getIconType(cur)}
-      onClick={() => {
-        closePopover();
-        onPageSizeChange(cur);
-      }}
-    >
-      {cur} {rowsWord}
-    </EuiContextMenuItem>
-  ));
+  const rowsPerPageOptions = getRowsPerPageOptions(pageSize)
+    .filter((option) => option <= MAX_ROWS_PER_PAGE_OPTION) // legacy table is not optimized well for rendering more rows at once
+    .map((cur) => (
+      <EuiContextMenuItem
+        key={`${cur} rows`}
+        icon={getIconType(cur)}
+        onClick={() => {
+          closePopover();
+          onPageSizeChange(cur);
+        }}
+      >
+        {cur} {rowsWord}
+      </EuiContextMenuItem>
+    ));
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
