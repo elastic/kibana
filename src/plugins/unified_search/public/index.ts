@@ -21,7 +21,8 @@ export { DataViewPicker } from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
-export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
+export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+export { UPDATE_FILTER_REFERENCES_TRIGGER } from './triggers';
 
 /*
  * Autocomplete query suggestions:

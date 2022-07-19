@@ -262,7 +262,10 @@ export function ChangeDataView({
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
               setIsTextLangTransitionModalVisible(true);
             } else {
+              const dataView = await data.dataViews.get(newId);
+              await data.dataViews.refreshFields(dataView);
               onChangeDataView(newId);
+              setPopoverIsOpen(false);
             }
           }}
           currentDataViewId={currentDataViewId}
