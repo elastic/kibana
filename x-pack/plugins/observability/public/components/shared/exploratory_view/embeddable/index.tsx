@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
@@ -81,16 +82,18 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaContextProvider services={{ ...coreStart, ...pluginsStart }}>
-          <ExploratoryViewEmbeddable
-            {...props}
-            indexPatterns={indexPatterns}
-            lens={lens}
-            lensFormulaHelper={lensHelper.formula}
-          />
-        </KibanaContextProvider>
-      </EuiThemeProvider>
+      <EuiErrorBoundary>
+        <EuiThemeProvider darkMode={isDarkMode}>
+          <KibanaContextProvider services={{ ...coreStart, ...pluginsStart }}>
+            <ExploratoryViewEmbeddable
+              {...props}
+              indexPatterns={indexPatterns}
+              lens={lens}
+              lensFormulaHelper={lensHelper.formula}
+            />
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </EuiErrorBoundary>
     );
   };
 }
