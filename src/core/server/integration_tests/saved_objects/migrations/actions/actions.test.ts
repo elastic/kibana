@@ -51,10 +51,7 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.resolve(
-        __dirname,
-        '../../integration_tests/archives/7.7.2_xpack_100k_obj.zip'
-      ),
+      dataArchive: Path.resolve(__dirname, '../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
