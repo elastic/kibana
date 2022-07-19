@@ -11,8 +11,6 @@ import { useValues, useActions } from 'kea';
 import { snakeCase } from 'lodash';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,8 +25,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { KibanaLogic } from '../../../shared/kibana';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';
