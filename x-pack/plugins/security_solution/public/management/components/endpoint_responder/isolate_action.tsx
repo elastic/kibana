@@ -12,6 +12,7 @@ import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { ActionError } from './action_error';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
 export const IsolateActionResult = memo<
   CommandExecutionComponentProps<
@@ -33,7 +34,7 @@ export const IsolateActionResult = memo<
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
+    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
   // Send Isolate request if not yet done
