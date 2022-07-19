@@ -749,6 +749,7 @@ describe('MetricVisComponent', function () {
         }}
         data={table}
         renderComplete={renderCompleteSpy}
+        renderMode={'view'}
       />
     );
     component.find(Settings).props().onRenderChange!(false);
