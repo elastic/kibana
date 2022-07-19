@@ -239,7 +239,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             columns={getTableColumns(commandsByGroup)}
           />
         ))}
-        <EuiSpacer size="s" />
         {callout}
       </>
     );
