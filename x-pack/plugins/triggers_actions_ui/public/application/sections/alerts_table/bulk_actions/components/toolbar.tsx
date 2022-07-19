@@ -38,21 +38,29 @@ const useBulkActionsToMenuItemMapper = (
     [rowSelection, alerts]
   );
 
-  return items.map((item) => {
-    const isDisabled = isAllSelected && item.disableOnQuery;
-    return (
-      <EuiContextMenuItem
-        key={item.key}
-        data-test-subj={item['data-test-subj']}
-        disabled={isDisabled}
-        onClick={() => {
-          item.onClick(selectedAlertIds, isAllSelected);
-        }}
-      >
-        {isDisabled && item.disableOnQuery && item.disabledLabel ? item.disabledLabel : item.label}
-      </EuiContextMenuItem>
-    );
-  });
+  const bulkActionsItems = useMemo(
+    () =>
+      items.map((item) => {
+        const isDisabled = isAllSelected && item.disableOnQuery;
+        return (
+          <EuiContextMenuItem
+            key={item.key}
+            data-test-subj={item['data-test-subj']}
+            disabled={isDisabled}
+            onClick={() => {
+              item.onClick(selectedAlertIds, isAllSelected);
+            }}
+          >
+            {isDisabled && item.disableOnQuery && item.disabledLabel
+              ? item.disabledLabel
+              : item.label}
+          </EuiContextMenuItem>
+        );
+      }),
+    [isAllSelected, items, selectedAlertIds]
+  );
+
+  return bulkActionsItems;
 };
 
 const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, alerts }) => {
@@ -162,4 +170,6 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, a
   );
 };
 
-export const BulkActions = React.memo(BulkActionsComponent);
+// disabled to be able lazy load
+// eslint-disable-next-line import/no-default-export
+export default React.memo(BulkActionsComponent);

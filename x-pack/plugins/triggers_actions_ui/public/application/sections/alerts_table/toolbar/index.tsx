@@ -5,36 +5,4 @@
  * 2.0.
  */
 
-import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import React from 'react';
-import { BulkActionsConfig } from '../../../../types';
-import { BulkActions } from '../bulk_actions/components/toolbar';
-
-export const getToolbarVisibility = ({
-  bulkActions,
-  alertsCount,
-  rowSelection,
-  alerts,
-}: {
-  bulkActions: BulkActionsConfig[];
-  alertsCount: number;
-  rowSelection: Set<number>;
-  alerts: EcsFieldsResponse[];
-}): EuiDataGridToolBarVisibilityOptions => {
-  const selectedRowsCount = rowSelection.size;
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
-    return {};
-
-  const options = {
-    showColumnSelector: false,
-    showSortSelector: false,
-    additionalControls: {
-      left: {
-        append: <BulkActions totalItems={alertsCount} items={bulkActions} alerts={alerts} />,
-      },
-    },
-  };
-
-  return options;
-};
+export { getToolbarVisibility } from './toolbar_visibility';
