@@ -10,10 +10,10 @@ import fs from 'fs';
 import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
+import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
 import { DEV_TOOL_CONTENT } from '../../../../common/constants';
 
-import { SecuritySolutionPluginRouter } from '../../../types';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import { mappings } from '../mappings';
 
 const getReadables = (dataPath: string): Promise<string> =>
