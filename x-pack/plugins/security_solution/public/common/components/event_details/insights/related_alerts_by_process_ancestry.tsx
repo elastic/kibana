@@ -56,7 +56,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     );
   }, [showContent, cache, data, eventId, timelineId]);
 
-  const isEmpty = !!cache.alertIds && cache.alertIds.length == 0;
+  const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
 
   return (
     <InsightAccordion

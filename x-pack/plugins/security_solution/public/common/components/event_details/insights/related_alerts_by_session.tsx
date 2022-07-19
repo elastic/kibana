@@ -74,7 +74,7 @@ export const RelatedAlertsBySession = React.memo<Props>(
       );
     }, [alertIds, cellData?.dataProviders]);
 
-    const isEmpty = count == 0;
+    const isEmpty = count === 0;
 
     return (
       <InsightAccordion
