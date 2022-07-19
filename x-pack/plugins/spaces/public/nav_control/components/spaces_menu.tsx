@@ -44,25 +44,12 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   readonly activeSpace: Space | null;
 }
-
-// interface State {
-//   searchTerm: string;
-//   allowSpacesListFocus: boolean;
-// }
-
-// class SpacesMenuUI extends Component<Props, State> {
 class SpacesMenuUI extends Component<Props> {
-  // ToDo: removed unused state members
-  // public state = {
-  //   searchTerm: '',
-  //   allowSpacesListFocus: false,
-  // };
-
   public render() {
-    // const { intl, spaces, serverBasePath, navigateToUrl } = this.props;
-    // const { searchTerm } = this.state;
-
     const spaceMenuOptions: EuiSelectableOption[] = this.getSpaceOptions();
+    const activeIndex: number | undefined = spaceMenuOptions.findIndex(
+      (f) => f.key === this.props.activeSpace?.id
+    );
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -112,6 +99,7 @@ class SpacesMenuUI extends Component<Props> {
             rowHeight: 40,
             showIcons: false,
             onFocusBadge: false,
+            activeOptionIndex: activeIndex,
           }}
         >
           {(list, search) => (
@@ -133,9 +121,6 @@ class SpacesMenuUI extends Component<Props> {
 
   private getSpaceOptions = (): EuiSelectableOption[] => {
     return this.props.spaces.map((space) => {
-      // const strLabel = space.name.concat(
-      //   this.props.activeSpace?.id === space.id ? ' (active)' : ''
-      // );
       return {
         'aria-label': space.name,
         'aria-roledescription': 'space',
