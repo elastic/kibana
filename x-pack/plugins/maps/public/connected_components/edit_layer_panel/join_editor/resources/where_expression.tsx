@@ -9,14 +9,14 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../../common/constants';
 import { getData, getSearchBar } from '../../../../kibana_services';
 
 interface Props {
   indexPattern: DataView;
-  onChange: (whereQuery?: Query | AggregateQuery) => void;
+  onChange: (whereQuery?: Query) => void;
   whereQuery?: Query;
 }
 
@@ -41,7 +41,7 @@ export class WhereExpression extends Component<Props, State> {
     });
   };
 
-  _onQueryChange = ({ query }: { query?: Query | AggregateQuery }) => {
+  _onQueryChange = ({ query }: { query?: Query }) => {
     this.props.onChange(query);
     this._closePopover();
   };

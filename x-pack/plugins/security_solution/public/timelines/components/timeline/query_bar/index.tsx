@@ -11,8 +11,8 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { FilterStateStore, isOfQueryType } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -201,12 +201,11 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     }, [savedQueryId]);
 
     const onSubmitQuery = useCallback(
-      (newQuery: Query | AggregateQuery, timefilter?: SavedQueryTimeFilter) => {
+      (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
         if (
-          isOfQueryType(newQuery) &&
-          (filterQuery == null ||
-            (filterQuery != null && filterQuery.expression !== newQuery.query) ||
-            filterQuery.kind !== newQuery.language)
+          filterQuery == null ||
+          (filterQuery != null && filterQuery.expression !== newQuery.query) ||
+          filterQuery.kind !== newQuery.language
         ) {
           applyKqlFilterQuery(newQuery.query as string, newQuery.language as KueryFilterQueryKind);
         }

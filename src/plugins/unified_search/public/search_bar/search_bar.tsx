@@ -255,7 +255,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.state.query,
+      query: this.state.query as Query,
     };
 
     if (savedQueryMeta.shouldIncludeFilters) {

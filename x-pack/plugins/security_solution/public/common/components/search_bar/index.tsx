@@ -14,8 +14,7 @@ import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -109,7 +108,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, [end, fromStr, start, timefilter, toStr, setTablesActivePageToZero]);
 
     const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
+      (payload: { dateRange: TimeRange; query?: Query }) => {
         // if the function is there, call it to check if the signals index exists yet
         // in order to update the index fields
         if (pollForSignalIndex != null) {
@@ -240,7 +239,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     );
 
     const onClearSavedQuery = useCallback(() => {
-      if (savedQuery != null && isOfQueryType(savedQuery.attributes.query)) {
+      if (savedQuery != null) {
         updateSearch({
           id,
           filters: [],

@@ -61,7 +61,9 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
  *
  **/
 
-export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
+export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
+  props: TopNavMenuProps<QT>
+): ReactElement | null {
   const { config, badges, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
@@ -104,7 +106,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     // Validate presense of all required fields
     if (!showSearchBar || !props.unifiedSearch) return null;
     const { SearchBar } = props.unifiedSearch.ui;
-    return <SearchBar {...searchBarProps} />;
+    return <SearchBar<QT> {...searchBarProps} />;
   }
 
   function renderLayout() {

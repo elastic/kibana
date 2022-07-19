@@ -8,7 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter, isOfQueryType } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
@@ -113,7 +113,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeQuery = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
-      if (!deepEqual(newQuery, query) && isOfQueryType(query)) {
+      if (!deepEqual(newQuery, query)) {
         dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
       }
     },
@@ -122,7 +122,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   // needs to change language mode only
   const onQueryBarSubmit = ({ query: newQuery }: { query?: Query }) => {
-    if (isOfQueryType(query) && isOfQueryType(newQuery) && newQuery?.language !== query.language) {
+    if (newQuery?.language !== query.language) {
       dispatch({ type: 'query', payload: { ...query, language: newQuery?.language } as Query });
     }
   };

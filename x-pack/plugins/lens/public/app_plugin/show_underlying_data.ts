@@ -13,8 +13,6 @@ import {
   buildEsQuery,
   FilterStateStore,
   TimeRange,
-  AggregateQuery,
-  isOfQueryType,
   EsQueryConfig,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -156,7 +154,7 @@ type QueryLanguage = 'lucene' | 'kuery';
  * extra filter pill.
  */
 export function combineQueryAndFilters(
-  query: Query | AggregateQuery | Array<Query | AggregateQuery> | undefined,
+  query: Query | Query[] | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined,
@@ -171,8 +169,7 @@ export function combineQueryAndFilters(
   };
 
   const allQueries = Array.isArray(query) ? query : query ? [query] : [];
-  const queryTypeQueries = allQueries.filter(isOfQueryType);
-  const nonEmptyQueries = queryTypeQueries.filter((q) => Boolean(q.query.trim()));
+  const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
 

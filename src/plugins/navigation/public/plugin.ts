@@ -35,6 +35,7 @@ export class NavigationPublicPlugin
     { unifiedSearch }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
+
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),

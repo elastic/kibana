@@ -8,8 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { isOfQueryType } from '@kbn/es-query';
-import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -25,11 +24,11 @@ export interface QueryBarComponentProps {
   indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
-  filterQuery: Query | AggregateQuery;
+  filterQuery: Query;
   filterManager: FilterManager;
   filters: Filter[];
-  onChangedQuery?: (query: Query | AggregateQuery) => void;
-  onSubmitQuery: (query: Query | AggregateQuery, timefilter?: SavedQueryTimeFilter) => void;
+  onChangedQuery?: (query: Query) => void;
+  onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
@@ -56,7 +55,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
   }) => {
     const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
+      (payload: { dateRange: TimeRange; query?: Query }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onSubmitQuery(payload.query);
         }
@@ -65,7 +64,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const onQueryChange = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
+      (payload: { dateRange: TimeRange; query?: Query }) => {
         if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onChangedQuery(payload.query);
         }
@@ -84,7 +83,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const onClearSavedQuery = useCallback(() => {
-      if (savedQuery != null && isOfQueryType(savedQuery.attributes.query)) {
+      if (savedQuery != null) {
         onSubmitQuery({
           query: '',
           language: savedQuery.attributes.query.language,

@@ -12,13 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
-import {
-  type Filter,
-  FilterStateStore,
-  type Query,
-  type TimeRange,
-  type AggregateQuery,
-} from '@kbn/es-query';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
@@ -77,7 +71,7 @@ export interface Props {
     searchSessionId,
   }: {
     filters?: Filter[];
-    query?: Query | AggregateQuery;
+    query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
     searchSessionId?: string;
@@ -229,7 +223,7 @@ export class MapApp extends React.Component<Props, State> {
     time,
   }: {
     filters?: Filter[];
-    query?: Query | AggregateQuery;
+    query?: Query;
     time?: TimeRange;
   }) => {
     const { filterManager } = getData().query;
@@ -413,7 +407,7 @@ export class MapApp extends React.Component<Props, State> {
 
     const { TopNavMenu } = getNavigation().ui;
     return (
-      <TopNavMenu
+      <TopNavMenu<Query>
         setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
         config={topNavConfig}

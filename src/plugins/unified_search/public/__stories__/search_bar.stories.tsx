@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
+import type { Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -167,7 +168,7 @@ setIndexPatterns({
   get: () => Promise.resolve(mockIndexPatterns[0]),
 } as unknown as DataViewsContract);
 
-function wrapSearchBarInContext(testProps: SearchBarProps) {
+function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
   const defaultOptions = {
     appName: 'test',
     timeHistory: mockTimeHistory,
@@ -185,12 +186,12 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
     filters: [],
     onClearSavedQuery: action('onClearSavedQuery'),
     onFiltersUpdated: action('onFiltersUpdated'),
-  } as unknown as SearchBarProps;
+  } as unknown as SearchBarProps<Query>;
 
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+        <SearchBar<Query> {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -491,7 +492,7 @@ storiesOf('SearchBar', module)
         textBasedLanguages: ['SQL'],
       },
       query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
-    } as SearchBarProps)
+    } as unknown as SearchBarProps<Query>)
   )
   .add('with dataviewPicker with SQL and large sql query', () =>
     wrapSearchBarInContext({
@@ -510,7 +511,7 @@ storiesOf('SearchBar', module)
       query: {
         sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
       },
-    } as SearchBarProps)
+    } as unknown as SearchBarProps<Query>)
   )
   .add('with dataviewPicker with SQL and errors in sql query', () =>
     wrapSearchBarInContext({
@@ -532,5 +533,5 @@ storiesOf('SearchBar', module)
         ),
       ],
       query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
-    } as SearchBarProps)
+    } as unknown as SearchBarProps<Query>)
   );

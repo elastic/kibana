@@ -10,8 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import type { DataViewBase, Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
@@ -141,9 +140,9 @@ export const QueryBarDefineRule = ({
   }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
 
   const onSubmitQuery = useCallback(
-    (newQuery: Query | AggregateQuery) => {
+    (newQuery: Query) => {
       const { query } = fieldValue;
-      if (!deepEqual(query, newQuery) && isOfQueryType(newQuery)) {
+      if (!deepEqual(query, newQuery)) {
         setFieldValue({ ...fieldValue, query: newQuery });
       }
     },
@@ -151,9 +150,9 @@ export const QueryBarDefineRule = ({
   );
 
   const onChangedQuery = useCallback(
-    (newQuery: Query | AggregateQuery) => {
+    (newQuery: Query) => {
       const { query } = fieldValue;
-      if (!deepEqual(query, newQuery) && isOfQueryType(newQuery)) {
+      if (!deepEqual(query, newQuery)) {
         setFieldValue({ ...fieldValue, query: newQuery });
       }
     },
@@ -168,7 +167,7 @@ export const QueryBarDefineRule = ({
           setSavedQuery(newSavedQuery);
           setFieldValue({
             filters: newSavedQuery.attributes.filters ?? [],
-            query: newSavedQuery.attributes.query as Query,
+            query: newSavedQuery.attributes.query,
             saved_id: newSavedQuery.id,
           });
         } else {

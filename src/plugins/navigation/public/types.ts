@@ -14,13 +14,11 @@ export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-type GenericTopNavMenu = <QT extends AggregateQuery | Query = Query>(
-  props: TopNavMenuProps<QT>
-) => React.ReactElement;
-
 export interface NavigationPublicPluginStart {
   ui: {
-    TopNavMenu: GenericTopNavMenu;
+    TopNavMenu: <QT extends Query | AggregateQuery = Query>(
+      props: TopNavMenuProps<QT>
+    ) => React.ReactElement;
   };
 }
 

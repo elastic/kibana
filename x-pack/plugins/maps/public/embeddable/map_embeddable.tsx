@@ -14,13 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import {
-  type Filter,
-  compareFilters,
-  type TimeRange,
-  type Query,
-  type AggregateQuery,
-} from '@kbn/es-query';
+import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -121,7 +115,7 @@ export class MapEmbeddable
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
-  private _prevQuery?: Query | AggregateQuery;
+  private _prevQuery?: Query;
   private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;

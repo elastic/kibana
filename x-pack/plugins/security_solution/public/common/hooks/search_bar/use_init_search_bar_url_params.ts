@@ -68,7 +68,7 @@ export const useInitSearchBarFromUrlParams = () => {
       if (savedQueryId != null && savedQueryId !== '') {
         savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
           const filters = savedQueryData.attributes.filters || [];
-          const query = savedQueryData.attributes.query as Query;
+          const query = savedQueryData.attributes.query;
 
           filterManager.setFilters(filters);
           dispatch(

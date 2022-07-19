@@ -9,6 +9,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -589,7 +590,7 @@ export function DashboardTopNav({
 
   return (
     <>
-      <TopNavMenu {...getNavBarProps()} />
+      <TopNavMenu<Query> {...getNavBarProps()} />
       {!printMode && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}

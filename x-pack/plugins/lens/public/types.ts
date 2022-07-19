@@ -14,7 +14,7 @@ import type {
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter, TimeRange, AggregateQuery } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -398,7 +398,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
-  query: Query | AggregateQuery;
+  query: Query;
   dateRange: DateRange;
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
@@ -717,7 +717,7 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  query: Query | AggregateQuery;
+  query: Query;
   filters: Filter[];
 }
 
@@ -1032,7 +1032,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   visualizationId: string;
   datasourceStates: Record<string, { state: unknown }>;
   visualizationState: unknown;
-  query: Query | AggregateQuery;
+  query: Query;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }) => undefined | TopNavMenuData;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -24,7 +24,7 @@ export interface Document {
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
-    query: Query | AggregateQuery;
+    query: Query;
     globalPalette?: {
       activePaletteId: string;
       state?: unknown;

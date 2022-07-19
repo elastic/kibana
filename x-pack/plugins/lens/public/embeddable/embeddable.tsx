@@ -192,7 +192,7 @@ function getViewUnderlyingDataArgs({
   }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    query,
+    query as Query,
     filters,
     meta,
     dataViews,
@@ -602,7 +602,7 @@ export class Embeddable
 
     const context: ExecutionContextSearch = {
       timeRange: this.externalSearchContext.timeRange,
-      query: [this.savedVis.state.query as Query],
+      query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
         this.savedVis.references

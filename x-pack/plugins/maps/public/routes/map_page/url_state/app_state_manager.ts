@@ -7,16 +7,16 @@
 
 import { Subject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 export interface MapsAppState {
-  query?: Query | AggregateQuery | null;
+  query?: Query | null;
   savedQueryId?: string;
   filters?: Filter[];
 }
 
 export class AppStateManager {
-  _query: Query | AggregateQuery | null = null;
+  _query: Query | null = null;
   _savedQueryId: string = '';
   _filters: Filter[] = [];
 

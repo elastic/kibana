@@ -13,9 +13,7 @@ import {
   buildQueryFromFilters,
   buildEsQuery,
   Query,
-  AggregateQuery,
   Filter,
-  isOfQueryType,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchSource } from '@kbn/data-plugin/common';
@@ -75,14 +73,14 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
  * Should also form a valid query if only the query or filters is provided
  */
 export function createMergedEsQuery(
-  query?: Query | AggregateQuery,
+  query?: Query,
   filters?: Filter[],
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  if (query && isOfQueryType(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, dataView);
