@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions } from 'kea';
 import { snakeCase } from 'lodash';
 
 import {
@@ -25,7 +25,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
@@ -46,12 +45,12 @@ interface ProductCardProps {
     ICON: string;
     RESOURCE_LINKS: ProductResourceLink[];
     PRODUCT_CARD_CTA: string;
+    FEATURES: string[];
   };
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { config } = useValues(KibanaLogic);
 
   return (
     <EuiPanel hasBorder paddingSize="l">
@@ -101,7 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-features">
           <EuiListGroup flush style={{ paddingTop: '1.5rem' }}>
-            {product.FEATURES.map((item, index) => (
+            {product.FEATURES.map((item: string, index: number) => (
               <EuiListGroupItem
                 key={index}
                 size="s"
