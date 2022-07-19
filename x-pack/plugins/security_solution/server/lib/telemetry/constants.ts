@@ -32,3 +32,194 @@ export const LIST_ENDPOINT_EVENT_FILTER = 'endpoint_event_filter';
 export const LIST_TRUSTED_APPLICATION = 'trusted_application';
 
 export const INSIGHTS_CHANNEL = 'security-insights-v1';
+
+export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
+  linux: {
+    advanced: {
+      agent: {
+        connection_delay: 60
+      },
+      artifacts: {
+        global: {
+          base_url: '',
+          manifest_relative_url: '',
+          public_key: '',
+          interval: 300
+        },
+        user: {
+          public_key: '',
+          ca_cert: ''
+        }
+      },
+      elasticsearch: {
+        delay: 600,
+        tls: {
+          verify_peer: true,
+          verify_hostname: true,
+          ca_cert: ''
+        }
+      },
+      logging: {
+        file: 'info',
+        syslog: 'off'
+      },
+      diagnostic: {
+        enabled: true
+      },
+      malware: {
+        quarantine: true
+      },
+      memory_protection: {
+        memory_scan_collect_sample: false,
+        memory_scan: true
+      },
+      kernel: {
+        capture_mode: 'auto'
+      },
+      event_filter: {
+        default: true
+      },
+      utilization_limits: {
+        cpu: 50
+      }
+    }
+  },
+  mac: {
+    advanced: {
+      agent: {
+        connection_delay: 60
+      },
+      artifacts: {
+        global: {
+          base_url: '',
+          manifest_relative_url: '',
+          public_key: '',
+          interval: 300
+        },
+        user: {
+          public_key: '',
+          ca_cert: ''
+        }
+      },
+      elasticsearch: {
+        delay: 600,
+        tls: {
+          verify_peer: true,
+          verify_hostname: true,
+          ca_cert: ''
+        }
+      },
+      logging: {
+        file: 'info',
+        syslog: 'off'
+      },
+      malware: {
+        quarantine: true,
+        threshold: 'normal'
+      },
+      kernel: {
+        connect: true,
+        process: true,
+        filewrite: true,
+        network: true,
+        network_extension: {
+          enable_content_filtering: true,
+          enable_packet_filtering: true
+        }
+      },
+      harden: {
+        self_protect: true
+      },
+      diagnostic: {
+        enabled: true
+      },
+      alerts: {
+        cloud_lookup: true
+      },
+      memory_protection: {
+        memory_scan_collect_sample: false,
+        memory_scan: true
+      },
+      event_filter: {
+        default: true
+      }
+    }
+  },
+  windows: {
+    advanced: {
+      agent: {
+        connection_delay: 60
+      },
+      artifacts: {
+        global: {
+          base_url: '',
+          manifest_relative_url: '',
+          public_key: '',
+          interval: 300
+        },
+        user: {
+          public_key: '',
+          ca_cert: ''
+        }
+      },
+      elasticsearch: {
+        delay: 600,
+        tls: {
+          verify_peer: true,
+          verify_hostname: true,
+          ca_cert: ''
+        }
+      },
+      logging: {
+        file: 'info',
+        debugview: 'off'
+      },
+      malware: {
+        quarantine: true,
+        threshold: 'normal'
+      },
+      kernel: {
+        connect: true,
+        process: true,
+        filewrite: true,
+        network: true,
+        fileopen: true,
+        asyncimageload: true,
+        syncimageload: true,
+        registry: true,
+        fileaccess: true,
+        registryaccess: true
+      },
+      diagnostic: {
+        enabled: true,
+        rollback_telemetry_enabled: true
+      },
+      alerts: {
+        cloud_lookup: true
+      },
+      ransomware: {
+        mbr: true,
+        canary: true
+      },
+      memory_protection: {
+        shellcode: true,
+        memory_scan: true,
+        shellcode_collect_sample: false,
+        memory_scan_collect_sample: false,
+        shellcode_enhanced_pe_parsing: true,
+        shellcode_trampoline_detection: true
+      },
+      events: {
+        etw: '' // ! Can't find default
+      },
+      event_filter: {
+        default: true
+      },
+      utilization_limits: {
+        cpu: 50
+      },
+      rollback: '' // ! Can't find default
+    }
+  }
+};
+

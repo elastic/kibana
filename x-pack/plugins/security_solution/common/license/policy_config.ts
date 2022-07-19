@@ -250,4 +250,3 @@ export const unsetPolicyFeaturesAccordingToLicenseLevel = (
   // set any license-gated features back to the defaults
   return policyFactoryWithoutPaidFeatures(policy);
 };
-
