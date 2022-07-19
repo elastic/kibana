@@ -8,6 +8,7 @@
 
 import { debounce } from 'lodash';
 import type { Reducer, Store } from 'redux';
+import { filter } from 'rxjs';
 import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { EmbeddableInput, IEmbeddable } from './lib';
 
@@ -69,11 +70,7 @@ export function createStore(
   let isUpstreamUpdate = false;
   let isDownstreamUpdate = false;
 
-  const store = configureStore({
-    reducer,
-    preloadedState: embeddable.getInput(),
-  });
-
+  const store = configureStore({ reducer });
   const onUpdate = debounce(() => {
     isDownstreamUpdate = true;
     embeddable.updateInput(store.getState());
@@ -81,18 +78,17 @@ export function createStore(
   });
   const unsubscribe = store.subscribe(() => !isUpstreamUpdate && onUpdate());
 
-  embeddable.getInput$().subscribe({
-    next: () => {
-      if (isDownstreamUpdate) {
-        return;
-      }
-
-      isUpstreamUpdate = true;
-      store.dispatch(actions.set(embeddable.getInput()));
-      isUpstreamUpdate = false;
-    },
-    complete: unsubscribe,
-  });
+  embeddable
+    .getInput$()
+    .pipe(filter(() => !isDownstreamUpdate))
+    .subscribe({
+      next: () => {
+        isUpstreamUpdate = true;
+        store.dispatch(actions.set(embeddable.getInput()));
+        isUpstreamUpdate = false;
+      },
+      complete: unsubscribe,
+    });
 
   return store;
 }
