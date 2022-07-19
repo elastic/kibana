@@ -17,7 +17,7 @@ export const bodySchema = schema.object({
   name: commonSchemas.fileName,
   alt: commonSchemas.fileAlt,
   meta: commonSchemas.fileMeta,
-  mime: schema.maybe(schema.string()),
+  mimeType: schema.maybe(schema.string()),
 });
 
 type Body = Ensure<CreateFileKindHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
@@ -31,9 +31,11 @@ export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
 ) => {
   const { fileService } = await files;
   const {
-    body: { name, alt, meta, mime },
+    body: { name, alt, meta, mimeType },
   } = req;
-  const file = await fileService.asCurrentUser().create({ fileKind, name, alt, meta, mime });
+  const file = await fileService
+    .asCurrentUser()
+    .create({ fileKind, name, alt, meta, mime: mimeType });
   const body: Response = {
     file: file.toJSON(),
   };
