@@ -39,6 +39,10 @@ export const FILE_KIND_API_ROUTES_CLIENT = {
   getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
 };
 
+export const FILES_API_ROUTES = {
+  find: `${FILES_API_BASE_PATH}/find`,
+};
+
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
   Q = unknown,
@@ -60,7 +64,7 @@ export type CreateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
     name: string;
     alt?: string;
     meta?: Record<string, unknown>;
-    mime?: string;
+    mimeType?: string;
   },
   { file: FileJSON }
 >;
@@ -142,7 +146,12 @@ export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
     /**
      * Filter for match on extensions
      */
-    extensions?: string[];
+    extension?: string[];
+
+    /**
+     * Filter for match on extensions
+     */
+    status?: string[];
   },
   { files: FileJSON[] }
 >;
