@@ -46,7 +46,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
           const pattern = /^(.*), column (\d+), row (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
-          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
+          return { text: matches![1], column: Number(matches![2]), row: Number(matches![3]) };
         })
         .filter((cell) =>
           maxColumnsToParse !== undefined ? cell?.column <= maxColumnsToParse : false
