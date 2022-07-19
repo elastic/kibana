@@ -3415,6 +3415,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-disable@link:bazel-bin/packages/kbn-eslint-plugin-disable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint":
   version "0.0.0"
   uid ""
@@ -7139,6 +7143,10 @@
   uid ""
 
 "@types/kbn__es-query@link:bazel-bin/packages/kbn-es-query/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__eslint-plugin-disable@link:bazel-bin/packages/kbn-eslint-plugin-disable/npm_module_types":
   version "0.0.0"
   uid ""
 
