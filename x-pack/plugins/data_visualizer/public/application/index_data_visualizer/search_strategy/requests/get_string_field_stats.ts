@@ -38,7 +38,6 @@ export const getStringFieldStatsRequest = (
 ) => {
   const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
-  console.log('params', params);
   const size = 0;
 
   const aggs: Aggs = {};
@@ -75,8 +74,6 @@ export const getStringFieldStatsRequest = (
     aggs: buildRandomSamplerAggregation(aggs, 0.05),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
-
-  console.log('searchBody', searchBody);
 
   return {
     index,

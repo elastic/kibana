@@ -15,12 +15,16 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiSpacer,
-  EuiRadioGroup,
   EuiCallOut,
+  EuiRange,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { sortedIndex } from 'lodash';
 import type { DocumentCountChartPoint } from './document_count_chart';
-import { RANDOM_SAMPLER_PROBABILITIES } from '../../../index_data_visualizer/constants/random_sampler';
+import {
+  RANDOM_SAMPLER_STEP,
+  RANDOM_SAMPLER_PROBABILITIES,
+} from '../../../index_data_visualizer/constants/random_sampler';
 import { TotalCountHeader } from './total_count_header';
 import type { DocumentCountStats } from '../../../../../common/types/field_stats';
 import { DocumentCountChart } from './document_count_chart';
@@ -83,118 +87,88 @@ export const DocumentCountContent: FC<Props> = ({
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <TotalCountHeader totalCount={totalCount} approximate={approximate} />
-        {approximate ? (
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-            <EuiPopover
-              id="dscSamplingOptions"
-              button={
-                <EuiToolTip
-                  content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
+        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+          <EuiPopover
+            id="dscSamplingOptions"
+            button={
+              <EuiToolTip
+                content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
+                  defaultMessage: 'Sampling options',
+                })}
+              >
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="gear"
+                  onClick={onShowSamplingOptions}
+                  data-test-subj="discoverSamplingOptionsToggle"
+                  aria-label={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
                     defaultMessage: 'Sampling options',
                   })}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    iconType="gear"
-                    onClick={onShowSamplingOptions}
-                    data-test-subj="discoverSamplingOptionsToggle"
-                    aria-label={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
-                      defaultMessage: 'Sampling options',
-                    })}
-                  />
-                </EuiToolTip>
-              }
-              isOpen={showSamplingOptionsPopover}
-              closePopover={closeSamplingOptions}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiPanel style={{ maxWidth: 400 }}>
-                <EuiFlexItem grow={true}>
-                  <EuiCallOut
-                    iconType="help"
-                    size="s"
-                    color={'primary'}
-                    title={i18n.translate('xpack.dataVisualizer.randomSamplerInfoCalloutMessage', {
-                      defaultMessage:
-                        'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for exact values without any sampling..',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiSpacer size="m" />
-                <EuiRadioGroup
-                  options={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
-                    id: `dv-random-sampler-option${d}`,
-                    label: `${d * 100}%`,
-                  }))}
-                  idSelected={radioIdSelected}
-                  onChange={(id) => onChange(id)}
                 />
-                {/* @TODO: remove */}
-                {/* <EuiFlexItem grow={true}>*/}
-                {/*  <EuiRange*/}
-                {/*    fullWidth*/}
-                {/*    min={RANDOM_SAMPLER_STEP}*/}
-                {/*    max={1}*/}
-                {/*    value={samplingProbability ?? 1}*/}
-                {/*    ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({*/}
-                {/*      value: d,*/}
-                {/*      label: d === 0.00001 || d === 0.05 || d >= 0.1 ? `${d * 100}%` : '',*/}
-                {/*    }))}*/}
-                {/*    showValue*/}
-                {/*    onChange={(e) => {*/}
-                {/*      const newProbability = Number(e.currentTarget.value);*/}
-                {/*      const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);*/}
-                {/*      const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];*/}
-                {/*      const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];*/}
-                {/*      const closestProbability =*/}
-                {/*        Math.abs(closestPrev - newProbability) <*/}
-                {/*        Math.abs(closestNext - newProbability)*/}
-                {/*          ? closestPrev*/}
-                {/*          : closestNext;*/}
-
-                {/*      if (setSamplingProbability) {*/}
-                {/*        setSamplingProbability(closestProbability);*/}
-                {/*      }*/}
-                {/*    }}*/}
-                {/*    showTicks*/}
-                {/*    showRange={false}*/}
-                {/*    step={RANDOM_SAMPLER_STEP}*/}
-                {/*  />*/}
-                {/* </EuiFlexItem>*/}
-              </EuiPanel>
-            </EuiPopover>
-            <EuiFlexItem>
-              {/* <EuiRange*/}
-              {/*  fullWidth*/}
-              {/*  min={RANDOM_SAMPLER_STEP}*/}
-              {/*  max={1}*/}
-              {/*  value={samplingProbability ?? 1}*/}
-              {/*  ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({*/}
-              {/*    value: d,*/}
-              {/*    label: d === 0.00001 || d === 0.05 || d >= 0.1 ? `${d * 100}%` : '',*/}
+              </EuiToolTip>
+            }
+            isOpen={showSamplingOptionsPopover}
+            closePopover={closeSamplingOptions}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiPanel style={{ maxWidth: 400 }}>
+              <EuiFlexItem grow={true}>
+                <EuiCallOut
+                  iconType="help"
+                  size="s"
+                  color={'primary'}
+                  title={i18n.translate('xpack.dataVisualizer.randomSamplerInfoCalloutMessage', {
+                    defaultMessage:
+                      'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for exact values without any sampling..',
+                  })}
+                />
+              </EuiFlexItem>
+              <EuiSpacer size="m" />
+              {/* <EuiRadioGroup*/}
+              {/*  options={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({*/}
+              {/*    id: `dv-random-sampler-option${d}`,*/}
+              {/*    label: `${d}%`,*/}
               {/*  }))}*/}
-              {/*  onChange={(e) => {*/}
-              {/*    const newProbability = Number(e.currentTarget.value);*/}
-              {/*    const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);*/}
-              {/*    const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];*/}
-              {/*    const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];*/}
-              {/*    const closestProbability =*/}
-              {/*      Math.abs(closestPrev - newProbability) < Math.abs(closestNext - newProbability)*/}
-              {/*        ? closestPrev*/}
-              {/*        : closestNext;*/}
-
-              {/*    if (setSamplingProbability) {*/}
-              {/*      setSamplingProbability(closestProbability);*/}
-              {/*    }*/}
-              {/*  }}*/}
-              {/*  showTicks*/}
-              {/*  showRange={false}*/}
-              {/*  step={RANDOM_SAMPLER_STEP}*/}
+              {/*  idSelected={radioIdSelected}*/}
+              {/*  onChange={(id) => onChange(id)}*/}
               {/* />*/}
-            </EuiFlexItem>
-          </EuiFlexItem>
-        ) : null}
+              {/* @TODO: remove*/}
+              <EuiFlexItem grow={true}>
+                <EuiRange
+                  fullWidth
+                  showValue
+                  showTicks
+                  showRange={false}
+                  min={RANDOM_SAMPLER_STEP}
+                  max={1 * 100}
+                  value={(samplingProbability ?? 1) * 100}
+                  ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
+                    value: d,
+                    label: d === 0.001 || d >= 10 ? `${d}%` : '',
+                  }))}
+                  onChange={(e) => {
+                    const newProbability = Number(e.currentTarget.value);
+                    const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
+                    const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
+                    const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
+                    const closestProbability =
+                      Math.abs(closestPrev - newProbability) <
+                      Math.abs(closestNext - newProbability)
+                        ? closestPrev
+                        : closestNext;
+
+                    if (setSamplingProbability) {
+                      setSamplingProbability(closestProbability / 100);
+                    }
+                  }}
+                  step={RANDOM_SAMPLER_STEP}
+                />
+              </EuiFlexItem>
+            </EuiPanel>
+          </EuiPopover>
+          <EuiFlexItem />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <DocumentCountChart
         chartPoints={chartPoints}
