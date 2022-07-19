@@ -124,6 +124,8 @@ export const DETECTION_ENGINE_EXCEPTION_OPERATORS: OperatorOption[] = [
   doesNotExistOperator,
   isInListOperator,
   isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 ];
 
 export const ALL_OPERATORS: OperatorOption[] = [
