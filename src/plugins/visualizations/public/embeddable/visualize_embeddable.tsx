@@ -54,6 +54,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -94,7 +95,9 @@ export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeIn
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
+    FilterableEmbeddable
 {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -186,6 +189,11 @@ export class VisualizeEmbeddable
 
   public getDescription() {
     return this.vis.description;
+  }
+
+  public getFilters() {
+    console.log('vis get filters');
+    return this.vis.data.searchSource?.getFields().filter ?? [];
   }
 
   public getInspectorAdapters = () => {

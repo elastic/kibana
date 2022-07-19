@@ -27,6 +27,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -103,7 +104,7 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -246,6 +247,17 @@ export class MapEmbeddable
 
   public getDescription() {
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  }
+
+  public getFilters() {
+    console.log('maps get filters');
+    let mapState: { filters?: Filter[] } = {};
+    try {
+      mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');
+    } catch (e) {
+      throw new Error('Unable to parse attribute mapStateJSON');
+    }
+    return mapState.filters ?? [];
   }
 
   public supportedTriggers(): string[] {

@@ -80,6 +80,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
+import { FiltersNotificationAction } from './application/actions/filters_notification_action';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -411,6 +412,10 @@ export class DashboardPlugin
       );
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+
+      const panelLevelFiltersAction = new FiltersNotificationAction(theme, unlinkFromLibraryAction);
+      uiActions.registerAction(panelLevelFiltersAction);
+      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersAction.id);
 
       const copyToDashboardAction = new CopyToDashboardAction(
         theme,

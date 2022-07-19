@@ -32,6 +32,7 @@ import {
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -213,7 +214,8 @@ export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
     ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>,
-    SelfStyledEmbeddable
+    SelfStyledEmbeddable,
+    FilterableEmbeddable
 {
   type = DOC_TYPE;
 
@@ -868,6 +870,14 @@ export class Embeddable
   public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
+  }
+
+  public getFilters() {
+    console.log('lens get filters');
+    if (!this.savedVis) {
+      throw new Error('savedVis is required for getMergedSearchContext');
+    }
+    return this.savedVis.state.filters;
   }
 
   public getSavedVis(): Readonly<Document | undefined> {

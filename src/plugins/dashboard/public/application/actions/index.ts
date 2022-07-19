@@ -23,5 +23,9 @@ export {
   LibraryNotificationAction,
   ACTION_LIBRARY_NOTIFICATION,
 } from './library_notification_action';
+export {
+  FiltersNotificationAction,
+  ACTION_FILTERS_NOTIFICATION,
+} from './filters_notification_action';
 export type { ExportContext } from './export_csv_action';
 export { ExportCSVAction, ACTION_EXPORT_CSV } from './export_csv_action';

@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
+// import { isFilterableEmbeddable, FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
@@ -127,6 +128,11 @@ export function PanelHeader({
   customizeTitle,
 }: PanelHeaderProps) {
   const description = getViewDescription(embeddable);
+  // console.log('Embeddable attributes:', embeddable.getInput().attributes);
+  // console.log('Embeddable filters:', embeddable.getInput().attributes?.state?.filters);
+  // if (isFilterableEmbeddable(embeddable)) {
+  //   embeddable.getFilters();
+  // }
   const showTitle = !hidePanelTitle && (!isViewMode || title);
   const showPanelBar =
     !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
