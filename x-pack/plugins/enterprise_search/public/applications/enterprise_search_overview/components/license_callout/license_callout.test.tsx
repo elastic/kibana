@@ -11,9 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPanel, EuiText } from '@elastic/eui';
-
-import { ManageLicenseButton } from '../../../shared/licensing';
+import { EuiPanel } from '@elastic/eui';
 
 import { LicenseCallout } from '.';
 

@@ -15,7 +15,6 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 
-import { ElasticsearchCard } from '../elasticsearch_card';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
@@ -47,9 +46,10 @@ describe('ProductSelector', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector {...props} isWorkplaceSearchAdmin={false} />);
 
-    expect(wrapper.find(ProductCard).last().prop('product')).toEqual(
-      { ...WORKPLACE_SEARCH_PLUGIN, URL: WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL }
-    );
+    expect(wrapper.find(ProductCard).last().prop('product')).toEqual({
+      ...WORKPLACE_SEARCH_PLUGIN,
+      URL: WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL,
+    });
   });
 
   describe('access checks when host is set', () => {
