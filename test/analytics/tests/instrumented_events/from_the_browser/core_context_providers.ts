@@ -8,8 +8,8 @@
 
 import expect from '@kbn/expect';
 import { Event } from '@kbn/core/public';
-import { KIBANA_LOADED_EVENT } from '@kbn/core/utils';
 import { FtrProviderContext } from '../../../services';
+import { KIBANA_LOADED_EVENT } from '@kbn/core/public/events';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
