@@ -38,6 +38,7 @@ import {
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
 } from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   ActionType,
   Rule,
@@ -324,7 +325,7 @@ export const RulesList = ({
   useEffect(() => {
     (async () => {
       try {
-        const result = await loadActionTypes({ http });
+        const result = await loadActionTypes({ http, featureId: AlertingConnectorFeatureId });
         const sortedResult = result
           .filter(({ id }) => actionTypeRegistry.has(id))
           .sort((a, b) => a.name.localeCompare(b.name));
