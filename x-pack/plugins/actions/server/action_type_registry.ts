@@ -130,7 +130,6 @@ export class ActionTypeRegistry {
             'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
-            ids: actionType.supportedFeatureIds.join(','),
           },
         })
       );
