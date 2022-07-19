@@ -24,7 +24,7 @@ beforeEach(() => {
 
 describe('getRuleExecutionLogRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedExecutionLogWithErrors: IExecutionLogResult = {
+  const mockedExecutionLog: IExecutionLogResult = {
     total: 374,
     data: [
       {
@@ -80,7 +80,7 @@ describe('getRuleExecutionLogRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_execution_log"`);
 
-    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLogWithErrors);
+    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLog);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
