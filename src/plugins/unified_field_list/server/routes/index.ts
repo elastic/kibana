@@ -12,20 +12,4 @@ import { initFieldStatsRoute } from './field_stats';
 
 export function defineRoutes(setup: CoreSetup<PluginStart>) {
   initFieldStatsRoute(setup);
-
-  // TODO: remove this temporary code
-  const router = setup.http.createRouter();
-  router.get(
-    {
-      path: '/api/unified_field_list/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
 }
