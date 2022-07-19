@@ -118,10 +118,21 @@ export function ChangeDataView({
   const [isTourOpen, setIsTourOpen] = useState(false);
 
   useEffect(() => {
-    if (showNewMenuTour && !isTourDismissed && !isHideAnnouncementSettingsOn) {
+    if (
+      showNewMenuTour &&
+      !isTourDismissed &&
+      !isHideAnnouncementSettingsOn &&
+      !isTextBasedLangSelected
+    ) {
       setIsTourOpen(true);
     }
-  }, [isHideAnnouncementSettingsOn, isTourDismissed, setIsTourOpen, showNewMenuTour]);
+  }, [
+    isHideAnnouncementSettingsOn,
+    isTextBasedLangSelected,
+    isTourDismissed,
+    setIsTourOpen,
+    showNewMenuTour,
+  ]);
 
   const onTourDismiss = () => {
     storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);
@@ -181,7 +192,7 @@ export function ChangeDataView({
 
   const getPanelItems = () => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
-    if (onAddField) {
+    if (onAddField && !isTextBasedLangSelected) {
       panelItems.push(
         <EuiContextMenuItem
           key="add"
@@ -402,7 +413,7 @@ export function ChangeDataView({
           isOpen={isPopoverOpen}
           closePopover={() => setPopoverIsOpen(false)}
           panelPaddingSize="none"
-          initialFocus={`#${searchListInputId}`}
+          initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : false}
           display="block"
           buffer={8}
         >

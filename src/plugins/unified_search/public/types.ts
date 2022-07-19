@@ -39,7 +39,8 @@ export interface UnifiedSearchStartDependencies {
  */
 export interface UnifiedSearchPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: <QT extends Query | AggregateQuery = Query>(
+  SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
+  AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
     props: StatefulSearchBarProps<QT>
   ) => React.ReactElement;
 }

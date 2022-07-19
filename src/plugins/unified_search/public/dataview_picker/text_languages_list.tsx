@@ -45,6 +45,7 @@ export default function TextBasedLanguagesList({
             size="s"
             css={css`
               vertical-align: middle;
+              cursor: pointer;
             `}
           />
         ),
