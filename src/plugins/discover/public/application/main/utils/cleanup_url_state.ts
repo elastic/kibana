@@ -31,5 +31,14 @@ export function cleanupUrlState(appStateFromUrl: AppStateUrl): AppState {
     // This allows the sort prop to be overwritten with the default sorting
     delete appStateFromUrl.sort;
   }
+
+  if (
+    appStateFromUrl?.rowsPerPage &&
+    !(typeof appStateFromUrl.rowsPerPage === 'number' && appStateFromUrl.rowsPerPage > 0)
+  ) {
+    // remove the param if it's invalid
+    delete appStateFromUrl.rowsPerPage;
+  }
+
   return appStateFromUrl as AppState;
 }

@@ -10,6 +10,7 @@ export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';

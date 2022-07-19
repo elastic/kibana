@@ -2898,8 +2898,6 @@
     "discover.advancedSettings.params.maxCellHeightTitle": "经典表中的最大单元格高度",
     "discover.advancedSettings.params.rowHeightText": "一行中允许的文本行数。值为 -1 时，会自动调整行高以适应内容。值为 0 时，会在单文本行中显示内容。",
     "discover.advancedSettings.params.rowHeightTitle": "Document Explorer 中的行高",
-    "discover.advancedSettings.sampleSizeText": "要在表中显示的行数目",
-    "discover.advancedSettings.sampleSizeTitle": "行数目",
     "discover.advancedSettings.searchOnPageLoadText": "控制在 Discover 首次加载时是否执行搜索。加载已保存搜索时，此设置无效。",
     "discover.advancedSettings.searchOnPageLoadTitle": "在页面加载时搜索",
     "discover.advancedSettings.sortDefaultOrderText": "在 Discover 应用中控制基于时间的数据视图的默认排序方向。",

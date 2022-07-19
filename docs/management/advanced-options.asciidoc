@@ -298,6 +298,9 @@ When enabled, removes the columns that are not in the new data view.
 [[discover-sample-size]]`discover:sampleSize`::
 Specifies the number of rows to display in the *Discover* table.
 
+[[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
+Specifies the number of rows to display per page in the *Discover* table.
+
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
 When disabled, *Discover* loads fields using the {es} search API's

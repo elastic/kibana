@@ -2896,8 +2896,6 @@
     "discover.advancedSettings.params.maxCellHeightTitle": "Hauteur de cellule maximale dans le tableau classique",
     "discover.advancedSettings.params.rowHeightText": "Nombre de sous-lignes à autoriser dans une ligne. La valeur -1 ajuste automatiquement la hauteur de ligne selon le contenu. La valeur 0 affiche le contenu en une seule ligne.",
     "discover.advancedSettings.params.rowHeightTitle": "Hauteur de ligne dans l'explorateur de documents",
-    "discover.advancedSettings.sampleSizeText": "Le nombre de lignes à afficher dans le tableau",
-    "discover.advancedSettings.sampleSizeTitle": "Nombre de lignes",
     "discover.advancedSettings.searchOnPageLoadText": "Détermine si une recherche est exécutée lors du premier chargement de Discover. Ce paramètre n'a pas d'effet lors du chargement d’une recherche enregistrée.",
     "discover.advancedSettings.searchOnPageLoadTitle": "Recherche au chargement de la page",
     "discover.advancedSettings.sortDefaultOrderText": "Détermine le sens de tri par défaut pour les vues de données temporelles dans l'application Discover.",

@@ -105,6 +105,7 @@ describe('getSavedSearch', () => {
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "rowHeight": undefined,
+        "rowsPerPage": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],

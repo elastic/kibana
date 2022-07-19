@@ -22,7 +22,13 @@ test('onSaveSearch', async () => {
       i18n: i18nServiceMock.create(),
     },
   } as unknown as DiscoverServices;
-  const stateMock = {} as unknown as GetStateReturn;
+  const stateMock = {
+    appStateContainer: {
+      getState: () => ({
+        rowsPerPage: 250,
+      }),
+    },
+  } as unknown as GetStateReturn;
 
   await onSaveSearch({
     indexPattern: indexPatternMock,

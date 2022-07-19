@@ -90,6 +90,10 @@ export interface AppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
 }
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
