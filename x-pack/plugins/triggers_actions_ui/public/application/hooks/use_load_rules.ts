@@ -8,7 +8,8 @@ import { useMemo, useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Rule, Pagination } from '../../types';
-import { loadRulesWithKueryFilter, LoadRulesProps } from '../lib/rule_api';
+import type { LoadRulesProps } from '../lib/rule_api';
+import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
 
 interface RuleState {

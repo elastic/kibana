@@ -8,7 +8,6 @@
 export { alertingFrameworkHealth } from './health';
 export type { LoadRuleAggregationsProps } from './aggregate_helpers';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
-export { loadRuleAggregationsWithKueryFilter } from './aggregate_kuery_filter';
 export { createRule } from './create';
 export { deleteRules } from './delete';
 export { disableRule, disableRules } from './disable';
@@ -20,7 +19,6 @@ export { muteRule, muteRules } from './mute';
 export { loadRuleTypes } from './rule_types';
 export type { LoadRulesProps } from './rules_helpers';
 export { loadRules } from './rules';
-export { loadRulesWithKueryFilter } from './rules_kuery_filter';
 export { loadRuleState } from './state';
 export type { LoadExecutionLogAggregationsProps } from './load_execution_log_aggregations';
 export { loadExecutionLogAggregations } from './load_execution_log_aggregations';
