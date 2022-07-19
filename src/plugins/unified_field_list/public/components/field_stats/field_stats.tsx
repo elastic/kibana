@@ -41,6 +41,7 @@ import { buildEsQuery, Query, Filter } from '@kbn/es-query';
 import type { BucketedAggregation, FieldStatsResponse } from '../../../common/types';
 import { FIELD_STATS_API_PATH } from '../../../common/constants';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
+import './field_stats.scss';
 
 interface State {
   isLoading: boolean;
@@ -213,7 +214,6 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
-        className="lnsFieldItem__buttonGroup"
         buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
@@ -388,8 +388,8 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
         {topValues.buckets.map((topValue) => {
           const formatted = formatter.convert(topValue.key);
           return (
-            // TODO: move styles next to this file
-            <div className="lnsFieldItem__topValue" key={topValue.key}>
+            // TODO: convert styles to `css` prop
+            <div className="unifiedFieldList__fieldStats__topValue" key={topValue.key}>
               <EuiFlexGroup
                 alignItems="stretch"
                 key={topValue.key}
@@ -423,7 +423,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiProgress
-                className="lnsFieldItem__topValueProgress"
+                className="unifiedFieldList__fieldStats__topValueProgress"
                 value={topValue.count / sampledValues!}
                 max={1}
                 size="s"
@@ -454,7 +454,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
             </EuiFlexGroup>
 
             <EuiProgress
-              className="lnsFieldItem__topValueProgress"
+              className="unifiedFieldList__fieldStats__topValueProgress"
               value={otherCount / sampledValues!}
               max={1}
               size="s"
