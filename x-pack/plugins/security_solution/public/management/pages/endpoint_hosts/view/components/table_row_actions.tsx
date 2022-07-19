@@ -19,7 +19,7 @@ export interface TableRowActionProps {
 
 export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const endpointActions = useEndpointActionItems(endpointMetadata);
+  const endpointActions = useEndpointActionItems(endpointMetadata, { isEndpointList: true });
 
   const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
