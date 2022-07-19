@@ -29,29 +29,14 @@ describe('rows per page', () => {
 
   describe('getDefaultRowsPerPage', () => {
     it('should return a value from settings', () => {
-      expect(getDefaultRowsPerPage(discoverServiceMock)).toEqual(150);
+      expect(getDefaultRowsPerPage(discoverServiceMock.uiSettings)).toEqual(150);
       expect(discoverServiceMock.uiSettings.get).toHaveBeenCalledWith(SAMPLE_ROWS_PER_PAGE_SETTING);
     });
 
     it('should return a default value', () => {
-      expect(
-        getDefaultRowsPerPage({
-          ...discoverServiceMock,
-          uiSettings: { ...discoverServiceMock.uiSettings, get: jest.fn() },
-        })
-      ).toEqual(100);
-    });
-
-    it('should return an overridden default value', () => {
-      expect(
-        getDefaultRowsPerPage(
-          {
-            ...discoverServiceMock,
-            uiSettings: { ...discoverServiceMock.uiSettings, get: jest.fn() },
-          },
-          75
-        )
-      ).toEqual(75);
+      expect(getDefaultRowsPerPage({ ...discoverServiceMock.uiSettings, get: jest.fn() })).toEqual(
+        100
+      );
     });
   });
 });

@@ -14,18 +14,13 @@ import { DiscoverServices } from '../build_services';
 export const getRowsPerPageOptions = (currentRowsPerPage?: number): number[] => {
   return sortBy(
     uniq(
-      currentRowsPerPage ? [...ROWS_PER_PAGE_OPTIONS, currentRowsPerPage] : ROWS_PER_PAGE_OPTIONS
+      typeof currentRowsPerPage === 'number' && currentRowsPerPage > 0
+        ? [...ROWS_PER_PAGE_OPTIONS, currentRowsPerPage]
+        : ROWS_PER_PAGE_OPTIONS
     )
   );
 };
 
-export const getDefaultRowsPerPage = (
-  services: DiscoverServices,
-  defaultOverride?: number
-): number => {
-  return (
-    parseInt(services.uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) ||
-    defaultOverride ||
-    DEFAULT_ROWS_PER_PAGE
-  );
+export const getDefaultRowsPerPage = (uiSettings: DiscoverServices['uiSettings']): number => {
+  return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
 };

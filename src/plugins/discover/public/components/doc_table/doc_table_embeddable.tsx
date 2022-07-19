@@ -41,7 +41,10 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     changePageIndex,
     changePageSize,
   } = usePager({
-    initialPageSize: Math.min(props.rowsPerPageState ?? 50, MAX_ROWS_PER_PAGE_OPTION),
+    initialPageSize:
+      typeof props.rowsPerPageState === 'number' && props.rowsPerPageState > 0
+        ? Math.min(props.rowsPerPageState, MAX_ROWS_PER_PAGE_OPTION)
+        : 50,
     totalItems: props.rows.length,
   });
   const showPagination = totalPages !== 0;

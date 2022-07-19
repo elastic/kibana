@@ -262,8 +262,14 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const defaultRowsPerPage = useMemo(() => getDefaultRowsPerPage(services), [services]);
-  const currentPageSize = rowsPerPageState ?? defaultRowsPerPage;
+  const defaultRowsPerPage = useMemo(
+    () => getDefaultRowsPerPage(services.uiSettings),
+    [services.uiSettings]
+  );
+  const currentPageSize =
+    typeof rowsPerPageState === 'number' && rowsPerPageState > 0
+      ? rowsPerPageState
+      : defaultRowsPerPage;
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: currentPageSize,
