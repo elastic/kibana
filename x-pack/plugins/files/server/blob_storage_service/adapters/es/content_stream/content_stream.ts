@@ -6,13 +6,6 @@
  */
 import cuid from 'cuid';
 
-// TODO: cbor-x uses ESM modules and attempts to load a dependency when imported.
-//       When running in a Jest test environment detects "window" and causes
-//       a warning to be printed to the console: "For browser usage, directly use cbor-x/decode or cbor-x/encode modules..."
-//       we should clean this up.
-//       Also opened the following issue: https://github.com/kriszyp/cbor-x/issues/36
-import { encode } from 'cbor-x';
-
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -20,6 +13,15 @@ import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
+
+// TODO: cbor-x uses ESM modules and attempts to load a dependency when imported.
+//       When running in a Jest test environment detects "window" and causes
+//       a warning to be printed to the console: "For browser usage, directly use cbor-x/decode or cbor-x/encode modules..."
+//       we should clean this up.
+//       Also opened the following issue: https://github.com/kriszyp/cbor-x/issues/36
+// TODO: use import once type declarations for the lib are fixed
+// eslint-disable-next-line
+const { encode } = require('cbor-x');
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.

@@ -6,10 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { encode } from 'cbor-x';
 import { set } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+// TODO: use import once type declarations for the lib are fixed
+// eslint-disable-next-line
+const { encode } = require('cbor-x');
 
 const toBase64 = (str: string) => Buffer.from(str).toString('base64');
 
