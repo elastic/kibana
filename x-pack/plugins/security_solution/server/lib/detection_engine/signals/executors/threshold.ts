@@ -173,7 +173,7 @@ export const thresholdExecutor = async ({
     };
 
     const createdAlerts = createdItems.map((alert) => {
-      const { _id, _index, ...source } = alert as { _id: string; _index: string };
+      const { _id, _index, ...source } = alert;
       return {
         _id,
         _index,
