@@ -12,12 +12,11 @@ import type {
   MetricsService,
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
-} from './metrics_service'; // implemenetation, to be exported from `@kbn/core-metrics-server-internal`
-// import { collectorMock } from './collectors/mocks'; // public mock to be exported from `@kbn/core-metrics-collectors-server-mocks`
+} from './metrics_service';
 import {
   mocked as eventLoopDelaysMonitorMock,
   collectorMock,
-} from '@kbn/core-metrics-collectors-server-mocks'; // public mock to be exported from `@kbn/core-metrics-collectors-server-mocks`
+} from '@kbn/core-metrics-collectors-server-mocks';
 import { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 
 const createInternalSetupContractMock = () => {

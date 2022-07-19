@@ -8,7 +8,7 @@
 
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
-import { collectorMock } from '../collectors/mocks';
+import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 function createBaseOpsMetrics(): OpsMetrics {
   const mockProcess = collectorMock.createOpsProcessMetrics();
