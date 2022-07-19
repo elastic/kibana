@@ -15,7 +15,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <h3
-        className="euiTitle css-1c9cwui-euiTitle-xs"
+        className="euiTitle emotion-euiTitle-xs"
       >
         Selected layer
       </h3>
@@ -39,7 +39,7 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <h3
-        className="euiTitle css-1c9cwui-euiTitle-xs"
+        className="euiTitle emotion-euiTitle-xs"
       >
         Grouped element
       </h3>

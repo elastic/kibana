@@ -7,7 +7,15 @@
 
 import './table_basic.scss';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
-import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
+import React, {
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useContext,
+  useEffect,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -72,6 +80,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
     undefined
   );
+
+  useLayoutEffect(() => {
+    // Temporary solution: DataGrid should provide onRender callback
+    setTimeout(() => {
+      props.renderComplete();
+    }, 300);
+  }, [props]);
 
   useEffect(() => {
     setPagination(

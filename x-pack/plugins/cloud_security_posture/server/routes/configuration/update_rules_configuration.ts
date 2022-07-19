@@ -21,7 +21,7 @@ import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import { CspAppContext } from '../../plugin';
-import type { CspRuleType, CspRulesConfigSchema } from '../../../common/schemas';
+import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   UPDATE_RULES_CONFIG_ROUTE_PATH,
@@ -52,8 +52,8 @@ export const getPackagePolicy = async (
 export const getCspRules = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CspRuleType, unknown>> => {
-  return soClient.find<CspRuleType>({
+): Promise<SavedObjectsFindResponse<CspRule, unknown>> => {
+  return soClient.find<CspRule>({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: packagePolicy.id,
@@ -66,8 +66,8 @@ export const getCspRules = (
 };
 
 export const createRulesConfig = (
-  cspRules: SavedObjectsFindResponse<CspRuleType>
-): CspRulesConfigSchema => {
+  cspRules: SavedObjectsFindResponse<CspRule>
+): CspRulesConfiguration => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const config = {
     data_yaml: {
@@ -81,7 +81,7 @@ export const createRulesConfig = (
   return config;
 };
 
-export const convertRulesConfigToYaml = (config: CspRulesConfigSchema): string => {
+export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string => {
   return yaml.safeDump(config);
 };
 
@@ -128,7 +128,10 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
   router.post(
     {
       path: UPDATE_RULES_CONFIG_ROUTE_PATH,
-      validate: { body: configurationUpdateInputSchema },
+      validate: { body: updateRulesConfigurationBodySchema },
+      options: {
+        tags: ['access:cloud-security-posture-all'],
+      },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {
@@ -174,7 +177,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
     }
   );
 
-export const configurationUpdateInputSchema = rt.object({
+export const updateRulesConfigurationBodySchema = rt.object({
   /**
    * CSP integration instance ID
    */

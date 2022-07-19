@@ -1306,7 +1306,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
@@ -2626,7 +2626,15 @@
               },
               "[] | undefined; fieldsFromSource?: ",
               "Fields",
-              " | undefined; index?: string | undefined; searchAfter?: ",
+              " | undefined; index?: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; searchAfter?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3226,7 +3234,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; createRelativeFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3240,7 +3250,9 @@
               "RangeFilter",
               " | ",
               "ScriptedRangeFilter",
-              " | MatchAllRangeFilter | undefined; getBounds: () => ",
+              " | ",
+              "MatchAllRangeFilter",
+              " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4907,7 +4919,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">; }"
         ],
@@ -5111,7 +5123,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly id: string; readonly type: \"visualization\"; getExplicitInput: () => ",
+          "{ readonly type: \"visualization\"; readonly id: string; render: (domNode: HTMLElement) => Promise<void>; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5143,7 +5155,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; render: (domNode: HTMLElement) => Promise<void>; updateInput: (changes: Partial<",
+          "> | undefined; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5151,7 +5163,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; getInspectorAdapters: () => ",
+          ">) => void; reportsEmbeddableLoad: () => boolean; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -5167,7 +5179,7 @@
             "section": "def-public.OverlayRef",
             "text": "OverlayRef"
           },
-          " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerRender: () => void; onContainerError: (error: ",
+          " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerData: () => void; onContainerRender: () => void; onContainerError: (error: ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -5175,7 +5187,15 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => void; renderError: (domNode: HTMLElement, error: string | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ErrorLike",
+            "text": "ErrorLike"
+          },
+          ") => () => boolean; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5327,7 +5347,43 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ create: (input: ",
+          "{ readonly type: \"visualization\"; inject: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ", references: ",
+          "SavedObjectReference",
+          "[]) => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; extract: (_state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableStateWithType",
+            "text": "EmbeddableStateWithType"
+          },
+          "; references: ",
+          "SavedObjectReference",
+          "[]; }; create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5387,7 +5443,7 @@
           "VisualizeEmbeddable",
           " | ",
           "DisabledLabEmbeddable",
-          " | undefined>; readonly type: \"visualization\"; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          " | undefined>; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5439,43 +5495,7 @@
             "section": "def-public.SavedObjectMetaData",
             "text": "SavedObjectMetaData"
           },
-          "<VisualizationAttributes>; extract: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ") => { state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; references: ",
-          "SavedObjectReference",
-          "[]; }; inject: (_state: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          ", references: ",
-          "SavedObjectReference",
-          "[]) => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableStateWithType",
-            "text": "EmbeddableStateWithType"
-          },
-          "; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
+          "<VisualizationAttributes>; getCurrentAppId: () => Promise<string | undefined>; checkTitle: (props: ",
           {
             "pluginId": "savedObjects",
             "scope": "public",
@@ -6084,7 +6104,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined) => { id?: string | undefined; params?: Record<string, any> | undefined; } | undefined"
         ],
@@ -6148,7 +6168,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined"
             ],
@@ -6247,7 +6267,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
@@ -6767,7 +6787,15 @@
               },
               "[] | undefined; fieldsFromSource?: ",
               "Fields",
-              " | undefined; index?: string | undefined; searchAfter?: ",
+              " | undefined; index?: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; searchAfter?: ",
               {
                 "pluginId": "data",
                 "scope": "common",

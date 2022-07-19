@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { Ping } from '../../../../../common/runtime_types';
 import { useSelectedLocation } from './hooks/use_selected_location';
 
@@ -16,13 +17,19 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
   const selectedLocation = useSelectedLocation();
   const isBrowserType = ping.monitor.type === 'browser';
 
+  const theme = useTheme();
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         {ping.monitor.status === 'up' ? (
-          <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
+          <EuiBadge color={theme.eui.euiColorVis0}>
+            {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
+          </EuiBadge>
         ) : ping.monitor.status === 'up' ? (
-          <EuiBadge color="danger">{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
+          <EuiBadge color={theme.eui.euiColorVis9}>
+            {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
+          </EuiBadge>
         ) : (
           <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
         )}

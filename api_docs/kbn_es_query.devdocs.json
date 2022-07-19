@@ -2921,7 +2921,9 @@
             "section": "def-common.KueryQueryOptions",
             "text": "KueryQueryOptions"
           },
-          " | undefined, context?: Record<string, any> | undefined) => ",
+          " | undefined, context?: ",
+          "KqlContext",
+          " | undefined) => ",
           "QueryDslQueryContainer"
         ],
         "path": "packages/kbn-es-query/src/kuery/index.ts",
@@ -2959,7 +2961,9 @@
                 "section": "def-common.KueryQueryOptions",
                 "text": "KueryQueryOptions"
               },
-              " | undefined, context?: Record<string, any> | undefined]"
+              " | undefined, context?: ",
+              "KqlContext",
+              " | undefined]"
             ],
             "path": "packages/kbn-es-query/src/kuery/index.ts",
             "deprecated": false,

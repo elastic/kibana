@@ -9,7 +9,7 @@ import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import {
+import type {
   AuthenticationsEdges,
   AuthenticationHit,
   AuthenticationBucket,

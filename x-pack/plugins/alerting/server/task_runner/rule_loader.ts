@@ -8,7 +8,7 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -127,7 +127,7 @@ export function getFakeKibanaRequest(
 
   const path = addSpaceIdToPath('/', spaceId);
 
-  const fakeRequest = KibanaRequest.from({
+  const fakeRequest = CoreKibanaRequest.from({
     headers: requestHeaders,
     path: '/',
     route: { settings: {} },

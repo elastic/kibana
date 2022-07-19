@@ -647,7 +647,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -779,7 +779,7 @@
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
               },
-              "; }"
+              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
@@ -1331,6 +1331,20 @@
         "description": [],
         "signature": [
           "\"fields:popularLimit\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

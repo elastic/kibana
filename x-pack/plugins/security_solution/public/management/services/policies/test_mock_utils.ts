@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 
 export const sendGetEndpointSpecificPackagePoliciesMock = async (
   params: {

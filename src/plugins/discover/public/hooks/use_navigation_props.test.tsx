@@ -63,7 +63,8 @@ describe('useNavigationProps', () => {
   test('should provide valid breadcrumb for single doc page from main view', () => {
     const { result, history } = render();
 
-    result.current.singleDocProps.onClick?.();
+    // @ts-expect-error
+    result.current.singleDocProps.onClick();
     expect(history.location.pathname).toEqual(getSingeDocRoute());
     expect(history.location.search).toEqual(`?id=${defaultProps.rowId}`);
     expect(history.location.state?.breadcrumb).toEqual(`#/${getSearch()}`);
@@ -72,7 +73,8 @@ describe('useNavigationProps', () => {
   test('should provide valid breadcrumb for context page from main view', () => {
     const { result, history } = render();
 
-    result.current.surrDocsProps.onClick?.();
+    // @ts-expect-error
+    result.current.surrDocsProps.onClick();
     expect(history.location.pathname).toEqual(getContextRoute());
     expect(history.location.search).toEqual(
       `?${getContextHash(defaultProps.columns, filterManager)}`

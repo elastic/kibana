@@ -168,7 +168,7 @@ function ObservabilityActions({
     setActionsPopover((current) => (current ? null : id));
   }, []);
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
@@ -201,7 +201,7 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      ...(casePermissions?.crud
+      ...(userCasesPermissions.create && userCasesPermissions.read
         ? [
             <EuiContextMenuItem
               data-test-subj="add-to-existing-case-action"
@@ -246,7 +246,8 @@ function ObservabilityActions({
       ],
     ];
   }, [
-    casePermissions?.crud,
+    userCasesPermissions.create,
+    userCasesPermissions.read,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,
@@ -325,13 +326,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     timelines,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
     storage.get(stateStorageKey)
   );
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
     ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
@@ -414,7 +416,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     return {
       appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
-      casePermissions,
+      casePermissions: userCasesPermissions,
       type,
       columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
@@ -432,7 +434,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: kuery ?? '',
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert, observabilityRuleTypeRegistry }),
       rowRenderers: NO_ROW_RENDER,
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
@@ -463,7 +465,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
     };
   }, [
-    casePermissions,
+    userCasesPermissions,
     tGridState?.columns,
     tGridState?.sort,
     deletedEventIds,
@@ -471,6 +473,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     hasAlertsCrudPermissions,
     indexNames,
     itemsPerPage,
+    observabilityRuleTypeRegistry,
     onStateChange,
     kuery,
     rangeFrom,
@@ -480,7 +483,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return (
     <>

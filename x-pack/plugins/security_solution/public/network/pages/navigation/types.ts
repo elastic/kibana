@@ -6,16 +6,16 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
-import { NarrowDateRange } from '../../../common/components/ml/types';
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { NarrowDateRange } from '../../../common/components/ml/types';
+import type { ESTermQuery } from '../../../../common/typed_json';
 
-import { NavTab } from '../../../common/components/navigation/types';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { networkModel } from '../../store';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { NavTab } from '../../../common/components/navigation/types';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { networkModel } from '../../store';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-import { SetAbsoluteRangeDatePicker } from '../types';
-import { DocValueFields } from '../../../common/containers/source';
+import type { SetAbsoluteRangeDatePicker } from '../types';
+import type { DocValueFields } from '../../../common/containers/source';
 
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;

@@ -130,7 +130,8 @@ function getExpressionForLayer(
           indexPattern,
           layer,
           uiSettings,
-          orderedColumnIds
+          orderedColumnIds,
+          operationDefinitionMap
         );
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(

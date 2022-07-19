@@ -6,7 +6,8 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
@@ -14,11 +15,14 @@ import { HostStatus } from '../../../../common/endpoint/types';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
-  { defaultMessage: 'The current item does not support endpoint response actions' }
+  {
+    defaultMessage:
+      'Add the Endpoint and Cloud Security integration via Elastic Agent to enable this feature',
+  }
 );
 export const HOST_ENDPOINT_UNENROLLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
-  { defaultMessage: 'Host is no longer enrolled with endpoint security' }
+  { defaultMessage: 'Host is no longer enrolled with the Endpoint and Cloud Security integration' }
 );
 export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
@@ -53,7 +57,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       // or,
       // the Host status is `unenrolled`
       if (
-        (error && error.body.statusCode === 404) ||
+        (error && error.body?.statusCode === 404) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
         return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];

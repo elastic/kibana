@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
+import type { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
 export const isPolicyOutOfDate = (
   reported: HostMetadata['Endpoint']['policy']['applied'],

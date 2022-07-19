@@ -7,11 +7,11 @@
 
 import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
-import { Store, Middleware, Dispatch } from 'redux';
-import { BBox } from 'rbush';
-import { Provider } from 'react-redux';
-import { ResolverAction } from './store/actions';
-import {
+import type { Store, Middleware, Dispatch } from 'redux';
+import type { BBox } from 'rbush';
+import type { Provider } from 'react-redux';
+import type { ResolverAction } from './store/actions';
+import type {
   ResolverNode,
   ResolverRelatedEvents,
   ResolverEntityIndex,
@@ -20,7 +20,7 @@ import {
   NewResolverTree,
   ResolverSchema,
 } from '../../common/endpoint/types';
-import { Tree } from '../../common/endpoint/generate_data';
+import type { Tree } from '../../common/endpoint/generate_data';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.

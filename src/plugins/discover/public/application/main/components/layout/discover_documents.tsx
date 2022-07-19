@@ -24,6 +24,7 @@ import {
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
@@ -49,6 +50,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc,
   state,
   stateContainer,
+  onFieldEdited,
 }: {
   documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
@@ -59,10 +61,11 @@ function DiscoverDocumentsComponent({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
+  onFieldEdited: () => void;
 }) {
   const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
+  const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
@@ -83,8 +86,8 @@ function DiscoverDocumentsComponent({
 
   const onResize = useCallback(
     (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...state.grid } || {};
-      const newColumns = { ...grid.columns } || {};
+      const grid = { ...(state.grid || {}) };
+      const newColumns = { ...(grid.columns || {}) };
       newColumns[colSettings.columnId] = {
         width: colSettings.width,
       };
@@ -92,6 +95,13 @@ function DiscoverDocumentsComponent({
       stateContainer.setAppState({ grid: newGrid });
     },
     [stateContainer, state]
+  );
+
+  const onUpdateRowsPerPage = useCallback(
+    (rowsPerPage: number) => {
+      stateContainer.setAppState({ rowsPerPage });
+    },
+    [stateContainer]
   );
 
   const onSort = useCallback(
@@ -137,7 +147,7 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       {isLegacy && rows && rows.length && (
         <>
-          <DocumentExplorerCallout />
+          {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized
             columns={columns}
             indexPattern={indexPattern}
@@ -158,9 +168,11 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <>
-          <DiscoverTourProvider>
-            <DocumentExplorerUpdateCallout />
-          </DiscoverTourProvider>
+          {!hideAnnouncements && (
+            <DiscoverTourProvider>
+              <DocumentExplorerUpdateCallout />
+            </DiscoverTourProvider>
+          )}
           <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
@@ -185,6 +197,9 @@ function DiscoverDocumentsComponent({
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              rowsPerPageState={state.rowsPerPage}
+              onUpdateRowsPerPage={onUpdateRowsPerPage}
+              onFieldEdited={onFieldEdited}
             />
           </div>
         </>

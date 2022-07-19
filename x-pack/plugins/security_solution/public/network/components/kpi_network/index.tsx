@@ -13,7 +13,7 @@ import { NetworkKpiNetworkEvents } from './network_events';
 import { NetworkKpiTlsHandshakes } from './tls_handshakes';
 import { NetworkKpiUniqueFlows } from './unique_flows';
 import { NetworkKpiUniquePrivateIps } from './unique_private_ips';
-import { NetworkKpiProps } from './types';
+import type { NetworkKpiProps } from './types';
 
 export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (

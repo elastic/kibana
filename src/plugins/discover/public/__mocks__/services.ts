@@ -15,7 +15,9 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  HIDE_ANNOUNCEMENTS,
 } from '../../common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
@@ -66,8 +68,12 @@ export const discoverServiceMock = {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
+      } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+        return 150;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
+      } else if (key === HIDE_ANNOUNCEMENTS) {
+        return false;
       }
     }),
     isDefault: (key: string) => {
@@ -76,6 +82,11 @@ export const discoverServiceMock = {
   },
   http: {
     basePath: '/',
+  },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: () => true,
+    },
   },
   dataViewFieldEditor: {
     openEditor: jest.fn(),

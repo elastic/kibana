@@ -37,7 +37,7 @@ describe('DatastreamPipelines', () => {
 
     const result = renderer.render(
       <PackagePolicyEditorDatastreamPipelines
-        dataStream={{ dataset: 'test', type: 'logs' }}
+        packageInputStream={{ data_stream: { dataset: 'test', type: 'logs' } }}
         packageInfo={
           {
             version: '1.0.0',
@@ -62,7 +62,7 @@ describe('DatastreamPipelines', () => {
 
     const result = renderer.render(
       <PackagePolicyEditorDatastreamPipelines
-        dataStream={{ dataset: 'test', type: 'logs' }}
+        packageInputStream={{ data_stream: { dataset: 'test', type: 'logs' } }}
         packageInfo={
           {
             version: '1.0.0',

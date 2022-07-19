@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { shallow, render } from 'enzyme';
+import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+
 import { KibanaPageTemplate } from './page_template';
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 import { NoDataPageProps } from './no_data_page';
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',

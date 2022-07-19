@@ -33,6 +33,8 @@ export const useLinkedSearchUpdates = (
         const searchSourceParent = savedSearch.searchSource;
         const searchSourceGrandparent = searchSourceParent?.getParent();
         const currentIndex = searchSourceParent?.getField('index');
+        visInstance.savedSearch = undefined;
+        visInstance.vis.data.savedSearchId = undefined;
 
         searchSource.setField('index', currentIndex);
         searchSource.setParent(searchSourceGrandparent);
