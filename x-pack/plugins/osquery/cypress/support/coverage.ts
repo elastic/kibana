@@ -16,6 +16,7 @@ const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
+
 /**
  * Sends collected code coverage object to the backend code
  * via "cy.task".
@@ -50,7 +51,7 @@ const filterSupportFilesFromCoverage = (totalCoverage: any) => {
   const supportFile = Cypress.config('supportFile');
 
   /** @type {string} Cypress run-time config has the support folder string */
-  // @ts-ignore
+    // @ts-ignore
   const supportFolder = Cypress.config('supportFolder');
 
   const isSupportFile = (filename: string) => filename === supportFile;
@@ -69,7 +70,6 @@ const filterSupportFilesFromCoverage = (totalCoverage: any) => {
       filename.startsWith(supportFolder)
     );
   }
-
   return coverage;
 };
 
@@ -207,7 +207,6 @@ const registerHooks = () => {
               return;
             }
           }
-
           sendCoverage(coverage, 'backend');
         });
     }
@@ -241,7 +240,6 @@ const registerHooks = () => {
         'coverage report folder': coverageReportFolder,
       }));
       logInstance.end();
-
       return coverageReportFolder;
     });
   });
