@@ -124,7 +124,7 @@ import { DemoPlugin } from './plugin';
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-  });
+  }),
 }
 
 export const plugin = (initContext: PluginInitializerContext) => new DemoPlugin(initContext);
