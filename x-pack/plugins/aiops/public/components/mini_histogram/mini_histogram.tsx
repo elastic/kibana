@@ -46,7 +46,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, label }) => {
       <Chart>
         <Settings theme={theme} showLegend={false} />
         <BarSeries
-          id="Other"
+          id="doc_count_overall"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}

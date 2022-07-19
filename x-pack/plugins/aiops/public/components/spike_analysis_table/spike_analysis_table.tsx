@@ -104,7 +104,12 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
     const itemCount = changePointData?.length ?? 0;
     return {
-      pageOfItems: changePointData?.slice(pageStart, pageStart + pageSize),
+      pageOfItems: changePointData
+        // Temporary default sorting by ascending pValue until we add native table sorting
+        ?.sort((a, b) => {
+          return (a?.pValue ?? 1) - (b?.pValue ?? 0);
+        })
+        .slice(pageStart, pageStart + pageSize),
       pagination: {
         pageIndex,
         pageSize,
@@ -118,10 +123,7 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
     <EuiBasicTable
       compressed
       columns={columns}
-      // Temporary default sorting by ascending pValue until we add native table sorting
-      items={pageOfItems.sort((a, b) => {
-        return (a?.pValue ?? 1) - (b?.pValue ?? 0);
-      })}
+      items={pageOfItems}
       noItemsMessage={noDataText}
       onChange={onChange}
       pagination={pagination}

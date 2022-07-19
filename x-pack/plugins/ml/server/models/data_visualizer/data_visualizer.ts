@@ -114,7 +114,6 @@ type BatchStats =
   | DocumentCountStats
   | FieldExamples;
 
-// export for re-use by transforms plugin
 export class DataVisualizer {
   private _asCurrentUser: IScopedClusterClient['asCurrentUser'];
 
