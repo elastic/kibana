@@ -414,7 +414,9 @@ export class Server {
       key4: 'start-time',
       value4: ups.start!.end - ups.start!.start,
       // backwards compatibility
-      uptime_per_step: this.uptimePerStep,
+      meta: {
+        uptime_per_step: this.uptimePerStep,
+      },
     });
 
     return this.coreStart;
