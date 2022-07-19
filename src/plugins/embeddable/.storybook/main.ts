@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+// eslint-disable-next-line import/no-default-export
+export { defaultConfig as default } from '@kbn/storybook';
