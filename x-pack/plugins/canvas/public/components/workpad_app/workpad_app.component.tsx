@@ -47,7 +47,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad })
 
   const commit = interactivePageLayout.current || (() => {});
 
-  const untitledWorkpadLabel = getUntitledWorkpadLabel();
+  const untitledWorkpadLabel = useMemo(() => getUntitledWorkpadLabel(), []);
 
   return (
     <div className="canvasLayout">
