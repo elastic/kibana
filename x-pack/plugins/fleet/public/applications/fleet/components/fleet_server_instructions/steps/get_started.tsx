@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import { useLink } from '../../../hooks';
 
@@ -97,7 +98,11 @@ const GettingStartedStepContent: React.FunctionComponent<{
 
       <EuiForm onSubmit={quickStartCreateForm.submit}>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              max-width: 100%;
+            `}
+          >
             <FleetServerHostComboBox
               fleetServerHost={fleetServerHost}
               fleetServerHostSettings={fleetServerHostSettings}
