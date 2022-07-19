@@ -31,36 +31,49 @@ export function DependencyDetailView({
 
   const apmRouter = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: DependenciesInventoryTitle,
-      href: apmRouter.link('/dependencies/inventory', {
-        query: {
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-    {
-      title: dependencyName,
-      href: apmRouter.link('/dependencies', {
-        query: {
-          dependencyName,
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: DependenciesInventoryTitle,
+        href: apmRouter.link('/dependencies/inventory', {
+          query: {
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+      {
+        title: dependencyName,
+        href: apmRouter.link('/dependencies', {
+          query: {
+            dependencyName,
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+    ],
+    [
+      apmRouter,
+      comparisonEnabled,
+      dependencyName,
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+    ]
+  );
   return <DependencyDetailTemplate>{children}</DependencyDetailTemplate>;
 }

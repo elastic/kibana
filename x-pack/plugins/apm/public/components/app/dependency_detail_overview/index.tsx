@@ -30,26 +30,39 @@ export function DependencyDetailOverview() {
 
   const apmRouter = useApmRouter();
 
-  useBreadcrumb([
-    {
-      title: i18n.translate(
-        'xpack.apm.dependencyDetailOverview.breadcrumbTitle',
-        { defaultMessage: 'Overview' }
-      ),
-      href: apmRouter.link('/dependencies/overview', {
-        query: {
-          dependencyName,
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
-      }),
-    },
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: i18n.translate(
+          'xpack.apm.dependencyDetailOverview.breadcrumbTitle',
+          { defaultMessage: 'Overview' }
+        ),
+        href: apmRouter.link('/dependencies/overview', {
+          query: {
+            dependencyName,
+            rangeFrom,
+            rangeTo,
+            refreshInterval,
+            refreshPaused,
+            environment,
+            kuery,
+            comparisonEnabled,
+          },
+        }),
+      },
+    ],
+    [
+      apmRouter,
+      comparisonEnabled,
+      dependencyName,
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+    ]
+  );
 
   return (
     <>

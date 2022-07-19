@@ -116,30 +116,33 @@ export function ServiceGroupTemplate({
 
   const tabs = useTabs(serviceGroupContextTab);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
-  useBreadcrumb([
-    {
-      title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
-        defaultMessage: 'Services',
-      }),
-      href: serviceGroupsLink,
-    },
-    ...(selectedTab
-      ? [
-          ...(serviceGroupName
-            ? [
-                {
-                  title: serviceGroupName,
-                  href: router.link('/services', { query }),
-                },
-              ]
-            : []),
-          {
-            title: selectedTab.label,
-            href: selectedTab.href,
-          } as { title: string; href: string },
-        ]
-      : []),
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+          defaultMessage: 'Services',
+        }),
+        href: serviceGroupsLink,
+      },
+      ...(selectedTab
+        ? [
+            ...(serviceGroupName
+              ? [
+                  {
+                    title: serviceGroupName,
+                    href: router.link('/services', { query }),
+                  },
+                ]
+              : []),
+            {
+              title: selectedTab.label,
+              href: selectedTab.href,
+            } as { title: string; href: string },
+          ]
+        : []),
+    ],
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
+  );
   return (
     <ApmMainTemplate
       pageTitle={isServiceGroupsEnabled ? serviceGroupsPageTitle : pageTitle}
