@@ -45,7 +45,7 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
   const handleContinueClick = () => {
     fleetStatus.forceDisplayInstructions = false;
-    flyoutContext.openEnrollmentFlyout({ flyoutMode: 'managed' });
+    flyoutContext.openEnrollmentFlyout();
   };
 
   return isFleetServerReady ? (

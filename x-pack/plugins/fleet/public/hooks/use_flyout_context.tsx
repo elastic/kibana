@@ -7,13 +7,10 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
-import type { FlyoutMode } from '../components/agent_enrollment_flyout/types';
-
 const agentFlyoutContext = createContext<
   | {
-      defaultMode: FlyoutMode;
       isEnrollmentFlyoutOpen: boolean;
-      openEnrollmentFlyout: (args?: { flyoutMode: FlyoutMode }) => void;
+      openEnrollmentFlyout: () => void;
       closeEnrollmentFlyout: () => void;
       isFleetServerFlyoutOpen: boolean;
       openFleetServerFlyout: () => void;
@@ -23,17 +20,14 @@ const agentFlyoutContext = createContext<
 >(undefined);
 
 export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => {
-  const [defaultMode, setDefaultMode] = useState<FlyoutMode>('standalone');
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [isFleetServerFlyoutOpen, setIsFleetServerFlyoutOpen] = useState(false);
 
   return (
     <agentFlyoutContext.Provider
       value={{
-        defaultMode,
         isEnrollmentFlyoutOpen,
-        openEnrollmentFlyout: (args = { flyoutMode: 'standalone' }) => {
-          setDefaultMode(args.flyoutMode);
+        openEnrollmentFlyout: () => {
           setIsEnrollmentFlyoutOpen(true);
         },
         closeEnrollmentFlyout: () => setIsEnrollmentFlyoutOpen(false),
