@@ -14,9 +14,9 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
-import { buildRandomSamplerAggregation } from './constants';
+
 import type {
   Field,
   BooleanFieldStats,
@@ -48,7 +48,7 @@ export const getBooleanFieldsStatsRequest = (
   });
   const searchBody = {
     query,
-    aggs: buildRandomSamplerAggregation(aggs, 0.05),
+    aggs: buildSamplerAggregation(aggs, samplerShardSize),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 

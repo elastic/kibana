@@ -16,10 +16,9 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import {
-  buildRandomSamplerAggregation,
   MAX_PERCENT,
   PERCENTILE_SPACING,
   SAMPLER_TOP_TERMS_SHARD_SIZE,
@@ -100,7 +99,7 @@ export const getNumericFieldsStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildRandomSamplerAggregation(aggs, 0.05),
+    aggs: buildSamplerAggregation(aggs, samplerShardSize),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 

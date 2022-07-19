@@ -29,11 +29,3 @@ export function buildSamplerAggregation(
     },
   };
 }
-
-// Returns the path of aggregations in the elasticsearch response, as an array,
-// depending on whether sampling is being used.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and an empty array is returned.
-export function getRandomSamplerAggregationsResponsePath(samplerShardSize: number): string[] {
-  return samplerShardSize > 0 ? ['sample'] : [];
-}
