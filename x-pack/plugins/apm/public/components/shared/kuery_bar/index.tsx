@@ -106,7 +106,7 @@ export function KueryBar(props: {
       const suggestions = (
         (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
-          indexPatterns: [dataView as DataView],
+          indexPatterns: [dataView],
           boolFilter:
             props.boolFilter ??
             getBoolFilter({

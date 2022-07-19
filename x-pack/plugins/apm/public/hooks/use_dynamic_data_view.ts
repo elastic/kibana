@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApmPluginStartDeps } from '../plugin';
 import { useFetcher } from './use_fetcher';
 
 export function useDynamicDataViewFetcher() {
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/apm/data_view/dynamic', {
-      isCachable: true,
-    });
-  }, []);
+  const { services } = useKibana<ApmPluginStartDeps>();
 
-  return {
-    dataView: data?.dynamicDataView,
-    status,
-  };
+  const { data, status } = useFetcher(
+    async (callApmApi) => {
+      const res = await callApmApi('GET /internal/apm/data_view/title', {
+        isCachable: true,
+      });
+
+      return services.dataViews.create({ title: res.apmDataViewTitle });
+    },
+    [services.dataViews]
+  );
+
+  return { dataView: data, status };
 }
