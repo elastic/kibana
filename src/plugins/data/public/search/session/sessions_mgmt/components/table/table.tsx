@@ -96,6 +96,9 @@ export function SearchSessionsMgmtTable({
   useEffect(() => {
     doRefresh();
     searchUsageCollector.trackSessionsListLoaded();
+    return () => {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    };
   }, [doRefresh, searchUsageCollector]);
 
   const onActionComplete: OnActionComplete = () => {
