@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
@@ -40,17 +41,23 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       <EuiFlexItem grow={1} className="eui-textTruncate">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EuiButtonIcon
-          style={{ marginLeft: 'auto' }}
-          onClick={handleHelpButtonOnClick}
-          iconType="help"
-          title={HELP_LABEL}
-          aria-label={HELP_LABEL}
-          isSelected={isHelpOpen}
-          display={isHelpOpen ? 'fill' : 'empty'}
-        />
-      </EuiFlexItem>
+      {!isHelpOpen && (
+        <EuiFlexItem grow={1}>
+          <EuiButtonEmpty
+            style={{ marginLeft: 'auto' }}
+            onClick={handleHelpButtonOnClick}
+            iconType="help"
+            title={HELP_LABEL}
+            aria-label={HELP_LABEL}
+            isSelected={isHelpOpen}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.console.layoutHeader.helpButtonTitle"
+              defaultMessage="Help"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -44,6 +45,7 @@ export interface BaseSnoozePanelProps {
   navigateToScheduler: (sched?: SnoozeSchedule) => void;
   isLoading: boolean;
   onRemoveAllSchedules: (ids: string[]) => void;
+  inPopover?: boolean;
 }
 
 export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
@@ -56,6 +58,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   navigateToScheduler,
   onRemoveAllSchedules,
   hasTitle,
+  inPopover = false,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
@@ -132,6 +135,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            flush="left"
             size="s"
             iconType="refresh"
             data-test-subj="ruleSnoozePreviousButton"
@@ -167,7 +171,6 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiFlexGroup>
         </EuiPopoverTitle>
       )}
-      <EuiSpacer size="s" />
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -206,6 +209,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             isLoading={isLoading}
             onClick={onClickApplyButton}
             data-test-subj="ruleSnoozeApply"
+            minWidth={0}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
@@ -239,12 +243,17 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       </EuiFlexGrid>
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiLink onClick={onApplyIndefinite} data-test-subj="ruleSnoozeIndefiniteApply">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            size="s"
+            onClick={onApplyIndefinite}
+            data-test-subj="ruleSnoozeIndefiniteApply"
+          >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
             })}
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
@@ -253,6 +262,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiButton
+                fill
                 color="primary"
                 onClick={onClickAddSchedule}
                 data-test-subj="ruleAddSchedule"
@@ -347,21 +357,24 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       )}
       {showCancel && (
         <>
-          <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiButton
-                isLoading={isLoading}
-                color="danger"
-                onClick={onCancelSnooze}
-                data-test-subj="ruleSnoozeCancel"
-              >
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
-                  defaultMessage: 'Cancel snooze',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!inPopover && <EuiSpacer size="s" />}
+          <EuiPopoverFooter>
+            {!inPopover && <EuiSpacer size="s" />}
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiButton
+                  isLoading={isLoading}
+                  color="danger"
+                  onClick={onCancelSnooze}
+                  data-test-subj="ruleSnoozeCancel"
+                >
+                  {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+                    defaultMessage: 'Cancel snooze',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </>
       )}
       <EuiSpacer size="s" />

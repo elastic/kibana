@@ -24,7 +24,7 @@ export const useStyles = () => {
     };
 
     const treeViewNav: CSSObject = {
-      width: '284px',
+      width: '316px',
     };
 
     const sessionsPanel: CSSObject = {
