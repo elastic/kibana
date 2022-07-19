@@ -33,8 +33,6 @@ import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
 import { MethodConnector } from './method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
-import { MethodEs } from './method_es';
-import { MethodJson } from './method_json';
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   {
@@ -149,9 +147,7 @@ export const NewIndex: React.FC = () => {
             <>
               {selectedMethod.id === 'crawler' && <MethodCrawler />}
               {selectedMethod.id === 'api' && <MethodApi />}
-              {selectedMethod.id === 'elasticsearch' && <MethodEs />}
               {selectedMethod.id === 'connector' && <MethodConnector />}
-              {selectedMethod.id === 'json' && <MethodJson />}
             </>
           ) : (
             <SearchIndexEmptyState />
