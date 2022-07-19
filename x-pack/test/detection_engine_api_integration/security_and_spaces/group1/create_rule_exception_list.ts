@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import {
   getCreateExceptionListDetectionSchemaMock,
   getCreateExceptionListMinimalSchemaMock,
-  getCreateExceptionListSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -115,8 +114,10 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(500);
 
-      expect(body).to.eql({ message: `Unable to add exception list to rule - rule with id:\"1234\" not found`,
-      status_code: 500 });
+      expect(body).to.eql({
+        message: `Unable to add exception list to rule - rule with id:\"1234\" not found`,
+        status_code: 500,
+      });
     });
 
     it('returns 409 if an exception list with matching `list_id` exists', async () => {
@@ -145,11 +146,24 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(409);
 
-      expect(body).to.eql({ message: `exception list id: \"i_exist\" already exists`, status_code: 409 });
+      expect(body).to.eql({
+        message: `exception list id: \"i_exist\" already exists`,
+        status_code: 409,
+      });
     });
 
     it('returns 409 if trying to add a default rule exception list to a rule that already has one', async () => {
-      const rule = await createRule(supertest, log, { ...getSimpleRule('rule-4'), exceptions_list: [{ id: '1234', list_id: 'list_id', namespace_type: 'single', type: ExceptionListTypeEnum.RULE_DEFAULT }] });
+      const rule = await createRule(supertest, log, {
+        ...getSimpleRule('rule-4'),
+        exceptions_list: [
+          {
+            id: '1234',
+            list_id: 'list_id',
+            namespace_type: 'single',
+            type: ExceptionListTypeEnum.RULE_DEFAULT,
+          },
+        ],
+      });
       const exceptionList = {
         ...getCreateExceptionListMinimalSchemaMock(),
         list_id: 'my-list-id',
@@ -164,11 +178,13 @@ export default ({ getService }: FtrProviderContext) => {
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.RULE_DEFAULT,
           list: exceptionList,
-         })
+        })
         .expect(409);
 
-      expect(body).to.eql({ message: 'Rule already contains a default exception list.',
-      status_code: 409 });
+      expect(body).to.eql({
+        message: 'Rule already contains a default exception list.',
+        status_code: 409,
+      });
     });
 
     it('returns 409 if trying to add an endpoint list when one already exists and is associated with rule', async () => {
@@ -177,20 +193,32 @@ export default ({ getService }: FtrProviderContext) => {
         .post(ENDPOINT_LIST_URL)
         .set('kbn-xsrf', 'true')
         .expect(200);
-     
-      const rule = await createRule(supertest, log, { ...getSimpleRule('rule-5'), exceptions_list: [{ id: endpointList.id, list_id: endpointList.list_id, namespace_type: endpointList.namespace_type, type: ExceptionListTypeEnum.ENDPOINT }] });
- 
+
+      const rule = await createRule(supertest, log, {
+        ...getSimpleRule('rule-5'),
+        exceptions_list: [
+          {
+            id: endpointList.id,
+            list_id: endpointList.list_id,
+            namespace_type: endpointList.namespace_type,
+            type: ExceptionListTypeEnum.ENDPOINT,
+          },
+        ],
+      });
+
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
         .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.ENDPOINT,
-         })
+        })
         .expect(409);
 
-      expect(body).to.eql({ message: 'Rule already contains a default exception list.',
-      status_code: 409 });
+      expect(body).to.eql({
+        message: 'Rule already contains a default exception list.',
+        status_code: 409,
+      });
     });
   });
 };
