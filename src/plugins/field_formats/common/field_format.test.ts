@@ -147,6 +147,33 @@ describe('FieldFormat class', () => {
 
         expect(f.convert(['one', 'two', 'three'])).toBe('["one","two","three"]');
       });
+
+      test('formats a list of values as html', () => {
+        const f = getTestFormat();
+
+        expect(f.convert([123, 456, 789], 'html')).toBe('[123, 456, 789]');
+      });
+
+      test('formats a list of values containing newlines as html', () => {
+        const f = getTestFormat();
+        const newlineList = [
+          '{\n  "foo": "bar",\n  "fizz": "buzz"\n}',
+          '{\n  "bar": "foo",\n  "buzz": "fizz"\n}',
+        ];
+
+        expect(f.convert(newlineList, 'html')).toMatchInlineSnapshot(`
+          "[
+            {
+              &quot;foo&quot;: &quot;bar&quot;,
+              &quot;fizz&quot;: &quot;buzz&quot;
+            },
+            {
+              &quot;bar&quot;: &quot;foo&quot;,
+              &quot;buzz&quot;: &quot;fizz&quot;
+            }
+          ]"
+        `);
+      });
     });
   });
 });

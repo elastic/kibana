@@ -50,7 +50,19 @@ export const setup = (
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return recurse(value, options);
+    const convertedValue = recurse(value, options);
+
+    if (!Array.isArray(value) || value.length < 2) {
+      return convertedValue;
+    }
+
+    if (convertedValue.includes('\n')) {
+      const indentedValue = convertedValue.replaceAll(/(\n+)/g, '$1  ');
+
+      return `[\n  ${indentedValue}\n]`;
+    }
+
+    return `[${convertedValue}]`;
   };
 
   return wrap;
