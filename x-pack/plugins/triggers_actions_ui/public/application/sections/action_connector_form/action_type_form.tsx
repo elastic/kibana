@@ -296,9 +296,11 @@ export const ActionTypeForm = ({
               </EuiToolTip>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-          </EuiFlexItem>
+          {!showActionGroupErrorIcon() && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>
               <div>
