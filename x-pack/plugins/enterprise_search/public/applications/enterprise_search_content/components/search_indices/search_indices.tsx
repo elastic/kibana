@@ -195,7 +195,7 @@ export const SearchIndices: React.FC = () => {
                           ),
                         }}
                         aria-label={i18n.translate(
-                          'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                          'xpack.enterpriseSearch.content.searchIndices.searchIndices.searchBar.ariaLabel',
                           {
                             defaultMessage: 'Filter Elasticsearch indices',
                           }
