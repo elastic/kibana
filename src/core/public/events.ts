@@ -9,20 +9,30 @@
 /** @internal */
 export const KBN_LOAD_MARKS = 'kbnLoad';
 
-export { KIBANA_LOADED_EVENT } from '../../utils';
+export const KIBANA_LOADED_EVENT = 'kibana_loaded';
 
-export const LOAD_START = 'load-started';
-export const LOAD_BOOTSTRAP_START = 'bootstrap-started';
-export const LOAD_CORE_CREATED = 'core-created';
-export const LOAD_SETUP_DONE = 'setup-done';
-export const LOAD_START_DONE = 'start-done';
-export const LOAD_FIRST_NAV = 'first-app-nav';
+export const LOAD_START = 'load_started';
+export const LOAD_BOOTSTRAP_START = 'bootstrap_started';
+export const LOAD_CORE_CREATED = 'core_created';
+export const LOAD_SETUP_DONE = 'setup_done';
+export const LOAD_START_DONE = 'start_done';
+export const LOAD_FIRST_NAV = 'first_app_nav';
 
-export interface PerformanceMetricEvent {
+
+
+
+/// remove from this file 
+
+export interface MetricEvent {
+  type: string;
+
+  // Standardized fields
   duration?: number;
   jsHeapSizeLimit?: number;
   totalJSHeapSize?: number;
   usedJSHeapSize?: number;
+
+  // Free fields - will be mapped in the index;
   key1?: string;
   value1?: number;
   key2?: string;
@@ -35,7 +45,11 @@ export interface PerformanceMetricEvent {
   value5?: number;
 }
 
-export const PERFORMANCE_METRIC_EVENT_SCHEMA: Record<keyof PerformanceMetricEvent, any> = {
+export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
+  type: {
+    type: 'keyword',
+    _meta: { description: 'Type of the event' },
+  },
   duration: {
     type: 'integer',
     _meta: { description: 'The main event duration in ms', optional: true },

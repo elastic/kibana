@@ -48,7 +48,7 @@ import {
   LOAD_FIRST_NAV,
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
-} from './utils';
+} from './events';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -272,7 +272,18 @@ describe('#start()', () => {
     );
   });
 
-  it('reports the event Loaded Kibana and clears marks', async () => {
+  it('reports the deprecated event Loaded Kibana', async () => {
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      kibana_version: '1.2.3',
+      protocol: 'http:',
+    });
+
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the event kibana-loaded and clears marks', async () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
@@ -294,7 +305,7 @@ describe('#start()', () => {
     expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
   });
 
-  it('reports the event Loaded Kibana (with memory)', async () => {
+  it('reports the event kibana-loaded (with memory)', async () => {
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {

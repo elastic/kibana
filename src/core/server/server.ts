@@ -65,7 +65,7 @@ import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
-const KIBANA_STARTED_EVENT = 'kibana-started';
+const KIBANA_STARTED_EVENT = 'kibana_started';
 
 /** @internal */
 interface UptimePerStep {

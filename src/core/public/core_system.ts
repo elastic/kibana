@@ -42,11 +42,11 @@ import {
   LOAD_START_DONE,
   KIBANA_LOADED_EVENT,
   LOAD_CORE_CREATED,
-  PERFORMANCE_METRIC_EVENT_SCHEMA,
+  METRIC_EVENT_SCHEMA,
   LOAD_FIRST_NAV,
   LOAD_BOOTSTRAP_START,
   LOAD_START,
-} from './utils';
+} from './events';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -154,6 +154,14 @@ export class CoreSystem {
   }
 
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
+    /**
+     * @deprecated here for backwards compatibility in Fullstory
+     **/ 
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
+    });
+    
     const timing = this.getLoadMarksInfo();
     analytics.reportEvent(KIBANA_LOADED_EVENT, {
       kibana_version: this.coreContext.env.packageInfo.version,
@@ -367,7 +375,7 @@ export class CoreSystem {
     analytics.registerEventType({
       eventType: KIBANA_LOADED_EVENT,
       schema: {
-        ...PERFORMANCE_METRIC_EVENT_SCHEMA,
+        ...METRIC_EVENT_SCHEMA,
         kibana_version: {
           type: 'keyword',
           _meta: { description: 'The version of Kibana' },

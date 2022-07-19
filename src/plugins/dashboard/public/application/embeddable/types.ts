@@ -7,10 +7,10 @@
  */
 
 export * from '../../../common/types';
-import type { PerformanceMetricEvent } from '@kbn/core/public';
+import type { MetricEvent } from '@kbn/core/public';
 
 export type DashboardLoadedEventStatus = 'done' | 'error';
 
-export interface DashboardLoadedEvent extends PerformanceMetricEvent {
+export interface DashboardLoadedEvent extends MetricEvent {
   status: DashboardLoadedEventStatus;
 }

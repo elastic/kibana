@@ -362,6 +362,6 @@ export type {
   NavType,
 };
 
-export type { PerformanceMetricEvent } from './utils';
+export type { MetricEvent } from './events';
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';

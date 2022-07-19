@@ -29,7 +29,7 @@ import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { PERFORMANCE_METRIC_EVENT_SCHEMA } from '@kbn/core/public/utils';
+import { METRIC_EVENT_SCHEMA } from '@kbn/core/public';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -145,7 +145,7 @@ export class DashboardPlugin
     analytics.registerEventType<DashboardLoadedEvent>({
       eventType: DASHBOARD_LOADED_EVENT,
       schema: {
-        ...PERFORMANCE_METRIC_EVENT_SCHEMA,
+        ...METRIC_EVENT_SCHEMA,
         status: {
           type: 'keyword',
           _meta: { description: 'Dashboard load status' },

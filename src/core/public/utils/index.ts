@@ -7,16 +7,3 @@
  */
 
 export { MountWrapper, mountReactNode } from './mount';
-export {
-  KBN_LOAD_MARKS,
-  LOAD_START,
-  LOAD_CORE_CREATED,
-  KIBANA_LOADED_EVENT,
-  LOAD_SETUP_DONE,
-  LOAD_START_DONE,
-  LOAD_FIRST_NAV,
-  LOAD_BOOTSTRAP_START,
-} from './events';
-
-export type { PerformanceMetricEvent } from './events';
-export { PERFORMANCE_METRIC_EVENT_SCHEMA } from './events';
