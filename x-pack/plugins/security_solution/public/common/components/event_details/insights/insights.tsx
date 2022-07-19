@@ -59,7 +59,7 @@ export const Insights = React.memo<Props>(
 
     return (
       <div>
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <EuiTitle size="xxxs">
               <h5>{i18n.INSIGHTS}</h5>
