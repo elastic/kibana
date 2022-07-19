@@ -856,7 +856,7 @@ export const FIELD: Record<string, FieldMeta> = {
       defaultMessage: 'Certificate authorities',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.helpText', {
-      defaultMessage: 'PEM formatted custom certificate authorities.',
+      defaultMessage: 'PEM-formatted custom certificate authorities.',
     }),
     showWhen: ['isTLSEnabled', true],
   },
