@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('docCount query', () => {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/136412
+  describe.skip('docCount query', () => {
     const supertest = getService('supertest');
 
     it(`will fetch the index's count`, async () => {
