@@ -22,9 +22,13 @@ interface Labels {
   maxUsersCount: string;
 }
 
+export interface Headers {
+  readonly [key: string]: string[];
+}
+
 interface Request {
   method: string;
-  headers: string;
+  headers: Headers;
   body?: { original: string };
 }
 
