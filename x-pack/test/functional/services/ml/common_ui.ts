@@ -340,5 +340,21 @@ export function MachineLearningCommonUIProvider({
     async waitForRefreshButtonEnabled() {
       await testSubjects.waitForEnabled('~mlRefreshPageButton');
     },
+
+    async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {
+      const singleSubjectTimeout = 500;
+      // make sure that the overall timeout is not too short
+      const overallTimeout = Math.max(timeout, subjectsToCheck.length * singleSubjectTimeout * 5);
+
+      await retry.tryForTime(overallTimeout, async () => {
+        for (const testSubj of subjectsToCheck) {
+          const subjExists = await testSubjects.exists(testSubj, { timeout: singleSubjectTimeout });
+          if (subjExists) return; // stop ckecking once we found an existing element
+        }
+        throw new Error(
+          `Expected one element of the following list to exist: ${JSON.stringify(subjectsToCheck)}`
+        );
+      });
+    },
   };
 }
