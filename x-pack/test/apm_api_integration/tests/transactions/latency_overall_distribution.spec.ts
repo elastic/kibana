@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         end: '2021',
         kuery: '',
         percentileThreshold: 95,
-        chartType: LatencyDistributionChartType.traceSamples,
+        chartType: LatencyDistributionChartType.transactionLatency,
       },
     },
   });

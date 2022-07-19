@@ -9,10 +9,10 @@ import { LatencyDistributionChartType } from '../../../../common/latency_distrib
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 const {
-  traceSamples: TRANSACTION_DETAILS,
-  latencyCorrelations: LATENCY_CORRELATIONS,
-  failedTransactionsCorrelations: FAILED_TRANSACTIONS_CORRELATIONS,
-  dependencyLatencyDistribution: DEPENDENCY_LATENCY_DISTRIBUTION,
+  transactionLatency,
+  latencyCorrelations,
+  failedTransactionsCorrelations,
+  dependencyLatencyDistribution,
 } = LatencyDistributionChartType;
 
 export function getEventType(
@@ -20,16 +20,16 @@ export function getEventType(
   searchAggregatedTransactions = false
 ): ProcessorEvent {
   switch (chartType) {
-    case TRANSACTION_DETAILS:
+    case transactionLatency:
       if (searchAggregatedTransactions) {
         return ProcessorEvent.metric;
       }
       return ProcessorEvent.transaction;
-    case LATENCY_CORRELATIONS:
+    case latencyCorrelations:
       return ProcessorEvent.transaction;
-    case FAILED_TRANSACTIONS_CORRELATIONS:
+    case failedTransactionsCorrelations:
       return ProcessorEvent.transaction;
-    case DEPENDENCY_LATENCY_DISTRIBUTION:
+    case dependencyLatencyDistribution:
       return ProcessorEvent.span;
     default:
       return ProcessorEvent.transaction;

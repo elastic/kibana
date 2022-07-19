@@ -68,9 +68,9 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       chartType,
     } = resources.params.body;
 
-    // only the trace samples distribution chart can use metrics data
+    // only the transaction latency distribution chart can use metrics data
     const searchAggregatedTransactions =
-      chartType === LatencyDistributionChartType.traceSamples
+      chartType === LatencyDistributionChartType.transactionLatency
         ? await getSearchAggregatedTransactions({
             ...setup,
             kuery,

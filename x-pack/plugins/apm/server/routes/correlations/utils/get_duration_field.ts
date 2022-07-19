@@ -13,10 +13,10 @@ import {
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 const {
-  traceSamples: TRANSACTION_DETAILS,
-  latencyCorrelations: LATENCY_CORRELATIONS,
-  failedTransactionsCorrelations: FAILED_TRANSACTIONS_CORRELATIONS,
-  dependencyLatencyDistribution: DEPENDENCY_LATENCY_DISTRIBUTION,
+  transactionLatency,
+  latencyCorrelations,
+  failedTransactionsCorrelations,
+  dependencyLatencyDistribution,
 } = LatencyDistributionChartType;
 
 export function getDurationField(
@@ -24,16 +24,16 @@ export function getDurationField(
   searchAggregatedTransactions = false
 ) {
   switch (chartType) {
-    case TRANSACTION_DETAILS:
+    case transactionLatency:
       if (searchAggregatedTransactions) {
         return TRANSACTION_DURATION_HISTOGRAM;
       }
       return TRANSACTION_DURATION;
-    case LATENCY_CORRELATIONS:
+    case latencyCorrelations:
       return TRANSACTION_DURATION;
-    case FAILED_TRANSACTIONS_CORRELATIONS:
+    case failedTransactionsCorrelations:
       return TRANSACTION_DURATION;
-    case DEPENDENCY_LATENCY_DISTRIBUTION:
+    case dependencyLatencyDistribution:
       return SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;

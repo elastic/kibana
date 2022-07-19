@@ -45,7 +45,7 @@ export const useTransactionDistributionChartData = () => {
               body: {
                 ...params,
                 percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                chartType: LatencyDistributionChartType.traceSamples,
+                chartType: LatencyDistributionChartType.transactionLatency,
               },
             },
           }
@@ -101,7 +101,7 @@ export const useTransactionDistributionChartData = () => {
                       fieldValue: EventOutcome.failure,
                     },
                   ],
-                  chartType: LatencyDistributionChartType.traceSamples,
+                  chartType: LatencyDistributionChartType.transactionLatency,
                 },
               },
             }
