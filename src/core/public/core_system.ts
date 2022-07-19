@@ -26,6 +26,7 @@ import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { METRIC_EVENT_SCHEMA } from '@kbn/ebt-tools';
+import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -34,7 +35,6 @@ import { PluginsService } from './plugins';
 import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
-import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import {
