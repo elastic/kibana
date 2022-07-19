@@ -15,21 +15,27 @@ import { useFormData } from '../../../shared_imports';
 interface IResponseActionsAddButtonProps {
   supportedResponseActionTypes: ResponseActionType[];
   addActionType: () => void;
+  updateActionTypeId: (id: string) => void;
 }
 
 export const ResponseActionAddButton = ({
   supportedResponseActionTypes,
   addActionType,
+  updateActionTypeId,
 }: IResponseActionsAddButtonProps) => {
   const [data] = useFormData();
   const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
     data.responseActions && data.responseActions.length > 0
   );
+  const handleAddActionType = useCallback(
+    (item) => {
+      setAddResponseActionButtonShown(false);
+      addActionType();
 
-  const handleAddActionType = useCallback(() => {
-    setAddResponseActionButtonShown(false);
-    addActionType();
-  }, [addActionType]);
+      updateActionTypeId(item.id);
+    },
+    [addActionType, updateActionTypeId]
+  );
 
   const renderAddResponseActionButton = useMemo(() => {
     return (
@@ -60,7 +66,7 @@ export const ResponseActionAddButton = ({
             isDisabled={false}
             data-test-subj={`${item.id}-ResponseActionTypeSelectOption`}
             label={item.name}
-            onClick={handleAddActionType}
+            onClick={() => handleAddActionType(item)}
           >
             <EuiIcon
               size="xl"

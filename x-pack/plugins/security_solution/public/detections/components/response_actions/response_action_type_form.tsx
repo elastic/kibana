@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
-import { getLogo } from './constants';
+import { getLogo, RESPONSE_ACTION_TYPES } from './constants';
 import { useFormData } from '../../../shared_imports';
 import type { ArrayItem } from '../../../shared_imports';
 
@@ -33,13 +33,13 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const [data] = useFormData();
   const action = get(data, item.path);
 
-  // const getResponseActionTypeForm = useCallback(() => {
-  //   if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-  //     return <OsqueryResponseAction item={item} />;
-  //   }
-  //   // Place for other ResponseActionTypes
-  //   return null;
-  // }, [action?.actionTypeId, item]);
+  const getResponseActionTypeForm = useCallback(() => {
+    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
+      return <OsqueryResponseAction item={item} />;
+    }
+    // Place for other ResponseActionTypes
+    return null;
+  }, [action?.actionTypeId, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
@@ -91,7 +91,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
-      <OsqueryResponseAction item={item} />
+      {getResponseActionTypeForm()}
     </EuiAccordion>
   );
 });

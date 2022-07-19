@@ -10,7 +10,6 @@ import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 
 import type { ArrayItem } from '../../../shared_imports';
-import { ResponseActionAddButton } from './response_action_add_button';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 import { UseField } from '../../../shared_imports';
 
@@ -23,21 +22,26 @@ interface IProps {
 }
 
 export const ResponseActionsForm = ({ items, addItem, removeItem }: IProps) => {
-  const form = useMemo(() => {
-    return <ResponseActionsList items={items} removeItem={removeItem} />;
-  }, [items, removeItem]);
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
-  if (!supportedResponseActionTypes?.length)
-    return <UseField path="responseActions" component={GhostFormField} />;
+
+  const form = useMemo(() => {
+    if (!supportedResponseActionTypes?.length) {
+      return <UseField path="responseActions" component={GhostFormField} />;
+    }
+    return (
+      <ResponseActionsList
+        items={items}
+        removeItem={removeItem}
+        supportedResponseActionTypes={supportedResponseActionTypes}
+        addItem={addItem}
+      />
+    );
+  }, [addItem, items, removeItem, supportedResponseActionTypes]);
 
   return (
     <>
       <ResponseActionsHeader />
       {form}
-      <ResponseActionAddButton
-        supportedResponseActionTypes={supportedResponseActionTypes}
-        addActionType={addItem}
-      />
     </>
   );
 };
