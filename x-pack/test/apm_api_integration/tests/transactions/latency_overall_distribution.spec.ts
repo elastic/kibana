@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { LATENCY_DISTRIBUTION_CHART_TYPE } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

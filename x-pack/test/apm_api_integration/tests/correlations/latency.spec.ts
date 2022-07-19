@@ -13,8 +13,8 @@ import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
 } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { LATENCY_DISTRIBUTION_CHART_TYPE } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
