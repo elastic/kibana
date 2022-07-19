@@ -59,56 +59,54 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
 };
 
 describe('PrevalenceCellRenderer', () => {
-  describe('From Query', () => {
-    describe('When data is loading', () => {
-      test('it should show the loading spinner', async () => {
-        mockUseAlertPrevalence.mockImplementation(() => ({
-          loading: true,
-          count: 123,
-          error: true,
-        }));
-        const { container } = render(
-          <TestProviders>
-            <PrevalenceCellRenderer {...enrichedHostIpData} />
-          </TestProviders>
-        );
-        expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(1);
-      });
+  describe('When data is loading', () => {
+    test('it should show the loading spinner', async () => {
+      mockUseAlertPrevalence.mockImplementation(() => ({
+        loading: true,
+        count: 123,
+        error: true,
+      }));
+      const { container } = render(
+        <TestProviders>
+          <PrevalenceCellRenderer {...enrichedHostIpData} />
+        </TestProviders>
+      );
+      expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(1);
     });
+  });
 
-    describe('When an error was returned', () => {
-      test('it should return empty value placeholder', async () => {
-        mockUseAlertPrevalence.mockImplementation(() => ({
-          loading: false,
-          count: undefined,
-          error: true,
-        }));
-        const { container } = render(
-          <TestProviders>
-            <PrevalenceCellRenderer {...enrichedHostIpData} />
-          </TestProviders>
-        );
-        expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(0);
-        expect(screen.queryByText('123')).toBeNull();
-        expect(screen.queryByText(getEmptyValue())).toBeTruthy();
-      });
+  describe('When an error was returned', () => {
+    test('it should return empty value placeholder', async () => {
+      mockUseAlertPrevalence.mockImplementation(() => ({
+        loading: false,
+        count: undefined,
+        error: true,
+      }));
+      const { container } = render(
+        <TestProviders>
+          <PrevalenceCellRenderer {...enrichedHostIpData} />
+        </TestProviders>
+      );
+      expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(0);
+      expect(screen.queryByText('123')).toBeNull();
+      expect(screen.queryByText(getEmptyValue())).toBeTruthy();
     });
+  });
 
-    describe('When an actual count is returned', () => {
-      test('it should show the count', async () => {
-        mockUseAlertPrevalence.mockImplementation(() => ({
-          loading: false,
-          count: 123,
-          error: false,
-        }));
-        const { container } = render(
-          <TestProviders>
-            <PrevalenceCellRenderer {...enrichedHostIpData} />
-          </TestProviders>
-        );
-        expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(0);
-        expect(screen.queryByText('123')).toBeInTheDocument();
-      });
+  describe('When an actual count is returned', () => {
+    test('it should show the count', async () => {
+      mockUseAlertPrevalence.mockImplementation(() => ({
+        loading: false,
+        count: 123,
+        error: false,
+      }));
+      const { container } = render(
+        <TestProviders>
+          <PrevalenceCellRenderer {...enrichedHostIpData} />
+        </TestProviders>
+      );
+      expect(container.getElementsByClassName('euiLoadingSpinner')).toHaveLength(0);
+      expect(screen.queryByText('123')).toBeInTheDocument();
     });
   });
 });
