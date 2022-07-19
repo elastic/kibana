@@ -58,13 +58,7 @@ export default function TextBasedLanguagesList({
       }}
     >
       {(list) => (
-        <EuiPanel
-          css={css`
-            padding-bottom: 0;
-          `}
-          color="transparent"
-          paddingSize="s"
-        >
+        <EuiPanel color="transparent" paddingSize="none">
           {list}
         </EuiPanel>
       )}

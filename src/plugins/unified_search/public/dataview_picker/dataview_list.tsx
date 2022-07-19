@@ -77,16 +77,18 @@ export function DataViewsList({
       }}
     >
       {(list, search) => (
-        <EuiPanel
-          css={css`
-            padding-bottom: 0;
-          `}
-          color="transparent"
-          paddingSize="s"
-        >
-          {search}
+        <>
+          <EuiPanel
+            css={css`
+              padding-bottom: 0;
+            `}
+            color="transparent"
+            paddingSize="s"
+          >
+            {search}
+          </EuiPanel>
           {list}
-        </EuiPanel>
+        </>
       )}
     </EuiSelectable>
   );
