@@ -113,7 +113,7 @@ function logApiKeyWithInteractiveUserDeprecated(
 
   if (isUsingApiKey) {
     logger.warn(
-      `Using API Key authentication as an interactive user is deprecated and will not be supported in a future version`,
+      `API keys are intended for programatic access. Do not use API keys to authenticate access via a web browser.`,
       { tags: ['deprecation'] }
     );
   }

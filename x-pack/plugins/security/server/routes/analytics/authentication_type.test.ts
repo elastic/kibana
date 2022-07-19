@@ -348,7 +348,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
   });
 
   describe('logApiKeyWithInteractiveUserDeprecated', () => {
-    it('should log a deprecation warning if interactive user is using API Key', async () => {
+    it('should log a deprecation warning if API key is being used for access via a web browser', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey' },
       });
@@ -379,12 +379,12 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
 
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
       expect(routeParamsMock.logger.warn).toBeCalledWith(
-        'Using API Key authentication as an interactive user is deprecated and will not be supported in a future version',
+        'API keys are intended for programatic access. Do not use API keys to authenticate access via a web browser.',
         { tags: ['deprecation'] }
       );
     });
 
-    it('should not log a deprecation warning if interactive user is using API Key', async () => {
+    it('should not log a deprecation warning if other http auth scheme is being used for access via a web browser', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Basic' },
       });
