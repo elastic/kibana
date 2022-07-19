@@ -71,7 +71,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     } else if (cache.alertIds) {
       return (
         <ActualRelatedAlertsByProcessAncestry
-          data={data}
           eventId={eventId}
           timelineId={timelineId}
           alertIds={cache.alertIds}
@@ -81,7 +80,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     return (
       <FetchAndNotifyCachedAlertsByProcessAncestry
         data={data}
-        eventId={eventId}
         timelineId={timelineId}
         onCacheLoad={setCache}
       />
@@ -129,9 +127,11 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
 /**
  * Fetches data, displays a loading and error state and notifies about on success
  */
-const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<
-  Props & { onCacheLoad: (cache: Cache) => void }
-> = ({ data, timelineId, onCacheLoad }) => {
+const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
+  data: TimelineEventsDetailsItem;
+  timelineId?: string;
+  onCacheLoad: (cache: Cache) => void;
+}> = ({ data, timelineId, onCacheLoad }) => {
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     parentEntityId: data.values,
     timelineId: timelineId ?? '',
@@ -164,11 +164,11 @@ FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
 /**
  * Renders the alert table and the timeline button from a filled cache.
  */
-const ActualRelatedAlertsByProcessAncestry: React.FC<Props & Cache> = ({
-  alertIds,
-  eventId,
-  timelineId,
-}) => {
+const ActualRelatedAlertsByProcessAncestry: React.FC<{
+  alertIds: string[];
+  eventId: string;
+  timelineId?: string;
+}> = ({ alertIds, eventId, timelineId }) => {
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
       return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
