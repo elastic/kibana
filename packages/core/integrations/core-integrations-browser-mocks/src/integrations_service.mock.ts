@@ -7,10 +7,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { IntegrationsService } from './integrations_service';
+import type { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 
-type IntegrationsServiceContract = PublicMethodsOf<IntegrationsService>;
-const createMock = (): jest.Mocked<IntegrationsServiceContract> => ({
+export type IntegrationsServiceContract = PublicMethodsOf<IntegrationsService>;
+export type IntegrationsServiceMock = jest.Mocked<IntegrationsServiceContract>;
+
+const createMock = (): IntegrationsServiceMock => ({
   setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
