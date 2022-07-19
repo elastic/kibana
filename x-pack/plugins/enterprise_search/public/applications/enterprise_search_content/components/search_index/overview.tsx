@@ -13,19 +13,18 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
-  const { data } = useValues(FetchIndexApiLogic);
+  const { indexData } = useValues(OverviewLogic);
 
-  const isCrawler = typeof data?.crawler !== 'undefined';
-  const isConnector = typeof data?.connector !== 'undefined';
+  const isCrawler = typeof indexData?.crawler !== 'undefined';
+  const isConnector = typeof indexData?.connector !== 'undefined';
   const isApi = !(isCrawler || isConnector);
 
   return (
@@ -52,7 +51,6 @@ export const SearchIndexOverview: React.FC = () => {
           }
         />
       )}
-      <EuiSpacer />
       {isApi && <GenerateApiKeyPanel />}
       {isCrawler && (
         <>
