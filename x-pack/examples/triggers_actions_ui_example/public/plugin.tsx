@@ -50,7 +50,8 @@ export class TriggersActionsUiExamplePlugin
     developerExamples.register({
       appId: 'triggersActionsUiExample',
       title: 'Shared Reusable Alerting Components',
-      description: 'Sandbox for shared reusable alerting components (triggers actions UI shareable components)',
+      description:
+        'Sandbox for shared reusable alerting components (triggers actions UI shareable components)',
     });
   }
   public start() {}
