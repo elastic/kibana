@@ -98,7 +98,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         )}
         {shouldShowWorkplaceSearchCard && (
           <EuiFlexItem>
-            <ProductCard product={WORKPLACE_SEARCH_PLUGIN} />
+            <ProductCard product={{ ...WORKPLACE_SEARCH_PLUGIN, URL: WORKPLACE_SEARCH_URL }} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
