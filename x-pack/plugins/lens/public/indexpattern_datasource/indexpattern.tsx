@@ -419,6 +419,7 @@ export function getIndexPatternDatasource({
                 replaceIfPossible: true,
                 storage,
                 indexPatternsService,
+                uiActions,
               });
             }}
             {...props}
@@ -673,6 +674,9 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
+    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+      return state.layers[layerId].indexPatternId;
+    },
   };
 
   return indexPatternDatasource;

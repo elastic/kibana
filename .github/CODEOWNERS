@@ -108,6 +108,7 @@
 /x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
@@ -373,6 +374,7 @@
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
+/x-pack/test/api_integration/apis/cases @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
