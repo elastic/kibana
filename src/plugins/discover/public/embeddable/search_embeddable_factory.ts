@@ -92,7 +92,7 @@ export class SearchEmbeddableFactory
           editPath: url,
           filterManager,
           editable: services.capabilities.discover.save as boolean,
-          dataViews: dataView ? [dataView] : [],
+          indexPatterns: dataView ? [dataView] : [],
           services,
         },
         input,
