@@ -91,6 +91,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -103,6 +106,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -116,6 +123,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -129,6 +140,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
@@ -157,6 +172,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [],
@@ -169,6 +187,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -182,6 +204,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [],
@@ -195,6 +221,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [],
@@ -229,6 +259,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -241,6 +274,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -254,6 +291,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -267,6 +308,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
@@ -306,6 +351,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -318,6 +366,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -333,6 +385,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -348,6 +404,10 @@ describe('gauge', () => {
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
