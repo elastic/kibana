@@ -260,7 +260,7 @@ describe('When entering data into the Console input', () => {
       expect(getUserInputText()).toEqual('c');
       expect(getRightOfCursorText()).toEqual('md1 ');
 
-      expect(getFooterText()).toEqual('cmd1 ');
+      expect(getFooterText()).toEqual('Hit enter to execute');
     });
 
     // FIXME:PT uncomment once task OLM task #4384 is implemented
