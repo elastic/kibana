@@ -129,7 +129,7 @@ describe('action_type_form', () => {
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         // add errors to the form
-        const validationResult = { errors: { message: ['test error']} };
+        const validationResult = { errors: { message: ['test error'] } };
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
