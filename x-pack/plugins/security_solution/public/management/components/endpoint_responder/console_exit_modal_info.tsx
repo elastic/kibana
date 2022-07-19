@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
@@ -16,19 +16,21 @@ const actionLogLink = i18n.translate('xpack.securitySolution.consolePageOverlay.
   defaultMessage: 'Action log',
 });
 
-const getTruncateHostName = (name: string): string => {
-  if (name.length <= 12) {
-    return name;
-  }
-  const split = [name.slice(0, 8), name.slice(-4)];
-  return split.join('..');
-};
+export const HostNameText = ({ hostName }: { hostName: string }) => {
+  const truncatedHostName = useMemo(() => {
+    if (hostName.length <= 12) {
+      return hostName;
+    }
+    const split = [hostName.slice(0, 8), hostName.slice(-4)];
+    return split.join('..');
+  }, [hostName]);
 
-export const HostNameText = ({ hostName }: { hostName: string }) => (
-  <EuiToolTip content={hostName}>
-    <strong>{getTruncateHostName(hostName)}</strong>
-  </EuiToolTip>
-);
+  return (
+    <EuiToolTip content={hostName}>
+      <strong>{truncatedHostName}</strong>
+    </EuiToolTip>
+  );
+};
 
 export const ConsoleExitModalInfo = memo(({ hostName }: { hostName: string }) => {
   return (
