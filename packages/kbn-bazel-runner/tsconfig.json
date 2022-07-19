@@ -4,6 +4,8 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
+    "allowJs": true,
+    "checkJs": true,
     "outDir": "target_types",
     "rootDir": "src",
     "stripInternal": false,
