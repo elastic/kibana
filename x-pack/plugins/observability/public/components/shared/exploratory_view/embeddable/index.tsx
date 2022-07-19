@@ -8,10 +8,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { useFetcher } from '../../../..';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import type { DataViewState } from '../hooks/use_app_data_view';
@@ -28,10 +27,12 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 }
 
 export function getExploratoryViewEmbeddable(
-  uiSettings?: IUiSettingsClient,
-  dataViews?: DataViewsPublicPluginStart,
-  lens?: LensPublicStart
+  coreStart: CoreStart,
+  pluginsStart: ObservabilityPublicPluginsStart
 ) {
+  const { lens, dataViews } = pluginsStart;
+  const { uiSettings } = coreStart;
+
   return (props: ExploratoryEmbeddableProps) => {
     if (!dataViews || !lens) {
       return null;
@@ -81,12 +82,14 @@ export function getExploratoryViewEmbeddable(
 
     return (
       <EuiThemeProvider darkMode={isDarkMode}>
-        <ExploratoryViewEmbeddable
-          {...props}
-          indexPatterns={indexPatterns}
-          lens={lens}
-          lensFormulaHelper={lensHelper.formula}
-        />
+        <KibanaContextProvider services={{ ...coreStart, ...pluginsStart }}>
+          <ExploratoryViewEmbeddable
+            {...props}
+            indexPatterns={indexPatterns}
+            lens={lens}
+            lensFormulaHelper={lensHelper.formula}
+          />
+        </KibanaContextProvider>
       </EuiThemeProvider>
     );
   };
