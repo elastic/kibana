@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-  TRANSACTION_DURATION_HISTOGRAM,
-} from '../../../../common/elasticsearch_fieldnames';
 import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 const {
   TRANSACTION_DETAILS,
@@ -19,23 +15,23 @@ const {
   DEPENDENCY_LATENCY_DISTRIBUTION,
 } = LATENCY_DISTRIBUTION_CHART_TYPE;
 
-export function getDurationField(
+export function getEventType(
   chartType: LATENCY_DISTRIBUTION_CHART_TYPE,
   searchAggregatedTransactions = false
-) {
+): ProcessorEvent {
   switch (chartType) {
     case TRANSACTION_DETAILS:
       if (searchAggregatedTransactions) {
-        return TRANSACTION_DURATION_HISTOGRAM;
+        return ProcessorEvent.metric;
       }
-      return TRANSACTION_DURATION;
+      return ProcessorEvent.transaction;
     case LATENCY_CORRELATIONS:
-      return TRANSACTION_DURATION;
+      return ProcessorEvent.transaction;
     case FAILED_TRANSACTIONS_CORRELATIONS:
-      return TRANSACTION_DURATION;
+      return ProcessorEvent.transaction;
     case DEPENDENCY_LATENCY_DISTRIBUTION:
-      return SPAN_DURATION;
+      return ProcessorEvent.span;
     default:
-      return TRANSACTION_DURATION;
+      return ProcessorEvent.transaction;
   }
 }

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../../common/latency_distribution_chart_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
@@ -44,6 +45,7 @@ export const useTransactionDistributionChartData = () => {
               body: {
                 ...params,
                 percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                chartType: LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS,
               },
             },
           }
@@ -99,6 +101,8 @@ export const useTransactionDistributionChartData = () => {
                       fieldValue: EventOutcome.failure,
                     },
                   ],
+                  chartType:
+                    LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS,
                 },
               },
             }

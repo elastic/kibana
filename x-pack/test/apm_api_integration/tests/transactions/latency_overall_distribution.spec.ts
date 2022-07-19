@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -23,6 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         end: '2021',
         kuery: '',
         percentileThreshold: 95,
+        chartType: LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS,
       },
     },
   });

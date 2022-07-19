@@ -12,14 +12,14 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export const fetchFailedEventsCorrelationPValues = async ({
   setup,
-  eventType,
   start,
   end,
   environment,
@@ -29,11 +29,14 @@ export const fetchFailedEventsCorrelationPValues = async ({
   fieldName,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
   rangeSteps: number[];
   fieldName: string;
 }) => {
   const { apmEventClient } = setup;
+
+  const chartType =
+    LATENCY_DISTRIBUTION_CHART_TYPE.FAILED_TRANSACTIONS_CORRELATIONS;
+  const eventType = getEventType(chartType);
 
   const commonQuery = getCommonCorrelationsQuery({
     start,
@@ -103,7 +106,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
 
     const histogram = await fetchDurationRanges({
       setup,
-      eventType,
+      chartType,
       start,
       end,
       environment,

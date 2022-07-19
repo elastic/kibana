@@ -6,32 +6,35 @@
  */
 
 import { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../common/latency_distribution_chart_types';
 import { Setup } from '../../lib/helpers/setup_request';
 import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
 
 export async function getPercentileThresholdValue({
   setup,
-  eventType,
+  chartType,
   start,
   end,
   environment,
   kuery,
   query,
   percentileThreshold,
+  searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
+  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
   percentileThreshold: number;
+  searchAggregatedTransactions?: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
     kuery,
     query,
+    searchAggregatedTransactions,
   });
 
   return durationPercentiles.percentiles[`${percentileThreshold}.0`];

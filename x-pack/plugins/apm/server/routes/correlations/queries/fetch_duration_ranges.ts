@@ -6,11 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
-import { getDurationField } from '../utils';
+import { getDurationField, getEventType } from '../utils';
 
 export const fetchDurationRanges = async ({
   rangeSteps,
@@ -20,7 +20,8 @@ export const fetchDurationRanges = async ({
   environment,
   kuery,
   query,
-  eventType,
+  chartType,
+  searchAggregatedTransactions,
 }: {
   rangeSteps: number[];
   setup: Setup;
@@ -29,7 +30,8 @@ export const fetchDurationRanges = async ({
   environment: Environment;
   kuery: string;
   query: estypes.QueryDslQueryContainer;
-  eventType: ProcessorEvent;
+  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  searchAggregatedTransactions?: boolean;
 }): Promise<Array<{ key: number; doc_count: number }>> => {
   const { apmEventClient } = setup;
 
@@ -47,7 +49,7 @@ export const fetchDurationRanges = async ({
 
   const resp = await apmEventClient.search('get_duration_ranges', {
     apm: {
-      events: [eventType],
+      events: [getEventType(chartType, searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -61,7 +63,7 @@ export const fetchDurationRanges = async ({
       aggs: {
         logspace_ranges: {
           range: {
-            field: getDurationField(eventType),
+            field: getDurationField(chartType, searchAggregatedTransactions),
             ranges,
           },
         },

@@ -14,6 +14,7 @@ import type {
   LatencyCorrelationsResponse,
 } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -40,6 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body: {
               ...getOptions(),
               percentileThreshold: 95,
+              chartType: LATENCY_DISTRIBUTION_CHART_TYPE.LATENCY_CORRELATIONS,
             },
           },
         });
@@ -117,6 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body: {
               ...getOptions(),
               percentileThreshold: 95,
+              chartType: LATENCY_DISTRIBUTION_CHART_TYPE.LATENCY_CORRELATIONS,
             },
           },
         });

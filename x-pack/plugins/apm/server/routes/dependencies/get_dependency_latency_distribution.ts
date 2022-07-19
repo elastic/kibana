@@ -13,7 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../common/latency_distribution_chart_types';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
@@ -41,7 +41,7 @@ export async function getDependencyLatencyDistribution({
   failedSpansDistribution: OverallLatencyDistributionResponse;
 }> {
   const commonProps = {
-    eventType: ProcessorEvent.span,
+    chartType: LATENCY_DISTRIBUTION_CHART_TYPE.DEPENDENCY_LATENCY_DISTRIBUTION,
     setup,
     start,
     end,

@@ -412,7 +412,6 @@ const pValuesTransactionsRoute = createApmServerRoute({
 
     return fetchPValues({
       setup,
-      eventType: ProcessorEvent.transaction,
       start,
       end,
       environment,

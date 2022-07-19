@@ -7,13 +7,13 @@
 
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { getDurationField } from '../utils';
+import { getDurationField, getEventType } from '../utils';
 
 export const fetchDurationPercentiles = async ({
-  eventType,
+  chartType,
   setup,
   start,
   end,
@@ -21,16 +21,18 @@ export const fetchDurationPercentiles = async ({
   kuery,
   query,
   percents,
+  searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
-  eventType: ProcessorEvent;
+  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
   setup: Setup;
   percents?: number[];
+  searchAggregatedTransactions?: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;
 }> => {
   const params = {
-    apm: { events: [eventType] },
+    apm: { events: [getEventType(chartType, searchAggregatedTransactions)] },
     body: {
       track_total_hits: true,
       query: getCommonCorrelationsQuery({
@@ -47,7 +49,7 @@ export const fetchDurationPercentiles = async ({
             hdr: {
               number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
             },
-            field: getDurationField(eventType),
+            field: getDurationField(chartType, searchAggregatedTransactions),
             ...(Array.isArray(percents) ? { percents } : {}),
           },
         },

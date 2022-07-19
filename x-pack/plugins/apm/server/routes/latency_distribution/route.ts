@@ -19,7 +19,11 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  latencyDistributionChartTypeRt,
+  LATENCY_DISTRIBUTION_CHART_TYPE,
+} from '../../../common/latency_distribution_chart_types';
+import { getDurationField } from '../correlations/utils';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -41,6 +45,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       rangeRt,
       t.type({
         percentileThreshold: toNumberRt,
+        chartType: latencyDistributionChartTypeRt,
       }),
     ]),
   }),
@@ -60,20 +65,22 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       end,
       percentileThreshold,
       termFilters,
+      chartType,
     } = resources.params.body;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
+    const searchAggregatedTransactions =
+      chartType === LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS
+        ? await getSearchAggregatedTransactions({
+            ...setup,
+            kuery,
+            start,
+            end,
+          })
+        : false;
 
     return getOverallLatencyDistribution({
       setup,
-      eventType: searchAggregatedTransactions
-        ? ProcessorEvent.metric
-        : ProcessorEvent.transaction,
+      chartType,
       environment,
       kuery,
       start,
@@ -88,10 +95,23 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
               (fieldValuePair): QueryDslQueryContainer[] =>
                 termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),
+            ...(searchAggregatedTransactions
+              ? [
+                  {
+                    exists: {
+                      field: getDurationField(
+                        chartType,
+                        searchAggregatedTransactions
+                      ),
+                    },
+                  },
+                ]
+              : []),
           ],
         },
       },
       percentileThreshold,
+      searchAggregatedTransactions,
     });
   },
 });

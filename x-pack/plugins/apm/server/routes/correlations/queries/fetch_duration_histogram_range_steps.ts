@@ -9,10 +9,10 @@ import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
-import { getDurationField } from '../utils';
+import { getDurationField, getEventType } from '../utils';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
@@ -24,28 +24,33 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
 };
 
 export const fetchDurationHistogramRangeSteps = async ({
-  eventType,
+  chartType,
   setup,
   start,
   end,
   environment,
   kuery,
   query,
+  searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
-  eventType: ProcessorEvent;
+  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
   setup: Setup;
+  searchAggregatedTransactions?: boolean;
 }): Promise<number[]> => {
   const { apmEventClient } = setup;
 
   const steps = 100;
 
-  const durationField = getDurationField(eventType);
+  const durationField = getDurationField(
+    chartType,
+    searchAggregatedTransactions
+  );
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
     {
       apm: {
-        events: [eventType],
+        events: [getEventType(chartType, searchAggregatedTransactions)],
       },
       body: {
         size: 0,
