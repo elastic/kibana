@@ -25,6 +25,7 @@ import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
+import { METRIC_EVENT_SCHEMA } from '@kbn/ebt-tools';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -42,7 +43,6 @@ import {
   LOAD_START_DONE,
   KIBANA_LOADED_EVENT,
   LOAD_CORE_CREATED,
-  METRIC_EVENT_SCHEMA,
   LOAD_FIRST_NAV,
   LOAD_BOOTSTRAP_START,
   LOAD_START,

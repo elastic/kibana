@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../common/types';
-import type { MetricEvent } from '@kbn/ebt-tools';
-
-export type DashboardLoadedEventStatus = 'done' | 'error';
-
-export interface DashboardLoadedEvent extends MetricEvent {
-  status: DashboardLoadedEventStatus;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ebt-tools'],
+};
