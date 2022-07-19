@@ -867,7 +867,7 @@ export const FIELD: Record<string, FieldMeta> = {
       defaultMessage: 'Client certificate',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.helpText', {
-      defaultMessage: 'PEM formatted certificate for TLS client authentication.',
+      defaultMessage: 'PEM-formatted certificate for TLS client authentication.',
     }),
     showWhen: ['isTLSEnabled', true],
   },
