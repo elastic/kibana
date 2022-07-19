@@ -56,3 +56,14 @@ export function verifyAgentPackage() {
   cy.visit('/app/integrations/installed');
   cy.getBySel('integration-card:epr:elastic_agent');
 }
+
+export function setFleetServerHost(host = 'https://fleetserver:8220') {
+  cy.request({
+    method: 'PUT',
+    url: '/api/fleet/settings',
+    headers: { 'kbn-xsrf': 'xx' },
+    body: {
+      fleet_server_hosts: [host],
+    },
+  });
+}

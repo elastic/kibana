@@ -23,3 +23,8 @@ export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivileg
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
+
+export const ADD_AGENT_FLYOUT = {
+  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
+  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+};
