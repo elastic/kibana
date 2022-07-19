@@ -6,8 +6,6 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -84,24 +82,13 @@ export const KillProcessActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.pendingMessage"
-          defaultMessage="Killing process"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
-          { defaultMessage: 'Kill process action failure' }
-        )}
         dataTestSubj={'killProcessErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -110,14 +97,6 @@ export const KillProcessActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
-        { defaultMessage: 'Process killed successfully!' }
-      )}
-      data-test-subj="killProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent showAs="success" data-test-subj="killProcessSuccessCallout" />;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

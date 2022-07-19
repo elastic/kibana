@@ -59,7 +59,7 @@ export const readWithPit =
         // Sort fields are required to use searchAfter so we sort by the
         // natural order of the index which is the most efficient option
         // as order is not important for the migration
-        sort: ['_shard_doc'],
+        sort: ['_shard_doc:asc'],
         pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE_10MINS },
         size: batchSize,
         search_after: searchAfter,

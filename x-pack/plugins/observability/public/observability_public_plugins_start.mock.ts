@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-const casesUiStartMock = {
-  createStart() {
-    return {
-      getCases: jest.fn(),
-      getAllCasesSelectorModal: jest.fn(),
-      getCreateCaseFlyout: jest.fn(),
-      getRecentCases: jest.fn(),
-    };
-  },
-};
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 const embeddableStartMock = {
   createStart() {
@@ -40,6 +31,7 @@ const triggersActionsUiStartMock = {
       getRuleTagBadge: jest.fn(),
       getRuleStatusFilter: jest.fn(),
       getRuleTagFilter: jest.fn(),
+      getRulesList: jest.fn(),
       ruleTypeRegistry: {
         has: jest.fn(),
         register: jest.fn(),
@@ -59,7 +51,7 @@ const triggersActionsUiStartMock = {
 export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
-      cases: casesUiStartMock.createStart(),
+      cases: mockCasesContract(),
       embeddable: embeddableStartMock.createStart(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: null,

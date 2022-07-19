@@ -7,8 +7,8 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
 
