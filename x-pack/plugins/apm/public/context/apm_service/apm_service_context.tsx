@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode, useMemo } from 'react';
+import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -65,17 +66,8 @@ export function ApmServiceContextProvider({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
+    history,
   });
-
-  // Replace transactionType in the URL in case it is not one of the types returned by the API
-  useMemo(() => {
-    if (
-      transactionTypes.length &&
-      !transactionTypes.some((type) => type === transactionType)
-    ) {
-      replace(history, { query: { transactionType: transactionTypes[0] } });
-    }
-  }, [history, transactionType, transactionTypes]);
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -100,12 +92,14 @@ export function getTransactionType({
   transactionType,
   transactionTypes,
   agentName,
+  history,
 }: {
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
+  history: History;
 }) {
-  if (transactionType) {
+  if (transactionType && transactionTypes.includes(transactionType)) {
     return transactionType;
   }
 
@@ -119,7 +113,13 @@ export function getTransactionType({
     : TRANSACTION_REQUEST;
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  return transactionTypes.includes(defaultTransactionType)
+  const currentTransactionType = transactionTypes.includes(
+    defaultTransactionType
+  )
     ? defaultTransactionType
     : transactionTypes[0];
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  replace(history, { query: { transactionType: currentTransactionType } });
+  return currentTransactionType;
 }
