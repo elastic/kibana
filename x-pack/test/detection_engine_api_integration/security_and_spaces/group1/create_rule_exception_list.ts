@@ -6,10 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { getCreateExceptionListDetectionSchemaMock, getCreateExceptionListMinimalSchemaMock, getCreateExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import {
+  getCreateExceptionListDetectionSchemaMock,
+  getCreateExceptionListMinimalSchemaMock,
+  getCreateExceptionListSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ENDPOINT_LIST_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -19,7 +24,6 @@ import {
   deleteAllAlerts,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -43,15 +47,15 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.DETECTION,
           list: getCreateExceptionListDetectionSchemaMock(),
-         })
+        })
         .expect(200);
       const { _version, created_at, id, updated_at, tie_breaker_id, ...restOfBody } = body;
 
-      expect(restOfBody).to.eql({ 
+      expect(restOfBody).to.eql({
         created_by: 'elastic',
         description: 'some description',
         immutable: false,
@@ -62,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         tags: [],
         type: ExceptionListTypeEnum.DETECTION,
         updated_by: 'elastic',
-        version: 1 
+        version: 1,
       });
     });
 
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.RULE_DEFAULT,
           list: {
@@ -81,11 +85,11 @@ export default ({ getService }: FtrProviderContext) => {
             namespace_type: 'single',
             type: ExceptionListTypeEnum.RULE_DEFAULT,
           },
-         })
+        })
         .expect(200);
       const { _version, created_at, id, updated_at, tie_breaker_id, ...restOfBody } = body;
 
-      expect(restOfBody).to.eql({ 
+      expect(restOfBody).to.eql({
         created_by: 'elastic',
         description: 'some description',
         immutable: false,
@@ -96,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         tags: [],
         type: 'rule_default',
         updated_by: 'elastic',
-        version: 1 
+        version: 1,
       });
     });
 
@@ -104,11 +108,11 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: '1234',
           list_type: ExceptionListTypeEnum.DETECTION,
           list: getCreateExceptionListDetectionSchemaMock(),
-         })
+        })
         .expect(500);
 
       expect(body).to.eql({ message: `Unable to add exception list to rule - rule with id:\"1234\" not found`,
@@ -126,19 +130,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       // create an exception list
       await supertest
-      .post(EXCEPTION_LIST_URL)
-      .set('kbn-xsrf', 'true')
-      .send(exceptionList)
-      .expect(200);
-      
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(exceptionList)
+        .expect(200);
+
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.DETECTION,
           list: exceptionList,
-         })
+        })
         .expect(409);
 
       expect(body).to.eql({ message: `exception list id: \"i_exist\" already exists`, status_code: 409 });
@@ -156,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.RULE_DEFAULT,
           list: exceptionList,
@@ -179,7 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_URL}/exceptions`)
         .set('kbn-xsrf', 'true')
-        .send({ 
+        .send({
           rule_so_id: rule.id,
           list_type: ExceptionListTypeEnum.ENDPOINT,
          })

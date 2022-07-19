@@ -6,8 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionListById } from '@kbn/securitysolution-list-api';
 import type { HttpStart } from '@kbn/core/public';
 import {
