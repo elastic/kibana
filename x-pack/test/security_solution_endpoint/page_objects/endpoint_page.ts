@@ -102,12 +102,11 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     /**
-     * Display the Responder page overlay for one of the Endpoints on the Endpoint list.
+     * Returns an Endpoint table row (`<tr>`)
      *
-     * @param [endpointAgentId] If defined, will be used as the endpoint for which Responder
-     * will be opened. If not, then the first endpoint on the list will be used.
+     * @param [endpointAgentId] if defined, then it will look for the row matching this endpoint id
      */
-    async showResponderFromEndpointList(endpointAgentId?: string) {
+    async getEndpointTableRow(endpointAgentId?: string) {
       await this.ensureIsOnEndpointListPage();
       const table = await testSubjects.find('endpointListTable');
 
@@ -124,8 +123,31 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
         )[0];
       }
 
+      return endpointRow;
+    },
+
+    /**
+     * Displays the Endpoint details for an endpoint
+     * @param [endpointAgentId] if defined, then the details for this specific endpoint will be opened.
+     */
+    async showEndpointDetails(endpointAgentId?: string) {
+      const endpointRow = await this.getEndpointTableRow(endpointAgentId);
+
+      await (await testSubjects.findDescendant('hostnameCellLink', endpointRow)).click();
+      await testSubjects.existOrFail('endpointDetailsFlyout');
+    },
+
+    /**
+     * Display the Responder page overlay for one of the Endpoints on the Endpoint list.
+     *
+     * @param [endpointAgentId] If defined, will be used as the endpoint for which Responder
+     * will be opened. If not, then the first endpoint on the list will be used.
+     */
+    async showResponderFromEndpointList(endpointAgentId?: string) {
+      const endpointRow = await this.getEndpointTableRow(endpointAgentId);
+
       // Click the row menu
-      (await testSubjects.findDescendant('endpointTableRowActions', endpointRow)).click();
+      await (await testSubjects.findDescendant('endpointTableRowActions', endpointRow)).click();
       await testSubjects.existOrFail('tableRowActionsMenuPanel');
       const rowMenuPanel = await testSubjects.findDescendant(
         'console',
@@ -133,6 +155,22 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       );
 
       await rowMenuPanel.click();
+      await testSubjects.existOrFail('consolePageOverlay');
+    },
+
+    /**
+     * Shows the details panel for the given a given endpoint and displays Responder
+     * from the details action menu
+     *
+     * @param [endpointAgentId]
+     */
+    async showResponderFromEndpointDetails(endpointAgentId?: string) {
+      await this.showEndpointDetails(endpointAgentId);
+
+      await testSubjects.click('endpointDetailsActionsButton');
+      await testSubjects.existOrFail('endpointDetailsActionsPopover');
+
+      await testSubjects.click('console');
       await testSubjects.existOrFail('consolePageOverlay');
     },
   };
