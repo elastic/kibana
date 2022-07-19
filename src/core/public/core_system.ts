@@ -16,7 +16,7 @@ import {
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
@@ -203,6 +203,7 @@ export class CoreSystem {
 
       const analytics = this.analytics.setup({ injectedMetadata });
 
+      this.registerLoadedKibanaEventType(analytics);
       registerMetricEvent(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
@@ -373,5 +374,26 @@ export class CoreSystem {
     this.theme.stop();
     this.analytics.stop();
     this.rootDomElement.textContent = '';
+  }
+
+  /**
+   * @deprecated
+   */
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana' },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
+          },
+        },
+      },
+    });
   }
 }
