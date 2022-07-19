@@ -7,12 +7,18 @@
  */
 
 import { Datatable, ExecutionContext } from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, ReferenceLineLayerConfig } from '../types';
 
-export const logDatatables = (layers: CommonXYLayerConfig[], handlers: ExecutionContext) => {
+export const logDatatables = (
+  layers: CommonXYLayerConfig[],
+  handlers: ExecutionContext,
+  splitColumnAccessor?: string | ExpressionValueVisDimension,
+  splitRowAccessor?: string | ExpressionValueVisDimension
+) => {
   if (!handlers?.inspectorAdapters?.tables) {
     return;
   }
@@ -25,7 +31,18 @@ export const logDatatables = (layers: CommonXYLayerConfig[], handlers: Execution
       return;
     }
 
-    const logTable = prepareLogTable(layer.table, getLayerDimensions(layer), true);
+    const layerDimensions = getLayerDimensions(layer);
+
+    layerDimensions.push([
+      splitColumnAccessor ? [splitColumnAccessor] : undefined,
+      strings.getSplitColumnHelp(),
+    ]);
+    layerDimensions.push([
+      splitRowAccessor ? [splitRowAccessor] : undefined,
+      strings.getSplitRowHelp(),
+    ]);
+
+    const logTable = prepareLogTable(layer.table, layerDimensions, true);
     handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
   });
 };
@@ -33,7 +50,9 @@ export const logDatatables = (layers: CommonXYLayerConfig[], handlers: Execution
 export const logDatatable = (
   data: Datatable,
   layers: CommonXYLayerConfig[],
-  handlers: ExecutionContext
+  handlers: ExecutionContext,
+  splitColumnAccessor?: string | ExpressionValueVisDimension,
+  splitRowAccessor?: string | ExpressionValueVisDimension
 ) => {
   if (handlers.inspectorAdapters.tables) {
     handlers.inspectorAdapters.tables.reset();
@@ -47,6 +66,15 @@ export const logDatatable = (
       return [...dimensions, ...getLayerDimensions(layer)];
     }, []);
 
+    layerDimensions.push([
+      splitColumnAccessor ? [splitColumnAccessor] : undefined,
+      strings.getSplitColumnHelp(),
+    ]);
+    layerDimensions.push([
+      splitRowAccessor ? [splitRowAccessor] : undefined,
+      strings.getSplitRowHelp(),
+    ]);
+
     const logTable = prepareLogTable(data, layerDimensions, true);
     handlers.inspectorAdapters.tables.logDatatable('default', logTable);
   }
@@ -57,9 +85,11 @@ export const getLayerDimensions = (
 ): Dimension[] => {
   let xAccessor;
   let splitAccessors;
+  let markSizeAccessor;
   if (layer.layerType === LayerTypes.DATA) {
     xAccessor = layer.xAccessor;
     splitAccessors = layer.splitAccessors;
+    markSizeAccessor = layer.markSizeAccessor;
   }
 
   const { accessors, layerType } = layer;
@@ -70,5 +100,6 @@ export const getLayerDimensions = (
     ],
     [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
     [splitAccessors ? splitAccessors : undefined, strings.getBreakdownHelp()],
+    [markSizeAccessor ? [markSizeAccessor] : undefined, strings.getMarkSizeHelp()],
   ];
 };

@@ -24,9 +24,9 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
 
   // for visialize we should log one datable for all layers
   if (handlers.getExecutionContext()?.name === 'visualize') {
-    logDatatable(data, layers, handlers);
+    logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   } else {
-    logDatatables(layers, handlers);
+    logDatatables(layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   }
 
   const dataLayers = getDataLayers(layers);

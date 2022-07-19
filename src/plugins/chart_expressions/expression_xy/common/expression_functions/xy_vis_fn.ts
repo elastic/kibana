@@ -104,7 +104,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
-  logDatatable(data, layers, handlers);
+  logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
 
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
