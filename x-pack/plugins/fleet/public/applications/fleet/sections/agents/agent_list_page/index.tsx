@@ -227,6 +227,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const fetchData = useCallback(
     ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
       async function fetchDataAsync() {
+        // skipping refresh if previous request is in progress
         if (isLoadingVar.current) {
           return;
         }
