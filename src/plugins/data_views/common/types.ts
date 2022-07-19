@@ -8,7 +8,7 @@
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
-// eslint-disable-next-line
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths,@kbn/imports/uniform_imports
 import type { SavedObject } from 'src/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';

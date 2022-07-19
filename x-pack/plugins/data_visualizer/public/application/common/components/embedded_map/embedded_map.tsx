@@ -108,7 +108,7 @@ export function EmbeddedMapComponent({
 
     setupEmbeddable();
     // we want this effect to execute exactly once after the component mounts
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

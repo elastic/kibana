@@ -489,6 +489,9 @@
               "id": "kibDevDocsOpsEslintPluginImports"
             },
             {
+              "id": "kibDevDocsOpsEslintPluginDisable"
+            },
+            {
               "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]

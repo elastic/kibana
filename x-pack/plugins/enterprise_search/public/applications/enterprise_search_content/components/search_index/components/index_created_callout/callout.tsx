@@ -56,7 +56,7 @@ export const IndexCreatedCallout: React.FC<IndexCreatedCalloutProps> = ({ indexN
             color="success"
             onClick={() => {
               // TODO bind it to AppSearch
-              // eslint-disable-next-line
+              // eslint-disable-next-line no-console
               console.log(indexName);
             }}
           >

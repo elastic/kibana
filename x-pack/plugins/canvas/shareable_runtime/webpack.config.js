@@ -9,7 +9,7 @@ require('../../../../src/setup_node_env');
 
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
+const { stringifyRequest } = require('loader-utils');
 
 const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {

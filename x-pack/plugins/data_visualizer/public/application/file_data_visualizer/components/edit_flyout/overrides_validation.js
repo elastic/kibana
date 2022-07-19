@@ -104,7 +104,7 @@ export function isTimestampFormatValid(timestampFormat) {
               'xpack.dataVisualizer.file.editFlyout.overrides.timestampLetterSValidationErrorMessage',
               {
                 defaultMessage:
-                  'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported because it is not preceded by ss and a separator from {sep}', // eslint-disable-line
+                  'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported because it is not preceded by ss and a separator from {sep}',
                 values: {
                   length,
                   lg: letterGroup,

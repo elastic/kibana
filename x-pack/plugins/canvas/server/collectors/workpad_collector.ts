@@ -251,7 +251,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     try {
       pages = { count: workpad.pages.length };
     } catch (err) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.warn(err, workpad);
     }
     const elementCounts = workpad.pages.reduce<number[]>(

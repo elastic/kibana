@@ -23,7 +23,7 @@ test('render', () => {
       basePath={basePathMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('props', () => {
@@ -36,7 +36,7 @@ describe('props', () => {
         iconType="logoElastic"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('exportedFieldsUrl', () => {
@@ -48,7 +48,7 @@ describe('props', () => {
         exportedFieldsUrl="exported_fields_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('previewUrl', () => {
@@ -60,7 +60,7 @@ describe('props', () => {
         previewUrl="preview_image_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('isBeta', () => {
@@ -72,7 +72,7 @@ describe('props', () => {
         isBeta={true}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('Beats badge should show', () => {

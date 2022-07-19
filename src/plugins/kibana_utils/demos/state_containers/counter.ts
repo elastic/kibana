@@ -26,6 +26,6 @@ const container = createStateContainer(
 container.transitions.increment(5);
 container.transitions.double();
 
-console.log(container.selectors.count()); // eslint-disable-line
+console.log(container.selectors.count()); // eslint-disable-line no-console
 
 export const result = container.selectors.count();
