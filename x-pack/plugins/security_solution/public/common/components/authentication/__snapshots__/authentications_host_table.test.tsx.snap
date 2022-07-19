@@ -66,12 +66,14 @@ exports[`Authentication Host Table Component rendering it renders the host authe
   >
     <div
       class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn"
+      data-test-subj="headerSectionOuterFlexGroup"
     >
       <div
         class="euiFlexItem"
       >
         <div
           class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          data-test-subj="headerSectionInnerFlexGroup"
         >
           <div
             class="euiFlexItem"
