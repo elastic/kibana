@@ -54,6 +54,8 @@ interface EngineCreationValues {
   selectedIndexFormatted?: SearchIndexSelectableOption;
   engineType: EngineType;
   aliasName: string;
+  aliasNameErrorMessage: string;
+  showAliasNameErrorMessages: boolean;
   isAliasAllowed: boolean;
   isAliasRequired: boolean;
   isSubmitDisabled: boolean;
@@ -109,7 +111,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setSelectedIndex: (_, { selectedIndexName }) => {
           return selectedIndexName.length === 0 || selectedIndexName.startsWith('search-')
             ? ''
-            : `search-${selectedIndexName}`;
+            : `search-${selectedIndexName}-alias`;
         },
       },
     ],
@@ -191,6 +193,21 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       (selectedIndex: string, indicesFormatted: SearchIndexSelectableOption[]) => {
         return indicesFormatted.find((el) => el.label === selectedIndex);
       },
+    ],
+    aliasNameErrorMessage: [
+      () => [selectors.aliasName, selectors.indicesFormatted],
+      (aliasName: string, indicesFormatted: SearchIndexSelectableOption[]) => {
+        let existingAlias = indicesFormatted.find((el) => el.label === aliasName);
+        if (existingAlias) {
+          return `There is an existing alias with the name ${aliasName}. Please choose another name.`;
+        } else {
+          return '';
+        }
+      },
+    ],
+    showAliasNameErrorMessages: [
+      () => [selectors.aliasNameErrorMessage],
+      (aliasNameErrorMessage: string) => aliasNameErrorMessage.length > 0,
     ],
   }),
   listeners: ({ values, actions }) => ({

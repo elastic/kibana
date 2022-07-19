@@ -56,6 +56,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
 export const ConfigureElasticsearchEngine: React.FC = () => {
   const {
     aliasName,
+    aliasNameErrorMessage,
     indicesFormatted,
     isAliasAllowed,
     isAliasRequired,
@@ -64,6 +65,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
     isSubmitDisabled,
     name,
     rawName,
+    showAliasNameErrorMessages,
   } = useValues(EngineCreationLogic);
   const {
     loadIndices,
@@ -292,6 +294,8 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                   }
                 )}
                 fullWidth
+                isInvalid={showAliasNameErrorMessages}
+                error={aliasNameErrorMessage}
               >
                 <EuiFieldText
                   name="alias-name"
@@ -302,6 +306,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                   data-test-subj="AliasNameInput"
                   prepend={aliasOptionalOrRequired}
                   disabled={!isAliasAllowed}
+                  isInvalid={showAliasNameErrorMessages}
                 />
               </EuiFormRow>
             </EuiFlexItem>
