@@ -26,6 +26,12 @@ run this API.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[[list-connector-types-api-query-params]]
+=== {api-query-parms-title}
+
+`feature_id`::
+(Optional, string) Filters list of connector types to those that support the feature id.
+
 [[list-connector-types-api-codes]]
 ==== {api-response-codes-title}
 
