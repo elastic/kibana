@@ -63,7 +63,7 @@ export const fetchIndices = async (
 
   const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
     accum.push(indexName);
-    let aliases = Object.keys(totalIndices[indexName].aliases!);
+    const aliases = Object.keys(totalIndices[indexName].aliases!);
 
     aliases.forEach((alias) => accum.push(alias));
     return accum;

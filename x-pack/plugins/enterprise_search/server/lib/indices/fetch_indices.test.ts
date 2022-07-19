@@ -51,7 +51,7 @@ describe('fetchIndices lib function', () => {
   };
 
   mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
-    'index': {
+    index: {
       'index-without-prefix': { read: true, manage: true },
       'search-aliased': { read: true, manage: true },
       'search-double-aliased': { read: true, manage: true },
