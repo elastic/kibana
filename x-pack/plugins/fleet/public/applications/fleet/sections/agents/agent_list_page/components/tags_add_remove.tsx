@@ -7,6 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { difference } from 'lodash';
+import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -25,6 +26,13 @@ import { useUpdateTags } from '../hooks';
 import { sanitizeTag } from '../utils';
 
 import { TagOptions } from './tag_options';
+
+const TruncatedEuiHighlight = styled(EuiHighlight)`
+  width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 interface Props {
   agentId?: string;
@@ -95,11 +103,12 @@ export const TagsAddRemove: React.FC<Props> = ({
   const renderOption = (option: EuiSelectableOption<any>, search: string) => {
     return (
       <EuiFlexGroup
+        gutterSize={'s'}
         onMouseEnter={() => setIsTagHovered({ ...isTagHovered, [option.label]: true })}
         onMouseLeave={() => setIsTagHovered({ ...isTagHovered, [option.label]: false })}
       >
         <EuiFlexItem>
-          <EuiHighlight
+          <TruncatedEuiHighlight
             search={search}
             onClick={() => {
               const tagsToAdd = option.checked === 'on' ? [] : [option.label];
@@ -108,7 +117,7 @@ export const TagsAddRemove: React.FC<Props> = ({
             }}
           >
             {option.label}
-          </EuiHighlight>
+          </TruncatedEuiHighlight>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TagOptions
