@@ -15,9 +15,13 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import {
+  buildRandomSamplerAggregation,
+  SAMPLER_TOP_TERMS_SHARD_SIZE,
+  SAMPLER_TOP_TERMS_THRESHOLD,
+} from './constants';
 import type {
   Aggs,
   Bucket,
@@ -34,6 +38,7 @@ export const getStringFieldStatsRequest = (
 ) => {
   const { index, query, runtimeFieldMap, samplerShardSize } = params;
 
+  console.log('params', params);
   const size = 0;
 
   const aggs: Aggs = {};
@@ -67,9 +72,11 @@ export const getStringFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildRandomSamplerAggregation(aggs, 0.05),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
+
+  console.log('searchBody', searchBody);
 
   return {
     index,

@@ -15,8 +15,9 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { buildRandomSamplerAggregation } from './constants';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
@@ -45,7 +46,7 @@ export const getDateFieldsStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildRandomSamplerAggregation(aggs, 0.05),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
   return {
