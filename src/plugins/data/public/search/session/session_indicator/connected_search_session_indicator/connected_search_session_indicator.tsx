@@ -50,6 +50,10 @@ export const createConnectedSearchSessionIndicator = ({
       sessionService.disableSaveAfterSessionCompleteTimedOut$,
       false
     );
+    const disableSaveAfterSessionContinuedFromDifferentApp = useObservable(
+      sessionService.disableSaveAfterSessionContinuedFromDifferentApp$,
+      false
+    );
     const [searchSessionIndicator, setSearchSessionIndicator] =
       useState<SearchSessionIndicatorRef | null>(null);
     const searchSessionIndicatorRef = useCallback((ref: SearchSessionIndicatorRef) => {
@@ -64,7 +68,10 @@ export const createConnectedSearchSessionIndicator = ({
     let managementDisabled = false;
     let managementDisabledReasonText: string = '';
 
-    if (disableSaveAfterSessionCompleteTimedOut) {
+    if (
+      disableSaveAfterSessionCompleteTimedOut ||
+      disableSaveAfterSessionContinuedFromDifferentApp
+    ) {
       saveDisabled = true;
       saveDisabledReasonText = i18n.translate(
         'data.searchSessionIndicator.disabledDueToTimeoutMessage',

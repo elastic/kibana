@@ -14,13 +14,12 @@ import {
   mapTo,
   mergeMap,
   repeat,
-  share,
   startWith,
   switchMap,
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { EMPTY, from, merge, Observable, of, Subscription, timer } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, merge, Observable, of, Subscription, timer } from 'rxjs';
 import {
   PluginInitializerContext,
   StartServicesAccessor,
@@ -157,7 +156,16 @@ export class SessionService {
    * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed
    * Used to stop keeping searches alive after some times and disabled "save session" button
    */
-  public readonly disableSaveAfterSessionCompleteTimedOut$: Observable<boolean>;
+  public readonly disableSaveAfterSessionCompleteTimedOut$ = new BehaviorSubject<boolean>(false);
+
+  /**
+   * Emits `true` for session that was continued from another app
+   * Need to separate search caching from search session to remove this limitation:
+   * https://github.com/elastic/kibana/issues/121543
+   */
+  public readonly disableSaveAfterSessionContinuedFromDifferentApp$ = new BehaviorSubject<boolean>(
+    false
+  );
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
@@ -196,17 +204,20 @@ export class SessionService {
       .duration(initializerContext.config.get().search.sessions.notTouchedTimeout)
       .asMilliseconds();
 
-    this.disableSaveAfterSessionCompleteTimedOut$ = this.state$.pipe(
-      switchMap((_state) =>
-        _state === SearchSessionState.Completed
-          ? merge(of(false), timer(notTouchedTimeout).pipe(mapTo(true)))
-          : of(false)
-      ),
-      distinctUntilChanged(),
-      tap((value) => {
-        if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
-      }),
-      share()
+    this.subscription.add(
+      this.state$
+        .pipe(
+          switchMap((_state) =>
+            _state === SearchSessionState.Completed
+              ? merge(of(false), timer(notTouchedTimeout).pipe(mapTo(true)))
+              : of(false)
+          ),
+          distinctUntilChanged(),
+          tap((value) => {
+            if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
+          })
+        )
+        .subscribe(this.disableSaveAfterSessionCompleteTimedOut$)
     );
 
     this.subscription.add(
@@ -257,6 +268,8 @@ export class SessionService {
           switchMap((sessionId) => {
             if (!sessionId) return EMPTY;
             if (this.isStored()) return EMPTY; // no need to keep searches alive because session and searches are already stored
+            if (!this.isSessionStorageReady()) return EMPTY; // don't need to keep searches alive if app doesn't allow saving session
+            if (this.disableSaveAfterSessionContinuedFromDifferentApp$.getValue()) return EMPTY; // don't poll searches because it won't be possible to save this session
 
             const schedulePollSearches = () => {
               return timer(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
@@ -398,6 +411,7 @@ export class SessionService {
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
+    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.start({ appName: this.currentApp });
 
     return this.getSessionId()!;
@@ -408,6 +422,7 @@ export class SessionService {
    * @param sessionId
    */
   public restore(sessionId: string) {
+    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
   }
@@ -418,9 +433,16 @@ export class SessionService {
    *
    * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
    * @param sessionId
+   *
+   * TODO: remove this functionality in favor of separate architecture for client side search cache
+   * that won't interfere with saving search sessions
+   * https://github.com/elastic/kibana/issues/121543
+   *
+   * @deprecated
    */
   public continue(sessionId: string) {
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
+      this.disableSaveAfterSessionContinuedFromDifferentApp$.next(true);
       this.state.set({
         ...this.lastSessionSnapshot,
         // have to change a name, so that current app can cancel a session that it continues
@@ -458,6 +480,7 @@ export class SessionService {
     if (this.getSessionId()) {
       this.lastSessionSnapshot = this.state.get();
     }
+    this.disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

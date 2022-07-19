@@ -432,19 +432,19 @@ describe('Session service', () => {
 
       complete();
 
-      expect(emitResult).toEqual([false]);
+      expect(emitResult).toEqual([false, false]);
 
       jest.advanceTimersByTime(2 * 60 * 1000); // 2 minutes
 
-      expect(emitResult).toEqual([false]);
+      expect(emitResult).toEqual([false, false]);
 
       jest.advanceTimersByTime(3 * 60 * 1000); // 3 minutes
 
-      expect(emitResult).toEqual([false, true]);
+      expect(emitResult).toEqual([false, false, true]);
 
       sessionService.start();
 
-      expect(emitResult).toEqual([false, true, false]);
+      expect(emitResult).toEqual([false, false, true, false]);
     });
 
     test('emits usage once', async () => {
