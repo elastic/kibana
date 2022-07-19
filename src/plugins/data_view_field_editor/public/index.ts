@@ -32,5 +32,6 @@ export function plugin() {
 }
 
 // Expose types
+export type { FormatEditorServiceStart } from './service';
 export type { OpenFieldEditorOptions } from './open_editor';
 export type { OpenFieldDeleteModalOptions } from './open_delete_modal';
