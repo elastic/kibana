@@ -52,7 +52,7 @@ const SCRIPT_RECORDER_BTNS = (
     <EuiFlexItem grow={false}>
       <EuiButton href={`elastic-synthetics-recorder://`} iconType="popout" iconSide="right">
         {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.launch', {
-          defaultMessage: 'Launch Script Recorder',
+          defaultMessage: 'Launch Synthetics Recorder',
         })}
       </EuiButton>
     </EuiFlexItem>
