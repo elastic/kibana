@@ -67,7 +67,7 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const { TopNavMenu } = navigation.ui;
+  const { AggregateQueryTopNavMenu } = navigation.ui;
 
   const onOpenSavedSearch = useCallback(
     (newSavedSearchId: string) => {
@@ -210,7 +210,7 @@ export const DiscoverTopNav = ({
   );
 
   return (
-    <TopNavMenu
+    <AggregateQueryTopNavMenu
       appName="discover"
       config={topNavMenu}
       indexPatterns={[indexPattern]}

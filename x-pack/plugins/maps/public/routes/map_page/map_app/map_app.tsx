@@ -407,7 +407,7 @@ export class MapApp extends React.Component<Props, State> {
 
     const { TopNavMenu } = getNavigation().ui;
     return (
-      <TopNavMenu<Query>
+      <TopNavMenu
         setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
         config={topNavConfig}

@@ -135,7 +135,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     [filterManager, indexPatterns, indexPattern, capabilities]
   );
 
-  const TopNavMenu = navigation.ui.TopNavMenu;
+  const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
     return {
       appName: 'context',

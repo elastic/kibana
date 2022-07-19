@@ -16,9 +16,8 @@ export interface NavigationPublicPluginSetup {
 
 export interface NavigationPublicPluginStart {
   ui: {
-    TopNavMenu: <QT extends Query | AggregateQuery = Query>(
-      props: TopNavMenuProps<QT>
-    ) => React.ReactElement;
+    TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
+    AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
   };
 }
 
