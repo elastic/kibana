@@ -59,8 +59,6 @@ export const RUM_AGENT_NAMES: AgentName[] = [
   'opentelemetry/webjs',
 ];
 
-export const MOBILE_AGENT_NAMES: AgentName[] = ['iOS/swift', 'android/java'];
-
 export function isRumAgentName(
   agentName?: string
 ): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
@@ -70,7 +68,7 @@ export function isRumAgentName(
 export function isMobileAgentName(
   agentName?: string
 ): agentName is 'iOS/swift' | 'android/java' {
-  return MOBILE_AGENT_NAMES.includes(agentName! as AgentName);
+  return isIosAgentName(agentName! as AgentName) || isAndroidAgentName(agentName! as AgentName);
 }
 
 export function normalizeAgentName<T extends string | undefined>(
