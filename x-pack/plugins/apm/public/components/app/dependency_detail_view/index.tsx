@@ -32,7 +32,7 @@ export function DependencyDetailView({
   const apmRouter = useApmRouter();
 
   useBreadcrumb(
-    [
+    () => [
       {
         title: DependenciesInventoryTitle,
         href: apmRouter.link('/dependencies/inventory', {
@@ -63,7 +63,17 @@ export function DependencyDetailView({
         }),
       },
     ],
-    []
+    [
+      apmRouter,
+      comparisonEnabled,
+      dependencyName,
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+    ]
   );
   return <DependencyDetailTemplate>{children}</DependencyDetailTemplate>;
 }

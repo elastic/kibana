@@ -45,14 +45,14 @@ export function TransactionDetails() {
   }
 
   useBreadcrumb(
-    {
+    () => ({
       title: transactionName,
       href: apmRouter.link('/services/{serviceName}/transactions/view', {
         path,
         query,
       }),
-    },
-    []
+    }),
+    [apmRouter, path, query, transactionName]
   );
 
   const isServerless = isServerlessAgent(runtimeName);

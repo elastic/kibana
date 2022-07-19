@@ -128,7 +128,7 @@ export function ErrorGroupDetails() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb(
-    {
+    () => ({
       title: groupId,
       href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
         path: {
@@ -144,8 +144,18 @@ export function ErrorGroupDetails() {
           comparisonEnabled,
         },
       }),
-    },
-    []
+    }),
+    [
+      apmRouter,
+      comparisonEnabled,
+      environment,
+      groupId,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      serviceGroup,
+      serviceName,
+    ]
   );
 
   const { data: errorGroupData } = useFetcher(

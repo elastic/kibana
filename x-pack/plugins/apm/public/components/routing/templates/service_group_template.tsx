@@ -117,7 +117,7 @@ export function ServiceGroupTemplate({
   const tabs = useTabs(serviceGroupContextTab);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
   useBreadcrumb(
-    [
+    () => [
       {
         title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
           defaultMessage: 'Services',
@@ -141,7 +141,7 @@ export function ServiceGroupTemplate({
           ]
         : []),
     ],
-    []
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
   );
   return (
     <ApmMainTemplate

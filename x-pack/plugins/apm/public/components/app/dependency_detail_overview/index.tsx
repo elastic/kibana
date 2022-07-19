@@ -31,7 +31,7 @@ export function DependencyDetailOverview() {
   const apmRouter = useApmRouter();
 
   useBreadcrumb(
-    [
+    () => [
       {
         title: i18n.translate(
           'xpack.apm.dependencyDetailOverview.breadcrumbTitle',
@@ -51,7 +51,17 @@ export function DependencyDetailOverview() {
         }),
       },
     ],
-    []
+    [
+      apmRouter,
+      comparisonEnabled,
+      dependencyName,
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+    ]
   );
 
   return (

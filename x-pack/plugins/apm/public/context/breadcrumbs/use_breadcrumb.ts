@@ -11,7 +11,7 @@ import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
 
 export function useBreadcrumb(
-  breadcrumb: Breadcrumb | Breadcrumb[],
+  callback: () => Breadcrumb | Breadcrumb[],
   fnDeps: any[]
 ) {
   const api = useContext(BreadcrumbsContext);
@@ -32,7 +32,7 @@ export function useBreadcrumb(
     matchedRoute.current = match?.route;
 
     if (matchedRoute.current) {
-      api.set(matchedRoute.current, castArray(breadcrumb));
+      api.set(matchedRoute.current, castArray(callback()));
     }
 
     return () => {
