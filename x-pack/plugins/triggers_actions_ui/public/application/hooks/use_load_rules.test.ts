@@ -13,11 +13,11 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleStatus } from '../../types';
 
-jest.mock('../lib/rule_api', () => ({
+jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
 
-const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api');
+const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api/rules_kuery_filter');
 
 const onError = jest.fn();
 const onPage = jest.fn();

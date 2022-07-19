@@ -42,6 +42,9 @@ jest.mock('../../../lib/rule_api', () => ({
     hasPermanentEncryptionKey: true,
   })),
 }));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
+jest.mock('../../../lib/rule_api/rules_kuery_filter');
+
 jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
@@ -70,13 +73,11 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const {
-  loadRulesWithKueryFilter,
-  loadRuleTypes,
-  loadRuleAggregationsWithKueryFilter,
-  updateAPIKey,
-  loadRuleTags,
-} = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, updateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../../../lib/rule_api/aggregate_kuery_filter'
+);
+const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();

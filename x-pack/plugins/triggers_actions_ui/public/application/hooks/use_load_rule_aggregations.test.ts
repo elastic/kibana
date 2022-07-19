@@ -18,11 +18,13 @@ const MOCK_AGGS = {
   ruleTags: MOCK_TAGS,
 };
 
-jest.mock('../lib/rule_api', () => ({
+jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
 
-const { loadRuleAggregationsWithKueryFilter } = jest.requireMock('../lib/rule_api');
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../lib/rule_api/aggregate_kuery_filter'
+);
 
 const onError = jest.fn();
 
