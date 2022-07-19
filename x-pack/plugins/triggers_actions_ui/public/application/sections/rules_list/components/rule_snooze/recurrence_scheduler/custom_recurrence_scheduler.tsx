@@ -7,7 +7,6 @@
 
 import {
   EuiButtonGroup,
-  EuiFieldNumber,
   EuiFormControlLayout,
   EuiFormRow,
   EuiSelect,
@@ -19,6 +18,7 @@ import deepEqual from 'fast-deep-equal';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
+import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency } from '../../../../../../types';
 import { I18N_WEEKDAY_OPTIONS } from './constants';
 import {
@@ -140,12 +140,12 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
                 }
               )}
             >
-              <EuiFieldNumber
+              <NumberField
                 compressed
                 data-test-subj="customRecurrenceSchedulerInterval"
                 min={intervalMin}
                 value={interval}
-                onChange={(e) => setInterval(Number(e.target.value))}
+                onChange={(value) => setInterval(Number(value))}
               />
             </EuiFormControlLayout>
           </EuiFlexItem>
