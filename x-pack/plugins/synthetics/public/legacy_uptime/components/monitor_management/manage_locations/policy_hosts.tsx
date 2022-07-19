@@ -124,13 +124,6 @@ const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLa
   defaultMessage: 'Agents: ',
 });
 
-const ALREADY_ATTACHED = i18n.translate(
-  'xpack.synthetics.monitorManagement.anotherPrivateLocation',
-  {
-    defaultMessage: 'This agent policy is already attached to another private location.',
-  }
-);
-
 const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.selectPolicyHost', {
   defaultMessage: 'Select agent policy',
 });
