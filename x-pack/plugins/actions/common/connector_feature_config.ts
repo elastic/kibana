@@ -49,7 +49,7 @@ export const UptimeConnectorFeature: ConnectorFeatureConfig = {
 export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   id: SecurityConnectorFeatureId,
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
-    defaultMessage: 'Security Solutions',
+    defaultMessage: 'Security Solution',
   }),
 };
 
