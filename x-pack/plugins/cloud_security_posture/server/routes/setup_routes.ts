@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -18,6 +18,10 @@ import { defineUpdateRulesConfigRoute } from './configuration/update_rules_confi
 import { defineGetCspSetupStatusRoute } from './status/status';
 import { defineEsPitRoute } from './es_pit/es_pit';
 
+/**
+ * 1. Registers routes
+ * 2. Registers routes handler context
+ */
 export function setupRoutes({
   core,
   logger,
@@ -34,39 +38,23 @@ export function setupRoutes({
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
-    (context, request) =>
-      createCspRouteContext({
-        core,
+    async (context, request) => {
+      const [, { security, fleet }] = await core.getStartServices();
+      const coreContext = await context.core;
+      await fleet.fleetSetupCompleted();
+
+      return {
+        get user() {
+          return security.authc.getCurrentUser(request);
+        },
         logger,
-        context,
-        request,
-      })
+        esClient: coreContext.elasticsearch.client,
+        soClient: coreContext.savedObjects.client,
+        agentPolicyService: fleet.agentPolicyService,
+        agentService: fleet.agentService,
+        packagePolicyService: fleet.packagePolicyService,
+        packageService: fleet.packageService,
+      };
+    }
   );
-}
-
-async function createCspRouteContext({
-  core,
-  logger,
-  context,
-  request,
-}: {
-  core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>;
-  logger: Logger;
-  context: Omit<CspRequestHandlerContext, 'csp'>;
-  request: KibanaRequest;
-}) {
-  const [, { security, fleet }] = await core.getStartServices();
-
-  await fleet.fleetSetupCompleted();
-
-  return {
-    logger,
-    security,
-    fleet: {
-      agentPolicyService: fleet.agentPolicyService,
-      agentService: fleet.agentService,
-      packagePolicyService: fleet.packagePolicyService,
-      packageService: fleet.packageService,
-    },
-  };
 }

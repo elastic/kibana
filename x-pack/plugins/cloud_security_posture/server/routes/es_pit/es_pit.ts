@@ -34,8 +34,7 @@ export const defineEsPitRoute = (router: CspRouter): void =>
       }
 
       try {
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const esClient = cspContext.esClient.asCurrentUser;
         const { id } = await esClient.openPointInTime({
           index: request.query.index_name,
           keep_alive: request.query.keep_alive,

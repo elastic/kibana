@@ -27,7 +27,7 @@ import type {
   CspServerPluginStartDeps,
   CspServerPluginStartServices,
 } from './types';
-import { defineRoutes } from './routes';
+import { setupRoutes } from './routes/setup_routes';
 import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
@@ -64,12 +64,6 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    const cspAppContext: CspAppContext = {
-      logger: this.logger,
-      service: this.CspAppService,
-      security: plugins.security,
-    };
-
     setupSavedObjects(core.savedObjects);
 
     setupRoutes({

@@ -45,7 +45,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
       const cspContext = await context.csp;
 
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const esClient = cspContext.esClient.asCurrentUser;
 
         const { id: pitId } = await esClient.openPointInTime({
           index: LATEST_FINDINGS_INDEX_DEFAULT_NS,

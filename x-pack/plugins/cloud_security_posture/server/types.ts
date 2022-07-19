@@ -12,7 +12,14 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { IRouter, CoreStart, CustomRequestHandlerContext, Logger } from '@kbn/core/server';
+import type {
+  IRouter,
+  CoreStart,
+  CustomRequestHandlerContext,
+  Logger,
+  SavedObjectsClientContract,
+  IScopedClusterClient,
+} from '@kbn/core/server';
 import type {
   AgentService,
   PackageService,
@@ -48,14 +55,14 @@ export type CspServerPluginStartServices = Promise<
 >;
 
 interface CspApiRequestHandlerContext {
+  user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
   logger: Logger;
-  security: SecurityPluginStart;
-  fleet: {
-    agentPolicyService: AgentPolicyServiceInterface;
-    agentService: AgentService;
-    packagePolicyService: PackagePolicyServiceInterface;
-    packageService: PackageService;
-  };
+  esClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+  agentPolicyService: AgentPolicyServiceInterface;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyServiceInterface;
+  packageService: PackageService;
 }
 
 export type CspRequestHandlerContext = CustomRequestHandlerContext<{

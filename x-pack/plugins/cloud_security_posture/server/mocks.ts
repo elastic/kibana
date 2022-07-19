@@ -14,19 +14,21 @@ import {
   createPackagePolicyServiceMock,
   createMockPackageService,
 } from '@kbn/fleet-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
+
+const coreMockRequestContext = coreMock.createRequestHandlerContext();
 
 export const createCspRequestHandlerContextMock = () => ({
-  core: coreMock.createRequestHandlerContext(),
+  core: coreMockRequestContext,
   fleet: createFleetRequestHandlerContextMock(),
   csp: {
+    user: mockAuthenticatedUser(),
     logger: loggingSystemMock.createLogger(),
-    security: securityMock.createStart(),
-    fleet: {
-      agentPolicyService: createMockAgentPolicyService(),
-      agentService: createMockAgentService(),
-      packagePolicyService: createPackagePolicyServiceMock(),
-      packageService: createMockPackageService(),
-    },
+    esClient: coreMockRequestContext.elasticsearch.client,
+    soClient: coreMockRequestContext.savedObjects.client,
+    agentPolicyService: createMockAgentPolicyService(),
+    agentService: createMockAgentService(),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    packageService: createMockPackageService(),
   },
 });

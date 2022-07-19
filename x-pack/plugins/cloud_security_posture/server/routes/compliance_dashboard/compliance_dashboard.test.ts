@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-'@kbn/core/server/elasticsearch/client/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 import { createCspRequestHandlerContextMock } from '../../mocks';
 

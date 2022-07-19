@@ -30,6 +30,7 @@ import { Chance } from 'chance';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 import { DeepPartial } from 'utility-types';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('Update rules configuration API', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;

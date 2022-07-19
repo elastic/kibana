@@ -4,17 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import {
-  ElasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,

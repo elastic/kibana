@@ -20,7 +20,7 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
-import { CspAppContext } from '../../plugin';
+
 import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -141,25 +141,18 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter): void =>
       }
 
       try {
-        const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const soClient = coreContext.savedObjects.client;
-        const user = await cspContext.security.authc.getCurrentUser(request);
-        const packagePolicyService = cspContext.fleet.packagePolicyService;
-        const packagePolicyId = request.body.package_policy_id;
-
         const packagePolicy = await getPackagePolicy(
-          soClient,
-          packagePolicyService,
-          packagePolicyId
+          cspContext.soClient,
+          cspContext.packagePolicyService,
+          request.body.package_policy_id
         );
 
         const updatedPackagePolicy = await updateAgentConfiguration(
-          packagePolicyService,
+          cspContext.packagePolicyService,
           packagePolicy,
-          esClient,
-          soClient,
-          user
+          cspContext.esClient.asCurrentUser,
+          cspContext.soClient,
+          cspContext.user
         );
 
         return response.ok({ body: updatedPackagePolicy });
