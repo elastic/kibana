@@ -1,5 +1,6 @@
 plugins:
   - stylelint-scss
+customSyntax: postcss-scss
 rules:
   color-no-invalid-hex: true
   string-no-newline: true
