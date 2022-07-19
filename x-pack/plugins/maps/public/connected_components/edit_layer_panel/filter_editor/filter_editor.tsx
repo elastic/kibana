@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -33,7 +33,7 @@ import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox
 
 export interface Props {
   layer: ILayer;
-  setLayerQuery: (id: string, query: Query | AggregateQuery) => void;
+  setLayerQuery: (id: string, query: Query) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
   isFeatureEditorOpenForLayer: boolean;
 }
@@ -101,7 +101,7 @@ export class FilterEditor extends Component<Props, State> {
     this.setState({ isPopoverOpen: false });
   };
 
-  _onQueryChange = ({ query }: { query?: Query | AggregateQuery }) => {
+  _onQueryChange = ({ query }: { query?: Query }) => {
     if (!query) {
       return;
     }
