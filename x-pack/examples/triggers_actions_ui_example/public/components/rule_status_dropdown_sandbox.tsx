@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import moment from 'moment';
-import { getRuleStatusDropdownLazy } from '../../../common/get_rule_status_dropdown';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
-export const RuleStatusDropdownSandbox: React.FC<{}> = () => {
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
+export const RuleStatusDropdownSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const [enabled, setEnabled] = useState(true);
   const [isSnoozedUntil, setIsSnoozedUntil] = useState<Date | null>(null);
   const [muteAll, setMuteAll] = useState(false);
 
-  return getRuleStatusDropdownLazy({
+  return triggersActionsUi.getRuleStatusDropdown({
     rule: {
       enabled,
       isSnoozedUntil,

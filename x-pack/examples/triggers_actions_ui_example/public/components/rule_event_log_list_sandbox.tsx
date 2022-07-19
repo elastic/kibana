@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { getRuleEventLogListLazy } from '../../../common/get_rule_event_log_list';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
-export const RuleEventLogListSandbox = () => {
-  const props: any = {
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
+export const RuleEventLogListSandbox = ({ triggersActionsUi }: SandboxProps) => {
+  const componenProps: any = {
     rule: {
       id: 'test',
     },
@@ -40,5 +44,7 @@ export const RuleEventLogListSandbox = () => {
     }),
   };
 
-  return <div style={{ height: '400px' }}>{getRuleEventLogListLazy(props)}</div>;
+  return (
+    <div style={{ height: '400px' }}>{triggersActionsUi.getRuleEventLogList(componenProps)}</div>
+  );
 };
