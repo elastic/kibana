@@ -27,9 +27,9 @@ const actionParams = {
   subAction: 'pushToService',
   subActionParams: {
     incident: {
-      summary: 'sn title',
+      title: 'sn title',
       description: 'some description',
-      labels: ['kibana'],
+      tags: ['kibana'],
       externalId: null,
     },
     comments: [],
@@ -61,7 +61,7 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();

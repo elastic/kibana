@@ -33,7 +33,7 @@ const config: CasesWebhookPublicConfigurationType = {
   createCommentUrl:
     'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
-    '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   createIncidentMethod: CasesWebhookMethods.POST,
   createIncidentResponseKey: 'id',
   createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
@@ -45,7 +45,7 @@ const config: CasesWebhookPublicConfigurationType = {
   incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
   updateIncidentJson:
-    '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+    '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: CasesWebhookMethods.PUT,
   updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
 };
@@ -129,7 +129,7 @@ describe('Cases webhook service', () => {
         id: '1',
         key: 'CK-1',
         fields: {
-          summary: 'title',
+          title: 'title',
           description: 'description',
           created: '2021-10-20T19:41:02.754+0300',
           updated: '2021-10-20T19:41:02.754+0300',
@@ -137,14 +137,14 @@ describe('Cases webhook service', () => {
       },
     };
 
-    test('it returns the incident correctly', async () => {
+    test.only('it returns the incident correctly', async () => {
       requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
       const res = await service.getIncident('1');
       expect(res).toEqual({
         id: '1',
         title: 'CK-1',
-        created: '2021-10-20T19:41:02.754+0300',
-        updated: '2021-10-20T19:41:02.754+0300',
+        createdAt: '2021-10-20T19:41:02.754+0300',
+        updatedAt: '2021-10-20T19:41:02.754+0300',
       });
     });
 
@@ -195,9 +195,9 @@ describe('Cases webhook service', () => {
   describe('createIncident', () => {
     const incident = {
       incident: {
-        summary: 'title',
+        title: 'title',
         description: 'desc',
-        labels: ['hello', 'world'],
+        tags: ['hello', 'world'],
         issueType: '10006',
         priority: 'High',
         parent: 'RJ-107',
@@ -207,7 +207,7 @@ describe('Cases webhook service', () => {
     test('it creates the incident correctly', async () => {
       requestMock.mockImplementationOnce(() =>
         createAxiosResponse({
-          data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
+          data: { id: '1', key: 'CK-1', fields: { title: 'title', description: 'description' } },
         })
       );
 
@@ -224,7 +224,7 @@ describe('Cases webhook service', () => {
       const res = await service.createIncident(incident);
 
       expect(requestMock.mock.calls[0][0].data).toEqual(
-        `{"fields":{"summary":"title","description":"desc","labels":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`
+        `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`
       );
 
       expect(res).toEqual({
@@ -264,7 +264,7 @@ describe('Cases webhook service', () => {
         logger,
         method: CasesWebhookMethods.POST,
         configurationUtilities,
-        data: `{"fields":{"summary":"title","description":"desc","labels":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
+        data: `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
       });
     });
 
@@ -303,9 +303,9 @@ describe('Cases webhook service', () => {
     const incident = {
       incidentId: '1',
       incident: {
-        summary: 'title',
+        title: 'title',
         description: 'desc',
-        labels: ['hello', 'world'],
+        tags: ['hello', 'world'],
       },
     };
 
@@ -351,9 +351,9 @@ describe('Cases webhook service', () => {
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
         data: JSON.stringify({
           fields: {
-            summary: 'title',
+            title: 'title',
             description: 'desc',
-            labels: ['hello', 'world'],
+            tags: ['hello', 'world'],
             project: { key: 'ROC' },
             issuetype: { id: '10024' },
           },

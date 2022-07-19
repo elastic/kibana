@@ -104,8 +104,8 @@ export interface ExternalServiceCommentResponse {
 export interface GetIncidentResponse {
   id: string;
   title: string;
-  created: string;
-  updated: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ExternalServiceApi {
@@ -113,8 +113,3 @@ export interface ExternalServiceApi {
 }
 
 export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;
-
-export interface ResponseError {
-  errorMessages: string[] | null | undefined;
-  errors: { [k: string]: string } | null | undefined;
-}

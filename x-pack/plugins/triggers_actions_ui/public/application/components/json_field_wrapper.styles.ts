@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { css } from '@emotion/react';
 
-export const CasesWebhookFieldsRT = rt.record(
-  rt.string,
-  rt.union([rt.string, rt.array(rt.string), rt.undefined, rt.null])
-);
-
-export type CasesWebhookFieldsType = rt.TypeOf<typeof CasesWebhookFieldsRT>;
+export const styles = {
+  editor: css`
+    .euiFormRow__fieldWrapper .kibanaCodeEditor {
+      height: auto;
+    }
+  `,
+};

@@ -67,9 +67,9 @@ describe('api', () => {
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
         incident: {
-          labels: ['kibana', 'elastic'],
+          tags: ['kibana', 'elastic'],
           description: 'Incident description',
-          summary: 'Incident title',
+          title: 'Incident title',
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -146,9 +146,9 @@ describe('api', () => {
       expect(externalService.updateIncident).toHaveBeenCalledWith({
         incidentId: 'incident-3',
         incident: {
-          labels: ['kibana', 'elastic'],
+          tags: ['kibana', 'elastic'],
           description: 'Incident description',
-          summary: 'Incident title',
+          title: 'Incident title',
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -162,8 +162,8 @@ describe('api', () => {
         incidentId: 'incident-3',
         incident: {
           description: 'Incident description',
-          summary: 'Incident title',
-          labels: ['kibana', 'elastic'],
+          title: 'Incident title',
+          tags: ['kibana', 'elastic'],
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();

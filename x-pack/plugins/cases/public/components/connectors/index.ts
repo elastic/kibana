@@ -13,7 +13,6 @@ import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webhook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import {
-  CasesWebhookFieldsType,
   JiraFieldsType,
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
@@ -43,7 +42,7 @@ class CaseConnectors {
     );
     this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
     this.caseConnectorsRegistry.register<SwimlaneFieldsType>(getSwimlaneCaseConnector());
-    this.caseConnectorsRegistry.register<CasesWebhookFieldsType>(getCasesWebhookCaseConnector());
+    this.caseConnectorsRegistry.register<null>(getCasesWebhookCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {

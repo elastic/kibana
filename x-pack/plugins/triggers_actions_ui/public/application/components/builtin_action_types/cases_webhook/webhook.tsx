@@ -35,15 +35,15 @@ export function getActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
-        'subActionParams.incident.summary': new Array<string>(),
+        'subActionParams.incident.title': new Array<string>(),
       };
       const validationResult = { errors };
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
-        !actionParams.subActionParams.incident.summary?.length
+        !actionParams.subActionParams.incident.title?.length
       ) {
-        errors['subActionParams.incident.summary'].push(translations.SUMMARY_REQUIRED);
+        errors['subActionParams.incident.title'].push(translations.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

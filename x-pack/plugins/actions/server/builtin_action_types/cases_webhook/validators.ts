@@ -25,63 +25,27 @@ const validateConfig = (
     updateIncidentUrl,
   } = configObject;
 
-  try {
-    new URL(createIncidentUrl);
-  } catch (err) {
-    return i18n.INVALID_URL(err, 'createIncidentUrl');
-  }
+  const urls = [
+    createCommentUrl,
+    createIncidentUrl,
+    incidentViewUrl,
+    getIncidentUrl,
+    updateIncidentUrl,
+  ];
 
-  try {
-    configurationUtilities.ensureUriAllowed(createIncidentUrl);
-  } catch (allowListError) {
-    return i18n.CONFIG_ERR(allowListError.message);
-  }
-  if (createCommentUrl) {
-    try {
-      new URL(createCommentUrl);
-    } catch (err) {
-      return i18n.INVALID_URL(err, 'createCommentUrl');
+  for (const url of urls) {
+    if (url) {
+      try {
+        new URL(url);
+      } catch (err) {
+        return i18n.INVALID_URL(err, url);
+      }
+      try {
+        configurationUtilities.ensureUriAllowed(url);
+      } catch (allowListError) {
+        return i18n.CONFIG_ERR(allowListError.message);
+      }
     }
-
-    try {
-      configurationUtilities.ensureUriAllowed(createCommentUrl);
-    } catch (allowListError) {
-      return i18n.CONFIG_ERR(allowListError.message);
-    }
-  }
-
-  try {
-    new URL(incidentViewUrl);
-  } catch (err) {
-    return i18n.INVALID_URL(err, 'incidentViewUrl');
-  }
-
-  try {
-    configurationUtilities.ensureUriAllowed(incidentViewUrl);
-  } catch (allowListError) {
-    return i18n.CONFIG_ERR(allowListError.message);
-  }
-  try {
-    new URL(getIncidentUrl);
-  } catch (err) {
-    return i18n.INVALID_URL(err, 'getIncidentUrl');
-  }
-
-  try {
-    configurationUtilities.ensureUriAllowed(getIncidentUrl);
-  } catch (allowListError) {
-    return i18n.CONFIG_ERR(allowListError.message);
-  }
-  try {
-    new URL(updateIncidentUrl);
-  } catch (err) {
-    return i18n.INVALID_URL(err, 'updateIncidentUrl');
-  }
-
-  try {
-    configurationUtilities.ensureUriAllowed(updateIncidentUrl);
-  } catch (allowListError) {
-    return i18n.CONFIG_ERR(allowListError.message);
   }
 };
 

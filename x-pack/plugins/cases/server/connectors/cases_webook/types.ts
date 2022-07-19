@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { CasesWebhookFieldsType } from '../../../common/api';
 import { ICasesConnector } from '../types';
 
-interface ExternalServiceFormatterParams extends CasesWebhookFieldsType {
-  labels: string[];
-}
-
-export type CasesWebhookCaseConnector = ICasesConnector<ExternalServiceFormatterParams>;
-export type Format = ICasesConnector<ExternalServiceFormatterParams>['format'];
-export type GetMapping = ICasesConnector<ExternalServiceFormatterParams>['getMapping'];
+export type CasesWebhookCaseConnector = ICasesConnector;
+export type Format = ICasesConnector['format'];
+export type GetMapping = ICasesConnector['getMapping'];

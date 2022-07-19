@@ -11,8 +11,8 @@ import {
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback } from 'react';
-import './json_field_wrapper.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { styles } from './json_field_wrapper.styles';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 
 interface Props {
@@ -36,18 +36,20 @@ export const JsonFieldWrapper = ({ field, ...rest }: Props) => {
   );
 
   return (
-    <JsonEditorWithMessageVariables
-      errors={errorMessage ? [errorMessage] : []}
-      helpText={<p>{helpText}</p>}
-      inputTargetValue={value}
-      label={
-        label ??
-        i18n.translate('xpack.triggersActionsUI.jsonFieldWrapper.defaultLabel', {
-          defaultMessage: 'JSON Editor',
-        })
-      }
-      onDocumentsChange={onJsonUpdate}
-      {...rest}
-    />
+    <span css={styles.editor}>
+      <JsonEditorWithMessageVariables
+        errors={errorMessage ? [errorMessage] : []}
+        helpText={<p>{helpText}</p>}
+        inputTargetValue={value}
+        label={
+          label ??
+          i18n.translate('xpack.triggersActionsUI.jsonFieldWrapper.defaultLabel', {
+            defaultMessage: 'JSON Editor',
+          })
+        }
+        onDocumentsChange={onJsonUpdate}
+        {...rest}
+      />
+    </span>
   );
 };

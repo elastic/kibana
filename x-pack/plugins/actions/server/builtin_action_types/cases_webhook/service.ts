@@ -14,7 +14,7 @@ import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
-  makeCaseStringy,
+  stringifyObjValues,
   removeSlash,
   throwIfResponseIsNotValidSpecial,
 } from './utils';
@@ -76,7 +76,10 @@ export const createExternalService = (
     ...(hasAuth && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {}),
-    ...(headers != null ? { headers } : {}),
+    headers: {
+      ['content-type']: 'application/json',
+      ...(headers != null ? headers : {}),
+    },
   });
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
@@ -103,19 +106,19 @@ export const createExternalService = (
         ],
       });
 
-      const title = getObjectValueByKey(res.data, getIncidentResponseExternalTitleKey);
-      const created = getObjectValueByKey(res.data, getIncidentResponseCreatedDateKey);
-      const updated = getObjectValueByKey(res.data, getIncidentResponseUpdatedDateKey);
-      return { id, title, created, updated };
+      const title = getObjectValueByKey<string>(res.data, getIncidentResponseExternalTitleKey);
+      const createdAt = getObjectValueByKey<string>(res.data, getIncidentResponseCreatedDateKey);
+      const updatedAt = getObjectValueByKey<string>(res.data, getIncidentResponseUpdatedDateKey);
+      return { id, title, createdAt, updatedAt };
     } catch (error) {
-      throw createServiceError(error, 'Unable to get incident');
+      throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   };
 
   const createIncident = async ({
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
-    const { labels, summary, description } = incident;
+    const { tags, title, description } = incident;
     try {
       const res: AxiosResponse = await request({
         axios: axiosInstance,
@@ -124,10 +127,10 @@ export const createExternalService = (
         method: createIncidentMethod,
         data: renderMustacheStringNoEscape(
           createIncidentJson,
-          makeCaseStringy({
-            title: summary,
+          stringifyObjValues({
+            title,
             description: description ?? '',
-            tags: labels ?? [],
+            tags: tags ?? [],
           })
         ),
         configurationUtilities,
@@ -139,7 +142,7 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
-      const externalId = getObjectValueByKey(data, createIncidentResponseKey);
+      const externalId = getObjectValueByKey<string>(data, createIncidentResponseKey);
       const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
@@ -155,7 +158,7 @@ export const createExternalService = (
             },
           },
         }),
-        pushedDate: getPushedDate(insertedIncident.created),
+        pushedDate: getPushedDate(insertedIncident.createdAt),
       };
     } catch (error) {
       throw createServiceError(error, 'Unable to create incident');
@@ -167,7 +170,7 @@ export const createExternalService = (
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
-      const { labels, summary, description } = incident;
+      const { tags, title, description } = incident;
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
@@ -181,10 +184,10 @@ export const createExternalService = (
         logger,
         data: renderMustacheStringNoEscape(
           updateIncidentJson,
-          makeCaseStringy({
-            ...(summary ? { title: summary } : {}),
+          stringifyObjValues({
+            ...(title ? { title } : {}),
             ...(description ? { description } : {}),
-            ...(labels ? { tags: labels } : {}),
+            ...(tags ? { tags } : {}),
           })
         ),
         configurationUtilities,
@@ -207,7 +210,7 @@ export const createExternalService = (
             },
           },
         }),
-        pushedDate: getPushedDate(updatedIncident.updated),
+        pushedDate: getPushedDate(updatedIncident.updatedAt),
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
@@ -232,7 +235,7 @@ export const createExternalService = (
         logger,
         data: renderMustacheStringNoEscape(
           createCommentJson,
-          makeCaseStringy({ comment: comment.comment })
+          stringifyObjValues({ comment: comment.comment })
         ),
         configurationUtilities,
       });
@@ -240,7 +243,6 @@ export const createExternalService = (
       throwIfResponseIsNotValidSpecial({
         res,
       });
-      return res.data;
     } catch (error) {
       throw createServiceError(error, `Unable to create comment at incident with id ${incidentId}`);
     }

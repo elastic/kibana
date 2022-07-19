@@ -13,7 +13,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
       Promise.resolve({
         id: 'incident-1',
         key: 'CK-1',
-        summary: 'title from jira',
+        title: 'title from jira',
         description: 'description from jira',
         created: '2020-04-27T10:59:46.202Z',
         updated: '2020-04-27T10:59:46.202Z',
@@ -64,9 +64,9 @@ export const externalServiceMock = {
 const executorParams: ExecutorSubActionPushParams = {
   incident: {
     externalId: 'incident-3',
-    summary: 'Incident title',
+    title: 'Incident title',
     description: 'Incident description',
-    labels: ['kibana', 'elastic'],
+    tags: ['kibana', 'elastic'],
   },
   comments: [
     {

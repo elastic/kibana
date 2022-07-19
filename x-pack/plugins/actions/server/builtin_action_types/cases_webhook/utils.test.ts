@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getObjectValueByKey, throwIfResponseIsNotValidSpecial } from './utils';
+import { getObjectValueByKey, stringifyObjValues, throwIfResponseIsNotValidSpecial } from './utils';
 
 const bigOlObject = {
   fields: {
@@ -33,20 +33,20 @@ const bigOlObject = {
 describe('cases_webhook/utils', () => {
   describe('getObjectValueByKey()', () => {
     it('Handles a simple key', () => {
-      expect(getObjectValueByKey(bigOlObject, 'field.simple')).toEqual('simple');
+      expect(getObjectValueByKey<string | unknown>(bigOlObject, 'field.simple')).toEqual('simple');
     });
     it('Handles a complicated key', () => {
-      expect(getObjectValueByKey(bigOlObject, 'fields.id[0].good.cool')).toEqual('cool');
+      expect(getObjectValueByKey<string | unknown>(bigOlObject, 'fields.id[0].good.cool')).toEqual(
+        'cool'
+      );
     });
     it('Handles a more complicated key', () => {
-      expect(getObjectValueByKey(bigOlObject, 'fields.id[1].more[0].more.complicated')).toEqual(
-        'complicated'
-      );
+      expect(
+        getObjectValueByKey<string | unknown>(bigOlObject, 'fields.id[1].more[0].more.complicated')
+      ).toEqual('complicated');
     });
     it('Handles a bad key', () => {
-      expect(() => getObjectValueByKey(bigOlObject, 'bad.key')).toThrow(
-        'Value not found in object for key bad.key'
-      );
+      expect(getObjectValueByKey<unknown>(bigOlObject, 'bad.key')).toEqual(undefined);
     });
   });
   describe('throwIfResponseIsNotValidSpecial()', () => {
@@ -137,6 +137,24 @@ describe('cases_webhook/utils', () => {
           requiredAttributesToBeInTheResponse: ['fields.id[0].good.cool'],
         })
       ).not.toThrow();
+    });
+  });
+  describe('stringifyObjValues()', () => {
+    const caseObj = {
+      title: 'title',
+      description: 'description',
+      labels: ['cool', 'rad', 'awesome'],
+      comment: 'comment',
+    };
+    it('Handles a case object', () => {
+      expect(stringifyObjValues(caseObj)).toEqual({
+        case: {
+          comment: '"comment"',
+          description: '"description"',
+          labels: '["cool","rad","awesome"]',
+          title: '"title"',
+        },
+      });
     });
   });
 });

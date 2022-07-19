@@ -6,7 +6,7 @@
  */
 
 import { AxiosResponse, AxiosError } from 'axios';
-import { isEmpty, isObjectLike } from 'lodash';
+import { isEmpty, isObjectLike, get } from 'lodash';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 
@@ -21,7 +21,7 @@ export const createServiceError = (error: AxiosError, message: string) =>
   );
 
 export const getPushedDate = (timestamp?: string) => {
-  if (timestamp != null) {
+  if (timestamp != null && new Date(timestamp).getTime() > 0) {
     try {
       return new Date(timestamp).toISOString();
     } catch (e) {
@@ -31,35 +31,12 @@ export const getPushedDate = (timestamp?: string) => {
   return new Date().toISOString();
 };
 
-const splitKeys = (key: string) => {
-  const split1 = key.split('.');
-  const split2 = split1.reduce((acc: string[], k: string) => {
-    const newSplit = k.split('[');
-    return [...acc, ...newSplit.filter((j) => j !== '')];
-  }, []);
-  return split2.reduce((acc: string[], k: string) => {
-    const newSplit = k.split(']');
-    return [...acc, ...newSplit.filter((j) => j !== '')];
-  }, []);
-};
-const findTheValue = (obj: Record<string, Record<string, unknown> | unknown>, keys: string[]) => {
-  let currentLevel: unknown = obj;
-  keys.forEach((k: string) => {
-    // @ts-ignore
-    currentLevel = currentLevel[k];
-  });
-  return currentLevel;
-};
-
-export const getObjectValueByKey = (
-  obj: Record<string, Record<string, unknown> | unknown>,
+export const getObjectValueByKey = <T = unknown>(
+  obj: Record<string, Record<string, T> | T>,
   key: string
-): string => {
-  try {
-    return findTheValue(obj, splitKeys(key)) as string;
-  } catch (e) {
-    throw new Error(`Value not found in object for key ${key}`);
-  }
+): T => {
+  // @ts-ignore
+  return get(obj, key);
 };
 
 export const throwIfResponseIsNotValidSpecial = ({
@@ -114,11 +91,7 @@ export const throwIfResponseIsNotValidSpecial = ({
      */
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
-      try {
-        if (getObjectValueByKey(data, attr) === undefined) {
-          errorAttributes.push(attr);
-        }
-      } catch (e) {
+      if (typeof getObjectValueByKey(data, attr) === 'undefined') {
         errorAttributes.push(attr);
       }
     });
@@ -130,7 +103,7 @@ export const throwIfResponseIsNotValidSpecial = ({
 
 export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
-export const makeCaseStringy = (properties: Record<string, string | string[]>) => ({
+export const stringifyObjValues = (properties: Record<string, string | string[]>) => ({
   case: Object.entries(properties).reduce(
     (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
     {}

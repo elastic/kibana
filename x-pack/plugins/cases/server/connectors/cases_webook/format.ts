@@ -7,11 +7,10 @@
 
 import { Format } from './types';
 
-export const format: Format = (theCase, alerts) => {
+export const format: Format = (theCase) => {
   return {
-    summary: theCase.title,
+    title: theCase.title,
     description: theCase.description,
-    // CasesWebook do not allows empty spaces on labels. We replace white spaces with hyphens
-    labels: theCase.tags.map((tag) => tag.replace(/\s+/g, '-')),
+    tags: theCase.tags,
   };
 };

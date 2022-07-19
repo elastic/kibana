@@ -10,7 +10,6 @@ import {
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback } from 'react';
-import './json_field_wrapper.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 

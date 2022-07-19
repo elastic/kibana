@@ -36,8 +36,8 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
   ).config;
 
   const labelOptions = useMemo(
-    () => (incident.labels ? incident.labels.map((label: string) => ({ label })) : []),
-    [incident.labels]
+    () => (incident.tags ? incident.tags.map((label: string) => ({ label })) : []),
+    [incident.tags]
   );
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -85,16 +85,16 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
   return (
     <>
       <EuiFormRow
-        data-test-subj="summary-row"
+        data-test-subj="title-row"
         fullWidth
-        error={errors['subActionParams.incident.summary']}
+        error={errors['subActionParams.incident.title']}
         isInvalid={
-          errors['subActionParams.incident.summary'] !== undefined &&
-          errors['subActionParams.incident.summary'].length > 0 &&
-          incident.summary !== undefined
+          errors['subActionParams.incident.title'] !== undefined &&
+          errors['subActionParams.incident.title'].length > 0 &&
+          incident.title !== undefined
         }
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.summaryFieldLabel',
+          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.titleFieldLabel',
           {
             defaultMessage: 'Summary (required)',
           }
@@ -104,9 +104,9 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
-          paramsProperty={'summary'}
-          inputTargetValue={incident.summary ?? undefined}
-          errors={errors['subActionParams.incident.summary'] as string[]}
+          paramsProperty={'title'}
+          inputTargetValue={incident.title ?? undefined}
+          errors={errors['subActionParams.incident.title'] as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
@@ -130,7 +130,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
             defaultMessage: 'Tags',
           }
         )}
-        error={errors['subActionParams.incident.labels'] as string[]}
+        error={errors['subActionParams.incident.tags'] as string[]}
       >
         <EuiComboBox
           noSuggestions
@@ -139,19 +139,19 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           onCreateOption={(searchValue: string) => {
             const newOptions = [...labelOptions, { label: searchValue }];
             editSubActionProperty(
-              'labels',
+              'tags',
               newOptions.map((newOption) => newOption.label)
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editSubActionProperty(
-              'labels',
+              'tags',
               selectedOptions.map((selectedOption) => selectedOption.label)
             );
           }}
           onBlur={() => {
-            if (!incident.labels) {
-              editSubActionProperty('labels', []);
+            if (!incident.tags) {
+              editSubActionProperty('tags', []);
             }
           }}
           isClearable={true}

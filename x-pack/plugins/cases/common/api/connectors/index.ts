@@ -16,14 +16,12 @@ import type { ActionType } from '@kbn/actions-plugin/common';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
-import { CasesWebhookFieldsRT } from './cases_webhook';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
 import { ServiceNowSIRFieldsRT } from './servicenow_sir';
 import { SwimlaneFieldsRT } from './swimlane';
 
-export * from './cases_webhook';
 export * from './jira';
 export * from './servicenow_itsm';
 export * from './servicenow_sir';
@@ -35,7 +33,6 @@ export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
 
 export const ConnectorFieldsRt = rt.union([
-  CasesWebhookFieldsRT,
   JiraFieldsRT,
   ResilientFieldsRT,
   ServiceNowITSMFieldsRT,
@@ -55,7 +52,7 @@ export enum ConnectorTypes {
 
 const ConnectorCasesWebhookTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.casesWebhook),
-  fields: rt.union([CasesWebhookFieldsRT, rt.null]),
+  fields: rt.null,
 });
 
 const ConnectorJiraTypeFieldsRt = rt.type({

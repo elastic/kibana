@@ -71,10 +71,10 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
-    summary: schema.string(),
+    title: schema.string(),
     description: schema.nullable(schema.string()),
     externalId: schema.nullable(schema.string()),
-    labels: schema.nullable(schema.arrayOf(schema.string())),
+    tags: schema.nullable(schema.arrayOf(schema.string())),
   }),
   comments: schema.nullable(
     schema.arrayOf(
