@@ -653,4 +653,3 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
-
