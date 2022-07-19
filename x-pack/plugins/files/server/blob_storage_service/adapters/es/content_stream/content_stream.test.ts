@@ -6,15 +6,17 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { encode } from 'cbor-x';
 import { set } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+
+const toBase64 = (str: string) => Buffer.from(str).toString('base64');
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: Logger;
   let stream: ContentStream;
-  let base64Stream: ContentStream;
 
   const getContentStream = ({
     id = 'something',
@@ -36,7 +38,6 @@ describe('ContentStream', () => {
   describe('read', () => {
     beforeEach(() => {
       stream = getContentStream({ params: { size: 1 } });
-      base64Stream = getContentStream();
     });
 
     it('should perform a search using index and the document id', async () => {
@@ -52,7 +53,7 @@ describe('ContentStream', () => {
     it('should read the document contents', async () => {
       const data = await new Promise((resolve) => stream.once('data', resolve));
 
-      expect(data).toEqual(Buffer.from('some content'));
+      expect(data).toEqual(Buffer.from('some content', 'base64'));
     });
 
     it('should be an empty stream on empty response', async () => {
@@ -78,18 +79,21 @@ describe('ContentStream', () => {
       client.get.mockResponseOnce(
         set<any>({}, '_source.data', Buffer.from('encoded content').toString('base64'))
       );
-      const data = await new Promise((resolve) => base64Stream.once('data', resolve));
+      const data = await new Promise((resolve) => stream.once('data', resolve));
 
       expect(data).toEqual(Buffer.from('encoded content'));
     });
 
     it('should compound content from multiple chunks', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '56'));
+      const [one, two, three] = ['12', '34', '56'].map(toBase64);
+      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', three));
+
       stream = getContentStream({
         params: { size: 6 },
       });
+
       let data = '';
       for await (const chunk of stream) {
         data += chunk;
@@ -109,9 +113,10 @@ describe('ContentStream', () => {
     });
 
     it('should stop reading on empty chunk', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
+      const [one, two, three] = ['12', '34', ''].map(toBase64);
+      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', three));
       stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {
@@ -123,8 +128,9 @@ describe('ContentStream', () => {
     });
 
     it('should read until chunks are present when there is no size', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
+      const [one, two] = ['12', '34'].map(toBase64);
+      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
       client.get.mockResponseOnce({} as any);
       stream = getContentStream({ params: { size: undefined } });
       let data = '';
@@ -147,9 +153,9 @@ describe('ContentStream', () => {
         set<any>({}, '_source.data', Buffer.from('56').toString('base64'))
       );
       client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
-      base64Stream = getContentStream({ params: { size: 12 } });
+      stream = getContentStream({ params: { size: 12 } });
       let data = '';
-      for await (const chunk of base64Stream) {
+      for await (const chunk of stream) {
         data += chunk;
       }
 
@@ -160,7 +166,6 @@ describe('ContentStream', () => {
   describe('write', () => {
     beforeEach(() => {
       stream = getContentStream({ params: { size: 1 } });
-      base64Stream = getContentStream();
     });
     it('should not send a request until stream is closed', () => {
       stream.write('something');
@@ -188,7 +193,10 @@ describe('ContentStream', () => {
 
       expect(request).toHaveProperty('id', 'something.0');
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('document.data', '123456');
+      expect(request).toHaveProperty(
+        'document',
+        encode({ data: Buffer.from('123456'), bid: 'something', last: true })
+      );
     });
 
     it('should update a number of written bytes', async () => {
@@ -223,7 +231,48 @@ describe('ContentStream', () => {
 
     it('should split data into chunks', async () => {
       stream = getContentStream({ params: { maxChunkSize: '1028B' } });
-      stream.end('123456');
+      stream.end('123456789');
+      await new Promise((resolve) => stream.once('finish', resolve));
+
+      expect(client.index).toHaveBeenCalledTimes(3);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          document: encode({ data: Buffer.from('123'), bid: 'something' }),
+          id: 'something.0',
+          index: 'somewhere',
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: 'something.1',
+          index: 'somewhere',
+          document: encode({ data: Buffer.from('456'), bid: 'something' }),
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          id: 'something.2',
+          index: 'somewhere',
+          document: encode({ data: Buffer.from('789'), bid: 'something', last: true }),
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
+        })
+      );
+    });
+
+    it('should encode every chunk separately', async () => {
+      stream = getContentStream({ params: { maxChunkSize: '1028B' } });
+      stream.end('12345678');
       await new Promise((resolve) => stream.once('finish', resolve));
 
       expect(client.index).toHaveBeenCalledTimes(3);
@@ -232,7 +281,13 @@ describe('ContentStream', () => {
         expect.objectContaining({
           id: 'something.0',
           index: 'somewhere',
-          document: { data: '12', bid: 'something' },
+          document: encode({
+            data: Buffer.from('123'),
+            bid: 'something',
+          }),
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
@@ -240,7 +295,13 @@ describe('ContentStream', () => {
         expect.objectContaining({
           id: 'something.1',
           index: 'somewhere',
-          document: { bid: 'something', data: '34' },
+          document: encode({
+            data: Buffer.from('456'),
+            bid: 'something',
+          }),
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
@@ -248,53 +309,14 @@ describe('ContentStream', () => {
         expect.objectContaining({
           id: 'something.2',
           index: 'somewhere',
-          document: {
-            bid: 'something',
-            data: '56',
-            last: true,
-          },
-        })
-      );
-    });
-
-    it('should encode every chunk separately', async () => {
-      base64Stream = getContentStream({ params: { maxChunkSize: '1028B' } });
-      base64Stream.end('12345678');
-      await new Promise((resolve) => base64Stream.once('finish', resolve));
-
-      expect(client.index).toHaveBeenCalledTimes(3);
-      expect(client.index).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          id: 'something.0',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('123').toString('base64'),
-            bid: 'something',
-          },
-        })
-      );
-      expect(client.index).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          id: 'something.1',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('456').toString('base64'),
-            bid: 'something',
-          },
-        })
-      );
-      expect(client.index).toHaveBeenNthCalledWith(
-        3,
-        expect.objectContaining({
-          id: 'something.2',
-          index: 'somewhere',
-          document: {
-            data: Buffer.from('78').toString('base64'),
+          document: encode({
+            data: Buffer.from('78'),
             bid: 'something',
             last: true,
-          },
+          }),
+        }),
+        expect.objectContaining({
+          headers: { accept: 'application/json', 'content-type': 'application/cbor' },
         })
       );
     });
