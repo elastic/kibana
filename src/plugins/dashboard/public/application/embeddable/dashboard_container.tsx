@@ -167,9 +167,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.services.analytics?.reportEvent(DASHBOARD_LOADED_EVENT, {
       duration: data.timeToDone,
       status: data.status,
-      key1: 'time-to-data',
+      key1: 'time_to_data',
       value1: data.timeToData,
-      key2: 'num-of-panels',
+      key2: 'num_of_panels',
       value2: data.numOfPanels,
     });
   }

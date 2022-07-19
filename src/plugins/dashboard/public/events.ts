@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DASHBOARD_LOADED_EVENT = 'dashboard-loaded';
+export const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
