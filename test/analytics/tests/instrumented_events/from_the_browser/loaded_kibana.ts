@@ -7,9 +7,10 @@
  */
 
 import { Event } from '@kbn/analytics-client';
-import { KIBANA_LOADED_EVENT } from '@kbn/core/utils';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
+
+const KIBANA_LOADED_EVENT = 'kibana_loaded';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
@@ -32,17 +33,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Legacy event
       expect(legacyEvent.event_type).to.eql('Loaded Kibana');
-      expect(event.properties).to.have.property('kibana_version');
-      expect(event.properties.kibana_version).to.be.a('string');
-      expect(event.properties).to.have.property('protocol');
-      expect(event.properties.protocol).to.be.a('string');
+      expect(legacyEvent.properties).to.have.property('kibana_version');
+      expect(legacyEvent.properties.kibana_version).to.be.a('string');
+      expect(legacyEvent.properties).to.have.property('protocol');
+      expect(legacyEvent.properties.protocol).to.be.a('string');
 
       // New event
-      expect(event.event_type).to.eql(KIBANA_LOADED_EVENT);
-      expect(event.properties).to.have.property('kibana_version');
-      expect(event.properties.kibana_version).to.be.a('string');
-      expect(event.properties).to.have.property('protocol');
-      expect(event.properties.protocol).to.be.a('string');
+      expect(event.event_type).to.eql('metric');
+      expect(event.properties.eventName).to.eql(KIBANA_LOADED_EVENT);
+
+      // meta
+      expect(event.properties).to.have.property('meta');
+
+      const meta = event.properties.meta as Record<string, any>;
+      expect(meta.kibana_version).to.be.a('string');
+      expect(meta.protocol).to.be.a('string');
 
       // Kibana Loaded timings
       expect(event.properties).to.have.property('duration');
