@@ -29,7 +29,6 @@ import type {
   PostBulkUpdateAgentTagsRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
-import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
@@ -123,12 +122,14 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
 
   try {
     const results = await AgentService.updateAgentTags(
+      soClient,
       esClient,
       { ...agentOptions, batchSize: request.body.batchSize },
       request.body.tagsToAdd ?? [],
@@ -214,13 +215,6 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isGoldPlus()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Gold license' },
-    });
-  }
-
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
