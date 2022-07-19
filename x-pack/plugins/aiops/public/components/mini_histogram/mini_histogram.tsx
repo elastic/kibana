@@ -53,7 +53,6 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, label }) => {
           yAccessors={['doc_count_overall']}
           data={chartData}
           stackAccessors={[0]}
-          // color={['lightblue']}
         />
         <BarSeries
           id={`${label}`}
