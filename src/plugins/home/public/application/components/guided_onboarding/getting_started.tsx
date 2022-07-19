@@ -62,7 +62,6 @@ export const GettingStarted = () => {
   }, [chrome, trackUiMetric]);
 
   const onSkip = () => {
-    console.log('skip');
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
