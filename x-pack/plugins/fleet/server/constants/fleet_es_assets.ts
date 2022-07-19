@@ -95,7 +95,7 @@ processors:
       target_field: event.ingested
       formats:
         - ISO8601
-      output_format: yyyy-MM-dd'T'HH:mm:ss
+      output_format: date_time_no_millis
       ignore_failure: true
   - remove:
       description: Remove any pre-existing untrusted values.
