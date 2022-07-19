@@ -8,31 +8,31 @@
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
-export type FrameType = number;
+
+export enum FrameType {
+  Unsymbolized = 0,
+  Python,
+  PHP,
+  Native,
+  Kernel,
+  JVM,
+  Ruby,
+  Perl,
+  JavaScript,
+}
 
 export function describeFrameType(ft: FrameType): string {
-  switch (ft) {
-    case 0:
-      return '<unsymbolized frame>';
-    case 1:
-      return 'Python';
-    case 2:
-      return 'PHP';
-    case 3:
-      return 'Native';
-    case 4:
-      return 'Kernel';
-    case 5:
-      return 'JVM/Hotspot';
-    case 6:
-      return 'Ruby';
-    case 7:
-      return 'Perl';
-    case 8:
-      return 'JavaScript';
-    default:
-      return '';
-  }
+  return {
+    [FrameType.Unsymbolized]: '<unsymbolized frame>',
+    [FrameType.Python]: 'Python',
+    [FrameType.PHP]: 'PHP',
+    [FrameType.Native]: 'Native',
+    [FrameType.Kernel]: 'Kernel',
+    [FrameType.JVM]: 'JVM/Hotspot',
+    [FrameType.Ruby]: 'Ruby',
+    [FrameType.Perl]: 'Perl',
+    [FrameType.JavaScript]: 'JavaScript',
+  }[ft];
 }
 
 export interface StackTraceEvent {
