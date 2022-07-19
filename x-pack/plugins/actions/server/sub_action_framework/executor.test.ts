@@ -35,7 +35,7 @@ describe('Executor', () => {
       id: '.test',
       name: 'Test',
       minimumLicenseRequired: 'basic' as const,
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       schema: {
         config: TestConfigSchema,
         secrets: TestSecretsSchema,

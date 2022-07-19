@@ -63,7 +63,7 @@ describe('connector_add_flyout', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 
@@ -102,7 +102,7 @@ describe('connector_add_flyout', () => {
         enabledInConfig: false,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 
@@ -141,7 +141,7 @@ describe('connector_add_flyout', () => {
         enabledInConfig: true,
         enabledInLicense: false,
         minimumLicenseRequired: 'gold',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 

@@ -55,7 +55,7 @@ export function getActionType(
     name: i18n.translate('xpack.actions.builtin.swimlaneTitle', {
       defaultMessage: 'Swimlane',
     }),
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,

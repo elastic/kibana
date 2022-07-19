@@ -23,7 +23,7 @@ export function defineActionTypes(
     id: 'test.noop',
     name: 'Test: Noop',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     async executor() {
       return { status: 'ok', actionId: '' };
     },
@@ -33,7 +33,7 @@ export function defineActionTypes(
     id: 'test.throw',
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     async executor() {
       throw new Error('this action is intended to fail');
     },
@@ -43,7 +43,7 @@ export function defineActionTypes(
     id: 'test.capped',
     name: 'Test: Capped',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     async executor() {
       return { status: 'ok', actionId: '' };
     },
@@ -85,7 +85,7 @@ function getIndexRecordActionType() {
     id: 'test.index-record',
     name: 'Test: Index Record',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     validate: {
       params: paramsSchema,
       config: configSchema,
@@ -126,7 +126,7 @@ function getDelayedActionType() {
     id: 'test.delayed',
     name: 'Test: Delayed',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     validate: {
       params: paramsSchema,
       config: configSchema,
@@ -154,7 +154,7 @@ function getFailingActionType() {
     id: 'test.failing',
     name: 'Test: Failing',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     validate: {
       params: paramsSchema,
     },
@@ -187,7 +187,7 @@ function getRateLimitedActionType() {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
       params: paramsSchema,
@@ -224,7 +224,7 @@ function getNoAttemptsRateLimitedActionType() {
     id: 'test.no-attempts-rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     maxAttempts: 0,
     validate: {
       params: paramsSchema,
@@ -264,7 +264,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     id: 'test.authorization',
     name: 'Test: Authorization',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     validate: {
       params: paramsSchema,
     },
@@ -344,7 +344,7 @@ function getExcludedActionType() {
     id: 'test.excluded',
     name: 'Test: Excluded',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     async executor({ actionId }) {
       return { status: 'ok', actionId };
     },

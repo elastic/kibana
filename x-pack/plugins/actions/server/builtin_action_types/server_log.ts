@@ -49,7 +49,7 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
     name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
       defaultMessage: 'Server log',
     }),
-    featureConfig: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
     validate: {
       params: ParamsSchema,
     },

@@ -66,7 +66,7 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
     name: i18n.translate('xpack.actions.builtin.esIndexTitle', {
       defaultMessage: 'Index',
     }),
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,

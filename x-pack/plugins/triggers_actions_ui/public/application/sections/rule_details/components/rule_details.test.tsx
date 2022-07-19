@@ -207,7 +207,7 @@ describe('rule_details', () => {
             enabledInConfig: true,
             enabledInLicense: true,
             minimumLicenseRequired: 'basic',
-            featureConfig: ['alerting'],
+            supportedFeatureIds: ['alerting'],
           },
         ];
 
@@ -252,7 +252,7 @@ describe('rule_details', () => {
             enabledInConfig: true,
             enabledInLicense: true,
             minimumLicenseRequired: 'basic',
-            featureConfig: ['alerting'],
+            supportedFeatureIds: ['alerting'],
           },
           {
             id: '.email',
@@ -261,7 +261,7 @@ describe('rule_details', () => {
             enabledInConfig: true,
             enabledInLicense: true,
             minimumLicenseRequired: 'basic',
-            featureConfig: ['alerting'],
+            supportedFeatureIds: ['alerting'],
           },
         ];
 
@@ -340,7 +340,7 @@ describe('rule_details', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
@@ -470,7 +470,7 @@ describe('rule_details', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);

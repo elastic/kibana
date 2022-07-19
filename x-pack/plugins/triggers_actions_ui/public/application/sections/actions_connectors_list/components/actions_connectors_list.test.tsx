@@ -40,12 +40,12 @@ describe('actions_connectors_list component empty', () => {
       {
         id: 'test',
         name: 'Test',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -143,13 +143,13 @@ describe('actions_connectors_list component with items', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
         enabled: true,
-        featureConfig: ['alerting', 'cases'],
+        supportedFeatureIds: ['alerting', 'cases'],
       },
     ]);
 
@@ -284,12 +284,12 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         id: 'test',
         name: 'Test',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -349,12 +349,12 @@ describe('actions_connectors_list with show only capability', () => {
       {
         id: 'test',
         name: 'Test',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -422,7 +422,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -430,7 +430,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 
@@ -504,7 +504,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -512,7 +512,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 

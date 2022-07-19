@@ -18,12 +18,18 @@ const querySchema = schema.object({
 
 const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
   return results.map(
-    ({ enabledInConfig, enabledInLicense, minimumLicenseRequired, featureConfig, ...res }) => ({
+    ({
+      enabledInConfig,
+      enabledInLicense,
+      minimumLicenseRequired,
+      supportedFeatureIds,
+      ...res
+    }) => ({
       ...res,
       enabled_in_config: enabledInConfig,
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
-      feature_config: featureConfig,
+      supported_feature_ids: supportedFeatureIds,
     })
   );
 };

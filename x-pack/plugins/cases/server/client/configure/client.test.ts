@@ -25,7 +25,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
-        featureConfig: ['alerting', 'cases'],
+        supportedFeatureIds: ['alerting', 'cases'],
       },
       {
         id: '.servicenow',
@@ -34,7 +34,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
-        featureConfig: ['alerting', 'cases'],
+        supportedFeatureIds: ['alerting', 'cases'],
       },
       {
         id: '.unsupported',
@@ -43,7 +43,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: '.swimlane',
@@ -52,7 +52,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: false,
         minimumLicenseRequired: 'basic' as const,
-        featureConfig: ['alerting', 'cases'],
+        supportedFeatureIds: ['alerting', 'cases'],
       },
     ];
 

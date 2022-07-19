@@ -233,7 +233,7 @@ describe('alert_form', () => {
             enabledInConfig: true,
             enabledInLicense: true,
             minimumLicenseRequired: 'basic',
-            featureConfig: ['alerting'],
+            supportedFeatureIds: ['alerting'],
           },
         ]);
 

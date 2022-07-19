@@ -124,9 +124,9 @@ export class ActionTypeRegistry {
     }
 
     if (
-      !actionType.featureConfig ||
-      actionType.featureConfig.length === 0 ||
-      !areValidFeatures(actionType.featureConfig)
+      !actionType.supportedFeatureIds ||
+      actionType.supportedFeatureIds.length === 0 ||
+      !areValidFeatures(actionType.supportedFeatureIds)
     ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
@@ -134,7 +134,7 @@ export class ActionTypeRegistry {
             'Invalid feature configuration "{ids}" for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
-            ids: actionType.featureConfig.join(','),
+            ids: actionType.supportedFeatureIds.join(','),
           },
         })
       );
@@ -193,7 +193,7 @@ export class ActionTypeRegistry {
   public list(featureId?: string): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) =>
-        featureId ? actionType.featureConfig.includes(featureId) : true
+        featureId ? actionType.supportedFeatureIds.includes(featureId) : true
       )
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,
@@ -202,7 +202,7 @@ export class ActionTypeRegistry {
         enabled: this.isActionTypeEnabled(actionTypeId),
         enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        featureConfig: actionType.featureConfig,
+        supportedFeatureIds: actionType.supportedFeatureIds,
       }));
   }
 }

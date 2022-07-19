@@ -63,7 +63,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.teamsTitle', {
       defaultMessage: 'Microsoft Teams',
     }),
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,

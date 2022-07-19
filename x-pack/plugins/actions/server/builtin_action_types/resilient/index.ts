@@ -60,7 +60,7 @@ export function getActionType(
     id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,

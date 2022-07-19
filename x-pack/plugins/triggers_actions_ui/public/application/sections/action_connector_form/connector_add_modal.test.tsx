@@ -57,7 +57,7 @@ describe('connector_add_modal', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
     };
 
     const wrapper = mountWithIntl(

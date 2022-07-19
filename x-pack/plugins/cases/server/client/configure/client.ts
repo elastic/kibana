@@ -222,8 +222,9 @@ function isConnectorSupported(
   actionTypes: Record<string, ActionType>
 ): boolean {
   return (
-    (actionTypes[action.actionTypeId]?.featureConfig ?? []).includes(CasesConnectorFeatureId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense
+    (actionTypes[action.actionTypeId]?.supportedFeatureIds ?? []).includes(
+      CasesConnectorFeatureId
+    ) && actionTypes[action.actionTypeId]?.enabledInLicense
   );
 }
 

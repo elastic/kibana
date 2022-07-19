@@ -154,7 +154,7 @@ describe('create()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -187,7 +187,7 @@ describe('create()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -228,7 +228,7 @@ describe('create()', () => {
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -267,7 +267,7 @@ describe('create()', () => {
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -320,7 +320,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -364,7 +364,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -397,7 +397,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       validate: {
         connector: connectorValidator,
       },
@@ -437,7 +437,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -570,7 +570,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -605,7 +605,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
@@ -1685,7 +1685,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1789,7 +1789,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1862,7 +1862,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1928,7 +1928,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       validate: {
         config: schema.object({
           param1: schema.string(),
@@ -1963,7 +1963,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       validate: {
         connector: () => {
           return '[param1] is required';
@@ -1998,7 +1998,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -2079,7 +2079,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
@@ -2331,7 +2331,7 @@ describe('isActionTypeEnabled()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   beforeEach(() => {

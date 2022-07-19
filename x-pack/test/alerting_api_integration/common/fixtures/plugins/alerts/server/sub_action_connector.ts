@@ -83,7 +83,7 @@ export const getTestSubActionConnector = (
     id: '.test-sub-action-connector',
     name: 'Test: Sub action connector',
     minimumLicenseRequired: 'platinum' as const,
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
     Service: TestSubActionConnector,
   };
@@ -104,7 +104,7 @@ export const getTestSubActionConnectorWithoutSubActions = (
     id: '.test-sub-action-connector-without-sub-actions',
     name: 'Test: Sub action connector',
     minimumLicenseRequired: 'platinum' as const,
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
     Service: TestNoSubActions,
   };

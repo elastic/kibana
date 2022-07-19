@@ -25,7 +25,7 @@ describe('Validators', () => {
       id: '.test',
       name: 'Test',
       minimumLicenseRequired: 'basic' as const,
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       schema: {
         config: TestConfigSchema,
         secrets: TestSecretsSchema,

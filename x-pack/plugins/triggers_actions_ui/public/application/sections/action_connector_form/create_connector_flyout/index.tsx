@@ -156,7 +156,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         icon={actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
-        featureIds={actionType?.featureConfig}
+        featureIds={actionType?.supportedFeatureIds}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}

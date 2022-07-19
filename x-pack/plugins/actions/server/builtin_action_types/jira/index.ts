@@ -70,7 +70,7 @@ export function getActionType(
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       UptimeConnectorFeatureId,

@@ -138,7 +138,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             ? actionTypesIndex[action.actionTypeId].name
             : action.actionTypeId,
           featureIds: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].featureConfig
+            ? actionTypesIndex[action.actionTypeId].supportedFeatureIds
             : [],
         };
       })

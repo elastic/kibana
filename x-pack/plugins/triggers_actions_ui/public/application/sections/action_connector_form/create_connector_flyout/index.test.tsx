@@ -52,7 +52,7 @@ describe('CreateConnectorFlyout', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic' as const,
-      featureConfig: ['alerting', 'siem'],
+      supportedFeatureIds: ['alerting', 'siem'],
     },
   ]);
 
@@ -112,7 +112,7 @@ describe('CreateConnectorFlyout', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic' as const,
-          featureConfig: ['alerting', 'siem'],
+          supportedFeatureIds: ['alerting', 'siem'],
         },
         {
           id: disabledActionType.id,
@@ -121,7 +121,7 @@ describe('CreateConnectorFlyout', () => {
           enabledInConfig: true,
           enabledInLicense: false,
           minimumLicenseRequired: 'gold',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
       ]);
       const { getByTestId } = appMockRenderer.render(
@@ -149,7 +149,7 @@ describe('CreateConnectorFlyout', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic' as const,
-          featureConfig: ['alerting', 'siem'],
+          supportedFeatureIds: ['alerting', 'siem'],
         },
         {
           id: disabledActionType.id,
@@ -157,7 +157,7 @@ describe('CreateConnectorFlyout', () => {
           name: 'Test',
           enabledInConfig: true,
           enabledInLicense: false,
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
           minimumLicenseRequired: 'platinum',
         },
       ]);
@@ -186,7 +186,7 @@ describe('CreateConnectorFlyout', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic' as const,
-          featureConfig: ['alerting', 'siem'],
+          supportedFeatureIds: ['alerting', 'siem'],
         },
         {
           id: disabledActionType.id,
@@ -195,7 +195,7 @@ describe('CreateConnectorFlyout', () => {
           enabledInConfig: true,
           enabledInLicense: false,
           minimumLicenseRequired: 'enterprise',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
       ]);
       const { queryByTestId } = appMockRenderer.render(

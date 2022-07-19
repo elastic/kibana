@@ -59,7 +59,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -87,7 +87,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -102,7 +102,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(() =>
@@ -110,7 +110,7 @@ describe('register()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -125,7 +125,7 @@ describe('register()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: [],
+        supportedFeatureIds: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -140,7 +140,7 @@ describe('register()', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        featureConfig: ['foo'],
+        supportedFeatureIds: ['foo'],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -154,7 +154,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -175,7 +175,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
@@ -190,7 +190,7 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
@@ -204,19 +204,19 @@ describe('get()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
       Object {
         "executor": [Function],
-        "featureConfig": Array [
-          "alerting",
-        ],
         "id": "my-action-type",
         "minimumLicenseRequired": "basic",
         "name": "My action type",
+        "supportedFeatureIds": Array [
+          "alerting",
+        ],
       }
     `);
   });
@@ -237,7 +237,7 @@ describe('list()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -249,7 +249,7 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -263,14 +263,14 @@ describe('list()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     actionTypeRegistry.register({
       id: 'another-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['cases'],
+      supportedFeatureIds: ['cases'],
       executor,
     });
     const actionTypes = actionTypeRegistry.list('alerting');
@@ -282,7 +282,7 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe('has()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      featureConfig: ['alerting'],
+      supportedFeatureIds: ['alerting'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
@@ -315,7 +315,7 @@ describe('isActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -383,7 +383,7 @@ describe('ensureActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -429,7 +429,7 @@ describe('isActionExecutable()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    featureConfig: ['alerting'],
+    supportedFeatureIds: ['alerting'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },

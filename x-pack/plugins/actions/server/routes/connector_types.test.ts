@@ -41,7 +41,7 @@ describe('connectorTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -56,12 +56,12 @@ describe('connectorTypesRoute', () => {
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
-            "feature_config": Array [
-              "alerting",
-            ],
             "id": "1",
             "minimum_license_required": "gold",
             "name": "name",
+            "supported_feature_ids": Array [
+              "alerting",
+            ],
           },
         ],
       }
@@ -75,7 +75,7 @@ describe('connectorTypesRoute', () => {
           enabled: true,
           enabled_in_config: true,
           enabled_in_license: true,
-          feature_config: ['alerting'],
+          supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
         },
       ],
@@ -99,7 +99,7 @@ describe('connectorTypesRoute', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
@@ -123,12 +123,12 @@ describe('connectorTypesRoute', () => {
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
-            "feature_config": Array [
-              "alerting",
-            ],
             "id": "1",
             "minimum_license_required": "gold",
             "name": "name",
+            "supported_feature_ids": Array [
+              "alerting",
+            ],
           },
         ],
       }
@@ -149,7 +149,7 @@ describe('connectorTypesRoute', () => {
           enabled: true,
           enabled_in_config: true,
           enabled_in_license: true,
-          feature_config: ['alerting'],
+          supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
         },
       ],
@@ -173,7 +173,7 @@ describe('connectorTypesRoute', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
@@ -215,7 +215,7 @@ describe('connectorTypesRoute', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
-        featureConfig: ['alerting'],
+        supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];

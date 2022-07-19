@@ -22,7 +22,7 @@ describe('settings', () => {
           id: '.slack',
           minimumLicenseRequired: 'gold',
           name: 'Slack',
-          featureConfig: ['uptime'],
+          supportedFeatureIds: ['uptime'],
         },
       ]);
     });

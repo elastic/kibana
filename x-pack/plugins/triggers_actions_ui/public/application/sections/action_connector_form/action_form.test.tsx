@@ -244,7 +244,7 @@ describe('action_form', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
         {
           id: '.index',
@@ -253,7 +253,7 @@ describe('action_form', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
         {
           id: 'preconfigured',
@@ -262,7 +262,7 @@ describe('action_form', () => {
           enabledInConfig: false,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
         {
           id: 'disabled-by-config',
@@ -271,7 +271,7 @@ describe('action_form', () => {
           enabledInConfig: false,
           enabledInLicense: true,
           minimumLicenseRequired: 'gold',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
         {
           id: 'disabled-by-license',
@@ -280,7 +280,7 @@ describe('action_form', () => {
           enabledInConfig: true,
           enabledInLicense: false,
           minimumLicenseRequired: 'gold',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
         {
           id: '.jira',
@@ -289,7 +289,7 @@ describe('action_form', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
-          featureConfig: ['alerting'],
+          supportedFeatureIds: ['alerting'],
         },
       ]);
 

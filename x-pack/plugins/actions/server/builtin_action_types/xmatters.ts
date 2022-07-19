@@ -69,7 +69,7 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.xmattersTitle', {
       defaultMessage: 'xMatters',
     }),
-    featureConfig: [AlertingConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(validateActionTypeConfig)(configurationUtilities),

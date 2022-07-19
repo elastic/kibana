@@ -98,7 +98,7 @@ export function getServiceNowITSMActionType(
     id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITSM,
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       UptimeConnectorFeatureId,
@@ -132,7 +132,7 @@ export function getServiceNowSIRActionType(
     id: ServiceNowSIRActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_SIR,
-    featureConfig: [
+    supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
@@ -165,7 +165,7 @@ export function getServiceNowITOMActionType(
     id: ServiceNowITOMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
-    featureConfig: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: schema.object(ExternalIncidentServiceConfigurationBase, {
         validate: curry(validate.config)(configurationUtilities),
