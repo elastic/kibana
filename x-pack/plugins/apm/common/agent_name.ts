@@ -65,40 +65,16 @@ export function isRumAgentName(
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
-export function isMobileAgentName(
-  agentName?: string
-): agentName is 'iOS/swift' | 'android/java' {
+export function isMobileAgentName(agentName?: string) {
   return (
-    isIosAgentName(agentName! as AgentName) ||
-    isAndroidAgentName(agentName! as AgentName)
+    isIosAgentName(agentName) || 
+    isAndroidAgentName(agentName)
   );
-}
-
-export function normalizeAgentName<T extends string | undefined>(
-  agentName: T
-): T | string {
-  if (isRumAgentName(agentName)) {
-    return 'rum-js';
-  }
-
-  if (isJavaAgentName(agentName)) {
-    return 'java';
-  }
-
-  if (isIosAgentName(agentName)) {
-    return 'ios';
-  }
-
-  if (isAndroidAgentName(agentName)) {
-    return 'android';
-  }
-
-  return agentName;
 }
 
 export function isIosAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
-  return lowercased === 'ios/swift' || lowercased === 'opentelemetry/swift';
+  return lowercased === 'ios/swift';
 }
 
 export function isJRubyAgent(agentName?: string, runtimeName?: string) {
