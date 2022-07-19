@@ -73,7 +73,7 @@ export const PageLayout = memo<PageLayoutProps>(
 
     const headerRightSideGroupProps = useMemo<EuiPageHeaderProps['rightSideGroupProps']>(() => {
       return {
-        gutterSize: 'm',
+        gutterSize: 's',
       };
     }, []);
 
