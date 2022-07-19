@@ -82,7 +82,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
         text: i18n.translate(
           'xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
           {
-            defaultMessage: 'Anomaly detection only runs over time-based indices',
+            defaultMessage: 'Log rate spike analysis only runs over time-based indices',
           }
         ),
       });

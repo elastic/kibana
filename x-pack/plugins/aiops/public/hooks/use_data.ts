@@ -134,6 +134,12 @@ export const useData = (
     };
   });
 
+  // Ensure request is updated when search changes
+  useEffect(() => {
+    updateFieldStatsRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchString]);
+
   return {
     docStats,
     timefilter,
