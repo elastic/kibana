@@ -140,7 +140,7 @@ export class PdfMaker {
       // The typings are incomplete for the image property.
       // It's possible to pass a Buffer as the image data.
       // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
-      image: image.buffer,
+      image,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
