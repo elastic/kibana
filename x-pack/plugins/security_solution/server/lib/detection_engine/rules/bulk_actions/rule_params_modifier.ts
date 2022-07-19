@@ -49,10 +49,6 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!isMachineLearningParams(ruleParams) && action.overwriteDataViews) {
-        ruleParams.dataViewId = undefined;
-      }
-
       ruleParams.index = deleteItemsFromArray(ruleParams.index ?? [], action.value);
       break;
 
