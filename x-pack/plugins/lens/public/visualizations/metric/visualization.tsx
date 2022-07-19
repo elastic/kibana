@@ -157,6 +157,7 @@ export const getMetricVisualization = ({
       icon: LensIconChartMetric,
       label: metricLabel,
       groupLabel: metricGroupLabel,
+      showExperimentalBadge: true,
       sortPriority: 3,
     },
   ],

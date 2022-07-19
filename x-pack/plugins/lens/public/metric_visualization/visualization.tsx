@@ -188,7 +188,6 @@ export const getLegacyMetricVisualization = ({
       groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
         defaultMessage: 'Goal and single value',
       }),
-      sortPriority: 3,
     },
   ],
 
