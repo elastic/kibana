@@ -56,11 +56,37 @@ export const monitoredClustersQuery = ({ timeRange, timeout }: QueryOptions) => 
 };
 
 /**
- * some metricset documents use a stable ID to maintain a single occurence of
+ * some metricset documents use a stable ID to maintain a single occurrence of
  * the documents in the index. we query those metricsets separately without
  * a time range filter
  */
 export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
+  const shardMatches = [
+    {
+      term: {
+        type: 'shards',
+      },
+    },
+    {
+      term: {
+        'metricset.name': 'shard',
+      },
+    },
+  ];
+
+  const logstashStateMatches = [
+    {
+      term: {
+        type: 'logstash_state',
+      },
+    },
+    {
+      term: {
+        'metricset.name': 'node',
+      },
+    },
+  ];
+
   const metricsetsAggregations = {
     elasticsearch: {
       terms: {
@@ -71,18 +97,7 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
         shard: lastSeenByIndex({
           filter: {
             bool: {
-              should: [
-                {
-                  term: {
-                    type: 'shards',
-                  },
-                },
-                {
-                  term: {
-                    'metricset.name': 'shard',
-                  },
-                },
-              ],
+              should: shardMatches,
             },
           },
         }),
@@ -98,18 +113,7 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
         node: lastSeenByIndex({
           filter: {
             bool: {
-              should: [
-                {
-                  term: {
-                    type: 'logstash_state',
-                  },
-                },
-                {
-                  term: {
-                    'metricset.name': 'node',
-                  },
-                },
-              ],
+              should: logstashStateMatches,
             },
           },
         }),
@@ -117,8 +121,20 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
     },
   };
 
+  // Outer query on expected types to avoid catching kibana internal collection documents containing source_node.uuid
   return {
     timeout: `${timeout}s`,
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: shardMatches.concat(logstashStateMatches),
+            },
+          },
+        ],
+      },
+    },
     aggs: {
       clusters: {
         terms: clusterUuidTerm,

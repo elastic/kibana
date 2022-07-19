@@ -36,6 +36,7 @@ export function getRumPageLoadTransactionsProjection({
     filter: [
       ...rangeQuery(start, end),
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
       ...(checkFetchStartFieldExists
         ? [
             {
@@ -62,9 +63,6 @@ export function getRumPageLoadTransactionsProjection({
   };
 
   return {
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
     body: {
       query: {
         bool,

@@ -8,4 +8,4 @@
 
 require('../src/setup_node_env/no_transpilation');
 require('source-map-support/register');
-require('@kbn/type-summarizer/target_node/bazel_cli');
+require('@kbn/type-summarizer-cli');

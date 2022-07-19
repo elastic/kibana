@@ -36,7 +36,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeDescription } from './lib/get_field_type_description';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { KNOWN_FIELD_TYPES } from '../../../../../common/field_types';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export interface State {
   searchable: string;
@@ -107,7 +108,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
   const { docLinks } = useDiscoverServices();
 
   const items: FieldTypeTableItem[] = useMemo(() => {
+    const knownTypes = Object.values(KNOWN_FIELD_TYPES) as string[];
     return presentFieldTypes
+      .filter((element) => knownTypes.includes(element))
       .sort((one, another) => one.localeCompare(another))
       .map((element, index) => ({
         id: index,
@@ -122,7 +125,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
   const columnsSidebar: Array<EuiBasicTableColumn<FieldTypeTableItem>> = [
     {
       field: 'dataType',
-      name: 'Data type',
+      name: i18n.translate('discover.fieldTypesPopover.dataTypeColumnTitle', {
+        defaultMessage: 'Data type',
+      }),
       width: '110px',
       render: (name: string) => (
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
@@ -135,7 +140,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
     },
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate('discover.fieldTypesPopover.descriptionColumnTitle', {
+        defaultMessage: 'Description',
+      }),
       // eslint-disable-next-line react/no-danger
       render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
     },

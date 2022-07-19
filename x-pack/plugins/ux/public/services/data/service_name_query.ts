@@ -37,6 +37,6 @@ export function serviceNameQuery(
       },
     },
   });
-  const { apm, ...rest } = params;
-  return rest;
+
+  return params;
 }

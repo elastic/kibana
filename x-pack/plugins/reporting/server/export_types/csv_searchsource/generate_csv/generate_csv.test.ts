@@ -6,7 +6,8 @@
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import type { IScopedClusterClient, IUiSettingsClient, SearchResponse } from '@kbn/core/server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import {

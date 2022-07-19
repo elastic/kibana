@@ -19,8 +19,8 @@ import {
   type RequestBody,
 } from '@elastic/elasticsearch';
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 
 const createApiResponse = <T>({

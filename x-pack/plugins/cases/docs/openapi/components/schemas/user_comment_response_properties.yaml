@@ -1,0 +1,64 @@
+type: object
+properties:
+  comment:
+    type: string
+    example: A new comment.
+  created_at:
+    type: string
+    format: date-time
+    example: 2022-05-13T09:16:17.416Z
+  created_by:
+    type: object
+    properties:
+      email:
+        type: string
+        example: null
+      full_name:
+        type: string
+        example: null
+      username: 
+        type: string
+        example: elastic
+  id:
+    type: string
+    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+  owner:
+    $ref: 'owners.yaml'
+  pushed_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  pushed_by:
+    type: object
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      username: 
+        type: string
+    nullable: true
+    example: null 
+  type: 
+    type: string
+    example: user
+  updated_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null
+  updated_by:
+    type: object
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      username: 
+        type: string
+    nullable: true
+    example: null
+  version:
+    type: string
+    example: WzIwNDMxLDFd

@@ -172,7 +172,7 @@ To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then 
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial1_8.3.png[Bar chart with sample logs data]
 
 . To show the top five log traffic sources, add a sub-bucket aggregation.
 
@@ -187,7 +187,7 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial2_8.3.png[Bar chart with sample logs data]
 
 [float]
 [[save-the-aggregation-based-panel]]

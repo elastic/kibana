@@ -23,6 +23,7 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -91,13 +92,18 @@ export class TablePanelConfig extends Component<
     (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
       this.props.onChange({ [name]: e.target.value });
 
+  handleNumberChange =
+    (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      this.props.onChange({
+        [name]: !e.target.value ? undefined : Number(e.target.value),
+      });
+
   render() {
     const { selectedTab } = this.state;
     const defaults = {
       drilldown_url: '',
       filter: { query: '', language: getDefaultQueryLanguage() },
       pivot_label: '',
-      pivot_rows: 10,
       pivot_type: '',
     };
     const model = { ...defaults, ...this.props.model };
@@ -172,15 +178,10 @@ export class TablePanelConfig extends Component<
                       />
                     }
                   >
-                    {/*
-                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                      Should it be number or string?
-                    */}
-                    <input
-                      className="euiFieldNumber"
-                      type="number"
-                      onChange={this.handleTextChange('pivot_rows')}
-                      value={model.pivot_rows ?? ''}
+                    <EuiFieldNumber
+                      onChange={this.handleNumberChange('pivot_rows')}
+                      value={model.pivot_rows !== undefined ? Number(model.pivot_rows) : ''}
+                      placeholder="10"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -83,30 +86,36 @@ export function useFailedTransactionsCorrelations() {
       const [overallHistogramResponse, errorHistogramRespone] =
         await Promise.all([
           // Initial call to fetch the overall distribution for the log-log plot.
-          callApmApi('POST /internal/apm/latency/overall_distribution', {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+          callApmApi(
+            'POST /internal/apm/latency/overall_distribution/transactions',
+            {
+              signal: abortCtrl.current.signal,
+              params: {
+                body: {
+                  ...fetchParams,
+                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                },
               },
-            },
-          }),
-          callApmApi('POST /internal/apm/latency/overall_distribution', {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
+            }
+          ),
+          callApmApi(
+            'POST /internal/apm/latency/overall_distribution/transactions',
+            {
+              signal: abortCtrl.current.signal,
+              params: {
+                body: {
+                  ...fetchParams,
+                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                  termFilters: [
+                    {
+                      fieldName: EVENT_OUTCOME,
+                      fieldValue: EventOutcome.failure,
+                    },
+                  ],
+                },
               },
-            },
-          }),
+            }
+          ),
         ]);
 
       const { overallHistogram, percentileThresholdValue } =
@@ -128,7 +137,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse.flush();
 
       const { fieldCandidates: candidates } = await callApmApi(
-        'GET /internal/apm/correlations/field_candidates',
+        'GET /internal/apm/correlations/field_candidates/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {
@@ -159,7 +168,7 @@ export function useFailedTransactionsCorrelations() {
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
         const pValues = await callApmApi(
-          'POST /internal/apm/correlations/p_values',
+          'POST /internal/apm/correlations/p_values/transactions',
           {
             signal: abortCtrl.current.signal,
             params: {
@@ -213,7 +222,7 @@ export function useFailedTransactionsCorrelations() {
       setResponse.flush();
 
       const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats',
+        'POST /internal/apm/correlations/field_stats/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {

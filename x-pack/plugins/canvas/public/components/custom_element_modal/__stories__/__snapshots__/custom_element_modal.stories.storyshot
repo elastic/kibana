@@ -200,7 +200,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp emotion-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -211,15 +211,15 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle css-7xv8go-euiTitle-xxxs"
+                className="euiTitle emotion-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -236,13 +236,13 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+                    className="euiTitle euiCard__title emotion-euiTitle-s"
                     id="generated-idTitle"
                   >
                     
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description emotion-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -517,7 +517,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp emotion-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -528,15 +528,15 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle css-7xv8go-euiTitle-xxxs"
+                className="euiTitle emotion-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -554,7 +554,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+                    className="euiTitle euiCard__title emotion-euiTitle-s"
                     id="generated-idTitle"
                   >
                     
@@ -829,7 +829,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp emotion-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -840,15 +840,15 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle css-7xv8go-euiTitle-xxxs"
+                className="euiTitle emotion-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -865,7 +865,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+                    className="euiTitle euiCard__title emotion-euiTitle-s"
                     id="generated-idTitle"
                   >
                     My Chart
@@ -1138,7 +1138,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp emotion-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -1149,15 +1149,15 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle css-7xv8go-euiTitle-xxxs"
+                className="euiTitle emotion-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+                className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon emotion-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -1174,7 +1174,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+                    className="euiTitle euiCard__title emotion-euiTitle-s"
                     id="generated-idTitle"
                   >
                     

@@ -15,6 +15,7 @@ import type {
   GetAgentStatusResponse,
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
+  PostBulkUpdateAgentTagsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -25,9 +26,9 @@ import type {
   GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
-import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
 export const getAgentHandler: RequestHandler<
@@ -114,6 +115,41 @@ export const updateAgentHandler: RequestHandler<
   }
 };
 
+export const bulkUpdateAgentTagsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkUpdateAgentTagsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
+
+  try {
+    const results = await AgentService.updateAgentTags(
+      soClient,
+      esClient,
+      { ...agentOptions, batchSize: request.body.batchSize },
+      request.body.tagsToAdd ?? [],
+      request.body.tagsToRemove ?? []
+    );
+
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
 export const getAgentsHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
@@ -128,6 +164,8 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
     });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
@@ -177,13 +215,6 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isGoldPlus()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Gold license' },
-    });
-  }
-
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -195,7 +226,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, batchSize: request.body.batchSize },
       request.body.policy_id
     );
 

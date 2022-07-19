@@ -105,6 +105,7 @@ export enum SecurityPageName {
   networkTls = 'network-tls',
   overview = 'overview',
   policies = 'policy',
+  responseActions = 'response_actions',
   rules = 'rules',
   rulesCreate = 'rules-create',
   timelines = 'timelines',
@@ -121,6 +122,11 @@ export enum SecurityPageName {
   kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
+  noPage = '',
+  cloudSecurityPosture = 'cloud_security_posture',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -148,6 +154,11 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const CLOUD_SECURITY_POSTURE_PATH = '/cloud_security_posture' as const;
+export const CLOUD_SECURITY_POSTURE_DASHBOARD_PATH = '/cloud_security_posture/dashboard' as const;
+export const CLOUD_SECURITY_POSTURE_FINDINGS_PATH = '/cloud_security_posture/findings' as const;
+export const CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH = '/cloud_security_posture/benchmarks' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -173,6 +184,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -378,6 +390,11 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPING,
 ]);
 
+export const STARTED_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.INDEXING,
+  TRANSFORM_STATES.STARTED,
+]);
+
 /**
  * How many rules to update at a time is set to 50 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
@@ -426,3 +443,12 @@ export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+/**
+ * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
+ */
+export enum BulkActionsDryRunErrCode {
+  IMMUTABLE = 'IMMUTABLE',
+  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
+  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
+}

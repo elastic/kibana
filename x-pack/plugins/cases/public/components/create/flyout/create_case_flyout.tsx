@@ -60,7 +60,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
       && .euiFlyoutBody__overflowContent {
         display: block;
-        padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
+        padding: ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} 70px;
         height: auto;
       }
     `}

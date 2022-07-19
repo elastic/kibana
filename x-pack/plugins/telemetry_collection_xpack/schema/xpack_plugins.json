@@ -2602,6 +2602,9 @@
       "properties": {
         "services_per_agent": {
           "properties": {
+            "android/java": {
+              "type": "long"
+            },
             "dotnet": {
               "type": "long"
             },
@@ -2672,6 +2675,90 @@
         },
         "agents": {
           "properties": {
+            "android/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "dotnet": {
               "properties": {
                 "agent": {
@@ -5832,6 +5919,34 @@
                 }
               }
             },
+            "es_ml_anomalies": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es machine learning anomaly layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es machine learning anomaly layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es machine learning anomaly layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
             "es_point_to_point": {
               "properties": {
                 "min": {
@@ -6759,6 +6874,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6849,6 +6977,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6936,6 +7077,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7060,6 +7214,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -7178,6 +7345,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7331,6 +7511,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7986,6 +8179,19 @@
             }
           }
         },
+        "queue_times": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -8043,6 +8249,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8136,6 +8355,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8223,6 +8455,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8347,6 +8592,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8465,6 +8723,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8618,6 +8889,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -9270,6 +9554,19 @@
                 },
                 "99.0": {
                   "type": "long"
+                }
+              }
+            },
+            "queue_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             }

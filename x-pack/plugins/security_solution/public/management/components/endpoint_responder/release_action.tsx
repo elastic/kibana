@@ -6,13 +6,12 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import { EndpointCommandDefinitionMeta } from './types';
+import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
-import { CommandExecutionComponentProps } from '../console/types';
+import type { CommandExecutionComponentProps } from '../console/types';
+import { ActionError } from './action_error';
 
 export const ReleaseActionResult = memo<
   CommandExecutionComponentProps<
@@ -74,44 +73,21 @@ export const ReleaseActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.pendingMessage"
-          defaultMessage="Releasing"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Release action Failure' }
-        )}
-        data-test-subj="releaseErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+      <ActionError
+        dataTestSubj={'releaseErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
-      )}
-      data-test-subj="releaseSuccessCallout"
-    />
-  );
+  return <ResultComponent data-test-subj="releaseSuccessCallout" />;
 });
 ReleaseActionResult.displayName = 'ReleaseActionResult';

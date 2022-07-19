@@ -7,6 +7,8 @@
 
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../lib/suspended_component_with_props';
+import type { CreateConnectorFlyoutProps } from './action_connector_form/create_connector_flyout';
+import type { EditConnectorFlyoutProps } from './action_connector_form/edit_connector_flyout';
 
 export type {
   ActionGroupWithCondition,
@@ -19,11 +21,11 @@ export const AlertConditionsGroup = lazy(() => import('./rule_form/rule_conditio
 export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_add')));
 export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_edit')));
 
-export const ConnectorAddFlyout = suspendedComponentWithProps(
-  lazy(() => import('./action_connector_form/connector_add_flyout'))
+export const ConnectorAddFlyout = suspendedComponentWithProps<CreateConnectorFlyoutProps>(
+  lazy(() => import('./action_connector_form/create_connector_flyout'))
 );
-export const ConnectorEditFlyout = suspendedComponentWithProps(
-  lazy(() => import('./action_connector_form/connector_edit_flyout'))
+export const ConnectorEditFlyout = suspendedComponentWithProps<EditConnectorFlyoutProps>(
+  lazy(() => import('./action_connector_form/edit_connector_flyout'))
 );
 export const ActionForm = suspendedComponentWithProps(
   lazy(() => import('./action_connector_form/action_form'))
@@ -38,9 +40,6 @@ export const RuleTagFilter = suspendedComponentWithProps(
 export const RuleStatusFilter = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_status_filter'))
 );
-export const RuleTagBadge = suspendedComponentWithProps(
-  lazy(() => import('./rules_list/components/rule_tag_badge'))
-);
 export const RuleEventLogList = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_event_log_list'))
 );
@@ -49,4 +48,13 @@ export const RulesList = suspendedComponentWithProps(
 );
 export const RulesListNotifyBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rules_list_notify_badge'))
+);
+export const RuleDefinition = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_definition'))
+);
+export const RuleTagBadge = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_tag_badge'))
+);
+export const RuleStatusPanel = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_status_panel'))
 );

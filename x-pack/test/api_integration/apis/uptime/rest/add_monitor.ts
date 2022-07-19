@@ -7,8 +7,9 @@
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
-import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
@@ -46,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
       // Delete a required property to make payload invalid
-      const newMonitor = { ...httpMonitorJson, 'check.request.headers': undefined };
+      const newMonitor = { ...httpMonitorJson, 'check.request.headers': null };
 
       const apiResponse = await supertestAPI
         .post(API_URLS.SYNTHETICS_MONITORS)
@@ -66,6 +67,71 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.status).eql(400);
       expect(apiResponse.body.message).eql('Monitor type is invalid');
+    });
+
+    it('can create valid monitors without all defaults', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        type: 'http',
+        urls: 'https://elastic.co',
+        locations: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor);
+
+      expect(apiResponse.status).eql(200);
+      expect(apiResponse.body.attributes).eql(
+        omit(
+          {
+            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...newMonitor,
+            revision: 1,
+          },
+          secretKeys
+        )
+      );
+    });
+
+    it('cannot create a valid monitor without a monitor type', async () => {
+      // Delete a required property to make payload invalid
+      const newMonitor = {
+        name: 'Sample name',
+        url: 'https://elastic.co',
+        locations: [
+          {
+            id: 'eu-west-01',
+            label: 'Europe West',
+            geo: {
+              lat: 33.2343132435,
+              lon: 73.2342343434,
+            },
+            url: 'https://example-url.com',
+            isServiceManaged: true,
+          },
+        ],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor);
+
+      expect(apiResponse.status).eql(400);
     });
 
     it('can create monitor with API key with proper permissions', async () => {

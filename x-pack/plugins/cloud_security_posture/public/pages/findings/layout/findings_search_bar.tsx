@@ -9,11 +9,11 @@ import { css } from '@emotion/react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
 import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
-import { FINDINGS_SEARCH_PLACEHOLDER } from '../translations';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 
@@ -49,7 +49,9 @@ export const FindingsSearchBar = ({
         onQuerySubmit={setQuery}
         // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
-        placeholder={FINDINGS_SEARCH_PLACEHOLDER}
+        placeholder={i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
+          defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )',
+        })}
       />
     </div>
   );

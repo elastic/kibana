@@ -167,6 +167,7 @@ export async function buildContextMenuForActions({
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
+      toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,

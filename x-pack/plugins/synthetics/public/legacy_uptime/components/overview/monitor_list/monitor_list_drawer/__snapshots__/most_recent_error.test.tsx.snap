@@ -13,7 +13,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
     class="euiDescriptionList__description"
   >
     <button
-      class="euiLink css-102pf9n-euiLink-primary"
+      class="euiLink emotion-euiLink-primary"
       type="button"
     >
       <a

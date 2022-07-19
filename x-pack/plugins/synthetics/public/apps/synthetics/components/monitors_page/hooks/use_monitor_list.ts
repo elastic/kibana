@@ -20,7 +20,7 @@ export function useMonitorList() {
   const dispatch = useDispatch();
   const [isDataQueried, setIsDataQueried] = useState(false);
 
-  const { pageState, loading, error, data } = useSelector(selectMonitorListState);
+  const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
 
   const { query, tags, monitorType, locations: locationFilters } = useGetUrlParams();
@@ -61,12 +61,14 @@ export function useMonitorList() {
 
   return {
     loading,
+    loaded,
     error,
     pageState,
     syntheticsMonitors,
+    total: data?.total ?? 0,
     loadPage,
     reloadPage,
     isDataQueried,
-    allTotal: data.allTotal ?? 0,
+    absoluteTotal: data.absoluteTotal ?? 0,
   };
 }

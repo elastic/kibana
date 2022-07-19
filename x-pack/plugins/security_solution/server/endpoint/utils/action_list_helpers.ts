@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -14,29 +14,17 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type {
   LogsEndpointAction,
-  ActionListApiResponse,
   EndpointActionResponse,
   LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
 import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
-import { GetActionDetailsListParam } from '../services/actions/action_list';
+import type { GetActionDetailsListParam } from '../services/actions/action_list';
 
 const queryOptions = Object.freeze({
   ignore: [404],
 });
-
-// This is same as the one for audit log
-// but we want to deprecate audit log at some point
-// thus creating this one for sorting action list log entries
-export const getTimeSortedActionListLogEntries = (
-  data: ActionListApiResponse['data'][number]['logEntries']
-): ActionListApiResponse['data'][number]['logEntries'] => {
-  return data.sort((a, b) =>
-    new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-  );
-};
 
 export const getActions = async ({
   commands,

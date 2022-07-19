@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import {
+import type {
   ResultsStrategyResponse,
   ResultsRequestOptions,
   OsqueryQueries,
 } from '../../../../../common/search_strategy/osquery';
 import { inspectStringifyObject } from '../../../../../common/utils/build_query';
-import { OsqueryFactory } from '../types';
+import type { OsqueryFactory } from '../types';
 import { buildResultsQuery } from './query.all_results.dsl';
 
 export const allResults: OsqueryFactory<OsqueryQueries.results> = {

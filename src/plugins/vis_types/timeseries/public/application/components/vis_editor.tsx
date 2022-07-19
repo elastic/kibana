@@ -18,7 +18,7 @@ import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugi
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 

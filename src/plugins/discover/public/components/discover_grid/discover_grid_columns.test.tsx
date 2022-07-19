@@ -281,20 +281,24 @@ describe('Discover grid columns', function () {
             [Function],
             [Function],
           ],
-          "display": <React.Fragment>
-            timestamp
-             
-            <EuiIconTip
-              aria-label="Primary time field."
+          "display": <div
+            aria-label="timestamp - this field represents the time that events occurred."
+          >
+            <EuiToolTip
               content="This field represents the time that events occurred."
-              iconProps={
-                Object {
-                  "tabIndex": -1,
-                }
-              }
-              type="clock"
-            />
-          </React.Fragment>,
+              delay="regular"
+              display="inlineBlock"
+              position="top"
+            >
+              <React.Fragment>
+                timestamp
+                 
+                <EuiIcon
+                  type="clock"
+                />
+              </React.Fragment>
+            </EuiToolTip>
+          </div>,
           "id": "timestamp",
           "initialWidth": 210,
           "isSortable": true,

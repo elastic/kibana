@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
-import { useEsDocSearch } from '../../../utils/use_es_doc_search';
-import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export interface DocProps {
   /**
@@ -39,8 +40,26 @@ export function Doc(props: DocProps) {
   const [reqState, hit] = useEsDocSearch(props);
   const { docLinks } = useDiscoverServices();
   const indexExistsLink = docLinks.links.apis.indexExists;
+
+  const singleDocTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    singleDocTitle.current?.focus();
+  }, []);
+
   return (
     <EuiPage>
+      <h1
+        id="singleDocTitle"
+        className="euiScreenReaderOnly"
+        data-test-subj="discoverSingleDocTitle"
+        tabIndex={-1}
+        ref={singleDocTitle}
+      >
+        {i18n.translate('discover.doc.pageTitle', {
+          defaultMessage: 'Single document - #{id}',
+          values: { id: props.id },
+        })}
+      </h1>
       <EuiPageContent>
         {reqState === ElasticRequestState.NotFoundIndexPattern && (
           <EuiCallOut

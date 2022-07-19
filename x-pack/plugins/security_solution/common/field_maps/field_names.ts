@@ -14,6 +14,10 @@ export const ALERT_GROUP_ID = `${ALERT_NAMESPACE}.group.id` as const;
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time` as const;
 export const ALERT_THRESHOLD_RESULT = `${ALERT_NAMESPACE}.threshold_result` as const;
+export const ALERT_THRESHOLD_RESULT_CARDINALITY = `${ALERT_THRESHOLD_RESULT}.cardinality` as const;
+export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as const;
+export const ALERT_THRESHOLD_RESULT_FROM = `${ALERT_THRESHOLD_RESULT}.from` as const;
+export const ALERT_THRESHOLD_RESULT_TERMS = `${ALERT_THRESHOLD_RESULT}.terms` as const;
 
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;
@@ -38,3 +42,4 @@ export const ALERT_RULE_THROTTLE = `${ALERT_RULE_NAMESPACE}.throttle` as const;
 export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as const;
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
 export const ALERT_RULE_TIMESTAMP_OVERRIDE = `${ALERT_RULE_NAMESPACE}.timestamp_override` as const;
+export const ALERT_RULE_INDICES = `${ALERT_RULE_NAMESPACE}.indices` as const;

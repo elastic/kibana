@@ -13,9 +13,16 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
 import { useAppNavLinks } from '../nav_links';
 import { SolutionGroupedNav } from '../solution_grouped_nav';
-import { CustomSideNavItem, DefaultSideNavItem, SideNavItem } from '../solution_grouped_nav/types';
-import { NavLinkItem } from '../types';
+import type {
+  CustomSideNavItem,
+  DefaultSideNavItem,
+  SideNavItem,
+} from '../solution_grouped_nav/types';
+import type { NavLinkItem } from '../types';
 import { EuiIconLaunch } from './icons/launch';
+import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
+import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
+import { bottomNavOffset } from '../../../lib/helpers';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -127,7 +134,7 @@ const useSideNavItems = () => {
 const useSelectedId = (): SecurityPageName => {
   const [{ pageName }] = useRouteSpy();
   const selectedId = useMemo(() => {
-    const [rootLinkInfo] = getAncestorLinksInfo(pageName as SecurityPageName);
+    const [rootLinkInfo] = getAncestorLinksInfo(pageName);
     return rootLinkInfo?.id ?? '';
   }, [pageName]);
 
@@ -142,9 +149,21 @@ export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
 
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const bottomOffset =
+    isTimelineBottomBarVisible || isPolicySettingsVisible ? bottomNavOffset : undefined;
+
   if (items.length === 0 && footerItems.length === 0) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
   }
 
-  return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
+  return (
+    <SolutionGroupedNav
+      items={items}
+      footerItems={footerItems}
+      selectedId={selectedId}
+      bottomOffset={bottomOffset}
+    />
+  );
 };

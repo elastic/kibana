@@ -7,49 +7,35 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { Engine } from '../../../app_search/components/engine/types';
 import { formatApiName } from '../../utils/format_api_name';
 
-import { SearchIndicesLogic, SearchIndicesValues } from '../search_indices/search_indices_logic';
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { LanguageForOptimization } from './types';
+import { getLanguageForOptimizatioin } from './utils';
 
-import { DEFAULT_LANGUAGE } from './constants';
-import { ISearchEngineOption } from './new_search_index_template';
-
-export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchEngines'> {
-  searchEngineSelectOptions: ISearchEngineOption[];
-  rawName: string;
+export interface NewSearchIndexValues {
+  language: LanguageForOptimization;
+  languageSelectValue: string;
   name: string;
-  language: string;
-  selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
+  rawName: string;
 }
 
 export interface NewSearchIndexActions {
+  setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-  setLanguage(language: string): { language: string };
-  setSelectedSearchEngineOptions(selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>): {
-    selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
-  };
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
-  path: ['enterprise_search', 'content', 'new_search_index'],
-  connect: {
-    values: [SearchIndicesLogic, ['searchEngines']],
-  },
   actions: {
+    setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
-    setLanguage: (language) => ({ language }),
-    setSelectedSearchEngineOptions: (selectedSearchEngines) => ({
-      selectedSearchEngines,
-    }),
   },
+  path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
-    language: [
-      DEFAULT_LANGUAGE,
+    languageSelectValue: [
+      UNIVERSAL_LANGUAGE_VALUE,
       {
-        setLanguage: (_, { language }) => language,
+        setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
@@ -58,22 +44,12 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
         setRawName: (_, { rawName }) => rawName,
       },
     ],
-    selectedSearchEngines: [
-      [],
-      {
-        setSelectedSearchEngineOptions: (_, { selectedSearchEngines }) => selectedSearchEngines,
-      },
-    ],
   },
   selectors: ({ selectors }) => ({
-    name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
-    searchEngineSelectOptions: [
-      () => [selectors.searchEngines],
-      (searchEngines) =>
-        searchEngines.map((s: Engine) => ({
-          label: s.name,
-          value: s,
-        })),
+    language: [
+      () => [selectors.languageSelectValue],
+      (languageSelectValue) => getLanguageForOptimizatioin(languageSelectValue),
     ],
+    name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
   }),
 });

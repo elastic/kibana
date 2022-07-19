@@ -9,7 +9,7 @@
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 
 import { SavedObjectsClient } from '../saved_objects';

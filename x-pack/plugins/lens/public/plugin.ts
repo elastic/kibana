@@ -272,6 +272,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
@@ -284,6 +285,7 @@ export class LensPlugin {
         inspector: plugins.inspector,
         spaces: plugins.spaces,
         theme: core.theme,
+        uiSettings: core.uiSettings,
       };
     };
 
@@ -292,13 +294,13 @@ export class LensPlugin {
     }
 
     visualizations.registerAlias(getLensAliasConfig());
-
     if (discover) {
       uiActionsEnhanced.registerDrilldown(
         new OpenInDiscoverDrilldown({
           discover,
           dataViews: () => this.dataViewsService!,
           hasDiscoverAccess: () => this.hasDiscoverAccess,
+          application: () => startServices().core.application,
         })
       );
     }
@@ -306,6 +308,7 @@ export class LensPlugin {
     setupExpressions(
       expressions,
       () => startServices().plugins.fieldFormats.deserialize,
+      () => startServices().plugins.data.datatableUtilities,
       async () => {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);

@@ -8,7 +8,8 @@
 import React, { Fragment } from 'react';
 import { EuiPageBody, EuiSpacer } from '@elastic/eui';
 
-import { Header, HeaderProps } from './header';
+import type { HeaderProps } from './header';
+import { Header } from './header';
 import { Page, ContentWrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {

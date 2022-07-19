@@ -26,6 +26,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
@@ -246,13 +247,13 @@ export interface DiscoverFieldProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
@@ -317,10 +318,9 @@ function DiscoverFieldComponent({
     );
   }
 
-  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
-  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
-  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
-  const canDeleteField = onDeleteField && isRuntimeField;
+  const { canEdit, canDelete } = getFieldCapabilities(indexPattern, field);
+  const canEditField = onEditField && canEdit;
+  const canDeleteField = onDeleteField && canDelete;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup responsive={false} gutterSize="s">

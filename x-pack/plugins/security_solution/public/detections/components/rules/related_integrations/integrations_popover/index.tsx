@@ -53,7 +53,7 @@ const IntegrationListItem = styled('li')`
  */
 const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const { integrations, privileges, isLoaded } = useRelatedIntegrations(relatedIntegrations);
+  const { integrations, isLoaded } = useRelatedIntegrations(relatedIntegrations);
 
   const enabledIntegrations = useMemo(() => {
     return integrations.filter(
@@ -65,10 +65,10 @@ const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopov
   const numIntegrationsEnabled = enabledIntegrations.length;
 
   const badgeTitle = useMemo(() => {
-    return privileges.canReadInstalledIntegrations && isLoaded
+    return isLoaded
       ? `${numIntegrationsEnabled}/${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`
       : `${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`;
-  }, [privileges, isLoaded, numIntegrations, numIntegrationsEnabled]);
+  }, [isLoaded, numIntegrations, numIntegrationsEnabled]);
 
   return (
     <IntegrationsPopoverWrapper

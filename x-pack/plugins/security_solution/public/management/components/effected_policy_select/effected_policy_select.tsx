@@ -6,24 +6,23 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelectable,
-  EuiSelectableProps,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -56,7 +55,7 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {
-    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
+    padding-right: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 

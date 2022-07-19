@@ -7,13 +7,12 @@
 
 import { capitalize } from 'lodash';
 import semver from 'semver';
-import {
+import type {
   InstalledIntegration,
   InstalledIntegrationArray,
   RelatedIntegration,
   RelatedIntegrationArray,
 } from '../../../../../common/detection_engine/schemas/common';
-import { IntegrationPrivileges } from './integration_privileges';
 
 export interface IntegrationDetails {
   packageName: string;
@@ -45,13 +44,12 @@ export interface UnknownInstallationStatus {
  * has.
  */
 export const calculateIntegrationDetails = (
-  privileges: IntegrationPrivileges,
   relatedIntegrations: RelatedIntegrationArray,
   installedIntegrations: InstalledIntegrationArray | undefined
 ): IntegrationDetails[] => {
   const integrationMatches = findIntegrationMatches(relatedIntegrations, installedIntegrations);
   const integrationDetails = integrationMatches.map((integration) => {
-    return createIntegrationDetails(integration, privileges);
+    return createIntegrationDetails(integration);
   });
 
   return integrationDetails.sort((a, b) => {
@@ -90,19 +88,15 @@ const findIntegrationMatches = (
   });
 };
 
-const createIntegrationDetails = (
-  integration: IntegrationMatch,
-  privileges: IntegrationPrivileges
-): IntegrationDetails => {
+const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDetails => {
   const { related, installed, isLoaded } = integration;
-  const { canReadInstalledIntegrations } = privileges;
 
   const packageName = related.package;
   const integrationName = related.integration ?? null;
   const requiredVersion = related.version;
 
   // We don't know whether the integration is installed or not.
-  if (!canReadInstalledIntegrations || !isLoaded) {
+  if (!isLoaded) {
     const integrationTitle = getCapitalizedTitle(packageName, integrationName);
     const targetVersion = getMinimumConcreteVersionMatchingSemver(requiredVersion);
     const targetUrl = buildTargetUrl(packageName, integrationName, targetVersion);

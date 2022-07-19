@@ -23,7 +23,8 @@ import {
   setHostPageQueriesActivePageToZero,
   setHostDetailsQueriesActivePageToZero,
 } from './helpers';
-import { HostsModel, HostsTableType } from './model';
+import type { HostsModel } from './model';
+import { HostsTableType } from './model';
 
 export type HostsState = HostsModel;
 

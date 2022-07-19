@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  CSSProperties,
-} from 'react';
+import type { ReactNode, CSSProperties } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
@@ -55,19 +47,19 @@ const OverlayRootContainer = styled.div`
   }
 
   &.padding-xs {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.xs};
+    padding: ${({ theme: { eui } }) => eui.euiSizeXS};
   }
   &.padding-s {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.s};
+    padding: ${({ theme: { eui } }) => eui.euiSizeS};
   }
   &.padding-m {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.m};
+    padding: ${({ theme: { eui } }) => eui.euiSizeM};
   }
   &.padding-l {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.l};
+    padding: ${({ theme: { eui } }) => eui.euiSizeL};
   }
   &.padding-xl {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
+    padding: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 
   .fullHeight {

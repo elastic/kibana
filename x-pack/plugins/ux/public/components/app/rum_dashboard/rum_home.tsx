@@ -29,7 +29,7 @@ export function RumHome() {
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { data: rumHasData, status } = useHasRumData();
+  const { data: rumHasData, loading: isLoading } = useHasRumData();
 
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
     !rumHasData?.hasData
@@ -56,14 +56,13 @@ export function RumHome() {
         }
       : undefined;
 
-  const isLoading = status === 'loading';
-
   return (
     <Fragment>
       <CsmSharedContextProvider>
         <PageTemplateComponent
           noDataConfig={isLoading ? undefined : noDataConfig}
           pageHeader={{ children: <PageHeader /> }}
+          isPageDataLoaded={isLoading === false}
         >
           {isLoading && <EmptyStateLoading />}
           <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>

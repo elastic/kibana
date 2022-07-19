@@ -30,7 +30,7 @@ const PrependContainer = euiStyled.div`
   align-items: center;
   background-color: ${({ theme }) =>
     theme.eui.euiFormInputGroupLabelBackground};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export function TimeComparison() {
@@ -39,7 +39,11 @@ export function TimeComparison() {
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
 
   const location = useLocation();
   const apmRouter = useApmRouter();

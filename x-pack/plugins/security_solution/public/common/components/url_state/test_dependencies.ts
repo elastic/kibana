@@ -11,9 +11,7 @@ import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { networkModel } from '../../../network/store';
-import { hostsModel } from '../../../hosts/store';
+import type { UrlStateContainerPropTypes, LocationTypes } from './types';
 import { HostsTableType } from '../../../hosts/store/model';
 import { TimelineTabs } from '../../../../common/types/timeline';
 
@@ -91,36 +89,11 @@ export const defaultProps: UrlStateContainerPropTypes = {
     title: 'filebeat-*,packetbeat-*',
   },
   urlState: {
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: '2019-05-16T23:10:43.696Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2019-05-17T23:10:43.697Z',
-          toStr: 'now',
-        },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: '2019-05-16T23:10:43.696Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2019-05-17T23:10:43.697Z',
-          toStr: 'now',
-        },
-        linkTo: ['global'],
-      },
-    },
-    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-    [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
       isOpen: false,
     },
-    [CONSTANTS.sourcerer]: {},
   },
   history: {
     ...mockHistory,
@@ -132,13 +105,12 @@ export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
   kqlQueryValue: Query | null,
-  pageName: string,
+  pageName: SecurityPageName,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.appQuery]: kqlQueryValue || { query: '', language: 'kuery' },
   },
   history: {
     ...mockHistory,
@@ -154,7 +126,7 @@ interface GetMockPropsObj {
   examplePath: string;
   namespaceLower: string;
   page: LocationTypes;
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
 }
 
@@ -266,73 +238,3 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
     ),
   },
 });
-
-// silly that this needs to be an array and not an object
-// https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-export const testCases: Array<
-  [LocationTypes, string, string, string, string | null, string, undefined | string]
-> = [
-  [
-    /* page */ CONSTANTS.networkPage,
-    /* namespaceLower */ 'network',
-    /* namespaceUpper */ 'Network',
-    /* pathName */ '/network',
-    /* type */ networkModel.NetworkType.page,
-    /* pageName */ SecurityPageName.network,
-    /* detailName */ undefined,
-  ],
-  [
-    /* page */ CONSTANTS.hostsPage,
-    /* namespaceLower */ 'hosts',
-    /* namespaceUpper */ 'Hosts',
-    /* pathName */ '/hosts',
-    /* type */ hostsModel.HostsType.page,
-    /* pageName */ SecurityPageName.hosts,
-    /* detailName */ undefined,
-  ],
-  [
-    /* page */ CONSTANTS.hostsDetails,
-    /* namespaceLower */ 'hosts',
-    /* namespaceUpper */ 'Hosts',
-    /* pathName */ '/hosts/siem-es',
-    /* type */ hostsModel.HostsType.details,
-    /* pageName */ SecurityPageName.hosts,
-    /* detailName */ 'host-test',
-  ],
-  [
-    /* page */ CONSTANTS.networkDetails,
-    /* namespaceLower */ 'network',
-    /* namespaceUpper */ 'Network',
-    /* pathName */ '/network/ip/100.90.80',
-    /* type */ networkModel.NetworkType.details,
-    /* pageName */ SecurityPageName.network,
-    /* detailName */ '100.90.80',
-  ],
-  [
-    /* page */ CONSTANTS.overviewPage,
-    /* namespaceLower */ 'overview',
-    /* namespaceUpper */ 'Overview',
-    /* pathName */ '/overview',
-    /* type */ null,
-    /* pageName */ SecurityPageName.overview,
-    /* detailName */ undefined,
-  ],
-  [
-    /* page */ CONSTANTS.timelinePage,
-    /* namespaceLower */ 'timeline',
-    /* namespaceUpper */ 'Timeline',
-    /* pathName */ '/timeline',
-    /* type */ null,
-    /* pageName */ SecurityPageName.timelines,
-    /* detailName */ undefined,
-  ],
-  [
-    /* page */ CONSTANTS.kubernetesPage,
-    /* namespaceLower */ 'kubernetes',
-    /* namespaceUpper */ 'Kubernetes',
-    /* pathName */ '/kubernetes',
-    /* type */ null,
-    /* pageName */ SecurityPageName.kubernetes,
-    /* detailName */ undefined,
-  ],
-];

@@ -17,7 +17,7 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
@@ -35,6 +35,7 @@ import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -47,7 +48,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling';
+    | 'profiling'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -143,7 +145,7 @@ export function isMetricsTabHidden({
     !agentName ||
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
-    isIosAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
     isJRubyAgent(agentName, runtimeName) ||
     isServerlessAgent(runtimeName)
   );
@@ -164,7 +166,13 @@ export function isJVMsTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core } = useApmPluginContext();
+  const { config, core, plugins } = useApmPluginContext();
+  const { capabilities } = core.application;
+  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
+    plugins,
+    capabilities
+  );
+
   const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
@@ -213,7 +221,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Dependencies',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'errors',
@@ -278,7 +286,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Logs',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'profiling',
@@ -315,6 +323,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+    },
+    {
+      key: 'alerts',
+      href: router.link('/services/{serviceName}/alerts', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
+        defaultMessage: 'Alerts',
+      }),
+      hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
 

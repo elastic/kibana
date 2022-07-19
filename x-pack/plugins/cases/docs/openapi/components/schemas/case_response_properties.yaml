@@ -17,7 +17,9 @@ closed_by:
 comments:
   type: array
   items: 
-    type: string
+    oneOf:
+      - $ref: 'alert_comment_response_properties.yaml'
+      - $ref: 'user_comment_response_properties.yaml'
   example: []
 connector: 
   type: object

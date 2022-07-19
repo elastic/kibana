@@ -9,9 +9,10 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
 import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
+import { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
 
 /** @public */
-export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | 'wildcard';
+export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | typeof KQL_NODE_TYPE_WILDCARD;
 
 /** @public */
 export interface KueryNode {
@@ -39,4 +40,21 @@ export { nodeTypes } from './node_types';
 export interface KueryQueryOptions {
   filtersInMustClause?: boolean;
   dateFormatTZ?: string;
+
+  /**
+   * the Nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
+   * The optional ignore_unmapped parameter defaults to false.
+   * The `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
+   */
+  nestedIgnoreUnmapped?: boolean;
+}
+
+/** @public */
+export interface KqlContext {
+  nested?: {
+    /**
+     * For nested queries, we pass along the path to the nested document so we can properly craft the query DSL.
+     */
+    path: string;
+  };
 }

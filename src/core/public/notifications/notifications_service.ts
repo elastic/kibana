@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { I18nStart } from '../i18n';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 export interface SetupDeps {

@@ -8,7 +8,8 @@
 
 import { EMPTY, Observable } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
-import { nodeBuilder, SEARCH_SESSION_TYPE, SearchSessionStatus, KueryNode } from '../../../common';
+import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { CheckSearchSessionsDeps, SearchSessionsResponse } from './types';
 import { bulkUpdateSessions, getAllSessionsStatusUpdates } from './update_session_status';
