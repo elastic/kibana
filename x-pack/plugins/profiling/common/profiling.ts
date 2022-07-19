@@ -8,6 +8,32 @@
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
+export type FrameType = number;
+
+export function describeFrameType(ft: FrameType): string {
+  switch (ft) {
+    case 0:
+      return '<unsymbolized frame>';
+    case 1:
+      return 'Python';
+    case 2:
+      return 'PHP';
+    case 3:
+      return 'Native';
+    case 4:
+      return 'Kernel';
+    case 5:
+      return 'JVM/Hotspot';
+    case 6:
+      return 'Ruby';
+    case 7:
+      return 'Perl';
+    case 8:
+      return 'JavaScript';
+    default:
+      return '';
+  }
+}
 
 export interface StackTraceEvent {
   StackTraceID: StackTraceID;
@@ -36,7 +62,7 @@ export interface StackFrameMetadata {
   // StackTrace.FileID
   FileID: FileID;
   // StackTrace.Type
-  FrameType: number;
+  FrameType: FrameType;
   // stringified FrameType -- FrameType.String()
   FrameTypeString: string;
 

@@ -9,14 +9,14 @@ import React, { useContext, useMemo } from 'react';
 
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 
-import { StackFrameMetadata } from '../../common/profiling';
+import { describeFrameType, StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
 
 function getCalleeFunction(frame: StackFrameMetadata): string {
   // In the best case scenario, we have the file names, source lines,
   // and function names. However we need to deal with missing function or
   // executable info.
-  const exeDisplayName = frame.ExeFileName ? frame.ExeFileName : frame.FrameTypeString;
+  const exeDisplayName = frame.ExeFileName ? frame.ExeFileName : describeFrameType(frame.FrameType);
 
   // When there is no function name, only use the executable name
   return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
@@ -74,7 +74,7 @@ export const TopNFunctionsTable = () => {
       field: 'frame',
       name: 'Function',
       width: '50%',
-      render: (f: StackFrameMetadata) => (
+      render: (f: StackFrameMetadata, row: Row) => (
         <EuiText size="s">
           <strong>{getCalleeFunction(f)}</strong>
           <p>{getCalleeSource(f)}</p>
@@ -88,12 +88,12 @@ export const TopNFunctionsTable = () => {
     {
       field: 'exclusiveCPU',
       name: 'Exclusive CPU',
-      render: (row: Row) => `${row.exclusiveCPU.toFixed(2)}%`,
+      render: (n: number, row: Row) => `${n.toFixed(2)}%`,
     },
     {
       field: 'inclusiveCPU',
       name: 'Inclusive CPU',
-      render: (row: Row) => `${row.inclusiveCPU.toFixed(2)}%`,
+      render: (n: number, row: Row) => `${n.toFixed(2)}%`,
     },
   ];
 
