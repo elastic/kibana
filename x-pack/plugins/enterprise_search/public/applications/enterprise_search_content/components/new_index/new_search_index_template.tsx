@@ -33,12 +33,13 @@ import { i18n } from '@kbn/i18n';
 
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
+import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;
   formDisabled?: boolean;
   onNameChange?(name: string): void;
-  onSubmit(name: string, language: LanuageForOptimization): void;
+  onSubmit(name: string, language: LanguageForOptimization): void;
   title: React.ReactNode;
   type: string;
 }
