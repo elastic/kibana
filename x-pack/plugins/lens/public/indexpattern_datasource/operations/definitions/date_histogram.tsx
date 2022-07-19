@@ -438,6 +438,7 @@ export const dateHistogramOperation: OperationDefinition<
                   })}
                 </EuiText>
               }
+              data-test-subj="lensDropPartialIntervals"
               checked={Boolean(currentColumn.params.dropPartials)}
               onChange={onChangeDropPartialBuckets}
               compressed
