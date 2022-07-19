@@ -210,7 +210,7 @@ describe('IndexPatterns', () => {
 
     // Create a normal index patterns
     const pattern = await indexPatterns.get('foo');
-    indexPatterns.clearCache();
+    indexPatterns.clearInstanceCache();
 
     // Create the same one - we're going to handle concurrency
     const samePattern = await indexPatterns.get('foo');
