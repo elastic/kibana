@@ -434,7 +434,7 @@ describe('Cloud Plugin', () => {
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
 
@@ -446,14 +446,15 @@ describe('Cloud Plugin', () => {
       expect(securityStart.authc.getCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('registers a custom nav link for superusers', async () => {
+    it('registers a custom nav link for cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
+
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -494,14 +495,14 @@ describe('Cloud Plugin', () => {
       `);
     });
 
-    it('does not register a custom nav link for non-superusers', async () => {
+    it('does not register a custom nav link for non-cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['not-a-superuser'],
+          elastic_cloud_user: false,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -511,14 +512,14 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink).not.toHaveBeenCalled();
     });
 
-    it('registers user profile links for superusers', async () => {
+    it('registers user profile links for cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['superuser'],
+          elastic_cloud_user: true,
         })
       );
       plugin.start(coreStart, { security: securityStart });
@@ -579,14 +580,14 @@ describe('Cloud Plugin', () => {
       `);
     });
 
-    it('does not register profile links for non-superusers', async () => {
+    it('does not register profile links for non-cloud users', async () => {
       const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
       const securityStart = securityMock.createStart();
       securityStart.authc.getCurrentUser.mockResolvedValue(
         securityMock.createMockAuthenticatedUser({
-          roles: ['not-a-superuser'],
+          elastic_cloud_user: false,
         })
       );
       plugin.start(coreStart, { security: securityStart });
