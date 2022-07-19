@@ -18,7 +18,7 @@ import { FieldResultSetting } from '../types';
 import { FieldNumber } from './field_number';
 
 export const TextFieldsBody: React.FC = () => {
-  const { textResultFields } = useValues(ResultSettingsLogic);
+  const { isSnippetAllowed, textResultFields } = useValues(ResultSettingsLogic);
   const {
     toggleRawForField,
     updateRawSizeForField,
@@ -75,6 +75,7 @@ export const TextFieldsBody: React.FC = () => {
               data-test-subj="ResultSettingSnippetTextBox"
               id={`${fieldName}-snippet}`}
               checked={!!fieldSettings.snippet}
+              disabled={!isSnippetAllowed(fieldName)}
               onChange={() => {
                 toggleSnippetForField(fieldName);
               }}
