@@ -31,9 +31,10 @@ export const ContainerNameRow = ({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       data-test-subj={ROW_TEST_ID}
+      css={styles.flexWidth}
     >
       <EuiText size="xs" css={styles.dataInfo}>
-        {name}
+        <div css={styles.truncate}>{name}</div>
         {isHover && (
           <div css={styles.filters}>
             {filterButtonIn}

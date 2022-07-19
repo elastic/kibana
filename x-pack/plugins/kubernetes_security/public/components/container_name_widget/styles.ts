@@ -17,12 +17,16 @@ export const useStyles = () => {
     const { size, font, colors } = euiTheme;
 
     const container: CSSObject = {
-      padding: size.base,
+      paddingTop: size.s,
+      paddingBottom: size.s,
+      paddingRight: size.base,
+      paddingLeft: size.base,
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
       height: '100%',
       minHeight: '250px',
+      maxHeight: '252px',
       position: 'relative',
       marginBottom: size.l,
     };
@@ -31,7 +35,7 @@ export const useStyles = () => {
       marginBottom: size.xs,
       display: 'flex',
       alignItems: 'center',
-      height: size.l,
+      height: size.base,
       position: 'relative',
     };
 
@@ -48,6 +52,18 @@ export const useStyles = () => {
 
     const countValue: CSSObject = {
       fontWeight: font.weight.semiBold,
+      minWidth: '76px',
+    };
+
+    const truncate: CSSObject = {
+      width: '74%',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+    };
+
+    const flexWidth: CSSObject = {
+      width: '100%',
     };
 
     return {
@@ -55,6 +71,8 @@ export const useStyles = () => {
       dataInfo,
       filters,
       countValue,
+      truncate,
+      flexWidth,
     };
   }, [euiTheme]);
 
