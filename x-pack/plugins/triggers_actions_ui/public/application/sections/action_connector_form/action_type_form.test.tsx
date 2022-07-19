@@ -128,8 +128,8 @@ describe('action_type_form', () => {
       iconClass: 'test',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        // add errors to the form
-        const validationResult = { errors: { message: ['test error']} };
+        // Add errors to the form
+        const validationResult = { errors: { message: ['test error'] } };
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
@@ -164,9 +164,20 @@ describe('action_type_form', () => {
 
     expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeFalsy();
     wrapper.find('.euiAccordion__button').last().simulate('click');
-    // make sure that the accordion is collapsed
+    // Make sure that the accordion is collapsed
     expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
     expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeTruthy();
+
+    // Verify that the tooltip renders
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+    wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Action contains errors.');
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
   });
 });
 

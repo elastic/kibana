@@ -23,6 +23,7 @@ import {
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
@@ -280,12 +281,19 @@ export const ActionTypeForm = ({
         <EuiFlexGroup gutterSize="l" alignItems="center">
           {showActionGroupErrorIcon() && (
             <EuiFlexItem grow={false}>
-              <EuiIcon
-                data-test-subj="action-group-error-icon"
-                type="alert"
-                color="danger"
-                size="m"
-              />
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
+                  { defaultMessage: 'Action contains errors.' }
+                )}
+              >
+                <EuiIcon
+                  data-test-subj="action-group-error-icon"
+                  type="alert"
+                  color="danger"
+                  size="m"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
