@@ -23,7 +23,7 @@ import { Datatable } from '@kbn/expressions-plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
@@ -76,11 +76,13 @@ export const getMetricVisRenderer: (
     const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
 
     const renderComplete = () => {
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-          `render_${originatingApp}_legacy_metric`,
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_legacy_metric`,
         ]);
       }
 

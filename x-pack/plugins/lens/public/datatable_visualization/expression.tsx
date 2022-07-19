@@ -46,7 +46,7 @@ export const getDatatableRenderer = (dependencies: {
     const { hasCompatibleActions, isInteractive } = handlers;
 
     const renderComplete = () => {
-      trackUiCounterEvents('table');
+      trackUiCounterEvents('table', handlers.getExecutionContext());
       handlers.done();
     };
 

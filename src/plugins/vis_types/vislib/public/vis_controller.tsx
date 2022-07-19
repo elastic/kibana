@@ -14,6 +14,7 @@ import { mountReactNode } from '@kbn/core/public/utils';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { getUsageCollectionStart } from './services';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
@@ -29,18 +30,32 @@ const legendClassName = {
 
 export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 const renderComplete = (
   visParams: BasicVislibParams | PieVisParams,
   handlers: IInterpreterRenderHandlers
 ) => {
   const usageCollection = getUsageCollectionStart();
-  const originatingApp = 'agg_based';
+  const containerType = extractContainerType(handlers.getExecutionContext());
 
-  if (usageCollection) {
-    usageCollection?.reportUiCounter(
-      originatingApp,
+  if (usageCollection && containerType) {
+    usageCollection.reportUiCounter(
+      containerType,
       METRIC_TYPE.COUNT,
-      `render_${originatingApp}_${visParams.type}`
+      `render_agg_based_${visParams.type}`
     );
   }
 

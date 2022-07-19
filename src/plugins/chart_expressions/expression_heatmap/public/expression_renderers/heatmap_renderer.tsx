@@ -27,7 +27,7 @@ import {
   getUISettings,
 } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
@@ -55,11 +55,13 @@ export const heatmapRenderer: (
     };
 
     const renderComplete = () => {
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-          `render_${originatingApp}_${EXPRESSION_HEATMAP_NAME}`,
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_${EXPRESSION_HEATMAP_NAME}`,
         ]);
       }
 

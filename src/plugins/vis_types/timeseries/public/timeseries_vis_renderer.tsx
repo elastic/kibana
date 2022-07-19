@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import { IUiSettingsClient, KibanaExecutionContext, ThemeServiceStart } from '@kbn/core/public';
 
 import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
@@ -38,6 +38,20 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
   return false;
 };
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
@@ -56,21 +70,22 @@ export const getTimeseriesVisRenderer: (deps: {
 
     const initialRender = () => {
       const usageCollection = getUsageCollectionStart();
-      const originatingApp = 'tsvb';
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'tsvb';
 
-      if (usageCollection) {
+      if (usageCollection && containerType) {
         const counterEvents = [
-          `render_${originatingApp}_${model.type}`,
+          `render_${visualizationType}_${model.type}`,
           model.use_kibana_indexes === false
-            ? `render_${originatingApp}_index_pattern_string`
+            ? `render_${visualizationType}_index_pattern_string`
             : undefined,
           model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
-            ? `render_${originatingApp}_last_value`
+            ? `render_${visualizationType}_last_value`
             : undefined,
-          canNavigateToLens ? `render_${originatingApp}_convertable` : undefined,
+          canNavigateToLens ? `render_${visualizationType}_convertable` : undefined,
         ].filter(Boolean) as string[];
 
-        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
       }
 
       handlers.done();

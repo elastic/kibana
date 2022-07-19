@@ -19,7 +19,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -56,11 +56,13 @@ export const getPartitionVisRenderer: (
     });
 
     const renderComplete = () => {
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-          `render_${originatingApp}_${visType}`,
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_${visType}`,
         ]);
       }
       handlers.done();

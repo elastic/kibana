@@ -19,7 +19,22 @@ import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
 
-export const extractOriginatingApp = (context?: KibanaExecutionContext): string | undefined => {
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
+/** @internal **/
+const extractVisualizationType = (context?: KibanaExecutionContext): string | undefined => {
   if (context) {
     const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
       if (item.child) {
@@ -64,11 +79,13 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       }
 
       const renderComplete = () => {
-        const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+        const executionContext = handlers.getExecutionContext();
+        const containerType = extractContainerType(executionContext);
+        const visualizationType = extractVisualizationType(executionContext);
 
-        if (originatingApp) {
-          plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-            `render_${originatingApp}_map`,
+        if (containerType && visualizationType) {
+          plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+            `render_${visualizationType}_map`,
           ]);
         }
 

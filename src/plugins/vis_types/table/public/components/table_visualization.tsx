@@ -10,7 +10,7 @@ import './table_visualization.scss';
 import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -27,6 +27,20 @@ interface TableVisualizationComponentProps {
   visConfig: TableVisConfig;
 }
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 const TableVisualizationComponent = ({
   core,
   handlers,
@@ -37,15 +51,16 @@ const TableVisualizationComponent = ({
     // Temporary solution: DataGrid should provide onRender callback
     setTimeout(() => {
       const usageCollection = getUsageCollectionStart();
-      const originatingApp = 'agg_based';
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'agg_based';
 
-      if (usageCollection) {
+      if (usageCollection && containerType) {
         const counterEvents = [
-          `render_${originatingApp}_table`,
-          !table ? `render_${originatingApp}_table_split` : undefined,
+          `render_${visualizationType}_table`,
+          !table ? `render_${visualizationType}_table_split` : undefined,
         ].filter(Boolean) as string[];
 
-        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
       }
       handlers.done();
     }, 300);

@@ -12,12 +12,27 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { VegaVisualizationDependencies } from './plugin';
 import { getUsageCollectionStart } from './services';
 import { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
+
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
 
 export const getVegaVisRenderer: (
   deps: VegaVisualizationDependencies
@@ -31,16 +46,17 @@ export const getVegaVisRenderer: (
 
     const renderComplete = () => {
       const usageCollection = getUsageCollectionStart();
-      const originatingApp = 'vega';
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'vega';
 
-      if (usageCollection) {
+      if (usageCollection && containerType) {
         const counterEvents = [
-          `render_${originatingApp}`,
-          visData.useMap ? `render_${originatingApp}_map` : undefined,
-          `render_${originatingApp}_${visData.isVegaLite ? 'lite' : 'normal'}`,
+          `render_${visualizationType}`,
+          visData.useMap ? `render_${visualizationType}_map` : undefined,
+          `render_${visualizationType}_${visData.isVegaLite ? 'lite' : 'normal'}`,
         ].filter(Boolean) as string[];
 
-        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
       }
 
       handlers.done();

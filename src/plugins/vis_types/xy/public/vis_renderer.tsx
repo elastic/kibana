@@ -9,6 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -33,6 +34,20 @@ function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
   return Boolean(isZeroHits);
 }
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 export const getXYVisRenderer: (deps: {
   getStartDeps: StartServicesGetter<VisTypeXyPluginStartDependencies>;
 }) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
@@ -48,16 +63,18 @@ export const getXYVisRenderer: (deps: {
       const visTypeTelemetryMap: Record<string, string> = {
         histogram: 'vertical_bar',
       };
-      const originatingApp = 'agg_based';
-      if (originatingApp) {
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'agg_based';
+
+      if (plugins.usageCollection && containerType) {
         const hasMixedXY = visConfig.seriesParams.some((item) => item.type !== visType);
 
         const counterEvents = [
-          `render_${originatingApp}_${visTypeTelemetryMap[visType] ?? visType}`,
-          hasMixedXY ? `render_${originatingApp}_mixed_xy` : undefined,
+          `render_${visualizationType}_${visTypeTelemetryMap[visType] ?? visType}`,
+          hasMixedXY ? `render_${visualizationType}_mixed_xy` : undefined,
         ].filter(Boolean) as string[];
 
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+        plugins.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
       }
 
       handlers.done();

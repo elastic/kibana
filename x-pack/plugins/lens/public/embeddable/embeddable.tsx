@@ -230,7 +230,8 @@ export class Embeddable
 
   private logError(type: 'runtime' | 'validation') {
     trackUiCounterEvents(
-      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error'
+      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error',
+      this.getExecutionContext()
     );
   }
 
@@ -510,11 +511,12 @@ export class Embeddable
       }
     }
 
-    trackUiCounterEvents([
-      ...datasourceEvents,
-      ...visualizationEvents,
-      ...getExecutionContextEvents(this.getExecutionContext()),
-    ]);
+    const executionContext = this.getExecutionContext();
+
+    trackUiCounterEvents(
+      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
+      executionContext
+    );
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({

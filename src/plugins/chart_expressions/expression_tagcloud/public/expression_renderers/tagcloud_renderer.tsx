@@ -18,7 +18,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -52,11 +52,13 @@ export const tagcloudRenderer: (
     });
 
     const renderComplete = () => {
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-          `render_${originatingApp}_${EXPRESSION_NAME}`,
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_${EXPRESSION_NAME}`,
         ]);
       }
 

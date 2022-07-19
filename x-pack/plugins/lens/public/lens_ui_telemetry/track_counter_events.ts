@@ -13,14 +13,31 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);
 
-export const trackUiCounterEvents = (events: string | string[]) => {
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
+export const trackUiCounterEvents = (
+  events: string | string[],
+  context?: KibanaExecutionContext
+) => {
   const usageCollection = getUsageCollectionStart();
-  const originatingApp = 'lens';
+  const containerType = extractContainerType(context) ?? 'application';
 
   usageCollection?.reportUiCounter(
-    originatingApp,
+    containerType,
     METRIC_TYPE.COUNT,
-    (Array.isArray(events) ? events : [events]).map((item) => `render_${originatingApp}_${item}`)
+    (Array.isArray(events) ? events : [events]).map((item) => `render_lens_${item}`)
   );
 };
 

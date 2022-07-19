@@ -24,7 +24,7 @@ import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
@@ -112,12 +112,15 @@ export const getXyChartRenderer = ({
     };
 
     const renderComplete = () => {
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (deps.usageCollection && originatingApp) {
-        const uiEvents = extractCounterEvents(originatingApp, config.args.layers);
+      if (deps.usageCollection && containerType && visualizationType) {
+        const uiEvents = extractCounterEvents(visualizationType, config.args.layers);
+
         if (uiEvents) {
-          deps.usageCollection.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, uiEvents);
+          deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
         }
       }
 

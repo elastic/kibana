@@ -16,7 +16,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
-import { extractOriginatingApp } from '../../../common';
+import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressionGaugeRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionGaugePluginStart>;
@@ -51,11 +51,13 @@ export const gaugeRenderer: (
           type = EXPRESSION_GAUGE_NAME;
       }
 
-      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
 
-      if (originatingApp) {
-        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
-          `render_${originatingApp}_${type}`,
+      if (containerType && visualizationType) {
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+          `render_${visualizationType}_${type}`,
         ]);
       }
 

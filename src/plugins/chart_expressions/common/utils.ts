@@ -8,7 +8,20 @@
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-export const extractOriginatingApp = (context?: KibanaExecutionContext): string | undefined => {
+export const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
+export const extractVisualizationType = (context?: KibanaExecutionContext): string | undefined => {
   if (context) {
     const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
       if (item.child) {
