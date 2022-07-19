@@ -86,14 +86,7 @@ export const KillProcessActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.pendingMessage"
-          defaultMessage="Killing process"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show API errors if perform action fails
@@ -120,10 +113,6 @@ export const KillProcessActionResult = memo<
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
-          { defaultMessage: 'Kill process action failure' }
-        )}
         dataTestSubj={'killProcessErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -132,14 +121,6 @@ export const KillProcessActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
-        { defaultMessage: 'Process killed successfully!' }
-      )}
-      data-test-subj="killProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent showAs="success" data-test-subj="killProcessSuccessCallout" />;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

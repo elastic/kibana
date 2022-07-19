@@ -106,24 +106,13 @@ export const SuspendProcessActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.suspendProcess.pendingMessage"
-          defaultMessage="Suspending process"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.suspendProcess.errorMessageTitle',
-          { defaultMessage: 'Suspend process action failure' }
-        )}
         dataTestSubj={'suspendProcessErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -132,14 +121,6 @@ export const SuspendProcessActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.suspendProcess.successMessageTitle',
-        { defaultMessage: 'Process suspended successfully' }
-      )}
-      data-test-subj="suspendProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent data-test-subj="suspendProcessSuccessCallout" />;
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';
