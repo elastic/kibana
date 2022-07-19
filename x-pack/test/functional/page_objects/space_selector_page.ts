@@ -46,6 +46,19 @@ export class SpaceSelectorPageObject extends FtrService {
     });
   }
 
+  async expectSpace(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.debug(`expectSpace(${spaceId}`);
+      await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+      const url = await this.browser.getCurrentUrl();
+      if (spaceId === 'default') {
+        expect(url).to.not.contain(`/s/${spaceId}`);
+      } else {
+        expect(url).to.contain(`/s/${spaceId}`);
+      }
+    });
+  }
+
   async openSpacesNav() {
     this.log.debug('openSpacesNav()');
     return await this.retry.try(async () => {
