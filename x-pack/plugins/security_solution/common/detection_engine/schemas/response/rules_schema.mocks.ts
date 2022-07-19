@@ -8,7 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
-import { RulesSchema } from './rules_schema';
+import type { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -68,6 +68,9 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
@@ -126,12 +129,15 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     interval: '5m',
     index: ['auditbeat-*'],
     rule_id: 'rule-1',
-    output_index: '.siem-signals-default',
+    output_index: '',
     max_signals: 100,
     risk_score: 55,
     risk_score_mapping: [],
     name: 'Query with a rule id',
     references: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     severity: 'high',
     severity_mapping: [],
     updated_by: 'elastic',
@@ -146,7 +152,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     threat_query: '*:*',
-    threat_index: ['list-index'],
+    threat_index: ['auditbeat-*'],
     threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
     threat_mapping: [
       {

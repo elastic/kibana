@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus } from '@elastic/eui';
 import { useServices } from '../../app_context';
 
 interface Props {
@@ -27,16 +27,22 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepLogisticsName', {
         defaultMessage: 'Logistics',
       }),
-      isComplete: maxCompletedStep >= 1,
-      isSelected: currentStep === 1,
+      status: (currentStep === 1
+        ? 'selected'
+        : maxCompletedStep >= 1
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       onClick: () => updateCurrentStep(1),
     },
     {
       title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepSettingsName', {
         defaultMessage: 'Index settings',
       }),
-      isComplete: maxCompletedStep >= 2,
-      isSelected: currentStep === 2,
+      status: (currentStep === 2
+        ? 'selected'
+        : maxCompletedStep >= 2
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 1,
       onClick: () => updateCurrentStep(2),
     },
@@ -44,8 +50,11 @@ export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.restoreForm.navigation.stepReviewName', {
         defaultMessage: 'Review',
       }),
-      isComplete: maxCompletedStep >= 2,
-      isSelected: currentStep === 3,
+      status: (currentStep === 3
+        ? 'selected'
+        : maxCompletedStep >= 2
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 2,
       onClick: () => updateCurrentStep(3),
     },

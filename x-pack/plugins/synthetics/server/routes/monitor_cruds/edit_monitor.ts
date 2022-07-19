@@ -27,7 +27,9 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
+import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -39,12 +41,8 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }),
     body: schema.any(),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server: { encryptedSavedObjects, syntheticsService, logger, telemetry, kibanaVersion },
-  }): Promise<any> => {
+  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+    const { encryptedSavedObjects, logger } = server;
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
@@ -85,35 +83,19 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
 
-      const updatedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
+      const editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
           monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
-      const errors = await syntheticsService.pushConfigs([
-        {
-          ...editedMonitor,
-          id: updatedMonitor.id,
-          fields: {
-            config_id: updatedMonitor.id,
-          },
-          fields_under_root: true,
-        },
-      ]);
-
-      sendTelemetryEvents(
-        logger,
-        telemetry,
-        formatTelemetryUpdateEvent(
-          updatedMonitor,
-          previousMonitor,
-          kibanaVersion,
-          Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-          errors
-        )
-      );
+      const errors = await syncEditedMonitor({
+        server,
+        editedMonitor,
+        editedMonitorSavedObject,
+        previousMonitor,
+      });
 
       // Return service sync errors in OK response
       if (errors && errors.length > 0) {
@@ -122,7 +104,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         });
       }
 
-      return updatedMonitor;
+      return editedMonitorSavedObject;
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
@@ -133,3 +115,40 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     }
   },
 });
+
+export const syncEditedMonitor = async ({
+  editedMonitor,
+  editedMonitorSavedObject,
+  previousMonitor,
+  server,
+}: {
+  editedMonitor: SyntheticsMonitor;
+  editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
+  server: UptimeServerSetup;
+}) => {
+  const errors = await server.syntheticsService.pushConfigs(
+    [
+      formatHeartbeatRequest({
+        monitor: editedMonitor,
+        monitorId: editedMonitorSavedObject.id,
+        customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      }),
+    ],
+    true
+  );
+
+  sendTelemetryEvents(
+    server.logger,
+    server.telemetry,
+    formatTelemetryUpdateEvent(
+      editedMonitorSavedObject,
+      previousMonitor,
+      server.kibanaVersion,
+      Boolean((editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+      errors
+    )
+  );
+
+  return errors;
+};

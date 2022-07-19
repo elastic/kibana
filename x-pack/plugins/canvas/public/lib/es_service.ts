@@ -6,7 +6,6 @@
  */
 
 // TODO - clint: convert to service abstraction
-import { IndexPatternAttributes } from '@kbn/data-plugin/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
@@ -49,7 +48,7 @@ export const getFields = (index = '_all') => {
 
 export const getIndices = () =>
   getSavedObjectsClient()
-    .find<IndexPatternAttributes>({
+    .find<{ title: string }>({
       type: 'index-pattern',
       fields: ['title'],
       searchFields: ['title'],
@@ -70,7 +69,7 @@ export const getDefaultIndex = () => {
 
   return defaultIndexId
     ? getSavedObjectsClient()
-        .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
+        .get<{ title: string }>('index-pattern', defaultIndexId)
         .then((defaultIndex) => defaultIndex.attributes.title)
         .catch((err) => {
           const notifyService = pluginServices.getServices().notify;

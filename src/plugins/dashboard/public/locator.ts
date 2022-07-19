@@ -8,11 +8,13 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import { type Filter } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import type { SavedDashboardPanel } from '../common/types';
 import type { RawDashboardState } from './types';
 import { DashboardConstants } from './dashboard_constants';
@@ -100,6 +102,11 @@ export type DashboardAppLocatorParams = {
   savedQuery?: string;
 
   options?: RawDashboardState['options'];
+
+  /**
+   * Control group input
+   */
+  controlGroupInput?: SerializableControlGroupInput;
 };
 
 export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
@@ -155,7 +162,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     const { isFilterPinned } = await import('@kbn/es-query');
 
     let path = `#/${hash}`;
-    path = setStateToKbnUrl<QueryState>(
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,

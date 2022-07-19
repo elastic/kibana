@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 // See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
@@ -31,8 +32,9 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
+
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
-import { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -125,6 +127,14 @@ const createSecuritySolutionRequestContextMock = (
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+    getInternalFleetServices: jest.fn(() => {
+      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
+    getScopedFleetServices: jest.fn((req: KibanaRequest) => {
+      // TODO: Mock EndpointScopedFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
   };
 };
 

@@ -27,7 +27,7 @@ export const sampleData: CasePostRequest = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const sampleConnectorData = { loading: false, connectors: [] };
+export const sampleConnectorData = { isLoading: false, data: [] };
 
 export const useGetIncidentTypesResponse = {
   isLoading: false,

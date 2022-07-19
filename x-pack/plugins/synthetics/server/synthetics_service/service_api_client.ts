@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
+import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, ServiceLocations, ServiceLocationErrors } from '../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
@@ -24,6 +26,7 @@ export interface ServiceData {
     api_key: string;
   };
   runOnce?: boolean;
+  isEdit?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -33,12 +36,13 @@ export class ServiceAPIClient {
   private logger: Logger;
   private readonly config: ServiceConfig;
   private readonly kibanaVersion: string;
+  private readonly server: UptimeServerSetup;
 
-  constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
+  constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
     const { username, password } = config;
     this.username = username;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = server.kibanaVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -48,14 +52,22 @@ export class ServiceAPIClient {
 
     this.logger = logger;
     this.locations = [];
+    this.server = server;
   }
 
-  getHttpsAgent() {
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
     const config = this.config;
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
-
-      const rejectUnauthorized = process.env.NODE_ENV === 'production';
 
       return new https.Agent({
         rejectUnauthorized,
@@ -63,6 +75,8 @@ export class ServiceAPIClient {
         key: tlsConfig.key,
       });
     }
+
+    return baseHttpsAgent;
   }
 
   async post(data: ServiceData) {
@@ -87,29 +101,31 @@ export class ServiceAPIClient {
       return { allowed: true, signupUrl: null };
     }
 
-    const httpsAgent = this.getHttpsAgent();
-
-    if (this.locations.length > 0 && httpsAgent) {
+    if (this.locations.length > 0) {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
-      try {
-        const { data } = await axios({
-          method: 'GET',
-          url: url + '/allowed',
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
-          httpsAgent,
-        });
+      const httpsAgent = this.getHttpsAgent(url);
 
-        const { allowed, signupUrl } = data;
-        return { allowed, signupUrl };
-      } catch (e) {
-        this.logger.error(e);
+      if (httpsAgent) {
+        try {
+          const { data } = await axios({
+            method: 'GET',
+            url: url + '/allowed',
+            headers:
+              process.env.NODE_ENV !== 'production' && this.authorization
+                ? {
+                    Authorization: this.authorization,
+                  }
+                : undefined,
+            httpsAgent,
+          });
+
+          const { allowed, signupUrl } = data;
+          return { allowed, signupUrl };
+        } catch (e) {
+          this.logger.error(e);
+        }
       }
     }
 
@@ -118,7 +134,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce }: ServiceData
+    { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -134,14 +150,19 @@ export class ServiceAPIClient {
       return axios({
         method,
         url: url + (runOnce ? '/run' : '/monitors'),
-        data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
+        data: {
+          monitors: monitorsStreams,
+          output,
+          stack_version: this.kibanaVersion,
+          is_edit: isEdit,
+        },
         headers:
           process.env.NODE_ENV !== 'production' && this.authorization
             ? {
                 Authorization: this.authorization,
               }
             : undefined,
-        httpsAgent: this.getHttpsAgent(),
+        httpsAgent: this.getHttpsAgent(url),
       });
     };
 
@@ -163,9 +184,18 @@ export class ServiceAPIClient {
                 `Successfully called service with method ${method} with ${allMonitors.length} monitors `
               );
             }),
-            catchError((err) => {
-              pushErrors.push({ locationId: id, error: err.response?.data });
+            catchError((err: AxiosError<{ reason: string; status: number }>) => {
+              pushErrors.push({ locationId: id, error: err.response?.data! });
               this.logger.error(err);
+              sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+                reason: err.response?.data?.reason,
+                message: err.message,
+                type: 'syncError',
+                code: err.code,
+                status: err.response?.data?.status,
+                url,
+                kibanaVersion: this.server.kibanaVersion,
+              });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);
               }

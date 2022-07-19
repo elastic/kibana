@@ -61,7 +61,7 @@ describe('ExplainCollectionInterval', () => {
         />
       );
       const rendered = mountWithIntl(component);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should show a success message while updated = true', () => {
@@ -74,7 +74,7 @@ describe('ExplainCollectionInterval', () => {
         />
       );
       const rendered = mountWithIntl(component);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 });

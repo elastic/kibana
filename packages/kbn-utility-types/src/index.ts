@@ -110,3 +110,29 @@ export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 export type Writable<T> = {
   -readonly [K in keyof T]: T[K];
 };
+
+/**
+ * XOR for some properties applied to a type
+ * (XOR is one of these but not both or neither)
+ *
+ * Usage: OneOf<typeToExtend, one | but | not | multiple | of | these | are | required>
+ *
+ * To require aria-label or aria-labelledby but not both
+ * Example: OneOf<Type, 'aria-label' | 'aria-labelledby'>
+ */
+export type OneOf<T, K extends keyof T> = Omit<T, K> &
+  { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: never } }[K];
+
+/**
+ * Deep partial version of a type.
+ */
+export type DeepPartial<T> = T extends any[]
+  ? DeepPartialArray<T[number]>
+  : T extends object
+  ? DeepPartialObject<T>
+  : T;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
+
+export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };

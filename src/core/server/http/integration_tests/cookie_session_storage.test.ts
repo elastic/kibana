@@ -8,23 +8,19 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/utils';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
-
-import { CoreContext } from '../../core_context';
-import { HttpService } from '../http_service';
-import { Env } from '../../config';
-
-import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../../config/mocks';
-import { httpServerMock } from '../http_server.mocks';
-
-import { createCookieSessionStorageFactory } from '../cookie_session_storage';
-import { ensureRawRequest } from '../router';
+import { REPO_ROOT } from '@kbn/utils';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
+import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 

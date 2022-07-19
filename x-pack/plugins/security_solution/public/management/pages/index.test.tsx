@@ -9,13 +9,15 @@ import React from 'react';
 
 import { ManagementContainer } from '.';
 import '../../common/mock/match_media';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { endpointPageHttpMock } from './endpoint_hosts/mocks';
 
 jest.mock('../../common/components/user_privileges');
 
-describe('when in the Administration tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/135166
+describe.skip('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {

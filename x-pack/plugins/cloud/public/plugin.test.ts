@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/crypto-browser';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { CloudPlugin, CloudConfigType } from './plugin';
-import { firstValueFrom } from 'rxjs';
-import { Sha256 } from '@kbn/core/public/utils';
+import { CloudPlugin, type CloudConfigType } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -136,6 +136,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
+          isElasticCloudUser: false,
         });
       });
 
@@ -150,7 +151,7 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId1 = await firstValueFrom(context1$);
+        const { userId: hashId1 } = (await firstValueFrom(context1$)) as { userId: string };
         expect(hashId1).not.toEqual(expectedHashedPlainUsername);
 
         const { coreSetup: coreSetup2 } = await setupPlugin({
@@ -163,19 +164,16 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId2 = await firstValueFrom(context2$);
+        const { userId: hashId2 } = (await firstValueFrom(context2$)) as { userId: string };
         expect(hashId2).not.toEqual(expectedHashedPlainUsername);
 
         expect(hashId1).not.toEqual(hashId2);
       });
 
-      test('user hash does not include cloudId when authenticated via Cloud SAML', async () => {
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
         const { coreSetup } = await setupPlugin({
           config: { id: 'cloudDeploymentId' },
-          currentUserProps: {
-            username,
-            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
-          },
+          currentUserProps: { username, elastic_cloud_user: true },
         });
 
         expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
@@ -186,6 +184,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: expectedHashedPlainUsername,
+          isElasticCloudUser: true,
         });
       });
 
@@ -203,6 +202,7 @@ describe('Cloud Plugin', () => {
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: expectedHashedPlainUsername,
+          isElasticCloudUser: false,
         });
       });
 
@@ -217,7 +217,10 @@ describe('Cloud Plugin', () => {
           ([{ name }]) => name === 'cloud_user_id'
         )!;
 
-        await expect(firstValueFrom(context$)).resolves.toEqual({ userId: undefined });
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: undefined,
+          isElasticCloudUser: false,
+        });
       });
     });
 

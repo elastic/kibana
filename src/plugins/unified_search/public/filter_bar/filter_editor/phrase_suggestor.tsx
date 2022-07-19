@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { IFieldType, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 
@@ -18,7 +18,7 @@ import { getAutocomplete } from '../../services';
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   indexPattern: DataView;
-  field: IFieldType;
+  field: DataViewField;
   timeRangeForSuggestionsOverride?: boolean;
 }
 

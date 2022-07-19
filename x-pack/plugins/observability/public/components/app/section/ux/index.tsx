@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -14,6 +16,13 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
+import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
+import { AllSeries } from '../../../shared/exploratory_view/hooks/use_series_storage';
+import {
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+} from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 interface Props {
   bucketSize: BucketSize;
@@ -21,10 +30,34 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
+  const { services } = useKibana<ObservabilityAppServices>();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
+
+  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
+    services.uiSettings,
+    services.dataViews,
+    services.lens
+  );
+
+  const seriesList: AllSeries = [
+    {
+      name: PAGE_LOAD_DISTRIBUTION_TITLE,
+      time: {
+        from: relativeStart,
+        to: relativeEnd,
+      },
+      reportDefinitions: {
+        [SERVICE_NAME]: ['ALL_VALUES'],
+      },
+      breakdown: SERVICE_NAME,
+      dataType: 'ux' as AppDataType,
+      selectedMetricField: TRANSACTION_DURATION,
+      showPercentileAnnotations: false,
+    },
+  ];
 
   const { data, status } = useFetcher(
     () => {
@@ -72,6 +105,15 @@ export function UXSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
+      <div style={{ height: 320 }}>
+        <ExploratoryViewEmbeddable
+          attributes={seriesList}
+          reportType="data-distribution"
+          title={PAGE_LOAD_DISTRIBUTION_TITLE}
+          withActions={false}
+        />
+      </div>
+
       <CoreVitals
         data={coreWebVitals}
         loading={isLoading}
@@ -81,3 +123,10 @@ export function UXSection({ bucketSize }: Props) {
     </SectionContainer>
   );
 }
+
+const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
+  'xpack.observability.overview.ux.pageLoadDistribution.title',
+  {
+    defaultMessage: 'Page load distribution',
+  }
+);

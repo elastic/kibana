@@ -15,11 +15,9 @@
 import React, { useState } from 'react';
 
 import {
-  EuiCheckableCard,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -30,197 +28,72 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
+import { ButtonGroup, ButtonGroupOption } from './button_group';
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
 import { MethodConnector } from './method_connector';
-import { MethodCrawler } from './method_crawler';
+import { MethodCrawler } from './method_crawler/method_crawler';
 import { MethodEs } from './method_es';
 import { MethodJson } from './method_json';
 
-interface CardLabelProps {
-  title: string;
-  description: React.ReactNode;
-  icon: string;
-}
-
-interface ButtonGroupOption {
-  id: string;
-  icon: string;
-  label: string;
-  description: string;
-}
+const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
+  {
+    id: 'crawler',
+    icon: 'globe',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
+      defaultMessage: 'Use the web crawler',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
+      {
+        defaultMessage: 'Index content from your websites',
+      }
+    ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
+      defaultMessage: 'No development required',
+    }),
+  },
+  {
+    id: 'api',
+    icon: 'visVega',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
+      defaultMessage: 'Use the API',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
+      {
+        defaultMessage: 'Use a variety of client libraries to add documents to your search index',
+      }
+    ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.footer', {
+      defaultMessage: 'Some development required',
+    }),
+  },
+  {
+    id: 'connector',
+    icon: 'package',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
+      defaultMessage: 'Build a connector package',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
+      {
+        defaultMessage: 'Clone the connector package repo and build a custom connector',
+      }
+    ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
+      defaultMessage: 'Development required',
+    }),
+    badge: (
+      <EuiBadge iconType="beaker">
+        <EuiText size="xs">Technical Preview</EuiText>
+      </EuiBadge>
+    ),
+  },
+];
 
 export const NewIndex: React.FC = () => {
-  const [selectedMethod, setSelectedMethod] = useState({ id: '', label: '' });
-  const [methodIsSelected, setMethodIsSelected] = useState(false);
-
-  const buttonGroupOptions = [
-    {
-      id: 'crawler',
-      icon: 'globe',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
-        defaultMessage: 'Web crawler',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
-        {
-          defaultMessage: 'Automatically index content from your website or knowlege base',
-        }
-      ),
-    },
-    {
-      id: 'api',
-      icon: 'visVega',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
-        defaultMessage: 'API',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
-        {
-          defaultMessage: 'Use a variety of client libraries to add documents to your search index',
-        }
-      ),
-    },
-    {
-      id: 'connector',
-      icon: 'package',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
-        defaultMessage: 'Connector',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
-        {
-          defaultMessage:
-            'Ingest data from content sources like GitHub, Google Drive or SharePoint',
-        }
-      ),
-    },
-    {
-      id: 'elasticsearch',
-      icon: 'logoElasticsearch',
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.elasticsearch.label',
-        {
-          defaultMessage: 'Elasticsearch index',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.elasticsearch.description',
-        {
-          defaultMessage: 'Connect to an existing Elasticsearch index',
-        }
-      ),
-    },
-    {
-      id: 'json',
-      icon: 'document',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.json.label', {
-        defaultMessage: 'Paste or upload JSON',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.json.description',
-        {
-          defaultMessage: 'Manually upload JSON files',
-        }
-      ),
-    },
-  ] as ButtonGroupOption[];
-
-  const handleMethodChange = (val: string) => {
-    const selected = buttonGroupOptions.find((b) => b.id === val) as ButtonGroupOption;
-    setSelectedMethod(selected);
-    setMethodIsSelected(true);
-  };
-
-  const NewSearchIndexLayout = () => (
-    <>
-      {selectedMethod.id === 'crawler' && <MethodCrawler />}
-      {selectedMethod.id === 'api' && <MethodApi />}
-      {selectedMethod.id === 'elasticsearch' && <MethodEs />}
-      {selectedMethod.id === 'connector' && <MethodConnector />}
-      {selectedMethod.id === 'json' && <MethodJson />}
-    </>
-  );
-
-  const CardLabel: React.FC<CardLabelProps> = ({ title, description, icon }) => (
-    <span style={{ minWidth: '13rem', width: 'calc(100% - .5rem)', display: 'inline-block' }}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} color="text" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{title}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs">{description}</EuiText>
-    </span>
-  );
-
-  const SelectSearchIndexLayout = () => (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ maxWidth: '22rem' }}>
-          <EuiPanel hasShadow={false} paddingSize="none" grow={false}>
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
-                  defaultMessage: 'Create a search index',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
-                  {
-                    defaultMessage:
-                      'Add your content to Enterprise Search by creating a search index.',
-                  }
-                )}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-              {buttonGroupOptions.map((item) => (
-                <EuiFlexItem style={{ width: 'calc(100% - .5rem)' }}>
-                  <EuiCheckableCard
-                    id={`method_${item.id}`}
-                    label={
-                      <CardLabel
-                        title={item.label}
-                        description={item.description}
-                        icon={item.icon}
-                      />
-                    }
-                    value={item.id}
-                    name="method_options"
-                    onChange={() => handleMethodChange(item.id)}
-                    checked={selectedMethod.id === item.id}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiLink href="#" target="_blank">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.learnMore.buttonText',
-                {
-                  defaultMessage: 'Learn more about search indices',
-                }
-              )}
-            </EuiLink>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {methodIsSelected ? <NewSearchIndexLayout /> : <SearchIndexEmptyState />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
+  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>();
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -238,7 +111,50 @@ export const NewIndex: React.FC = () => {
         }),
       }}
     >
-      <SelectSearchIndexLayout />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} style={{ maxWidth: '24rem' }}>
+          <EuiPanel hasShadow={false} paddingSize="m" grow={false} color="subdued">
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
+                  defaultMessage: 'Select an ingestion method',
+                })}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
+                  {
+                    defaultMessage:
+                      'Add your content to Enterprise Search by creating a search index.',
+                  }
+                )}
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <ButtonGroup
+              options={METHOD_BUTTON_GROUP_OPTIONS}
+              selected={selectedMethod}
+              onChange={setSelectedMethod}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {selectedMethod ? (
+            <>
+              {selectedMethod.id === 'crawler' && <MethodCrawler />}
+              {selectedMethod.id === 'api' && <MethodApi />}
+              {selectedMethod.id === 'elasticsearch' && <MethodEs />}
+              {selectedMethod.id === 'connector' && <MethodConnector />}
+              {selectedMethod.id === 'json' && <MethodJson />}
+            </>
+          ) : (
+            <SearchIndexEmptyState />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>
   );
 };

@@ -136,10 +136,10 @@ PUT _index_template/tri_met_tracks
               "type": "text"
             },
             "lastLocID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "nextLocID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "locationInScheduleDay": {
               "type": "integer"
@@ -163,13 +163,13 @@ PUT _index_template/tri_met_tracks
               "type": "keyword"
             },
             "tripID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "delay": {
               "type": "integer"
             },
             "extraBlockID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "messageCode": {
               "type": "integer"
@@ -188,7 +188,7 @@ PUT _index_template/tri_met_tracks
               "doc_values": true
             },
             "vehicleID": {
-              "type": "integer"
+              "type": "keyword"
             },
             "offRoute": {
               "type": "boolean"

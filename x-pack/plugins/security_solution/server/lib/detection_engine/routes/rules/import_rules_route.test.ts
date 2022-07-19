@@ -14,7 +14,8 @@ import {
   getFindResultWithSingleHit,
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
-import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
+import type { requestMock } from '../__mocks__';
+import { createMockConfig, requestContextMock, serverMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
@@ -99,6 +100,7 @@ describe('import_rules_route', () => {
         ],
         success: false,
         success_count: 0,
+        rules_count: 1,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -137,6 +139,7 @@ describe('import_rules_route', () => {
         errors: [],
         success: true,
         success_count: 1,
+        rules_count: 1,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -161,6 +164,7 @@ describe('import_rules_route', () => {
         ],
         success: false,
         success_count: 0,
+        rules_count: 1,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -185,6 +189,7 @@ describe('import_rules_route', () => {
           ],
           success: false,
           success_count: 0,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -206,6 +211,7 @@ describe('import_rules_route', () => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -230,6 +236,7 @@ describe('import_rules_route', () => {
         success: true,
         success_count: 2,
         exceptions_errors: [],
+        rules_count: 2,
         exceptions_success: true,
         exceptions_success_count: 0,
       });
@@ -248,6 +255,7 @@ describe('import_rules_route', () => {
         errors: [],
         success: true,
         success_count: 9999,
+        rules_count: 9999,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -287,6 +295,7 @@ describe('import_rules_route', () => {
         ],
         success: false,
         success_count: 0,
+        rules_count: 2,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -316,6 +325,7 @@ describe('import_rules_route', () => {
           ],
           success: false,
           success_count: 1,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -336,6 +346,7 @@ describe('import_rules_route', () => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -369,6 +380,7 @@ describe('import_rules_route', () => {
           ],
           success: false,
           success_count: 2,
+          rules_count: 3,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -388,6 +400,7 @@ describe('import_rules_route', () => {
           errors: [],
           success: true,
           success_count: 3,
+          rules_count: 3,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,

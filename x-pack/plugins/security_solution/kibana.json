@@ -27,7 +27,7 @@
     "triggersActionsUi",
     "uiActions",
     "unifiedSearch",
-    "sessionView"
+    "kubernetesSecurity"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
@@ -42,7 +42,8 @@
     "home",
     "telemetry",
     "dataViewFieldEditor",
-    "osquery"
+    "osquery",
+    "savedObjectsTaggingOss"
   ],
   "server": true,
   "ui": true,

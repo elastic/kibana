@@ -8,8 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';
 import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
@@ -20,7 +18,6 @@ import {
   Timeslice,
 } from '../../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../../licensed_features';
-import { PreIndexedShape } from '../../../common/elasticsearch_util';
 
 export type OnSourceChangeArgs = {
   propName: string;
@@ -41,9 +38,7 @@ export type ImmutableSourceProperty = {
 };
 
 export interface ISource {
-  destroy(): void;
   getDisplayName(): Promise<string>;
-  getInspectorAdapters(): Adapters | undefined;
   getType(): string;
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
@@ -63,7 +58,6 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -74,14 +68,10 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  private readonly _inspectorAdapters?: Adapters;
 
-  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor) {
     this._descriptor = descriptor;
-    this._inspectorAdapters = inspectorAdapters;
   }
-
-  destroy(): void {}
 
   cloneDescriptor(): AbstractSourceDescriptor {
     return copyPersistentState(this._descriptor);
@@ -97,10 +87,6 @@ export class AbstractSource implements ISource {
    */
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [];
-  }
-
-  getInspectorAdapters(): Adapters | undefined {
-    return this._inspectorAdapters;
   }
 
   getType(): string {
@@ -161,11 +147,6 @@ export class AbstractSource implements ISource {
 
   isESSource(): boolean {
     return false;
-  }
-
-  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
-    return null;
   }
 
   // Returns function used to format value

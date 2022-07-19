@@ -12,7 +12,7 @@ import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { exporters } from '@kbn/data-plugin/public';
+import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -244,7 +244,7 @@ export const LensTopNavMenu = ({
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -367,14 +367,16 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
+      data.query.timefilter.timefilter.getTime(),
       application.capabilities
     );
   }, [
-    activeData,
     activeDatasourceId,
+    discover,
     datasourceMap,
     datasourceStates,
-    discover,
+    activeData,
+    data.query.timefilter.timefilter,
     application.capabilities,
   ]);
 
@@ -497,7 +499,8 @@ export const LensTopNavMenu = ({
             query,
             filters,
             meta,
-            indexPatterns
+            indexPatterns,
+            getEsQueryConfig(uiSettings)
           );
 
           return discover.locator!.getRedirectUrl({
@@ -642,7 +645,7 @@ export const LensTopNavMenu = ({
 
   const editField = useMemo(
     () =>
-      editPermission
+      canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
@@ -658,43 +661,58 @@ export const LensTopNavMenu = ({
             }
           }
         : undefined,
-    [editPermission, currentIndexPattern?.id, data.dataViews, dataViewFieldEditor, refreshFieldList]
+    [
+      canEditDataView,
+      currentIndexPattern?.id,
+      data.dataViews,
+      dataViewFieldEditor,
+      refreshFieldList,
+    ]
   );
 
   const addField = useMemo(
-    () => (editPermission && editField ? () => editField(undefined, 'add') : undefined),
-    [editField, editPermission]
+    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    const dataViewEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!dataViewEditPermission) {
-      return;
-    }
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          handleIndexPatternChange({
-            activeDatasources: Object.keys(datasourceStates).reduce(
-              (acc, datasourceId) => ({
-                ...acc,
-                [datasourceId]: datasourceMap[datasourceId],
-              }),
-              {}
-            ),
-            datasourceStates,
-            indexPatternId: dataView.id,
-            setDatasourceState,
-          });
-          refreshFieldList();
-        }
-      },
-    });
-  }, [dataViewEditor, datasourceMap, datasourceStates, refreshFieldList, setDatasourceState]);
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                if (dataView.id) {
+                  handleIndexPatternChange({
+                    activeDatasources: Object.keys(datasourceStates).reduce(
+                      (acc, datasourceId) => ({
+                        ...acc,
+                        [datasourceId]: datasourceMap[datasourceId],
+                      }),
+                      {}
+                    ),
+                    datasourceStates,
+                    indexPatternId: dataView.id,
+                    setDatasourceState,
+                  });
+                  refreshFieldList();
+                }
+              },
+            });
+          }
+        : undefined,
+    [
+      dataViewEditor,
+      canEditDataView,
+      datasourceMap,
+      datasourceStates,
+      refreshFieldList,
+      setDatasourceState,
+    ]
+  );
 
   const dataViewPickerProps = {
     trigger: {
-      label: currentIndexPattern?.title || '',
+      label: currentIndexPattern?.getName?.() || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },

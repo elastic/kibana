@@ -35,6 +35,7 @@ import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -44,16 +45,17 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
-    | 'infra'
+    | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling';
+    | 'profiling'
+    | 'alerts';
   hidden?: boolean;
 };
 
 interface Props {
   title: string;
-  children: React.ReactNode;
+  children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
@@ -61,9 +63,7 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <ServiceAnomalyTimeseriesContextProvider>
-        <TemplateWithContext {...props} />
-      </ServiceAnomalyTimeseriesContextProvider>
+      <TemplateWithContext {...props} />
     </ApmServiceContextProvider>
   );
 }
@@ -127,8 +127,9 @@ function TemplateWithContext({
       }}
     >
       <SearchBar {...searchBarOptions} />
-
-      {children}
+      <ServiceAnomalyTimeseriesContextProvider>
+        {children}
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );
 }
@@ -165,7 +166,13 @@ export function isJVMsTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core } = useApmPluginContext();
+  const { config, core, plugins } = useApmPluginContext();
+  const { capabilities } = core.application;
+  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
+    plugins,
+    capabilities
+  );
+
   const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
@@ -249,8 +256,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
-      key: 'infra',
-      href: router.link('/services/{serviceName}/infra', {
+      key: 'infrastructure',
+      href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),
@@ -316,6 +323,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+    },
+    {
+      key: 'alerts',
+      href: router.link('/services/{serviceName}/alerts', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
+        defaultMessage: 'Alerts',
+      }),
+      hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
 

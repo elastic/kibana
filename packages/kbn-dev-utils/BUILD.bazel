@@ -40,6 +40,9 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-dev-cli-runner",
+  "//packages/kbn-dev-cli-errors",
+  "//packages/kbn-dev-proc-runner",
   "//packages/kbn-std",
   "//packages/kbn-utils",
   "//packages/kbn-plugin-discovery",
@@ -71,6 +74,9 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-dev-cli-runner:npm_module_types",
+  "//packages/kbn-dev-cli-errors:npm_module_types",
+  "//packages/kbn-dev-proc-runner:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-plugin-discovery:npm_module_types",
@@ -127,6 +133,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

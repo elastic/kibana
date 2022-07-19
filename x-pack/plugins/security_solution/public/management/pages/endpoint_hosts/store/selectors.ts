@@ -10,17 +10,10 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
-import { Query } from '@kbn/es-query';
-import {
-  Immutable,
-  HostPolicyResponseAppliedAction,
-  HostPolicyResponseConfiguration,
-  HostPolicyResponseActionStatus,
-  HostStatus,
-  ActivityLog,
-  HostMetadata,
-} from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { Query } from '@kbn/es-query';
+import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -28,16 +21,15 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import {
-  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 
-import { ServerApiError } from '../../../../common/types';
+import type { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -98,83 +90,6 @@ export const endpointPackageVersion = createSelector(endpointPackageInfo, (info)
 export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
 export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
-
-/**
- * Returns the full policy response from the endpoint after a user modifies a policy.
- */
-const detailsPolicyAppliedResponse = (state: Immutable<EndpointState>) =>
-  state.policyResponse && state.policyResponse.Endpoint.policy.applied;
-
-/**
- * Returns the policy response timestamp from the endpoint after a user modifies a policy.
- */
-export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
-  state.policyResponse && state.policyResponse['@timestamp'];
-
-/**
- * Returns the Endpoint Package Policy Revision number, which correlates to the `applied_policy_version`
- * property on the endpoint policy response message.
- * @param state
- */
-export const policyResponseAppliedRevision = (state: Immutable<EndpointState>): string => {
-  return String(state.policyResponse?.Endpoint.policy.applied.endpoint_policy_version || '');
-};
-
-/**
- * Returns the response configurations from the endpoint after a user modifies a policy.
- */
-export const policyResponseConfigurations: (
-  state: Immutable<EndpointState>
-) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
-  detailsPolicyAppliedResponse,
-  (applied) => {
-    return applied?.response?.configurations;
-  }
-);
-
-/**
- * Returns a map of the number of failed and warning policy response actions per configuration.
- */
-export const policyResponseFailedOrWarningActionCount: (
-  state: Immutable<EndpointState>
-) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, (applied) => {
-  const failureOrWarningByConfigType = new Map<string, number>();
-  if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
-    Object.entries(applied.response.configurations).map(([key, val]) => {
-      let count = 0;
-      for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions.find(
-          (policyActions) => policyActions.name === action
-        )?.status;
-        if (
-          actionStatus === HostPolicyResponseActionStatus.failure ||
-          actionStatus === HostPolicyResponseActionStatus.warning
-        ) {
-          count += 1;
-        }
-      }
-      return failureOrWarningByConfigType.set(key, count);
-    });
-  }
-  return failureOrWarningByConfigType;
-});
-
-/**
- * Returns the actions taken by the endpoint for each response configuration after a user modifies a policy.
- */
-export const policyResponseActions: (
-  state: Immutable<EndpointState>
-) => undefined | Immutable<HostPolicyResponseAppliedAction[]> = createSelector(
-  detailsPolicyAppliedResponse,
-  (applied) => {
-    return applied?.actions;
-  }
-);
-
-export const policyResponseLoading = (state: Immutable<EndpointState>): boolean =>
-  state.policyResponseLoading;
-
-export const policyResponseError = (state: Immutable<EndpointState>) => state.policyResponseError;
 
 export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   return (
@@ -254,19 +169,6 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show ?? 'details';
   });
-
-/**
- * Returns the selected endpoint's elastic agent Id
- * used for fetching endpoint actions log
- */
-export const selectedAgent = (state: Immutable<EndpointState>): string => {
-  const hostList = state.hosts;
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
-  return (
-    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
-      .id || ''
-  );
-};
 
 /**
  * Returns the Host Status which is connected the fleet agent
@@ -362,59 +264,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
-
-export const getActivityLogDataPaging = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
-  return state.endpointDetails.activityLog.paging;
-};
-
-export const getActivityLogData = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
-  state.endpointDetails.activityLog.logData;
-
-export const getLastLoadedActivityLogData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
-  return getLastLoadedResourceState(activityLog)?.data;
-});
-
-export const getActivityLogUninitialized: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isUninitialisedResourceState(activityLog));
-
-export const getActivityLogRequestLoading: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadingResourceState(activityLog));
-
-export const getActivityLogRequestLoaded: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadedResourceState(activityLog));
-
-export const getActivityLogIterableData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
-  const emptyArray: ActivityLog['data'] = [];
-  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
-});
-
-export const getActivityLogError: (state: Immutable<EndpointState>) => ServerApiError | undefined =
-  createSelector(getActivityLogData, (activityLog) => {
-    if (isFailedResourceState(activityLog)) {
-      return activityLog.error;
-    }
-  });
-
-// returns a true if either lgo is uninitialised
-// or if it has failed an api call after having fetched a non empty log list earlier
-export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(
-  getActivityLogUninitialized,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  (isUninitialized, lastLoadedLogData, isAPIError) => {
-    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
-  }
-);
 
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;

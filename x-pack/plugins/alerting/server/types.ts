@@ -10,13 +10,15 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+} from '@kbn/core/server';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
+import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -40,6 +42,7 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleSnooze,
 } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -71,7 +74,7 @@ export interface RuleExecutorServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  searchSourceClient: Promise<ISearchStartSearchSource>;
+  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -123,7 +126,7 @@ export type ExecutorType<
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
-  validateMutatedParams?: (mutatedOject: unknown, origObject?: unknown) => Params;
+  validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
 export interface RuleType<
@@ -249,7 +252,8 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
 }
 
 export interface AlertingPlugin {
@@ -276,3 +280,5 @@ export interface InvalidatePendingApiKey {
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;

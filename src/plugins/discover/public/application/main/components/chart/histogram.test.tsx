@@ -8,12 +8,12 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { DataCharts$ } from '../../utils/use_saved_search';
+import { DataCharts$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import React from 'react';
-import * as hooks from '../../utils/use_data_state';
+import * as hooks from '../../hooks/use_data_state';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { GetStateReturn } from '../../services/discover_state';
 

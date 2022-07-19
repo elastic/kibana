@@ -19,6 +19,8 @@ export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
+export const selectStagedActiveData = (state: LensState) =>
+  state.lens.stagedPreview?.activeData || state.lens.activeData;
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);

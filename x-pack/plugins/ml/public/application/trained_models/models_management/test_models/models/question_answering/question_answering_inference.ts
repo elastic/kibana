@@ -7,7 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BehaviorSubject } from 'rxjs';
-
+import { i18n } from '@kbn/i18n';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getQuestionAnsweringInput } from './question_answering_input';
 import { getQuestionAnsweringOutputComponent } from './question_answering_output';
@@ -44,6 +44,16 @@ export type QuestionAnsweringResponse = InferResponse<
 
 export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.label',
+    { defaultMessage: 'Question answering' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.questionAnswer.info1', {
+      defaultMessage:
+        'Provide a question and test how well the model extracts an answer from your input text.',
+    }),
+  ];
 
   public questionText$ = new BehaviorSubject<string>('');
 
@@ -90,7 +100,13 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
   }
 
   public getInputComponent(): JSX.Element {
-    return getQuestionAnsweringInput(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.inputText',
+      {
+        defaultMessage: "Enter unstructured text phrases related to the answers you're seeking",
+      }
+    );
+    return getQuestionAnsweringInput(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {

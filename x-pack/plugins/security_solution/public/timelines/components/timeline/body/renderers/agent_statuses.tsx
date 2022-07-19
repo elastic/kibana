@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
 import { useHostIsolationStatus } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
 import { AgentStatus } from '../../../../../common/components/endpoint/agent_status';
@@ -33,26 +32,11 @@ export const AgentStatuses = React.memo(
   }) => {
     const { isIsolated, agentStatus, pendingIsolation, pendingUnisolation } =
       useHostIsolationStatus({ agentId: value });
-    const isolationFieldName = 'host.isolation';
     return (
       <EuiFlexGroup gutterSize="none">
         {agentStatus !== undefined ? (
           <EuiFlexItem grow={false}>
-            {isDraggable ? (
-              <DefaultDraggable
-                field={fieldName}
-                id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-                fieldType={fieldType}
-                isAggregatable={isAggregatable}
-                isDraggable={isDraggable}
-                tooltipContent={fieldName}
-                value={`${agentStatus}`}
-              >
-                <AgentStatus hostStatus={agentStatus} />
-              </DefaultDraggable>
-            ) : (
-              <AgentStatus hostStatus={agentStatus} />
-            )}
+            <AgentStatus hostStatus={agentStatus} />
           </EuiFlexItem>
         ) : (
           <EuiText>
@@ -60,21 +44,11 @@ export const AgentStatuses = React.memo(
           </EuiText>
         )}
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
-            field={isolationFieldName}
-            id={`event-details-value-default-draggable-${contextId}-${eventId}-${isolationFieldName}-${value}`}
-            fieldType={fieldType}
-            isAggregatable={isAggregatable}
-            isDraggable={isDraggable}
-            tooltipContent={isolationFieldName}
-            value={`${isIsolated}`}
-          >
-            <EndpointHostIsolationStatus
-              isIsolated={isIsolated}
-              pendingIsolate={pendingIsolation}
-              pendingUnIsolate={pendingUnisolation}
-            />
-          </DefaultDraggable>
+          <EndpointHostIsolationStatus
+            isIsolated={isIsolated}
+            pendingIsolate={pendingIsolation}
+            pendingUnIsolate={pendingUnisolation}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -20,10 +20,10 @@ export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
   'accessors' | 'xAccessor' | 'splitAccessor'
 > = {
-  hide: {
+  simpleView: {
     types: ['boolean'],
     default: false,
-    help: strings.getHideHelp(),
+    help: strings.getSimpleView(),
   },
   seriesType: {
     aliases: ['_'],
@@ -36,7 +36,6 @@ export const commonDataLayerArgs: Omit<
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {
@@ -44,9 +43,40 @@ export const commonDataLayerArgs: Omit<
     default: false,
     help: strings.getIsHistogramHelp(),
   },
-  yConfig: {
-    types: [Y_CONFIG],
-    help: strings.getYConfigHelp(),
+  isPercentage: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsPercentageHelp(),
+  },
+  isStacked: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsStackedHelp(),
+  },
+  isHorizontal: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsHorizontalHelp(),
+  },
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
+  },
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
+  },
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
+  },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
+  },
+  decorations: {
+    types: [DATA_DECORATION_CONFIG],
+    help: strings.getDecorationsHelp(),
     multi: true,
   },
   columnToLabel: {

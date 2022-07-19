@@ -10,8 +10,7 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../..';
-import { IndexPattern } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -53,9 +52,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
@@ -67,7 +66,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
     };
 
@@ -258,9 +258,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(
@@ -286,7 +286,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
 

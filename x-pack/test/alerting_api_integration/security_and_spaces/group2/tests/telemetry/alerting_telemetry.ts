@@ -6,16 +6,17 @@
  */
 
 import expect from '@kbn/expect';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Spaces, Superuser } from '../../../scenarios';
 import {
   getUrlPrefix,
   getEventLog,
   getTestRuleData,
-  ObjectRemover,
-  TaskManagerDoc,
   ESTestIndexTool,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingTelemetryTests({ getService }: FtrProviderContext) {
@@ -24,26 +25,18 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const esArchiver = getService('esArchiver');
 
   describe('alerting telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
-    const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      // reset the state in the telemetry task
-      await es.update({
-        id: `task:Alerting-alerting_telemetry`,
-        index: '.kibana_task_manager',
-        body: {
-          doc: {
-            task: {
-              state: '{}',
-            },
-          },
-        },
-      });
+      await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
+      await setupSpacesAndUsers(getService);
     });
-    after(() => objectRemover.removeAll());
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/event_log_telemetry');
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -63,7 +56,6 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(space, createdConnector.id, 'action', 'actions');
       return createdConnector.id;
     }
 
@@ -75,7 +67,6 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
         .auth(Superuser.username, Superuser.password)
         .send(getTestRuleData(ruleOverwrites));
       expect(ruleResponse.status).to.eql(200);
-      objectRemover.add(space, ruleResponse.body.id, 'rule', 'alerting');
       return ruleResponse.body.id;
     }
 
@@ -226,22 +217,32 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // request telemetry task to run
       await supertest
-        .post('/api/alerting_actions_telemetry/run_now')
+        .post('/api/alerting_actions_telemetry/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ taskId: 'Alerting-alerting_telemetry' })
         .expect(200);
 
-      // get telemetry task doc
-      const telemetryTask = await es.get<TaskManagerDoc>({
-        id: `task:Alerting-alerting_telemetry`,
-        index: '.kibana_task_manager',
-      });
-      const taskState = telemetryTask?._source?.task?.state;
-      expect(taskState).not.to.be(undefined);
-      const telemetry = JSON.parse(taskState!);
+      let telemetry: any;
 
-      // total number of rules
-      expect(telemetry.count_total).to.equal(21);
+      await retry.try(async () => {
+        const resp = await es.search<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              term: {
+                _id: `task:Alerting-alerting_telemetry`,
+              },
+            },
+          },
+        });
+        const task = resp.hits.hits[0]?._source?.task;
+        expect(task?.status).to.be('idle');
+        const taskState = task?.state;
+        expect(taskState).not.to.be(undefined);
+        telemetry = JSON.parse(String(taskState!));
+        // total number of rules
+        expect(telemetry.count_total).to.equal(21);
+      });
 
       // total number of enabled rules
       expect(telemetry.count_active_total).to.equal(18);

@@ -17,7 +17,6 @@ import {
   Rule,
   RuleType,
   RuleTypeModel,
-  ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
 import { RuleForm } from './rule_form';
@@ -56,16 +55,6 @@ describe('rule_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({
-        config: {
-          errors: {},
-        },
-        secrets: {
-          errors: {},
-        },
-      });
-    },
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -213,7 +202,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
@@ -332,7 +324,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -527,7 +522,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
@@ -590,7 +588,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"

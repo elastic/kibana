@@ -46,7 +46,7 @@ import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
-import { Logger } from '../../../logging';
+import type { Logger } from '@kbn/logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import {
   SavedObjectsMigrationVersion,
@@ -670,7 +670,7 @@ function wrapWithTry(
     try {
       const result = migrationFn(doc, context);
 
-      // A basic sanity check to help migration authors detect basic errors
+      // A basic check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
       if (!result || !result.type) {
         throw new Error(`Invalid saved object returned from migration ${type.name}:${version}.`);

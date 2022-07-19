@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { combineReducers, createStore } from 'redux';
 import type {
   FoundExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -15,28 +14,10 @@ import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysoluti
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 
-import {
-  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
-} from '../../../common/constants';
-
-import { eventFiltersPageReducer } from '../store/reducer';
-import {
-  httpHandlerMockFactory,
-  ResponseProvidersInterface,
-} from '../../../../common/mock/endpoint/http_handler_mock_factory';
-
-export const createGlobalNoMiddlewareStore = () => {
-  return createStore(
-    combineReducers({
-      [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: combineReducers({
-        [MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE]: eventFiltersPageReducer,
-      }),
-    })
-  );
-};
+import type { ResponseProvidersInterface } from '../../../../common/mock/endpoint/http_handler_mock_factory';
+import { httpHandlerMockFactory } from '../../../../common/mock/endpoint/http_handler_mock_factory';
 
 export const ecsEventMock = (): Ecs => ({
   _id: 'unLfz3gB2mJZsMY3ytx3',
@@ -206,6 +187,8 @@ export const esResponseData = () => ({
       ],
     },
   },
+  indexFields: [],
+  indicesExist: [],
   isPartial: false,
   isRunning: false,
   total: 1,

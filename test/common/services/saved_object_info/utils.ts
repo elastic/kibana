@@ -7,7 +7,7 @@
  */
 
 import { inspect } from 'util';
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ResolvedPayload {

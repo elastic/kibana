@@ -69,7 +69,6 @@ echo "--- Build Elasticsearch"
   :distribution:archives:darwin-aarch64-tar:assemble \
   :distribution:archives:darwin-tar:assemble \
   :distribution:docker:docker-export:assemble \
-  :distribution:docker:cloud-docker-export:assemble \
   :distribution:archives:linux-aarch64-tar:assemble \
   :distribution:archives:linux-tar:assemble \
   :distribution:archives:windows-zip:assemble \
@@ -86,26 +85,33 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 
 echo "--- Create kibana-ci docker cloud image archives"
-ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
-ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
-KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
-KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"
+# Ignore build failures.  This docker image downloads metricbeat and filebeat.
+# When we bump versions, these dependencies may not exist yet, but we don't want to
+# block the rest of the snapshot promotion process
+set +e
+./gradlew :distribution:docker:cloud-docker-export:assemble && {
+  ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.ID}}")
+  ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch-ci/elasticsearch-cloud" --format "{{.Tag}}")
+  KIBANA_ES_CLOUD_VERSION="$ES_CLOUD_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+  KIBANA_ES_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$KIBANA_ES_CLOUD_VERSION"
+  echo $ES_CLOUD_ID $ES_CLOUD_VERSION $KIBANA_ES_CLOUD_VERSION $KIBANA_ES_CLOUD_IMAGE
+  docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_IMAGE"
 
-docker tag "$ES_CLOUD_ID" "$KIBANA_ES_CLOUD_IMAGE"
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  trap 'docker logout docker.elastic.co' EXIT
+  docker image push "$KIBANA_ES_CLOUD_IMAGE"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-docker image push "$KIBANA_ES_CLOUD_IMAGE"
-
-export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
-export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"
+  export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
+  export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"
+}
+set -e
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"
 find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
 
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
-node "$(dirname "${0}")/create_manifest.js" "$destination"
+ts-node "$(dirname "${0}")/create_manifest.ts" "$destination"
 
 ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST)"
 

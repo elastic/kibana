@@ -41,9 +41,6 @@ interface Props {
 }
 
 const dataStreamToString = [
-  { value: DataStream.HTTP, text: 'HTTP' },
-  { value: DataStream.TCP, text: 'TCP' },
-  { value: DataStream.ICMP, text: 'ICMP' },
   {
     value: DataStream.BROWSER,
     text: i18n.translate(
@@ -53,6 +50,9 @@ const dataStreamToString = [
       }
     ),
   },
+  { value: DataStream.HTTP, text: 'HTTP' },
+  { value: DataStream.TCP, text: 'TCP' },
+  { value: DataStream.ICMP, text: 'ICMP' },
 ];
 
 export const CustomFields = memo<Props>(

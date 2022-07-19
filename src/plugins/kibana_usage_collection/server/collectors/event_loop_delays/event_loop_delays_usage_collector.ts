@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { timer } from 'rxjs';
+import { type Observable, timer, takeUntil } from 'rxjs';
 import { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { rollDailyData } from './rollups';
@@ -19,13 +19,14 @@ export function registerEventLoopDelaysCollector(
   logger: Logger,
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  pluginStop$: Observable<void>
 ) {
   registerSavedObjectTypes(registerType);
 
-  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(() =>
-    rollDailyData(logger, getSavedObjectsClient())
-  );
+  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL)
+    .pipe(takeUntil(pluginStop$))
+    .subscribe(() => rollDailyData(logger, getSavedObjectsClient()));
 
   const collector = usageCollection.makeUsageCollector<EventLoopDelaysUsageReport>({
     type: 'event_loop_delays',

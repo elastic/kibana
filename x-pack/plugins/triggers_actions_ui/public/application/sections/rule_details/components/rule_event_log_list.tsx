@@ -23,6 +23,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -53,6 +54,10 @@ const updateButtonProps = {
   fill: false,
 };
 
+const MAX_RESULTS = 1000;
+
+const ruleEventListContainerStyle = { minHeight: 400 };
+
 export type RuleEventLogListProps = {
   rule: Rule;
   localStorageKey?: string;
@@ -70,7 +75,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const { uiSettings, notifications } = useKibana().services;
 
   // Data grid states
-  const [logs, setLogs] = useState<IExecutionLog[]>([]);
+  const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     return (
       JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
@@ -79,6 +84,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
+  const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
@@ -104,6 +110,11 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 
   const isInitialized = useRef(false);
 
+  const isOnLastPage = useMemo(() => {
+    const { pageIndex, pageSize } = pagination;
+    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+  }, [pagination]);
+
   // Formats the sort columns to be consumed by the API endpoint
   const formattedSort = useMemo(() => {
     return sortingColumns.map(({ id: sortId, direction }) => ({
@@ -128,8 +139,9 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
       setLogs(result.data);
       setPagination({
         ...pagination,
-        totalItemCount: result.total,
+        totalItemCount: Math.min(result.total, MAX_RESULTS),
       });
+      setActualTotalItemCount(result.total);
     } catch (e) {
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
@@ -186,6 +198,30 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination, setFilter]
   );
 
+  const renderList = () => {
+    if (!logs) {
+      return <CenterJustifiedSpinner />;
+    }
+    return (
+      <>
+        {isLoading && (
+          <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+        )}
+        <RuleEventLogDataGrid
+          logs={logs}
+          pagination={pagination}
+          sortingColumns={sortingColumns}
+          visibleColumns={visibleColumns}
+          dateFormat={dateFormat}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          setVisibleColumns={setVisibleColumns}
+          setSortingColumns={setSortingColumns}
+        />
+      </>
+    );
+  };
+
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,7 +240,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [localStorageKey, visibleColumns]);
 
   return (
-    <div>
+    <div style={ruleEventListContainerStyle}>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -226,24 +262,14 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {isLoading && (
-        <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+      {renderList()}
+      {isOnLastPage && (
+        <RefineSearchPrompt
+          documentSize={actualTotalItemCount}
+          visibleDocumentSize={MAX_RESULTS}
+          backToTopAnchor="rule_event_log_list"
+        />
       )}
-      <RuleEventLogDataGrid
-        logs={logs}
-        pagination={pagination}
-        sortingColumns={sortingColumns}
-        visibleColumns={visibleColumns}
-        dateFormat={dateFormat}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        onChangePage={onChangePage}
-        setVisibleColumns={setVisibleColumns}
-        setSortingColumns={setSortingColumns}
-      />
-      <RefineSearchPrompt
-        documentSize={pagination.totalItemCount}
-        backToTopAnchor="rule_event_log_list"
-      />
     </div>
   );
 };

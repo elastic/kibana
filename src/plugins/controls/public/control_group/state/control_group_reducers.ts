@@ -25,11 +25,23 @@ export const controlGroupReducers = {
   ) => {
     state.defaultControlWidth = action.payload;
   },
+  setDefaultControlGrow: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<ControlGroupInput['defaultControlGrow']>
+  ) => {
+    state.defaultControlGrow = action.payload;
+  },
   setControlWidth: (
     state: WritableDraft<ControlGroupInput>,
     action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
   ) => {
     state.panels[action.payload.embeddableId].width = action.payload.width;
+  },
+  setControlGrow: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<{ grow: boolean; embeddableId: string }>
+  ) => {
+    state.panels[action.payload.embeddableId].grow = action.payload.grow;
   },
   setControlOrders: (
     state: WritableDraft<ControlGroupInput>,

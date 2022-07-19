@@ -71,7 +71,7 @@ describe('Service overview - header filters', () => {
 
   describe('Filtering by transaction type', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
     });
     it('changes url when selecting different value', () => {
       cy.visit(serviceOverviewHref);
@@ -89,7 +89,7 @@ describe('Service overview - header filters', () => {
       );
     });
 
-    it('calls APIs with correct transaction type', () => {
+    it.skip('calls APIs with correct transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
@@ -117,9 +117,9 @@ describe('Service overview - header filters', () => {
     });
   });
 
-  describe('Filtering by kuerybar', () => {
+  describe.skip('Filtering by kuerybar', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
     });
     it('filters by transaction.name', () => {
       cy.visit(

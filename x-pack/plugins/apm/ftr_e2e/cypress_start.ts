@@ -11,7 +11,7 @@ import { argv } from 'yargs';
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
-import { createApmAndObsUsersAndRoles } from '../scripts/create_apm_users_and_roles/create_apm_users_and_roles';
+import { createApmUsers } from '../scripts/create_apm_users/create_apm_users';
 import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
 export async function cypressStart(
@@ -27,14 +27,13 @@ export async function cypressStart(
   });
 
   // Creates APM users
-  await createApmAndObsUsersAndRoles({
+  await createApmUsers({
     elasticsearch: {
       username: config.get('servers.elasticsearch.username'),
       password: config.get('servers.elasticsearch.password'),
     },
     kibana: {
       hostname: kibanaUrl,
-      roleSuffix: 'e2e_tests',
     },
   });
 

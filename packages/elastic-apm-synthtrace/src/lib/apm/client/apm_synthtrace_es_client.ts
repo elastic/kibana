@@ -258,7 +258,19 @@ export class ApmSynthtraceEsClient {
     });
     this.logger.info(`Created index template for ${datastreamName}-*`);
 
-    await this.client.indices.createDataStream({ name: datastreamName + '-default' });
+    const dataStreamWithNamespace = datastreamName + '-default';
+    const getDataStreamResponse = await this.client.indices.getDataStream(
+      {
+        name: dataStreamWithNamespace,
+      },
+      { ignore: [404] }
+    );
+    if (getDataStreamResponse.data_streams && getDataStreamResponse.data_streams.length === 0) {
+      await this.client.indices.createDataStream({ name: dataStreamWithNamespace });
+      this.logger.info(`Created data stream: ${dataStreamWithNamespace}.`);
+    } else {
+      this.logger.info(`Data stream: ${dataStreamWithNamespace} already exists.`);
+    }
 
     await aggregator.bootstrapElasticsearch(this.client);
   }

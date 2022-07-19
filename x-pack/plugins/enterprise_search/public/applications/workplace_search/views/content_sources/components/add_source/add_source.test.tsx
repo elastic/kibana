@@ -62,7 +62,7 @@ describe('AddSourceList', () => {
       resetSourcesState,
     });
     setMockValues(mockValues);
-    mockUseParams.mockReturnValue({ serviceType: 'confluence_cloud' });
+    mockUseParams.mockReturnValue({ serviceType: 'box' });
   });
 
   describe('layout', () => {
@@ -125,7 +125,7 @@ describe('AddSourceList', () => {
     expect(saveSourceConfig).toHaveBeenCalled();
 
     saveConfig.prop('goBackStep')!();
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/intro');
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/intro');
   });
 
   it('renders Connect Instance step', () => {

@@ -171,7 +171,7 @@ export const dateHistogramOperation: OperationDefinition<
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
     dateRange,
     data,
     indexPattern,
@@ -197,16 +197,19 @@ export const dateHistogramOperation: OperationDefinition<
 
     const onChangeDropPartialBuckets = useCallback(
       (ev: EuiSwitchEvent) => {
-        updateLayer((newLayer) =>
+        // updateColumnParam will be called async
+        // store the checked value before the event pooling clears it
+        const value = ev.target.checked;
+        paramEditorUpdater((newLayer) =>
           updateColumnParam({
             layer: newLayer,
             columnId,
             paramName: 'dropPartials',
-            value: ev.target.checked,
+            value,
           })
         );
       },
-      [columnId, updateLayer]
+      [columnId, paramEditorUpdater]
     );
 
     const setInterval = useCallback(
@@ -218,11 +221,11 @@ export const dateHistogramOperation: OperationDefinition<
             ? autoInterval
             : `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-        updateLayer((newLayer) =>
+        paramEditorUpdater((newLayer) =>
           updateColumnParam({ layer: newLayer, columnId, paramName: 'interval', value })
         );
       },
-      [columnId, updateLayer]
+      [columnId, paramEditorUpdater]
     );
 
     const options = (intervalOptions || [])
@@ -320,7 +323,7 @@ export const dateHistogramOperation: OperationDefinition<
                 const newValue = opts.length ? opts[0].key! : '';
                 setIntervalInput(newValue);
                 if (newValue === autoInterval && currentColumn.params.ignoreTimeRange) {
-                  updateLayer(
+                  paramEditorUpdater(
                     updateColumnParam({
                       layer,
                       columnId,
@@ -394,7 +397,7 @@ export const dateHistogramOperation: OperationDefinition<
                 });
                 setIntervalInput(newFixedInterval);
               }
-              updateLayer(newLayer);
+              paramEditorUpdater(newLayer);
             }}
             compressed
           />
@@ -407,7 +410,7 @@ export const dateHistogramOperation: OperationDefinition<
             checked={Boolean(currentColumn.params.includeEmptyRows)}
             data-test-subj="indexPattern-include-empty-rows"
             onChange={() => {
-              updateLayer(
+              paramEditorUpdater(
                 updateColumnParam({
                   layer,
                   columnId,

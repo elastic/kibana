@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
-import { WrapSequences } from '../../signals/types';
+import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
-import { ConfigType } from '../../../../config';
-import { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
-import {
+import type { ConfigType } from '../../../../config';
+import type { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
@@ -23,12 +23,14 @@ export const wrapSequencesFactory =
     ignoreFields,
     mergeStrategy,
     spaceId,
+    indicesToQuery,
   }: {
     logger: Logger;
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
+    indicesToQuery: string[];
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -40,7 +42,8 @@ export const wrapSequencesFactory =
           completeRule,
           mergeStrategy,
           spaceId,
-          buildReasonMessage
+          buildReasonMessage,
+          indicesToQuery
         ),
       ],
       []

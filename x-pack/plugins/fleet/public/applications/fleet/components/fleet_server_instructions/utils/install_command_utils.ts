@@ -14,34 +14,40 @@ export type CommandsByPlatform = {
 function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
   const ARTIFACT_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
 
-  const artifactMap: Record<
-    PLATFORM_TYPE,
-    { fullUrl: string; filename: string; unpackedDir: string }
-  > = {
+  const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
     linux: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
-      filename: `elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
-      unpackedDir: `elastic-agent-${kibanaVersion}-linux-x86_64`,
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-linux-x86_64`,
+      ].join(`\n`),
     },
     mac: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-      filename: `elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-      unpackedDir: `elastic-agent-${kibanaVersion}-darwin-x86_64`,
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-darwin-x86_64`,
+      ].join(`\n`),
     },
     windows: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
-      filename: `elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
-      unpackedDir: `elastic-agent-${kibanaVersion}-windows-x86_64`,
+      downloadCommand: [
+        `$ProgressPreference = 'SilentlyContinue'`,
+        `wget ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+        `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+        `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
+      ].join(`\n`),
     },
     deb: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb`,
-      filename: `elastic-agent-${kibanaVersion}-amd64.deb`,
-      unpackedDir: `elastic-agent-${kibanaVersion}-amd64`,
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb`,
+        `sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
+      ].join(`\n`),
     },
     rpm: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm`,
-      filename: `elastic-agent-${kibanaVersion}-x86_64.rpm`,
-      unpackedDir: `elastic-agent-${kibanaVersion}-x86_64`,
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm`,
+        `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
+      ].join(`\n`),
     },
   };
 
@@ -61,18 +67,6 @@ export function getInstallCommandForPlatform(
   const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
   const artifact = getArtifact(platform, kibanaVersion ?? '');
-  const downloadCommand =
-    platform === 'windows'
-      ? [
-          `wget ${artifact.fullUrl} -OutFile ${artifact.filename}`,
-          `Expand-Archive .\\${artifact.filename}`,
-          `cd ${artifact.unpackedDir}`,
-        ].join(`\n`)
-      : [
-          `curl -L -O ${artifact.fullUrl}`,
-          `tar xzvf ${artifact.filename}`,
-          `cd ${artifact.unpackedDir}`,
-        ].join(`\n`);
 
   const commandArguments = [];
 
@@ -108,11 +102,11 @@ export function getInstallCommandForPlatform(
   }, '');
 
   const commands = {
-    linux: `${downloadCommand}\nsudo ./elastic-agent install${commandArgumentsStr}`,
-    mac: `${downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
-    windows: `${downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    deb: `${downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}`,
-    rpm: `${downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install${commandArgumentsStr}`,
+    mac: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
+    deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
+    rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
   };
 
   return commands[platform];

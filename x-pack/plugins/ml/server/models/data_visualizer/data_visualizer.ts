@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
 import { get, each, last, find } from 'lodash';
+
+import { IScopedClusterClient } from '@kbn/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/server';
+import {
+  buildSamplerAggregation,
+  getAggIntervals,
+  getSamplerAggregationsResponsePath,
+} from '@kbn/ml-agg-utils';
+import { stringHash } from '@kbn/ml-string-hash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
-import { stringHash } from '../../../common/util/string_utils';
-import {
-  buildBaseFilterCriteria,
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-} from '../../lib/query_utils';
+import { buildBaseFilterCriteria } from '../../lib/query_utils';
 import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -112,13 +114,6 @@ interface FieldExamples {
   examples: any[];
 }
 
-interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-type NumericColumnStatsMap = Record<string, NumericColumnStats>;
-
 interface AggHistogram {
   histogram: {
     field: string;
@@ -178,64 +173,6 @@ type BatchStats =
   | DocumentCountStats
   | FieldExamples;
 
-const getAggIntervals = async (
-  { asCurrentUser }: IScopedClusterClient,
-  indexPattern: string,
-  query: any,
-  fields: HistogramField[],
-  samplerShardSize: number,
-  runtimeMappings?: RuntimeMappings
-): Promise<NumericColumnStatsMap> => {
-  const numericColumns = fields.filter((field) => {
-    return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
-  });
-
-  if (numericColumns.length === 0) {
-    return {};
-  }
-
-  const minMaxAggs = numericColumns.reduce((aggs, c) => {
-    const id = stringHash(c.fieldName);
-    aggs[id] = {
-      stats: {
-        field: c.fieldName,
-      },
-    };
-    return aggs;
-  }, {} as Record<string, object>);
-
-  const body = await asCurrentUser.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
-      size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-    },
-  });
-
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
-
-  return Object.keys(aggregations).reduce((p, aggName) => {
-    const stats = [aggregations[aggName].min, aggregations[aggName].max];
-    if (!stats.includes(null)) {
-      const delta = aggregations[aggName].max - aggregations[aggName].min;
-
-      let aggInterval = 1;
-
-      if (delta > MAX_CHART_COLUMNS || delta <= 1) {
-        aggInterval = delta / (MAX_CHART_COLUMNS - 1);
-      }
-
-      p[aggName] = { interval: aggInterval, min: stats[0], max: stats[1] };
-    }
-
-    return p;
-  }, {} as NumericColumnStatsMap);
-};
-
 // export for re-use by transforms plugin
 export const getHistogramsForFields = async (
   client: IScopedClusterClient,
@@ -247,7 +184,7 @@ export const getHistogramsForFields = async (
 ) => {
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
-    client,
+    client.asCurrentUser,
     indexPattern,
     query,
     fields,
@@ -290,16 +227,19 @@ export const getHistogramsForFields = async (
     return [];
   }
 
-  const body = await asCurrentUser.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
+  const body = await asCurrentUser.search(
+    {
+      index: indexPattern,
       size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      body: {
+        query,
+        aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
+        size: 0,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      },
     },
-  });
+    { maxRetries: 0 }
+  );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
@@ -666,12 +606,15 @@ export class DataVisualizer {
         : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      track_total_hits: true,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        track_total_hits: true,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     const aggregations = body.aggregations;
     // @ts-expect-error incorrect search response type
@@ -757,11 +700,14 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
@@ -802,11 +748,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     const buckets: { [key: string]: number } = {};
     const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
@@ -907,11 +856,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: NumericFieldStats[] = [];
@@ -1030,11 +982,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: StringFieldStats[] = [];
@@ -1106,11 +1061,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: DateFieldStats[] = [];
@@ -1175,11 +1133,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: BooleanFieldStats[] = [];
@@ -1240,11 +1201,14 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const body = await this._asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
     const stats = {
       fieldName: field,
       examples: [] as any[],

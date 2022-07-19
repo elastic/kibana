@@ -8,7 +8,8 @@
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
-import { HasDataViewsResponse, IndicesResponse, IndicesResponseModified } from '..';
+import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
+import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
@@ -17,13 +18,8 @@ export class HasData {
     // filter out indices that start with `.`
     if (source.name.startsWith('.')) return false;
 
-    // filter out empty sources created by apm server
-    if (source.name.startsWith('apm-')) return false;
-
     // filter out sources from DEFAULT_ASSETS_TO_IGNORE
     if (source.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
-    if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
     if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE)
       return false;
 
@@ -77,6 +73,41 @@ export class HasData {
     return source;
   };
 
+  private getIndicesViaSearch = async ({
+    http,
+    pattern,
+    showAllIndices,
+  }: {
+    http: HttpStart;
+    pattern: string;
+    showAllIndices: boolean;
+  }): Promise<boolean> =>
+    http
+      .post<IndicesViaSearchResponse>(`/internal/search/ese`, {
+        body: JSON.stringify({
+          params: {
+            ignore_unavailable: true,
+            expand_wildcards: showAllIndices ? 'all' : 'open',
+            index: pattern,
+            body: {
+              size: 0, // no hits
+              aggs: {
+                indices: {
+                  terms: {
+                    field: '_index',
+                    size: 200,
+                  },
+                },
+              },
+            },
+          },
+        }),
+      })
+      .then((resp) => {
+        return !!(resp && resp.total >= 0);
+      })
+      .catch(() => false);
+
   private getIndices = async ({
     http,
     pattern,
@@ -96,26 +127,29 @@ export class HasData {
         } else {
           return this.responseToItemArray(response);
         }
-      })
-      .catch(() => []);
+      });
 
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
       pattern: '*',
       showAllIndices: false,
-    }).then((dataSources: IndicesResponseModified[]) => {
-      return dataSources.some(this.isUserDataIndex);
-    });
+    })
+      .then((dataSources: IndicesResponseModified[]) => {
+        return dataSources.some(this.isUserDataIndex);
+      })
+      .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
 
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
       pattern: '*:*',
       showAllIndices: false,
-    }).then((dataSources: IndicesResponseModified[]) => {
-      return !!dataSources.filter(this.removeAliases).length;
-    });
+    })
+      .then((dataSources: IndicesResponseModified[]) => {
+        return !!dataSources.filter(this.removeAliases).length;
+      })
+      .catch(() => this.getIndicesViaSearch({ http, pattern: '*:*', showAllIndices: false }));
 
   // Data Views
 

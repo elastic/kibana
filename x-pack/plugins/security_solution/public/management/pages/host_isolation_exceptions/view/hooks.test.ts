@@ -9,7 +9,7 @@ import { renderHook as _renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { exceptionsGetSummaryHttpMock } from '../../mocks/exceptions_list_http_mocks';
+import { exceptionsGetSummaryHttpMock } from '../../../mocks/exceptions_list_http_mocks';
 
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');

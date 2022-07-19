@@ -53,6 +53,11 @@ https://www.elastic.co/guide/en/kibana/current/settings.html[standard
 settings].
 
 [discrete]
+=== Using an Alternate YML File
+
+To run Kibana with an alternate yml file, use the `--config` option to specify the path to the desired yml file. For example: `yarn start --config=config/my_config.yml`
+
+[discrete]
 === Potential Optimization Pitfalls
 
 * Webpack is trying to include a file in the bundle that was deleted and

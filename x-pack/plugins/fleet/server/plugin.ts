@@ -67,6 +67,8 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
   registerPreconfigurationRoutes,
+  registerDownloadSourcesRoutes,
+  registerHealthCheckRoutes,
 } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
@@ -284,18 +286,11 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
-          {
-            defaultMessage: 'All Spaces is required for All Integrations access.',
-          }
-        ),
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -373,6 +368,8 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerDownloadSourcesRoutes(fleetAuthzRouter);
+    registerHealthCheckRoutes(fleetAuthzRouter);
 
     // Conditional config routes
     if (config.agents.enabled) {

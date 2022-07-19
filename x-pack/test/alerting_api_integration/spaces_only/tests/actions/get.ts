@@ -98,6 +98,18 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
         });
+
+      await supertest
+        .get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-deprecated-servicenow-default`
+        )
+        .expect(200, {
+          id: 'my-deprecated-servicenow-default',
+          is_preconfigured: true,
+          is_deprecated: true,
+          connector_type_id: '.servicenow',
+          name: 'ServiceNow#xyz',
+        });
     });
 
     describe('legacy', () => {

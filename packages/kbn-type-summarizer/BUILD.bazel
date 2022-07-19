@@ -1,14 +1,18 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@build_bazel_rules_nodejs//:index.bzl", "directory_file_path", "js_library", "nodejs_binary")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-type-summarizer"
+PKG_DIRNAME = "kbn-type-summarizer"
 PKG_REQUIRE_NAME = "@kbn/type-summarizer"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
-  ]
+  ],
+  exclude = [
+    "**/*.test.*",
+    "src/tests/**/*",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -20,33 +24,52 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
 ]
 
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//@babel/runtime",
-  "@npm//@microsoft/api-extractor",
-  "@npm//source-map-support",
-  "@npm//chalk",
-  "@npm//getopts",
-  "@npm//is-path-inside",
-  "@npm//normalize-path",
-  "@npm//source-map",
-  "@npm//tslib",
-]
-
-TYPES_DEPS = [
-  "@npm//@microsoft/api-extractor",
-  "@npm//@types/jest",
-  "@npm//@types/node",
-  "@npm//@types/normalize-path",
-  "@npm//getopts",
   "@npm//is-path-inside",
   "@npm//normalize-path",
   "@npm//source-map",
   "@npm//strip-ansi",
   "@npm//tslib",
+  "//packages/kbn-type-summarizer-core",
 ]
+
+# In this array place dependencies necessary to build the types, which will include the
+# :npm_module_types target of other packages and packages from NPM, including @types/*
+# packages.
+#
+#  To reference the types for another package use:
+#    "//repo/relative/path/to/package:npm_module_types"
+#    eg. "//packages/kbn-utils:npm_module_types"
+#
+#  References to NPM packages work the same as RUNTIME_DEPS
+TYPES_DEPS = [
+  "@npm//@types/jest",
+  "@npm//@types/node",
+  "@npm//is-path-inside",
+  "@npm//@types/normalize-path",
+  "@npm//source-map",
+  "@npm//strip-ansi",
+  "@npm//tslib",
+  "//packages/kbn-type-summarizer-core:npm_module_types",
+]
+
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
@@ -70,47 +93,22 @@ ts_project(
   tsconfig = ":tsconfig",
 )
 
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
-directory_file_path(
-  name = "bazel-cli-path",
-  directory = ":target_node",
-  path = "bazel_cli.js",
-)
-
-nodejs_binary(
-  name = "bazel-cli",
-  data = [
-    ":%s" % PKG_BASE_NAME
-  ],
-  entry_point = ":bazel-cli-path",
-  visibility = ["//visibility:public"],
-)
-
 pkg_npm(
   name = "npm_module",
-  deps = [
-      ":%s" % PKG_BASE_NAME,
-  ],
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
   name = "build",
-  srcs = [
-      ":npm_module",
-  ],
+  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 
@@ -125,8 +123,6 @@ pkg_npm_types(
 
 filegroup(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  srcs = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

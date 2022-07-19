@@ -70,6 +70,7 @@ export const mockState: AppState = {
       total: null,
       monitors: [],
       syncErrors: null,
+      absoluteTotal: 0,
     },
     locations: [],
     loading: {

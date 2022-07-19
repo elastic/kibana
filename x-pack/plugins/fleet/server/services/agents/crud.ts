@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
@@ -68,6 +69,7 @@ export type GetAgentsOptions =
   | {
       kuery: string;
       showInactive?: boolean;
+      perPage?: number;
     };
 
 export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
@@ -90,10 +92,36 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
   return agents;
 }
 
+export async function openPointInTime(
+  esClient: ElasticsearchClient,
+  index: string = AGENTS_INDEX
+): Promise<string> {
+  const pitKeepAlive = '10m';
+  const pitRes = await esClient.openPointInTime({
+    index,
+    keep_alive: pitKeepAlive,
+  });
+  return pitRes.id;
+}
+
+export async function closePointInTime(esClient: ElasticsearchClient, pitId: string) {
+  try {
+    await esClient.closePointInTime({ id: pitId });
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error closing point in time with id: ${pitId}. Error: ${error.message}`);
+  }
+}
+
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+    pitId?: string;
+    searchAfter?: SortResults;
   }
 ): Promise<{
   agents: Agent[];
@@ -104,11 +132,13 @@ export async function getAgentsByKuery(
   const {
     page = 1,
     perPage = 20,
-    sortField = 'enrolled_at',
-    sortOrder = 'desc',
+    sortField = options.sortField ?? 'enrolled_at',
+    sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
     showUpgradeable,
+    searchAfter,
+    pitId,
   } = options;
   const filters = [];
 
@@ -122,18 +152,33 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
+  // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
+  const secondarySort: estypes.Sort = isDefaultSort
+    ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
+    : [];
   const queryAgents = async (from: number, size: number) =>
     esClient.search<FleetServerAgent, {}>({
-      index: AGENTS_INDEX,
       from,
       size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      ignore_unavailable: true,
       body: {
         ...body,
-        sort: [{ [sortField]: { order: sortOrder } }],
+        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
       },
+      ...(pitId
+        ? {
+            pit: {
+              id: pitId,
+              keep_alive: '1m',
+            },
+          }
+        : {
+            index: AGENTS_INDEX,
+            ignore_unavailable: true,
+          }),
+      ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
     });
   const res = await queryAgents((page - 1) * perPage, perPage);
 
@@ -166,6 +211,83 @@ export async function getAgentsByKuery(
     page,
     perPage,
   };
+}
+
+export async function processAgentsInBatches(
+  esClient: ElasticsearchClient,
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showInactive: boolean;
+    batchSize?: number;
+  },
+  processAgents: (
+    agents: Agent[],
+    includeSuccess: boolean
+  ) => Promise<{ items: BulkActionResult[] }>
+): Promise<{ items: BulkActionResult[] }> {
+  const pitId = await openPointInTime(esClient);
+
+  const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
+
+  const res = await getAgentsByKuery(esClient, {
+    ...options,
+    page: 1,
+    perPage,
+    pitId,
+  });
+
+  let currentAgents = res.agents;
+  // include successful agents if total agents does not exceed 10k
+  const skipSuccess = res.total > SO_SEARCH_LIMIT;
+
+  let results = await processAgents(currentAgents, skipSuccess);
+  let allAgentsProcessed = currentAgents.length;
+
+  while (allAgentsProcessed < res.total) {
+    const lastAgent = currentAgents[currentAgents.length - 1];
+    const nextPage = await getAgentsByKuery(esClient, {
+      ...options,
+      page: 1,
+      perPage,
+      pitId,
+      searchAfter: lastAgent.sort!,
+    });
+    currentAgents = nextPage.agents;
+    const currentResults = await processAgents(currentAgents, skipSuccess);
+    results = { items: results.items.concat(currentResults.items) };
+    allAgentsProcessed += currentAgents.length;
+  }
+
+  await closePointInTime(esClient, pitId);
+
+  return results;
+}
+
+export function errorsToResults(
+  agents: Agent[],
+  errors: Record<Agent['id'], Error>,
+  agentIds?: string[],
+  skipSuccess?: boolean
+): BulkActionResult[] {
+  if (!skipSuccess) {
+    const givenOrder = agentIds ? agentIds : agents.map((agent) => agent.id);
+    return givenOrder.map((agentId) => {
+      const hasError = agentId in errors;
+      const result: BulkActionResult = {
+        id: agentId,
+        success: !hasError,
+      };
+      if (hasError) {
+        result.error = errors[agentId];
+      }
+      return result;
+    });
+  } else {
+    return Object.entries(errors).map(([agentId, error]) => ({
+      id: agentId,
+      success: false,
+      error,
+    }));
+  }
 }
 
 export async function getAllAgentsByKuery(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -25,6 +25,7 @@ import {
   useGetAgentPolicies,
 } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../../../../components';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 interface Props {
   onClose: () => void;
@@ -38,29 +39,18 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 
-  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    isSingleAgent ? (agents[0] as Agent).policy_id : undefined
-  );
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
-  useEffect(() => {
-    if (!selectedAgentPolicyId && agentPolicies[0]) {
-      setSelectedAgentPolicyId(agentPolicies[0].id);
-    }
-  }, [agentPolicies, selectedAgentPolicyId]);
 
-  const policySelectOptions = useMemo(() => {
-    return agentPolicies
-      .filter((policy) => policy && !policy.is_managed)
-      .map((agentPolicy) => ({
-        value: agentPolicy.id,
-        text: agentPolicy.name,
-      }));
-  }, [agentPolicies]);
+  const agentPolicies = agentPoliciesRequest.data
+    ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
+    : [];
+
+  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
+    isSingleAgent ? (agents[0] as Agent).policy_id : agentPolicies[0]?.id ?? undefined
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function onSubmit() {
@@ -145,7 +135,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
             <EuiSelect
               fullWidth
               isLoading={agentPoliciesRequest.isLoading}
-              options={policySelectOptions}
+              options={agentPolicies.map((agentPolicy) => ({
+                value: agentPolicy.id,
+                text: agentPolicy.name,
+              }))}
               value={selectedAgentPolicyId}
               onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
             />

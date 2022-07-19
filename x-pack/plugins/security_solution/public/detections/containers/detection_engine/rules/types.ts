@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   risk_score_mapping,
   threat_query,
@@ -21,26 +22,38 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  SortOrder,
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
   outcome as savedObjectResolveOutcome,
-  SortOrder,
   author,
   building_block_type,
   license,
   rule_name_override,
+  data_view_id,
   timestamp_override,
+  timestamp_override_fallback_disabled,
+  timestamp_field,
+  event_category_override,
+  tiebreaker_field,
   threshold,
-  BulkAction,
-  BulkActionEditPayload,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../../common/detection_engine/schemas/common';
 
-import {
+import type {
   CreateRulesSchema,
   PatchRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
+
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -102,11 +115,14 @@ export const RuleSchema = t.intersection([
     name: t.string,
     max_signals: t.number,
     references: t.array(t.string),
+    related_integrations: RelatedIntegrationArray,
+    required_fields: RequiredFieldArray,
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
     severity,
     severity_mapping,
+    setup: SetupGuide,
     tags: t.array(t.string),
     type,
     to: t.string,
@@ -124,6 +140,7 @@ export const RuleSchema = t.intersection([
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
     index: t.array(t.string),
+    data_view_id,
     language: t.string,
     license,
     meta: MetaRule,
@@ -142,6 +159,10 @@ export const RuleSchema = t.intersection([
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
+    timestamp_override_fallback_disabled,
+    timestamp_field,
+    event_category_override,
+    tiebreaker_field,
     note: t.string,
     exceptions_list: listArray,
     uuid: t.string,
@@ -205,6 +226,7 @@ export interface FilterOptions {
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
+  excludeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {
@@ -224,6 +246,7 @@ export interface BulkActionProps<Action extends BulkAction> {
   query?: string;
   ids?: string[];
   edit?: BulkActionEditPayload[];
+  isDryRun?: boolean;
 }
 
 export interface BulkActionSummary {
@@ -241,6 +264,7 @@ export interface BulkActionResult {
 export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
+  err_code?: BulkActionsDryRunErrCode;
   rules: Array<{ id: string; name?: string }>;
 }
 
@@ -303,6 +327,7 @@ export interface ExceptionsImportError {
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
+  rules_count?: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
   exceptions_success?: boolean;
   exceptions_success_count?: number;

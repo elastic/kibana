@@ -66,6 +66,7 @@ const createAgentDoc = (
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
+  ...[...Array(15).keys()].map((_, index) => createAgentDoc(`agent-${index + 2}`, 'policy-3')),
 ];
 
 let docs: any[] = [];
@@ -116,6 +117,14 @@ describe('View agents', () => {
           monitoring_enabled: ['logs', 'metrics'],
           status: 'active',
         },
+        {
+          id: 'policy-4',
+          name: 'Agent policy 4',
+          description: '',
+          namespace: 'default',
+          monitoring_enabled: ['logs', 'metrics'],
+          status: 'active',
+        },
       ],
     });
   });
@@ -123,7 +132,7 @@ describe('View agents', () => {
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
       cy.visit('/app/fleet/agents');
-      cy.getBySel('agentList.queryInput').type('agent.id: agent-1{enter}');
+      cy.getBySel('agentList.queryInput').type('agent.id: "agent-1"{enter}');
       cy.getBySel('fleetAgentListTable');
       cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
@@ -135,7 +144,7 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
 
@@ -144,7 +153,7 @@ describe('View agents', () => {
 
       cy.getBySel('agentList.showUpgradeable').click();
       cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
       cy.getBySel('fleetAgentListTable').contains('agent-2');
     });
@@ -165,7 +174,7 @@ describe('View agents', () => {
 
       cy.getBySel('agentList.policyFilter').click();
 
-      cy.get('button').contains('Agent policy 3').click();
+      cy.get('button').contains('Agent policy 4').click();
 
       cy.getBySel('fleetAgentListTable').contains('No agents found');
     });
@@ -193,14 +202,14 @@ describe('View agents', () => {
     });
   });
   describe('Agent status filter', () => {
-    it('should filter on healthy (1 result)', () => {
+    it('should filter on healthy (16 result)', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel('agentList.statusFilter').click();
 
       cy.get('button').contains('Healthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
     it('should filter on unhealthy (1 result)', () => {
@@ -230,9 +239,29 @@ describe('View agents', () => {
       cy.get('button').contains('healthy').click();
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
       cy.getBySel('fleetAgentListTable').contains('agent-2');
+    });
+  });
+
+  describe('Bulk actions', () => {
+    it('should allow to bulk upgrade agents', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel('agentList.policyFilter').click();
+
+      cy.get('button').contains('Agent policy 3').click();
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 16);
+
+      cy.getBySel('checkboxSelectAll').click();
+      // Trigger a bulk upgrade
+      cy.getBySel('agentBulkActionsButton').click();
+      cy.get('button').contains('Upgrade 15 agents').click();
+      cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
+      // Cancel upgrade
+      cy.getBySel('abortUpgradeBtn').click();
+      cy.get('button').contains('Confirm').click();
     });
   });
 });

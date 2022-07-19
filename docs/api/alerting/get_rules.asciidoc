@@ -1,5 +1,5 @@
 [[get-rule-api]]
-=== Get rule API
+== Get rule API
 ++++
 <titleabbrev>Get rule</titleabbrev>
 ++++
@@ -7,35 +7,46 @@
 Retrieve a rule by ID.
 
 [[get-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/alerting/rule/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
+=== {api-prereq-title}
+
+You must have `read` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're seeking. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. To get rules associated
+with the *{stack-monitor-app}*, use the `monitoring_user` built-in role.
+
+For more details, refer to <<kibana-feature-privileges>>.
+
 [[get-rule-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the rule to retrieve.
+(Required, string) The identifier of the rule to retrieve.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
 [[get-rule-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
-    Indicates a successful call.
+Indicates a successful call.
 
 [[get-rule-api-example]]
-==== Example
+=== {api-examples-title}
 
 Retrieve the rule object with the ID `41893910-6bca-11eb-9e0d-85d233e3ee35`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
+GET api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
 --------------------------------------------------
 // KIBANA
 
@@ -69,7 +80,8 @@ The API returns the following:
   "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
   "execution_status": {
     "last_execution_date": "2021-02-10T17:55:14.262Z",
-    "status": "ok"
+    "status": "ok",
+    "last_duration": 359
   }
 }
 --------------------------------------------------

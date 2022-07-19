@@ -41,7 +41,7 @@ export class ProcessImpl implements Process {
   children: Process[];
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null;
+  searchMatched: number[] | null;
   orphans: Process[];
 
   constructor(id: string) {
@@ -306,7 +306,9 @@ export const useProcessTree = ({
     const newProcessedPages: ProcessEventsPage[] = [];
 
     data.forEach((page, i) => {
-      const processed = processedPages.find((p) => p.cursor === page.cursor);
+      const processed = processedPages.find(
+        (p) => p.cursor === page.cursor && p.events?.length === page.events?.length
+      );
 
       if (!processed) {
         const backwards = i < processedPages.length;

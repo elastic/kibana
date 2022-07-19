@@ -7,8 +7,8 @@
 
 import './share_to_space_form.scss';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -47,7 +47,7 @@ export const ShareToSpaceForm = (props: Props) => {
     onUpdate({ ...shareOptions, selectedSpaceIds });
 
   const createCopyCallout = showCreateCopyCallout ? (
-    <Fragment>
+    <EuiFlexItem grow={false}>
       <EuiCallOut
         size="s"
         title={
@@ -75,7 +75,7 @@ export const ShareToSpaceForm = (props: Props) => {
       </EuiCallOut>
 
       <EuiSpacer size="m" />
-    </Fragment>
+    </EuiFlexItem>
   ) : null;
 
   return (

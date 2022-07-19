@@ -83,7 +83,7 @@ const findTestUtils = (
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
                 ...(describeType === 'internal'
-                  ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
+                  ? { monitoring: match.monitoring, snooze_schedule: match.snooze_schedule }
                   : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
@@ -284,7 +284,7 @@ const findTestUtils = (
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
                 ...(describeType === 'internal'
-                  ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
+                  ? { monitoring: match.monitoring, snooze_schedule: match.snooze_schedule }
                   : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);

@@ -6,8 +6,8 @@
  */
 
 import { call, put } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
-import { IHttpFetchError } from '@kbn/core/public';
+import { PayloadAction } from '@reduxjs/toolkit';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -22,10 +22,10 @@ import { IHttpFetchError } from '@kbn/core/public';
  */
 export function fetchEffectFactory<T, R, S, F>(
   fetch: (request: T) => Promise<R>,
-  success: (response: R) => Action<S>,
-  fail: (error: IHttpFetchError) => Action<F>
+  success: (response: R) => PayloadAction<S>,
+  fail: (error: IHttpFetchError) => PayloadAction<F>
 ) {
-  return function* (action: Action<T>): Generator {
+  return function* (action: PayloadAction<T>): Generator {
     try {
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {

@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { SpanLinks } from '.';
-import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
@@ -31,6 +32,7 @@ export function getSpanLinksTabContent({
   return {
     id: 'span_links',
     'data-test-subj': 'spanLinksTab',
+    prepend: <TechnicalPreviewBadge icon="beaker" />,
     name: (
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {

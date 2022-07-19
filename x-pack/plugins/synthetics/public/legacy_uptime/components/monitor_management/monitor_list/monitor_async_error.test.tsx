@@ -7,7 +7,7 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-import { DEFAULT_THROTTLING } from '../../../../../common/runtime_types';
+import { DEFAULT_THROTTLING, LocationStatus } from '../../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { MonitorAsyncError } from './monitor_async_error';
@@ -24,6 +24,7 @@ describe('<MonitorAsyncError />', () => {
       throttling: DEFAULT_THROTTLING,
       enablement: null,
       list: {
+        absoluteTotal: 6,
         perPage: 5,
         page: 1,
         total: 6,
@@ -55,6 +56,7 @@ describe('<MonitorAsyncError />', () => {
           },
           url: '',
           isServiceManaged: true,
+          status: LocationStatus.GA,
         },
         {
           id: 'us_north',
@@ -65,6 +67,7 @@ describe('<MonitorAsyncError />', () => {
           },
           url: '',
           isServiceManaged: true,
+          status: LocationStatus.GA,
         },
       ],
       error: {

@@ -14,6 +14,10 @@ import {
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeDeps, ProcessTree } from '.';
+import { useDateFormat } from '../../hooks';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTree component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -35,6 +39,7 @@ describe('ProcessTree component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTree is mounted', () => {
@@ -106,7 +111,7 @@ describe('ProcessTree component', () => {
 
     it('When Verbose mode is ON, it should show all childrens', () => {
       renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
-      expect(renderResult.queryByText('cat')).toBeTruthy();
+      expect(renderResult.queryByRole('document', { name: '/home/vagrant cat' })).toBeTruthy();
     });
   });
 });

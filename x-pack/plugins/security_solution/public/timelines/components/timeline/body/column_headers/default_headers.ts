@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { ColumnHeaderType } from '../../../../store/timeline/model';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { ColumnHeaderType } from '../../../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
@@ -15,8 +15,9 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    type: 'number',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    esTypes: ['date'],
+    type: 'date',
   },
   {
     columnHeaderType: defaultColumnHeaderType,

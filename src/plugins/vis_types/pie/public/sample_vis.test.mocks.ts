@@ -46,6 +46,7 @@ export const samplePieVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       collections: {
         legendPositions: [
           {

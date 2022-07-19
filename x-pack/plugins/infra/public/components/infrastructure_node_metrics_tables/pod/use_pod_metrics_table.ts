@@ -5,41 +5,54 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  averageOfValues,
+  createMetricByFieldLookup,
+  makeUnpackMetric,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  useInfrastructureNodeMetrics,
+} from '../shared';
 
 type PodMetricsField =
   | 'kubernetes.pod.start_time'
-  | 'kubernetes.pod.cpu.usage.node.pct'
+  | 'kubernetes.pod.cpu.usage.limit.pct'
   | 'kubernetes.pod.memory.usage.bytes';
 
-const podMetricsMap: MetricsMap<PodMetricsField> = {
-  'kubernetes.pod.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.pod.start_time',
+const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.pod',
+    },
   },
-  'kubernetes.pod.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.cpu.usage.node.pct',
-  },
-  'kubernetes.pod.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.pod.memory.usage.bytes',
+  groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
+  metricsMap: {
+    'kubernetes.pod.start_time': {
+      aggregation: 'max',
+      field: 'kubernetes.pod.start_time',
+    },
+    'kubernetes.pod.cpu.usage.limit.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.cpu.usage.limit.pct',
+    },
+    'kubernetes.pod.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.pod.memory.usage.bytes',
+    },
   },
 };
 
-const { options: podMetricsOptions, metricByField } = metricsToApiOptions(
-  podMetricsMap,
-  'kubernetes.pod.name'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(podMetricsQueryConfig.metricsMap);
+const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface PodNodeMetricsRow {
+  id: string;
   name: string;
   uptime: number | null;
   averageCpuUsagePercent: number | null;
@@ -53,71 +66,116 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     direction: 'desc',
   });
 
-  const {
-    isLoading,
-    nodes: pods,
-    pageCount,
-  } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
+  const { options: podMetricsOptions } = useMemo(
+    () => metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
+  const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: podMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToPodNodeMetricsRow,
     sortState,
     currentPageIndex,
   });
 
   return {
-    timerange,
-    isLoading,
-    pods,
-    pageCount,
     currentPageIndex,
+    data,
+    isLoading,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 
 function seriesToPodNodeMetricsRow(series: MetricsExplorerSeries): PodNodeMetricsRow {
+  const [id, name] = series.keys ?? [];
   if (series.rows.length === 0) {
-    return {
-      name: series.id,
-      uptime: null,
-      averageCpuUsagePercent: null,
-      averageMemoryUsageMegabytes: null,
-    };
+    return rowWithoutMetrics(id, name);
   }
 
-  let uptime: number = 0;
-  let averageCpuUsagePercent: number = 0;
-  let averageMemoryUsagePercent: number = 0;
-  series.rows.forEach((row) => {
-    const metricValues = unpackMetrics(row);
-    uptime += metricValues.uptime ?? 0;
-    averageCpuUsagePercent += metricValues.averageCpuUsagePercent ?? 0;
-    averageMemoryUsagePercent += metricValues.averageMemoryUsageMegabytes ?? 0;
-  });
-
-  const bucketCount = series.rows.length;
-  const bytesPerMegabyte = 1000000;
   return {
-    name: series.id,
-    uptime: uptime / bucketCount,
-    averageCpuUsagePercent: averageCpuUsagePercent / bucketCount,
-    averageMemoryUsageMegabytes: Math.floor(
-      averageMemoryUsagePercent / bucketCount / bytesPerMegabyte
-    ),
+    id,
+    name,
+    ...calculateMetricAverages(series.rows),
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'name'> {
+function rowWithoutMetrics(id: string, name: string) {
   return {
-    uptime: row[metricByField['kubernetes.pod.start_time']] as number | null,
-    averageCpuUsagePercent: row[metricByField['kubernetes.pod.cpu.usage.node.pct']] as
-      | number
-      | null,
-    averageMemoryUsageMegabytes: row[metricByField['kubernetes.pod.memory.usage.bytes']] as
-      | number
-      | null,
+    id,
+    name,
+    uptime: null,
+    averageCpuUsagePercent: null,
+    averageMemoryUsageMegabytes: null,
+  };
+}
+
+function calculateMetricAverages(rows: MetricsExplorerRow[]) {
+  const { startTimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+    collectMetricValues(rows);
+
+  let uptime = null;
+  if (startTimeValues.length !== 0) {
+    const startTime = startTimeValues.at(-1);
+    uptime = Date.now() - startTime!;
+  }
+
+  let averageCpuUsagePercent = null;
+  if (averageCpuUsagePercentValues.length !== 0) {
+    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+  }
+
+  let averageMemoryUsageMegabytes = null;
+  if (averageMemoryUsageMegabytesValues.length !== 0) {
+    const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
+    const bytesPerMegabyte = 1000000;
+    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
+  }
+
+  return {
+    uptime,
+    averageCpuUsagePercent,
+    averageMemoryUsageMegabytes,
+  };
+}
+
+function collectMetricValues(rows: MetricsExplorerRow[]) {
+  const startTimeValues: number[] = [];
+  const averageCpuUsagePercentValues: number[] = [];
+  const averageMemoryUsageMegabytesValues: number[] = [];
+
+  rows.forEach((row) => {
+    const { startTime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+
+    if (startTime !== null) {
+      startTimeValues.push(startTime);
+    }
+
+    if (averageCpuUsagePercent !== null) {
+      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
+    }
+
+    if (averageMemoryUsageMegabytes !== null) {
+      averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
+    }
+  });
+
+  return {
+    startTimeValues,
+    averageCpuUsagePercentValues,
+    averageMemoryUsageMegabytesValues,
+  };
+}
+
+function unpackMetrics(
+  row: MetricsExplorerRow
+): Omit<PodNodeMetricsRow, 'id' | 'name' | 'uptime'> & { startTime: number | null } {
+  return {
+    startTime: unpackMetric(row, 'kubernetes.pod.start_time'),
+    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.pod.cpu.usage.limit.pct'),
+    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.pod.memory.usage.bytes'),
   };
 }
