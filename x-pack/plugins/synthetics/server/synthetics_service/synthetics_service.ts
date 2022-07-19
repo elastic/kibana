@@ -112,27 +112,30 @@ export class SyntheticsService {
       // if already installed, don't need to reinstall
       return;
     }
+    try {
+      if (!this.indexTemplateInstalling) {
+        this.indexTemplateInstalling = true;
 
-    if (!this.indexTemplateInstalling) {
-      this.indexTemplateInstalling = true;
-
-      return installSyntheticsIndexTemplates(this.server).then(
-        (result) => {
-          this.indexTemplateInstalling = false;
-          if (result.name === 'synthetics' && result.install_status === 'installed') {
-            this.logger.info('Installed synthetics index templates');
-            this.indexTemplateExists = true;
-          } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
-            this.logger.warn(new IndexTemplateInstallationError());
-            this.indexTemplateExists = false;
-          }
-        },
-        (e) => {
-          this.logger.error(e);
-          this.indexTemplateInstalling = false;
+        const installedPackage = await installSyntheticsIndexTemplates(this.server);
+        this.indexTemplateInstalling = false;
+        if (
+          installedPackage.name === 'synthetics' &&
+          installedPackage.install_status === 'installed'
+        ) {
+          this.logger.info('Installed synthetics index templates');
+          this.indexTemplateExists = true;
+        } else if (
+          installedPackage.name === 'synthetics' &&
+          installedPackage.install_status === 'install_failed'
+        ) {
           this.logger.warn(new IndexTemplateInstallationError());
+          this.indexTemplateExists = false;
         }
-      );
+      }
+    } catch (e) {
+      this.logger.error(e);
+      this.indexTemplateInstalling = false;
+      this.logger.warn(new IndexTemplateInstallationError());
     }
   }
 

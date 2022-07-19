@@ -10,6 +10,7 @@ import { SyntheticsConfig } from '../formatters/format_configs';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
+  ConfigKey,
   MonitorFields,
   PrivateLocation,
   SyntheticsMonitorWithId,
@@ -45,7 +46,7 @@ export class SyntheticsPrivateLocation {
 
     newPolicy.is_managed = true;
     newPolicy.policy_id = privateLocation.policyHostId;
-    newPolicy.name = getPolicyId(config, privateLocation);
+    newPolicy.name = config[ConfigKey.NAME] + '-' + privateLocation.name;
     newPolicy.output_id = '';
     newPolicy.namespace = 'default';
 
@@ -176,19 +177,17 @@ export class SyntheticsPrivateLocation {
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      if (monitorPrivateLocations.length > 0) {
-        for (const privateLocation of monitorPrivateLocations) {
-          const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
-          if (location) {
-            await this.server.fleet.packagePolicyService.delete(
-              soClient,
-              esClient,
-              [getPolicyId(config, location)],
-              {
-                force: true,
-              }
-            );
-          }
+      for (const privateLocation of monitorPrivateLocations) {
+        const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
+        if (location) {
+          await this.server.fleet.packagePolicyService.delete(
+            soClient,
+            esClient,
+            [getPolicyId(config, location)],
+            {
+              force: true,
+            }
+          );
         }
       }
     }
