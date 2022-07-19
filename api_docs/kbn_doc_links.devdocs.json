@@ -510,7 +510,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; }; }"
+              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; }; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false

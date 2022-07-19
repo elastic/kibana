@@ -6,11 +6,18 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLoadingContent,
+  EuiToolTip,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../hooks/endpoint/use_get_endpoint_details';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
-import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
 
 interface HeaderEndpointInfoProps {
@@ -60,13 +67,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
               anchorClassName="eui-textTruncate"
             >
               <EuiText size="s" data-test-subj="responderHeaderEndpointName">
-                <h6 className="eui-textTruncate">
-                  <FormattedMessage
-                    id="xpack.securitySolution.responder.header.endpointName"
-                    defaultMessage="ENDPOINT {name}"
-                    values={{ name: endpointDetails.metadata.host.name }}
-                  />
-                </h6>
+                <h6 className="eui-textTruncate">{endpointDetails.metadata.host.name}</h6>
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
@@ -81,6 +82,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
         <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
           <FormattedMessage
             id="xpack.securitySolution.responder.header.lastSeen"

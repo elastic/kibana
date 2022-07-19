@@ -41,11 +41,10 @@ import { ExecutionDurationChart } from '../../common/components/execution_durati
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import { RuleStatusPanelWithApi } from './rule_status_panel';
+import RuleStatusPanelWithApi from './rule_status_panel';
 
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
 const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
-
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
 type RuleProps = {

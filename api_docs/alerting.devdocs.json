@@ -43,7 +43,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ id: string; monitoring?: ",
+              "{ id: string; name: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -51,7 +51,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; name: string; tags: string[]; enabled: boolean; params: never; actions: ",
+              " | undefined; tags: string[]; enabled: boolean; params: never; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -831,6 +831,37 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.isRuleSnoozed",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleSnoozed",
+        "description": [],
+        "signature": [
+          "(rule: RuleSnoozeProps) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.isRuleSnoozed.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "RuleSnoozeProps"
+            ],
+            "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.parseDuration",
         "type": "Function",
         "tags": [],
@@ -1479,13 +1510,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "RulesClientApi"
             ],
@@ -1500,13 +1525,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -1525,13 +1544,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "PublicMethodsOf",
               "<",
@@ -1555,13 +1568,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -3044,7 +3051,7 @@
             "section": "def-common.RuleSnoozeSchedule",
             "text": "RuleSnoozeSchedule"
           },
-          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; updateSnoozedUntilTime: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; updateSnoozedUntilTime: ({ id }: { id: string; }) => Promise<void>; clearExpiredSnoozes: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
@@ -4374,7 +4381,7 @@
             "label": "freq",
             "description": [],
             "signature": [
-              "0 | 2 | 1 | 4 | 3 | 5 | 6 | undefined"
+              "0 | 2 | 1 | 6 | 4 | 3 | 5 | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
@@ -5313,6 +5320,19 @@
             ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.skipRecurrences",
+            "type": "Array",
+            "tags": [],
+            "label": "skipRecurrences",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -6018,7 +6038,7 @@
         "label": "RuleSnooze",
         "description": [],
         "signature": [
-          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; }[]"
+          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
         ],
         "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
         "deprecated": false,
@@ -6102,7 +6122,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ id: string; monitoring?: ",
+          "{ id: string; name: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6110,7 +6130,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; name: string; tags: string[]; enabled: boolean; params: Params; actions: ",
+          " | undefined; tags: string[]; enabled: boolean; params: Params; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",

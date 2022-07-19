@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleDetailsContextType } from '../rule_details_context';
+import type { RuleDetailsContextType } from '../rule_details_context';
 import React from 'react';
 
 export const useRuleDetailsContextMock = {

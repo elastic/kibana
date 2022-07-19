@@ -7,7 +7,13 @@
  */
 
 import React from 'react';
-import { Settings, TooltipType, Heatmap } from '@elastic/charts';
+import {
+  Settings,
+  TooltipType,
+  Heatmap,
+  GeometryValue,
+  XYChartSeriesIdentifier,
+} from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
@@ -19,6 +25,7 @@ import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -306,6 +313,72 @@ describe('HeatmapComponent', function () {
     const newProps = { ...wrapperProps, data: newData };
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
     expect(component.find(EmptyPlaceholder).length).toBe(1);
+  });
+
+  it('preformats non-primitive types in the data table before passing it to the chart and maps them back in the click handler', () => {
+    const component = shallowWithIntl(
+      <HeatmapComponent
+        {...wrapperProps}
+        formatFactory={(format) =>
+          format?.id === 'string'
+            ? ({ convert: (v: unknown) => String(v) } as unknown as FieldFormat)
+            : ({ convert: (v: unknown) => v } as unknown as FieldFormat)
+        }
+        data={{
+          ...data,
+          columns: [
+            { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
+            { id: 'col-1-2', name: 'Dest', meta: { type: 'string', params: { id: 'string' } } },
+            { id: 'col-2-3', name: 'Test', meta: { type: 'string', params: { id: 'string' } } },
+          ],
+          rows: [
+            ...data.rows,
+            { 'col-0-1': 148, 'col-1-2': { complex: 'object' }, 'col-2-3': { weird: 'object' } },
+          ],
+        }}
+      />
+    );
+    expect(component.find(Heatmap).prop('data')).toEqual([
+      ...data.rows,
+      { 'col-0-1': 148, 'col-1-2': '[object Object]', 'col-2-3': '[object Object]' },
+    ]);
+    // clicking the "object" row
+    component.find(Settings).first().prop('onElementClick')!([
+      [
+        {
+          datum: {
+            x: '[object Object]',
+            y: 'ES-Air',
+          },
+        } as unknown as GeometryValue,
+        {
+          specId: 'heatmap',
+          key: 'spec{heatmap}',
+        } as unknown as XYChartSeriesIdentifier,
+      ],
+    ]);
+    expect(wrapperProps.onClickValue).toHaveBeenCalledWith({
+      data: [expect.objectContaining({ row: 2 }), expect.anything()],
+    });
+
+    // clicking the "object" column
+    component.find(Settings).first().prop('onElementClick')!([
+      [
+        {
+          datum: {
+            x: 'ES-Air',
+            y: '[object Object]',
+          },
+        } as unknown as GeometryValue,
+        {
+          specId: 'heatmap',
+          key: 'spec{heatmap}',
+        } as unknown as XYChartSeriesIdentifier,
+      ],
+    ]);
+    expect(wrapperProps.onClickValue).toHaveBeenCalledWith({
+      data: [expect.anything(), expect.objectContaining({ row: 2 })],
+    });
   });
 
   it('calls filter callback', () => {
