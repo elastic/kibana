@@ -42,6 +42,11 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
         defaultMessage: 'Discover, extract, index, and sync of all your website content',
       }
     ),
+    icon: 'globe',
+    id: 'crawler',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
+      defaultMessage: 'Use the web crawler',
+    }),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
       defaultMessage: 'No development required',
     }),

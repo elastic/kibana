@@ -13,6 +13,7 @@ import { updateConnectorConfiguration } from '../../lib/connectors/update_connec
 import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
 
 import { RouteDependencies } from '../../plugin';
+import { ErrorCodes } from '../../types/error_codes';
 
 export function registerConnectorRoutes({ router }: RouteDependencies) {
   router.post(
@@ -30,6 +31,20 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         const body = await addConnector(client, request.body);
         return response.ok({ body });
       } catch (error) {
+        if (
+          (error as Error).message === ErrorCodes.CONNECTOR_DOCUMENT_ALREADY_EXISTS ||
+          (error as Error).message === ErrorCodes.INDEX_ALREADY_EXISTS
+        ) {
+          return response.customError({
+            body: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addConnector.connectorExistsError',
+              {
+                defaultMessage: 'Connector or index already exists',
+              }
+            ),
+            statusCode: 409,
+          });
+        }
         return response.customError({
           body: i18n.translate('xpack.enterpriseSearch.server.routes.addConnector.error', {
             defaultMessage: 'Error fetching data from Enterprise Search',

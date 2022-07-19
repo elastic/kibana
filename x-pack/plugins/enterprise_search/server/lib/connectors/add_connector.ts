@@ -10,23 +10,39 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
+import { ErrorCodes } from '../../types/error_codes';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-export const createConnectorsIndex = async (client: IScopedClusterClient): Promise<void> => {
-  const index = CONNECTORS_INDEX;
-  await client.asCurrentUser.indices.create({ index });
-};
+import { fetchConnectorByIndexName } from './fetch_connectors';
 
 const createConnector = async (
-  index: string,
   document: ConnectorDocument,
-  client: IScopedClusterClient
+  client: IScopedClusterClient,
+  deleteExisting: boolean
 ): Promise<{ id: string; index_name: string }> => {
+  const index = document.index_name;
+  const connector = await fetchConnectorByIndexName(client, index);
+  if (connector) {
+    if (deleteExisting) {
+      // Delete COnnector
+    } else {
+      throw new Error(ErrorCodes.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
+    }
+  }
+  const indexData = await client.asCurrentUser.indices.get({ index });
+  if (indexData[index]) {
+    if (deleteExisting) {
+      await client.asCurrentUser.indices.delete({ index });
+    } else {
+      throw new Error(ErrorCodes.INDEX_ALREADY_EXISTS);
+    }
+  }
   const result = await client.asCurrentUser.index({
     document,
-    index,
+    index: CONNECTORS_INDEX,
   });
   await client.asCurrentUser.indices.create({ index: document.index_name });
+  await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
 };
@@ -35,7 +51,6 @@ export const addConnector = async (
   client: IScopedClusterClient,
   input: { index_name: string }
 ): Promise<{ id: string; index_name: string }> => {
-  const index = CONNECTORS_INDEX;
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
@@ -50,13 +65,13 @@ export const addConnector = async (
     sync_status: null,
   };
   try {
-    return await createConnector(index, document, client);
+    return await createConnector(document, client);
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       // This means .ent-search-connectors index doesn't exist yet
       // So we first have to create it, and then try inserting the document again
       await setupConnectorsIndices(client.asCurrentUser);
-      return await createConnector(index, document, client);
+      return await createConnector(document, client);
     } else {
       throw error;
     }
