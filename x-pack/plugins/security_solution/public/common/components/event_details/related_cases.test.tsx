@@ -12,6 +12,7 @@ import { TestProviders } from '../../mock';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { RelatedCases } from './related_cases';
+import { noCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
@@ -42,9 +43,7 @@ const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27
 describe('Related Cases', () => {
   describe('When user does not have cases read permissions', () => {
     test('should not show related cases when user does not have permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        read: false,
-      });
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
       render(
         <TestProviders>
           <RelatedCases eventId={eventId} />
@@ -56,9 +55,7 @@ describe('Related Cases', () => {
   });
   describe('When user does have case read permissions', () => {
     beforeEach(() => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        read: true,
-      });
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
     });
 
     describe('When related cases are unable to be retrieved', () => {
