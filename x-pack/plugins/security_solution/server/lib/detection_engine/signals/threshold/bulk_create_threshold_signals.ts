@@ -87,9 +87,9 @@ const getTransformedHits = (
             : undefined,
           count: bucket.doc_count,
           from:
-            new Date(
-              (bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string
-            ) ?? from,
+            bucket.min_timestamp.value_as_string ? new Date(
+              bucket.min_timestamp.value_as_string
+            ) : from,
           terms: Object.entries(thresholdTerms).map(([key, val]) => ({ field: key, value: val })),
         },
       },
