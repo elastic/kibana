@@ -9,9 +9,7 @@
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 export const mockOsCollector = collectorMock.create();
-
 export const mockProcessCollector = collectorMock.create();
-
 export const mockServerCollector = collectorMock.create();
 
 jest.doMock('@kbn/core-metrics-collectors-server-internal', () => {

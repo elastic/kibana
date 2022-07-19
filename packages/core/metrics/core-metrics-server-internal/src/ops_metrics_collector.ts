@@ -11,9 +11,9 @@ import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,
+  type OpsMetricsCollectorOptions,
   ServerMetricsCollector,
 } from '@kbn/core-metrics-collectors-server-internal';
-import type { OpsMetricsCollectorOptions } from '@kbn/core-metrics-collectors-server-internal';
 
 export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly processCollector: ProcessMetricsCollector;

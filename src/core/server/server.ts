@@ -41,6 +41,7 @@ import {
   ElasticsearchService,
   config as elasticsearchConfig,
 } from '@kbn/core-elasticsearch-server-internal';
+import { MetricsService, opsConfig } from '@kbn/core-metrics-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { HttpResourcesService } from './http_resources';
@@ -48,7 +49,6 @@ import { RenderingService } from './rendering';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
-import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';

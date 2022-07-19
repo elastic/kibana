@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-metrics-collectors-server-mocks"
-PKG_REQUIRE_NAME = "@kbn/core-metrics-collectors-server-mocks"
+PKG_DIRNAME = "core-metrics-server-mocks"
+PKG_REQUIRE_NAME = "@kbn/core-metrics-server-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -27,16 +27,18 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/core/metrics/core-metrics-server",
-  "@npm//moment",
+  "@npm//rxjs",
+  "//packages/core/metrics/core-metrics-collectors-server-mocks",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//moment",
+  "@npm//rxjs",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/core/metrics/core-metrics-server:npm_module_types",
-  "//packages/core/metrics/core-metrics-collectors-server-internal:npm_module_types",
+  "//packages/core/metrics/core-metrics-server-internal:npm_module_types",
+  "//packages/core/metrics/core-metrics-collectors-server-mocks:npm_module_types",
 ]
 
 jsts_transpiler(

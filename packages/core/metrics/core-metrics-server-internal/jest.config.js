@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { collectorMock } from './collectors/mocks'; // public mock to be exported from `@kbn/core-metrics-collectors-server-mocks`
-
-export const mockOpsCollector = collectorMock.create();
-
-jest.doMock('./ops_metrics_collector', () => ({
-  OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
-}));
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/metrics/core-metrics-server-internal'],
+};

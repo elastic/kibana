@@ -12,12 +12,12 @@ import type {
   MetricsService,
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
-} from './metrics_service';
+} from '@kbn/core-metrics-server-internal'; // only importing types from here
 import {
   mocked as eventLoopDelaysMonitorMock,
   collectorMock,
 } from '@kbn/core-metrics-collectors-server-mocks';
-import { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 
 const createInternalSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {

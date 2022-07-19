@@ -52,7 +52,7 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
+import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 import {
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
@@ -405,7 +405,7 @@ export type {
 } from '@kbn/core-metrics-server';
 // TODO: not sure if the class export is needed, see https://github.com/elastic/kibana/issues/136051
 export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
-export type { IEventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
+// export type { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

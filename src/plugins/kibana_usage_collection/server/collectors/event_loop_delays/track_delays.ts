@@ -9,7 +9,7 @@
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
-import type { IEventLoopDelaysMonitor } from '@kbn/core/server';
+import type { EventLoopDelaysMonitor } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
@@ -27,7 +27,7 @@ export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   instanceUuid: string,
   stopMonitoringEventLoop$: Observable<void>,
-  eventLoopDelaysMonitor: IEventLoopDelaysMonitor,
+  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
     collectionStartDelay?: number;
     collectionInterval?: number;

@@ -22,6 +22,7 @@ import type { Logger } from '@kbn/logging';
 import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
+import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
 import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
@@ -38,7 +39,6 @@ import { coreUsageStatsType } from './core_usage_stats';
 import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { MetricsServiceSetup, OpsMetrics } from '..';
 import { CoreIncrementUsageCounter } from './types';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;

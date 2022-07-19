@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { OsMetricsCollector, ProcessMetricsCollector, ServerMetricsCollector } from './collectors';
-export type { OpsMetricsCollectorOptions } from './collectors';
-export { EventLoopDelaysMonitor } from './event_loop_delays';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/metrics/core-metrics-server-mocks'],
+};

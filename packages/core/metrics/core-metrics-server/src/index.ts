@@ -9,6 +9,7 @@
 export type {
   MetricsServiceSetup,
   MetricsServiceStart,
+  // IOpsConfigType,
   OpsMetrics,
   IntervalHistogram,
 } from './types';

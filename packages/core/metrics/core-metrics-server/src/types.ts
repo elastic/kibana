@@ -7,8 +7,8 @@
  */
 
 import { Observable } from 'rxjs';
+// import type { Duration } from 'moment';
 import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
-
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
  *
@@ -38,6 +38,20 @@ export interface MetricsServiceSetup {
  * @public
  */
 export type MetricsServiceStart = MetricsServiceSetup;
+
+// /**
+//  * @public
+//  * I created this type explicitly since it's exported for use external to the metrics service.
+//  */
+// export interface IOpsConfigType {
+//   readonly interval: Duration;
+//   readonly cGroupOverrides: Readonly<
+//     {
+//       cpuPath?: string;
+//       cpuAcctPath?: string;
+//     } & {}
+//   >;
+// }
 
 /**
  * Regroups metrics gathered by all the collectors.

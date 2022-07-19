@@ -8,7 +8,7 @@
 
 import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-import type { IntervalHistogram } from '@kbn/core-metrics-server';
+import type { IntervalHistogram, MetricsCollector } from '@kbn/core-metrics-server';
 
 /**
  * Nanosecond to milisecond conversion unit
@@ -21,11 +21,10 @@ export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 export function nsToMs(metric: number) {
   return metric / ONE_MILLISECOND_AS_NANOSECONDS;
 }
-/**
- * Internal contract for EventLoopDelaysMonitor
- * @internal
- */
-export type IEventLoopDelaysMonitor = EventLoopDelaysMonitor;
+
+// TODO: make this an interface: https://www.typescriptlang.org/docs/handbook/interfaces.html#class-types
+export type IEventLoopDelaysMonitor = typeof EventLoopDelaysMonitor;
+
 export class EventLoopDelaysMonitor {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;

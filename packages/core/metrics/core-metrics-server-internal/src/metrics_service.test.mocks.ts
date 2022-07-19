@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { OsMetricsCollector, ProcessMetricsCollector, ServerMetricsCollector } from './collectors';
-export type { OpsMetricsCollectorOptions } from './collectors';
-export { EventLoopDelaysMonitor } from './event_loop_delays';
+import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
+
+export const mockOpsCollector = collectorMock.create();
+
+jest.doMock('./ops_metrics_collector', () => ({
+  OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
+}));
