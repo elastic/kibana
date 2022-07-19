@@ -25,8 +25,6 @@ import {
   LIST_TRUSTED_APPLICATION,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
-import { getDefaultPolicyConfigAccordingToLicenseLevel } from '../../../common/license/policy_config';
-import { licenseService } from '../license';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -229,12 +227,7 @@ export const createUsageCounterLabel = (labelList: string[]): string => labelLis
  */
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
-  const defaultPolicyConfig = getDefaultPolicyConfigAccordingToLicenseLevel(
-    licenseService.getLicenseInformation()
-  );
-  return epPolicyConfig != null
-    ? {value: merge(defaultPolicyConfig, epPolicyConfig.value)}
-    : {value: defaultPolicyConfig};
+  return epPolicyConfig ? epPolicyConfig : null;
 };
 
 export const addDefaultAdvancedPolicySettings = (policyConfig: PolicyConfig) => {
