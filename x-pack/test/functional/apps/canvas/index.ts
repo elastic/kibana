@@ -6,7 +6,7 @@
  */
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
-export default function canvasApp({ loadTestFile, getService }): FtrProviderContext {
+export default async ({ loadTestFile, getService }: FtrProviderContext) => {
   const security = getService('security');
   const config = getService('config');
   let esNode: EsArchiver;
@@ -57,4 +57,4 @@ export default function canvasApp({ loadTestFile, getService }): FtrProviderCont
       }
     });
   });
-}
+};
