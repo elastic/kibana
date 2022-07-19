@@ -240,7 +240,7 @@ export const IncludeExcludeRow = ({
               defaultMessage: 'Include values',
             })}
             placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-              defaultMessage: 'Select values to include or create a new one',
+              defaultMessage: 'Select values or create a new one',
             })}
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.include}
@@ -315,7 +315,7 @@ export const IncludeExcludeRow = ({
               defaultMessage: 'Exclude values',
             })}
             placeholder={i18n.translate('xpack.lens.indexPattern.terms.includeExcludePlaceholder', {
-              defaultMessage: 'Select values to include or create a new one',
+              defaultMessage: 'Select values or create a new one',
             })}
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.exclude}
