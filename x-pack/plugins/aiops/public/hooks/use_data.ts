@@ -24,8 +24,8 @@ export const useData = (
   const { services } = useAiOpsKibana();
   const { uiSettings } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
-  const [activeBounds, setActiveBounds] = useState<
-    { earliest?: number; latest?: number } | undefined
+  const [fieldStatsRequest, setFieldStatsRequest] = useState<
+    DocumentStatsSearchStrategyParams | undefined
   >();
 
   const _timeBuckets = useMemo(() => {
@@ -42,42 +42,26 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
-    // Obtain the interval to use for date histogram aggregations
-    // (such as the document count chart). Aim for 75 bars.
-
-    if (!activeBounds || activeBounds.earliest === undefined || activeBounds.latest === undefined)
-      return;
-
-    const timefilterActiveBounds = timefilter.getActiveBounds();
-
-    if (!timefilterActiveBounds) return;
-
-    const BAR_TARGET = 75;
-    _timeBuckets.setInterval('auto');
-    _timeBuckets.setBounds(timefilterActiveBounds);
-    _timeBuckets.setBarTarget(BAR_TARGET);
-    const aggInterval = _timeBuckets.getInterval();
-
-    return {
-      earliest: activeBounds.earliest,
-      latest: activeBounds.latest,
-      intervalMs: aggInterval?.asMilliseconds(),
-      index: currentDataView.title,
-      timeFieldName: currentDataView.timeFieldName,
-      runtimeFieldMap: currentDataView.getRuntimeMappings(),
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    _timeBuckets,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    activeBounds === undefined,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(timefilter.getTime()),
-    currentDataView.id,
-    lastRefresh,
-  ]);
   const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+
+  function updateFieldStatsRequest() {
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+    if (timefilterActiveBounds !== undefined) {
+      const BAR_TARGET = 75;
+      _timeBuckets.setInterval('auto');
+      _timeBuckets.setBounds(timefilterActiveBounds);
+      _timeBuckets.setBarTarget(BAR_TARGET);
+      setFieldStatsRequest({
+        earliest: timefilterActiveBounds.min?.valueOf(),
+        latest: timefilterActiveBounds.max?.valueOf(),
+        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
+        index: currentDataView.title,
+        timeFieldName: currentDataView.timeFieldName,
+        runtimeFieldMap: currentDataView.getRuntimeMappings(),
+      });
+      setLastRefresh(Date.now());
+    }
+  }
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -91,14 +75,7 @@ export const useData = (
           refreshInterval: timefilter.getRefreshInterval(),
         });
       }
-      const timefilterActiveBounds = timefilter.getActiveBounds();
-      if (timefilterActiveBounds !== undefined) {
-        setActiveBounds({
-          earliest: timefilterActiveBounds.min?.valueOf(),
-          latest: timefilterActiveBounds.max?.valueOf(),
-        });
-      }
-      setLastRefresh(Date.now());
+      updateFieldStatsRequest();
     });
     return () => {
       timeUpdateSubscription.unsubscribe();
@@ -108,14 +85,8 @@ export const useData = (
   // This hook listens just for an initial update of the timefilter to be switched on.
   useEffect(() => {
     const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
-      const timefilterActiveBounds = timefilter.getActiveBounds();
-
-      if (timefilterActiveBounds && activeBounds === undefined) {
-        setActiveBounds({
-          earliest: timefilterActiveBounds.min?.valueOf(),
-          latest: timefilterActiveBounds.max?.valueOf(),
-        });
-        setLastRefresh(Date.now());
+      if (fieldStatsRequest === undefined) {
+        updateFieldStatsRequest();
       }
     });
     return () => {
@@ -126,7 +97,7 @@ export const useData = (
   return {
     docStats,
     timefilter,
-    earliest: activeBounds?.earliest,
-    latest: activeBounds?.latest,
+    earliest: fieldStatsRequest?.earliest,
+    latest: fieldStatsRequest?.latest,
   };
 };
