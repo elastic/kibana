@@ -54,6 +54,7 @@ import {
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
+import { IncludeExcludeRow } from './include_exclude_options';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -61,7 +62,6 @@ export function supportsRarityRanking(field?: IndexPatternField) {
     ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
   );
 }
-
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -320,6 +320,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       orderAgg,
       size: column.params.size,
       shardSize,
+      ...(column.params.include?.length && { include: column.params.include }),
+      ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+      includeIsRegex: Boolean(column.params.includeIsRegex),
+      excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -549,6 +553,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
+    activeData,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -1006,6 +1011,36 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
+              {(currentColumn.dataType === 'number' || currentColumn.dataType === 'string') &&
+                !currentColumn.params.secondaryFields?.length && (
+                  <>
+                    <IncludeExcludeRow
+                      include={currentColumn.params.include}
+                      exclude={currentColumn.params.exclude}
+                      includeIsRegex={Boolean(currentColumn.params.includeIsRegex)}
+                      excludeIsRegex={Boolean(currentColumn.params.excludeIsRegex)}
+                      tableRows={activeData?.[rest.layerId]?.rows}
+                      columnId={columnId}
+                      isNumberField={Boolean(currentColumn.dataType === 'number')}
+                      updateParams={(operation, operationValue, regex, regexValue) =>
+                        paramEditorUpdater({
+                          ...layer,
+                          columns: {
+                            ...layer.columns,
+                            [columnId]: {
+                              ...currentColumn,
+                              params: {
+                                ...currentColumn.params,
+                                [operation]: operationValue,
+                                [regex]: regexValue,
+                              },
+                            },
+                          } as Record<string, TermsIndexPatternColumn>,
+                        })
+                      }
+                    />
+                  </>
+                )}
             </EuiAccordion>
           </>
         )}
