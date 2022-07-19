@@ -51,7 +51,7 @@ const filterSupportFilesFromCoverage = (totalCoverage: any) => {
   const supportFile = Cypress.config('supportFile');
 
   /** @type {string} Cypress run-time config has the support folder string */
-    // @ts-ignore
+  // @ts-ignore
   const supportFolder = Cypress.config('supportFolder');
 
   const isSupportFile = (filename: string) => filename === supportFile;
