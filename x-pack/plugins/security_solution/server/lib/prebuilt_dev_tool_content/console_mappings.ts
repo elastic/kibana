@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// When creating a new *.console, add it here and put a random uuid as its reference
-export const mappings = {
-  '61c3927a-e933-4404-b986-188680950a95': 'enable_host_risk_score.console',
+export const consoleMappings = {
+  enable_host_risk_score: 'enable_host_risk_score.console',
 };

@@ -14,7 +14,7 @@ import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core
 import { DEV_TOOL_CONTENT } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { mappings } from '../mappings';
+import { consoleMappings } from '../console_mappings';
 
 const getReadables = (dataPath: string): Promise<string> =>
   new Promise((resolved, reject) => {
@@ -59,7 +59,7 @@ const buildConsoleResponse = (response: KibanaResponseFactory) =>
 
 const ReadConsoleRequestSchema = {
   params: schema.object({
-    console_id: schema.string(),
+    console_id: schema.oneOf([schema.literal('enable_host_risk_score')]),
   }),
 };
 
@@ -80,13 +80,13 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
         const securitySolution = await context.securitySolution;
         const spaceId = securitySolution.getSpaceId();
 
-        const fileName = mappings[consoleId] ?? null;
+        const fileName = consoleMappings[consoleId] ?? null;
 
         if (!fileName) {
           return siemResponse.error({ statusCode: 500, body: 'No such file or directory' });
         }
 
-        const filePath = '../';
+        const filePath = '../console_templates';
         const dir = resolve(join(__dirname, filePath));
 
         const dataPath = path.join(dir, fileName);

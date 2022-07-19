@@ -24,7 +24,7 @@ const DETECTION_ENGINE_DOC_LINK =
 const emptyList: LinkPanelListItem[] = [];
 
 export const RiskyHostsDisabledModuleComponent = () => {
-  const hostRiskScoreConsoleId = '61c3927a-e933-4404-b986-188680950a95';
+  const hostRiskScoreConsoleId = 'enable_host_risk_score';
   const loadFromUrl = useMemo(() => {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;

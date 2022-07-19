@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core/types';
 import type { LinkPanelListItem } from '../link_panel';
 import { InnerLinkPanel, LinkPanel } from '../link_panel';
 import type { LinkPanelViewProps } from '../link_panel/types';
@@ -92,9 +93,10 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   } = useKibana();
 
   const onImportDashboardSuccessCallback = useCallback(
-    (response) => {
+    (response: Array<SavedObject<SavedObjectAttributes>>) => {
       const targetDashboard = response.find(
-        (obj) => obj.type === 'dashboard' && obj.attributes.title === 'Current Risk Score for Hosts'
+        (obj) =>
+          obj.type === 'dashboard' && obj?.attributes?.title === 'Current Risk Score for Hosts'
       );
 
       const fetchDashboardUrl = async (targetDashboardId: string | null | undefined) => {
