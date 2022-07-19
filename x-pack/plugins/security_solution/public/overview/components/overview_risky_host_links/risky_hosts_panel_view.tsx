@@ -101,7 +101,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
 
       const fetchDashboardUrl = async (targetDashboardId: string | null | undefined) => {
         if (to && from && targetDashboardId) {
-          const targetUrl = await dashboard?.locator?.getUrl({
+          const targetUrl = dashboard?.locator?.getRedirectUrl({
             dashboardId: targetDashboardId,
             timeRange: {
               to,

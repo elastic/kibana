@@ -1,3 +1,4 @@
+# Click the run button of each step to enable the module
 # Upload scripts
 # Script to assign risk level based on risk score
 PUT _scripts/ml_hostriskscore_levels_script
@@ -8,7 +9,7 @@ PUT _scripts/ml_hostriskscore_levels_script
   }
 }
 
-# Map script for the Host Risk Score transform 
+# Map script for the Host Risk Score transform
 PUT _scripts/ml_hostriskscore_map_script
 {
   "script": {
@@ -17,7 +18,7 @@ PUT _scripts/ml_hostriskscore_map_script
   }
 }
 
-# Reduce script for the Host Risk Score transform 
+# Reduce script for the Host Risk Score transform
 PUT _scripts/ml_hostriskscore_reduce_script
 {
   "script": {
