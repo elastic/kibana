@@ -2,7 +2,6 @@ plugins:
   - stylelint-scss
 rules:
   color-no-invalid-hex: true
-  function-calc-no-invalid: true
   string-no-newline: true
   unit-no-unknown: true
   property-no-unknown:
