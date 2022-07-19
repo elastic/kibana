@@ -18,6 +18,7 @@ import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/sa
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useQueryData } from './hooks/query_data/use_query_data';
+import { useDataAccessStateMachine } from './hooks/query_data/use_state_machine';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -44,6 +45,10 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
     },
     [usedHistory]
   );
+
+  const dataAccessService = useDataAccessStateMachine({
+    timefilter: data.query.timefilter.timefilter,
+  });
 
   // TODO: We will want to rewrite the bulk of the query fetching logic in useDiscoverState > useSavedSearch (which returns data$)
   /**
