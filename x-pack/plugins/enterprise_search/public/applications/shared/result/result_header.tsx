@@ -1,4 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useState } from 'react';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -11,18 +19,19 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
+
 import { ResultActions } from './result_actions';
 import { ActionProps } from './types';
 import { MetaDataProps } from './types';
 
 interface Props {
-  title: string;
-  metaData: MetaDataProps;
   actions: ActionProps[];
+  metaData: MetaDataProps;
+  title: string;
 }
 
 interface TermDef {
-  label: string | number
+  label: string | number;
 }
 
 const Term: React.FC<TermDef> = ({ label }) => (
@@ -31,23 +40,18 @@ const Term: React.FC<TermDef> = ({ label }) => (
       <EuiTextColor color="subdued">{label}:</EuiTextColor>
     </strong>
   </EuiFlexItem>
-)
+);
 
 const Definition: React.FC<TermDef> = ({ label }) => (
   <EuiFlexItem grow={false}>
     <EuiTextColor color="subdued">{label}</EuiTextColor>
   </EuiFlexItem>
-)
+);
 
-export const ResultHeader: React.FC<Props> = ({
-  title,
-  actions,
-  metaData,
-}) => {
+export const ResultHeader: React.FC<Props> = ({ title, actions, metaData }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
   const closePopover = () => setPopoverIsOpen(false);
-
 
   const metaDataIcon = (
     <EuiButtonIcon
@@ -57,14 +61,10 @@ export const ResultHeader: React.FC<Props> = ({
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
     />
-  )
+  );
 
   const popover = (
-    <EuiPopover
-      button={metaDataIcon}
-      isOpen={popoverIsOpen}
-      closePopover={closePopover}
-    >
+    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>Document metadata</EuiPopoverTitle>
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
         <EuiFlexItem>
@@ -93,34 +93,29 @@ export const ResultHeader: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiPopoverFooter>
-        <EuiButton
-          iconType="trash"
-          color="danger"
-          size="s"
-          onClick={closePopover}
-          fullWidth>
+        <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
           Delete document
         </EuiButton>
       </EuiPopoverFooter>
     </EuiPopover>
-  )
+  );
   return (
     <div className="resultHeader">
       <EuiText size="s">
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiLink><strong>{title}</strong></EuiLink>
+            <EuiLink>
+              <strong>{title}</strong>
+            </EuiLink>
           </EuiFlexItem>
           {actions.length >= 1 && (
             <EuiFlexItem grow={false}>
               <ResultActions actions={actions} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            {popover}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{popover}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiText>
     </div>
-  )
-}
+  );
+};

@@ -1,4 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 import React from 'react';
+
 import { ResultField } from './result_field';
 import { ResultFieldProps } from './types';
 
@@ -6,9 +13,7 @@ interface Props {
   fields: ResultFieldProps[];
 }
 
-export const ResultFields: React.FC<Props> = ({
-  fields
-}) => {
+export const ResultFields: React.FC<Props> = ({ fields }) => {
   return (
     <div className="resultFieldList">
       {fields.map((field) => (
@@ -19,5 +24,5 @@ export const ResultFields: React.FC<Props> = ({
         />
       ))}
     </div>
-  )
-}
+  );
+};

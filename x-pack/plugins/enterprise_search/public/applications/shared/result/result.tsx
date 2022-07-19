@@ -1,18 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+
+import {
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+} from '@elastic/eui';
+
 // @ts-ignore
 import { htmlIdGenerator } from '@elastic/eui/lib/services';
 
-import { ActionProps, MetaDataProps, ResultFieldProps } from './types';
-import { ResultHeader } from './result_header';
 import { ResultFields } from './result_fields';
+import { ResultHeader } from './result_header';
+
+import { ActionProps, MetaDataProps, ResultFieldProps } from './types';
 
 interface ResultProps {
   actions: ActionProps[];
-  metaData: MetaDataProps;
   fields: ResultFieldProps[];
   isCheckable?: boolean;
   isDraggable?: boolean;
+  metaData: MetaDataProps;
 }
 
 export const Result: React.FC<ResultProps> = ({
@@ -28,13 +45,11 @@ export const Result: React.FC<ResultProps> = ({
 
   const toolTipContent = (
     <>
-      {fields.length <= 3 ? (
-        'All fields are visible'
-      ) : (
-        `Show ${fields.length - 3} ${isExpanded ? 'fewer' : 'more'} fields`
-      )}
+      {fields.length <= 3
+        ? 'All fields are visible'
+        : `Show ${fields.length - 3} ${isExpanded ? 'fewer' : 'more'} fields`}
     </>
-  )
+  );
 
   return (
     <EuiPanel hasBorder paddingSize="none" className={`${isChecked && 'result__selected'}`}>
@@ -50,7 +65,7 @@ export const Result: React.FC<ResultProps> = ({
                 />
               ) : (
                 <div className="resultCheckDragColumn__emptySpace" />
-                )}
+              )}
               {isDraggable ? (
                 <EuiButtonIcon
                   iconType="grab"
@@ -79,18 +94,17 @@ export const Result: React.FC<ResultProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div className="resultExpandColumn">
-            <EuiToolTip
-              position="left"
-              content={toolTipContent}>
+            <EuiToolTip position="left" content={toolTipContent}>
               <EuiButtonIcon
                 disabled={fields.length <= 3}
                 iconType={isExpanded ? 'fold' : 'unfold'}
                 color="text"
-                onClick={() => setIsExpanded(!isExpanded)}/>
+                onClick={() => setIsExpanded(!isExpanded)}
+              />
             </EuiToolTip>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
-  )
-}
+  );
+};

@@ -1,11 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-} from '@elastic/eui';
+
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import { ActionProps } from './types';
 
@@ -20,14 +22,16 @@ interface Props {
 const LinkAction: React.FC<SingleAction> = ({ action }) => (
   <EuiButtonEmpty
     className="resultActionButton"
-    flush="both" style={{ fontWeight: 700 }}
+    flush="both"
+    style={{ fontWeight: 700 }}
     size="xs"
     // @ts-ignore
     color={action.color || 'primary'}
-    iconType={action.iconType}>
+    iconType={action.iconType}
+  >
     {action.label}
   </EuiButtonEmpty>
-)
+);
 
 // Maybe allow users to pass hrefs as well as an onClick and have the dom render either a button or a link
 const TextAction: React.FC<SingleAction> = ({ action }) => (
@@ -38,29 +42,21 @@ const TextAction: React.FC<SingleAction> = ({ action }) => (
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color={action.color || 'default' }>
-        <strong>
-          {action.label}
-        </strong>
+      <EuiText size="xs" color={action.color || 'default'}>
+        <strong>{action.label}</strong>
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-)
+);
 
-export const ResultActions: React.FC<Props> = ({
-  actions
-}) => {
+export const ResultActions: React.FC<Props> = ({ actions }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       {actions.map((action: ActionProps) => (
         <EuiFlexItem grow={false}>
-          {action.onClick ? (
-            <LinkAction action={action} />
-          ) : (
-            <TextAction action={action} />
-          )}
+          {action.onClick ? <LinkAction action={action} /> : <TextAction action={action} />}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
-  )
-}
+  );
+};
