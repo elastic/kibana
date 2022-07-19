@@ -446,17 +446,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasShadow={false} hasBorder>
-                {overallStats?.totalCount !== undefined && (
-                  <EuiFlexItem grow={true}>
-                    <DocumentCountContent
-                      documentCountStats={documentCountStats}
-                      totalCount={overallStats.totalCount}
-                      setSamplingProbability={setSamplingProbability}
-                      samplingProbability={probability}
-                      loading={overallStatsProgress.loaded < 100}
-                    />
-                  </EuiFlexItem>
-                )}
                 <SearchPanel
                   dataView={currentDataView}
                   searchString={searchString}
@@ -474,6 +463,21 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   showEmptyFields={showEmptyFields}
                   onAddFilter={onAddFilter}
                 />
+
+                {overallStats?.totalCount !== undefined && (
+                  <>
+                    <EuiSpacer size={'m'} />
+                    <EuiFlexItem grow={true}>
+                      <DocumentCountContent
+                        documentCountStats={documentCountStats}
+                        totalCount={overallStats.totalCount}
+                        setSamplingProbability={setSamplingProbability}
+                        samplingProbability={probability}
+                        loading={overallStatsProgress.loaded < 100}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
                 <EuiSpacer size={'m'} />
                 <FieldCountPanel
                   showEmptyFields={showEmptyFields}
