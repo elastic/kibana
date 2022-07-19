@@ -49,8 +49,8 @@ export class TriggersActionsUiExamplePlugin
 
     developerExamples.register({
       appId: 'triggersActionsUiExample',
-      title: 'Triggers Actions UI Shareable Components',
-      description: 'Sandbox for triggers actions UI shareable components',
+      title: 'Shared Reusable Alerting Components',
+      description: 'Sandbox for shared reusable alerting components (triggers actions UI shareable components)',
     });
   }
   public start() {}
