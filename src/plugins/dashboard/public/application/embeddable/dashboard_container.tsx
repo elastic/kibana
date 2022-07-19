@@ -166,7 +166,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDataLoaded(data: DashboardLoadedInfo) {
     reportMetricEvent(this.services.analytics, {
-      event_name: DASHBOARD_LOADED_EVENT,
+      eventName: DASHBOARD_LOADED_EVENT,
       duration: data.timeToDone,
       status: data.status,
       key1: 'time_to_data',

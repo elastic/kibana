@@ -7,7 +7,7 @@
  */
 
 export interface MetricEvent extends Record<string, any> {
-  event_name: string;
+  eventName: string;
   meta?: Record<string, any>;
 
   // Standardized fields
@@ -31,7 +31,7 @@ export interface MetricEvent extends Record<string, any> {
 }
 
 export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
-  event_name: {
+  eventName: {
     type: 'keyword',
     _meta: { description: 'Type of the event' },
   },

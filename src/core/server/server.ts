@@ -403,7 +403,7 @@ export class Server {
     const ups = this.uptimePerStep;
 
     reportMetricEvent(this.coreStart.analytics, {
-      event_name: KIBANA_STARTED_EVENT,
+      eventName: KIBANA_STARTED_EVENT,
       duration: ups.start!.end - ups.constructor!.start,
       key1: 'constructor-time',
       value1: ups.constructor!.end - ups.constructor!.start,
