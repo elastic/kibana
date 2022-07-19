@@ -77,16 +77,21 @@ export const fetchIndices = async (
   });
 
   // TODO: make multiple batched requests if indicesNames.length > SOMETHING
-  const { has_all_requested, index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
-    index: [{
-      names: indicesNames,
-      privileges: ['read', 'manage'],
-    }],
-  });
+  const { has_all_requested, index: indexPrivileges } =
+    await client.asCurrentUser.security.hasPrivileges({
+      index: [
+        {
+          names: indicesNames,
+          privileges: ['read', 'manage'],
+        },
+      ],
+    });
 
-  const accessibleIndexNames = has_all_requested ? indicesNames : indicesNames.filter((indexName) => (
-    indexPrivileges[indexName].read && indexPrivileges[indexName].manage
-  ));
+  const accessibleIndexNames = has_all_requested
+    ? indicesNames
+    : indicesNames.filter(
+        (indexName) => indexPrivileges[indexName].read && indexPrivileges[indexName].manage
+      );
 
   return accessibleIndexNames
     .map((indexName: string) => {
@@ -103,9 +108,11 @@ export const fetchIndices = async (
         indicesAndAliases.push({ name: alias, alias: true, ...engineData });
       });
       return indicesAndAliases;
-    }).filter(({ name }, index, array) => (
-      // make list of aliases unique since we add an alias per index above
-      // and aliases can point to multiple indices
-      array.findIndex((engineData) => engineData.name === name) === index
-    ));
+    })
+    .filter(
+      ({ name }, index, array) =>
+        // make list of aliases unique since we add an alias per index above
+        // and aliases can point to multiple indices
+        array.findIndex((engineData) => engineData.name === name) === index
+    );
 };

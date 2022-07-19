@@ -19,7 +19,7 @@ describe('fetchIndices lib function', () => {
       },
       security: {
         hasPrivileges: jest.fn(),
-      }
+      },
     },
     asInternalUser: {},
   };
@@ -50,7 +50,9 @@ describe('fetchIndices lib function', () => {
     },
   };
 
-  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
+  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+    has_all_requested: true,
+  }));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -97,10 +99,12 @@ describe('fetchIndices lib function', () => {
     });
 
     expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      index: [{
-        names: ['search-regular-index'],
-        privileges: ['read', 'manage'],
-      }],
+      index: [
+        {
+          names: ['search-regular-index'],
+          privileges: ['read', 'manage'],
+        },
+      ],
     });
   });
 
@@ -175,7 +179,9 @@ describe('fetchIndices lib function', () => {
   it('should return hidden indices without aliases if specified', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
-    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
+    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+      has_all_requested: true,
+    }));
 
     await expect(
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true)
