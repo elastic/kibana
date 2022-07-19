@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
-
 import {
   LogicMounter,
   mockHttpValues,
@@ -19,6 +17,8 @@ import {
   mockElasticsearchIndices,
   mockSearchIndexOptions,
 } from '../../__mocks__/engine_creation_logic.mock';
+
+import dedent from 'dedent';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -453,7 +453,7 @@ describe('EngineCreationLogic', () => {
       it('should be true if there is an error message', () => {
         mount({
           aliasRawName: 'alias-without-manage-privilege',
-          indices: mockElasticsearchIndices
+          indices: mockElasticsearchIndices,
         });
 
         expect(EngineCreationLogic.values.showAliasNameErrorMessages).toBe(true);
