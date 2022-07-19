@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
@@ -30,7 +30,7 @@ export const fetchDurationRanges = async ({
   environment: Environment;
   kuery: string;
   query: estypes.QueryDslQueryContainer;
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   searchAggregatedTransactions?: boolean;
 }): Promise<Array<{ key: number; doc_count: number }>> => {
   const { apmEventClient } = setup;

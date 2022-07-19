@@ -12,7 +12,7 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { fetchDurationRanges } from './fetch_duration_ranges';
@@ -35,7 +35,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
   const { apmEventClient } = setup;
 
   const chartType =
-    LATENCY_DISTRIBUTION_CHART_TYPE.FAILED_TRANSACTIONS_CORRELATIONS;
+    LatencyDistributionChartType.failedTransactionsCorrelations;
   const eventType = getEventType(chartType);
 
   const commonQuery = getCommonCorrelationsQuery({

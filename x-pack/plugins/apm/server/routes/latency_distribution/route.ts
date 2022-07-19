@@ -21,7 +21,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import {
   latencyDistributionChartTypeRt,
-  LATENCY_DISTRIBUTION_CHART_TYPE,
+  LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
 import { getDurationField } from '../correlations/utils';
 
@@ -68,8 +68,9 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       chartType,
     } = resources.params.body;
 
+    // only the trace samples distribution chart can use metrics data
     const searchAggregatedTransactions =
-      chartType === LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS
+      chartType === LatencyDistributionChartType.traceSamples
         ? await getSearchAggregatedTransactions({
             ...setup,
             kuery,
@@ -95,6 +96,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
               (fieldValuePair): QueryDslQueryContainer[] =>
                 termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),
+            // when using metrics data, ensure we filter by docs with the appropriate duration field
             ...(searchAggregatedTransactions
               ? [
                   {

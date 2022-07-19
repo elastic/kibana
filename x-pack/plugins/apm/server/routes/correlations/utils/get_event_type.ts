@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 const {
-  TRANSACTION_DETAILS,
-  LATENCY_CORRELATIONS,
-  FAILED_TRANSACTIONS_CORRELATIONS,
-  DEPENDENCY_LATENCY_DISTRIBUTION,
-} = LATENCY_DISTRIBUTION_CHART_TYPE;
+  traceSamples: TRANSACTION_DETAILS,
+  latencyCorrelations: LATENCY_CORRELATIONS,
+  failedTransactionsCorrelations: FAILED_TRANSACTIONS_CORRELATIONS,
+  dependencyLatencyDistribution: DEPENDENCY_LATENCY_DISTRIBUTION,
+} = LatencyDistributionChartType;
 
 export function getEventType(
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE,
+  chartType: LatencyDistributionChartType,
   searchAggregatedTransactions = false
 ): ProcessorEvent {
   switch (chartType) {

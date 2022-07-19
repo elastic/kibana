@@ -7,15 +7,15 @@
 
 import * as t from 'io-ts';
 
-export enum LATENCY_DISTRIBUTION_CHART_TYPE {
-  TRANSACTION_DETAILS = 'TRANSACTION_DETAILS',
-  LATENCY_CORRELATIONS = 'LATENCY_CORRELATIONS',
-  FAILED_TRANSACTIONS_CORRELATIONS = 'FAILED_TRANSACTIONS_CORRELATIONS',
-  DEPENDENCY_LATENCY_DISTRIBUTION = 'DEPENDENCY_LATENCY_DISTRIBUTION',
+export enum LatencyDistributionChartType {
+  traceSamples = 'traceSamples',
+  latencyCorrelations = 'latencyCorrelations',
+  failedTransactionsCorrelations = 'failedTransactionsCorrelations',
+  dependencyLatencyDistribution = 'dependencyLatencyDistribution',
 }
 export const latencyDistributionChartTypeRt = t.union([
-  t.literal(LATENCY_DISTRIBUTION_CHART_TYPE.TRANSACTION_DETAILS),
-  t.literal(LATENCY_DISTRIBUTION_CHART_TYPE.LATENCY_CORRELATIONS),
-  t.literal(LATENCY_DISTRIBUTION_CHART_TYPE.FAILED_TRANSACTIONS_CORRELATIONS),
-  t.literal(LATENCY_DISTRIBUTION_CHART_TYPE.DEPENDENCY_LATENCY_DISTRIBUTION),
+  t.literal(LatencyDistributionChartType.traceSamples),
+  t.literal(LatencyDistributionChartType.latencyCorrelations),
+  t.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
+  t.literal(LatencyDistributionChartType.dependencyLatencyDistribution),
 ]);

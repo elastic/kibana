@@ -18,7 +18,7 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
@@ -40,7 +40,7 @@ export async function fetchDurationCorrelationWithHistogram({
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
   fractions: number[];

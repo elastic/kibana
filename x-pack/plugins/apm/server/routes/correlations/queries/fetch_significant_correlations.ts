@@ -14,7 +14,7 @@ import type {
   FieldValuePair,
 } from '../../../../common/correlations/types';
 
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
@@ -41,7 +41,7 @@ export const fetchSignificantCorrelations = async ({
 }) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
-  const chartType = LATENCY_DISTRIBUTION_CHART_TYPE.LATENCY_CORRELATIONS;
+  const chartType = LatencyDistributionChartType.latencyCorrelations;
   const eventType = getEventType(chartType);
 
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
@@ -88,7 +88,7 @@ export const fetchSignificantCorrelations = async ({
       fieldValuePairs.map((fieldValuePair) =>
         fetchDurationCorrelationWithHistogram({
           setup,
-          eventType,
+          chartType,
           start,
           end,
           environment,

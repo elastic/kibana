@@ -9,7 +9,7 @@ import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { getDurationField, getEventType } from '../utils';
@@ -33,7 +33,7 @@ export const fetchDurationHistogramRangeSteps = async ({
   query,
   searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   setup: Setup;
   searchAggregatedTransactions?: boolean;
 }): Promise<number[]> => {

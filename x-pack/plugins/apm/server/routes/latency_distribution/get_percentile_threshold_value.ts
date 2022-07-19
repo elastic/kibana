@@ -6,7 +6,7 @@
  */
 
 import { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { Setup } from '../../lib/helpers/setup_request';
 import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
 
@@ -22,7 +22,7 @@ export async function getPercentileThresholdValue({
   searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   percentileThreshold: number;
   searchAggregatedTransactions?: boolean;
 }) {

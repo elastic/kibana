@@ -17,7 +17,7 @@ import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_
 
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type { OverallLatencyDistributionResponse } from './types';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 
 export async function getOverallLatencyDistribution({
   chartType,
@@ -30,7 +30,7 @@ export async function getOverallLatencyDistribution({
   percentileThreshold,
   searchAggregatedTransactions,
 }: {
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   setup: Setup;
   start: number;
   end: number;

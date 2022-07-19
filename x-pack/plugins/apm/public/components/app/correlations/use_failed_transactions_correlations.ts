@@ -23,7 +23,7 @@ import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -96,7 +96,7 @@ export function useFailedTransactionsCorrelations() {
                   ...fetchParams,
                   percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
                   chartType:
-                    LATENCY_DISTRIBUTION_CHART_TYPE.FAILED_TRANSACTIONS_CORRELATIONS,
+                    LatencyDistributionChartType.failedTransactionsCorrelations,
                 },
               },
             }
@@ -116,7 +116,7 @@ export function useFailedTransactionsCorrelations() {
                     },
                   ],
                   chartType:
-                    LATENCY_DISTRIBUTION_CHART_TYPE.FAILED_TRANSACTIONS_CORRELATIONS,
+                    LatencyDistributionChartType.failedTransactionsCorrelations,
                 },
               },
             }

@@ -7,7 +7,7 @@
 
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { getDurationField, getEventType } from '../utils';
@@ -23,7 +23,7 @@ export const fetchDurationPercentiles = async ({
   percents,
   searchAggregatedTransactions,
 }: CommonCorrelationsQueryParams & {
-  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
+  chartType: LatencyDistributionChartType;
   setup: Setup;
   percents?: number[];
   searchAggregatedTransactions?: boolean;
