@@ -208,6 +208,11 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
 
+        // if response null, likely network error happened and export rules haven't been received
+        if (!response) {
+          return;
+        }
+
         const details = await getExportedRulesDetails(response);
 
         // if there are failed exported rules notify users.

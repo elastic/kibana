@@ -28,7 +28,7 @@ import type { Rule } from '../../../containers/detection_engine/rules';
 import {
   executeRulesBulkAction,
   goToRuleEditPage,
-  downloadExportedRules,
+  bulkExportRules,
 } from '../../../pages/detection_engine/rules/all/actions';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
@@ -109,14 +109,12 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                const response = await executeRulesBulkAction({
+                await bulkExportRules({
                   action: BulkAction.export,
                   onSuccess: noop,
                   search: { ids: [rule.id] },
                   toasts,
                 });
-
-                await downloadExportedRules({ response, toasts, onSuccess: noop });
               }}
             >
               {i18nActions.EXPORT_RULE}
