@@ -9,7 +9,7 @@
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { MetricEvent, METRIC_EVENT_SCHEMA } from './schema';
 
-const METRIC_EVENT_TYPE = 'metric-event';
+const METRIC_EVENT_TYPE = 'metric';
 
 export function registerMetricEvent(analytics: AnalyticsClient) {
   analytics.registerEventType({

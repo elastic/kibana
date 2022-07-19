@@ -163,7 +163,7 @@ export class CoreSystem {
     });
 
     const timing = this.getLoadMarksInfo();
-    reportMetricEvent({
+    reportMetricEvent(analytics, {
       event_name: KIBANA_LOADED_EVENT,
       meta: {
         kibana_version: this.coreContext.env.packageInfo.version,

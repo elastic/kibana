@@ -23,8 +23,7 @@ import {
 } from '@kbn/core-config-server-internal';
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { reportMetricEvent } from '@kbn/ebt-tools';
+import { registerMetricEvent, reportMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -236,7 +235,7 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
-    this.registerKibanaStartedEventType(analyticsSetup);
+    registerMetricEvent(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -401,9 +400,20 @@ export class Server {
 
     this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
 
-    reportMetricEvent({
+    const ups = this.uptimePerStep;
+
+    reportMetricEvent(this.coreStart.analytics, {
       event_name: KIBANA_STARTED_EVENT,
-      duration: this.uptimePerStep,
+      duration: ups.start!.end - ups.constructor!.start,
+      key1: 'constructor-time',
+      value1: ups.constructor!.end - ups.constructor!.start,
+      key2: 'preboot-time',
+      value2: ups.preboot!.end - ups.preboot!.start,
+      key3: 'setup-time',
+      value3: ups.setup!.end - ups.setup!.start,
+      key4: 'start-time',
+      value4: ups.start!.end - ups.start!.start,
+      // backwards compatibility
       uptime_per_step: this.uptimePerStep,
     });
 
@@ -465,93 +475,5 @@ export class Server {
       }
       this.configService.setSchema(descriptor.path, descriptor.schema);
     }
-  }
-
-  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
-    analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
-      eventType: KIBANA_STARTED_EVENT,
-      schema: {
-        uptime_per_step: {
-          properties: {
-            constructor: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor finished',
-                  },
-                },
-              },
-            },
-            preboot: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` finished',
-                  },
-                },
-              },
-            },
-            setup: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` finished',
-                  },
-                },
-              },
-            },
-            start: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` finished',
-                  },
-                },
-              },
-            },
-          },
-          _meta: {
-            description:
-              'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
-          },
-        },
-      },
-    });
   }
 }

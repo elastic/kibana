@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('kibana_started', () => {
     it('should emit the "kibana_started" event', async () => {
       const [event] = await ebtServerHelper.getEvents(1, { eventTypes: ['kibana_started'] });
-      expect(event.event_type).to.eql('kibana_started');
+      expect(event.event_type).to.eql('metric');
+      expect(event.properties.event_name).to.eql('kibana_started');
       const uptimePerStep = event.properties.uptime_per_step as Record<
         'constructor' | 'preboot' | 'setup' | 'start',
         Record<'start' | 'end', number>

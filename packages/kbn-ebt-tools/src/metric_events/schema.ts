@@ -36,7 +36,7 @@ export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
     _meta: { description: 'Type of the event' },
   },
   meta: {
-    type: 'passthrough',
+    type: 'pass_through',
     _meta: { description: 'Meta data that is searchable but not aggregatable', optional: true },
   },
   duration: {
