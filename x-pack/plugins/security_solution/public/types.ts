@@ -34,7 +34,6 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
   SavedObjectsTaggingApi,
@@ -88,7 +87,6 @@ export interface StartPlugins {
   osquery?: OsqueryPluginStart;
   security: SecurityPluginSetup;
   cloudSecurityPosture: CspClientPluginStart;
-  charts: ChartsPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

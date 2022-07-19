@@ -28,9 +28,7 @@
     "uiActions",
     "unifiedSearch",
     "kubernetesSecurity",
-    "cloudSecurityPosture",
-    "charts",
-    "discover"
+    "cloudSecurityPosture"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
