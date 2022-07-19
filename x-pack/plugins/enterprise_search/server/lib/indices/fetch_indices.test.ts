@@ -52,11 +52,14 @@ describe('fetchIndices lib function', () => {
   });
 
   it('should return regular index without aliases', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
+    mockClient.asCurrentUser.indices.get.mockImplementation(() => ({
+      ...regularIndexResponse,
+      hidden: { aliases: {}, settings: { index: { hidden: 'true' } } },
+    }));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
 
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
     ).resolves.toEqual([
       {
         health: 'green',
@@ -78,12 +81,50 @@ describe('fetchIndices lib function', () => {
     expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
       expand_wildcards: ['open'],
       features: ['aliases', 'settings'],
-      filter_path: ['*.aliases'],
+      filter_path: ['*.aliases', '*.settings.index.hidden'],
       index: 'search-*',
     });
 
     expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
       expand_wildcards: ['open'],
+      index: 'search-*',
+      metric: ['docs', 'store'],
+    });
+  });
+
+  it('should return hidden indices without aliases if specified', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
+    mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
+
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true)
+    ).resolves.toEqual([
+      {
+        health: 'green',
+        name: 'search-regular-index',
+        status: 'open',
+        alias: false,
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      },
+    ]);
+    expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
+      expand_wildcards: ['hidden', 'all'],
+      features: ['aliases', 'settings'],
+      filter_path: ['*.aliases', '*.settings.index.hidden'],
+      index: 'search-*',
+    });
+
+    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+      expand_wildcards: ['hidden', 'all'],
       index: 'search-*',
       metric: ['docs', 'store'],
     });
@@ -115,8 +156,24 @@ describe('fetchIndices lib function', () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => aliasedIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => aliasedStatsResponse);
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
     ).resolves.toEqual([
+      {
+        health: 'green',
+        name: 'index-without-prefix',
+        status: 'open',
+        alias: false,
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      },
       {
         health: 'green',
         name: 'search-aliased',
@@ -149,6 +206,22 @@ describe('fetchIndices lib function', () => {
         },
         uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
+      {
+        health: 'green',
+        name: 'second-index',
+        status: 'open',
+        alias: false,
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      },
     ]);
   });
 
@@ -164,7 +237,7 @@ describe('fetchIndices lib function', () => {
     // simulates when an index has been deleted after get indices call
     // deleted index won't be present in the indices stats call response
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
     ).resolves.toEqual([
       {
         health: undefined,
@@ -188,7 +261,7 @@ describe('fetchIndices lib function', () => {
   it('should return empty array when no index found', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => ({}));
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
     ).resolves.toEqual([]);
     expect(mockClient.asCurrentUser.indices.stats).not.toHaveBeenCalled();
   });
