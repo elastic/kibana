@@ -17,4 +17,3 @@ export const LOAD_CORE_CREATED = 'core_created';
 export const LOAD_SETUP_DONE = 'setup_done';
 export const LOAD_START_DONE = 'start_done';
 export const LOAD_FIRST_NAV = 'first_app_nav';
-

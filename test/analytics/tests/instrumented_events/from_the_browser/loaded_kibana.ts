@@ -21,10 +21,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should emit the legacy "Loaded Kibana" and new kibana-loaded events', async () => {
-      const events = await ebtUIHelper.getEvents(2, { eventTypes: [KIBANA_LOADED_EVENT, 'Loaded Kibana'] });
+      const events = await ebtUIHelper.getEvents(2, {
+        eventTypes: [KIBANA_LOADED_EVENT, 'Loaded Kibana'],
+      });
 
-      const legacyEvent = events.find(e => e.event_type !== KIBANA_LOADED_EVENT) as unknown as Event;
-      const event = events.find(e => e.event_type === KIBANA_LOADED_EVENT) as unknown as Event;
+      const legacyEvent = events.find(
+        (e) => e.event_type !== KIBANA_LOADED_EVENT
+      ) as unknown as Event;
+      const event = events.find((e) => e.event_type === KIBANA_LOADED_EVENT) as unknown as Event;
 
       // Legacy event
       expect(legacyEvent.event_type).to.eql('Loaded Kibana');

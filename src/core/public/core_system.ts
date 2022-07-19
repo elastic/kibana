@@ -156,12 +156,12 @@ export class CoreSystem {
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     /**
      * @deprecated here for backwards compatibility in Fullstory
-     **/ 
+     **/
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
       protocol: window.location.protocol,
     });
-    
+
     const timing = this.getLoadMarksInfo();
     analytics.reportEvent(KIBANA_LOADED_EVENT, {
       kibana_version: this.coreContext.env.packageInfo.version,
