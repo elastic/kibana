@@ -17,7 +17,7 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
@@ -145,7 +145,7 @@ export function isMetricsTabHidden({
     !agentName ||
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
-    isIosAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
     isJRubyAgent(agentName, runtimeName) ||
     isServerlessAgent(runtimeName)
   );
@@ -221,7 +221,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Dependencies',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'errors',
@@ -286,7 +286,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Logs',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'profiling',
