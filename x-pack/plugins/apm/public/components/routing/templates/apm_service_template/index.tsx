@@ -332,14 +332,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: (
-        <EuiFlexGroup direction="row" gutterSize="xs">
-          <EuiFlexItem>
-            <TechnicalPreviewBadge icon="beaker" />
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
             {i18n.translate('xpack.apm.home.alertsTabLabel', {
               defaultMessage: 'Alerts',
             })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TechnicalPreviewBadge icon="beaker" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
