@@ -35,6 +35,14 @@ export type LabelBorderSizeStylePropertyDescriptor = {
   options: LabelBorderSizeOptions;
 };
 
+export type LabelVisibilityStylePropertyDescriptor = {
+  options: {
+    useLayerVisibility: boolean;
+    minZoom: number;
+    maxZoom: number;
+  };
+};
+
 // Static/dynamic options
 
 export type FieldMetaOptions = {
@@ -200,6 +208,7 @@ export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_VISIBILITY]: LabelVisibilityStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;

@@ -16,6 +16,7 @@ import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+import { LabelVisibilityEditor } from './label/label_visibility_editor';
 // @ts-expect-error
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 // @ts-expect-error
@@ -301,6 +302,17 @@ export class VectorStyleEditor extends Component<Props, State> {
             this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]
               .options as LabelDynamicOptions
           }
+        />
+        <EuiSpacer size="m" />
+
+        <LabelVisibilityEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
+          handlePropertyChange={this.props.handlePropertyChange}
+          layerMinZoom={this.props.layer.getMinZoom()}
+          layerMaxZoom={this.props.layer.getMaxZoom()}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_VISIBILITY]}
+          
         />
         <EuiSpacer size="m" />
 

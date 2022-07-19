@@ -40,6 +40,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelVisibilityProperty } from './properties/label_visibility_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
@@ -177,6 +178,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _iconSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _iconOrientationProperty: StaticOrientationProperty | DynamicOrientationProperty;
   private readonly _labelStyleProperty: StaticTextProperty | DynamicTextProperty;
+  private readonly _LabelVisibilityProperty: LabelVisibilityProperty;
   private readonly _labelSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _labelColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
@@ -249,6 +251,10 @@ export class VectorStyle implements IVectorStyle {
     );
     this._labelStyleProperty = this._makeLabelProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
+    );
+    this._labelVisibilityProperty = new LabelVisibilityProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_VISIBILITY].options,
+      VECTOR_STYLES.LABEL_VISIBILITY,
     );
     this._labelSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
@@ -459,6 +465,7 @@ export class VectorStyle implements IVectorStyle {
       this._iconSizeStyleProperty,
       this._iconOrientationProperty,
       this._labelStyleProperty,
+      this._labelVisibilityProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
       this._labelBorderColorStyleProperty,
