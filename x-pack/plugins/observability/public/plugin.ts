@@ -300,7 +300,7 @@ export class Plugin
       },
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(coreStart, pluginsStart),
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable({ ...coreStart, ...pluginsStart }),
       useRulesLink: createUseRulesLink(),
     };
   }

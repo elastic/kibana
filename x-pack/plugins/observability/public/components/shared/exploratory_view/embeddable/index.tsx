@@ -28,11 +28,9 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 }
 
 export function getExploratoryViewEmbeddable(
-  coreStart: CoreStart,
-  pluginsStart: ObservabilityPublicPluginsStart
+  services: CoreStart & ObservabilityPublicPluginsStart
 ) {
-  const { lens, dataViews } = pluginsStart;
-  const { uiSettings } = coreStart;
+  const { lens, dataViews, uiSettings } = services;
 
   return (props: ExploratoryEmbeddableProps) => {
     if (!dataViews || !lens) {
@@ -84,7 +82,7 @@ export function getExploratoryViewEmbeddable(
     return (
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
-          <KibanaContextProvider services={{ ...coreStart, ...pluginsStart }}>
+          <KibanaContextProvider services={services}>
             <ExploratoryViewEmbeddable
               {...props}
               indexPatterns={indexPatterns}
