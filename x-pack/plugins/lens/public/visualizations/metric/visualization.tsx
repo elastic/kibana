@@ -14,7 +14,7 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } f
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { LayerType } from '../../../common';
-import { getSuggestions } from './metric_suggestions';
+import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import { layerTypes } from '../../../common';
@@ -40,7 +40,7 @@ export interface MetricVisualizationState {
   maxCols?: number;
 }
 
-const supportedDataTypes = new Set(['number']);
+export const supportedDataTypes = new Set(['number']);
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(params: CustomPaletteParams) {
@@ -137,7 +137,7 @@ const toExpression = (
   };
 };
 
-const metricLabel = i18n.translate('xpack.lens.metric.label', {
+export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
 const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
