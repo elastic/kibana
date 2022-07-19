@@ -28,7 +28,7 @@ import { DiscoverNoResults } from '../../../main/components/no_results';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
 import { DiscoverLayoutProps } from '../../../main/components/layout/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -82,11 +82,6 @@ export function LogExplorerLayout({
   } = useDiscoverServices();
   const { main$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-
-  const viewMode = useMemo(() => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, state.viewMode]);
 
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
@@ -242,7 +237,7 @@ export function LogExplorerLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
+              viewMode={VIEW_MODE.DOCUMENT_LEVEL}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
             />
