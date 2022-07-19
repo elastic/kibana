@@ -23,3 +23,9 @@ export const useFormatUrl = (page: SecurityPageName) => ({
   formatUrl: (path: string) => path,
   search: '',
 });
+
+// do not delete
+export const useGetSecuritySolutionUrl =
+  () =>
+  ({ path }: { path: string }) =>
+    path;

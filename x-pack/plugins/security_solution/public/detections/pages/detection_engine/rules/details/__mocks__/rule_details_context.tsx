@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { RuleDetailsContextType } from '../rule_details_context';
 
 export const useRuleDetailsContextMock = {
@@ -47,3 +48,18 @@ export const useRuleDetailsContextMock = {
     },
   }),
 };
+
+// do not delete
+export const useRuleDetailsContext = jest
+  .fn<jest.Mocked<RuleDetailsContextType>, []>()
+  .mockImplementation(useRuleDetailsContextMock.create);
+
+// do not delete
+export const useRuleDetailsContextOptional = jest
+  .fn<jest.Mocked<RuleDetailsContextType>, []>()
+  .mockImplementation(useRuleDetailsContextMock.create);
+
+// do not delete
+export const RulesTableContextProvider = jest
+  .fn()
+  .mockImplementation(({ children }: { children: React.ReactNode }) => <>{children}</>);
