@@ -31,6 +31,7 @@ import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-plugin/public';
+import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
   RumHome,
@@ -148,7 +149,9 @@ export function UXAppRoot({
               <InspectorContextProvider>
                 <UrlParamsProvider>
                   <EuiErrorBoundary>
-                    <UxApp />
+                    <CsmSharedContextProvider>
+                      <UxApp />
+                    </CsmSharedContextProvider>
                   </EuiErrorBoundary>
                   <UXActionMenu appMountParameters={appMountParameters} />
                 </UrlParamsProvider>
