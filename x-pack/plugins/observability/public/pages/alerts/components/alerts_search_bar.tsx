@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewBase, isOfQueryType } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -58,12 +58,11 @@ export function AlertsSearchBar({
         onQueryChange({ dateRange, query });
       }}
       onQuerySubmit={({ dateRange, query: nextQuery }) => {
-        const nQuery = nextQuery && isOfQueryType(nextQuery) ? nextQuery : undefined;
         onQueryChange({
           dateRange,
-          query: typeof nQuery?.query === 'string' ? nQuery.query : '',
+          query: typeof nextQuery?.query === 'string' ? nextQuery.query : '',
         });
-        setQueryLanguage((nQuery?.language ?? 'kuery') as QueryLanguageType);
+        setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
       }}
       displayStyle="inPage"
     />

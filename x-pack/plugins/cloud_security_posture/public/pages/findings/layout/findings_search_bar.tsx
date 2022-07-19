@@ -10,6 +10,7 @@ import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { Query } from '@kbn/es-query';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
 import type { CspClientPluginStartDeps } from '../../../types';
@@ -36,7 +37,7 @@ export const FindingsSearchBar = ({
 
   return (
     <div css={getContainerStyle(euiTheme)}>
-      <SearchBar
+      <SearchBar<Query>
         appName={PLUGIN_NAME}
         dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
         showFilterBar={true}

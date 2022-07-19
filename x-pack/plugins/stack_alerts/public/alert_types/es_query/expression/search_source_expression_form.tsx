@@ -8,7 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter, AggregateQuery, isOfQueryType } from '@kbn/es-query';
+import { Filter, isOfQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
@@ -32,7 +32,7 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
 interface LocalState {
   index: DataView;
   filter: Filter[];
-  query: Query | AggregateQuery;
+  query: Query;
   thresholdComparator: CommonAlertParams['thresholdComparator'];
   threshold: CommonAlertParams['threshold'];
   timeWindowSize: CommonAlertParams['timeWindowSize'];
@@ -51,7 +51,7 @@ type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => Lo
 
 interface SearchSourceParamsAction {
   type: 'index' | 'filter' | 'query';
-  payload: DataView | Filter[] | Query | AggregateQuery;
+  payload: DataView | Filter[] | Query;
 }
 
 interface SearchSourceExpressionFormProps {
@@ -87,7 +87,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     },
     {
       index: searchSource.getField('index')!,
-      query: searchSource.getField('query')!,
+      query: searchSource.getField('query')! as Query,
       filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
@@ -112,7 +112,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   }, []);
 
   const onChangeQuery = useCallback(
-    ({ query: newQuery }: { query?: Query | AggregateQuery }) => {
+    ({ query: newQuery }: { query?: Query }) => {
       if (!deepEqual(newQuery, query) && isOfQueryType(query)) {
         dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
       }
@@ -121,7 +121,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   // needs to change language mode only
-  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query | AggregateQuery }) => {
+  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query }) => {
     if (isOfQueryType(query) && isOfQueryType(newQuery) && newQuery?.language !== query.language) {
       dispatch({ type: 'query', payload: { ...query, language: newQuery?.language } as Query });
     }

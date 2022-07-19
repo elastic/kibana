@@ -6,13 +6,13 @@
  */
 import type { Criteria } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CspRuleMetadata } from '../../../common/schemas';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
 export interface FindingsBaseURLQuery {
-  query: Query | AggregateQuery;
+  query: Query;
   filters: Filter[];
 }
 

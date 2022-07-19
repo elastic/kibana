@@ -53,7 +53,7 @@ const SuperDatePicker = React.memo(
 const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
-export interface QueryBarTopRowProps {
+export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
   dataTestSubj?: string;
   dateRangeFrom?: string;
@@ -68,13 +68,13 @@ export interface QueryBarTopRowProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
-  onChange: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
+  onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
-  query?: Query | AggregateQuery;
+  query?: Query | QT;
   refreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
@@ -129,8 +129,14 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
   );
 });
 
+type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
+  props: QueryBarTopRowProps<QT>
+) => React.ReactElement;
+
 export const QueryBarTopRow = React.memo(
-  function QueryBarTopRow(props: QueryBarTopRowProps) {
+  function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
+    props: QueryBarTopRowProps<QT>
+  ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
@@ -162,7 +168,7 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
-    const queryRef = useRef<Query | AggregateQuery | undefined>(props.query);
+    const queryRef = useRef<Query | QT | undefined>(props.query);
     queryRef.current = props.query;
 
     const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -219,7 +225,7 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | AggregateQuery; dateRange: TimeRange }) => {
+      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
@@ -585,7 +591,7 @@ export const QueryBarTopRow = React.memo(
 
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
-);
+) as GenericQueryBarTopRow;
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export

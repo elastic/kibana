@@ -41,7 +41,7 @@ export interface SearchBarInjectedDeps {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
-export interface SearchBarOwnProps {
+export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
@@ -61,13 +61,13 @@ export interface SearchBarOwnProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
-  query?: Query | AggregateQuery;
+  query?: QT | Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
-  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
   onQuerySubmit?: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+    payload: { dateRange: TimeRange; query?: QT | Query },
     isUpdate?: boolean
   ) => void;
   // User has saved the current state as a saved query
@@ -98,19 +98,23 @@ export interface SearchBarOwnProps {
   isScreenshotMode?: boolean;
 }
 
-export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
+export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
+  SearchBarInjectedDeps;
 
-interface State {
+interface State<QT extends Query | AggregateQuery = Query> {
   isFiltersVisible: boolean;
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
-  query?: Query | AggregateQuery;
+  query?: QT | Query;
   dateRangeFrom: string;
   dateRangeTo: string;
 }
 
-class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
+class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
+  SearchBarProps<QT> & WithEuiThemeProps,
+  State<QT | Query>
+> {
   public static defaultProps = {
     showQueryBar: true,
     showFilterBar: true,
@@ -122,7 +126,10 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
 
-  public static getDerivedStateFromProps(nextProps: SearchBarProps, prevState: State) {
+  public static getDerivedStateFromProps(
+    nextProps: SearchBarProps,
+    prevState: State<AggregateQuery | Query>
+  ) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
     }
@@ -196,7 +203,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-  };
+  } as State<QT>;
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
@@ -298,10 +305,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     }
   };
 
-  public onQueryBarChange = (queryAndDateRange: {
-    dateRange: TimeRange;
-    query?: Query | AggregateQuery;
-  }) => {
+  public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: QT | Query }) => {
     this.setState({
       query: queryAndDateRange.query,
       dateRangeFrom: queryAndDateRange.dateRange.from,
@@ -338,7 +342,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     this.props.onFiltersUpdated?.([]);
     this.setState(
       {
-        query,
+        query: query as QT,
       },
       () => {
         if (this.props.onQuerySubmit) {
@@ -354,10 +358,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     );
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: {
-    dateRange?: TimeRange;
-    query?: Query | AggregateQuery;
-  }) => {
+  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query }) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -509,7 +510,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
     return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
-        <QueryBarTopRow
+        <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
@@ -590,4 +591,12 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default injectI18n(withEuiTheme(withKibana(SearchBarUI)));
+export default injectI18n(
+  withEuiTheme(
+    withKibana(
+      SearchBarUI as React.ComponentType<
+        SearchBarOwnProps<AggregateQuery | Query> & SearchBarInjectedDeps & WithEuiThemeProps<{}>
+      >
+    )
+  )
+);
