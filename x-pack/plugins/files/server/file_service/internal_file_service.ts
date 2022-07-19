@@ -11,10 +11,8 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { fromKueryExpression } from '@kbn/es-query';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
@@ -64,6 +62,7 @@ export interface FindFileArgs {
   kind?: string[];
   name?: string[];
   extension?: string[];
+  status?: string[];
   meta?: Record<string, string>;
   mimeType?: string[];
   page?: number;
@@ -188,48 +187,37 @@ export class InternalFileService {
     extension,
     mimeType,
     meta,
+    status,
     page,
     perPage,
   }: FindFileArgs): Promise<FileJSON[]> {
-    const toTermsQuery = (fieldName: string, values?: string[]): QueryDslQueryContainer[] =>
-      values
-        ? values.map((value) => ({
-            term: { [`${this.savedObjectType}.attributes.${fieldName}`]: value },
-          }))
-        : [];
+    const kueryExpressions: string[] = [];
 
-    const filter = [
-      ...toTermsQuery('file_kind', kind),
-      ...toTermsQuery('name', name),
-      ...toTermsQuery('extension', extension),
-      ...toTermsQuery('mimeType', mimeType),
-    ];
+    const addFilters = (fieldName: string, values: string[] = []): void => {
+      if (values.length) {
+        const orExpressions = values
+          .filter(Boolean)
+          .map(
+            (value) => `${this.savedObjectType}.attributes.${fieldName}: ${JSON.stringify(value)}`
+          )
+          .join(' OR ');
+        kueryExpressions.push(`(${orExpressions})`);
+      }
+    };
 
-    const metaFields = meta ? getFlattenedObject(meta) : {};
-    Object.entries(metaFields).forEach(([fieldName, value]) => {
-      const termsQueries = toTermsQuery(
-        `meta.${fieldName}`,
-        Array.isArray(value) ? value : [value]
-      );
-      termsQueries.forEach((query) => filter.push(query));
+    addFilters('FileKind', kind);
+    addFilters('name', name);
+    addFilters('Extension', extension);
+    addFilters('mime_type', mimeType);
+    addFilters('Status', status);
+
+    Object.entries(meta ? getFlattenedObject(meta) : {}).forEach(([fieldName, value]) => {
+      addFilters(`Meta.${fieldName}`, Array.isArray(value) ? value : [value]);
     });
 
     const result = await this.soClient.find<FileSavedObjectAttributes>({
       type: this.savedObjectType,
-      filter: filter.length
-        ? fromKueryExpression({
-            bool: {
-              must: filter,
-              filter: [
-                {
-                  term: { [`${this.savedObjectType}.attributes.status`]: 'READY' },
-                },
-                ...filter,
-              ],
-            },
-          })
-        : undefined,
-      defaultSearchOperator: 'AND',
+      filter: kueryExpressions ? kueryExpressions.join(' AND ') : undefined,
       page,
       perPage,
     });
