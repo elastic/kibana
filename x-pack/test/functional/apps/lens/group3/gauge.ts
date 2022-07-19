@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',
-        field: '__records__',
+        field: 'Records',
         isPreviousIncompatible: false,
         keepOpen: true,
       });
