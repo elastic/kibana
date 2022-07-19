@@ -1154,7 +1154,7 @@ export const tasks: TelemetryTask[] = [
     name: 'per_service',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices.transaction],
+        index: [indices.metric],
         body: {
           size: 0,
           timeout,
@@ -1181,30 +1181,30 @@ export const tasks: TelemetryTask[] = [
                         sort: '_score',
                         metrics: [
                           {
-                            field: 'agent.name',
+                            field: AGENT_NAME,
                           },
                           {
-                            field: 'agent.version',
+                            field: AGENT_VERSION,
                           },
                         ],
                       },
                     },
-                    cloud_region: {
+                    [CLOUD_REGION]: {
                       terms: {
                         field: CLOUD_REGION,
                         size: 5,
                       },
                     },
-                    cloud_provider: {
+                    [CLOUD_PROVIDER]: {
                       terms: {
                         field: CLOUD_PROVIDER,
                         size: 3,
                       },
                     },
-                    availability_zone: {
+                    [CLOUD_AVAILABILITY_ZONE]: {
                       terms: {
                         field: CLOUD_AVAILABILITY_ZONE,
-                        size: 3,
+                        size: 5,
                       },
                     },
                   },
@@ -1225,22 +1225,21 @@ export const tasks: TelemetryTask[] = [
           data[fullServiceName] = {
             cloud: {
               availability_zones:
-                serviceBucket.availability_zone?.buckets.map(
+                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               regions:
-                serviceBucket.cloud_region?.buckets.map(
+                serviceBucket[CLOUD_REGION]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               providers:
-                serviceBucket.cloud_provider?.buckets.map(
+                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
             },
             agent: {
-              name: serviceBucket.top_metrics?.top[0].metrics['agent.name'],
-              version:
-                serviceBucket.top_metrics?.top[0].metrics['agent.version'],
+              name: serviceBucket.top_metrics?.top[0].metrics[AGENT_NAME],
+              version: serviceBucket.top_metrics?.top[0].metrics[AGENT_VERSION],
             },
           };
         });
