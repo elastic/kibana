@@ -14,13 +14,13 @@ import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { EngineCreation } from '.';
-
 import { ConfigureAppSearchEngine } from './configure_app_search_engine';
 import { ConfigureElasticsearchEngine } from './configure_elasticsearch_engine';
 import { EngineCreationSteps } from './engine_creation_logic';
 import { ReviewElasticsearchEngine } from './review_elasticsearch_engine';
 import { SelectEngineType } from './select_engine_type';
+
+import { EngineCreation } from '.';
 
 const MOCK_ACTIONS = {
   setIngestionMethod: jest.fn(),

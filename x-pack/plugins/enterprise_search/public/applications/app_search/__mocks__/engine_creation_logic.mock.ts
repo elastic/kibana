@@ -183,7 +183,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
       label: 'Alias',
       icon: 'alert',
       toolTipTitle: 'Alias name is incompatible',
-      toolTipContent: `You'll have to create a new alias prefixed with "search-".`,
+      toolTipContent: 'You\'ll have to create a new alias prefixed with "search-".',
     },
     total: {
       docs: {
