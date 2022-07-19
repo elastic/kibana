@@ -61,7 +61,7 @@ export const formatIndicesToSelectable = (
         icon = 'alert';
         color = 'danger';
         toolTipTitle = 'Alias name is incompatible';
-        toolTipContent = `You'll have to create a new alias prefixed with "search-".`;
+        toolTipContent = 'You\'ll have to create a new alias prefixed with "search-".';
       } else {
         icon = 'iInCircle';
         color = 'warning';
