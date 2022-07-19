@@ -6,8 +6,7 @@
  */
 
 import React, { FC } from 'react';
-// @ts-expect-error
-import Style from 'style-it';
+import { css } from '@emotion/react';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
@@ -125,9 +124,9 @@ export const Workpad: FC<Props> = ({
               : {};
 
             // NOTE: the data-shared-* attributes here are used for reporting
-            return Style.it(
-              workpadCss || DEFAULT_WORKPAD_CSS,
+            return (
               <div
+                css={css(workpadCss || DEFAULT_WORKPAD_CSS)}
                 className={`canvasWorkpad ${isFullscreenProp ? 'fullscreen' : ''}`}
                 style={fsStyle}
                 data-shared-items-count={totalElementCount}

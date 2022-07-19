@@ -10,10 +10,6 @@ import { mount } from 'enzyme';
 import { ExportApp } from './export_app.component';
 import { CanvasWorkpad } from '../../../types';
 
-jest.mock('style-it', () => ({
-  it: (css: string, Component: any) => Component,
-}));
-
 jest.mock('../workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,
 }));
