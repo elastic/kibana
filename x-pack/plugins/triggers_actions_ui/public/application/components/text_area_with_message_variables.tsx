@@ -6,26 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiTextArea, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
-const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningTitle',
-  {
-    defaultMessage: 'Unable to share case comments',
-  }
-);
 
-const CREATE_COMMENT_WARNING_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningDesc',
-  {
-    defaultMessage:
-      'Configure the Create Comment URL and Create Comment Objects fields for the connector to share comments externally.',
-  }
-);
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
@@ -79,38 +65,23 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         />
       }
     >
-      <>
-        {isDisabled && paramsProperty === 'comments' && (
-          <>
-            <EuiCallOut
-              title={CREATE_COMMENT_WARNING_TITLE}
-              color="warning"
-              iconType="help"
-              size="s"
-            >
-              <p>{CREATE_COMMENT_WARNING_DESC}</p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <EuiTextArea
-          disabled={isDisabled}
-          fullWidth
-          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-          name={paramsProperty}
-          value={inputTargetValue || ''}
-          data-test-subj={`${paramsProperty}TextArea`}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-            setCurrentTextElement(e.target);
-          }}
-          onBlur={() => {
-            if (!inputTargetValue) {
-              editAction(paramsProperty, '', index);
-            }
-          }}
-        />
-      </>
+      <EuiTextArea
+        disabled={isDisabled}
+        fullWidth
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        name={paramsProperty}
+        value={inputTargetValue || ''}
+        data-test-subj={`${paramsProperty}TextArea`}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+        onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+          setCurrentTextElement(e.target);
+        }}
+        onBlur={() => {
+          if (!inputTargetValue) {
+            editAction(paramsProperty, '', index);
+          }
+        }}
+      />
     </EuiFormRow>
   );
 };

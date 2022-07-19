@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getObjectValueByKey, stringifyObjValues, throwIfResponseIsNotValidSpecial } from './utils';
+import {
+  getObjectValueByKey,
+  stringifyObjValues,
+  throwDescriptiveErrorIfResponseIsNotValid,
+} from './utils';
 
 const bigOlObject = {
   fields: {
@@ -49,7 +53,7 @@ describe('cases_webhook/utils', () => {
       expect(getObjectValueByKey<unknown>(bigOlObject, 'bad.key')).toEqual(undefined);
     });
   });
-  describe('throwIfResponseIsNotValidSpecial()', () => {
+  describe('throwDescriptiveErrorIfResponseIsNotValid()', () => {
     const res = {
       data: bigOlObject,
       headers: {},
@@ -62,7 +66,7 @@ describe('cases_webhook/utils', () => {
     };
     it('Throws error when missing content-type', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res,
           requiredAttributesToBeInTheResponse: ['field.simple'],
         })
@@ -72,7 +76,7 @@ describe('cases_webhook/utils', () => {
     });
     it('Throws error when content-type is not valid', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res: {
             ...res,
             headers: {
@@ -87,7 +91,7 @@ describe('cases_webhook/utils', () => {
     });
     it('Throws error when for bad data', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res: {
             ...res,
             headers: {
@@ -101,7 +105,7 @@ describe('cases_webhook/utils', () => {
     });
     it('Throws for bad key', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res: {
             ...res,
             headers: {
@@ -114,7 +118,7 @@ describe('cases_webhook/utils', () => {
     });
     it('Throws for multiple bad keys', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res: {
             ...res,
             headers: {
@@ -127,7 +131,7 @@ describe('cases_webhook/utils', () => {
     });
     it('Does not throw for valid key', () => {
       expect(() =>
-        throwIfResponseIsNotValidSpecial({
+        throwDescriptiveErrorIfResponseIsNotValid({
           res: {
             ...res,
             headers: {

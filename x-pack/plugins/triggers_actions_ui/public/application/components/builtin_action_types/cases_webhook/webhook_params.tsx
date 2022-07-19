@@ -7,11 +7,26 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+
+const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningTitle',
+  {
+    defaultMessage: 'Unable to share case comments',
+  }
+);
+
+const CREATE_COMMENT_WARNING_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningDesc',
+  {
+    defaultMessage:
+      'Configure the Create Comment URL and Create Comment Objects fields for the connector to share comments externally.',
+  }
+);
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhookActionParams>> = ({
   actionConnector,
@@ -158,20 +173,35 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           data-test-subj="tagsComboBox"
         />
       </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        isDisabled={!createCommentUrl || !createCommentJson}
-        editAction={editComment}
-        messageVariables={messageVariables}
-        paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.commentsTextAreaFieldLabel',
-          {
-            defaultMessage: 'Additional comments',
-          }
+      <>
+        <TextAreaWithMessageVariables
+          index={index}
+          isDisabled={!createCommentUrl || !createCommentJson}
+          editAction={editComment}
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhook.commentsTextAreaFieldLabel',
+            {
+              defaultMessage: 'Additional comments',
+            }
+          )}
+        />
+        {(!createCommentUrl || !createCommentJson) && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={CREATE_COMMENT_WARNING_TITLE}
+              color="warning"
+              iconType="help"
+              size="s"
+            >
+              <p>{CREATE_COMMENT_WARNING_DESC}</p>
+            </EuiCallOut>
+          </>
         )}
-      />
+      </>
     </>
   );
 };

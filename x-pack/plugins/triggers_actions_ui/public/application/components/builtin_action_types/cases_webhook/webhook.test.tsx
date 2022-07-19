@@ -32,22 +32,22 @@ describe('actionTypeRegistry.get() works', () => {
 describe('webhook action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
+      subActionParams: { incident: { title: 'some title {{test}}' }, comments: [] },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { 'subActionParams.incident.summary': [] },
+      errors: { 'subActionParams.incident.title': [] },
     });
   });
 
   test('params validation fails when body is not valid', async () => {
     const actionParams = {
-      subActionParams: { incident: { summary: '' }, comments: [] },
+      subActionParams: { incident: { title: '' }, comments: [] },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        'subActionParams.incident.summary': ['Summary is required.'],
+        'subActionParams.incident.title': ['Summary is required.'],
       },
     });
   });

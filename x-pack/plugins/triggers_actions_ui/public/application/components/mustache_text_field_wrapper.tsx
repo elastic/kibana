@@ -24,23 +24,17 @@ interface Props {
 export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const { value, onChange } = field;
+  const { value, setValue } = field;
 
   const editAction = useCallback(
     (property: string, newValue: string) => {
-      onChange({
-        // @ts-ignore we don't have to send the whole type
-        target: {
-          value: newValue,
-        },
-      });
+      setValue(newValue);
     },
-    [onChange]
+    [setValue]
   );
 
   return (
     <TextFieldWithMessageVariables
-      editAction={editAction}
       errors={errorMessage ? [errorMessage] : []}
       formRowProps={{
         describedByIds: idAria ? [idAria] : undefined,
@@ -55,6 +49,7 @@ export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest
       inputTargetValue={value}
       wrapField
       {...euiFieldProps}
+      editAction={editAction}
     />
   );
 };

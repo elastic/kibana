@@ -17,7 +17,7 @@ import { templateActionVariable } from '../../../lib';
 
 const errorCode: ERROR_CODE = 'ERR_FIELD_MISSING';
 
-const missingVariable = (path: string, variables: string[]) => ({
+const missingVariableErrorMessage = (path: string, variables: string[]) => ({
   code: errorCode,
   path,
   message: i18n.MISSING_VARIABLES(variables),
@@ -33,26 +33,13 @@ export const containsTitleAndDesc =
     const description = templateActionVariable(
       casesVars.find((actionVariable) => actionVariable.name === 'case.description')!
     );
-    let error;
-    if (typeof value === 'string') {
-      // will always be true, but this keeps my doesContain var contained!
-      if (!error) {
-        const { doesContain } = containsChars(title)(value);
-        if (!doesContain) {
-          error = missingVariable(path, [title]);
-        }
-      }
-      if (!error) {
-        const { doesContain } = containsChars(description)(value);
-        error = !doesContain ? missingVariable(path, [description]) : undefined;
-      } else {
-        const { doesContain } = containsChars(description)(value);
-        error = !doesContain
-          ? missingVariable(path, [title, description])
-          : missingVariable(path, [title]);
-      }
+    const varsWithErrors = [title, description].filter(
+      (variable) => !containsChars(variable)(value as string).doesContain
+    );
+
+    if (varsWithErrors.length > 0) {
+      return missingVariableErrorMessage(path, varsWithErrors);
     }
-    return error;
   };
 
 export const containsExternalId =
@@ -63,14 +50,9 @@ export const containsExternalId =
     const id = templateActionVariable(
       urlVars.find((actionVariable) => actionVariable.name === 'external.system.id')!
     );
-    let error;
-    if (typeof value === 'string') {
-      const { doesContain } = containsChars(id)(value);
-      if (!doesContain) {
-        error = missingVariable(path, [id]);
-      }
-    }
-    return error;
+    return containsChars(id)(value as string).doesContain
+      ? undefined
+      : missingVariableErrorMessage(path, [id]);
   };
 
 export const containsExternalIdOrTitle =
@@ -84,7 +66,7 @@ export const containsExternalIdOrTitle =
     const title = templateActionVariable(
       urlVarsExt.find((actionVariable) => actionVariable.name === 'external.system.title')!
     );
-    const error = missingVariable(path, [id, title]);
+    const error = missingVariableErrorMessage(path, [id, title]);
     if (typeof value === 'string') {
       const { doesContain: doesContainId } = containsChars(id)(value);
       const { doesContain: doesContainTitle } = containsChars(title)(value);
@@ -134,7 +116,7 @@ export const containsCommentsOrEmpty =
     if (typeof value === 'string') {
       const { doesContain } = containsChars(comment)(value);
       if (!doesContain) {
-        error = missingVariable(path, [comment]);
+        error = missingVariableErrorMessage(path, [comment]);
       }
     }
     return error;

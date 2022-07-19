@@ -35,11 +35,10 @@ export const getObjectValueByKey = <T = unknown>(
   obj: Record<string, Record<string, T> | T>,
   key: string
 ): T => {
-  // @ts-ignore
-  return get(obj, key);
+  return get(obj, key) as T;
 };
 
-export const throwIfResponseIsNotValidSpecial = ({
+export const throwDescriptiveErrorIfResponseIsNotValid = ({
   res,
   requiredAttributesToBeInTheResponse = [],
 }: {
@@ -65,13 +64,6 @@ export const throwIfResponseIsNotValidSpecial = ({
     );
   }
 
-  /**
-   * Check if the response is a JS object (data != null && typeof data === 'object')
-   * in case the content type is application/json but for some reason the response is not.
-   * Empty responses (204 No content) are ignored because the typeof data will be string and
-   * isObjectLike will fail.
-   * Axios converts automatically JSON to JS objects.
-   */
   if (isEmpty(data) || !isObjectLike(data)) {
     throw new Error('Response is not a valid JSON');
   }

@@ -16,7 +16,7 @@ import {
   getPushedDate,
   stringifyObjValues,
   removeSlash,
-  throwIfResponseIsNotValidSpecial,
+  throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
 import {
   CreateIncidentParams,
@@ -97,7 +97,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfResponseIsNotValidSpecial({
+      throwDescriptiveErrorIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: [
           getIncidentResponseCreatedDateKey,
@@ -138,7 +138,7 @@ export const createExternalService = (
 
       const { status, statusText, data } = res;
 
-      throwIfResponseIsNotValidSpecial({
+      throwDescriptiveErrorIfResponseIsNotValid({
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
@@ -193,7 +193,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfResponseIsNotValidSpecial({
+      throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
 
@@ -240,7 +240,7 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      throwIfResponseIsNotValidSpecial({
+      throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
     } catch (error) {

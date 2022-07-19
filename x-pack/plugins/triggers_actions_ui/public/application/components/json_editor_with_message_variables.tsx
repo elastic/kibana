@@ -185,13 +185,13 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           height="200px"
           data-test-subj={`${paramsProperty}JsonEditor`}
           aria-label={areaLabel}
+          {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
           onChange={(xjson: string) => {
             setXJson(xjson);
             // Keep the documents in sync with the editor content
             onDocumentsChange(convertToJson(xjson));
           }}
-          {...euiCodeEditorProps}
         />
       </>
     </EuiFormRow>
