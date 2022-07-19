@@ -24,7 +24,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
-const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
+const mockNavigationPlugin = {
+  ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
+};
 
 describe('ContextApp test', () => {
   const services = {
