@@ -79,7 +79,7 @@ export function Main() {
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
               {i18n.translate('console.pageHeading', {
-                defaultMessage: 'Console',
+                defaultMessage: 'Console!',
               })}
             </h1>
           </EuiTitle>
