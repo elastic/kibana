@@ -89,16 +89,16 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <ProductCard product={ELASTICSEARCH_PLUGIN} />
+          <ProductCard data-test-subj="productCard-elasticsearch" product={ELASTICSEARCH_PLUGIN} />
         </EuiFlexItem>
         {shouldShowAppSearchCard && (
           <EuiFlexItem>
-            <ProductCard product={APP_SEARCH_PLUGIN} />
+            <ProductCard data-test-subj="productCard-appSearch" product={APP_SEARCH_PLUGIN} />
           </EuiFlexItem>
         )}
         {shouldShowWorkplaceSearchCard && (
           <EuiFlexItem>
-            <ProductCard product={{ ...WORKPLACE_SEARCH_PLUGIN, URL: WORKPLACE_SEARCH_URL }} />
+            <ProductCard data-test-subj="productCard-workplaceSearch" product={{ ...WORKPLACE_SEARCH_PLUGIN, URL: WORKPLACE_SEARCH_URL }} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
