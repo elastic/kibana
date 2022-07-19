@@ -37,7 +37,7 @@ describe('TextFieldsBody', () => {
         snippetFallback: false,
       },
     },
-    isSnippetAllowed: (_fieldName: string) => true,
+    isSnippetAllowed: () => true,
   };
 
   const actions = {
@@ -114,7 +114,7 @@ describe('TextFieldsBody', () => {
     });
 
     describe('when "isSnippetAllowed" return false', () => {
-      values.isSnippetAllowed = (_fieldName: string) => false;
+      values.isSnippetAllowed = () => false;
 
       it('the snippet checkbox is disabled', () => {
         const snippetCheckbox = getSnippetCheckbox();
