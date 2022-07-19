@@ -7,7 +7,7 @@
 
 import React, { useContext, useMemo } from 'react';
 
-import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { describeFrameType, StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
@@ -50,6 +50,14 @@ interface Row {
 
 export const TopNFunctionsTable = () => {
   const ctx = useContext(FunctionContext);
+
+  const totalCount: number = useMemo(() => {
+    if (!ctx || !ctx.TotalCount || ctx.TotalCount === 0) {
+      return 0;
+    }
+
+    return ctx.TotalCount;
+  }, [ctx]);
 
   const rows: Row[] = useMemo(() => {
     if (!ctx || !ctx.TotalCount || ctx.TotalCount === 0) {
@@ -99,6 +107,11 @@ export const TopNFunctionsTable = () => {
 
   return (
     <>
+      <EuiText size="xs">
+        <strong>Total Samples count:</strong> {totalCount}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable items={rows} columns={columns} />
     </>
   );
