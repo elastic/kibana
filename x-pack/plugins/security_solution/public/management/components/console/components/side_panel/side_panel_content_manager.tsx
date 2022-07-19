@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiText,
   EuiIcon,
@@ -24,6 +25,11 @@ import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
+  padding-right: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
+`;
+
 export const SidePanelContentManager = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
@@ -40,7 +46,7 @@ export const SidePanelContentManager = memo(() => {
     if (show === 'help') {
       return (
         <>
-          <EuiFlexGroup>
+          <StyledEuiFlexGroup>
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h3>
@@ -59,7 +65,7 @@ export const SidePanelContentManager = memo(() => {
                 onClick={closeHelpPanel}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </StyledEuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage
