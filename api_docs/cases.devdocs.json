@@ -490,7 +490,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesPermissions",
+            "text": "CasesPermissions"
+          },
+          "; releasePhase?: ",
           "ReleasePhase",
           " | undefined; hiddenStatuses?: ",
           "CaseStatusWithAllStatus",
@@ -518,7 +526,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; onComponentInitialized?: (() => void) | undefined; actionsNavigation?: ",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesPermissions",
+            "text": "CasesPermissions"
+          },
+          "; onComponentInitialized?: (() => void) | undefined; actionsNavigation?: ",
           "CasesNavigation",
           "<string, \"configurable\"> | undefined; ruleDetailsNavigation?: ",
           "CasesNavigation",
@@ -552,7 +568,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; onClose?: (() => void) | undefined; owner: string[]; permissions: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesPermissions",
+            "text": "CasesPermissions"
+          },
+          "; releasePhase?: ",
           "ReleasePhase",
           " | undefined; afterCaseCreated?: ((theCase: ",
           {
@@ -596,7 +620,15 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: { all: boolean; read: boolean; }; releasePhase?: ",
+          "> | undefined; basePath?: string | undefined; owner: string[]; permissions: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesPermissions",
+            "text": "CasesPermissions"
+          },
+          "; releasePhase?: ",
           "ReleasePhase",
           " | undefined; maxCasesToShow: number; }"
         ],
@@ -818,7 +850,23 @@
           "signature": [
             "{ canUseCases: (owners?: ",
             "CasesOwners",
-            "[] | undefined) => { crud: boolean; read: boolean; }; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; groupAlertsByRule: (items: Event[], owner: string) => ",
+            "[]) => ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.CasesPermissions",
+              "text": "CasesPermissions"
+            },
+            "; getUICapabilities: (featureCapabilities?: Partial<Record<string, boolean | Record<string, boolean>>> | undefined) => ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.CasesPermissions",
+              "text": "CasesPermissions"
+            },
+            "; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; groupAlertsByRule: (items: Event[], owner: string) => ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -1059,6 +1107,24 @@
     "functions": [
       {
         "parentPluginId": "cases",
+        "id": "def-common.createUICapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "createUICapabilities",
+        "description": [
+          "\nReturn the UI capabilities for each type of operation. These strings must match the values defined in the UI\nhere: x-pack/plugins/cases/public/client/helpers/capabilities.ts"
+        ],
+        "signature": [
+          "() => { all: readonly [\"create_cases\", \"read_cases\", \"update_cases\", \"push_cases\"]; read: readonly [\"read_cases\"]; delete: readonly [\"delete_cases\"]; }"
+        ],
+        "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.getAllConnectorsUrl",
         "type": "Function",
         "tags": [],
@@ -1163,6 +1229,79 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CasesPermissions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesPermissions",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.all",
+            "type": "boolean",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.create",
+            "type": "boolean",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.read",
+            "type": "boolean",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.update",
+            "type": "boolean",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.delete",
+            "type": "boolean",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.push",
+            "type": "boolean",
+            "tags": [],
+            "label": "push",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "cases",
         "id": "def-common.Ecs",
@@ -1400,6 +1539,64 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CREATE_CASES_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_CASES_CAPABILITY",
+        "description": [
+          "\nCases UI Capabilities"
+        ],
+        "signature": [
+          "\"create_cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.DELETE_CASES_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "DELETE_CASES_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"delete_cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.PUSH_CASES_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "PUSH_CASES_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"push_cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.READ_CASES_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "READ_CASES_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"read_cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.SECURITY_SOLUTION_OWNER",
         "type": "string",
         "tags": [],
@@ -1425,6 +1622,20 @@
           "\"all\""
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.UPDATE_CASES_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_CASES_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"update_cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
