@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const hostRiskScoreDashboards = [
+
+import type { SavedObject } from '@kbn/core/types';
+
+export const hostRiskScoreDashboards: SavedObject[] = [
   {
     attributes: {
       fieldAttrs: '{}',

@@ -9,7 +9,7 @@ import { EuiButton, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import type { SavedObjectsImportSuccess } from '@kbn/core/public';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import { useKibana, useToasts } from '../../../lib/kibana';
 import { bulkCreatePrebuiltSavedObjects } from '../apis/bulk_create_prebuilt_saved_objects';
 import { IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
@@ -28,7 +28,7 @@ const PopoverWrapper = styled.div`
 interface ImportSavedObjectsButtonProps {
   href?: string | null | undefined;
   ishostRiskScoreDataAvailable: boolean;
-  onSuccessCallback?: (result: SavedObjectsImportSuccess[]) => void;
+  onSuccessCallback?: (result: Array<SavedObject<SavedObjectAttributes>>) => void;
   successTitle: string;
   title: string;
   tooltip?: string;
@@ -45,8 +45,8 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
   const {
     services: { http },
   } = useKibana();
-  const [response, setResponse] = useState<SavedObjectsImportSuccess[] | null>(null);
-  const [error, setError] = useState(undefined);
+  const [response, setResponse] = useState<Array<SavedObject<SavedObjectAttributes>>>();
+  const [error, setError] = useState<Error>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const toasts = useToasts();
@@ -65,7 +65,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
       const res = await bulkCreatePrebuiltSavedObjects(http, {
         templateName: 'hostRiskScoreDashboards',
       });
-      const savedObjects = getOr([], ['data', 'createDashboards', 'message', 'saved_objects'], res);
+      const savedObjects = getOr([], ['saved_objects'], res);
       setResponse(savedObjects);
       setStatus('success');
     } catch (e) {
@@ -75,18 +75,16 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
   }, [http]);
 
   useEffect(() => {
-    const res = response ?? [];
-
     if (status === 'success' && response != null) {
       toasts.addSuccess(
-        `${IMPORT_SAVED_OBJECTS_SUCCESS(res.length)}: ${(response ?? [])
+        `${IMPORT_SAVED_OBJECTS_SUCCESS(response.length)}: ${response
           .map((o, idx) => `${idx + 1}. ) ${o?.attributes?.title ?? o?.attributes?.name}`)
           .join(' ,')}`
       );
     }
 
-    if (onSuccessCallback) {
-      onSuccessCallback(res);
+    if (onSuccessCallback && response != null) {
+      onSuccessCallback(response);
     }
 
     if (status === 'error' && error != null) {

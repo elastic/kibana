@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../framework';
-import * as savedObjectsToCreate from '../prebuilt_templates';
+import type { FrameworkRequest } from '../../framework';
+import * as savedObjectsToCreate from '../saved_object';
+import type { SavedObjectTemplate } from '../types';
 
 export const bulkCreateSavedObjects = async ({
   request,
@@ -15,20 +16,23 @@ export const bulkCreateSavedObjects = async ({
 }: {
   request: FrameworkRequest;
   spaceId?: string;
-  savedObjectTemplate: string;
+  savedObjectTemplate: SavedObjectTemplate;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
-
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const regex = /<REPLACE-WITH-SPACE>/g;
-  const savedObjects = JSON.stringify(savedObjectsToCreate[savedObjectTemplate]);
+  let savedObjects;
+
+  try {
+    savedObjects = JSON.stringify(savedObjectsToCreate[savedObjectTemplate]);
+  } catch (e) {
+    return new Error('No saved object template found');
+  }
+
   const replacedSO = spaceId ? savedObjects.replace(regex, spaceId) : savedObjects;
 
   const createSO = await savedObjectsClient.bulkCreate(JSON.parse(replacedSO), {
     overwrite: true,
   });
 
-  return {
-    code: 200,
-    message: createSO,
-  };
+  return createSO;
 };

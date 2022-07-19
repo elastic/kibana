@@ -6,24 +6,18 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { BULK_CREATE_SAVED_OBJECTS_ROUTE } from '../../../../common/constants';
 
-import { SetupPlugins } from '../../../plugin';
+import type { SetupPlugins } from '../../../plugin';
 
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
-
-export const createPrebuiltSavedObjectsSchema = {
-  params: schema.object({
-    template_name: schema.string(),
-  }),
-};
+import { createPrebuiltSavedObjectsSchema } from '../schema';
 
 export const createPrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -55,7 +49,7 @@ export const createPrebuiltSavedObjectsRoute = (
         });
 
         return response.ok({
-          body: { data: { createDashboards: res } },
+          body: res,
         });
       } catch (err) {
         const error = transformError(err);

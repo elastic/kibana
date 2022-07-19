@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
+import type { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
 import { bulkCreateSavedObjects } from '../../../../../common/constants';
 
 interface Options {
   templateName: string;
 }
 
-export async function bulkCreatePrebuiltSavedObjects(http: HttpStart, options: Options) {
+export const bulkCreatePrebuiltSavedObjects = async (http: HttpStart, options: Options) => {
   const res = await http.post<SavedObjectsImportResponse>(
     bulkCreateSavedObjects(options.templateName)
   );
 
   return res;
-}
+};
