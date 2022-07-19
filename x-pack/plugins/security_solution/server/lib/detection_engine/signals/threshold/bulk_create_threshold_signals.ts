@@ -74,7 +74,7 @@ const getTransformedHits = (
         Object.values(bucket.key).sort().join(',')
       ),
       _source: {
-        [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
+        [TIMESTAMP]: bucket.max_timestamp.value_as_string,
         ...thresholdTerms,
         threshold_result: {
           cardinality: threshold.cardinality?.length
