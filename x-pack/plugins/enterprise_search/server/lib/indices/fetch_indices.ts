@@ -75,7 +75,20 @@ export const fetchIndices = async (
     index: indexPattern,
     metric: ['docs', 'store'],
   });
-  return indicesNames
+
+  // TODO: make multiple batched requests if indicesNames.length > SOMETHING
+  const { has_all_requested, index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
+    index: [{
+      names: indicesNames,
+      privileges: ['read', 'manage'],
+    }],
+  });
+
+  const accessibleIndexNames = has_all_requested ? indicesNames : indicesNames.filter((indexName) => (
+    indexPrivileges[indexName].read && indexPrivileges[indexName].manage
+  ));
+
+  return accessibleIndexNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
@@ -91,6 +104,8 @@ export const fetchIndices = async (
       });
       return indicesAndAliases;
     }).filter(({ name }, index, array) => (
+      // make list of aliases unique since we add an alias per index above
+      // and aliases can point to multiple indices
       array.findIndex((engineData) => engineData.name === name) === index
     ));
 };

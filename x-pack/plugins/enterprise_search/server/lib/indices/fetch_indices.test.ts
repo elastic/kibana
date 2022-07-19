@@ -17,6 +17,9 @@ describe('fetchIndices lib function', () => {
         get: jest.fn(),
         stats: jest.fn(),
       },
+      security: {
+        hasPrivileges: jest.fn(),
+      }
     },
     asInternalUser: {},
   };
@@ -46,6 +49,8 @@ describe('fetchIndices lib function', () => {
       },
     },
   };
+
+  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -90,11 +95,87 @@ describe('fetchIndices lib function', () => {
       index: 'search-*',
       metric: ['docs', 'store'],
     });
+
+    expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      index: [{
+        names: ['search-regular-index'],
+        privileges: ['read', 'manage'],
+      }],
+    });
+  });
+
+  it('should not return index for which user does not have read privileges', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementation(() => ({
+      ...regularIndexResponse,
+      hidden: { aliases: {}, settings: { index: { hidden: 'true' } } },
+    }));
+    mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
+    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+      has_all_requested: false,
+      index: {
+        'search-regular-index': {
+          read: false,
+          manage: true,
+        },
+      },
+    }));
+
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
+    ).resolves.toEqual([]);
+
+    expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
+      expand_wildcards: ['open'],
+      features: ['aliases', 'settings'],
+      filter_path: ['*.aliases', '*.settings.index.hidden'],
+      index: 'search-*',
+    });
+
+    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+      expand_wildcards: ['open'],
+      index: 'search-*',
+      metric: ['docs', 'store'],
+    });
+  });
+
+  it('should not return index for which user does not have manage privileges', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementation(() => ({
+      ...regularIndexResponse,
+      hidden: { aliases: {}, settings: { index: { hidden: 'true' } } },
+    }));
+    mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
+    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+      has_all_requested: false,
+      index: {
+        'search-regular-index': {
+          read: true,
+          manage: false,
+        },
+      },
+    }));
+
+    await expect(
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
+    ).resolves.toEqual([]);
+
+    expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
+      expand_wildcards: ['open'],
+      features: ['aliases', 'settings'],
+      filter_path: ['*.aliases', '*.settings.index.hidden'],
+      index: 'search-*',
+    });
+
+    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+      expand_wildcards: ['open'],
+      index: 'search-*',
+      metric: ['docs', 'store'],
+    });
   });
 
   it('should return hidden indices without aliases if specified', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
+    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
 
     await expect(
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true)
