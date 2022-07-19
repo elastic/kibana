@@ -67,7 +67,7 @@ describe('Related Cases', () => {
           </TestProviders>
         );
 
-        expect(await screen.findByText('0 cases.')).toBeInTheDocument();
+        expect(await screen.findByText(/0 cases/)).toBeInTheDocument();
       });
     });
 
