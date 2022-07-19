@@ -89,7 +89,7 @@ export interface ThreatIndicatorRule extends CustomRule {
 
 export interface MachineLearningRule {
   machineLearningJobs: string[];
-  anomalyScoreThreshold: string;
+  anomalyScoreThreshold: number;
   name: string;
   description: string;
   severity: string;
@@ -102,6 +102,7 @@ export interface MachineLearningRule {
   note: string;
   runsEvery: Interval;
   lookBack: Interval;
+  interval?: string;
 }
 
 export const getIndexPatterns = (): string[] => [
@@ -326,7 +327,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
     'v3_linux_anomalous_process_all_hosts',
     'v3_linux_anomalous_network_activity',
   ],
-  anomalyScoreThreshold: '20',
+  anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
   severity: 'Critical',
