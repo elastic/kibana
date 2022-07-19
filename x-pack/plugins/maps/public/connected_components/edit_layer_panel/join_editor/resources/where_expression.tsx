@@ -9,8 +9,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from '@kbn/es-query';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../../common/constants';
 import { getData, getSearchBar } from '../../../../kibana_services';
 

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
