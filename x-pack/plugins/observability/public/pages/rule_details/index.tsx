@@ -42,17 +42,15 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
+import { useKibana } from '../../utils/kibana_react';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
-    cases,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -65,7 +63,7 @@ export function RuleDetailsPage() {
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
