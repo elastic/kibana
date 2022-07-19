@@ -9,14 +9,20 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const EmptyLocations = ({ setIsAddingNew }: { setIsAddingNew: (val: boolean) => void }) => {
+export const EmptyLocations = ({
+  setIsAddingNew,
+  disabled,
+}: {
+  disabled: boolean;
+  setIsAddingNew: (val: boolean) => void;
+}) => {
   return (
     <EuiEmptyPrompt
       iconType="visMapCoordinate"
       title={<h2>{START_ADDING_LOCATIONS}</h2>}
       body={<p>{START_ADDING_LOCATIONS_DESCRIPTION}</p>}
       actions={
-        <EuiButton color="primary" fill onClick={() => setIsAddingNew(true)}>
+        <EuiButton disabled={disabled} color="primary" fill onClick={() => setIsAddingNew(true)}>
           {ADD_LOCATION}
         </EuiButton>
       }

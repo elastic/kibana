@@ -8,9 +8,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
+import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge, EuiIconTip } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorServiceLocations, LocationStatus } from '../../../../../common/runtime_types';
+import { ClientPluginsStart } from '../../../../plugin';
 
 interface Props {
   selectedLocations: MonitorServiceLocations;
@@ -50,6 +52,11 @@ export const ServiceLocations = ({
 
   const errorMessage = error ?? (isInvalid ? VALIDATION_ERROR : null);
 
+  const kServices = useKibana<ClientPluginsStart>().services;
+
+  const canSaveIntegrations: boolean =
+    !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
+
   useEffect(() => {
     const newCheckboxIdToSelectedMap = selectedLocations.reduce<Record<string, boolean>>(
       (acc, location) => {
@@ -75,15 +82,25 @@ export const ServiceLocations = ({
           const invalidBadge = location.isInvalid ? (
             <EuiBadge color="danger">{INVALID_LABEL}</EuiBadge>
           ) : null;
+
+          const isPrivateDisabled =
+            !location.isServiceManaged && (Boolean(location.isInvalid) || !canSaveIntegrations);
+
+          const iconTip =
+            isPrivateDisabled && !canSaveIntegrations ? (
+              <EuiIconTip content={CANNOT_SAVE_INTEGRATION_LABEL} position="right" />
+            ) : null;
+
           const label = (
             <EuiText size="s" data-test-subj={`syntheticsServiceLocationText--${location.id}`}>
               {location.label} {badge} {invalidBadge}
+              {iconTip}
             </EuiText>
           );
           return {
             ...location,
             label,
-            disabled: Boolean(location.isInvalid),
+            disabled: isPrivateDisabled,
             'data-test-subj': `syntheticsServiceLocation--${location.id}`,
           };
         })}
@@ -124,3 +141,11 @@ export const PRIVATE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.
 export const INVALID_LABEL = i18n.translate('xpack.synthetics.monitorManagement.invalidLabel', {
   defaultMessage: 'Invalid',
 });
+
+export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.cannotSaveIntegration',
+  {
+    defaultMessage:
+      'You are not authorized to create integrations. Integrations write permissions are required.',
+  }
+);

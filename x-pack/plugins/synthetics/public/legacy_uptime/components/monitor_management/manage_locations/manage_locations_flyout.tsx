@@ -16,9 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../plugin';
 import { EmptyLocations } from './empty_locations';
 import { getServiceLocations } from '../../../state/actions';
 import { LocationForm } from './location_form';
@@ -33,6 +36,12 @@ export const ManageLocationsFlyout = () => {
   const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({ isOpen });
 
   const dispatch = useDispatch();
+
+  const { fleet } = useKibana<ClientPluginsStart>().services;
+
+  const hasFleetPermissions = Boolean(fleet?.authz.fleet.readAgentPolicies);
+
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
   useEffect(() => {
     if (isOpen) {
@@ -53,14 +62,20 @@ export const ManageLocationsFlyout = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {!hasFleetPermissions && (
+          <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
+            <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
+          </EuiCallOut>
+        )}
         {privateLocations.length === 0 && !loading && !isAddingNew ? (
-          <EmptyLocations setIsAddingNew={setIsAddingNew} />
+          <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />
         ) : (
           <PrivateLocationsList
             privateLocations={privateLocations}
             loading={loading}
             onDelete={onDelete}
             onSubmit={onSubmit}
+            hasFleetPermissions={hasFleetPermissions}
           />
         )}
         <EuiSpacer />
@@ -77,7 +92,12 @@ export const ManageLocationsFlyout = () => {
         {!isAddingNew && privateLocations.length > 0 && (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill isLoading={loading} onClick={() => setIsAddingNew(true)}>
+              <EuiButton
+                fill
+                isLoading={loading}
+                disabled={!hasFleetPermissions || !canSave}
+                onClick={() => setIsAddingNew(true)}
+              >
                 {ADD_LABEL}
               </EuiButton>
             </EuiFlexItem>
@@ -120,3 +140,15 @@ const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.closeLabe
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addLocation', {
   defaultMessage: 'Add location',
 });
+
+const NEED_PERMISSIONS = i18n.translate('xpack.synthetics.monitorManagement.needPermissions', {
+  defaultMessage: 'Need permissions',
+});
+
+const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
+  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
+  {
+    defaultMessage:
+      'You are not authorized to access Fleet. Fleet permissions are required to create new private locations.',
+  }
+);

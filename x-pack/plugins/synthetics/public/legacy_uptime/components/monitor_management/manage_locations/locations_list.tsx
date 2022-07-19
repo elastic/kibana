@@ -24,6 +24,7 @@ import {
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
@@ -35,9 +36,11 @@ export const PrivateLocationsList = ({
   onSubmit,
   loading,
   onDelete,
+  hasFleetPermissions,
 }: {
-  privateLocations: PrivateLocation[];
   loading: boolean;
+  privateLocations: PrivateLocation[];
+  hasFleetPermissions: boolean;
   onSubmit: (location: PrivateLocation) => void;
   onDelete: (id: string) => void;
 }) => {
@@ -49,6 +52,8 @@ export const PrivateLocationsList = ({
 
   const [openLocationMap, setOpenLocationMap] = useState<Record<string, boolean>>({});
 
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+
   if (loading) {
     return <EuiLoadingSpinner />;
   }
@@ -57,7 +62,7 @@ export const PrivateLocationsList = ({
     <Wrapper>
       {privateLocations.map((location, index) => {
         const monCount = locations?.find((l) => l.id === location.id)?.count ?? 0;
-        const canDelete = monCount === 0;
+        const canDelete = monCount === 0 || !hasFleetPermissions;
         const policy = policies?.items.find((policyT) => policyT.id === location.policyHostId);
         return (
           <div key={location.id}>
@@ -94,18 +99,22 @@ export const PrivateLocationsList = ({
 
                   <EuiText size="s">
                     <p>
-                      <EuiTextColor color="subdued">
-                        {AGENT_POLICY_LABEL}:{' '}
-                        {policy ? (
-                          <EuiLink href={`${basePath}/app/fleet/policies/${location.policyHostId}`}>
-                            {policy?.name}
-                          </EuiLink>
-                        ) : (
-                          <EuiText color="danger" size="s" className="eui-displayInline">
-                            {POLICY_IS_DELETED}
-                          </EuiText>
-                        )}
-                      </EuiTextColor>
+                      {hasFleetPermissions && (
+                        <EuiTextColor color="subdued">
+                          {AGENT_POLICY_LABEL}:{' '}
+                          {policy ? (
+                            <EuiLink
+                              href={`${basePath}/app/fleet/policies/${location.policyHostId}`}
+                            >
+                              {policy?.name}
+                            </EuiLink>
+                          ) : (
+                            <EuiText color="danger" size="s" className="eui-displayInline">
+                              {POLICY_IS_DELETED}
+                            </EuiText>
+                          )}
+                        </EuiTextColor>
+                      )}
                     </p>
                   </EuiText>
                 </div>
@@ -126,7 +135,7 @@ export const PrivateLocationsList = ({
                     color="danger"
                     aria-label={DELETE_LABEL}
                     onClick={() => onDelete(location.id)}
-                    isDisabled={!canDelete}
+                    isDisabled={!canDelete || !canSave}
                   />
                 </EuiToolTip>
               }

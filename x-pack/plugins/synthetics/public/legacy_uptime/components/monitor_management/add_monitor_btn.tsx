@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../../common/constants';
 import { useEnablement } from './hooks/use_enablement';
@@ -90,7 +91,16 @@ export const AddMonitorBtn = () => {
 
   const loading = allowedLoading || enablementLoading;
 
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+  const kServices = useKibana<ClientPluginsStart>().services;
+
+  const canSave: boolean = !!kServices?.application?.capabilities.uptime.save;
+
+  const canSaveIntegrations: boolean =
+    !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
+
+  const isCloud = useKibana<ClientPluginsSetup>().services?.cloud?.isCloudEnabled;
+
+  const canSavePrivate: boolean = Boolean(isCloud) || canSaveIntegrations;
 
   return (
     <EuiFlexGroup alignItems="center">
@@ -120,7 +130,7 @@ export const AddMonitorBtn = () => {
           <EuiButton
             isLoading={loading}
             fill
-            isDisabled={!canSave || !isEnabled || !isAllowed}
+            isDisabled={!canSave || !isEnabled || !isAllowed || !canSavePrivate}
             iconType="plus"
             data-test-subj="syntheticsAddMonitorBtn"
             href={history.createHref({
