@@ -115,7 +115,7 @@ const MONITOR_SCRIPT_STEP_EDIT: Step = {
           <p>
             <FormattedMessage
               id="xpack.synthetics.monitorConfig.monitorScriptEditStep.description"
-              defaultMessage="Use Elastic Script Recorder to generate and upload a script. Alternatively, you can edit the existing {playwright} script (or paste a new one) in the script editor."
+              defaultMessage="Use Elastic Synthetics Recorder to generate and upload a script. Alternatively, you can edit the existing {playwright} script (or paste a new one) in the script editor."
               values={{
                 playwright: (
                   <EuiLink href="https://playwright.dev/" target="_blank" external>
