@@ -6,14 +6,23 @@
  */
 
 import expect from '@kbn/expect';
+import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const rulesHelper = getService('rulesHelper');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
 
   describe('upgrade rules smoke tests', function describeIndexTests() {
+    before(async function () {
+      log.debug(process.env.ORIGINAL_VERSION!);
+      if (semver.lt(process.env.ORIGINAL_VERSION!, '7.13.0-SNAPSHOT')) {
+        log.debug('Skipping! These tests are valid only for 7.13+ versions');
+        this.skip();
+      }
+    });
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
