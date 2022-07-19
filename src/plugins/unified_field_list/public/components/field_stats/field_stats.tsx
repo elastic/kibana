@@ -59,7 +59,10 @@ export interface FieldStatsProps {
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
   testSubject: string;
-  overrideContent?: (field: DataViewField) => JSX.Element | null;
+  overrideContent?: (
+    field: DataViewField,
+    params?: { noDataFound?: boolean }
+  ) => JSX.Element | null;
 }
 
 // TODO: catch errors during rendering
@@ -204,22 +207,7 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    const isUsingSampling = services.uiSettings.get('lens:useFieldExistenceSampling'); // TODO: what to do with this setting?
-    return (
-      <>
-        <EuiText size="s">
-          {isUsingSampling
-            ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
-                defaultMessage:
-                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
-              })
-            : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                defaultMessage:
-                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-              })}
-        </EuiText>
-      </>
-    );
+    return overrideContent?.(field, { noDataFound: true }) || null;
   }
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
@@ -480,5 +468,5 @@ export const FieldStats: React.FC<FieldStatsProps> = ({
     );
   }
 
-  return <></>;
+  return null;
 };

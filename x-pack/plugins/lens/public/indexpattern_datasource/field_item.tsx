@@ -316,6 +316,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
     hasSuggestionForField,
     hideDetails,
     uiActions,
+    core,
   } = props;
 
   const panelHeader = (
@@ -344,7 +345,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         dataViewOrDataViewId={indexPattern.id}
         field={field as DataViewField}
         testSubject="lnsFieldListPanel"
-        overrideContent={(currentField) => {
+        overrideContent={(currentField, params) => {
           if (currentField.type === 'geo_point' || currentField.type === 'geo_shape') {
             return (
               <>
@@ -359,6 +360,26 @@ function FieldItemPopoverContents(props: FieldItemProps) {
               </>
             );
           }
+
+          if (params?.noDataFound) {
+            const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
+            return (
+              <>
+                <EuiText size="s">
+                  {isUsingSampling
+                    ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                        defaultMessage:
+                          'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                        defaultMessage:
+                          'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+                      })}
+                </EuiText>
+              </>
+            );
+          }
+
           return null;
         }}
       />

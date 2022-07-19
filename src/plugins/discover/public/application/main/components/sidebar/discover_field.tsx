@@ -401,9 +401,15 @@ function DiscoverFieldComponent({
               dataViewOrDataViewId={indexPattern}
               field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
               testSubject="dscFieldListPanel"
-              overrideContent={(currentField) => {
+              overrideContent={(currentField, params) => {
+                if (params?.noDataFound) {
+                  return (
+                    <EuiText size="s">{`TODO: add a custom "no data available" message for ${currentField.type} field`}</EuiText>
+                  );
+                }
+
                 return (
-                  <EuiText size="s">{`TODO: add a custom "not available" message for ${currentField.type} field`}</EuiText>
+                  <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${currentField.type} field`}</EuiText>
                 );
               }}
             />
