@@ -627,7 +627,6 @@ export class LensAttributes {
       return {
         formula,
         palette,
-        formula,
         fieldMeta,
         fieldName,
         columnType,
