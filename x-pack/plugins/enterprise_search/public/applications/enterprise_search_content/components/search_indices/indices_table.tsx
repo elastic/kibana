@@ -74,14 +74,6 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
     truncateText: true,
   },
   {
-    field: 'total.docs.count',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-      defaultMessage: 'Docs count',
-    }),
-    sortable: true,
-    truncateText: true,
-  },
-  {
     field: 'health',
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
       defaultMessage: 'Index health',
@@ -96,6 +88,14 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
     truncateText: true,
   },
   {
+    field: 'total.docs.count',
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
+      defaultMessage: 'Docs count',
+    }),
+    sortable: true,
+    truncateText: true,
+  },
+  {
     field: 'ingestionMethod',
     name: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
@@ -106,6 +106,34 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
     render: (ingestionMethod: IngestionMethod) => (
       <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
     ),
+    truncateText: true,
+  },
+  {
+    field: 'lastUpdated',
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.columnTitle', {
+      defaultMessage: 'Last updated',
+    }),
+    render: (dateString: string) => {
+      if (dateString === 'never') {
+        return (
+          <EuiText size="s">
+            {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.never', {
+              defaultMessage: 'Never',
+            })}
+          </EuiText>
+        );
+      }
+      return dateString ? (
+        <FormattedRelative value={new Date(dateString)} />
+      ) : (
+        <EuiText size="s">
+          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.none', {
+            defaultMessage: 'Unknown',
+          })}
+        </EuiText>
+      );
+    },
+    sortable: true,
     truncateText: true,
   },
   {
@@ -155,34 +183,6 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
         )
       );
     },
-    truncateText: true,
-  },
-  {
-    field: 'lastUpdated',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.columnTitle', {
-      defaultMessage: 'Last updated',
-    }),
-    render: (dateString: string) => {
-      if (dateString === 'never') {
-        return (
-          <EuiText size="s">
-            {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.never', {
-              defaultMessage: 'Never',
-            })}
-          </EuiText>
-        );
-      }
-      return dateString ? (
-        <FormattedRelative value={new Date(dateString)} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.none', {
-            defaultMessage: 'Unknown',
-          })}
-        </EuiText>
-      );
-    },
-    sortable: true,
     truncateText: true,
   },
   {
