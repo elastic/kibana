@@ -367,8 +367,6 @@ export const previewRulesRoute = async (
               { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
-          case 'saved_query':
-            throw new Error('Preview unavailable for Saved Query rules');
           default:
             assertUnreachable(previewRuleParams);
         }
