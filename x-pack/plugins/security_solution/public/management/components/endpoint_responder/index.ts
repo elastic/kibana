@@ -7,3 +7,4 @@
 
 export { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
 export { ActionLogButton } from './action_log_button';
+export { EndpointExitModalMessage } from './endpoint_exit_modal_message';
