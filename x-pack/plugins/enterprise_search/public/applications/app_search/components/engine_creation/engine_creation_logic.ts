@@ -211,9 +211,9 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       },
     ],
     aliasNameErrorMessage: [
-      () => [selectors.aliasName, selectors.indicesFormatted],
-      (aliasName: string, indicesFormatted: SearchIndexSelectableOption[]) => {
-        let existingAlias = indicesFormatted.find((el) => el.label === aliasName);
+      () => [selectors.aliasName, selectors.indices],
+      (aliasName: string, indices: ElasticsearchIndex[]) => {
+        let existingAlias = indices.find((el) => el.name === aliasName);
         if (existingAlias) {
           return i18n.translate(
             'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',

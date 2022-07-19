@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import {
   LogicMounter,
   mockHttpValues,
@@ -145,7 +147,7 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           selectedIndex: 'test-index',
-          aliasName: 'search-test-index',
+          aliasName: 'search-test-index-alias',
           isAliasRequired: true,
         });
       });
@@ -394,6 +396,55 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values.selectedIndexFormatted).toEqual(
           mockCheckedSearchIndexOptions[2]
         );
+      });
+    });
+
+    describe('aliasNameErrorMessage', () => {
+      it('should be an empty string if indices is empty', () => {
+        mount({
+          indices: [],
+        });
+
+        expect(EngineCreationLogic.values.aliasNameErrorMessage).toEqual('');
+      });
+
+      it('should be an empty string if there is no aliasName', () => {
+        mount({
+          aliasName: '',
+          indices: mockElasticsearchIndices,
+        });
+
+        expect(EngineCreationLogic.values.aliasNameErrorMessage).toEqual('');
+      });
+
+      it('should set an error message if there is an existing alias/index', () => {
+        mount({
+          aliasName: 'alias-without-manage-privilege',
+          indices: mockElasticsearchIndices,
+        });
+
+        expect(EngineCreationLogic.values.aliasNameErrorMessage).toEqual(dedent`
+          There is an existing index or alias with the name alias-without-manage-privilege.
+          Please choose another alias name.
+        `);
+      });
+    });
+
+    describe('showAliasNameErrorMessages', () => {
+      it('should be false if there is no error message', () => {
+        mount({
+          aliasNameErrorMessage: '',
+        });
+
+        expect(EngineCreationLogic.values.showAliasNameErrorMessages).toBe(false);
+      });
+
+      it('should be true if there is an error message', () => {
+        mount({
+          aliasNameErrorMessage: 'an error message',
+        });
+
+        expect(EngineCreationLogic.values.showAliasNameErrorMessages).toBe(true);
       });
     });
   });

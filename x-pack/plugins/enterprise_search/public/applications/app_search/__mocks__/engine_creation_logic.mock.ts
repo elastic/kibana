@@ -26,6 +26,9 @@ export const DEFAULT_VALUES = {
   isAliasAllowed: true,
   isAliasRequired: false,
   currentEngineCreationStep: EngineCreationSteps.SelectStep,
+  aliasNameErrorMessage: '',
+  showAliasNameErrorMessages: false,
+  selectedIndexFormatted: undefined,
 };
 
 export const mockElasticsearchIndices = [
@@ -35,6 +38,7 @@ export const mockElasticsearchIndices = [
     name: 'search-my-index-1',
     uuid: 'ydlR_QQJTeyZP66tzQSmMQ',
     alias: false,
+    privileges: { read: true, manage: true },
     total: {
       docs: {
         count: 0,
@@ -51,6 +55,7 @@ export const mockElasticsearchIndices = [
     name: 'my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
     alias: false,
+    privileges: { read: true, manage: true },
     total: {
       docs: {
         count: 100,
@@ -60,7 +65,6 @@ export const mockElasticsearchIndices = [
         size_in_bytes: '225b',
       },
     },
-    aliases: ['search-my-index-2', 'alias-my-index-2'],
   },
   {
     health: 'green',
@@ -68,6 +72,7 @@ export const mockElasticsearchIndices = [
     name: 'search-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
     alias: true,
+    privileges: { read: true, manage: true },
     total: {
       docs: {
         count: 100,
@@ -77,7 +82,6 @@ export const mockElasticsearchIndices = [
         size_in_bytes: '225b',
       },
     },
-    aliases: ['search-my-index-2', 'alias-my-index-2'],
   },
   {
     health: 'green',
@@ -85,6 +89,7 @@ export const mockElasticsearchIndices = [
     name: 'alias-my-index-2',
     uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
     alias: true,
+    privileges: { read: true, manage: true },
     total: {
       docs: {
         count: 100,
@@ -94,7 +99,57 @@ export const mockElasticsearchIndices = [
         size_in_bytes: '225b',
       },
     },
-    aliases: ['search-my-index-2', 'alias-my-index-2'],
+  },
+  {
+    health: 'green',
+    status: 'open',
+    name: 'index-without-read-privilege',
+    uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
+    alias: false,
+    privileges: { read: false, manage: true },
+    total: {
+      docs: {
+        count: 100,
+        deleted: 0,
+      },
+      store: {
+        size_in_bytes: '225b',
+      },
+    },
+  },
+  {
+    health: 'green',
+    status: 'open',
+    name: 'index-without-manage-privilege',
+    uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
+    alias: false,
+    privileges: { read: true, manage: false },
+    total: {
+      docs: {
+        count: 100,
+        deleted: 0,
+      },
+      store: {
+        size_in_bytes: '225b',
+      },
+    },
+  },
+  {
+    health: 'green',
+    status: 'open',
+    name: 'alias-without-manage-privilege',
+    uuid: '4dlR_QQJTe2ZP6qtzQSmMQ',
+    alias: true,
+    privileges: { read: true, manage: false },
+    total: {
+      docs: {
+        count: 100,
+        deleted: 0,
+      },
+      store: {
+        size_in_bytes: '225b',
+      },
+    },
   },
 ];
 

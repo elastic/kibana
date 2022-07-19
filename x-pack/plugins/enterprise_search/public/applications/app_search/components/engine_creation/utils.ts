@@ -37,7 +37,13 @@ export const formatIndicesToSelectable = (
   indices: ElasticsearchIndex[],
   selectedIndexName: string
 ): SearchIndexSelectableOption[] => {
-  return indices.map((index) => {
+  return indices.filter(({ alias, privileges }) => {
+    if (alias) {
+      return privileges.manage;
+    } else {
+      return privileges.read && privileges.manage;
+    }
+  }).map((index) => {
     let icon;
     let color;
     let toolTipTitle;
