@@ -166,7 +166,9 @@ export function ChangeDataView({
     panelItems.push(
       <DataViewsList
         dataViewsList={dataViewsList}
-        onChangeDataView={(newId) => {
+        onChangeDataView={async (newId) => {
+          const dataView = await data.dataViews.get(newId);
+          await data.dataViews.refreshFields(dataView);
           onChangeDataView(newId);
           setPopoverIsOpen(false);
         }}
