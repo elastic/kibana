@@ -55,7 +55,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, label }) => {
           stackAccessors={[0]}
         />
         <BarSeries
-          id={`${label}`}
+          id={label}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}
