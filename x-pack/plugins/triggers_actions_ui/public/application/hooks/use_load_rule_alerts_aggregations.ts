@@ -26,10 +26,19 @@ interface RuleAlertsAggs {
   recovered: number;
   error?: string;
 }
+export interface AlertChartData {
+  active?: number;
+  recovered?: number;
+  date?: string;
+}
 interface LoadRuleAlertsAggs {
   isLoadingRuleAlertsAggs: boolean;
-  ruleAlertsAggs: Omit<RuleAlertsAggs, 'error'>;
+  ruleAlertsAggs: {
+    active: number;
+    recovered: number;
+  };
   errorRuleAlertsAggs?: string;
+  alertsChartData: AlertChartData[];
 }
 interface IndexName {
   index: string;
@@ -40,6 +49,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
     ruleAlertsAggs: { active: 0, recovered: 0 },
+    alertsChartData: [] as AlertChartData[],
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -53,7 +63,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         http,
         features,
       });
-      const { active, recovered, error } = await fetchRuleAlertsAggByTimeRange({
+      const { active, recovered, error, alertsChartData } = await fetchRuleAlertsAggByTimeRange({
         http,
         index,
         ruleId,
@@ -67,6 +77,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
             active: active || 0,
             recovered: recovered || 0,
           },
+          alertsChartData,
           isLoadingRuleAlertsAggs: false,
         }));
       }
@@ -77,6 +88,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
             ...oldState,
             isLoadingRuleAlertsAggs: false,
             errorRuleAlertsAggs: 'error',
+            alertsChartData: [] as AlertChartData[],
           }));
         }
       }
@@ -108,6 +120,7 @@ interface RuleAlertsAggs {
   active: number;
   recovered: number;
   error?: string;
+  alertsChartData: AlertChartData[];
 }
 
 export async function fetchRuleAlertsAggByTimeRange({
@@ -176,15 +189,40 @@ export async function fetchRuleAlertsAggByTimeRange({
       key: string;
       doc_count: number;
     }>;
-    return list.reduce(
+    const dataHistogram = res?.aggregations?.alert_status_aggs?.buckets as Array<{
+      alert_status_aggs_per_day: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+        }>;
+      };
+      key_as_string: string;
+      doc_count: number;
+    }>;
+
+    const alertsChartData = dataHistogram.map((day) => ({
+      date: day.key_as_string,
+      ...day.alert_status_aggs_per_day.buckets.reduce(
+        (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
+        {}
+      ),
+    })) as AlertChartData[];
+
+    const ruleAlertsAgg = list.reduce(
       (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
       {}
     ) as RuleAlertsAggs;
+
+    return {
+      ...ruleAlertsAgg,
+      alertsChartData,
+    };
   } catch (error) {
     return {
       error,
       active: 0,
       recovered: 0,
+      alertsChartData: [],
     } as RuleAlertsAggs;
   }
 }
