@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import type { Reducer, Store } from 'redux';
 import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { EmbeddableInput, IEmbeddable } from './i_embeddable';
+import type { EmbeddableInput, IEmbeddable } from './lib';
 
 export const slice = createSlice({
   name: 'embeddable',
@@ -64,7 +64,7 @@ export const { actions } = slice;
 
 export function createStore(
   embeddable: IEmbeddable,
-  reducer: Reducer<EmbeddableInput>
+  reducer: Reducer<EmbeddableInput> = slice.reducer
 ): Store<EmbeddableInput> {
   let isUpstreamUpdate = false;
   let isDownstreamUpdate = false;

@@ -24,7 +24,8 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-import { actions, CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
+import { CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
+import { actions } from '../store';
 import { HelloWorldEmbeddable } from './hello_world_embeddable';
 
 const layout: DecoratorFn = (story) => {
@@ -91,13 +92,12 @@ const HelloWorldEmbeddablePanel = forwardRef<
     const embeddable = useMemo(() => new HelloWorldEmbeddable({ id: `${Math.random()}` }, {}), []);
     const theme$ = useMemo(() => new ReplaySubject<CoreTheme>(1), []);
     const theme = useContext(ThemeContext) as CoreTheme;
-    const store = useMemo(() => embeddable.getStore(), [embeddable]);
 
     useEffect(() => theme$.next(theme), [theme$, theme]);
     useEffect(() => {
-      store.dispatch(actions.setTitle(title));
-      store.dispatch(actions.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT));
-    }, [store, title, viewMode]);
+      embeddable.store.dispatch(actions.setTitle(title));
+      embeddable.store.dispatch(actions.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT));
+    }, [embeddable.store, title, viewMode]);
     useEffect(
       () =>
         embeddable.updateOutput({
@@ -158,9 +158,9 @@ export function DefaultWithBadges({ badges, ...props }: DefaultWithBadgesProps) 
 
   useEffect(
     () =>
-      void ref.current?.embeddable
-        .getStore()
-        .dispatch(actions.setLastReloadRequestTime(new Date().getMilliseconds())),
+      void ref.current?.embeddable.store.dispatch(
+        actions.setLastReloadRequestTime(new Date().getMilliseconds())
+      ),
     [getActions]
   );
 
@@ -205,9 +205,9 @@ export function DefaultWithContextMenu({ items, ...props }: DefaultWithContextMe
 
   useEffect(
     () =>
-      void ref.current?.embeddable
-        .getStore()
-        .dispatch(actions.setLastReloadRequestTime(new Date().getMilliseconds())),
+      void ref.current?.embeddable.store.dispatch(
+        actions.setLastReloadRequestTime(new Date().getMilliseconds())
+      ),
     [getActions]
   );
 

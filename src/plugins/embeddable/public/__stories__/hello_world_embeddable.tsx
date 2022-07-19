@@ -11,8 +11,12 @@ import { render } from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Embeddable, EmbeddableInput, IEmbeddable } from '..';
+import { createStore } from '../store';
 
 export class HelloWorldEmbeddable extends Embeddable {
+  // eslint-disable-next-line @kbn/eslint/no_this_in_property_initializers
+  readonly store = createStore(this);
+
   readonly type = 'hello-world';
 
   renderError: IEmbeddable['renderError'];
@@ -23,7 +27,7 @@ export class HelloWorldEmbeddable extends Embeddable {
     const App = connect((state: EmbeddableInput) => ({ body: state.title }))(EuiEmptyPrompt);
 
     render(
-      <Provider store={this.getStore()}>
+      <Provider store={this.store}>
         <App />
       </Provider>,
       node
