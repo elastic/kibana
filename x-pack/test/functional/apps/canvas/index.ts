@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EsArchiver } from '@kbn/es-archiver';
-export default function canvasApp({ loadTestFile, getService }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+export default function canvasApp({ loadTestFile, getService }): FtrProviderContext {
   const security = getService('security');
   const config = getService('config');
   let esNode: EsArchiver;
