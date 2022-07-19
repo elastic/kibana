@@ -64,7 +64,7 @@ const SCRIPT_RECORDER_BTNS = (
         {i18n.translate(
           'xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.download',
           {
-            defaultMessage: 'Download Script Recorder',
+            defaultMessage: 'Download Synthetics Recorder',
           }
         )}
       </EuiButtonEmpty>
