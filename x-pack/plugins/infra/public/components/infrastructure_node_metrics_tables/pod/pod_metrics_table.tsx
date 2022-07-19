@@ -125,15 +125,6 @@ function podNodeColumns(
         );
       },
     },
-    // Hidden as part of https://github.com/elastic/kibana/issues/136047
-    // {
-    //   name: i18n.translate('xpack.infra.metricsTable.pod.uptimeColumnHeader', {
-    //     defaultMessage: 'Uptime',
-    //   }),
-    //   field: 'uptime',
-    //   align: 'right',
-    //   render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
-    // },
     {
       name: i18n.translate('xpack.infra.metricsTable.pod.averageCpuUsagePercentColumnHeader', {
         defaultMessage: 'CPU usage (avg.)',
