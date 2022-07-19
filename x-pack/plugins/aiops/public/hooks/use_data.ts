@@ -24,6 +24,9 @@ export const useData = (
   const { services } = useAiOpsKibana();
   const { uiSettings } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [activeBounds, setActiveBounds] = useState<
+    { earliest?: number; latest?: number } | undefined
+  >();
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -39,53 +42,60 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(
-    () => {
-      // Obtain the interval to use for date histogram aggregations
-      // (such as the document count chart). Aim for 75 bars.
-      const buckets = _timeBuckets;
-      const tf = timefilter;
-      if (!buckets || !tf || !currentDataView) return;
-      const activeBounds = tf.getActiveBounds();
-      let earliest: number | undefined;
-      let latest: number | undefined;
-      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
-        earliest = activeBounds.min?.valueOf();
-        latest = activeBounds.max?.valueOf();
-      }
-      const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
-      buckets.setInterval('auto');
-      if (bounds) {
-        buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
-      }
-      const aggInterval = buckets.getInterval();
+  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
+    // Obtain the interval to use for date histogram aggregations
+    // (such as the document count chart). Aim for 75 bars.
 
-      return {
-        earliest,
-        latest,
-        intervalMs: aggInterval?.asMilliseconds(),
-        index: currentDataView.title,
-        timeFieldName: currentDataView.timeFieldName,
-        runtimeFieldMap: currentDataView.getRuntimeMappings(),
-      };
-    },
+    if (!activeBounds || activeBounds.earliest === undefined || activeBounds.latest === undefined)
+      return;
+
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+
+    if (!timefilterActiveBounds) return;
+
+    const BAR_TARGET = 75;
+    _timeBuckets.setInterval('auto');
+    _timeBuckets.setBounds(timefilterActiveBounds);
+    _timeBuckets.setBarTarget(BAR_TARGET);
+    const aggInterval = _timeBuckets.getInterval();
+
+    return {
+      earliest: activeBounds.earliest,
+      latest: activeBounds.latest,
+      intervalMs: aggInterval?.asMilliseconds(),
+      index: currentDataView.title,
+      timeFieldName: currentDataView.timeFieldName,
+      runtimeFieldMap: currentDataView.getRuntimeMappings(),
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
-  );
+  }, [
+    _timeBuckets,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    activeBounds === undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(timefilter.getTime()),
+    currentDataView.id,
+    lastRefresh,
+  ]);
   const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
+      timefilter.getTimeUpdate$(),
       aiopsRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
+        });
+      }
+      const timefilterActiveBounds = timefilter.getActiveBounds();
+      if (timefilterActiveBounds !== undefined) {
+        setActiveBounds({
+          earliest: timefilterActiveBounds.min?.valueOf(),
+          latest: timefilterActiveBounds.max?.valueOf(),
         });
       }
       setLastRefresh(Date.now());
@@ -95,8 +105,28 @@ export const useData = (
     };
   });
 
+  // This hook listens just for an initial update of the timefilter to be switched on.
+  useEffect(() => {
+    const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+      const timefilterActiveBounds = timefilter.getActiveBounds();
+
+      if (timefilterActiveBounds && activeBounds === undefined) {
+        setActiveBounds({
+          earliest: timefilterActiveBounds.min?.valueOf(),
+          latest: timefilterActiveBounds.max?.valueOf(),
+        });
+        setLastRefresh(Date.now());
+      }
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
+
   return {
     docStats,
     timefilter,
+    earliest: activeBounds?.earliest,
+    latest: activeBounds?.latest,
   };
 };
