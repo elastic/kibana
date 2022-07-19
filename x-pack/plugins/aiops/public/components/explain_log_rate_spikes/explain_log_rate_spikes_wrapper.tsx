@@ -187,15 +187,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
       <EuiHorizontalRule />
       <EuiPageContentBody>
         <EuiFlexGroup gutterSize="m" direction="column">
-          {docStats?.totalCount !== undefined && (
-            <EuiFlexItem>
-              <DocumentCountContent
-                brushSelectionUpdateHandler={setWindowParameters}
-                documentCountStats={docStats.documentCountStats}
-                totalCount={docStats.totalCount}
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <SearchPanel
               dataView={dataView}
@@ -205,6 +196,15 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
+          {docStats?.totalCount !== undefined && (
+            <EuiFlexItem>
+              <DocumentCountContent
+                brushSelectionUpdateHandler={setWindowParameters}
+                documentCountStats={docStats.documentCountStats}
+                totalCount={docStats.totalCount}
+              />
+            </EuiFlexItem>
+          )}
           <EuiSpacer size="m" />
           {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
             <EuiFlexItem>

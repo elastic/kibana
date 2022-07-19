@@ -138,7 +138,7 @@ export const useData = (
   useEffect(() => {
     updateFieldStatsRequest();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchString]);
+  }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
     docStats,

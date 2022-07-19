@@ -195,7 +195,9 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchData) {
+    // @ts-ignore property does not exist on type never
     const currentQuery = userQuery ?? savedSearchData?.query;
+    // @ts-ignore property does not exist on type never
     const currentFilters = userFilters ?? savedSearchData?.filter;
 
     if (filterManager) filterManager.setFilters(currentFilters);
