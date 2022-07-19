@@ -752,6 +752,34 @@
         "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.UPDATE_FILTER_REFERENCES_ACTION",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_FILTER_REFERENCES_ACTION",
+        "description": [],
+        "signature": [
+          "\"UPDATE_FILTER_REFERENCES_ACTION\""
+        ],
+        "path": "src/plugins/unified_search/public/actions/update_filter_references_action.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.UPDATE_FILTER_REFERENCES_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_FILTER_REFERENCES_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"UPDATE_FILTER_REFERENCES_TRIGGER\""
+        ],
+        "path": "src/plugins/unified_search/public/triggers/update_filter_references_trigger.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],

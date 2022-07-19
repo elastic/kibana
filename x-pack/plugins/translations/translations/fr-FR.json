@@ -26444,8 +26444,6 @@
     "xpack.securitySolution.endpointManagemnet.noPermissionsText": "Vous ne disposez pas des autorisations Kibana requises pour utiliser Elastic Security Administration",
     "xpack.securitySolution.endpointPolicyStatus.revisionNumber": "rév. {revNumber}",
     "xpack.securitySolution.endpointPolicyStatus.tooltipTitleLabel": "Politique appliquée",
-    "xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle": "Échec",
-    "xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle": "Réussite",
     "xpack.securitySolution.endpointResponseActions.status.agentStatus": "Statut de l'agent",
     "xpack.securitySolution.endpointResponseActions.status.lastActive": "Dernière activité",
     "xpack.securitySolution.endpointResponseActions.status.policyStatus": "Statut de la politique",
