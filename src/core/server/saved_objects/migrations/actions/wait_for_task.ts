@@ -80,7 +80,7 @@ export const waitForTask =
       .get({
         task_id: taskId,
         wait_for_completion: true,
-        timeout,
+        timeout: `${timeout}ms`,
       })
       .then((body) => {
         const failures = body.response?.failures ?? [];

@@ -49,7 +49,7 @@ export const updateAndPickupMappings = ({
       .putMapping(
         {
           index,
-          timeout: DEFAULT_TIMEOUT,
+          timeout: `${DEFAULT_TIMEOUT}ms`,
           body: mappings,
         },
         {

@@ -79,7 +79,7 @@ export function waitForIndexStatus({
         {
           index,
           wait_for_status: status,
-          timeout,
+          timeout: `${timeout}ms`,
         },
         {
           // Don't reject on status code 408 so that we can handle the timeout
