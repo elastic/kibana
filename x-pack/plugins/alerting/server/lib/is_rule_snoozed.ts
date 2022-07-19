@@ -10,7 +10,7 @@ import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 import { isSnoozeActive } from './snooze/is_snooze_active';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
-type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string }>;
+type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
 
 export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null) {
