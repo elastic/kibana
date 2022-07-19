@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
+import { first, isEmpty } from 'lodash';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 import { isSnoozeActive } from './snooze/is_snooze_active';
 
@@ -13,7 +13,7 @@ type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSc
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
 
 export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
-  if (rule.snoozeSchedule == null) {
+  if (rule.snoozeSchedule == null || isEmpty(rule.snoozeSchedule)) {
     return null;
   }
 

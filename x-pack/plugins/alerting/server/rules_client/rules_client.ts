@@ -8,7 +8,18 @@
 import Semver from 'semver';
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, cloneDeep } from 'lodash';
+import {
+  omit,
+  isEqual,
+  map,
+  uniq,
+  pick,
+  truncate,
+  trim,
+  mapValues,
+  cloneDeep,
+  isEmpty,
+} from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -511,7 +522,6 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      isSnoozedUntil: null,
       snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
@@ -2179,10 +2189,6 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
-      ...this.updateRuleAttrIsSnoozedUntil({
-        ...newAttrs,
-        isSnoozedUntil: attributes.isSnoozedUntil,
-      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2253,11 +2259,6 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
-      ...this.updateRuleAttrIsSnoozedUntil({
-        isSnoozedUntil: attributes.isSnoozedUntil,
-        snoozeSchedule,
-        muteAll: !scheduleIds ? false : attributes.muteAll,
-      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
       ...(!scheduleIds ? { muteAll: false } : {}),
@@ -2272,20 +2273,12 @@ export class RulesClient {
     );
   }
 
-  public updateRuleAttrIsSnoozedUntil(rule: {
+  public calculateIsSnoozedUntil(rule: {
     muteAll: boolean;
     snoozeSchedule?: RuleSnooze;
-    isSnoozedUntil?: Date | string | null;
-  }): { isSnoozedUntil?: string } | {} {
+  }): string | null {
     const isSnoozedUntil = getRuleSnoozeEndTime(rule);
-
-    if (!isSnoozedUntil && !rule.isSnoozedUntil) return {};
-
-    return isSnoozedUntil
-      ? {
-          isSnoozedUntil: isSnoozedUntil.toISOString(),
-        }
-      : {};
+    return isSnoozedUntil ? isSnoozedUntil.toISOString() : null;
   }
 
   public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
@@ -2309,11 +2302,6 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       snoozeSchedule,
-      ...this.updateRuleAttrIsSnoozedUntil({
-        snoozeSchedule,
-        isSnoozedUntil: attributes.isSnoozedUntil,
-        muteAll: attributes.muteAll,
-      }),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2688,7 +2676,6 @@ export class RulesClient {
       schedule,
       actions,
       snoozeSchedule,
-      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
@@ -2703,7 +2690,14 @@ export class RulesClient {
         ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
       },
     }));
-    const includeSnoozeSchedule = snoozeSchedule !== undefined && !excludeFromPublicApi;
+    const includeSnoozeSchedule =
+      snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
+    const isSnoozedUntil = includeSnoozeSchedule
+      ? this.calculateIsSnoozedUntil({
+          muteAll: partialRawRule.muteAll ?? false,
+          snoozeSchedule,
+        })
+      : null;
     const rule = {
       id,
       notifyWhen,
@@ -2713,10 +2707,10 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+      isSnoozedUntil,
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
-      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }

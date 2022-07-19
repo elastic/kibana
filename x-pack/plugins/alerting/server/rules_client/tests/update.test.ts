@@ -312,6 +312,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -649,6 +650,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -819,6 +821,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -910,6 +913,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -1066,6 +1070,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,

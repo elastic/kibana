@@ -255,9 +255,5 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    isSnoozedUntil: {
-      type: 'date',
-      format: 'strict_date_time',
-    },
   },
 };

@@ -560,7 +560,6 @@ export class TaskRunner<
       stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
         this.executeRule(fakeRequest, rulesClient, rule, apiKey, validatedParams, spaceId)
       ),
-      isRuleSnoozedUntil: asOk(rulesClient.updateRuleAttrIsSnoozedUntil(rule)),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
         // changed during the task execution

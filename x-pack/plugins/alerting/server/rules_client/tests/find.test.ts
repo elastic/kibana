@@ -155,6 +155,7 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -255,6 +256,7 @@ describe('find()', () => {
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -460,58 +462,60 @@ describe('find()', () => {
     );
 
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "1",
-              "params": Object {
-                "foo": true,
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
               },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "isSnoozedUntil": null,
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
             },
-          ],
-          "alertTypeId": "myType",
-          "createdAt": 2019-02-12T21:01:22.479Z,
-          "id": "1",
-          "notifyWhen": "onActiveAlert",
-          "params": Object {
-            "bar": true,
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
-          "schedule": Object {
-            "interval": "10s",
-          },
-          "updatedAt": 2019-02-12T21:01:22.479Z,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "1",
-              "params": Object {
-                "foo": true,
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
               },
+            ],
+            "alertTypeId": "123",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "2",
+            "isSnoozedUntil": null,
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+              "parameterThatIsSavedObjectId": "9",
             },
-          ],
-          "alertTypeId": "123",
-          "createdAt": 2019-02-12T21:01:22.479Z,
-          "id": "2",
-          "notifyWhen": "onActiveAlert",
-          "params": Object {
-            "bar": true,
-            "parameterThatIsSavedObjectId": "9",
+            "schedule": Object {
+              "interval": "20s",
+            },
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
-          "schedule": Object {
-            "interval": "20s",
-          },
-          "updatedAt": 2019-02-12T21:01:22.479Z,
-        },
-      ],
-      "page": 1,
-      "perPage": 10,
-      "total": 2,
-    }
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 2,
+      }
     `);
   });
 
@@ -709,6 +713,7 @@ describe('find()', () => {
             Object {
               "actions": Array [],
               "id": "1",
+              "isSnoozedUntil": null,
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
