@@ -34,8 +34,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
 }) => {
   const { apmEventClient } = setup;
 
-  const chartType =
-    LatencyDistributionChartType.failedTransactionsCorrelations;
+  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const eventType = getEventType(chartType);
 
   const commonQuery = getCommonCorrelationsQuery({

@@ -27,8 +27,7 @@ export const fetchPValues = async ({
   setup: Setup;
   fieldCandidates: string[];
 }) => {
-  const chartType =
-    LatencyDistributionChartType.failedTransactionsCorrelations;
+  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const eventType = getEventType(chartType);
 
   const rangeSteps = await fetchDurationHistogramRangeSteps({

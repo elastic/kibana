@@ -101,8 +101,7 @@ export const useTransactionDistributionChartData = () => {
                       fieldValue: EventOutcome.failure,
                     },
                   ],
-                  chartType:
-                    LatencyDistributionChartType.traceSamples,
+                  chartType: LatencyDistributionChartType.traceSamples,
                 },
               },
             }
