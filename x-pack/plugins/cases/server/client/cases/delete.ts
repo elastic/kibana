@@ -53,6 +53,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     const deleteCasesMapper = async (id: string) =>
       caseService.deleteCase({
         id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -81,6 +82,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
         attachmentService.delete({
           unsecuredSavedObjectsClient,
           attachmentId: comment.id,
+          refresh: false,
         })
       );
 
