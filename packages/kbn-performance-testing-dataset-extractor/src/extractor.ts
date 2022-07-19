@@ -88,7 +88,7 @@ const getTraceItems = (
           path: hit.url.path,
           headers: parseHeaders(hit.http.request.headers),
           method: hit.http.request.method,
-          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
+          body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
           statusCode: hit.http.response.status_code,
           timestamp: new Date(hit['@timestamp']).getTime(),
         },
