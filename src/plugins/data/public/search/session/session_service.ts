@@ -330,7 +330,7 @@ export class SessionService {
   public trackSearch(searchDescriptor: TrackSearchDescriptor): TrackSearchHandler {
     this.state.transitions.trackSearch(searchDescriptor, {
       lastPollingTime: new Date(),
-      isStored: this.isStored(),
+      isStored: false,
     });
 
     return {
