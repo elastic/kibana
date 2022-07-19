@@ -16,16 +16,43 @@ import {
 import { DEFAULT_TIMEOUT } from './constants';
 
 /** @internal */
-export interface WaitForIndexStatusYellowParams {
+export interface WaitForIndexStatusParams {
   client: ElasticsearchClient;
   index: string;
   timeout?: string;
+  status: 'yellow' | 'green';
 }
 
 export interface IndexNotYellowTimeout {
   type: 'index_not_yellow_timeout';
   message: string;
 }
+
+export interface IndexNotGreenTimeout {
+  type: 'index_not_green_timeout';
+  message: string;
+}
+
+export function waitForIndexStatus({
+  client,
+  index,
+  timeout,
+  status,
+}: WaitForIndexStatusParams & { status: 'yellow' }): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotYellowTimeout,
+  {}
+>;
+
+export function waitForIndexStatus({
+  client,
+  index,
+  timeout,
+  status,
+}: WaitForIndexStatusParams & { status: 'green' }): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotGreenTimeout,
+  {}
+>;
+
 /**
  * A yellow index status means the index's primary shard is allocated and the
  * index is ready for searching/indexing documents, but ES wasn't able to
@@ -37,21 +64,21 @@ export interface IndexNotYellowTimeout {
  * yellow at any point in the future. So ultimately data-redundancy is up to
  * users to maintain.
  */
-export const waitForIndexStatusYellow =
-  ({
-    client,
-    index,
-    timeout = DEFAULT_TIMEOUT,
-  }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotYellowTimeout,
-    {}
-  > =>
-  () => {
+export function waitForIndexStatus({
+  client,
+  index,
+  timeout = DEFAULT_TIMEOUT,
+  status,
+}: WaitForIndexStatusParams): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotYellowTimeout | IndexNotGreenTimeout,
+  {}
+> {
+  return () => {
     return client.cluster
       .health(
         {
           index,
-          wait_for_status: 'yellow',
+          wait_for_status: status,
           timeout,
         },
         // Don't reject on status code 408 so that we can handle the timeout
@@ -60,12 +87,20 @@ export const waitForIndexStatusYellow =
       )
       .then((res) => {
         if (res.timed_out === true) {
-          return Either.left({
-            type: 'index_not_yellow_timeout' as const,
-            message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become 'yellow'`,
-          });
+          if (status === 'green') {
+            return Either.left({
+              type: 'index_not_green_timeout' as const,
+              message: `[index_not_green_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
+            });
+          } else if (status === 'yellow') {
+            return Either.left({
+              type: 'index_not_yellow_timeout' as const,
+              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become '${status}'`,
+            });
+          }
         }
         return Either.right({});
       })
       .catch(catchRetryableEsClientErrors);
   };
+}

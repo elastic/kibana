@@ -241,8 +241,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isLeft(res)) {
       const left = res.left;
-      if (isTypeof(left, 'index_not_yellow_timeout')) {
-        // `index_not_yellow_timeout` for the LEGACY_CREATE_REINDEX_TARGET source index:
+      if (isTypeof(left, 'index_not_green_timeout')) {
+        // `index_not_green_timeout` for the LEGACY_CREATE_REINDEX_TARGET source index:
         // A yellow status timeout could theoretically be temporary for a busy cluster
         // that takes a long time to allocate the primary and we retry the action to see if
         // we get a response.
@@ -485,10 +485,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
     } else if (Either.isLeft(res)) {
       const left = res.left;
-      if (isTypeof(left, 'index_not_yellow_timeout')) {
-        // `index_not_yellow_timeout` for the CREATE_REINDEX_TEMP target temp index:
-        // The index status did not go yellow within the specified timeout period.
-        // A yellow status timeout could theoretically be temporary for a busy cluster.
+      if (isTypeof(left, 'index_not_green_timeout')) {
+        // `index_not_green_timeout` for the CREATE_REINDEX_TEMP target temp index:
+        // The index status did not go green within the specified timeout period.
+        // A green status timeout could theoretically be temporary for a busy cluster.
         //
         // If there is a problem CREATE_REINDEX_TEMP action will
         // continue to timeout and eventually lead to a failed migration.
@@ -753,9 +753,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'REFRESH_TARGET',
         };
-      } else if (isTypeof(left, 'index_not_yellow_timeout')) {
-        // `index_not_yellow_timeout` for the CLONE_TEMP_TO_TARGET source -> target index:
-        // The target index status did not go yellow within the specified timeout period.
+      } else if (isTypeof(left, 'index_not_green_timeout')) {
+        // `index_not_green_timeout` for the CLONE_TEMP_TO_TARGET source -> target index:
+        // The target index status did not go green within the specified timeout period.
         // The cluster could just be busy and we retry the action.
 
         // Once we run out of retries, the migration fails.
@@ -1019,8 +1019,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else if (Either.isLeft(res)) {
       const left = res.left;
-      if (isTypeof(left, 'index_not_yellow_timeout')) {
-        // `index_not_yellow_timeout` for the CREATE_NEW_TARGET target index:
+      if (isTypeof(left, 'index_not_green_timeout')) {
+        // `index_not_green_timeout` for the CREATE_NEW_TARGET target index:
         // The cluster might just be busy and we retry the action for a set number of times.
         // If the cluster hit the low watermark for disk usage the action will continue to timeout.
         // Unless the disk space is addressed, the LEGACY_CREATE_REINDEX_TARGET action will

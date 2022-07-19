@@ -15,7 +15,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { pitKeepAlive } from './open_pit';
+import { PIT_KEEP_ALIVE_10MINS } from './open_pit';
 
 /** @internal */
 export interface ReadWithPit {
@@ -51,7 +51,7 @@ export const readWithPit =
       .search<SavedObjectsRawDoc>({
         seq_no_primary_term: seqNoPrimaryTerm,
         // Fail if the index being searched doesn't exist or is closed
-        allow_no_indices: false, // TODO test
+        // allow_no_indices: false,
         // By default ES returns a 200 with partial results if there are shard
         // request timeouts or shard failures which can lead to data loss for
         // migrations
@@ -60,7 +60,7 @@ export const readWithPit =
         // natural order of the index which is the most efficient option
         // as order is not important for the migration
         sort: ['_shard_doc'],
-        pit: { id: pitId, keep_alive: pitKeepAlive },
+        pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE_10MINS },
         size: batchSize,
         search_after: searchAfter,
         /**

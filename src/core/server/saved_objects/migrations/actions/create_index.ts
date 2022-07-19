@@ -22,7 +22,7 @@ import {
   INDEX_AUTO_EXPAND_REPLICAS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import { IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import { isClusterShardLimitExceeded } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
@@ -61,7 +61,7 @@ export const createIndex = ({
   mappings,
   aliases = [],
 }: CreateIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+  RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   'create_index_succeeded'
 > => {
   const createIndexTask: TaskEither.TaskEither<
@@ -74,11 +74,11 @@ export const createIndex = ({
       .create(
         {
           index: indexName,
-          // wait until all shards are available before creating the index
-          // (since number_of_shards=1 this does not have any effect atm)
+          // wait up to timeout until the following shards are available before
+          // creating the index: primary, replica (only on multi node clusters)
           wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
           // Wait up to 60s for the cluster state to update and all shards to be
-          // started
+          // available
           timeout: DEFAULT_TIMEOUT,
           body: {
             mappings,
@@ -140,19 +140,25 @@ export const createIndex = ({
   return pipe(
     createIndexTask,
     TaskEither.chain<
-      RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+      RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
       AcknowledgeResponse,
       'create_index_succeeded'
     >((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
-        // If the cluster state was updated and all shards ackd we're done
+        // If the cluster state was updated and all shards started we're done
         return TaskEither.right('create_index_succeeded');
       } else {
-        // Otherwise, wait until the target index has a 'yellow' status.
+        // Otherwise, wait until the target index has a 'green' status meaning
+        // the primary (and on multi node clusters) the replica has been started
         return pipe(
-          waitForIndexStatusYellow({ client, index: indexName, timeout: DEFAULT_TIMEOUT }),
+          waitForIndexStatus({
+            client,
+            index: indexName,
+            timeout: DEFAULT_TIMEOUT,
+            status: 'green',
+          }),
           TaskEither.map(() => {
-            /** When the index status is 'yellow' we know that all shards were started */
+            /** When the index status is 'green' we know that all shards were started */
             return 'create_index_succeeded';
           })
         );

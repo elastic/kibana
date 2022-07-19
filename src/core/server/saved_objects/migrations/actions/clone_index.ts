@@ -15,8 +15,8 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse, IndexNotYellowTimeout } from '.';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import type { IndexNotFound, AcknowledgeResponse } from '.';
+import { IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
@@ -51,7 +51,7 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+  RetryableEsClientError | IndexNotFound | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
@@ -135,7 +135,7 @@ export const cloneIndex = ({
       } else {
         // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow({ client, index: target, timeout }),
+          waitForIndexStatus({ client, index: target, timeout, status: 'green' }),
           TaskEither.map((value) => {
             /** When the index status is 'yellow' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };

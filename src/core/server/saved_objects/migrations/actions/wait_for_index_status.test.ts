@@ -7,12 +7,12 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import { waitForIndexStatus } from './wait_for_index_status';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 jest.mock('./catch_retryable_es_client_errors');
 
-describe('waitForIndexStatusYellow', () => {
+describe('waitForIndexStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -30,9 +30,10 @@ describe('waitForIndexStatusYellow', () => {
   );
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-    const task = waitForIndexStatusYellow({
+    const task = waitForIndexStatus({
       client,
       index: 'my_index',
+      status: 'yellow',
     });
     try {
       await task();
