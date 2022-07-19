@@ -69,7 +69,7 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
             <EuiSpacer />
           </div>
         )}
-        <EuiBasicTable items={mappedData} columns={columns} />
+        <EuiBasicTable compressed={true} items={mappedData} columns={columns} />
       </>
     );
   }
