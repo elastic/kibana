@@ -5,72 +5,32 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText, EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const popoverOptions = props.options.filter((option) => option.showInPopover);
-  const inlineOptions = props.options.filter((option) => option.inlineElement);
-
+  const { euiTheme } = useEuiTheme();
   return (
-    <>
-      {popoverOptions.length > 0 && (
-        <EuiText textAlign="right">
-          <EuiPopover
-            ownFocus
-            button={
-              <EuiButtonEmpty
-                size="xs"
-                iconType="arrowDown"
-                iconSide="right"
-                data-test-subj="indexPattern-advanced-popover"
-                onClick={() => {
-                  setPopoverOpen(!popoverOpen);
-                }}
-              >
-                {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
-                  defaultMessage: 'Add advanced options',
-                })}
-              </EuiButtonEmpty>
-            }
-            isOpen={popoverOpen}
-            closePopover={() => {
-              setPopoverOpen(false);
-            }}
-          >
-            {popoverOptions.map(({ dataTestSubj, onClick, title, optionElement }, index) => (
-              <React.Fragment key={dataTestSubj}>
-                {optionElement ? (
-                  optionElement
-                ) : (
-                  <EuiText size="s">
-                    <EuiLink
-                      data-test-subj={dataTestSubj}
-                      color="text"
-                      onClick={() => {
-                        setPopoverOpen(false);
-                        onClick();
-                      }}
-                    >
-                      {title}
-                    </EuiLink>
-                  </EuiText>
-                )}
-                {popoverOptions.length - 1 !== index && <EuiSpacer size="s" />}
-              </React.Fragment>
-            ))}
-          </EuiPopover>
+    <EuiAccordion
+      id="advancedOptionsAccordion"
+      arrowProps={{ color: 'primary' }}
+      data-test-subj="indexPattern-advanced-accordion"
+      buttonContent={
+        <EuiText size="s" color={euiTheme.colors.primary}>
+          {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
+            defaultMessage: 'Advanced',
+          })}
         </EuiText>
-      )}
-      {inlineOptions.map((option) => (
-        <React.Fragment key={option.dataTestSubj}>
+      }
+    >
+      {props.options.map(({ dataTestSubj, inlineElement }) => (
+        <div key={dataTestSubj} data-test-subj={dataTestSubj}>
           <EuiSpacer size="s" />
-          {option.inlineElement}
-        </React.Fragment>
+          {inlineElement}
+        </div>
       ))}
-    </>
+    </EuiAccordion>
   );
 }

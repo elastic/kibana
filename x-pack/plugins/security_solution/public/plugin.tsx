@@ -31,6 +31,7 @@ import type {
   AppObservableLibs,
   SubPlugins,
   StartedSubPlugins,
+  StartPluginsDependencies,
 } from './types';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -94,7 +95,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private _store?: SecurityAppStore;
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
+  public setup(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ): PluginSetup {
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
@@ -122,13 +126,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * in the `setup` lifecycle phase.
      */
     const startServices: Promise<StartServices> = (async () => {
-      const [coreStart, startPlugins] = await core.getStartServices();
+      const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
+
+      const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         apm,
+        savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
         security: plugins.security,
       };

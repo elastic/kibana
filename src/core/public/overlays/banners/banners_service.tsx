@@ -11,9 +11,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
-import { IUiSettingsClient } from '../../ui_settings';
 import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
 
