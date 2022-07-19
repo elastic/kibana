@@ -2,8 +2,8 @@
 
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/banners/multispace"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multispace"
+orig_archive="x-pack/test/functional/es_archives/spaces/copy_saved_objects"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects"
 test_config="x-pack/test/functional/apps/spaces/config.ts"
 
 arrayify_csv() {

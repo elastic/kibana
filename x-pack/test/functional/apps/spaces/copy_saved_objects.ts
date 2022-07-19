@@ -12,14 +12,16 @@ export default function spaceSelectorFunctonalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
 
   describe('Copy Saved Objects to Space', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
+      await kibanaServer.importExport.load(
+        `x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects`
+      );
 
       await spaces.create({
         id: 'marketing',
@@ -45,7 +47,7 @@ export default function spaceSelectorFunctonalTests({
     after(async () => {
       await spaces.delete('sales');
       await spaces.delete('marketing');
-      await esArchiver.unload('x-pack/test/functional/es_archives/spaces/copy_saved_objects');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('allows a dashboard to be copied to the marketing space, with all references', async () => {
