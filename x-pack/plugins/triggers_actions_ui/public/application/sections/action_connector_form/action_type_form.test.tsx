@@ -121,6 +121,53 @@ describe('action_type_form', () => {
       0
     );
   });
+
+  it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        // add errors to the form
+        const validationResult = { errors: { message: ['test error']} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    const wrapper = mountWithIntl(
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: '232323',
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
+        },
+      })
+    );
+
+    // Wait for active space to resolve before requesting the component to update
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeFalsy();
+    wrapper.find('.euiAccordion__button').last().simulate('click');
+    // make sure that the accordion is collapsed
+    expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
+    expect(wrapper.exists('[data-test-subj="action-group-error-icon"]')).toBeTruthy();
+  });
 });
 
 function getActionTypeForm(

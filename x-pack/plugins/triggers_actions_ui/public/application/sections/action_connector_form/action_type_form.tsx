@@ -280,7 +280,12 @@ export const ActionTypeForm = ({
         <EuiFlexGroup gutterSize="l" alignItems="center">
           {showActionGroupErrorIcon() && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="danger" size="m" />
+              <EuiIcon
+                data-test-subj="action-group-error-icon"
+                type="alert"
+                color="danger"
+                size="m"
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
