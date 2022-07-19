@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-
-
 export type SavedObjectTemplate = 'hostRiskScoreDashboards';
