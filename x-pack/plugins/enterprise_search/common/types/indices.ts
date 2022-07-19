@@ -19,6 +19,11 @@ export interface ElasticsearchIndex {
   alias: boolean;
   health?: HealthStatus;
   name: IndexName;
+  privileges: {
+    // these will always be present, but we're fooling TypeScript with the ?'s
+    read?: boolean;
+    manage?: boolean;
+  };
   status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {

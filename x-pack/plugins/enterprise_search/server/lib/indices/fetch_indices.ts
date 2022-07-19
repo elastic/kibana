@@ -61,6 +61,14 @@ export const fetchIndices = async (
     index: indexPattern,
   });
 
+  const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
+    accum.push(indexName);
+    let aliases = Object.keys(totalIndices[indexName].aliases!);
+
+    aliases.forEach((alias) => accum.push(alias));
+    return accum;
+  }, [] as string[]);
+
   const indicesNames = returnHiddenIndices
     ? Object.keys(totalIndices)
     : Object.keys(totalIndices).filter(
@@ -77,30 +85,38 @@ export const fetchIndices = async (
   });
 
   // TODO: make multiple batched requests if indicesNames.length > SOMETHING
-  const { has_all_requested, index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
-    index: [{
-      names: indicesNames,
-      privileges: ['read', 'manage'],
-    }],
+  const { index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
+    index: [
+      {
+        names: indexAndAliasNames,
+        privileges: ['read', 'manage'],
+      },
+    ],
   });
 
-  const accessibleIndexNames = has_all_requested ? indicesNames : indicesNames.filter((indexName) => (
-    indexPrivileges[indexName].read && indexPrivileges[indexName].manage
-  ));
-
-  return accessibleIndexNames
+  return indicesNames
     .map((indexName: string) => {
       const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
       return mapIndexStats(indexData, indexStats, indexName);
     })
-    .flatMap(({ name, aliases, ...engineData }) => {
+    .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const indicesAndAliases = [];
-      indicesAndAliases.push({ name, alias: false, ...engineData });
+      const indicesAndAliases = [] as ElasticsearchIndex[];
+      indicesAndAliases.push({
+        name,
+        alias: false,
+        privileges: indexPrivileges[name],
+        ...indexData,
+      });
 
       aliases.forEach((alias) => {
-        indicesAndAliases.push({ name: alias, alias: true, ...engineData });
+        indicesAndAliases.push({
+          name: alias,
+          alias: true,
+          privileges: indexPrivileges[alias],
+          ...indexData,
+        });
       });
       return indicesAndAliases;
     }).filter(({ name }, index, array) => (

@@ -50,7 +50,15 @@ describe('fetchIndices lib function', () => {
     },
   };
 
-  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
+  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+    'index': {
+      'index-without-prefix': { read: true, manage: true },
+      'search-aliased': { read: true, manage: true },
+      'search-double-aliased': { read: true, manage: true },
+      'search-regular-index': { read: true, manage: true },
+      'second-index': { read: true, manage: true },
+    },
+  }));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,6 +79,7 @@ describe('fetchIndices lib function', () => {
         name: 'search-regular-index',
         status: 'open',
         alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -98,84 +107,15 @@ describe('fetchIndices lib function', () => {
 
     expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       index: [{
-        names: ['search-regular-index'],
+        names: ['search-regular-index', 'hidden'],
         privileges: ['read', 'manage'],
       }],
-    });
-  });
-
-  it('should not return index for which user does not have read privileges', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() => ({
-      ...regularIndexResponse,
-      hidden: { aliases: {}, settings: { index: { hidden: 'true' } } },
-    }));
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
-    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
-      has_all_requested: false,
-      index: {
-        'search-regular-index': {
-          read: false,
-          manage: true,
-        },
-      },
-    }));
-
-    await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
-    ).resolves.toEqual([]);
-
-    expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
-      expand_wildcards: ['open'],
-      features: ['aliases', 'settings'],
-      filter_path: ['*.aliases', '*.settings.index.hidden'],
-      index: 'search-*',
-    });
-
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      expand_wildcards: ['open'],
-      index: 'search-*',
-      metric: ['docs', 'store'],
-    });
-  });
-
-  it('should not return index for which user does not have manage privileges', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() => ({
-      ...regularIndexResponse,
-      hidden: { aliases: {}, settings: { index: { hidden: 'true' } } },
-    }));
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
-    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
-      has_all_requested: false,
-      index: {
-        'search-regular-index': {
-          read: true,
-          manage: false,
-        },
-      },
-    }));
-
-    await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
-    ).resolves.toEqual([]);
-
-    expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
-      expand_wildcards: ['open'],
-      features: ['aliases', 'settings'],
-      filter_path: ['*.aliases', '*.settings.index.hidden'],
-      index: 'search-*',
-    });
-
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      expand_wildcards: ['open'],
-      index: 'search-*',
-      metric: ['docs', 'store'],
     });
   });
 
   it('should return hidden indices without aliases if specified', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => regularIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
-    mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({ has_all_requested: true }));
 
     await expect(
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true)
@@ -185,6 +125,7 @@ describe('fetchIndices lib function', () => {
         name: 'search-regular-index',
         status: 'open',
         alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -244,6 +185,7 @@ describe('fetchIndices lib function', () => {
         name: 'index-without-prefix',
         status: 'open',
         alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -260,6 +202,7 @@ describe('fetchIndices lib function', () => {
         name: 'search-aliased',
         status: 'open',
         alias: true,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -276,6 +219,7 @@ describe('fetchIndices lib function', () => {
         name: 'search-double-aliased',
         status: 'open',
         alias: true,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -292,6 +236,7 @@ describe('fetchIndices lib function', () => {
         name: 'second-index',
         status: 'open',
         alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -325,6 +270,7 @@ describe('fetchIndices lib function', () => {
         name: 'search-regular-index',
         status: undefined,
         alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 0,
