@@ -28,7 +28,6 @@ const useBulkActionsToMenuItemMapper = (
   alerts: EcsFieldsResponse[]
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
-  const isDisabled = isAllSelected;
 
   const selectedAlertIds = useMemo(
     () =>
@@ -39,18 +38,21 @@ const useBulkActionsToMenuItemMapper = (
     [rowSelection, alerts]
   );
 
-  return items.map((item) => (
-    <EuiContextMenuItem
-      key={item.key}
-      data-test-subj={item['data-test-subj']}
-      disabled={isDisabled}
-      onClick={() => {
-        item.onClick(selectedAlertIds, isAllSelected);
-      }}
-    >
-      {isDisabled ? item.disabledLabel : item.label}
-    </EuiContextMenuItem>
-  ));
+  return items.map((item) => {
+    const isDisabled = isAllSelected && item.disableOnQuery;
+    return (
+      <EuiContextMenuItem
+        key={item.key}
+        data-test-subj={item['data-test-subj']}
+        disabled={isDisabled}
+        onClick={() => {
+          item.onClick(selectedAlertIds, isAllSelected);
+        }}
+      >
+        {isDisabled && item.disableOnQuery && item.disabledLabel ? item.disabledLabel : item.label}
+      </EuiContextMenuItem>
+    );
+  });
 };
 
 const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, alerts }) => {

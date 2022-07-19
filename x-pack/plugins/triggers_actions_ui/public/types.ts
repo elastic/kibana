@@ -429,7 +429,7 @@ export interface BulkActionsConfig {
   key: string;
   'data-test-subj': string;
   disableOnQuery: boolean;
-  disabledLabel: string;
+  disabledLabel?: string;
   onClick: (selectedIds: Array<{ id: string; index: string }>, isAllSelected: boolean) => void;
 }
 

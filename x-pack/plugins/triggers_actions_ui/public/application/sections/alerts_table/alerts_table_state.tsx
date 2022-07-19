@@ -55,7 +55,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-  cases: CaseUi;
+  cases?: CaseUi;
 }
 
 interface AlertsTableStorage {
@@ -243,7 +243,7 @@ const AlertsTableState = ({
     ]
   );
 
-  const CasesContext = cases.ui.getCasesContext();
+  const CasesContext = cases?.ui.getCasesContext();
 
   return hasAlertsTableConfiguration ? (
     <>
@@ -251,7 +251,7 @@ const AlertsTableState = ({
       {isLoading && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && (
+      {alertsCount !== 0 && CasesContext && cases && (
         <CasesContext
           owner={[configurationId]}
           permissions={cases.permissions}
@@ -261,6 +261,11 @@ const AlertsTableState = ({
             <AlertsTable {...tableProps} />
           </BulkActionsContext.Provider>
         </CasesContext>
+      )}
+      {alertsCount !== 0 && (!CasesContext || !cases) && (
+        <BulkActionsContext.Provider value={initialBulkActionsState}>
+          <AlertsTable {...tableProps} />
+        </BulkActionsContext.Provider>
       )}
     </>
   ) : (

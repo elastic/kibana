@@ -23,7 +23,7 @@ export const getToolbarVisibility = ({
   alerts: EcsFieldsResponse[];
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions === undefined)
+  if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
     return {};
 
   const options = {

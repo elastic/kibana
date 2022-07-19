@@ -13,7 +13,6 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import { AlertsField, AlertsTableProps, BulkActionsState } from '../../../../types';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { bulkActionsReducer } from './reducer';
 
 jest.mock('@kbn/data-plugin/public');
@@ -38,11 +37,13 @@ describe('AlertsTable.BulkActions', () => {
       [AlertsField.name]: ['one'],
       [AlertsField.reason]: ['two'],
       _id: 'alert0',
+      _index: 'idx0',
     },
     {
       [AlertsField.name]: ['three'],
       [AlertsField.reason]: ['four'],
       _id: 'alert1',
+      _index: 'idx1',
     },
   ] as unknown as EcsFieldsResponse[];
 
@@ -78,13 +79,11 @@ describe('AlertsTable.BulkActions', () => {
   const tableProps = {
     alertsTableConfiguration,
     columns,
-    bulkActions: [],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 2,
     pageSizeOptions: [2, 4],
     leadingControlColumns: [],
-    showCheckboxes: false,
     showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
@@ -98,13 +97,15 @@ describe('AlertsTable.BulkActions', () => {
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
-      useBulkActions: () => {
-        return {
-          render: () => [
-            <EuiContextMenuItem onClick={() => {}}>{'Fake Bulk Action'}</EuiContextMenuItem>,
-          ],
-        };
-      },
+      useBulkActions: () => [
+        {
+          label: 'Fake Bulk Action',
+          key: 'fakeBulkAction',
+          'data-test-subj': 'fake-bulk-action',
+          disableOnQuery: false,
+          onClick: () => {},
+        },
+      ],
     },
   };
 
@@ -302,11 +303,7 @@ describe('AlertsTable.BulkActions', () => {
     describe('and the toolbar is on ', () => {
       describe('and a bulk action is executed', () => {
         it('should return the selected alert ids', async () => {
-          const mockedFn = jest.fn(() => [
-            <EuiContextMenuItem key={'key'} onClick={() => {}}>
-              {'Fake Bulk Action'}
-            </EuiContextMenuItem>,
-          ]);
+          const mockedFn = jest.fn();
           const props = {
             ...tablePropsWithBulkActions,
             initialBulkActionsState: {
@@ -316,11 +313,15 @@ describe('AlertsTable.BulkActions', () => {
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
 
-              useBulkActions: () => {
-                return {
-                  render: mockedFn,
-                };
-              },
+              useBulkActions: () => [
+                {
+                  label: 'Fake Bulk Action',
+                  key: 'fakeBulkAction',
+                  'data-test-subj': 'fake-bulk-action',
+                  disableOnQuery: false,
+                  onClick: mockedFn,
+                },
+              ],
             },
           };
 
@@ -331,7 +332,7 @@ describe('AlertsTable.BulkActions', () => {
           userEvent.click(getByTestId('selectedShowBulkActionsButton'));
 
           userEvent.click(getByText('Fake Bulk Action'));
-          expect(mockedFn.mock.calls[mockedFn.mock.calls.length - 1]).toEqual([false, ['alert1']]);
+          expect(mockedFn.mock.calls[0]).toEqual([[{ id: 'alert1', index: 'idx1' }], false]);
         });
       });
 
@@ -384,26 +385,26 @@ describe('AlertsTable.BulkActions', () => {
 
         describe('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', () => {
-            const mockedFn = jest.fn(() => [
-              <EuiContextMenuItem key={'key'} onClick={() => {}}>
-                {'Fake Bulk Action'}
-              </EuiContextMenuItem>,
-            ]);
+            const mockedFn = jest.fn();
             const props = {
               ...tablePropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
-                areAllVisibleRowsSelected: true,
                 isAllSelected: true,
+                rowCount: 2,
                 rowSelection: new Set([0, 1]),
               },
               alertsTableConfiguration: {
                 ...alertsTableConfiguration,
-                useBulkActions: () => {
-                  return {
-                    render: mockedFn,
-                  };
-                },
+                useBulkActions: () => [
+                  {
+                    label: 'Fake Bulk Action',
+                    key: 'fakeBulkAction',
+                    'data-test-subj': 'fake-bulk-action',
+                    disableOnQuery: false,
+                    onClick: mockedFn,
+                  },
+                ],
               },
             };
 
@@ -412,10 +413,14 @@ describe('AlertsTable.BulkActions', () => {
             );
 
             userEvent.click(getByTestId('selectedShowBulkActionsButton'));
+
             userEvent.click(getByText('Fake Bulk Action'));
-            expect(mockedFn.mock.calls[mockedFn.mock.calls.length - 1]).toEqual([
+            expect(mockedFn.mock.calls[0]).toEqual([
+              [
+                { id: 'alert0', index: 'idx0' },
+                { id: 'alert1', index: 'idx1' },
+              ],
               true,
-              ['alert0', 'alert1'],
             ]);
           });
         });

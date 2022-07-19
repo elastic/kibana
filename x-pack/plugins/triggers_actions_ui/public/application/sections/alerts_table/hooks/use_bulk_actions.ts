@@ -37,7 +37,7 @@ export function useBulkActions({
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
   const bulkActions = useBulkActionsConfig();
 
-  const isBulkActionsColumnActive = Boolean(bulkActions);
+  const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
