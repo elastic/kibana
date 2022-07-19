@@ -46,6 +46,9 @@ interface NumericDataItem {
   doc_count: number;
 }
 
+/**
+ * Interface to describe the data structure returned for numeric based charts.
+ */
 export interface NumericChartData {
   data: NumericDataItem[];
   id: string;
@@ -54,6 +57,9 @@ export interface NumericChartData {
   type: 'numeric';
 }
 
+/**
+ * Numeric based histogram field interface, limited to `date` and `number`.
+ */
 export interface NumericHistogramField extends HistogramField {
   type: KBN_FIELD_TYPES.DATE | KBN_FIELD_TYPES.NUMBER;
 }
@@ -112,6 +118,9 @@ interface UnsupportedHistogramField extends HistogramField {
 
 type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
 
+/**
+ * All types of histogram field definitions for fetching histogram data.
+ */
 export type FieldsForHistograms = Array<
   | NumericHistogramField
   | NumericHistogramFieldWithColumnStats
@@ -119,6 +128,18 @@ export type FieldsForHistograms = Array<
   | UnsupportedHistogramField
 >;
 
+/**
+ * Fetches data to be used in mini histogram charts. Supports auto-identifying
+ * the histogram interval and min/max values.
+ *
+ * @param client Elasticsearch Client
+ * @param indexPattern index pattern to be queried
+ * @param query Elasticsearch query
+ * @param fields the fields the histograms should be generated for
+ * @param samplerShardSize shard_size parameter of the sampler aggregation
+ * @param runtimeMappings optional runtime mappings
+ * @returns an array of histogram data for each supplied field
+ */
 export const fetchHistogramsForFields = async (
   client: ElasticsearchClient,
   indexPattern: string,
