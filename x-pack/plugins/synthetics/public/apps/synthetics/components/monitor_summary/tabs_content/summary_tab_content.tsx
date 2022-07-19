@@ -38,9 +38,7 @@ export const SummaryTabContent = () => {
               </EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add availability sparkline*/}</EuiFlexItem>
               <EuiFlexItem>
-                <EuiPanel>
-                  <DurationPanel />
-                </EuiPanel>
+                <DurationPanel />
               </EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>

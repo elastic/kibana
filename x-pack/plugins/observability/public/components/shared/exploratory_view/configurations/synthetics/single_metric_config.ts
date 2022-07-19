@@ -68,7 +68,10 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       {
         id: 'monitor_duration',
         field: 'monitor.duration.us',
-        label: 'Monitor duration',
+        label: 'Avg. Duration',
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
       },
     ],
     labels: FieldLabels,
