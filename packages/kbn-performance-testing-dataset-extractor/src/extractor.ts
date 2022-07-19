@@ -107,7 +107,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
-  const esClient = initClient(authOptions);
+  const esClient = initClient(authOptions, log);
   const ftrTransactionHits = await esClient.getFtrTransactions(buildId, journeyName);
   if (!ftrTransactionHits || ftrTransactionHits.length === 0) {
     log.warning(
