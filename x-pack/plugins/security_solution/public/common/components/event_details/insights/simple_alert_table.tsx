@@ -58,7 +58,12 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
   if (loading) {
     return <EuiLoadingContent lines={2} />;
   } else if (error) {
-    return <>{'Failed to load data'}</>;
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.alertDetails.overview.simpleAlertTable.error"
+        defaultMessage="Failed to load the alerts."
+      />
+    );
   } else if (mappedData) {
     const showLimitedDataNote = alertIds.length > alertLimit;
     return (

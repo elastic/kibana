@@ -90,6 +90,9 @@ export const InsightAccordion = React.memo<Props>(
               {text}
             </span>
           }
+          buttonProps={{
+            'aria-disabled': true,
+          }}
           arrowDisplay="none"
         />
       );

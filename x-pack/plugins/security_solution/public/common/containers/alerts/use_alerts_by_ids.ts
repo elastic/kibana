@@ -24,6 +24,11 @@ interface UserAlertByIdsResult {
   data?: Hit[];
 }
 
+/**
+ * Fetches the alert documents associated to the ids that are passed.
+ * By default it fetches all fields but they can be limited by passing
+ * the `fields` parameter.
+ */
 export const useAlertsByIds = ({
   alertIds,
   fields = ['*'],
