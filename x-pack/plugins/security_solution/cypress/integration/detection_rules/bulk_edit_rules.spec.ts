@@ -28,7 +28,6 @@ import {
   waitForRulesTableToBeLoaded,
   selectAllRules,
   goToTheRuleDetailsOf,
-  waitForRulesTableToBeRefreshed,
   selectNumberOfRules,
   testAllTagsBadges,
   testTagsBadge,
