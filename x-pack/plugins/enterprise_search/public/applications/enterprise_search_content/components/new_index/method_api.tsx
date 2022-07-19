@@ -27,21 +27,26 @@ export const MethodApi: React.FC = () => {
           defaultMessage="Index using the API"
         />
       }
-      description={
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.newIndex.methodApi.description"
-            defaultMessage="Provide a name and optionally select a language analyzer for your documents. An Elasticsearch index will be created. In the next step, well display API instructions."
-          />
-        </EuiText>
-      }
-      docsUrl="#"
       type="api"
       onSubmit={() => null}
     >
       <EuiSteps
         steps={[
           {
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
+                    {
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional index language.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
             title: i18n.translate(
               'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
               {
@@ -50,29 +55,8 @@ export const MethodApi: React.FC = () => {
             ),
 
             titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional language analyzer.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
           },
           {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
-              }
-            ),
-            titleSize: 'xs',
             children: (
               <EuiText size="s">
                 <p>
@@ -87,15 +71,15 @@ export const MethodApi: React.FC = () => {
               </EuiText>
             ),
             status: 'incomplete',
-          },
-          {
             title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
               {
-                defaultMessage: 'Build a search experience',
+                defaultMessage: 'Configure ingestion settings',
               }
             ),
             titleSize: 'xs',
+          },
+          {
             children: (
               <EuiText size="s">
                 <p>
@@ -110,6 +94,13 @@ export const MethodApi: React.FC = () => {
               </EuiText>
             ),
             status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
           },
         ]}
       />

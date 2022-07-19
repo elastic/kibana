@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
@@ -58,7 +59,10 @@ export const fetchConnectorByIndexName = async (
   }
 };
 
-export const fetchConnectors = async (client: IScopedClusterClient): Promise<Connector[]> => {
+export const fetchConnectors = async (
+  client: IScopedClusterClient,
+  indexNames?: string[]
+): Promise<Connector[]> => {
   try {
     const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
       from: 0,
@@ -68,11 +72,14 @@ export const fetchConnectors = async (client: IScopedClusterClient): Promise<Con
     });
     let connectors = connectorResult.hits.hits;
     let length = connectors.length;
+    const query: QueryDslQueryContainer = indexNames
+      ? { terms: { 'index_name.keyword': indexNames } }
+      : { match_all: {} };
     while (length >= 1000) {
       const newConnectorResult = await client.asCurrentUser.search<ConnectorDocument>({
         from: 0,
         index: CONNECTORS_INDEX,
-        query: { match_all: {} },
+        query,
         size: 1000,
       });
       connectors = connectors.concat(newConnectorResult.hits.hits);

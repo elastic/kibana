@@ -12,9 +12,11 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { Connector } from './connectors';
+import { Crawler } from './crawler';
+
 export interface ElasticsearchIndex {
   health?: HealthStatus;
-
   name: IndexName;
   status?: IndicesStatsIndexMetadataState;
   total: {
@@ -27,4 +29,16 @@ export interface ElasticsearchIndex {
     };
   };
   uuid?: Uuid;
+}
+
+export interface ConnectorIndex extends ElasticsearchIndex {
+  connector: Connector;
+}
+
+export interface CrawlerIndex extends ElasticsearchIndex {
+  crawler: Crawler;
+}
+export interface ElasticsearchIndexWithIngestion extends ElasticsearchIndex {
+  connector?: Connector;
+  crawler?: Crawler;
 }

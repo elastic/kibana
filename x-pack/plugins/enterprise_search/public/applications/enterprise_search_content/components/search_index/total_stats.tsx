@@ -25,7 +25,7 @@ interface TotalStatsProps {
 
 export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
   const { indexData, isSuccess } = useValues(OverviewLogic);
-  const documentCount = indexData?.index.total.docs.count ?? 0;
+  const documentCount = indexData?.total.docs.count ?? 0;
   const lastUpdated = (
     <CustomFormattedTimestamp timestamp={Date.now() - 1000 * 60 * 12 /* TODO: Implement this */} />
   );

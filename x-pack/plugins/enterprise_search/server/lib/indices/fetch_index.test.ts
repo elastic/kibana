@@ -54,22 +54,20 @@ describe('fetchIndex lib function', () => {
   };
 
   const result = {
-    index: {
-      aliases: [],
-      health: 'green',
-      name: 'index_name',
-      status: 'open',
-      total: {
-        docs: {
-          count: 100,
-          deleted: 0,
-        },
-        store: {
-          size_in_bytes: '105.47kb',
-        },
+    aliases: [],
+    health: 'green',
+    name: 'index_name',
+    status: 'open',
+    total: {
+      docs: {
+        count: 100,
+        deleted: 0,
       },
-      uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      store: {
+        size_in_bytes: '105.47kb',
+      },
     },
+    uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
   };
 
   it('should return data and stats for index if no connector or crawler is present', async () => {
