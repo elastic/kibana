@@ -102,9 +102,9 @@ export function getEntitiesAndGenerateAlerts(
     ...currLocationMap,
   ]);
   const inactiveEntities: Map<string, GeoContainmentInstanceState[]> = new Map();
-  activeEntities.forEach((containtments, entityName) => {
+  activeEntities.forEach((containments, entityName) => {
     // Generate alerts
-    containtments.forEach((containment) => {
+    containments.forEach((containment) => {
       if (containment.shapeLocationId !== OTHER_CATEGORY) {
         const context = getContainedAlertContext({
           entityName,
@@ -119,20 +119,20 @@ export function getEntitiesAndGenerateAlerts(
     });
 
     // Entity in "other" filter bucket is no longer contained by any boundary and switches from "active" to "inactive"
-    if (containtments[0].shapeLocationId === OTHER_CATEGORY) {
-      inactiveEntities.set(entityName, containtments);
+    if (containments[0].shapeLocationId === OTHER_CATEGORY) {
+      inactiveEntities.set(entityName, containments);
       activeEntities.delete(entityName);
       return;
     }
 
-    const otherCatIndex = containtments.findIndex(
+    const otherCatIndex = containments.findIndex(
       ({ shapeLocationId }) => shapeLocationId === OTHER_CATEGORY
     );
     if (otherCatIndex >= 0) {
-      const afterOtherLocationsArr = containtments.slice(0, otherCatIndex);
+      const afterOtherLocationsArr = containments.slice(0, otherCatIndex);
       activeEntities.set(entityName, afterOtherLocationsArr);
     } else {
-      activeEntities.set(entityName, containtments);
+      activeEntities.set(entityName, containments);
     }
   });
   return { activeEntities, inactiveEntities };
