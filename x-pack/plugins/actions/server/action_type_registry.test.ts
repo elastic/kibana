@@ -118,7 +118,7 @@ describe('register()', () => {
     );
   });
 
-  test('throws if empty feature config provided', () => {
+  test('throws if empty supported feature ids provided', () => {
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     expect(() =>
       actionTypeRegistry.register({
@@ -129,7 +129,7 @@ describe('register()', () => {
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid feature configuration \\"\\" for connector type \\"my-action-type\\"."`
+      `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-action-type\\"."`
     );
   });
 
@@ -144,7 +144,7 @@ describe('register()', () => {
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid feature configuration \\"foo\\" for connector type \\"my-action-type\\"."`
+      `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
     );
   });
 

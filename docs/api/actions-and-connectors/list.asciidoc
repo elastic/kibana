@@ -52,7 +52,8 @@ The API returns the following:
     "minimum_license_required": "gold", <3>
     "enabled": false, <4>
     "enabled_in_config": true, <5>
-    "enabled_in_license": true <6>
+    "enabled_in_license": true, <6>
+    "supported_feature_ids": ["alerting"] <7>
   },
   {
     "id": ".index",
@@ -60,7 +61,8 @@ The API returns the following:
     "minimum_license_required": "basic",
     "enabled": true,
     "enabled_in_config": true,
-    "enabled_in_license": true
+    "enabled_in_license": true,
+    "supported_feature_ids": ["alerting"]
   },
   ...
 ]
@@ -71,3 +73,4 @@ The API returns the following:
 <4> `enabled` - Specifies if the connector type is enabled or disabled in {kib}.
 <5> `enabled_in_config` - Specifies if the connector type is enabled or enabled in the {kib} `.yml` file.
 <6> `enabled_in_license` - Specifies if the connector type is enabled or disabled in the license.
+<7> `supported_feature_ids` - Specifies which Kibana features this connector type supports.

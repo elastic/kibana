@@ -123,15 +123,23 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (
-      !actionType.supportedFeatureIds ||
-      actionType.supportedFeatureIds.length === 0 ||
-      !areValidFeatures(actionType.supportedFeatureIds)
-    ) {
+    if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
+          defaultMessage:
+            'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
+          values: {
+            connectorTypeId: actionType.id,
+            ids: actionType.supportedFeatureIds.join(','),
+          },
+        })
+      );
+    }
+
+    if (!areValidFeatures(actionType.supportedFeatureIds)) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
-          defaultMessage:
-            'Invalid feature configuration "{ids}" for connector type "{connectorTypeId}".',
+          defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
             ids: actionType.supportedFeatureIds.join(','),

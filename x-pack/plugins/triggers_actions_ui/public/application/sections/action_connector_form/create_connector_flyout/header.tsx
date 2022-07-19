@@ -61,7 +61,10 @@ const FlyoutHeaderComponent: React.FC<{
                     gutterSize="xs"
                     alignItems="center"
                   >
-                    Availability:{' '}
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderAvailability"
+                      defaultMessage="Availability:"
+                    />{' '}
                     {featureIds.map((featureId: string) => (
                       <EuiFlexItem grow={false} key={featureId}>
                         <EuiBadge color="default">{getConnectorFeatureName(featureId)}</EuiBadge>
