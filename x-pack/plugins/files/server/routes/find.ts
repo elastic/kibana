@@ -5,20 +5,22 @@
  * 2.0.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Ensure } from '@kbn/utility-types';
+import type { Ensure } from '@kbn/utility-types';
+import type { FilesRouter } from './types';
 
-import type { FindFilesHttpEndpoint } from '../../common/api_routes';
+import { FindFilesHttpEndpoint, FILES_API_ROUTES } from '../../common/api_routes';
 import type { FilesRequestHandler } from './types';
 
 export const method = 'post' as const;
 
 const stringOrArrayOfStrings = schema.oneOf([schema.string(), schema.arrayOf(schema.string())]);
 
-const paramsSchema = schema.object({
+const bodySchema = schema.object({
   kind: schema.maybe(stringOrArrayOfStrings),
   name: schema.maybe(stringOrArrayOfStrings),
   mimeType: schema.maybe(stringOrArrayOfStrings),
-  extension: schema.maybe(stringOrArrayOfStrings),
+  status: schema.maybe(stringOrArrayOfStrings),
+  kuery: schema.maybe(stringOrArrayOfStrings),
   meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
@@ -27,18 +29,31 @@ const querySchema = schema.object({
   perPage: schema.maybe(schema.number({ defaultValue: 100 })),
 });
 
-type Body = Ensure<FindFilesHttpEndpoint['inputs']['body'], TypeOf<typeof paramsSchema>>;
+type Body = Ensure<FindFilesHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
 
 type Query = Ensure<FindFilesHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
 
 type Response = FindFilesHttpEndpoint['output'];
 
-export const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files }, req, res) => {
+function toArray(val: string | string[]) {
+  return Array.isArray(val) ? val : [val];
+}
+
+const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files }, req, res) => {
   const { fileService } = await files;
-  const { body: reqBody, query } = req;
+  const {
+    body: { meta, extension, kind, mimeType, name, status },
+    query,
+  } = req;
+
   const body: Response = {
     files: await fileService.asCurrentUser().find({
-      ...reqBody,
+      kind: kind && toArray(kind),
+      extension: extension && toArray(extension),
+      mimeType: mimeType && toArray(mimeType),
+      name: name && toArray(name),
+      status: status && toArray(status),
+      meta,
       ...query,
     }),
   };
@@ -46,3 +61,20 @@ export const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files
     body,
   });
 };
+
+// TODO: Find out whether we want to add stricter access controls to this route.
+// Currently this is giving read-access to all files which bypasses the
+// security we set up on a per route level for the "getById" and "list" endpoints.
+// Alternatively, we can remove the access controls on the "file kind" endpoints
+// or remove them entirely.
+export function register(router: FilesRouter) {
+  router.post(
+    {
+      path: FILES_API_ROUTES.find,
+      validate: {
+        body: bodySchema,
+      },
+    },
+    handler
+  );
+}
