@@ -54,13 +54,13 @@ describe('ResultSettingsLogic', () => {
     nonTextResultFields: {},
     textResultFields: {},
     queryPerformanceScore: 0,
-    isSnippetAllowed: (_: string) => true,
   };
 
-  const FUNCTIONAL_SELECTORS = ['isSnippetAllowed']
+  const FUNCTIONAL_SELECTORS = ['isSnippetAllowed'];
 
   // Values without selectors
-  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
+  const resultSettingLogicValues = () =>
+    omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS, Object.keys(SELECTORS));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +71,7 @@ describe('ResultSettingsLogic', () => {
     mount();
     expect(omit(ResultSettingsLogic.values, FUNCTIONAL_SELECTORS)).toEqual({
       ...DEFAULT_VALUES,
-      ...omit(SELECTORS, FUNCTIONAL_SELECTORS),
+      ...SELECTORS,
     });
   });
 
@@ -220,7 +220,7 @@ describe('ResultSettingsLogic', () => {
         schema: {
           foo: { type: SchemaType.Text, capabilities: {} },
           bar: { type: SchemaType.Number, capabilities: {} },
-        }
+        },
       };
 
       it('should update settings for an individual field', () => {
@@ -279,14 +279,14 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('selectors', () => {
-    describe('textResultFields', () => {
+    describe('validResultFields', () => {
       it('should filter out nested fields and keep subfields only', () => {
         mount({
           schema: {
             'simple_field': { type: SchemaType.Text, capabilities: {} },
             'nested_object': { type: SchemaType.Nested, capabilities: {} },
             'nested_object.subfield': { type: SchemaType.Text, capabilities: {} },
-            'simple_object.subfield': { type: SchemaType.Text, capabilities: {} },
+            'simple_object.subfield': { type: SchemaType.Number, capabilities: {} },
           },
           resultFields: {
             'simple_field': { raw: true },
@@ -296,7 +296,7 @@ describe('ResultSettingsLogic', () => {
           },
         });
 
-        expect(ResultSettingsLogic.values.textResultFields).toEqual({
+        expect(ResultSettingsLogic.values.validResultFields).toEqual({
           'simple_field': { raw: true },
           'nested_object.subfield': { raw: true },
           'simple_object.subfield': { raw: true },
@@ -314,7 +314,7 @@ describe('ResultSettingsLogic', () => {
           },
         });
 
-        expect(ResultSettingsLogic.values.textResultFields).toEqual({
+        expect(ResultSettingsLogic.values.validResultFields).toEqual({
           'simple_field': { raw: true },
         });
       });
@@ -368,7 +368,7 @@ describe('ResultSettingsLogic', () => {
         mount({
           schema: {
             foo: { type: SchemaType.Text, capabilities: { snippet: true } },
-          }
+          },
         });
 
         expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(true);
@@ -378,7 +378,7 @@ describe('ResultSettingsLogic', () => {
         mount({
           schema: {
             foo: { type: SchemaType.Text, capabilities: {} },
-          }
+          },
         });
         expect(ResultSettingsLogic.values.isSnippetAllowed('foo')).toEqual(false);
       });
@@ -394,7 +394,7 @@ describe('ResultSettingsLogic', () => {
           schema: {
             foo: { type: SchemaType.Text, capabilities: {} },
             bar: { type: SchemaType.Text, capabilities: {} },
-          }
+          },
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(true);
@@ -409,7 +409,7 @@ describe('ResultSettingsLogic', () => {
           schema: {
             foo: { type: SchemaType.Text, capabilities: {} },
             bar: { type: SchemaType.Text, capabilities: {} },
-          }
+          },
         });
 
         expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(false);
@@ -486,7 +486,7 @@ describe('ResultSettingsLogic', () => {
             foo: { type: SchemaType.Text, capabilities: {} },
             bar: { type: SchemaType.Number, capabilities: {} },
             baz: { type: SchemaType.Text, capabilities: {} },
-          }
+          },
         });
 
         expect(ResultSettingsLogic.values.serverResultFields).toEqual({
@@ -513,7 +513,7 @@ describe('ResultSettingsLogic', () => {
           schema: {
             foo: { type: SchemaType.Text, capabilities: {} },
             bar: { type: SchemaType.Number, capabilities: {} },
-          }
+          },
         });
 
         expect(ResultSettingsLogic.values.reducedServerResultFields).toEqual({

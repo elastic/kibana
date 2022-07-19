@@ -174,14 +174,13 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
   selectors: ({ selectors }) => ({
     validResultFields: [
       () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: AdvancedSchema): FieldResultSettingObject => {
-        return Object.entries(resultFields).reduce((validResultFields, [fieldName, fieldSettings]) => {
-          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested ) {
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema): FieldResultSettingObject =>
+        Object.entries(resultFields).reduce((validResultFields, [fieldName, fieldSettings]) => {
+          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested) {
             return validResultFields;
           }
           return { ...validResultFields, [fieldName]: fieldSettings };
-        }, {});
-      },
+        }, {}),
     ],
     textResultFields: [
       () => [selectors.validResultFields, selectors.schema],
@@ -198,7 +197,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       },
     ],
     isSnippetAllowed: [
-      () => [selectors.schema], (schema: AdvancedSchema) => {
+      () => [selectors.schema],
+      (schema: AdvancedSchema) => {
         return (fieldName: string): boolean => !!schema[fieldName]?.capabilities.snippet;
       },
     ],
