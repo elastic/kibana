@@ -512,6 +512,7 @@ export const useDataVisualizerGridData = (
 
   return {
     progress: combinedProgress,
+    overallStatsProgress,
     configs,
     searchQueryLanguage,
     searchString,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import {
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -34,6 +33,7 @@ export interface Props {
   totalCount: number;
   samplingProbability?: number | null;
   setSamplingProbability?: (value: number) => void;
+  loading: boolean;
 }
 
 export const DocumentCountContent: FC<Props> = ({
@@ -41,19 +41,9 @@ export const DocumentCountContent: FC<Props> = ({
   totalCount,
   samplingProbability,
   setSamplingProbability,
+  loading,
 }) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
-  const [radioIdSelected, setRadioIdSelected] = useState(
-    `dv-random-sampler-option${samplingProbability ?? 1}`
-  );
-
-  const onChange = (optionId: string) => {
-    const closestProbability = parseFloat(optionId.slice(25, optionId.length));
-    if (setSamplingProbability) {
-      setSamplingProbability(closestProbability);
-    }
-    setRadioIdSelected(optionId);
-  };
 
   const onShowSamplingOptions = useCallback(() => {
     setShowSamplingOptionsPopover(!showSamplingOptionsPopover);
@@ -63,11 +53,6 @@ export const DocumentCountContent: FC<Props> = ({
     setShowSamplingOptionsPopover(false);
   }, [setShowSamplingOptionsPopover]);
 
-  useEffect(() => {
-    if (samplingProbability !== parseFloat(radioIdSelected.slice(25, radioIdSelected.length))) {
-      setRadioIdSelected(`dv-random-sampler-option${samplingProbability ?? 1}`);
-    }
-  }, [samplingProbability, radioIdSelected]);
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
@@ -87,7 +72,7 @@ export const DocumentCountContent: FC<Props> = ({
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <TotalCountHeader totalCount={totalCount} approximate={approximate} />
-        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+        <EuiFlexItem grow={false}>
           <EuiPopover
             id="dscSamplingOptions"
             button={
@@ -120,20 +105,11 @@ export const DocumentCountContent: FC<Props> = ({
                   color={'primary'}
                   title={i18n.translate('xpack.dataVisualizer.randomSamplerInfoCalloutMessage', {
                     defaultMessage:
-                      'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for exact values without any sampling..',
+                      'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for exact values without any sampling.',
                   })}
                 />
               </EuiFlexItem>
               <EuiSpacer size="m" />
-              {/* <EuiRadioGroup*/}
-              {/*  options={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({*/}
-              {/*    id: `dv-random-sampler-option${d}`,*/}
-              {/*    label: `${d}%`,*/}
-              {/*  }))}*/}
-              {/*  idSelected={radioIdSelected}*/}
-              {/*  onChange={(id) => onChange(id)}*/}
-              {/* />*/}
-              {/* @TODO: remove*/}
               <EuiFlexItem grow={true}>
                 <EuiRange
                   fullWidth
@@ -175,11 +151,8 @@ export const DocumentCountContent: FC<Props> = ({
         timeRangeEarliest={timeRangeEarliest}
         timeRangeLatest={timeRangeLatest}
         interval={documentCountStats.interval}
+        loading={loading}
       />
-      <EuiCodeBlock>{
-        // @TODO: Remove when draft PR is ready
-        `randomly sampled: ${documentCountStats.randomlySampled}\nprobability: ${documentCountStats.probability}\ntook: ${documentCountStats.took}`
-      }</EuiCodeBlock>
     </>
   );
 };

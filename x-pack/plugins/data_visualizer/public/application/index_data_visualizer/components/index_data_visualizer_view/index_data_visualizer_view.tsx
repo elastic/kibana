@@ -249,6 +249,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setLastRefresh,
     progress,
     extendedColumns,
+    overallStatsProgress,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   const probability = isDefined(dataVisualizerListState.probability)
@@ -452,6 +453,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       totalCount={overallStats.totalCount}
                       setSamplingProbability={setSamplingProbability}
                       samplingProbability={probability}
+                      loading={overallStatsProgress.loaded < 100}
                     />
                   </EuiFlexItem>
                 )}
