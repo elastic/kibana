@@ -11,18 +11,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'visChart']);
   const inspector = getService('inspector');
+  const kibanaServer = getService('kibanaServer');
 
   describe('hybrid index pattern', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+      );
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/logstash');
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+      );
       await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/logstash');
       await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.unsetTime();
     });
 
