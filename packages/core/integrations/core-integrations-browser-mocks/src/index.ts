@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { IntegrationsService } from './integrations_service';
+export { integrationsServiceMock } from './integrations_service.mock';
+export type {
+  IntegrationsServiceContract,
+  IntegrationsServiceMock,
+} from './integrations_service.mock';

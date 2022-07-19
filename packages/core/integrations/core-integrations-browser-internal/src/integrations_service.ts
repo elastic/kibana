@@ -12,7 +12,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { MomentService } from './moment';
 import { StylesService } from './styles';
 
-export interface Deps {
+export interface IntegrationsServiceSetupDeps {
   uiSettings: IUiSettingsClient;
 }
 
@@ -26,7 +26,7 @@ export class IntegrationsService implements CoreService {
     await this.moment.setup();
   }
 
-  public async start({ uiSettings }: Deps) {
+  public async start({ uiSettings }: IntegrationsServiceSetupDeps) {
     await this.styles.start({ uiSettings });
     await this.moment.start({ uiSettings });
   }
