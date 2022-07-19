@@ -43,8 +43,9 @@ import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
 import { AdvancedOptions } from './advanced_options';
-import { TimeShift, setTimeShift } from './time_shift';
-import type { LayerType, DOCUMENT_FIELD_NAME } from '../../../common';
+import { TimeShift } from './time_shift';
+import type { LayerType } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common';
 import {
   quickFunctionsName,
   staticValueOperationName,
