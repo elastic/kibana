@@ -168,7 +168,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <HeaderPage
                   subtitle={
                     <LastEventTime
-                      docValueFields={docValueFields}
                       indexKey={LastEventIndexKey.network}
                       indexNames={selectedPatterns}
                     />
