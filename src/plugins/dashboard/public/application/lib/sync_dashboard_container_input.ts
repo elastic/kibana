@@ -13,7 +13,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data';
+import type { Query, AggregateQuery } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
@@ -41,7 +41,7 @@ type ApplyStateChangesToContainerProps = SyncDashboardContainerCommon & {
 };
 
 type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon & {
-  applyFilters: (query: Query, filters: Filter[]) => void;
+  applyFilters: (query: Query | AggregateQuery, filters: Filter[]) => void;
 };
 
 type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainerChangesToStateProps;

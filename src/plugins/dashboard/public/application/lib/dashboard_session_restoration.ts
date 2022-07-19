@@ -8,7 +8,6 @@
 
 import { History } from 'history';
 import { createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
-import type { Query } from '@kbn/es-query';
 import { DashboardAppLocatorParams, DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
@@ -114,7 +113,7 @@ function getLocatorParams({
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     panels: getDashboardId() ? undefined : appState.panels,
-    query: queryString.formatQuery(appState.query) as Query,
+    query: queryString.formatQuery(appState.query),
     filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,
     dashboardId: getDashboardId(),

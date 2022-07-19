@@ -17,6 +17,7 @@ import {
   syncQueryStateWithUrl,
   connectToQueryState,
   Filter,
+  AggregateQuery,
   Query,
   waitUntilNextSessionCompletes$,
   GlobalQueryStateFromUrl,
@@ -56,7 +57,7 @@ export const syncDashboardFilterState = ({
   });
 
   // this callback will be used any time new filters and query need to be applied.
-  const applyFilters = (query: Query, filters: Filter[]) => {
+  const applyFilters = (query: Query | AggregateQuery, filters: Filter[]) => {
     savedDashboard.searchSource.setField('query', query);
     savedDashboard.searchSource.setField('filter', filters);
     dispatchDashboardStateChange(setQuery(query));
@@ -69,7 +70,7 @@ export const syncDashboardFilterState = ({
   );
 
   // starts syncing app filters between dashboard state and filterManager
-  const intermediateFilterState: { filters: Filter[]; query: Query } = {
+  const intermediateFilterState: { filters: Filter[]; query: Query | AggregateQuery } = {
     query: initialDashboardState.query ?? queryString.getDefaultQuery(),
     filters: initialDashboardState.filters ?? [],
   };
@@ -99,7 +100,7 @@ export const syncDashboardFilterState = ({
   // apply filters when the filter manager changes
   const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
     .pipe(debounceTime(100))
-    .subscribe(() => applyFilters(queryString.getQuery() as Query, filterManager.getFilters()));
+    .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
     timefilterService.getRefreshIntervalUpdate$(),

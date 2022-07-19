@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 export type ControlWidth = 'small' | 'medium' | 'large';
@@ -20,7 +20,7 @@ export interface ParentIgnoreSettings {
 }
 
 export type ControlInput = EmbeddableInput & {
-  query?: Query;
+  query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
   controlStyle?: ControlStyle;

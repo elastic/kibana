@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, BoolQuery, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { FieldSpec, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { DataControlInput } from '../../types';
@@ -47,7 +47,7 @@ export type OptionsListRequest = Omit<
   runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
 };
 
 /**
