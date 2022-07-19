@@ -22,6 +22,12 @@
 const pairs = ['()', '[]', '{}', `''`, '""'];
 const openers = pairs.map((pair) => pair[0]);
 const closers = pairs.map((pair) => pair[1]);
+const CODE_POINT_FOR_0 = 48;
+const CODE_POINT_FOR_9 = 57;
+const CODE_POINT_FOR_UPPER_CASE_A = 65;
+const CODE_POINT_FOR_UPPER_CASE_Z = 90;
+const CODE_POINT_FOR_LOWER_CASE_A = 97;
+const CODE_POINT_FOR_LOWER_CASE_Z = 122;
 
 interface MatchPairsOptions {
   value: string;
@@ -137,5 +143,16 @@ function shouldRemovePair(
 }
 
 function isAlphanumeric(value = '') {
-  return value.match(/[a-zA-Z0-9_]/);
+  const valueCodePoint = value.codePointAt(0);
+
+  if (valueCodePoint === undefined) {
+    return false;
+  }
+
+  return (
+    (CODE_POINT_FOR_0 <= valueCodePoint && valueCodePoint <= CODE_POINT_FOR_9) ||
+    (CODE_POINT_FOR_UPPER_CASE_A <= valueCodePoint &&
+      valueCodePoint <= CODE_POINT_FOR_UPPER_CASE_Z) ||
+    (CODE_POINT_FOR_LOWER_CASE_A <= valueCodePoint && valueCodePoint <= CODE_POINT_FOR_LOWER_CASE_Z)
+  );
 }
