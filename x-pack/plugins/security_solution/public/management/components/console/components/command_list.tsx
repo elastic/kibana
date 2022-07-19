@@ -94,6 +94,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           };
         },
       });
+
+      dispatch({ type: 'addFocusToKeyCapture' });
     },
     [dispatch]
   );
