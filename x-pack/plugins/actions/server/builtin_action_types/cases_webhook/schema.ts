@@ -74,15 +74,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
     summary: schema.string(),
     description: schema.nullable(schema.string()),
     externalId: schema.nullable(schema.string()),
-    labels: schema.nullable(
-      schema.arrayOf(
-        schema.string({
-          validate: (label) =>
-            // Matches any space, tab or newline character.
-            label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
-        })
-      )
-    ),
+    labels: schema.nullable(schema.arrayOf(schema.string())),
   }),
   comments: schema.nullable(
     schema.arrayOf(

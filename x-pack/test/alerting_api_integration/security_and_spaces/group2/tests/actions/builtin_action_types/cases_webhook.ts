@@ -369,33 +369,6 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               });
             });
         });
-
-        it('should handle failing with a simulated success when labels containing a space', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockCasesWebhook.params,
-                subActionParams: {
-                  incident: {
-                    ...mockCasesWebhook.params.subActionParams.incident,
-                    labels: ['label with spaces'],
-                  },
-                  comments: [],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.labels]: types that failed validation:\n- [subActionParams.incident.labels.0.0]: The label label with spaces cannot contain spaces\n- [subActionParams.incident.labels.1]: expected value to equal [null]',
-              });
-            });
-        });
       });
 
       describe('Execution', () => {

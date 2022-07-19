@@ -115,7 +115,9 @@ export const throwIfResponseIsNotValidSpecial = ({
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
       try {
-        getObjectValueByKey(data, attr);
+        if (getObjectValueByKey(data, attr) === undefined) {
+          errorAttributes.push(attr);
+        }
       } catch (e) {
         errorAttributes.push(attr);
       }

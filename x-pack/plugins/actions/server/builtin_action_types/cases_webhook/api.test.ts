@@ -75,42 +75,7 @@ describe('api', () => {
       expect(externalService.updateIncident).not.toHaveBeenCalled();
     });
 
-    test('it calls createIncident correctly without mapping', async () => {
-      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      await api.pushToService({ externalService, params, logger: mockedLogger });
-
-      expect(externalService.createIncident).toHaveBeenCalledWith({
-        incident: {
-          description: 'Incident description',
-          summary: 'Incident title',
-          labels: ['kibana', 'elastic'],
-        },
-      });
-      expect(externalService.updateIncident).not.toHaveBeenCalled();
-    });
-
     test('it calls createComment correctly', async () => {
-      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
-      await api.pushToService({ externalService, params, logger: mockedLogger });
-      expect(externalService.createComment).toHaveBeenCalledTimes(2);
-      expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-        incidentId: 'incident-1',
-        comment: {
-          commentId: 'case-comment-1',
-          comment: 'A comment',
-        },
-      });
-
-      expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-        incidentId: 'incident-1',
-        comment: {
-          commentId: 'case-comment-2',
-          comment: 'Another comment',
-        },
-      });
-    });
-
-    test('it calls createComment correctly without mapping', async () => {
       const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
       await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
