@@ -49,10 +49,51 @@ export const ELASTICSEARCH_PLUGIN = {
   }),
   CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
     defaultMessage:
-      'Design and build performant, relevant search-powered applications or large-scale search implementations directly in Elasticsearch.',
+      'Ideal for bespoke applications, Elasticsearch helps you build highly customizable search and offers many different ingestion methods.',
   }),
   URL: '/app/enterprise_search/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
+  ICON: 'logoElasticsearch',
+  PRODUCT_CARD_CTA: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardCTA', {
+    defaultMessage: 'View the setup guide',
+  }),
+  FEATURES: [
+    i18n.translate('xpack.enterpriseSearch.elasticsearch.features.one', {
+      defaultMessage: 'Integrate with databases, websites, and more',
+    }),
+    i18n.translate('xpack.enterpriseSearch.elasticsearch.features.two', {
+      defaultMessage: 'Build custom tooling',
+    }),
+    i18n.translate('xpack.enterpriseSearch.elasticsearch.features.three', {
+      defaultMessage: 'Build custom search experiences',
+    }),
+  ],
+  RESOURCE_LINKS: [
+    {
+      label: i18n.translate('xpack.enterpriseSearch.elasticsearch.resourceLabel.one', {
+        defaultMessage: 'Getting started with Elasticsearch',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.elasticsearch.resourceLabel.two', {
+        defaultMessage: 'Create a new index',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.elasticsearch.resourceLabel.three', {
+        defaultMessage: 'Set up a language client',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.elasticsearch.resourceLabel.four', {
+        defaultMessage: 'Search UI for Elasticsearch',
+      }),
+      to: 'https://google.com',
+    },
+  ],
 };
 
 export const APP_SEARCH_PLUGIN = {
@@ -66,10 +107,51 @@ export const APP_SEARCH_PLUGIN = {
   }),
   CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
     defaultMessage:
-      'Design, deploy, and manage powerful search experiences for your websites and web/mobile apps.',
+      'Ideal dor apps and websites, App Search helps you design, deploy, and manage powerful search experiences.',
   }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
+  ICON: 'logoAppSearch',
+  PRODUCT_CARD_CTA: i18n.translate('xpack.enterpriseSearch.appSearch.productCardCTA', {
+    defaultMessage: 'Open App Search',
+  }),
+  FEATURES: [
+    i18n.translate('xpack.enterpriseSearch.appSearch.features.one', {
+      defaultMessage: 'Ingest with a web crawler, API, or Elasticsearch',
+    }),
+    i18n.translate('xpack.enterpriseSearch.appSearch.features.two', {
+      defaultMessage: 'Search management dashboards',
+    }),
+    i18n.translate('xpack.enterpriseSearch.appSearch.features.three', {
+      defaultMessage: 'Search-optimized APIs',
+    }),
+  ],
+  RESOURCE_LINKS: [
+    {
+      label: i18n.translate('xpack.enterpriseSearch.appSearch.resourceLabel.one', {
+        defaultMessage: 'Getting started with App Search',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.appSearch.resourceLabel.two', {
+        defaultMessage: 'Search UI for App Search',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.appSearch.resourceLabel.three', {
+        defaultMessage: 'Tune your search relevance',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.appSearch.resourceLabel.four', {
+        defaultMessage: 'Automate with Adaptive Relevance',
+      }),
+      to: 'https://google.com',
+    },
+  ],
 };
 
 export const WORKPLACE_SEARCH_PLUGIN = {
@@ -85,12 +167,47 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
     {
       defaultMessage:
-        'Unify your content in one place, with instant connectivity to popular productivity and collaboration tools.',
+        'Ideal for internal teams, Workplace Search helps unify your content in one place with instant connectivity to popular productivity tools.',
     }
   ),
   URL: '/app/enterprise_search/workplace_search',
   NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
+  ICON: 'logoWorkplaceSearch',
+  PRODUCT_CARD_CTA: i18n.translate('xpack.enterpriseSearch.workplaceSearch.productCardCTA', {
+    defaultMessage: 'Open Workplace Search',
+  }),
+  FEATURES: [
+    i18n.translate('xpack.enterpriseSearch.workplaceSearch.features.one', {
+      defaultMessage: 'Ingest from third-party sources',
+    }),
+    i18n.translate('xpack.enterpriseSearch.workplaceSearch.features.two', {
+      defaultMessage: 'Search management dashboards',
+    }),
+    i18n.translate('xpack.enterpriseSearch.workplaceSearch.features.three', {
+      defaultMessage: 'Search experiences for authenticated users',
+    }),
+  ],
+  RESOURCE_LINKS: [
+    {
+      label: i18n.translate('xpack.enterpriseSearch.workplaceSearch.resourceLabel.one', {
+        defaultMessage: 'Getting started with Workplace Search',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.workplaceSearch.resourceLabel.two', {
+        defaultMessage: 'Set up your connectors',
+      }),
+      to: 'https://google.com',
+    },
+    {
+      label: i18n.translate('xpack.enterpriseSearch.workplaceSearch.resourceLabel.three', {
+        defaultMessage: 'Manage permissions',
+      }),
+      to: 'https://google.com',
+    },
+  ],
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
