@@ -9,6 +9,8 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 
 import { indices } from '../../__mocks__/search_indices.mock';
 
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { ConnectorStatus, SyncStatus } from '../../../../../common/types/connectors';
@@ -96,6 +98,7 @@ describe('IndicesLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
     apiLogicMount();
     mount();
   });
@@ -221,6 +224,47 @@ describe('IndicesLogic', () => {
       IndicesLogic.actions.apiError({} as HttpError);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
+    });
+    it('calls makeRequest on fetchIndices', async () => {
+      jest.useFakeTimers();
+      IndicesLogic.actions.makeRequest = jest.fn();
+      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      jest.advanceTimersByTime(150);
+      await nextTick();
+      expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
+        meta: DEFAULT_META,
+        returnHiddenIndices: false,
+      });
+    });
+    it('calls makeRequest once on two fetchIndices calls within 150ms', async () => {
+      jest.useFakeTimers();
+      IndicesLogic.actions.makeRequest = jest.fn();
+      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      jest.advanceTimersByTime(130);
+      await nextTick();
+      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      jest.advanceTimersByTime(150);
+      await nextTick();
+      expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
+        meta: DEFAULT_META,
+        returnHiddenIndices: false,
+      });
+      expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(1);
+    });
+    it('calls makeRequest twice on two fetchIndices calls outside 150ms', async () => {
+      jest.useFakeTimers();
+      IndicesLogic.actions.makeRequest = jest.fn();
+      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      jest.advanceTimersByTime(150);
+      await nextTick();
+      IndicesLogic.actions.fetchIndices({ meta: DEFAULT_META, returnHiddenIndices: false });
+      jest.advanceTimersByTime(150);
+      await nextTick();
+      expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledWith({
+        meta: DEFAULT_META,
+        returnHiddenIndices: false,
+      });
+      expect(IndicesLogic.actions.makeRequest).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -31,7 +31,9 @@ export const MethodConnector: React.FC = () => {
   AddConnectorPackageLogic.mount();
   return (
     <NewSearchIndexTemplate
-      title="Build a connector"
+      title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
+        defaultMessage: 'Build a connector',
+      })}
       type="connector"
       onSubmit={(name) => makeRequest({ indexName: name })}
       formDisabled={status === Status.LOADING}

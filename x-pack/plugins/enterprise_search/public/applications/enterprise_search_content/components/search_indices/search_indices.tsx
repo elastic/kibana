@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useValues, useActions } from 'kea';
-
-import useDebounce from 'react-use/lib/useDebounce';
 
 import {
   EuiButton,
@@ -49,7 +47,7 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { makeRequest, onPaginate } = useActions(IndicesLogic);
+  const { fetchIndices, onPaginate } = useActions(IndicesLogic);
   const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
@@ -58,12 +56,9 @@ export const SearchIndices: React.FC = () => {
     'enterprise-search-indices-callout-dismissed',
     false
   );
-
-  useDebounce(
-    () => makeRequest({ meta, returnHiddenIndices: showHiddenIndices, searchQuery }),
-    150,
-    [searchQuery, meta.page.current, showHiddenIndices]
-  );
+  useEffect(() => {
+    fetchIndices({ meta, returnHiddenIndices: showHiddenIndices, searchQuery });
+  }, [searchQuery, meta.page.current, showHiddenIndices]);
 
   const createNewIndexButton = (
     <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>

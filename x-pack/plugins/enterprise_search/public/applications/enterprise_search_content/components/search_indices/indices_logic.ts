@@ -81,6 +81,15 @@ export interface IndicesActions {
     isInitialRequest: boolean;
     meta: Meta;
   };
+  fetchIndices({
+    meta,
+    returnHiddenIndices,
+    searchQuery,
+  }: {
+    meta: Meta;
+    returnHiddenIndices: boolean;
+    searchQuery?: string;
+  }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
 }
@@ -94,26 +103,28 @@ export interface IndicesValues {
 }
 
 export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
-  actions: { onPaginate: (newPageIndex) => ({ newPageIndex }) },
+  actions: {
+    fetchIndices: ({ meta, returnHiddenIndices, searchQuery }) => ({
+      meta,
+      returnHiddenIndices,
+      searchQuery,
+    }),
+    onPaginate: (newPageIndex) => ({ newPageIndex }),
+  },
   connect: {
     actions: [FetchIndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
     values: [FetchIndicesAPILogic, ['data', 'status']],
   },
-  listeners: () => ({
+  listeners: ({ actions }) => ({
     apiError: (e) => flashAPIErrors(e),
+    fetchIndices: async (input, breakpoint) => {
+      await breakpoint(150);
+      actions.makeRequest(input);
+    },
     makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
-    hasNoIndices: [
-      false,
-      {
-        // We need this to show the landing page on the overview page if there are no indices
-        // We can't rely just on there being no indices, because user might have entered a search query
-        apiSuccess: (value, { indices, isInitialRequest }) =>
-          isInitialRequest ? indices.length === 0 : value,
-      },
-    ],
     meta: [
       DEFAULT_META,
       {
@@ -123,6 +134,12 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
   }),
   selectors: ({ selectors }) => ({
+    hasNoIndices: [
+      // We need this to show the landing page on the overview page if there are no indices
+      // We can't rely just on there being no indices, because user might have entered a search query
+      () => [selectors.data],
+      (data) => (data?.isInitialRequest && data?.indices && data.indices.length === 0) ?? false,
+    ],
     indices: [
       () => [selectors.data],
       (data) =>

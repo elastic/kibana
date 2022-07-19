@@ -16,8 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
-import { delay } from '@kbn/test-jest-helpers';
-
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { DEFAULT_META } from '../../../shared/constants';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
@@ -71,7 +69,6 @@ describe('SearchIndices', () => {
 
     expect(wrapper.find(GettingStartedSteps)).toHaveLength(0);
     expect(wrapper.find(ElasticsearchResources)).toHaveLength(0);
-    await delay(150);
 
     expect(mockActions.makeRequest).toHaveBeenCalled();
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);

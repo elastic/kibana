@@ -42,9 +42,3 @@ export interface ElasticsearchIndexWithIngestion extends ElasticsearchIndex {
   connector?: Connector;
   crawler?: Crawler;
 }
-
-export interface EntSearchIndex {
-  connector?: Connector;
-  crawler?: Crawler;
-  index: ElasticsearchIndex;
-}

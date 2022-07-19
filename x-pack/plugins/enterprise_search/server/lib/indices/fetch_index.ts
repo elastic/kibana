@@ -8,7 +8,8 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { Crawler } from '../../../common/types/crawler';
-import { EntSearchIndex } from '../../../common/types/indices';
+import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 
 import { mapIndexStats } from './fetch_indices';
@@ -16,7 +17,7 @@ import { mapIndexStats } from './fetch_indices';
 export const fetchIndex = async (
   client: IScopedClusterClient,
   index: string
-): Promise<EntSearchIndex> => {
+): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
@@ -29,8 +30,8 @@ export const fetchIndex = async (
   const connector = await fetchConnectorByIndexName(client, index);
   if (connector) {
     return {
+      ...indexResult,
       connector,
-      index: indexResult,
     };
   }
 
@@ -41,11 +42,8 @@ export const fetchIndex = async (
   const crawler = crawlerResult.hits.hits[0]?._source;
 
   if (crawler) {
-    return {
-      crawler,
-      index: indexResult,
-    };
+    return { ...indexResult, crawler };
   }
 
-  return { index: indexResult };
+  return indexResult;
 };
