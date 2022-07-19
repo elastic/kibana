@@ -7,6 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import dedent from 'dedent';
+
+import { i18n } from '@kbn/i18n';
+
 import { ElasticsearchIndex } from '../../../../../common/types';
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -163,9 +167,21 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         formatIndicesToSelectable(indices, selectedIndexName),
     ],
     isSubmitDisabled: [
-      () => [selectors.name, selectors.engineType, selectors.selectedIndex, selectors.aliasName],
-      (name: string, engineType: EngineType, selectedIndex: string, aliasName: string) => {
-        if (name.length === 0) {
+      () => [
+        selectors.name,
+        selectors.engineType,
+        selectors.selectedIndex,
+        selectors.aliasName,
+        selectors.showAliasNameErrorMessages,
+      ],
+      (
+        name: string,
+        engineType: EngineType,
+        selectedIndex: string,
+        aliasName: string,
+        showAliasNameErrorMessages: boolean
+      ) => {
+        if (name.length === 0 || showAliasNameErrorMessages) {
           return true;
         }
 
@@ -199,7 +215,18 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       (aliasName: string, indicesFormatted: SearchIndexSelectableOption[]) => {
         let existingAlias = indicesFormatted.find((el) => el.label === aliasName);
         if (existingAlias) {
-          return `There is an existing alias with the name ${aliasName}. Please choose another name.`;
+          return i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
+            {
+              defaultMessage: dedent(`
+                There is an existing index or alias with the name {aliasName}.
+                Please choose another alias name.
+              `),
+              values: {
+                aliasName: aliasName,
+              },
+            }
+          );
         } else {
           return '';
         }
