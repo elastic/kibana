@@ -10054,7 +10054,7 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@8.9.2:
+backport@^8.9.2:
   version "8.9.2"
   resolved "https://registry.yarnpkg.com/backport/-/backport-8.9.2.tgz#cf0ec69428f9e86c20e1898dd77e8f6c12bf5afa"
   integrity sha512-0ghVAwSssE0mamADGnsOybWn7RroKLSf9r4uU1IpAlxxa2zkRecfnGuSfEa5L1tQjh7lJwI/2i01JR6154r+qg==
