@@ -101,7 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const event = await checkEmitsOnce();
 
         expect(event.context.entityId).to.be('new');
-        expect(event.properties.numOfPanels).to.be(1);
+        expect(event.properties.key2).to.be('num-of-panels');
+        expect(event.properties.value2).to.be(1);
       });
 
       it('emits on saved search refreshed', async () => {
@@ -188,10 +189,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const event = await checkEmitsOnce();
         expect(event.context.entityId).to.be('7adfa750-4c81-11e8-b3d7-01146121b73d');
-        expect(event.properties.numOfPanels).to.be(17);
-        expect(event.properties.timeToDone as number).to.be.greaterThan(
-          event.properties.timeToData as number
+
+        expect(event.properties.key1).to.be('time-to-data');
+        expect(event.properties.duration as number).to.be.greaterThan(
+          event.properties.value1 as number
         );
+
+        expect(event.properties.key2).to.be('num-of-panels');
+        expect(event.properties.value2).to.be(17);
       });
 
       /**
