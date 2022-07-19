@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core/server';
-import { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
-import { validateEvents } from '../../../../common/endpoint/schema/resolver';
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
 

@@ -8,8 +8,8 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { AppLeaveHandler } from '@kbn/core/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { AppLeaveHandler } from '@kbn/core/public';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';

@@ -6,7 +6,8 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
+import type { Dispatch } from 'react';
+import React, { useEffect, useReducer, createContext, useContext } from 'react';
 
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';

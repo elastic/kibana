@@ -7,6 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { difference } from 'lodash';
+import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -22,7 +23,16 @@ import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
 
+import { sanitizeTag } from '../utils';
+
 import { TagOptions } from './tag_options';
+
+const TruncatedEuiHighlight = styled(EuiHighlight)`
+  width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 interface Props {
   agentId?: string;
@@ -64,26 +74,41 @@ export const TagsAddRemove: React.FC<Props> = ({
     setLabels(labelsFromTags(allTags));
   }, [allTags, labelsFromTags]);
 
-  const updateTags = async (tagsToAdd: string[], tagsToRemove: string[]) => {
+  const updateTags = async (
+    tagsToAdd: string[],
+    tagsToRemove: string[],
+    successMessage?: string,
+    errorMessage?: string
+  ) => {
     if (agentId) {
       updateTagsHook.updateTags(
         agentId,
         difference(selectedTags, tagsToRemove).concat(tagsToAdd),
-        () => onTagsUpdated()
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
       );
     } else {
-      updateTagsHook.bulkUpdateTags(agents!, tagsToAdd, tagsToRemove, () => onTagsUpdated());
+      updateTagsHook.bulkUpdateTags(
+        agents!,
+        tagsToAdd,
+        tagsToRemove,
+        () => onTagsUpdated(),
+        successMessage,
+        errorMessage
+      );
     }
   };
 
   const renderOption = (option: EuiSelectableOption<any>, search: string) => {
     return (
       <EuiFlexGroup
+        gutterSize={'s'}
         onMouseEnter={() => setIsTagHovered({ ...isTagHovered, [option.label]: true })}
         onMouseLeave={() => setIsTagHovered({ ...isTagHovered, [option.label]: false })}
       >
         <EuiFlexItem>
-          <EuiHighlight
+          <TruncatedEuiHighlight
             search={search}
             onClick={() => {
               const tagsToAdd = option.checked === 'on' ? [] : [option.label];
@@ -92,7 +117,7 @@ export const TagsAddRemove: React.FC<Props> = ({
             }}
           >
             {option.label}
-          </EuiHighlight>
+          </TruncatedEuiHighlight>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TagOptions
@@ -124,8 +149,9 @@ export const TagsAddRemove: React.FC<Props> = ({
               defaultMessage: 'Find or create label...',
             }),
             onChange: (value: string) => {
-              setSearchValue(value);
+              setSearchValue(sanitizeTag(value));
             },
+            value: searchValue ?? '',
           }}
           options={labels}
           renderOption={renderOption}
@@ -136,17 +162,32 @@ export const TagsAddRemove: React.FC<Props> = ({
                 if (!searchValue) {
                   return;
                 }
-                updateTags([searchValue], []);
+                updateTags(
+                  [searchValue],
+                  [],
+                  i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
+                    defaultMessage: 'Tag created',
+                  }),
+                  i18n.translate('xpack.fleet.createAgentTags.errorNotificationTitle', {
+                    defaultMessage: 'Tag creation failed',
+                  })
+                );
               }}
             >
-              <EuiIcon type="plus" />{' '}
-              <FormattedMessage
-                id="xpack.fleet.tagsAddRemove.createText"
-                defaultMessage='Create a new tag "{name}"'
-                values={{
-                  name: searchValue,
-                }}
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="plus" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.fleet.tagsAddRemove.createText"
+                    defaultMessage='Create a new tag "{name}"'
+                    values={{
+                      name: searchValue,
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiButtonEmpty>
           }
         >

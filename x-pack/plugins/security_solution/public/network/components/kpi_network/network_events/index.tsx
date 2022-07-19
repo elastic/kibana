@@ -8,9 +8,9 @@
 import React, { useEffect, useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
-import { NetworkKpiProps } from '../types';
+import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEventsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_network_events';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';

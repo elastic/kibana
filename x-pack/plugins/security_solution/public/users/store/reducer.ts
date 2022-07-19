@@ -16,7 +16,8 @@ import {
   updateUserRiskScoreSeverityFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
-import { UsersTableType, UsersModel } from './model';
+import type { UsersModel } from './model';
+import { UsersTableType } from './model';
 import { Direction } from '../../../common/search_strategy/common';
 import { RiskScoreFields } from '../../../common/search_strategy';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';

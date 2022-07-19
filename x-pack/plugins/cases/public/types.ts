@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { CoreStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import React, { ReactElement } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -26,19 +27,21 @@ import {
   CommentRequestAlertType,
   CommentRequestUserType,
 } from '../common/api';
-import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import type { CasesOwners } from './client/helpers/can_use_cases';
+import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
-import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
-import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
-import { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
+import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
+import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
+import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import { AttachmentFramework } from './client/attachment_framework/types';
+import { getUICapabilities } from './client/helpers/capabilities';
+import type { AttachmentFramework } from './client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -74,6 +77,7 @@ export interface RenderAppProps {
   storage: Storage;
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
 export interface CasesUiSetup {
@@ -134,7 +138,8 @@ export interface CasesUiStart {
      * @param owners an array of CaseOwners that should be queried for permission
      * @returns An object denoting the case permissions of the current user
      */
-    canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
+    canUseCases: ReturnType<typeof canUseCases>;
+    getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: typeof groupAlertsByRule;
   };

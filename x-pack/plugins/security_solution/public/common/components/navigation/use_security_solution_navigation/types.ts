@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TabNavigationProps } from '../tab_navigation/types';
+import type { TabNavigationProps } from '../tab_navigation/types';
 
 export type PrimaryNavigationItemsProps = Omit<
   TabNavigationProps,

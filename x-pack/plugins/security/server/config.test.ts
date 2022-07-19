@@ -14,7 +14,7 @@ jest.mock('@kbn/utils', () => ({
   getLogsPath: () => '/mock/kibana/logs/path',
 }));
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { ConfigSchema, createConfig } from './config';
 

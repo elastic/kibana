@@ -18,24 +18,24 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ListClient } from '@kbn/lists-plugin/server';
-import {
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { BuildRuleMessage } from '../rule_messages';
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
   WrapHits,
 } from '../types';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -68,6 +68,8 @@ export interface CreateThreatSignalsOptions {
   type: Type;
   wrapHits: WrapHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface CreateThreatSignalOptions {
@@ -95,6 +97,8 @@ export interface CreateThreatSignalOptions {
   type: Type;
   wrapHits: WrapHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface CreateEventSignalOptions {
@@ -130,6 +134,8 @@ export interface CreateEventSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 type EntryKey = 'field' | 'value';
@@ -261,7 +267,8 @@ export interface EventsOptions {
   perPage?: number;
   logger: Logger;
   filters: unknown[];
-  timestampOverride?: string;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
@@ -279,7 +286,8 @@ export interface EventCountOptions {
   query: string;
   filters: unknown[];
   tuple: RuleRangeTuple;
-  timestampOverride?: string;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface SignalMatch {
