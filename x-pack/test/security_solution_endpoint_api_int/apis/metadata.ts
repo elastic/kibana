@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
@@ -14,17 +19,13 @@ import {
   deleteIndex,
   stopTransform,
 } from './data_stream_helper';
-import {
-  HOST_METADATA_LIST_ROUTE,
-  METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-} from '../../../plugins/security_solution/common/endpoint/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('test metadata api', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/115488
+  describe.skip('test metadata api', () => {
     // TODO add this after endpoint package changes are merged and in snapshot
     // describe('with .metrics-endpoint.metadata_united_default index', () => {
     // });
