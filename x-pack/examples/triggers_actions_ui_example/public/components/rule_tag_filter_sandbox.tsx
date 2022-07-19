@@ -6,14 +6,18 @@
  */
 import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { getRuleTagFilterLazy } from '../../../common/get_rule_tag_filter';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
-export const RuleTagFilterSandbox = () => {
+interface SandboxProps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}
+
+export const RuleTagFilterSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   return (
     <div style={{ flex: 1 }}>
-      {getRuleTagFilterLazy({
+      {triggersActionsUi.getRuleTagFilter({
         tags: ['tag1', 'tag2', 'tag3', 'tag4'],
         selectedTags,
         onChange: setSelectedTags,
