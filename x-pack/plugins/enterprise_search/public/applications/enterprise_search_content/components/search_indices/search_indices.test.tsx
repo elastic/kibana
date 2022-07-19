@@ -31,7 +31,7 @@ const mockValues = {
 };
 
 const mockActions = {
-  makeRequest: jest.fn(),
+  fetchIndices: jest.fn(),
   onPaginate: jest.fn(),
 };
 
@@ -70,7 +70,7 @@ describe('SearchIndices', () => {
     expect(wrapper.find(GettingStartedSteps)).toHaveLength(0);
     expect(wrapper.find(ElasticsearchResources)).toHaveLength(0);
 
-    expect(mockActions.makeRequest).toHaveBeenCalled();
+    expect(mockActions.fetchIndices).toHaveBeenCalled();
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 
