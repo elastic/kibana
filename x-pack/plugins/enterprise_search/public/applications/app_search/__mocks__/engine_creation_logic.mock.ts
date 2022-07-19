@@ -23,6 +23,7 @@ export const DEFAULT_VALUES = {
   engineType: 'appSearch',
   isSubmitDisabled: true,
   aliasName: '',
+  aliasRawName: '',
   isAliasAllowed: true,
   isAliasRequired: false,
   currentEngineCreationStep: EngineCreationSteps.SelectStep,

@@ -57,6 +57,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   const {
     aliasName,
     aliasNameErrorMessage,
+    aliasRawName,
     indicesFormatted,
     isAliasAllowed,
     isAliasRequired,
@@ -70,7 +71,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
   const {
     loadIndices,
     setIsAliasAllowed,
-    setAliasName,
+    setAliasRawName,
     setCreationStep,
     setRawName,
     setSelectedIndex,
@@ -81,7 +82,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
     setSelectedIndex(selectedOption?.label ?? '');
 
     // If this is an alias, remove the alias name. Do nothing if an option was deselected
-    if (selectedOption?.alias ?? false) setAliasName('');
+    if (selectedOption?.alias ?? false) setAliasRawName('');
 
     // Set isAliasAllowed depending on if the selectedOption is an alias or not.
     // Set it to true if an option was deselected.
@@ -286,21 +287,36 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                     defaultMessage: 'Alias name',
                   }
                 )}
-                helpText={i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
-                  {
-                    defaultMessage:
-                      "Alias names must be prefixed with 'search-' in order to be used with App Search engines",
-                  }
-                )}
+                helpText={
+                  aliasName.length > 0 && aliasRawName !== aliasName ? (
+                    <>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
+                        {
+                          defaultMessage:
+                            "Alias names must be prefixed with 'search-' in order to be used with App Search engines. Your alias will be named",
+                        }
+                      )}
+                      &nbsp;<b>{aliasName}</b>
+                    </>
+                  ) : (
+                    i18n.translate(
+                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
+                      {
+                        defaultMessage:
+                          "Alias names must be prefixed with 'search-' in order to be used with App Search engines",
+                      }
+                    )
+                  )
+                }
                 fullWidth
                 isInvalid={showAliasNameErrorMessages}
                 error={aliasNameErrorMessage}
               >
                 <EuiFieldText
                   name="alias-name"
-                  value={aliasName}
-                  onChange={(event) => setAliasName(event.currentTarget.value)}
+                  value={aliasRawName}
+                  onChange={(event) => setAliasRawName(event.currentTarget.value)}
                   autoComplete="off"
                   fullWidth
                   data-test-subj="AliasNameInput"

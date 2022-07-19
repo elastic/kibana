@@ -136,18 +136,18 @@ describe('EngineCreationLogic', () => {
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           selectedIndex: 'search-test-index',
-          aliasName: '',
           isAliasRequired: false,
         });
       });
 
-      it('sets aliasName and isAliasRequired if it does not start with "search-"', () => {
+      it('sets aliasRawName and isAliasRequired if it does not start with "search-"', () => {
         mount();
         EngineCreationLogic.actions.setSelectedIndex('test-index');
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           selectedIndex: 'test-index',
           aliasName: 'search-test-index-alias',
+          aliasRawName: 'search-test-index-alias',
           isAliasRequired: true,
         });
       });
@@ -164,12 +164,13 @@ describe('EngineCreationLogic', () => {
       });
     });
 
-    describe('setAliasName', () => {
-      it('sets aliasName', () => {
+    describe('setAliasRawName', () => {
+      it('sets aliasRawName', () => {
         mount();
-        EngineCreationLogic.actions.setAliasName('search-index-name');
+        EngineCreationLogic.actions.setAliasRawName('search index name');
         expect(EngineCreationLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          aliasRawName: 'search index name',
           aliasName: 'search-index-name',
         });
       });
@@ -278,7 +279,7 @@ describe('EngineCreationLogic', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'my-index',
-            aliasName: '',
+            aliasRawName: '',
             engineType: 'elasticsearch',
           });
 
@@ -289,7 +290,7 @@ describe('EngineCreationLogic', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'my-index',
-            aliasName: 'an-alias',
+            aliasRawName: 'an-alias',
             engineType: 'elasticsearch',
           });
 
@@ -300,7 +301,7 @@ describe('EngineCreationLogic', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'search-my-index',
-            aliasName: 'an-alias',
+            aliasRawName: 'an-alias',
             engineType: 'elasticsearch',
           });
 
@@ -321,7 +322,7 @@ describe('EngineCreationLogic', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'my-index-1',
-            aliasName: 'search-my-index-1',
+            aliasRawName: 'search-my-index-1',
             engineType: 'elasticsearch',
           });
 
@@ -332,7 +333,7 @@ describe('EngineCreationLogic', () => {
           mount({
             rawName: 'my-engine-name',
             selectedIndex: 'my-index-1',
-            aliasName: 'search-my-index-1',
+            aliasRawName: 'search-my-index-1',
             engineType: 'elasticsearch',
           });
 
@@ -399,6 +400,16 @@ describe('EngineCreationLogic', () => {
       });
     });
 
+    describe('aliasName', () => {
+      it('should format the aliasName by replacing whitespace with hyphens from the aliasRawName', () => {
+        mount({
+          aliasRawName: '  search my    index-------now',
+        });
+
+        expect(EngineCreationLogic.values.aliasName).toEqual('search-my-index-now');
+      });
+    });
+
     describe('aliasNameErrorMessage', () => {
       it('should be an empty string if indices is empty', () => {
         mount({
@@ -419,7 +430,7 @@ describe('EngineCreationLogic', () => {
 
       it('should set an error message if there is an existing alias/index', () => {
         mount({
-          aliasName: 'alias-without-manage-privilege',
+          aliasRawName: 'alias-without-manage-privilege',
           indices: mockElasticsearchIndices,
         });
 
@@ -441,7 +452,8 @@ describe('EngineCreationLogic', () => {
 
       it('should be true if there is an error message', () => {
         mount({
-          aliasNameErrorMessage: 'an error message',
+          aliasRawName: 'alias-without-manage-privilege',
+          indices: mockElasticsearchIndices
         });
 
         expect(EngineCreationLogic.values.showAliasNameErrorMessages).toBe(true);
@@ -552,7 +564,7 @@ describe('EngineCreationLogic', () => {
             engineType: 'elasticsearch',
             name: 'engine-name',
             selectedIndex: 'selected-index',
-            aliasName: 'search-selected-index',
+            aliasRawName: 'search-selected-index',
           });
 
           const body = JSON.stringify({

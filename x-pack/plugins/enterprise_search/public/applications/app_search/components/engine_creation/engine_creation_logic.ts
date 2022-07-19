@@ -32,7 +32,7 @@ interface EngineCreationActions {
   setIngestionMethod(method: string): { method: string };
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-  setAliasName(aliasName: string): { aliasName: string };
+  setAliasRawName(aliasRawName: string): { aliasRawName: string };
   setCreationStep(creationStep: EngineCreationSteps): EngineCreationSteps;
   submitEngine(): void;
   onSubmitError(): void;
@@ -58,6 +58,7 @@ interface EngineCreationValues {
   engineType: EngineType;
   aliasName: string;
   aliasNameErrorMessage: string;
+  aliasRawName: string;
   showAliasNameErrorMessages: boolean;
   isAliasAllowed: boolean;
   isAliasRequired: boolean;
@@ -71,7 +72,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setIngestionMethod: (method) => ({ method }),
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
-    setAliasName: (aliasName) => ({ aliasName }),
+    setAliasRawName: (aliasRawName) => ({ aliasRawName }),
     submitEngine: true,
     onSubmitError: true,
     loadIndices: true,
@@ -107,10 +108,10 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         setRawName: (_, { rawName }) => rawName,
       },
     ],
-    aliasName: [
+    aliasRawName: [
       '',
       {
-        setAliasName: (_, { aliasName }) => aliasName,
+        setAliasRawName: (_, { aliasRawName }) => aliasRawName,
         setSelectedIndex: (_, { selectedIndexName }) => {
           return selectedIndexName.length === 0 || selectedIndexName.startsWith('search-')
             ? ''
@@ -160,6 +161,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
+    aliasName: [() => [selectors.aliasRawName], (aliasRawName) => formatApiName(aliasRawName)],
     indicesFormatted: [
       () => [selectors.indices, selectors.selectedIndex],
       (indices: ElasticsearchIndex[], selectedIndexName) =>
