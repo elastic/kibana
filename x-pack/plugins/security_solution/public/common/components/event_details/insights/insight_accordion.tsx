@@ -36,6 +36,10 @@ interface Props {
   onToggle?: EuiAccordionProps['onToggle'];
 }
 
+/**
+ * A special according that is used in the Insights section on the alert flyout.
+ * It wraps logic and custom styling around the loading, error and success states of an insight section.
+ */
 export const InsightAccordion = React.memo<Props>(
   ({
     prefix,
@@ -51,6 +55,7 @@ export const InsightAccordion = React.memo<Props>(
     const accordionId = useGeneratedHtmlId({ prefix });
 
     if (loading) {
+      // Don't render content when loading
       return (
         <StyledAccordion
           id={accordionId}
@@ -60,6 +65,7 @@ export const InsightAccordion = React.memo<Props>(
         />
       );
     } else if (error) {
+      // Display an alert icon and don't render content when there was an error
       return (
         <StyledAccordion
           id={accordionId}
@@ -73,6 +79,8 @@ export const InsightAccordion = React.memo<Props>(
         />
       );
     } else if (empty) {
+      // Since EuiAccordions don't have an empty state and they don't allow to style the arrow
+      // we're using a custom styled Accordion here and we're adding the faded-out button manually.
       return (
         <EmptyAccordion
           id={accordionId}
@@ -86,6 +94,7 @@ export const InsightAccordion = React.memo<Props>(
         />
       );
     } else if (renderContent) {
+      // The accordion can display the content now
       return (
         <StyledAccordion id={accordionId} buttonContent={text} onToggle={onToggle} paddingSize="l">
           {renderContent()}

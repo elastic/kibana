@@ -36,6 +36,11 @@ const columns: Array<EuiBasicTableColumn<Record<string, string[]>>> = [
 
 const alertLimit = 10;
 
+/**
+ * Displays a simplified alert table for the given alert ids.
+ * It will only fetch the latest 10 ids and in case more ids
+ * are passed in, it will add a note about omitted alerts.
+ */
 export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }) => {
   const sampledData = useMemo(() => alertIds.slice(0, alertLimit), [alertIds]);
 

@@ -26,6 +26,13 @@ interface Props {
   timelineId: string;
 }
 
+/**
+ * Fetches the count of alerts that were generated in the same session
+ * and displays an accordion with a mini table representation of the
+ * related cases.
+ * Offers the ability to dive deeper into the investigation by opening
+ * the related alerts in a timeline investigation.
+ */
 export const RelatedAlertsBySession = React.memo<Props>(
   ({ browserFields, data, eventId, timelineId }) => {
     const { field, values } = data;

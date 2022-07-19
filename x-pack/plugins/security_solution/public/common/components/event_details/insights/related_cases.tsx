@@ -20,6 +20,9 @@ interface Props {
   eventId: string;
 }
 
+/**
+ * Fetches and displays case links of cases that include the associated event (id).
+ */
 export const RelatedCases = React.memo<Props>(({ eventId }) => {
   const {
     services: { cases },

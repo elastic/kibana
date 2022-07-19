@@ -27,6 +27,9 @@ interface Props {
   isReadOnly?: boolean;
 }
 
+/**
+ * Displays several key insights for the associated alert.
+ */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
@@ -47,12 +50,17 @@ export const Insights = React.memo<Props>(
     const userCasesPermissions = useGetUserCasesPermissions();
     const hasCasesReadPermissions = userCasesPermissions.read;
 
+    // Make sure that the alert has at least one of the associated fields
+    // or the user has the required permissions for features/fields that
+    // we can provide insights for
     const canShowAtLeastOneInsight =
       hasCasesReadPermissions ||
       hasProcessEntityInfo ||
       hasSourceEventInfo ||
       hasProcessSessionInfo;
 
+    // If we're in read-only mode or don't have any insight-related data,
+    // don't render anything.
     if (isReadOnly || !canShowAtLeastOneInsight) {
       return null;
     }

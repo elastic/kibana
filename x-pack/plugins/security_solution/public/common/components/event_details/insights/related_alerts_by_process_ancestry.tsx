@@ -29,25 +29,57 @@ interface Cache {
   alertIds: string[];
 }
 
+/**
+ * Fetches and displays alerts that were generated in the associated process'
+ * process tree.
+ * Offers the ability to dive deeper into the investigation by opening
+ * the related alerts in a timeline investigation.
+ *
+ * In contrast to other insight accordions, this one does not fetch the
+ * count and alerts on mount since the call to fetch the process tree
+ * and its associated alerts is quite expensive.
+ * The component requires users to click on the accordion in order to
+ * initiate the fetch of the associated events.
+ *
+ * In order to achieve this, this component orchestrates two helper
+ * components:
+ *
+ * RelatedAlertsByProcessAncestry (empty cache)
+ *     user clicks -->
+ *         FetchAndNotifyCachedAlertsByProcessAncestry (fetches data, shows loading state)
+ *     cache loaded -->
+ *         ActualRelatedAlertsByProcessAncestry (displays data)
+ *
+ * The top-level component maintains a "cache" state that is used for
+ * state management and to prevent double-fetching in case the
+ * accordion is closed and re-opened.
+ *
+ * Due to the ephemeral nature of the data, it was decided to keep the
+ * state inside the component rather than to add it to Redux.
+ */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId, timelineId }) => {
   const [showContent, setShowContent] = useState(false);
   const [cache, setCache] = useState<Partial<Cache>>({});
 
   const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
 
+  // Makes sure the component is not fetching data before the accordion
+  // has been openend.
   const renderContent = useCallback(() => {
     if (!showContent) {
       return null;
     } else if (cache.alertIds) {
-      <ActualRelatedAlertsByProcessAncestry
-        data={data}
-        eventId={eventId}
-        timelineId={timelineId}
-        alertIds={cache.alertIds}
-      />;
+      return (
+        <ActualRelatedAlertsByProcessAncestry
+          data={data}
+          eventId={eventId}
+          timelineId={timelineId}
+          alertIds={cache.alertIds}
+        />
+      );
     }
     return (
-      <FetchAndShowRelatedAlertsByProcessAncestry
+      <FetchAndNotifyCachedAlertsByProcessAncestry
         data={data}
         eventId={eventId}
         timelineId={timelineId}
@@ -61,11 +93,14 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
   return (
     <InsightAccordion
       prefix="RelatedAlertsByProcessAncestry"
+      // `renderContent` and the associated sub-components are making sure to
+      // render the correct loading and error states so we can omit these here
       loading={false}
-      loadingText=""
       error={false}
+      loadingText=""
       errorText=""
       text={
+        // If we have fetched the alerts, display the count here, otherwise omit the count
         cache.alertIds
           ? i18n.translate(
               'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_with_count',
@@ -91,9 +126,12 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
 
 RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
 
-const FetchAndShowRelatedAlertsByProcessAncestry = React.memo<
+/**
+ * Fetches data, displays a loading and error state and notifies about on success
+ */
+const FetchAndNotifyCachedAlertsByProcessAncestry = React.memo<
   Props & { onCacheLoad: (cache: Cache) => void }
->(({ data, eventId, timelineId, onCacheLoad }) => {
+>(({ data, timelineId, onCacheLoad }) => {
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     parentEntityId: data.values,
     timelineId: timelineId ?? '',
@@ -115,23 +153,17 @@ const FetchAndShowRelatedAlertsByProcessAncestry = React.memo<
         defaultMessage="Failed to fetch alerts."
       />
     );
-  } else if (alertIds) {
-    return (
-      <ActualRelatedAlertsByProcessAncestry
-        alertIds={alertIds}
-        data={data}
-        eventId={eventId}
-        timelineId={timelineId}
-      />
-    );
   }
 
   return null;
 });
 
-FetchAndShowRelatedAlertsByProcessAncestry.displayName =
-  'FetchAndShowRelatedAlertsByProcessAncestry';
+FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
+  'FetchAndNotifyCachedAlertsByProcessAncestry';
 
+/**
+ * Renders the alert table and the timeline button from a filled cache.
+ */
 const ActualRelatedAlertsByProcessAncestry = React.memo<Props & Cache>(
   ({ alertIds, eventId, timelineId }) => {
     const dataProviders = useMemo(() => {
