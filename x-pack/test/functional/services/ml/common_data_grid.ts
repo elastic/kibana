@@ -43,7 +43,7 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
-          const pattern = /^(.*), column (\d+), row (\d+)$/;
+          const pattern = /^(.*)-(?:.*), column (\d+), row (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
           return { text: matches![1], column: Number(matches![2]), row: Number(matches![3]) };
