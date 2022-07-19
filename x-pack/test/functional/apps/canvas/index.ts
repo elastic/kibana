@@ -6,7 +6,7 @@
  */
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
-export default async ({ loadTestFile, getService }: FtrProviderContext) => {
+export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const security = getService('security');
   const config = getService('config');
   let esNode: EsArchiver;
