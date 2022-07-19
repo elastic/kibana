@@ -2401,13 +2401,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               "[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
