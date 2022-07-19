@@ -645,6 +645,9 @@
         "description": [
           "\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1675,6 +1678,9 @@
         "description": [
           "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
         ],
+        "signature": [
+          "CoreTheme"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1701,6 +1707,9 @@
         "label": "DeprecationsServiceStart",
         "description": [
           "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
+        ],
+        "signature": [
+          "DeprecationsServiceStart"
         ],
         "path": "node_modules/@types/kbn__core-deprecations-browser/index.d.ts",
         "deprecated": false,
@@ -1838,6 +1847,9 @@
         "tags": [],
         "label": "DocLinksStart",
         "description": [],
+        "signature": [
+          "DocLinksStart"
+        ],
         "path": "node_modules/@types/kbn__core-doc-links-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1884,6 +1896,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1991,6 +2006,9 @@
         "description": [
           "\nDefinition of the full event structure"
         ],
+        "signature": [
+          "Event"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2059,6 +2077,9 @@
         "label": "EventContext",
         "description": [
           "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+        ],
+        "signature": [
+          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -2288,6 +2309,9 @@
         "description": [
           "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
         ],
+        "signature": [
+          "ExecutionContextSetup"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2444,6 +2468,9 @@
         "description": [
           "\nRepresents the `message` and `stack` of a fatal Error\n"
         ],
+        "signature": [
+          "FatalErrorInfo"
+        ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2481,6 +2508,9 @@
         "label": "FatalErrorsSetup",
         "description": [
           "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+        ],
+        "signature": [
+          "FatalErrorsSetup"
         ],
         "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
@@ -2707,6 +2737,9 @@
         "tags": [],
         "label": "HttpFetchQuery",
         "description": [],
+        "signature": [
+          "HttpFetchQuery"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2715,12 +2748,12 @@
             "id": "def-public.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
+            "label": "[key: string]: string | number | boolean | number[] | string[] | boolean[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
+              "[key: string]:  string | number | boolean | number[] | string[] | boolean[] | null | undefined"
             ],
             "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
             "deprecated": false
@@ -2736,6 +2769,9 @@
         "label": "HttpHandler",
         "description": [
           "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
+        ],
+        "signature": [
+          "HttpHandler"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -2804,6 +2840,9 @@
         "description": [
           "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
         ],
+        "signature": [
+          "HttpHeadersInit"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2831,6 +2870,9 @@
         "label": "HttpInterceptor",
         "description": [
           "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
+        ],
+        "signature": [
+          "HttpInterceptor"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -3078,6 +3120,9 @@
         "tags": [],
         "label": "HttpInterceptorRequestError",
         "description": [],
+        "signature": [
+          "HttpInterceptorRequestError"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -3171,6 +3216,9 @@
         "label": "HttpRequestInit",
         "description": [
           "\nFetch API options available to {@link HttpHandler}s.\n"
+        ],
+        "signature": [
+          "HttpRequestInit"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -3464,6 +3512,9 @@
         "tags": [],
         "label": "HttpSetup",
         "description": [],
+        "signature": [
+          "HttpSetup"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -3736,6 +3787,9 @@
         "description": [
           "\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\n"
         ],
+        "signature": [
+          "I18nStart"
+        ],
         "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -3793,6 +3847,9 @@
         "label": "IAnonymousPaths",
         "description": [
           "\nAPIs for denoting paths as not requiring authentication"
+        ],
+        "signature": [
+          "IAnonymousPaths"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -3872,6 +3929,9 @@
         "label": "IBasePath",
         "description": [
           "\nAPIs for manipulating the basePath on URL segments."
+        ],
+        "signature": [
+          "IBasePath"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -3995,6 +4055,9 @@
         "label": "IExternalUrl",
         "description": [
           "\nAPIs for working with external URLs.\n"
+        ],
+        "signature": [
+          "IExternalUrl"
         ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
@@ -4201,6 +4264,9 @@
         "description": [
           "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
         ],
+        "signature": [
+          "IHttpInterceptController"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -4293,6 +4359,9 @@
         "label": "IShipper",
         "description": [
           "\nBasic structure of a Shipper"
+        ],
+        "signature": [
+          "IShipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -4450,6 +4519,9 @@
         "label": "IUiSettingsClient",
         "description": [
           "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n{@link IUiSettingsClient}\n"
+        ],
+        "signature": [
+          "IUiSettingsClient"
         ],
         "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
         "deprecated": false,
@@ -5173,6 +5245,9 @@
         "description": [
           "\n"
         ],
+        "signature": [
+          "OptInConfig"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -5508,7 +5583,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
+              "\"s\" | \"m\" | \"l\" | undefined"
             ],
             "path": "src/core/public/overlays/flyout/flyout_service.tsx",
             "deprecated": false
@@ -6459,6 +6534,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -6749,6 +6827,9 @@
         "tags": [],
         "label": "ResponseErrorBody",
         "description": [],
+        "signature": [
+          "ResponseErrorBody"
+        ],
         "path": "node_modules/@types/kbn__core-http-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8595,6 +8676,9 @@
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
+        "signature": [
+          "TelemetryCounter"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8671,6 +8755,9 @@
         "tags": [],
         "label": "ThemeServiceSetup",
         "description": [],
+        "signature": [
+          "ThemeServiceSetup"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -8700,6 +8787,9 @@
         "tags": [],
         "label": "ThemeServiceStart",
         "description": [],
+        "signature": [
+          "ThemeServiceStart"
+        ],
         "path": "node_modules/@types/kbn__core-theme-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -9009,6 +9099,9 @@
         "tags": [],
         "label": "UiSettingsState",
         "description": [],
+        "signature": [
+          "UiSettingsState"
+        ],
         "path": "node_modules/@types/kbn__core-ui-settings-browser/index.d.ts",
         "deprecated": false,
         "children": [
@@ -9531,7 +9624,7 @@
         "signature": [
           "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; options?: string[] | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
@@ -9632,7 +9725,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+          "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
         ],
         "path": "src/core/server/saved_objects/types.ts",
         "deprecated": false,
@@ -9690,7 +9783,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -9747,7 +9840,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -10751,6 +10844,9 @@
         "description": [
           "\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11314,6 +11410,9 @@
         "description": [
           "\nResult of auth redirection."
         ],
+        "signature": [
+          "AuthRedirectedParams"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11375,6 +11474,9 @@
         "tags": [],
         "label": "AuthResultNotHandled",
         "description": [],
+        "signature": [
+          "AuthResultNotHandled"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11403,6 +11505,9 @@
         "label": "AuthResultParams",
         "description": [
           "\nResult of successful authentication."
+        ],
+        "signature": [
+          "AuthResultParams"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -11496,6 +11601,9 @@
         "tags": [],
         "label": "AuthToolkit",
         "description": [],
+        "signature": [
+          "AuthToolkit"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11864,6 +11972,9 @@
         "description": [
           "\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\n"
         ],
+        "signature": [
+          "ConfigDeprecationContext"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -11917,6 +12028,9 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\nwhen invoking a {@link ConfigDeprecationProvider}.\n\nSee methods documentation for more detailed examples.\n"
+        ],
+        "signature": [
+          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -13218,6 +13332,9 @@
         "description": [
           "\nUiSettings deprecation field options."
         ],
+        "signature": [
+          "DeprecationSettings"
+        ],
         "path": "node_modules/@types/kbn__core-ui-settings-common/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13350,6 +13467,9 @@
         "description": [
           "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
         ],
+        "signature": [
+          "DiscoveredPlugin"
+        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13465,6 +13585,9 @@
         "tags": [],
         "label": "DocLinksServiceSetup",
         "description": [],
+        "signature": [
+          "DocLinksServiceSetup"
+        ],
         "path": "node_modules/@types/kbn__core-doc-links-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13943,6 +14066,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -13991,6 +14117,9 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "signature": [
+          "ErrorHttpResponseOptions"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -14037,6 +14166,9 @@
         "label": "Event",
         "description": [
           "\nDefinition of the full event structure"
+        ],
+        "signature": [
+          "Event"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -14106,6 +14238,9 @@
         "label": "EventContext",
         "description": [
           "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+        ],
+        "signature": [
+          "EventContext"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -14333,6 +14468,9 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
+        "signature": [
+          "ExecutionContextSetup"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -14426,7 +14564,7 @@
               "Headers used for authentication against Elasticsearch"
             ],
             "signature": [
-              "{ warning?: string | string[] | undefined; from?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; origin?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": false
@@ -14810,6 +14948,9 @@
         "tags": [],
         "label": "HttpAuth",
         "description": [],
+        "signature": [
+          "HttpAuth"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -15206,6 +15347,9 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "signature": [
+          "HttpResponseOptions"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -15268,6 +15412,9 @@
         "label": "HttpServerInfo",
         "description": [
           "\nInformation about what hostname, port, and protocol the server process is\nrunning on. Note that this may not match the URL that end-users access\nKibana at. For the public URL, see {@link BasePath.publicBaseUrl}."
+        ],
+        "signature": [
+          "HttpServerInfo"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -15790,6 +15937,9 @@
         "tags": [],
         "label": "HttpServiceStart",
         "description": [],
+        "signature": [
+          "HttpServiceStart"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -15899,6 +16049,9 @@
         "label": "IBasePath",
         "description": [
           "\nAccess or manipulate the Kibana base path\n"
+        ],
+        "signature": [
+          "IBasePath"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -16103,7 +16256,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
             ],
             "signature": [
-              "{ eql: ",
+              "{ name: string | symbol; transform: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -16137,7 +16290,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; eql: ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -16167,7 +16322,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -17233,8 +17388,6 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
-              "; transform: ",
-              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -17360,6 +17513,9 @@
         "label": "IContextContainer",
         "description": [
           "\nAn object that handles registration of context providers and configuring handlers with context.\n"
+        ],
+        "signature": [
+          "IContextContainer"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -17518,6 +17674,9 @@
         "description": [
           "\nCSP configuration for use in Kibana."
         ],
+        "signature": [
+          "ICspConfig"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -17628,6 +17787,9 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
+        "signature": [
+          "IExecutionContextContainer"
+        ],
         "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -17675,6 +17837,9 @@
         "description": [
           "\nExternal Url configuration for use in Kibana."
         ],
+        "signature": [
+          "IExternalUrlConfig"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -17705,6 +17870,9 @@
         "label": "IExternalUrlPolicy",
         "description": [
           "\nA policy describing whether access to an external destination is allowed."
+        ],
+        "signature": [
+          "IExternalUrlPolicy"
         ],
         "path": "node_modules/@types/kbn__core-http-common/index.d.ts",
         "deprecated": false,
@@ -17817,6 +17985,9 @@
         "label": "IKibanaSocket",
         "description": [
           "\nA tiny abstraction for TCP socket."
+        ],
+        "signature": [
+          "IKibanaSocket"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -18854,7 +19025,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the internal Kibana user."
             ],
             "signature": [
-              "{ eql: ",
+              "{ name: string | symbol; transform: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -18888,7 +19059,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; eql: ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -18918,7 +19091,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -19983,8 +20156,6 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
-              "default",
-              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -20057,7 +20228,7 @@
               "\nA {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster\non behalf of the user that initiated the request to the Kibana server."
             ],
             "signature": [
-              "{ eql: ",
+              "{ name: string | symbol; transform: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -20091,7 +20262,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; eql: ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -20121,7 +20294,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -21186,8 +21359,6 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
-              "default",
-              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -21261,6 +21432,9 @@
         "label": "IShipper",
         "description": [
           "\nBasic structure of a Shipper"
+        ],
+        "signature": [
+          "IShipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -21804,7 +21978,7 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ warning?: string | string[] | undefined; from?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; origin?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
             "deprecated": false
@@ -21939,6 +22113,9 @@
         "description": [
           "\nRequest events."
         ],
+        "signature": [
+          "KibanaRequestEvents"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22044,6 +22221,9 @@
         "label": "Logger",
         "description": [
           "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
+        ],
+        "signature": [
+          "Logger"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -22417,6 +22597,9 @@
         "description": [
           "\nDescribes the configuration of a given logger.\n"
         ],
+        "signature": [
+          "LoggerConfigType"
+        ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22451,7 +22634,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+              "\"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
             ],
             "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
@@ -22467,6 +22650,9 @@
         "label": "LoggerContextConfigInput",
         "description": [
           "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+        ],
+        "signature": [
+          "LoggerContextConfigInput"
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -22513,6 +22699,9 @@
         "label": "LoggerFactory",
         "description": [
           "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
+        ],
+        "signature": [
+          "LoggerFactory"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -22563,6 +22752,9 @@
         "label": "LoggingServiceSetup",
         "description": [
           "\nProvides APIs to plugins for customizing the plugin's logger."
+        ],
+        "signature": [
+          "LoggingServiceSetup"
         ],
         "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
@@ -22672,6 +22864,9 @@
         "description": [
           "\nContains information about how this Kibana process has been configured.\n"
         ],
+        "signature": [
+          "NodeInfo"
+        ],
         "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22701,6 +22896,9 @@
         "label": "NodeRoles",
         "description": [
           "\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\nThis configuration is then exposed to plugins via `NodeRoles`,\nwhich is available on the `PluginInitializerContext`.\n\nThe node roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured.\n"
+        ],
+        "signature": [
+          "NodeRoles"
         ],
         "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
         "deprecated": false,
@@ -22824,6 +23022,9 @@
         "tags": [],
         "label": "OnPostAuthToolkit",
         "description": [],
+        "signature": [
+          "OnPostAuthToolkit"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22855,6 +23056,9 @@
         "tags": [],
         "label": "OnPreAuthToolkit",
         "description": [],
+        "signature": [
+          "OnPreAuthToolkit"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22888,6 +23092,9 @@
         "description": [
           "\nAdditional data to extend a response."
         ],
+        "signature": [
+          "OnPreResponseExtensions"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22919,6 +23126,9 @@
         "description": [
           "\nResponse status code."
         ],
+        "signature": [
+          "OnPreResponseInfo"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22943,6 +23153,9 @@
         "label": "OnPreResponseRender",
         "description": [
           "\nAdditional data to extend a response when rendering a new body"
+        ],
+        "signature": [
+          "OnPreResponseRender"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -22986,6 +23199,9 @@
         "label": "OnPreResponseToolkit",
         "description": [
           "\nA tool set defining an outcome of OnPreResponse interceptor for incoming request."
+        ],
+        "signature": [
+          "OnPreResponseToolkit"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -23071,6 +23287,9 @@
         "tags": [],
         "label": "OnPreRoutingToolkit",
         "description": [],
+        "signature": [
+          "OnPreRoutingToolkit"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -23574,6 +23793,9 @@
         "description": [
           "\n"
         ],
+        "signature": [
+          "OptInConfig"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -23619,6 +23841,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -24293,7 +24518,7 @@
             "label": "internalClient",
             "description": [],
             "signature": [
-              "{ eql: ",
+              "{ name: string | symbol; transform: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -24327,7 +24552,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "<TDocument, TAggregations>>; }; eql: ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -24357,7 +24584,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -25423,8 +25650,6 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
-              "; transform: ",
-              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -25934,6 +26159,9 @@
         "description": [
           "\nAdditional body options for a route"
         ],
+        "signature": [
+          "RouteConfigOptionsBody"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "children": [
@@ -26010,6 +26238,9 @@
         "label": "RouteValidationResultFactory",
         "description": [
           "\nValidation result factory to be used in the custom validation function to return the valid data or validation errors\n\nSee {@link RouteValidationFunction}.\n"
+        ],
+        "signature": [
+          "RouteValidationResultFactory"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -26168,6 +26399,9 @@
         "label": "RouteValidatorOptions",
         "description": [
           "\nAdditional options for the RouteValidator class to modify its default behaviour.\n"
+        ],
+        "signature": [
+          "RouteValidatorOptions"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -26574,6 +26808,9 @@
         "label": "SessionCookieValidationResult",
         "description": [
           "\nReturn type from a function to validate cookie contents."
+        ],
+        "signature": [
+          "SessionCookieValidationResult"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -27120,6 +27357,9 @@
         "label": "TelemetryCounter",
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
+        ],
+        "signature": [
+          "TelemetryCounter"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -27871,6 +28111,9 @@
         "tags": [],
         "label": "AuthResultType",
         "description": [],
+        "signature": [
+          "AuthResultType"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -27884,6 +28127,9 @@
         "description": [
           "\nStatus indicating an outcome of the authentication."
         ],
+        "signature": [
+          "AuthStatus"
+        ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -27895,6 +28141,9 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
+        "signature": [
+          "PluginType"
+        ],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -28599,7 +28848,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"error\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"connection\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"end\" | \"group\" | \"user\" | \"info\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"connection\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -28615,7 +28864,7 @@
           "\nClient used to query the elasticsearch cluster.\n"
         ],
         "signature": [
-          "{ eql: ",
+          "{ name: string | symbol; transform: ",
           "default",
           "; search: { <TDocument = unknown, TAggregations = Record<string, ",
           "AggregationsAggregate",
@@ -28649,7 +28898,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "SearchResponse",
-          "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+          "<TDocument, TAggregations>>; }; eql: ",
+          "default",
+          "; create: { <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
           "<TDocument> | ",
           "CreateRequest",
@@ -28679,7 +28930,7 @@
           "default",
           "; security: ",
           "default",
-          "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+          "; index: { <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
           "IndexRequest",
@@ -29745,8 +29996,6 @@
           "TermvectorsResponse",
           ">; }; textStructure: ",
           "default",
-          "; transform: ",
-          "default",
           "; updateByQuery: { (this: That, params: ",
           "UpdateByQueryRequest",
           " | ",
@@ -30058,7 +30307,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ warning?: string | string[] | undefined; from?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; origin?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; date?: string | string[] | undefined; expires?: string | string[] | undefined; range?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; authorization?: string | string[] | undefined; connection?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -30391,7 +30640,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"warning\" | \"from\" | \"date\" | \"expires\" | \"range\" | \"origin\" | \"location\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
+          "\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
@@ -31066,7 +31315,7 @@
         "signature": [
           "{ metric?: { type: string; name: string; } | undefined; type?: ",
           "UiSettingsType",
-          " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; options?: string[] | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; }"
         ],
@@ -31301,7 +31550,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<\"warning\" | \"from\" | \"date\" | \"expires\" | \"range\" | \"origin\" | \"location\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
+          "Record<\"from\" | \"origin\" | \"warning\" | \"location\" | \"date\" | \"expires\" | \"range\" | \"allow\" | \"accept\" | \"host\" | \"etag\" | \"authorization\" | \"connection\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
         "path": "node_modules/@types/kbn__core-http-server/index.d.ts",
         "deprecated": false,
