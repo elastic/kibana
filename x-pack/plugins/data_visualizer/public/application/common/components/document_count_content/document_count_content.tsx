@@ -16,9 +16,11 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiRange,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortedIndex } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentCountChartPoint } from './document_count_chart';
 import {
   RANDOM_SAMPLER_STEP,
@@ -33,6 +35,8 @@ export interface Props {
   totalCount: number;
   samplingProbability?: number | null;
   setSamplingProbability?: (value: number) => void;
+  autoPickProbability?: boolean;
+  setAutoPickProbability: (value: boolean) => void;
   loading: boolean;
 }
 
@@ -42,6 +46,8 @@ export const DocumentCountContent: FC<Props> = ({
   samplingProbability,
   setSamplingProbability,
   loading,
+  autoPickProbability,
+  setAutoPickProbability,
 }) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
@@ -100,13 +106,15 @@ export const DocumentCountContent: FC<Props> = ({
             <EuiPanel style={{ maxWidth: 400 }}>
               <EuiFlexItem grow={true}>
                 <EuiCallOut
-                  iconType="help"
                   size="s"
                   color={'primary'}
-                  title={i18n.translate('xpack.dataVisualizer.randomSamplerInfoCalloutMessage', {
-                    defaultMessage:
-                      'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for exact values without any sampling.',
-                  })}
+                  title={i18n.translate(
+                    'xpack.dataVisualizer.randomSamplerSettingsPopUp.infoCalloutMessage',
+                    {
+                      defaultMessage:
+                        'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or 100% for no sampling.',
+                    }
+                  )}
                 />
               </EuiFlexItem>
               <EuiSpacer size="m" />
@@ -139,6 +147,24 @@ export const DocumentCountContent: FC<Props> = ({
                     }
                   }}
                   step={RANDOM_SAMPLER_STEP}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <EuiSwitch
+                  data-test-subj="dataVisualizerAutoPickPValue"
+                  label={
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.randomSamplerSettingsPopUp.autoPickPValue"
+                      defaultMessage="Automatically use the best percentage"
+                    />
+                  }
+                  checked={autoPickProbability === true}
+                  onChange={(e) => {
+                    if (setAutoPickProbability) {
+                      setAutoPickProbability(e.target.checked);
+                    }
+                  }}
                 />
               </EuiFlexItem>
             </EuiPanel>

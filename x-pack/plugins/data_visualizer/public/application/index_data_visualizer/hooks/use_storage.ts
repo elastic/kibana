@@ -9,9 +9,11 @@ import { useCallback, useState } from 'react';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
 export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreference';
+export const DV_RANDOM_SAMPLER_AUTO_SET_P = 'dataVisualizer.randomSamplerAutoPickPValue';
 
 export type DV = Partial<{
   [DV_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
+  [DV_RANDOM_SAMPLER_AUTO_SET_P]: 'true' | 'false';
 }> | null;
 
 export type DVKey = keyof Exclude<DV, null>;
