@@ -24,6 +24,7 @@ import {
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { reportMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -399,7 +400,12 @@ export class Server {
     startTransaction?.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
-    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
+
+    reportMetricEvent({
+      event_name: KIBANA_STARTED_EVENT,
+      duration: this.uptimePerStep,
+      uptime_per_step: this.uptimePerStep,
+    });
 
     return this.coreStart;
   }

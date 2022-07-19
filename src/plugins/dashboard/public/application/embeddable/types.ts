@@ -7,10 +7,9 @@
  */
 
 export * from '../../../common/types';
-import type { MetricEvent } from '@kbn/ebt-tools';
 
 export type DashboardLoadedEventStatus = 'done' | 'error';
 
-export interface DashboardLoadedEvent extends MetricEvent {
+export interface DashboardLoadedEventMeta {
   status: DashboardLoadedEventStatus;
 }

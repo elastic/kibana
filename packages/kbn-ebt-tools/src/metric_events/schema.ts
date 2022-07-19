@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-export interface MetricEvent {
-  type: string;
+export interface MetricEvent extends Record<string, any> {
+  event_name: string;
+  meta?: Record<string, any>;
 
   // Standardized fields
   duration?: number;
+  status?: string;
   jsHeapSizeLimit?: number;
   totalJSHeapSize?: number;
   usedJSHeapSize?: number;
@@ -29,13 +31,21 @@ export interface MetricEvent {
 }
 
 export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
-  type: {
+  event_name: {
     type: 'keyword',
     _meta: { description: 'Type of the event' },
+  },
+  meta: {
+    type: 'passthrough',
+    _meta: { description: 'Meta data that is searchable but not aggregatable', optional: true },
   },
   duration: {
     type: 'integer',
     _meta: { description: 'The main event duration in ms', optional: true },
+  },
+  status: {
+    type: 'keyword',
+    _meta: { description: 'A status', optional: true },
   },
   jsHeapSizeLimit: {
     type: 'long',

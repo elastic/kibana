@@ -29,7 +29,6 @@ import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { METRIC_EVENT_SCHEMA } from '@kbn/ebt-tools';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -72,7 +71,6 @@ import {
   LibraryNotificationAction,
   CopyToDashboardAction,
   DashboardCapabilities,
-  DashboardLoadedEvent,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -81,7 +79,6 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
-import { DASHBOARD_LOADED_EVENT } from './events';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -140,19 +137,6 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
-
-  private registerEvents(analytics: CoreSetup['analytics']) {
-    analytics.registerEventType<DashboardLoadedEvent>({
-      eventType: DASHBOARD_LOADED_EVENT,
-      schema: {
-        ...METRIC_EVENT_SCHEMA,
-        status: {
-          type: 'keyword',
-          _meta: { description: 'Dashboard load status' },
-        },
-      },
-    });
-  }
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -302,8 +286,6 @@ export class DashboardPlugin
         });
       },
     };
-
-    this.registerEvents(core.analytics);
 
     core.application.register(app);
     urlForwarding.forwardApp(

@@ -16,7 +16,7 @@ import {
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
@@ -25,8 +25,8 @@ import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
-import { METRIC_EVENT_SCHEMA } from '@kbn/ebt-tools';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
+import { registerMetricEvent, reportMetricEvent } from '@kbn/ebt-tools';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -156,16 +156,19 @@ export class CoreSystem {
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     /**
      * @deprecated here for backwards compatibility in Fullstory
-     **/ 
+     **/
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
       protocol: window.location.protocol,
     });
-    
+
     const timing = this.getLoadMarksInfo();
-    analytics.reportEvent(KIBANA_LOADED_EVENT, {
-      kibana_version: this.coreContext.env.packageInfo.version,
-      protocol: window.location.protocol,
+    reportMetricEvent({
+      event_name: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: this.coreContext.env.packageInfo.version,
+        protocol: window.location.protocol,
+      },
       duration: timing[LOAD_FIRST_NAV],
       // @ts-expect-error 2339
       ...performance.memory,
@@ -199,7 +202,8 @@ export class CoreSystem {
       this.docLinks.setup();
 
       const analytics = this.analytics.setup({ injectedMetadata });
-      this.registerLoadedKibanaEventType(analytics);
+
+      registerMetricEvent(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({
@@ -369,24 +373,5 @@ export class CoreSystem {
     this.theme.stop();
     this.analytics.stop();
     this.rootDomElement.textContent = '';
-  }
-
-  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
-    analytics.registerEventType({
-      eventType: KIBANA_LOADED_EVENT,
-      schema: {
-        ...METRIC_EVENT_SCHEMA,
-        kibana_version: {
-          type: 'keyword',
-          _meta: { description: 'The version of Kibana' },
-        },
-        protocol: {
-          type: 'keyword',
-          _meta: {
-            description: 'Value from window.location.protocol',
-          },
-        },
-      },
-    });
   }
 }

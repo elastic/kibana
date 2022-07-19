@@ -5,4 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { METRIC_EVENT_SCHEMA, MetricEvent } from './schema';
+export type { MetricEvent } from './schema';
+export type { registerMetricEvent, reportMetricEvent } from './helpers';

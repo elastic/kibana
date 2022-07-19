@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { reportMetricEvent } from '@kbn/ebt-tools';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
@@ -164,7 +165,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
-    this.services.analytics?.reportEvent(DASHBOARD_LOADED_EVENT, {
+    reportMetricEvent({
+      event_name: DASHBOARD_LOADED_EVENT,
       duration: data.timeToDone,
       status: data.status,
       key1: 'time_to_data',
