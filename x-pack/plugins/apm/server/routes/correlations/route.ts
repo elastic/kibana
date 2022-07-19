@@ -349,7 +349,6 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
 
     return fetchSignificantCorrelations({
       setup,
-      eventType: ProcessorEvent.transaction,
       start,
       end,
       environment,

@@ -18,14 +18,15 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export async function fetchDurationCorrelationWithHistogram({
   setup,
-  eventType,
+  chartType,
   start,
   end,
   environment,
@@ -39,7 +40,7 @@ export async function fetchDurationCorrelationWithHistogram({
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
+  chartType: LATENCY_DISTRIBUTION_CHART_TYPE;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
   fractions: number[];
@@ -47,6 +48,7 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount: number;
   fieldValuePair: FieldValuePair;
 }) {
+  const eventType = getEventType(chartType);
   const queryWithFieldValuePair = {
     bool: {
       filter: [
@@ -74,7 +76,7 @@ export async function fetchDurationCorrelationWithHistogram({
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
       const logHistogram = await fetchDurationRanges({
         setup,
-        eventType,
+        chartType,
         start,
         end,
         environment,

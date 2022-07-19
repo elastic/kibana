@@ -14,7 +14,7 @@ import type {
   FieldValuePair,
 } from '../../../../common/correlations/types';
 
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LATENCY_DISTRIBUTION_CHART_TYPE } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
@@ -25,10 +25,10 @@ import { fetchDurationCorrelationWithHistogram } from './fetch_duration_correlat
 import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export const fetchSignificantCorrelations = async ({
   setup,
-  eventType,
   start,
   end,
   environment,
@@ -37,14 +37,16 @@ export const fetchSignificantCorrelations = async ({
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
   fieldValuePairs: FieldValuePair[];
 }) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
+  const chartType = LATENCY_DISTRIBUTION_CHART_TYPE.LATENCY_CORRELATIONS;
+  const eventType = getEventType(chartType);
+
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
@@ -73,7 +75,7 @@ export const fetchSignificantCorrelations = async ({
 
   const histogramRangeSteps = await fetchDurationHistogramRangeSteps({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
@@ -132,7 +134,7 @@ export const fetchSignificantCorrelations = async ({
     const { fieldName, fieldValue } = fallbackResult;
     const logHistogram = await fetchDurationRanges({
       setup,
-      eventType,
+      chartType,
       start,
       end,
       environment,
