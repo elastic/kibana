@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, mockTelemetryActions } from '../../../__mocks__/kea_logic';
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard, EuiListGroup, EuiPanel } from '@elastic/eui';
+import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -37,8 +37,10 @@ describe('ProductCard', () => {
     expect(button).toHaveLength(1);
     expect(card.find(EuiButtonEmptyTo)).toHaveLength(0);
     expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(ELASTICSEARCH_PLUGIN.RESOURCE_LINKS.length);
-    expect(card.find(EuiButtonTo).prop('to')).toEqual(ELASTICSEARCH_PLUGIN.URL)
+    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
+      ELASTICSEARCH_PLUGIN.RESOURCE_LINKS.length
+    );
+    expect(card.find(EuiButtonTo).prop('to')).toEqual(ELASTICSEARCH_PLUGIN.URL);
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
@@ -59,8 +61,10 @@ describe('ProductCard', () => {
     expect(card.find(EuiButtonTo)).toHaveLength(0);
     expect(button).toHaveLength(1);
     expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(APP_SEARCH_PLUGIN.RESOURCE_LINKS.length);
-    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(APP_SEARCH_PLUGIN.URL)
+    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
+      APP_SEARCH_PLUGIN.RESOURCE_LINKS.length
+    );
+    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(APP_SEARCH_PLUGIN.URL);
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
@@ -80,8 +84,10 @@ describe('ProductCard', () => {
     expect(card.find(EuiButtonTo)).toHaveLength(0);
     expect(button).toHaveLength(1);
     expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(WORKPLACE_SEARCH_PLUGIN.RESOURCE_LINKS.length);
-    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(WORKPLACE_SEARCH_PLUGIN.URL)
+    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
+      WORKPLACE_SEARCH_PLUGIN.RESOURCE_LINKS.length
+    );
+    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(WORKPLACE_SEARCH_PLUGIN.URL);
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({

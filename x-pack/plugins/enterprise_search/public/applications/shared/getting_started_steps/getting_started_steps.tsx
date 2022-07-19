@@ -39,7 +39,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                         {
                           defaultMessage:
-                            "Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices , or third-party connectors like Google Drive, Microsoft Sharepoint and more.",
+                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices , or third-party connectors like Google Drive, Microsoft Sharepoint and more.',
                         }
                       )}
                     </p>
@@ -63,7 +63,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.message',
                         {
                           defaultMessage:
-                            "You can use search engines to build customizable search experiences for your customers with App Search.",
+                            'You can use search engines to build customizable search experiences for your customers with App Search.',
                         }
                       )}
                     </p>
@@ -97,7 +97,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                       'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.message',
                       {
                         defaultMessage:
-                          "Take full control over your client-side search experience by building with the Search UI library. Connect directly to App Search or Elasticsearch.",
+                          'Take full control over your client-side search experience by building with the Search UI library. Connect directly to App Search or Elasticsearch.',
                       }
                     )}
                   </p>
