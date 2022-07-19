@@ -104,7 +104,8 @@ export const splitResultFields = (resultFields: FieldResultSettingObject, schema
   Object.entries(resultFields).reduce(
     (acc, [fieldName, resultFieldSettings]) => {
       const fieldType = schema[fieldName].type;
-      const targetField = fieldType === SchemaType.Text ? 'textResultFields' : 'nonTextResultFields';
+      const targetField =
+        fieldType === SchemaType.Text ? 'textResultFields' : 'nonTextResultFields';
       return { ...acc, [targetField]: { ...acc[targetField], [fieldName]: resultFieldSettings } };
     },
     { textResultFields: {}, nonTextResultFields: {} }

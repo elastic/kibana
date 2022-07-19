@@ -283,21 +283,21 @@ describe('ResultSettingsLogic', () => {
       it('should filter out nested fields and keep subfields only', () => {
         mount({
           schema: {
-            'simple_field': { type: SchemaType.Text, capabilities: {} },
-            'nested_object': { type: SchemaType.Nested, capabilities: {} },
+            simple_field: { type: SchemaType.Text, capabilities: {} },
+            nested_object: { type: SchemaType.Nested, capabilities: {} },
             'nested_object.subfield': { type: SchemaType.Text, capabilities: {} },
             'simple_object.subfield': { type: SchemaType.Number, capabilities: {} },
           },
           resultFields: {
-            'simple_field': { raw: true },
-            'nested_object': { raw: true },
+            simple_field: { raw: true },
+            nested_object: { raw: true },
             'nested_object.subfield': { raw: true },
             'simple_object.subfield': { raw: true },
           },
         });
 
         expect(ResultSettingsLogic.values.validResultFields).toEqual({
-          'simple_field': { raw: true },
+          simple_field: { raw: true },
           'nested_object.subfield': { raw: true },
           'simple_object.subfield': { raw: true },
         });
@@ -306,16 +306,16 @@ describe('ResultSettingsLogic', () => {
       it('should filter out field that are missing in the schema', () => {
         mount({
           schema: {
-            'simple_field': { type: SchemaType.Text, capabilities: {} },
+            simple_field: { type: SchemaType.Text, capabilities: {} },
           },
           resultFields: {
-            'simple_field': { raw: true },
-            'invalid_field': { raw: true },
+            simple_field: { raw: true },
+            invalid_field: { raw: true },
           },
         });
 
         expect(ResultSettingsLogic.values.validResultFields).toEqual({
-          'simple_field': { raw: true },
+          simple_field: { raw: true },
         });
       });
     });
