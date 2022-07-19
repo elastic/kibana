@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
-
 import dedent from 'dedent';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -213,7 +212,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     aliasNameErrorMessage: [
       () => [selectors.aliasName, selectors.indices],
       (aliasName: string, indices: ElasticsearchIndex[]) => {
-        let existingAlias = indices.find((el) => el.name === aliasName);
+        const existingAlias = indices.find((el) => el.name === aliasName);
         if (existingAlias) {
           return i18n.translate(
             'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
@@ -223,7 +222,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
                 Please choose another alias name.
               `),
               values: {
-                aliasName: aliasName,
+                aliasName,
               },
             }
           );

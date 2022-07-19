@@ -19,7 +19,7 @@ describe('fetchIndices lib function', () => {
       },
       security: {
         hasPrivileges: jest.fn(),
-      }
+      },
     },
     asInternalUser: {},
   };
@@ -106,10 +106,12 @@ describe('fetchIndices lib function', () => {
     });
 
     expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      index: [{
-        names: ['search-regular-index', 'hidden'],
-        privileges: ['read', 'manage'],
-      }],
+      index: [
+        {
+          names: ['search-regular-index', 'hidden'],
+          privileges: ['read', 'manage'],
+        },
+      ],
     });
   });
 

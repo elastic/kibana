@@ -119,9 +119,11 @@ export const fetchIndices = async (
         });
       });
       return indicesAndAliases;
-    }).filter(({ name }, index, array) => (
-      // make list of aliases unique since we add an alias per index above
-      // and aliases can point to multiple indices
-      array.findIndex((engineData) => engineData.name === name) === index
-    ));
+    })
+    .filter(
+      ({ name }, index, array) =>
+        // make list of aliases unique since we add an alias per index above
+        // and aliases can point to multiple indices
+        array.findIndex((engineData) => engineData.name === name) === index
+    );
 };
