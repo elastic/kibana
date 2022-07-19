@@ -22,6 +22,7 @@ export async function getSortedAndFilteredServices({
   environment,
   logger,
   serviceGroup,
+  maxNumberOfServices,
 }: {
   setup: Setup;
   start: number;
@@ -29,6 +30,7 @@ export async function getSortedAndFilteredServices({
   environment: Environment;
   logger: Logger;
   serviceGroup: ServiceGroup | null;
+  maxNumberOfServices: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -48,7 +50,7 @@ export async function getSortedAndFilteredServices({
           ],
         },
         body: {
-          size: 500,
+          size: maxNumberOfServices,
           field: SERVICE_NAME,
         },
       }
