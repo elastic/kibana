@@ -41,6 +41,7 @@ export const AGENT_NAMES: AgentName[] = [
   'python',
   'ruby',
   'rum-js',
+  'android/java',
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
@@ -58,10 +59,21 @@ export const RUM_AGENT_NAMES: AgentName[] = [
   'opentelemetry/webjs',
 ];
 
+export const MOBILE_AGENT_NAMES: AgentName[] = [
+  'iOS/swift',
+  'android/java',
+];
+
 export function isRumAgentName(
   agentName?: string
 ): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
+}
+
+export function isMobileAgentName(
+  agentName?: string
+): agentName is 'iOS/swift' | 'android/java' {
+  return MOBILE_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
 export function normalizeAgentName<T extends string | undefined>(
@@ -79,6 +91,10 @@ export function normalizeAgentName<T extends string | undefined>(
     return 'ios';
   }
 
+  if (isAndroidAgentName(agentName)) {
+    return 'android';
+  }
+
   return agentName;
 }
 
@@ -93,4 +109,9 @@ export function isJRubyAgent(agentName?: string, runtimeName?: string) {
 
 export function isServerlessAgent(runtimeName?: string) {
   return runtimeName?.toLowerCase().startsWith('aws_lambda');
+}
+
+export function isAndroidAgentName(agentName?: string) {
+  const lowercased = agentName && agentName.toLowerCase();
+  return lowercased === 'android/java';
 }
