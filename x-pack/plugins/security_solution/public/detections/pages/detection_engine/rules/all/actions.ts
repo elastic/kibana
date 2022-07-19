@@ -60,7 +60,7 @@ interface ExportRulesBulkActionArgs extends BaseRulesBulkActionArgs {
   action: BulkAction.export;
 }
 
-// export bulk actions APi returns blob, the rest of actions returns BulkActionResponse JSON
+// export bulk actions API returns blob, the rest of actions returns BulkActionResponse object
 // hence method overloading to make type safe calls
 export async function executeRulesBulkAction(args: ExportRulesBulkActionArgs): Promise<Blob | null>;
 export async function executeRulesBulkAction(
