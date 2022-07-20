@@ -10,6 +10,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../../../../plugins/fleet/server/constants';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -312,6 +313,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -492,6 +494,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           is_managed: false,
           revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -652,6 +655,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           is_managed: false,
           revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],

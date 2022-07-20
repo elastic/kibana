@@ -27,6 +27,7 @@ import { appContextService } from './app_context';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
+import { AGENT_POLICY_INDEX } from '../../common';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -67,7 +68,6 @@ jest.mock('./agents');
 jest.mock('./package_policy');
 jest.mock('./app_context');
 jest.mock('./agent_policies/full_agent_policy');
-jest.mock('uuid/v5');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
@@ -383,11 +383,15 @@ describe('agent policy', () => {
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue(null);
 
-      soClient.get.mockResolvedValue({
+      const mockSo = {
         attributes: {},
         id: 'policy123',
         type: 'mocked',
         references: [],
+      };
+      soClient.get.mockResolvedValue(mockSo);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [mockSo],
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
@@ -409,24 +413,36 @@ describe('agent policy', () => {
         ],
       } as FullAgentPolicy);
 
-      soClient.get.mockResolvedValue({
+      const mockSo = {
         attributes: {},
         id: 'policy123',
         type: 'mocked',
         references: [],
+      };
+      soClient.get.mockResolvedValue(mockSo);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [mockSo],
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.bulk).toBeCalledWith(
         expect.objectContaining({
-          index: '.fleet-policies',
-          body: expect.objectContaining({
-            '@timestamp': expect.anything(),
-            data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
-            default_fleet_server: false,
-            policy_id: 'policy123',
-            revision_idx: 1,
-          }),
+          index: AGENT_POLICY_INDEX,
+          body: [
+            expect.objectContaining({
+              index: {
+                _id: expect.anything(),
+              },
+            }),
+            expect.objectContaining({
+              '@timestamp': expect.anything(),
+              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              default_fleet_server: false,
+              policy_id: 'policy123',
+              revision_idx: 1,
+            }),
+          ],
+          refresh: 'wait_for',
         })
       );
     });
