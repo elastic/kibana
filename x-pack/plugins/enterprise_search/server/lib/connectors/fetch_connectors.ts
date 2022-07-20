@@ -42,7 +42,7 @@ export const fetchConnectorByIndexName = async (
   try {
     const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
       index: CONNECTORS_INDEX,
-      query: { term: { 'index_name.keyword': indexName } },
+      query: { term: { index_name: indexName } },
     });
     const result = connectorResult.hits.hits[0]?._source
       ? {

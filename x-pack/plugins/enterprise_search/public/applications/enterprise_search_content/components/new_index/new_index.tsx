@@ -31,7 +31,7 @@ import { baseBreadcrumbs } from '../search_indices';
 import { ButtonGroup, ButtonGroupOption } from './button_group';
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
-import { MethodConnector } from './method_connector';
+import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
@@ -42,11 +42,6 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
         defaultMessage: 'Discover, extract, index, and sync of all your website content',
       }
     ),
-    icon: 'globe',
-    id: 'crawler',
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
-      defaultMessage: 'Use the web crawler',
-    }),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
       defaultMessage: 'No development required',
     }),
