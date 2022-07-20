@@ -64,6 +64,7 @@ export const ActionsMenu = React.memo<{}>(() => {
       closePopover={closePopoverHandler}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      data-test-subj="endpointDetailsActionsPopover"
     >
       <EuiContextMenuPanel size="s" items={takeActionItems} />
     </EuiPopover>
