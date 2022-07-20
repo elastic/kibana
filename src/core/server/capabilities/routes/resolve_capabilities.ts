@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
-import { CapabilitiesResolver } from '../resolve_capabilities';
+import type { CapabilitiesResolver } from '@kbn/core-capabilities-server';
 
 const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 

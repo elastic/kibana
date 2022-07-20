@@ -7,7 +7,7 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import { CapabilitiesResolver } from '../resolve_capabilities';
+import type { CapabilitiesResolver } from '@kbn/core-capabilities-server';
 import { registerCapabilitiesRoutes } from './resolve_capabilities';
 
 export function registerRoutes(router: IRouter, resolver: CapabilitiesResolver) {

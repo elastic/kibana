@@ -7,8 +7,3 @@
  */
 
 export { CapabilitiesService } from './capabilities_service';
-export type {
-  CapabilitiesSetup,
-  CapabilitiesStart,
-  ResolveCapabilitiesOptions,
-} from './capabilities_service';
