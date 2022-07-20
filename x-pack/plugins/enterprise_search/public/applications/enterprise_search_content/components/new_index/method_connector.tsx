@@ -31,15 +31,9 @@ export const MethodConnector: React.FC = () => {
   AddConnectorPackageLogic.mount();
   return (
     <NewSearchIndexTemplate
-      title="Build a custom connector package"
-      description={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.methodConnector.description',
-        {
-          defaultMessage:
-            'Ingest data from content sources like GitHub, Google Drive or SharePoint You can also build your own connectors using Custom API sources.',
-        }
-      )}
-      docsUrl="#"
+      title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
+        defaultMessage: 'Build a connector',
+      })}
       type="connector"
       onSubmit={(name) => makeRequest({ indexName: name })}
       formDisabled={status === Status.LOADING}
@@ -48,6 +42,20 @@ export const MethodConnector: React.FC = () => {
       <EuiSteps
         steps={[
           {
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
+                    {
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional index language.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
             title: i18n.translate(
               'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
               {
@@ -56,29 +64,8 @@ export const MethodConnector: React.FC = () => {
             ),
 
             titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional language analyzer.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
           },
           {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
-              }
-            ),
-            titleSize: 'xs',
             children: (
               <EuiText size="s">
                 <p>
@@ -86,22 +73,22 @@ export const MethodConnector: React.FC = () => {
                     'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.configureIngestion.content',
                     {
                       defaultMessage:
-                        'Clone the connector package repository on GitHub and build a custom connector that suits your needs.',
+                        'TODO TODO TODO Clone the connector package repository on GitHub and build a custom connector that suits your needs.',
                     }
                   )}
                 </p>
               </EuiText>
             ),
             status: 'incomplete',
-          },
-          {
             title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
               {
-                defaultMessage: 'Build a search experience',
+                defaultMessage: 'Configure ingestion settings',
               }
             ),
             titleSize: 'xs',
+          },
+          {
             children: (
               <EuiText size="s">
                 <p>
@@ -116,6 +103,13 @@ export const MethodConnector: React.FC = () => {
               </EuiText>
             ),
             status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
           },
         ]}
       />
