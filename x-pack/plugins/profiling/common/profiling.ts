@@ -121,6 +121,34 @@ export function createStackFrameMetadata(
   return metadata;
 }
 
+export function getCalleeFunction(frame: StackFrameMetadata): string {
+  // In the best case scenario, we have the file names, source lines,
+  // and function names. However we need to deal with missing function or
+  // executable info.
+  const exeDisplayName = frame.ExeFileName ? frame.ExeFileName : describeFrameType(frame.FrameType);
+
+  // When there is no function name, only use the executable name
+  return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
+}
+
+export function getCalleeSource(frame: StackFrameMetadata): string {
+  if (frame.FunctionName === '' && frame.SourceLine === 0) {
+    if (frame.ExeFileName) {
+      // If no source line or filename available, display the executable offset
+      return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
+    }
+
+    // If we don't have the executable filename, display <unsymbolized>
+    return '<unsymbolized>';
+  }
+
+  if (frame.SourceFilename !== '' && frame.SourceLine === 0) {
+    return frame.SourceFilename;
+  }
+
+  return frame.SourceFilename + (frame.FunctionOffset !== 0 ? `#${frame.FunctionOffset}` : '');
+}
+
 // groupStackFrameMetadataByStackTrace collects all of the per-stack-frame
 // metadata for a given set of trace IDs and their respective stack frames.
 //

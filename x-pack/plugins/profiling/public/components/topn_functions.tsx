@@ -10,36 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { describeFrameType, StackFrameMetadata } from '../../common/profiling';
+import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../common/profiling';
 import { FunctionContext } from './contexts/function';
-
-function getCalleeFunction(frame: StackFrameMetadata): string {
-  // In the best case scenario, we have the file names, source lines,
-  // and function names. However we need to deal with missing function or
-  // executable info.
-  const exeDisplayName = frame.ExeFileName ? frame.ExeFileName : describeFrameType(frame.FrameType);
-
-  // When there is no function name, only use the executable name
-  return frame.FunctionName ? exeDisplayName + ': ' + frame.FunctionName : exeDisplayName;
-}
-
-function getCalleeSource(frame: StackFrameMetadata): string {
-  if (frame.FunctionName === '' && frame.SourceLine === 0) {
-    if (frame.ExeFileName) {
-      // If no source line or filename available, display the executable offset
-      return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
-    }
-
-    // If we don't have the executable filename, display <unsymbolized>
-    return '<unsymbolized>';
-  }
-
-  if (frame.SourceFilename !== '' && frame.SourceLine === 0) {
-    return frame.SourceFilename;
-  }
-
-  return frame.SourceFilename + (frame.FunctionOffset !== 0 ? `#${frame.FunctionOffset}` : '');
-}
 
 interface Row {
   rank: number;
