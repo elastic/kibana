@@ -79,6 +79,7 @@ export interface InputHistoryItem {
 export interface CommandHistoryItem {
   id: string;
   enteredAt: string;
+  isValid: boolean;
   command: Command;
   state: CommandExecutionState;
 }
