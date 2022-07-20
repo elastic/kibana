@@ -408,6 +408,7 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema & {
     related_integrations?: RelatedIntegrationArray;
