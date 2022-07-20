@@ -6,6 +6,7 @@
  */
 
 import React, { useContext, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -105,10 +106,17 @@ export const TopNFunctionsTable = () => {
     },
   ];
 
+  const totalSampleCountLabel = i18n.translate(
+    'xpack.profiling.functionsView.totalSampleCountLabel',
+    {
+      defaultMessage: 'Total sample count',
+    }
+  );
+
   return (
     <>
       <EuiText size="xs">
-        <strong>Total Samples count:</strong> {totalCount}
+        <strong>{totalSampleCountLabel}:</strong> {totalCount}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
