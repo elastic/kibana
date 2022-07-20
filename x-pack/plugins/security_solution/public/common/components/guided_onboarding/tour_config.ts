@@ -46,10 +46,13 @@ const tourConfig: TourConfig = [
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourTitle', {
       defaultMessage: 'Define prevention, detection, and response across your entire ecosystem',
     }),
-    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourContent', {
-      defaultMessage:
-        'Create rules to detect and prevent malicious activity, and implement threat intelligence to protect endpoints and cloud workloads.',
-    }),
+    content: i18n.translate(
+      'xpack.securitySolution.guided_onboarding.tour.manageStep.tourContent',
+      {
+        defaultMessage:
+          'Create rules to detect and prevent malicious activity, and implement threat intelligence to protect endpoints and cloud workloads.',
+      }
+    ),
     anchor: `[data-test-subj="groupedNavItemLink-administration"]`,
     anchorPosition: 'rightUp',
     'data-test-subj': 'manageStep',
@@ -62,8 +65,7 @@ const tourConfig: TourConfig = [
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.alertsStep.tourContent',
       {
-        defaultMessage:
-          "Detect, investigate, and respond to evolving threats in your environment.",
+        defaultMessage: 'Detect, investigate, and respond to evolving threats in your environment.',
       }
     ),
     anchor: `[data-test-subj="groupedNavItemLink-alerts"]`,
