@@ -358,6 +358,7 @@ describe('metric visualization', () => {
           }
         `);
         expect(ast.chain[1].arguments.minTiles).toHaveLength(0);
+        expect(ast.chain[1].arguments.breakdownBy).toBeUndefined();
       });
 
       it('always applies max function to static max dimensions', () => {

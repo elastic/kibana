@@ -118,7 +118,8 @@ const toExpression = (
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
-          breakdownBy: state.breakdownByAccessor ? [state.breakdownByAccessor] : [],
+          breakdownBy:
+            state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           extraText: state.extraText ? [state.extraText] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
