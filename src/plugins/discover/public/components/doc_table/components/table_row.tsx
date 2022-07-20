@@ -93,7 +93,7 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = dataView.fields.getByName(column);
-      filter(field!, row.flattened, type);
+      filter(field!, row.flattened[column], type);
     },
     [filter, dataView.fields, row.flattened]
   );

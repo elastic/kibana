@@ -6,14 +6,13 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
+import { ActionError } from './action_error';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -83,45 +82,21 @@ export const KillProcessActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.pendingMessage"
-          defaultMessage="Killing process"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <ResultComponent
-        showAs="failure"
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
-          { defaultMessage: 'Kill process action failure' }
-        )}
-        data-test-subj="killProcessErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
-          values={{ errors: completedActionDetails.errors.join(' | ') }}
-        />
-      </ResultComponent>
+      <ActionError
+        dataTestSubj={'killProcessErrorCallout'}
+        errors={completedActionDetails?.errors}
+        ResultComponent={ResultComponent}
+      />
     );
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
-        { defaultMessage: 'Process killed successfully!' }
-      )}
-      data-test-subj="killProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent showAs="success" data-test-subj="killProcessSuccessCallout" />;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

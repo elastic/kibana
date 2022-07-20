@@ -390,6 +390,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitRowAccessor={splitChartRowAccessor}
               />
               <Settings
+                noResults={
+                  <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
+                }
                 debugState={window._echDebugStateFlag ?? false}
                 showLegend={
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)

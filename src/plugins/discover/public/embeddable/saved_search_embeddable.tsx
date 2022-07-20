@@ -65,6 +65,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -139,10 +140,19 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
+      if (
+        this.searchProps &&
+        (titleChanged ||
+          this.isFetchRequired(this.searchProps) ||
+          this.isInputChangedAndRerenderRequired(this.searchProps))
+      ) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
   }
 
   private fetch = async () => {
@@ -172,7 +182,12 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -208,7 +223,11 @@ export class SavedSearchEmbeddable
           executionContext,
         })
       );
-      this.updateOutput({ loading: false, error: undefined });
+
+      this.updateOutput({
+        ...this.getOutput(),
+        loading: false,
+      });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
         buildDataTableRecord(hit, this.searchProps!.dataView)
@@ -217,7 +236,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.isLoading = false;
     } catch (error) {
       if (!this.destroyed) {
-        this.updateOutput({ loading: false, error });
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+          error,
+        });
 
         this.searchProps!.isLoading = false;
       }
@@ -285,7 +308,7 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      sampleSize: 500,
+      sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
           this.filterManager,
@@ -311,6 +334,10 @@ export class SavedSearchEmbeddable
       rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
+      },
+      rowsPerPageState: this.input.rowsPerPage || this.savedSearch.rowsPerPage,
+      onUpdateRowsPerPage: (rowsPerPage) => {
+        this.updateInput({ rowsPerPage });
       },
     };
 
@@ -347,6 +374,13 @@ export class SavedSearchEmbeddable
     );
   }
 
+  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+  }
+
   private async pushContainerStateParamsToProps(
     searchProps: SearchProps,
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
@@ -367,6 +401,7 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
+    searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -455,6 +490,11 @@ export class SavedSearchEmbeddable
         domNode
       );
     }
+
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   }
 
   public reload() {

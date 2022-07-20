@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CommandDefinition } from '..';
+import type { CommandDefinition } from '..';
 import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
 
 export type ParsedArgData = string[];
@@ -181,7 +181,9 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
           optional: optionalArgs,
         });
       })
-    : [buildArgumentText({ required: requiredArgs, optional: optionalArgs })];
+    : requiredArgs || optionalArgs
+    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+    : [];
 };
 
 export const parsedPidOrEntityIdParameter = (parameters: {

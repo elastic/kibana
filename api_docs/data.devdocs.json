@@ -645,7 +645,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -3269,6 +3277,21 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SearchSource.getActiveIndexFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveIndexFilter",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SearchSource.getOwnField",
             "type": "Function",
             "tags": [],
@@ -3909,6 +3932,36 @@
             "returnComment": [
               "The expression AST."
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSource.parseActiveIndexPatternFromQueryString",
+            "type": "Function",
+            "tags": [],
+            "label": "parseActiveIndexPatternFromQueryString",
+            "description": [],
+            "signature": [
+              "(queryString: string) => string[]"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.parseActiveIndexPatternFromQueryString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "queryString",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4328,7 +4381,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -4665,7 +4720,13 @@
         "description": [],
         "signature": [
           "(x: unknown) => x is ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
@@ -6983,13 +7044,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -7059,13 +7114,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -8287,6 +8336,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8298,6 +8350,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8334,7 +8389,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; type: ",
+          "{ type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8342,7 +8397,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; enabled?: boolean | undefined; params?: {} | ",
+          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -8448,7 +8503,13 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -8659,7 +8720,13 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -9182,7 +9249,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "[K]; getOwnField: <K extends keyof ",
+          "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9314,7 +9381,7 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          "; }"
+          "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
@@ -9379,7 +9446,7 @@
         "signature": [
           "{ value: number; unit: ",
           "Unit",
-          "; type: \"calendar\" | \"fixed\"; }"
+          "; type: \"fixed\" | \"calendar\"; }"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_es_interval.ts",
         "deprecated": false,
@@ -9396,7 +9463,13 @@
         ],
         "signature": [
           "{ time?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -10402,7 +10475,7 @@
                 "signature": [
                   "(interval: string) => { value: number; unit: ",
                   "Unit",
-                  "; type: \"calendar\" | \"fixed\"; }"
+                  "; type: \"fixed\" | \"calendar\"; }"
                 ],
                 "path": "src/plugins/data/public/index.ts",
                 "deprecated": false,
@@ -11498,7 +11571,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -11595,7 +11678,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -11623,7 +11706,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -12935,7 +13018,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -12975,7 +13058,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -13269,7 +13352,24 @@
             "tags": [],
             "label": "clearCache",
             "description": [
-              "\nClear index pattern list cache."
+              "\nClear index pattern saved objects cache."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.clearInstanceCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearInstanceCache",
+            "description": [
+              "\nClear index pattern instance cache"
             ],
             "signature": [
               "(id?: string | undefined) => void"
@@ -13279,13 +13379,11 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.DataViewsService.clearCache.$1",
+                "id": "def-server.DataViewsService.clearInstanceCache.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "optionally clear a single id"
-                ],
+                "description": [],
                 "signature": [
                   "string | undefined"
                 ],
@@ -13309,7 +13407,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -13832,7 +13936,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "({ id, ...restOfSpec }: ",
+              "({ id, name, title, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13858,7 +13962,7 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, ...restOfSpec }",
+                "label": "{ id, name, title, ...restOfSpec }",
                 "description": [],
                 "signature": [
                   {
@@ -14434,7 +14538,16 @@
           "\nGet rollup job capabilities"
         ],
         "signature": [
-          "(indices: Record<string, { rollup_jobs: any; }>) => { [key: string]: any; }"
+          "(indices: ",
+          "RollupGetRollupIndexCapsResponse",
+          ") => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "server",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-server.RollupIndexCapability",
+            "text": "RollupIndexCapability"
+          }
         ],
         "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
         "deprecated": false,
@@ -14449,7 +14562,7 @@
               "rollup job index capabilites"
             ],
             "signature": [
-              "Record<string, { rollup_jobs: any; }>"
+              "RollupGetRollupIndexCapsResponse"
             ],
             "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
             "deprecated": false,
@@ -14551,7 +14664,9 @@
           "RangeFilter",
           " | ",
           "ScriptedRangeFilter",
-          " | MatchAllRangeFilter | undefined"
+          " | ",
+          "MatchAllRangeFilter",
+          " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -14705,13 +14820,7 @@
                 "text": "ElasticsearchClient"
               },
               ", request?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
@@ -15071,7 +15180,7 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ eql: ",
+                  "{ name: string | symbol; transform: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -15105,7 +15214,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+                  "<TDocument, TAggregations>>; }; eql: ",
+                  "default",
+                  "; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -15135,7 +15246,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -16201,8 +16312,6 @@
                   "TermvectorsResponse",
                   ">; }; textStructure: ",
                   "default",
-                  "; transform: ",
-                  "default",
                   "; updateByQuery: { (this: That, params: ",
                   "UpdateByQueryRequest",
                   " | ",
@@ -16272,13 +16381,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any> | undefined"
                 ],
                 "path": "src/plugins/data_views/server/types.ts",
@@ -16626,6 +16729,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -16637,6 +16743,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -16717,7 +16826,7 @@
         "signature": [
           "{ value: number; unit: ",
           "Unit",
-          "; type: \"calendar\" | \"fixed\"; }"
+          "; type: \"fixed\" | \"calendar\"; }"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_es_interval.ts",
         "deprecated": false,
@@ -17942,7 +18051,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -18039,7 +18158,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -18067,7 +18186,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -19379,7 +19498,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) => void"
             ],
@@ -19419,7 +19538,7 @@
                     "section": "def-common.SerializedFieldFormat",
                     "text": "SerializedFieldFormat"
                   },
-                  "<",
+                  "<{}, ",
                   "SerializableRecord",
                   ">"
                 ],
@@ -19507,7 +19626,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
@@ -20420,7 +20539,24 @@
             "tags": [],
             "label": "clearCache",
             "description": [
-              "\nClear index pattern list cache."
+              "\nClear index pattern saved objects cache."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.clearInstanceCache",
+            "type": "Function",
+            "tags": [],
+            "label": "clearInstanceCache",
+            "description": [
+              "\nClear index pattern instance cache"
             ],
             "signature": [
               "(id?: string | undefined) => void"
@@ -20430,13 +20566,11 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.DataViewsService.clearCache.$1",
+                "id": "def-common.DataViewsService.clearInstanceCache.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "optionally clear a single id"
-                ],
+                "description": [],
                 "signature": [
                   "string | undefined"
                 ],
@@ -20460,7 +20594,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -20983,7 +21123,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "({ id, ...restOfSpec }: ",
+              "({ id, name, title, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21009,7 +21149,7 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id, ...restOfSpec }",
+                "label": "{ id, name, title, ...restOfSpec }",
                 "description": [],
                 "signature": [
                   {
@@ -21417,6 +21557,9 @@
         "tags": [],
         "label": "KbnFieldType",
         "description": [],
+        "signature": [
+          "KbnFieldType"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22494,7 +22637,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22609,7 +22760,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
@@ -22642,6 +22793,9 @@
         "tags": [],
         "label": "KbnFieldTypeOptions",
         "description": [],
+        "signature": [
+          "KbnFieldTypeOptions"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "children": [
@@ -22891,7 +23045,7 @@
               "\nGet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string) => Promise<T>"
+              "<T = unknown>(key: string) => Promise<T | undefined>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22942,7 +23096,7 @@
               "\nSet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string, value: T) => Promise<void>"
+              "<T = unknown>(key: string, value: T) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -23041,6 +23195,9 @@
         "tags": [],
         "label": "ES_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "ES_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -23052,6 +23209,9 @@
         "tags": [],
         "label": "KBN_FIELD_TYPES",
         "description": [],
+        "signature": [
+          "KBN_FIELD_TYPES"
+        ],
         "path": "node_modules/@types/kbn__field-types/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -23148,7 +23308,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: ({ id, ...restOfSpec }: ",
+          "{ create: ({ id, name, title, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23188,10 +23348,16 @@
             "section": "def-common.DataViewListItem",
             "text": "DataViewListItem"
           },
-          "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
-          "DataViewSavedObjectAttrs",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSavedObjectAttrs",
+            "text": "DataViewSavedObjectAttrs"
+          },
           ">[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "dataViews",
@@ -23402,7 +23568,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           ">> | undefined; runtimeFieldMap?: Record<string, ",
           {
@@ -23499,7 +23665,7 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           "SerializableRecord",
           "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
@@ -23715,7 +23881,7 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has any user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,

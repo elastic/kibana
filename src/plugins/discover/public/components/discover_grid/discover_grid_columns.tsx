@@ -19,6 +19,7 @@ import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
+import { buildEditFieldButton } from './build_edit_field_button';
 
 export function getLeadControlColumns() {
   return [
@@ -53,7 +54,7 @@ export function getLeadControlColumns() {
   ];
 }
 
-export function buildEuiGridColumn({
+function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
   dataView,
@@ -62,6 +63,7 @@ export function buildEuiGridColumn({
   services,
   valueToStringConverter,
   rowsCount,
+  editField,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -71,8 +73,13 @@ export function buildEuiGridColumn({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
+  editField?: (fieldName: string) => void;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
+  const editFieldButton =
+    editField &&
+    dataViewField &&
+    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
@@ -105,6 +112,7 @@ export function buildEuiGridColumn({
           rowsCount,
           valueToStringConverter,
         }),
+        ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
     cellActions: dataViewField ? buildCellActions(dataViewField) : [],
@@ -153,6 +161,7 @@ export function getEuiGridColumns({
   isSortEnabled,
   services,
   valueToStringConverter,
+  editField,
 }: {
   columns: string[];
   rowsCount: number;
@@ -163,6 +172,7 @@ export function getEuiGridColumns({
   isSortEnabled: boolean;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
+  editField?: (fieldName: string) => void;
 }) {
   const timeFieldName = dataView.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -182,6 +192,7 @@ export function getEuiGridColumns({
       services,
       valueToStringConverter,
       rowsCount,
+      editField,
     })
   );
 }

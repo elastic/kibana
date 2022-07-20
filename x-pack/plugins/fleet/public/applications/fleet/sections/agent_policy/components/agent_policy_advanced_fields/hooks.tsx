@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 
-import { useGetOutputs, useLicense } from '../../../../hooks';
+import { useGetOutputs, useLicense, useGetDownloadSources } from '../../../../hooks';
 import {
   LICENCE_FOR_PER_POLICY_OUTPUT,
   FLEET_APM_PACKAGE,
@@ -20,6 +20,7 @@ import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
 export const DEFAULT_OUTPUT_VALUE = '@@##DEFAULT_OUTPUT_VALUE##@@';
+export const DEFAULT_DOWNLOAD_SOURCE_VALUE = '@@##DEFAULT_DOWNLOAD_SOURCE_VALUE##@@';
 
 function getOutputLabel(name: string, disabledMessage?: React.ReactNode) {
   if (!disabledMessage) {
@@ -135,4 +136,55 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     }),
     [dataOutputOptions, monitoringOutputOptions, outputsRequest.isLoading]
   );
+}
+
+export function useDownloadSourcesOptions(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
+  const downloadSourcesRequest = useGetDownloadSources();
+
+  const dataDownloadSourceOptions = useMemo(() => {
+    if (downloadSourcesRequest.isLoading || !downloadSourcesRequest.data) {
+      return [];
+    }
+
+    const defaultDownloadSource = downloadSourcesRequest.data.items.find((item) => item.is_default);
+    const defaultDownloadSourceName = defaultDownloadSource?.name;
+
+    return [
+      getDefaultDownloadSource(defaultDownloadSourceName),
+      ...downloadSourcesRequest.data.items
+        .filter((item) => !item.is_default)
+        .map((item) => {
+          return {
+            value: item.id,
+            inputDisplay: item.name,
+          };
+        }),
+    ];
+  }, [downloadSourcesRequest]);
+
+  return useMemo(
+    () => ({
+      dataDownloadSourceOptions,
+      isLoading: downloadSourcesRequest.isLoading,
+    }),
+    [dataDownloadSourceOptions, downloadSourcesRequest.isLoading]
+  );
+}
+
+function getDefaultDownloadSource(
+  defaultDownloadSourceName?: string,
+  defaultDownloadSourceDisabled?: boolean,
+  defaultDownloadSourceDisabledMessage?: React.ReactNode
+) {
+  return {
+    inputDisplay: getOutputLabel(
+      i18n.translate('xpack.fleet.agentPolicy.downloadSourcesOptions.defaultOutputText', {
+        defaultMessage: 'Default (currently {defaultDownloadSourceName})',
+        values: { defaultDownloadSourceName },
+      }),
+      defaultDownloadSourceDisabledMessage
+    ),
+    value: DEFAULT_DOWNLOAD_SOURCE_VALUE,
+    disabled: defaultDownloadSourceDisabled,
+  };
 }

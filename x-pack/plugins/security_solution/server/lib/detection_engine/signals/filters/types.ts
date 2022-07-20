@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '@kbn/lists-plugin/server';
-import { BuildRuleMessage } from '../rule_messages';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { BuildRuleMessage } from '../rule_messages';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;

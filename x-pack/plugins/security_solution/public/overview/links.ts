@@ -14,7 +14,7 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 

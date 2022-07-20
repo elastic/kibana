@@ -26,7 +26,7 @@ export type DiscoverTopNavProps = Pick<
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
   onChangeDataView: (dataView: string) => void;
-  onEditRuntimeField: () => void;
+  onFieldEdited: () => void;
 };
 
 export const DiscoverTopNav = ({
@@ -41,7 +41,7 @@ export const DiscoverTopNav = ({
   savedSearch,
   resetSavedSearch,
   onChangeDataView,
-  onEditRuntimeField,
+  onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -93,13 +93,13 @@ export const DiscoverTopNav = ({
                 },
                 fieldName,
                 onSave: async () => {
-                  onEditRuntimeField();
+                  onFieldEdited();
                 },
               });
             }
           }
         : undefined,
-    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
+    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
   );
 
   const addField = useMemo(

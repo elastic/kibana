@@ -11,7 +11,7 @@ import del from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '../../../root';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';

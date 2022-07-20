@@ -76,7 +76,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'cases')}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
-          'internalShareableComponentsSandbox',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
@@ -115,6 +114,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               feature: {
                 actions: ['all'],
                 stackAlerts: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
               },
               spaces: ['*'],
             },

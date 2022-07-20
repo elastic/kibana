@@ -11,10 +11,10 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getCommandListMock } from '../../mocks';
 import { useConsoleManager } from './console_manager';
-import { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
+import type { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
 
 export const getNewConsoleRegistrationMock = (
   overrides: Partial<ConsoleRegistrationInterface> = {}
@@ -75,7 +75,12 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
 
     hideOpenedConsole: async () => {
       userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
-
+      const exitModalConfirmButton = renderResult.queryByTestId('confirmModalConfirmButton');
+      if (exitModalConfirmButton) {
+        const exitModal = renderResult.getByTestId('consolePageOverlay-console-exit-modal');
+        expect(exitModal).toBeTruthy();
+        userEvent.click(exitModalConfirmButton);
+      }
       await waitFor(() => {
         expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
       });

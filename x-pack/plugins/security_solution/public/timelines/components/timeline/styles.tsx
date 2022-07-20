@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { TimelineEventsType } from '../../../../common/types/timeline';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';

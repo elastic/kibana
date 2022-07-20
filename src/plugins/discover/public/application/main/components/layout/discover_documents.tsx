@@ -50,6 +50,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc,
   state,
   stateContainer,
+  onFieldEdited,
 }: {
   documents$: DataDocuments$;
   expandedDoc?: DataTableRecord;
@@ -60,6 +61,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
+  onFieldEdited: () => void;
 }) {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -84,8 +86,8 @@ function DiscoverDocumentsComponent({
 
   const onResize = useCallback(
     (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...state.grid } || {};
-      const newColumns = { ...grid.columns } || {};
+      const grid = { ...(state.grid || {}) };
+      const newColumns = { ...(grid.columns || {}) };
       newColumns[colSettings.columnId] = {
         width: colSettings.width,
       };
@@ -93,6 +95,13 @@ function DiscoverDocumentsComponent({
       stateContainer.setAppState({ grid: newGrid });
     },
     [stateContainer, state]
+  );
+
+  const onUpdateRowsPerPage = useCallback(
+    (rowsPerPage: number) => {
+      stateContainer.setAppState({ rowsPerPage });
+    },
+    [stateContainer]
   );
 
   const onSort = useCallback(
@@ -188,6 +197,9 @@ function DiscoverDocumentsComponent({
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              rowsPerPageState={state.rowsPerPage}
+              onUpdateRowsPerPage={onUpdateRowsPerPage}
+              onFieldEdited={onFieldEdited}
             />
           </div>
         </>
