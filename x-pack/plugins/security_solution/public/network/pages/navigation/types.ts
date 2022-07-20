@@ -62,7 +62,7 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'external-alerts',
+  alerts = 'events', // changed officially to events in #136427
 }
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &

@@ -42,7 +42,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
 const ACTION_BUTTON_COUNT = 5;
-const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
+export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 

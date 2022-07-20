@@ -48,13 +48,6 @@ export const links: LinkItem = {
       path: `${NETWORK_PATH}/tls`,
     },
     {
-      id: SecurityPageName.networkExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.appLinks.network.externalAlerts', {
-        defaultMessage: 'External Alerts',
-      }),
-      path: `${NETWORK_PATH}/external-alerts`,
-    },
-    {
       id: SecurityPageName.networkAnomalies,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',

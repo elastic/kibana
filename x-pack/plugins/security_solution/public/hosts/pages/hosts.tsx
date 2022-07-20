@@ -74,12 +74,7 @@ const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (
-        getTimeline(state, TimelineId.hostsPageEvents) ??
-        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
-        timelineDefaults
-      ).graphEventId
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
