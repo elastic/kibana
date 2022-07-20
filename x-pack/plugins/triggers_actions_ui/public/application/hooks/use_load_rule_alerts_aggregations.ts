@@ -27,8 +27,8 @@ interface RuleAlertsAggs {
   error?: string;
 }
 export interface AlertChartData {
-  active?: number;
-  recovered?: number;
+  active: number;
+  recovered: number;
   date?: string;
 }
 interface LoadRuleAlertsAggs {
@@ -204,10 +204,12 @@ export async function fetchRuleAlertsAggByTimeRange({
       date: day.key_as_string,
       ...day.alert_status_aggs_per_day.buckets.reduce(
         (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
-        {}
+        {
+          active: 0,
+          recovered: 0,
+        }
       ),
     })) as AlertChartData[];
-
     const ruleAlertsAgg = list.reduce(
       (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
       {}

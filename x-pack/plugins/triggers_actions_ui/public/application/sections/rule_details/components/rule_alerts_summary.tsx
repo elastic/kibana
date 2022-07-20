@@ -164,9 +164,9 @@ const AlertsChart = ({ data }: AlertsChartProps) => {
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
         data={[
-          { x: data[0].active, y: data[0].recovered, g: 'a' },
-          { x: data[1].active, y: data[1].recovered, g: 'a' },
-          // { x: 2, y: 3, g: 'a' },
+          { x: data[0].active, y: data[0].recovered, g: 'b' },
+          { x: data[1].active, y: data[1].recovered, g: 'b' },
+          { x: 20, y: 300, g: 'a' },
           // { x: 3, y: 6, g: 'a' },
           // { x: 0, y: 4, g: 'b' },
           // { x: 1, y: 5, g: 'b' },
