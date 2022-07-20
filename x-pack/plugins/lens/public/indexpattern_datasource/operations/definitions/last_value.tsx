@@ -212,6 +212,7 @@ export const lastValueOperation: OperationDefinition<
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         showArrayValues,
         sortField: lastValueParams?.sortField || sortField,
@@ -220,6 +221,7 @@ export const lastValueOperation: OperationDefinition<
     };
   },
   filterable: true,
+  windowable: true,
   shiftable: true,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const initialArgs = {
