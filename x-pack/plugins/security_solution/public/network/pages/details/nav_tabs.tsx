@@ -48,10 +48,10 @@ export const navTabsNetworkDetails = (
       href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.anomalies),
       disabled: false,
     },
-    [NetworkDetailsRouteType.alerts]: {
-      id: NetworkDetailsRouteType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.alerts),
+    [NetworkDetailsRouteType.events]: {
+      id: NetworkDetailsRouteType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnNetworkDetailsUrl(ipAddress, NetworkDetailsRouteType.events),
       disabled: false,
     },
   };

@@ -44,9 +44,11 @@ export enum NetworkDetailsRouteType {
   flows = 'flows',
   tls = 'tls',
   http = 'http',
-  alerts = 'external-alerts',
+  events = 'events',
   users = 'users',
 }
 
-type KeyNetworkNavTabs = `${NetworkDetailsRouteType}`;
-export type NetworkDetailsNavTabs = Optional<Record<KeyNetworkNavTabs, NavTab>, 'anomalies'>;
+export type NetworkDetailsNavTabs = Optional<
+  Record<`${NetworkDetailsRouteType}`, NavTab>,
+  'anomalies'
+>;

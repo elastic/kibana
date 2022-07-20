@@ -7,9 +7,10 @@
 
 import { NETWORK_PATH } from '../../../common/constants';
 import { NetworkDetailsRouteType } from './details/types';
+import { NetworkRouteType } from './navigation/types';
 
-export const networkTabPath = `${NETWORK_PATH}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.alerts})`;
+export const networkTabPath = `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.anomalies}|${NetworkRouteType.events})`;
 
 export const networkDetailsPagePath = `${NETWORK_PATH}/:detailName`;
 
-export const networkDetailsTabPath = `${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.alerts}|${NetworkDetailsRouteType.users})`;
+export const networkDetailsTabPath = `${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})`;
