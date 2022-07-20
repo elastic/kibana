@@ -102,78 +102,69 @@ export function telemetryTaskRunner(
           getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
-        ])
-          .then(
-            ([
-              totalCountAggregations,
-              totalInUse,
-              dailyExecutionCounts,
-              dailyExecutionTimeoutCounts,
-              dailyFailedAndUnrecognizedTasks,
-            ]) => {
-              const errorMessages = [
-                totalCountAggregations.errorMessage,
-                totalInUse.errorMessage,
-                dailyExecutionCounts.errorMessage,
-                dailyExecutionTimeoutCounts.errorMessage,
-                dailyFailedAndUnrecognizedTasks.errorMessage,
-              ].filter((message) => message !== undefined);
+        ]).then(
+          ([
+            totalCountAggregations,
+            totalInUse,
+            dailyExecutionCounts,
+            dailyExecutionTimeoutCounts,
+            dailyFailedAndUnrecognizedTasks,
+          ]) => {
+            const errorMessages = [
+              totalCountAggregations.errorMessage,
+              totalInUse.errorMessage,
+              dailyExecutionCounts.errorMessage,
+              dailyExecutionTimeoutCounts.errorMessage,
+              dailyFailedAndUnrecognizedTasks.errorMessage,
+            ].filter((message) => message !== undefined);
 
-              return {
-                state: {
-                  ...(errorMessages.length > 0 && { error_messages: errorMessages }),
-                  runs: (state.runs || 0) + 1,
-                  ...totalCountAggregations,
-                  count_active_by_type: totalInUse.countByType,
-                  count_active_total: totalInUse.countTotal,
-                  count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
-                  count_rules_namespaces: totalInUse.countNamespaces,
-                  count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
-                  count_rules_executions_by_type_per_day:
-                    dailyExecutionCounts.countRuleExecutionsByType,
-                  count_rules_executions_failured_per_day:
-                    dailyExecutionCounts.countTotalFailedExecutions,
-                  count_rules_executions_failured_by_reason_per_day:
-                    dailyExecutionCounts.countFailedExecutionsByReason,
-                  count_rules_executions_failured_by_reason_by_type_per_day:
-                    dailyExecutionCounts.countFailedExecutionsByReasonByType,
-                  count_rules_executions_timeouts_per_day:
-                    dailyExecutionTimeoutCounts.countExecutionTimeouts,
-                  count_rules_executions_timeouts_by_type_per_day:
-                    dailyExecutionTimeoutCounts.countExecutionTimeoutsByType,
-                  count_failed_and_unrecognized_rule_tasks_per_day:
-                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasks,
-                  count_failed_and_unrecognized_rule_tasks_by_status_per_day:
-                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatus,
-                  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
-                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatusByType,
-                  avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
-                  avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
-                  avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
-                  avg_es_search_duration_by_type_per_day:
-                    dailyExecutionCounts.avgEsSearchDurationByType,
-                  avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
-                  avg_total_search_duration_by_type_per_day:
-                    dailyExecutionCounts.avgTotalSearchDurationByType,
-                  percentile_num_generated_actions_per_day:
-                    dailyExecutionCounts.generatedActionsPercentiles,
-                  percentile_num_generated_actions_by_type_per_day:
-                    dailyExecutionCounts.generatedActionsPercentilesByType,
-                  percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
-                  percentile_num_alerts_by_type_per_day:
-                    dailyExecutionCounts.alertsPercentilesByType,
-                },
-                runAt: getNextMidnight(),
-              };
-            }
-          )
-          .catch((errMsg) => {
-            logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
-              state: {},
+              state: {
+                ...(errorMessages.length > 0 && { error_messages: errorMessages }),
+                runs: (state.runs || 0) + 1,
+                ...totalCountAggregations,
+                count_active_by_type: totalInUse.countByType,
+                count_active_total: totalInUse.countTotal,
+                count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                count_rules_namespaces: totalInUse.countNamespaces,
+                count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
+                count_rules_executions_by_type_per_day:
+                  dailyExecutionCounts.countRuleExecutionsByType,
+                count_rules_executions_failured_per_day:
+                  dailyExecutionCounts.countTotalFailedExecutions,
+                count_rules_executions_failured_by_reason_per_day:
+                  dailyExecutionCounts.countFailedExecutionsByReason,
+                count_rules_executions_failured_by_reason_by_type_per_day:
+                  dailyExecutionCounts.countFailedExecutionsByReasonByType,
+                count_rules_executions_timeouts_per_day:
+                  dailyExecutionTimeoutCounts.countExecutionTimeouts,
+                count_rules_executions_timeouts_by_type_per_day:
+                  dailyExecutionTimeoutCounts.countExecutionTimeoutsByType,
+                count_failed_and_unrecognized_rule_tasks_per_day:
+                  dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasks,
+                count_failed_and_unrecognized_rule_tasks_by_status_per_day:
+                  dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatus,
+                count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
+                  dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatusByType,
+                avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
+                avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
+                avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
+                avg_es_search_duration_by_type_per_day:
+                  dailyExecutionCounts.avgEsSearchDurationByType,
+                avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
+                avg_total_search_duration_by_type_per_day:
+                  dailyExecutionCounts.avgTotalSearchDurationByType,
+                percentile_num_generated_actions_per_day:
+                  dailyExecutionCounts.generatedActionsPercentiles,
+                percentile_num_generated_actions_by_type_per_day:
+                  dailyExecutionCounts.generatedActionsPercentilesByType,
+                percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
+                percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
+              },
               runAt: getNextMidnight(),
             };
-          });
+          }
+        );
       },
     };
   };
