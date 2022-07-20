@@ -6,8 +6,6 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { DataProvider } from '../../../../../common/types';
@@ -18,6 +16,7 @@ import { InsightAccordion } from './insight_accordion';
 import { SimpleAlertTable } from './simple_alert_table';
 import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { PROCESS_ANCESTRY, PROCESS_ANCESTRY_COUNT, PROCESS_ANCESTRY_ERROR } from './translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
@@ -96,21 +95,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
       state={isEmpty ? 'empty' : 'success'}
       text={
         // If we have fetched the alerts, display the count here, otherwise omit the count
-        cache.alertIds
-          ? i18n.translate(
-              'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_with_count',
-              {
-                defaultMessage:
-                  '{count} {count, plural, =1 {alert} other {alerts}} by process ancestry',
-                values: { count: cache.alertIds.length },
-              }
-            )
-          : i18n.translate(
-              'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_found',
-              {
-                defaultMessage: 'Related alerts by process ancestry',
-              }
-            )
+        cache.alertIds ? PROCESS_ANCESTRY_COUNT(cache.alertIds.length) : PROCESS_ANCESTRY
       }
       renderContent={renderContent}
       onToggle={onToggle}
@@ -143,12 +128,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   if (loading) {
     return <EuiLoadingSpinner />;
   } else if (error) {
-    return (
-      <FormattedMessage
-        id="xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_process_ancestry_error"
-        defaultMessage="Failed to fetch alerts."
-      />
-    );
+    return <>{PROCESS_ANCESTRY_ERROR}</>;
   }
 
   return null;

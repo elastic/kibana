@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana, useToasts } from '../../../lib/kibana';
@@ -14,6 +13,7 @@ import { CaseDetailsLink } from '../../links';
 import { APP_ID } from '../../../../../common/constants';
 import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
+import { CASES_LOADING, CASES_ERROR, CASES_ERROR_TOAST, CASES_COUNT } from './translations';
 
 type RelatedCaseList = Array<{ id: string; title: string }>;
 
@@ -47,12 +47,7 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
       }
     } catch (error) {
       setHasError(true);
-      toasts.addWarning(
-        i18n.translate('xpack.securitySolution.alertDetails.overview.relatedCasesFailure', {
-          defaultMessage: 'Unable to load related cases: "{error}"',
-          values: { error },
-        })
-      );
+      toasts.addWarning(CASES_ERROR_TOAST(error));
     }
     setRelatedCases(relatedCaseList);
     setAreCasesLoading(false);
@@ -121,32 +116,15 @@ function renderCaseContent(relatedCases: RelatedCaseList) {
 
 RelatedCases.displayName = 'RelatedCases';
 
-function getTextFromState(state: InsightAccordionState, caseCount: number | undefined) {
+function getTextFromState(state: InsightAccordionState, caseCount: number) {
   switch (state) {
     case 'loading':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_loading',
-        {
-          defaultMessage: 'Loading related cases',
-        }
-      );
+      return CASES_LOADING;
     case 'error':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_error',
-        {
-          defaultMessage: 'Failed to load related cases',
-        }
-      );
+      return CASES_ERROR;
     case 'success':
     case 'empty':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_found_content_text',
-        {
-          defaultMessage:
-            '{caseCount} {caseCount, plural, =1 {case} other {cases}} related to this alert',
-          values: { caseCount },
-        }
-      );
+      return CASES_COUNT(caseCount);
     default:
       return '';
   }

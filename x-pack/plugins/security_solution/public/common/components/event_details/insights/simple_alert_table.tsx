@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { EuiBasicTable, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { useAlertsByIds } from '../../../containers/alerts/use_alerts_by_ids';
+import { SIMPLE_ALERT_TABLE_ERROR, SIMPLE_ALERT_TABLE_LIMITED } from './translations';
 
 const TABLE_FIELDS = ['@timestamp', 'kibana.alert.rule.name', 'kibana.alert.severity'];
 
@@ -58,24 +58,14 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
   if (loading) {
     return <EuiLoadingContent lines={2} />;
   } else if (error) {
-    return (
-      <FormattedMessage
-        id="xpack.securitySolution.alertDetails.overview.simpleAlertTable.error"
-        defaultMessage="Failed to load the alerts."
-      />
-    );
+    return <>{SIMPLE_ALERT_TABLE_ERROR}</>;
   } else if (mappedData) {
     const showLimitedDataNote = alertIds.length > alertLimit;
     return (
       <>
         {showLimitedDataNote && (
           <div>
-            <em>
-              <FormattedMessage
-                id="xpack.securitySolution.alertDetails.overview.limitedAlerts"
-                defaultMessage="Showing only the latest 10 alerts. View the rest of alerts in timeline."
-              />
-            </em>
+            <em>{SIMPLE_ALERT_TABLE_LIMITED}</em>
             <EuiSpacer />
           </div>
         )}

@@ -14,6 +14,7 @@ import { TestProviders } from '../../../mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { PROCESS_ANCESTRY, PROCESS_ANCESTRY_COUNT, PROCESS_ANCESTRY_ERROR } from './translations';
 
 jest.mock('../../../containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -39,7 +40,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('Related alerts by process ancestry')).toBeInTheDocument();
+    expect(screen.getByText(PROCESS_ANCESTRY)).toBeInTheDocument();
     expect(mockUseAlertPrevalenceFromProcessTree).not.toHaveBeenCalled();
   });
 
@@ -61,7 +62,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText('Related alerts by process ancestry'));
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalled();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -85,8 +86,8 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText('Related alerts by process ancestry'));
-    expect(screen.getByText(/Failed/)).toBeInTheDocument();
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    expect(screen.getByText(PROCESS_ANCESTRY_ERROR)).toBeInTheDocument();
   });
 
   it('renders the text with a count and a timeline button when the request works', async () => {
@@ -110,9 +111,9 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText('Related alerts by process ancestry'));
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     await waitFor(() => {
-      expect(screen.getByText('2 alerts by process ancestry')).toBeInTheDocument();
+      expect(screen.getByText(PROCESS_ANCESTRY_COUNT(2))).toBeInTheDocument();
 
       expect(
         screen.getByRole('button', { name: ACTION_INVESTIGATE_IN_TIMELINE })

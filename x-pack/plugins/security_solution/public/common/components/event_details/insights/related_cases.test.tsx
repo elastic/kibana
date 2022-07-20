@@ -13,6 +13,7 @@ import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedCases } from './related_cases';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
+import { CASES_COUNT } from './translations';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
@@ -67,7 +68,7 @@ describe('Related Cases', () => {
           </TestProviders>
         );
 
-        expect(screen.getByText(/0 cases/)).toBeInTheDocument();
+        expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
       });
     });
 
@@ -80,7 +81,7 @@ describe('Related Cases', () => {
           </TestProviders>
         );
         waitFor(() => {
-          expect(screen.getByText('1 case:')).toBeInTheDocument();
+          expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
           expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
         });
       });
@@ -99,7 +100,7 @@ describe('Related Cases', () => {
         );
 
         waitFor(() => {
-          expect(screen.getByText('2 cases:')).toBeInTheDocument();
+          expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
           const cases = screen.getAllByTestId('case-details-link');
           expect(cases).toHaveLength(2);
           expect(cases[0]).toHaveTextContent('Test Case 1');

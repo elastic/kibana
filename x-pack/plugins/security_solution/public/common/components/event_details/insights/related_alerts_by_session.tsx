@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { BrowserFields } from '../../../containers/source';
@@ -19,6 +18,7 @@ import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_bu
 import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { SESSION_LOADING, SESSION_ERROR, SESSION_COUNT } from './translations';
 
 interface Props {
   browserFields: BrowserFields;
@@ -107,26 +107,12 @@ RelatedAlertsBySession.displayName = 'RelatedAlertsBySession';
 function getTextFromState(state: InsightAccordionState, count: number | undefined) {
   switch (state) {
     case 'loading':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_source_event_loading',
-        { defaultMessage: 'Loading related alerts by source event' }
-      );
+      return SESSION_LOADING;
     case 'error':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session_error',
-        {
-          defaultMessage: 'Failed to load related alerts by session',
-        }
-      );
+      return SESSION_ERROR;
     case 'success':
     case 'empty':
-      return i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session__found',
-        {
-          defaultMessage: '{count} {count, plural, =1 {alert} other {alerts}} related by session',
-          values: { count },
-        }
-      );
+      return SESSION_COUNT(count);
     default:
       return '';
   }
