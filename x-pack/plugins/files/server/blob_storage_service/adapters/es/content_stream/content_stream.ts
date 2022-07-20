@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import cuid from 'cuid';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
-import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
@@ -66,7 +66,6 @@ export class ContentStream extends Duplex {
   private chunksWritten = 0;
   private maxChunkSize?: number;
   private parameters: Required<ContentStreamParameters>;
-  private puid = new Puid();
 
   /**
    * The number of bytes written so far.
@@ -197,7 +196,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = this.puid.generate();
+      this.id = cuid();
     }
     return this.id;
   }
