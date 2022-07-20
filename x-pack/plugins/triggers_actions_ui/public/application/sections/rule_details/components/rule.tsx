@@ -7,20 +7,13 @@
 
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiStat,
-  EuiIconTip,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
   AlertStatusValues,
 } from '@kbn/alerting-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
@@ -32,11 +25,6 @@ import {
   rulesStatusesTranslationsMapping,
   ALERT_STATUS_LICENSE_ERROR,
 } from '../../rules_list/translations';
-import {
-  formatMillisForDisplay,
-  shouldShowDurationWarning,
-} from '../../../lib/execution_duration_utils';
-import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 // import { RuleEventLogListWithApi } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -46,6 +34,7 @@ import RuleStatusPanelWithApi from './rule_status_panel';
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
 const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
+const RuleDefinition = lazy(() => import('./rule_definition'));
 
 type RuleProps = {
   rule: Rule;
@@ -78,6 +67,8 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleProps) {
+  const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
+
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
@@ -88,11 +79,6 @@ export function RuleComponent({
       : muteAlertInstance(rule, alert.alert));
     requestRefresh();
   };
-
-  const showDurationWarning = shouldShowDurationWarning(
-    ruleType,
-    ruleSummary.executionDuration.average
-  );
 
   const healthColor = getHealthColor(rule.executionStatus.status);
   const isLicenseError =
@@ -122,7 +108,16 @@ export function RuleComponent({
       content: suspendedComponentWithProps(
         RuleEventLogListWithApi,
         'xl'
-      )({ requestRefresh, rule, refreshToken }),
+      )({
+        rule,
+        ruleType,
+        ruleSummary,
+        numberOfExecutions,
+        refreshToken,
+        isLoadingRuleSummary: isLoadingChart,
+        onChangeDuration,
+        requestRefresh,
+      }),
     },
     {
       id: ALERT_LIST_TAB,
@@ -155,8 +150,8 @@ export function RuleComponent({
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
+      <EuiFlexGroup gutterSize="s" wrap>
+        <EuiFlexItem grow={2}>
           <RuleStatusPanelWithApi
             rule={rule}
             isEditable={!readOnly}
@@ -165,56 +160,15 @@ export function RuleComponent({
             requestRefresh={requestRefresh}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel
-            data-test-subj="avgExecutionDurationPanel"
-            color={showDurationWarning ? 'warning' : 'subdued'}
-            hasBorder={false}
-          >
-            <EuiStat
-              data-test-subj="avgExecutionDurationStat"
-              titleSize="xs"
-              title={
-                <EuiFlexGroup gutterSize="xs">
-                  {showDurationWarning && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        data-test-subj="ruleDurationWarning"
-                        anchorClassName="ruleDurationWarningIcon"
-                        type="alert"
-                        color="warning"
-                        content={i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',
-                          {
-                            defaultMessage: `Duration exceeds the rule's expected run time.`,
-                          }
-                        )}
-                        position="top"
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    {formatMillisForDisplay(ruleSummary.executionDuration.average)}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              description={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.alertsList.avgDurationDescription',
-                {
-                  defaultMessage: `Average duration`,
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <ExecutionDurationChart
-            executionDuration={ruleSummary.executionDuration}
-            numberOfExecutions={numberOfExecutions}
-            onChangeDuration={onChangeDuration}
-            isLoading={isLoadingChart}
-          />
-        </EuiFlexItem>
+        {suspendedComponentWithProps(
+          RuleDefinition,
+          'xl'
+        )({
+          rule,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+          onEditRule: requestRefresh,
+        })}
       </EuiFlexGroup>
 
       <EuiSpacer size="xl" />
