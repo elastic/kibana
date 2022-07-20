@@ -998,9 +998,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-       after(async () => {
-         await objectRemover.removeAll();
-       });
+      after(async () => {
+        await objectRemover.removeAll();
+      });
 
       it('renders the error log list', async () => {
         await browser.refresh();
