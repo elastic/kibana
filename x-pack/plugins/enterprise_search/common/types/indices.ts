@@ -42,7 +42,7 @@ export interface ElasticsearchIndexWithIngestion extends ElasticsearchIndex {
   connector?: Connector;
   crawler?: Crawler;
 }
-export interface SearchIndex extends ElasticsearchIndex {
+export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
   alias: boolean;
   privileges: {
     read: boolean;

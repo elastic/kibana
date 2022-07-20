@@ -13,7 +13,7 @@ import {
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { SearchIndex } from '../../../common/types';
+import { ElasticsearchIndexWithPrivileges } from '../../../common/types';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,
@@ -48,7 +48,7 @@ export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
   returnHiddenIndices: boolean
-): Promise<SearchIndex[]> => {
+): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
   const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
   const totalIndices = await client.asCurrentUser.indices.get({
@@ -102,7 +102,7 @@ export const fetchIndices = async (
     })
     .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const indicesAndAliases = [] as SearchIndex[];
+      const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
       indicesAndAliases.push({
         name,
         alias: false,

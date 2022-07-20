@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { SearchIndex } from '../../../../../common/types';
+import { ElasticsearchIndexWithPrivileges } from '../../../../../common/types';
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -36,7 +36,9 @@ interface EngineCreationActions {
   submitEngine(): void;
   onSubmitError(): void;
   loadIndices(): void;
-  onLoadIndicesSuccess(indices: SearchIndex[]): { indices: SearchIndex[] };
+  onLoadIndicesSuccess(indices: ElasticsearchIndexWithPrivileges[]): {
+    indices: ElasticsearchIndexWithPrivileges[];
+  };
   setSelectedIndex(selectedIndexName: string): { selectedIndexName: string };
   setEngineType(engineType: EngineType): { engineType: EngineType };
   setIsAliasAllowed(isAliasAllowed: boolean): { isAliasAllowed: boolean };
@@ -50,7 +52,7 @@ interface EngineCreationValues {
   name: string;
   rawName: string;
   isLoadingIndices: boolean;
-  indices: SearchIndex[];
+  indices: ElasticsearchIndexWithPrivileges[];
   indicesFormatted: SearchIndexSelectableOption[];
   selectedIndex: string;
   selectedIndexFormatted?: SearchIndexSelectableOption;
@@ -163,7 +165,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     aliasName: [() => [selectors.aliasRawName], (aliasRawName) => formatApiName(aliasRawName)],
     indicesFormatted: [
       () => [selectors.indices, selectors.selectedIndex],
-      (indices: SearchIndex[], selectedIndexName) =>
+      (indices: ElasticsearchIndexWithPrivileges[], selectedIndexName) =>
         formatIndicesToSelectable(indices, selectedIndexName),
     ],
     isSubmitDisabled: [
@@ -212,7 +214,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     ],
     aliasNameErrorMessage: [
       () => [selectors.aliasName, selectors.indices],
-      (aliasName: string, indices: SearchIndex[]) => {
+      (aliasName: string, indices: ElasticsearchIndexWithPrivileges[]) => {
         const existingAlias = indices.find((el) => el.name === aliasName);
         if (existingAlias) {
           return i18n.translate(
@@ -275,7 +277,7 @@ Please choose another alias name.
       const { http } = HttpLogic.values;
       try {
         const indices = await http.get('/internal/enterprise_search/search_indices');
-        actions.onLoadIndicesSuccess(indices as SearchIndex[]);
+        actions.onLoadIndicesSuccess(indices as ElasticsearchIndexWithPrivileges[]);
       } catch (e) {
         flashAPIErrors(e);
         actions.onSubmitError();
