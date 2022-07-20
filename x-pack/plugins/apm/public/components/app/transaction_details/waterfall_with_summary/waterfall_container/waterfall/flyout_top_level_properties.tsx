@@ -61,8 +61,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             comparisonEnabled: query.comparisonEnabled,
-            transactionType:
-              'transactionType' in query ? query.transactionType : undefined,
+            transactionType: transaction.transaction.type,
             serviceGroup,
             environment: nextEnvironment,
           }}
