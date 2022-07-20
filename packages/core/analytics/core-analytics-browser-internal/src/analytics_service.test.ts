@@ -34,7 +34,7 @@ describe('AnalyticsService', () => {
               `);
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[1][0].context$)
-    ).resolves.toEqual({ session_id: expect.any(String) });
+    ).resolves.toEqual({ sessionId: expect.any(String) });
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[2][0].context$)
     ).resolves.toEqual({
@@ -208,6 +208,7 @@ describe('AnalyticsService', () => {
 
   test('setup should register the elasticsearch info context provider (undefined)', async () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    injectedMetadata.getElasticsearchInfo.mockReturnValue({});
     analyticsService.setup({ injectedMetadata });
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
