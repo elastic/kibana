@@ -7,8 +7,7 @@
 
 import { left, right } from 'fp-ts/lib/Either';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { Dataset, RuleDataWriterInitializationError } from '..';

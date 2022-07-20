@@ -104,11 +104,9 @@ export class RuleDataClient implements IRuleDataClient {
 
     return {
       search: async (request) => {
-        const clusterClient = await waitUntilReady();
-        let body;
-
         try {
-          body = await clusterClient.search({
+          const clusterClient = await waitUntilReady();
+          return await clusterClient.search({
             ...request,
             index: indexPattern,
           });
@@ -116,8 +114,6 @@ export class RuleDataClient implements IRuleDataClient {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
           throw err;
         }
-
-        return body as any;
       },
 
       getDynamicIndexPattern: async () => {
