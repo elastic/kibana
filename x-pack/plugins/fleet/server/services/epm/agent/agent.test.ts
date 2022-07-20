@@ -464,20 +464,6 @@ invalid_var:
         invalid_var: null,
       });
     });
-
-    it('should handle function value', () => {
-      const vars = {
-        invalid_var: {
-          value: () => {},
-        },
-      };
-
-      const output = compileTemplate(vars, streamTemplateInvalid);
-      expect(output).toEqual({
-        input: 'log',
-        invalid_var: null,
-      });
-    });
   });
 
   it('should support optional yaml values at root level', () => {

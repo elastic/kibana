@@ -164,14 +164,14 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
 }
 
 // Recursively replace keys undefined values with null
-function replaceUndefinedObjectValues(obj: Object, performClone: Boolean) {
+function replaceUndefinedObjectValues(obj: any, performClone: Boolean) {
   let workObj = performClone === true ? cloneDeep(obj) : obj;
   Object.entries(workObj).forEach(([key, val]) => {
-    const val_type = typeof val;
-    if (val_type === 'object') {
+    const valType = typeof val;
+    if (valType === 'object') {
       // Null classified as object
       if (!isNil(val)) replaceUndefinedObjectValues(val);
-    } else if (val_type === 'undefined') {
+    } else if (valType === 'undefined') {
       workObj[key] = null;
     }
   });
