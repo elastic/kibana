@@ -10,8 +10,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Embeddable, EmbeddableInput, IEmbeddable } from '..';
-import { createStore } from '../store';
+import { Embeddable, IEmbeddable } from '..';
+import { createStore, State } from '../store';
 
 export class HelloWorldEmbeddable extends Embeddable {
   // eslint-disable-next-line @kbn/eslint/no_this_in_property_initializers
@@ -24,7 +24,7 @@ export class HelloWorldEmbeddable extends Embeddable {
   reload() {}
 
   render(node: HTMLElement) {
-    const App = connect((state: EmbeddableInput) => ({ body: state.title }))(EuiEmptyPrompt);
+    const App = connect((state: State) => ({ body: state.input.title }))(EuiEmptyPrompt);
 
     render(
       <Provider store={this.store}>

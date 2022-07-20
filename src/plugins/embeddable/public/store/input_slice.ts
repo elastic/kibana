@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { debounce } from 'lodash';
-import type { Reducer, Store } from 'redux';
-import { filter } from 'rxjs';
-import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { EmbeddableInput, IEmbeddable } from './lib';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { EmbeddableInput } from '../lib';
 
-export const slice = createSlice({
+export const input = createSlice({
   name: 'embeddable',
   initialState: {} as EmbeddableInput,
   reducers: {
@@ -60,35 +57,3 @@ export const slice = createSlice({
     },
   },
 });
-
-export const { actions } = slice;
-
-export function createStore(
-  embeddable: IEmbeddable,
-  reducer: Reducer<EmbeddableInput> = slice.reducer
-): Store<EmbeddableInput> {
-  let isUpstreamUpdate = false;
-  let isDownstreamUpdate = false;
-
-  const store = configureStore({ reducer });
-  const onUpdate = debounce(() => {
-    isDownstreamUpdate = true;
-    embeddable.updateInput(store.getState());
-    isDownstreamUpdate = false;
-  });
-  const unsubscribe = store.subscribe(() => !isUpstreamUpdate && onUpdate());
-
-  embeddable
-    .getInput$()
-    .pipe(filter(() => !isDownstreamUpdate))
-    .subscribe({
-      next: () => {
-        isUpstreamUpdate = true;
-        store.dispatch(actions.set(embeddable.getInput()));
-        isUpstreamUpdate = false;
-      },
-      complete: unsubscribe,
-    });
-
-  return store;
-}

@@ -95,8 +95,10 @@ const HelloWorldEmbeddablePanel = forwardRef<
 
     useEffect(() => theme$.next(theme), [theme$, theme]);
     useEffect(() => {
-      embeddable.store.dispatch(actions.setTitle(title));
-      embeddable.store.dispatch(actions.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT));
+      embeddable.store.dispatch(actions.input.setTitle(title));
+      embeddable.store.dispatch(
+        actions.input.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT)
+      );
     }, [embeddable.store, title, viewMode]);
     useEffect(
       () =>
@@ -159,7 +161,7 @@ export function DefaultWithBadges({ badges, ...props }: DefaultWithBadgesProps) 
   useEffect(
     () =>
       void ref.current?.embeddable.store.dispatch(
-        actions.setLastReloadRequestTime(new Date().getMilliseconds())
+        actions.input.setLastReloadRequestTime(new Date().getMilliseconds())
       ),
     [getActions]
   );
@@ -206,7 +208,7 @@ export function DefaultWithContextMenu({ items, ...props }: DefaultWithContextMe
   useEffect(
     () =>
       void ref.current?.embeddable.store.dispatch(
-        actions.setLastReloadRequestTime(new Date().getMilliseconds())
+        actions.input.setLastReloadRequestTime(new Date().getMilliseconds())
       ),
     [getActions]
   );
