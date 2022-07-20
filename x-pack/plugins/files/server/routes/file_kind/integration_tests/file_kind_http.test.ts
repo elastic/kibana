@@ -17,7 +17,7 @@ describe('File kind HTTP API', () => {
 
   beforeAll(async () => {
     testHarness = await setupIntegrationEnvironment();
-    ({ createFile, root, request } = testHarness);
+    ({ createFile, root, request, fileKind } = testHarness);
   });
 
   afterAll(async () => {
