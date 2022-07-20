@@ -40,7 +40,7 @@ export function HelpPanel(props: Props) {
         <EuiText>
           <h3>
             <FormattedMessage
-              defaultMessage="Request format"
+              defaultMessage="Request format..."
               id="console.helpPage.requestFormatTitle"
             />
           </h3>
