@@ -154,12 +154,11 @@ export function RuleDetailsPage() {
       : false);
 
   const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.all, read: userPermissions.read };
 
   const alertStateProps = {
     cases: {
       ui: cases.ui,
-      permissions: casesPermissions,
+      permissions: userPermissions,
     },
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
