@@ -22,11 +22,12 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { Filter, Query } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
+import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
@@ -42,9 +43,11 @@ import { SearchPanel } from '../search_panel';
 interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
+  savedSearch: SavedSearch | SavedSearchSavedObject;
 }
 
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView, savedSearch }) => {
   const { services } = useAiOpsKibana();
   const { http, data: dataService } = services;
   const basePath = http?.basePath.get() ?? '';
@@ -71,7 +74,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   );
 
   const { docStats, timefilter, earliest, latest, searchQueryLanguage, searchString, searchQuery } =
-    useData(dataView, aiopsListState, setGlobalState);
+    useData(
+      { currentDataView: dataView, currentSavedSearch: savedSearch },
+      aiopsListState,
+      setGlobalState
+    );
 
   useEffect(() => {
     return () => {
@@ -104,7 +111,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   useEffect(() => {
     // Update data query manager if input string is updated
     dataService?.query.queryString.setQuery({
-      query: searchString,
+      query: searchString ?? '',
       language: searchQueryLanguage,
     });
   }, [dataService, searchQueryLanguage, searchString]);
@@ -176,7 +183,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
           <EuiFlexItem>
             <SearchPanel
               dataView={dataView}
-              searchString={searchString}
+              searchString={searchString ?? ''}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
