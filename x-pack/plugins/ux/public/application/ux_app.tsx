@@ -126,6 +126,8 @@ export function UXAppRoot({
   const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
 
+  createCallApmApi(core);
+
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
