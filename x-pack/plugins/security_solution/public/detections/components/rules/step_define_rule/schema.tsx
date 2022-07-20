@@ -57,7 +57,7 @@ export const schema: FormSchema<DefineStepRule> = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
           const skipValidation =
-            isMlRule(formData.ruleType) || formData.dataSourceType !== 'indexPatterns';
+            isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.IndexPatterns;
 
           if (skipValidation) {
             return;
@@ -99,7 +99,7 @@ export const schema: FormSchema<DefineStepRule> = {
           const skipValidation =
             isMlRule(formData.ruleType) ||
             notEmptyDataViewId ||
-            formData.dataSourceType !== 'dataView';
+            formData.dataSourceType !== DataSourceType.DataView;
 
           if (skipValidation) {
             return;
