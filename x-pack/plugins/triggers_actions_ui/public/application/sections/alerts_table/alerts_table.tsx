@@ -180,7 +180,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
       const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
-        data.push({ field: key, value });
+        data.push({ field: key, value: value as string[] });
       });
       return renderCellValue({
         ..._props,
