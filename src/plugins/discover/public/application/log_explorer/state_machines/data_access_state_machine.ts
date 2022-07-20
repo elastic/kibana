@@ -8,25 +8,7 @@
 
 import { TimeRange } from '@kbn/es-query';
 import { createMachine } from 'xstate';
-
-export type Timestamp = TimeRange['from'];
-export type Tiebreaker = number;
-
-export interface LogExplorerPosition {
-  timestamp: Timestamp;
-  tiebreaker: Tiebreaker;
-}
-
-// totally incomplete
-export type LogExplorerChunk =
-  | {
-      status: 'loaded';
-      startPosition: LogExplorerPosition;
-      endPosition: LogExplorerPosition;
-    }
-  | {
-      status: 'uninitialized';
-    };
+import { LogExplorerChunk, LogExplorerPosition } from '../types';
 
 export interface LogExplorerContext {
   timeRange: TimeRange;
