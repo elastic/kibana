@@ -10,7 +10,9 @@ import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
+  SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import { nodeBuilder, escapeKuery, KueryNode } from '@kbn/es-query';
 
@@ -24,6 +26,7 @@ import {
   UpdatableFileAttributes,
   FileKind,
   FileJSON,
+  FilesDiagnostics,
 } from '../../common';
 import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
@@ -222,5 +225,44 @@ export class InternalFileService {
       perPage,
     });
     return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
+  }
+
+  public async getUsageMetrics(): Promise<undefined | FilesDiagnostics> {
+    let pit: undefined | SavedObjectsOpenPointInTimeResponse;
+    try {
+      pit = await this.soClient.openPointInTimeForType(this.savedObjectType);
+      const { aggregations } = await this.soClient.find<
+        FileSavedObjectAttributes,
+        { size: AggregationsSumAggregate }
+      >({
+        type: this.savedObjectType,
+        pit,
+        aggs: {
+          size: {
+            sum: {
+              field: 'size',
+            },
+          },
+        },
+      });
+
+      if (aggregations?.size.value) {
+        const capacity =
+          this.blobStorageService.getStaticBlobStorageSettings().esFixedSizeIndex.capacity;
+        return {
+          esFixedSizeIndex: {
+            capacity,
+            available: capacity - aggregations.size.value,
+            used: aggregations.size.value,
+          },
+        };
+      }
+    } finally {
+      if (pit) {
+        await this.soClient.closePointInTime(pit.id).catch((e) => {
+          this.logger.error(e);
+        });
+      }
+    }
   }
 }
