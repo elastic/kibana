@@ -39,14 +39,14 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
     {
       label: i18n.translate('xpack.profiling.functionsView.functionsTabLabel', {
-        defaultMessage: 'TopN Functions',
+        defaultMessage: 'TopN functions',
       }),
       isSelected: routePath === '/functions/topn',
       href: profilingRouter.link('/functions/topn', { query }),
     },
     {
       label: i18n.translate('xpack.profiling.functionsView.differentialFunctionsTabLabel', {
-        defaultMessage: 'Differential TopN Functions',
+        defaultMessage: 'Differential TopN functions',
       }),
       isSelected: routePath === '/functions/differential',
       href: profilingRouter.link('/functions/differential', { query }),
