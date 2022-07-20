@@ -24,8 +24,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.existOrFail('flyoutTitle');
     });
 
-    it('uses preselected options for a new field', async () => {
-      await testSubjects.click('usePreselected');
+    it('uses preconfigured options for a new field', async () => {
+      // wonky way to check the checkbox in a test
+      const controlWrapper = await testSubjects.find('usePreconfigured');
+      const control = await find.descendantDisplayedByCssSelector('label', controlWrapper);
+      await control.click();
+
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
 
@@ -35,7 +39,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         nameField
       );
 
-      expect(await nameInput.getAttribute('value')).to.equal('testdemo great');
+      expect(await nameInput.getAttribute('value')).to.equal('demotestfield');
     });
   });
 }

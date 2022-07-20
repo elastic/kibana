@@ -38,7 +38,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const [fields, setFields] = useState<DataViewField[]>(
     dataView?.fields.getAll().filter((f) => !f.scripted) || []
   );
-  const [preselected, setPreselected] = useState<boolean>(false);
+  const [preconfigured, setPreconfigured] = useState<boolean>(false);
 
   const refreshFields = () => setFields(dataView?.fields.getAll().filter((f) => !f.scripted) || []);
   const columns = [
@@ -82,7 +82,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
     },
   ];
 
-  const preselectionId = useGeneratedHtmlId({ prefix: 'usePreselection' });
+  const preconfigureId = useGeneratedHtmlId({ prefix: 'usePreconfigured' });
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
@@ -93,7 +93,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
               dataViewFieldEditor.openEditor({
                 ctx: { dataView },
                 onSave: refreshFields,
-                fieldToCreate: preselected
+                fieldToCreate: preconfigured
                   ? {
                       name: 'demotestfield',
                       type: 'boolean',
@@ -109,12 +109,11 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
             Add field
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="usePreconfigured">
           <EuiCheckbox
-            id={preselectionId}
-            label="Use preselected options"
-            checked={preselected}
-            onChange={() => setPreselected(!preselected)}
+            id={preconfigureId}
+            label="Use preconfigured options"
+            onChange={() => setPreconfigured(!preconfigured)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
