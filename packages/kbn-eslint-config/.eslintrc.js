@@ -9,6 +9,7 @@ module.exports = {
   ],
 
   plugins: [
+    '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
     'prettier',
@@ -232,6 +233,7 @@ module.exports = {
       },
     ]],
 
+    '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',

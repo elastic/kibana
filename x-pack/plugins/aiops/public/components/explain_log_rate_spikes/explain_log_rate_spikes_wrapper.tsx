@@ -52,16 +52,8 @@ export interface ExplainLogRateSpikesWrapperProps {
 export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const { docStats, timefilter } = useData(dataView, setGlobalState);
+  const { docStats, timefilter, earliest, latest } = useData(dataView, setGlobalState);
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-
-  const activeBounds = timefilter.getActiveBounds();
-  let earliest: number | undefined;
-  let latest: number | undefined;
-  if (activeBounds !== undefined) {
-    earliest = activeBounds.min?.valueOf();
-    latest = activeBounds.max?.valueOf();
-  }
 
   useEffect(() => {
     if (globalState?.time !== undefined) {

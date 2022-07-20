@@ -144,14 +144,14 @@
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.options",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "options",
             "description": [
               "array of permitted values for this setting"
             ],
             "signature": [
-              "string[] | undefined"
+              "number[] | string[] | undefined"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false
@@ -382,7 +382,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; description?: string | undefined; options?: number[] | string[] | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

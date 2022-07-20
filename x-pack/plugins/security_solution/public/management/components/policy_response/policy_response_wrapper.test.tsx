@@ -23,8 +23,7 @@ import { useGetEndpointDetails } from '../../hooks';
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
-// FLAKY: https://github.com/elastic/kibana/issues/136272
-describe.skip('when on the policy response', () => {
+describe('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
     overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,
@@ -42,7 +41,21 @@ describe.skip('when on the policy response', () => {
     policyResponse.Endpoint.policy.applied.status = overallStatus;
     malwareResponseConfigurations.status = overallStatus;
 
-    for (const extraAction of extraActions) {
+    // remove existing extra actions so no dupes when we add them in later
+    Object.values(policyResponse.Endpoint.policy.applied.response.configurations).forEach(
+      (responseConfiguration) => {
+        extraActions.forEach((extraAction) => {
+          let extraActionIndex = responseConfiguration.concerned_actions.indexOf(extraAction.name);
+          // generator can pick same action multiple times
+          while (extraActionIndex !== -1) {
+            responseConfiguration.concerned_actions.splice(extraActionIndex, 1);
+            extraActionIndex = responseConfiguration.concerned_actions.indexOf(extraAction.name);
+          }
+        });
+      }
+    );
+
+    extraActions.forEach((extraAction) => {
       let foundExtraAction = policyResponse.Endpoint.policy.applied.actions.find(
         (action) => action.name === extraAction.name
       );
@@ -53,13 +66,7 @@ describe.skip('when on the policy response', () => {
       } else {
         // Else, make sure the status of the generated action matches what was passed in
         foundExtraAction.status = overallStatus;
-      }
-
-      if (
-        overallStatus === HostPolicyResponseActionStatus.failure ||
-        overallStatus === HostPolicyResponseActionStatus.warning
-      ) {
-        foundExtraAction.message = 'no action taken';
+        foundExtraAction.message = extraAction.message;
       }
 
       // Make sure that at least one configuration has the above action, else
@@ -67,27 +74,7 @@ describe.skip('when on the policy response', () => {
       if (malwareResponseConfigurations.concerned_actions.indexOf(foundExtraAction.name) === -1) {
         malwareResponseConfigurations.concerned_actions.push(foundExtraAction.name);
       }
-    }
-
-    // if extra actions exist more than once, remove dupes to maintain exact counts
-    Object.entries(policyResponse.Endpoint.policy.applied.response.configurations).forEach(
-      ([responseConfigurationKey, responseConfiguration]) => {
-        if (responseConfigurationKey === 'malware') {
-          return;
-        }
-
-        extraActions.forEach((extraAction) => {
-          const extraActionIndex = responseConfiguration.concerned_actions.indexOf(
-            extraAction.name
-          );
-          if (extraActionIndex === -1) {
-            return;
-          }
-
-          responseConfiguration.concerned_actions.splice(extraActionIndex, 1);
-        });
-      }
-    );
+    });
 
     // Add an unknown Action Name - to ensure we handle the format of it on the UI
     const unknownAction: HostPolicyResponseAppliedAction = {
