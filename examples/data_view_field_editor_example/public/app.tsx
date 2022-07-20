@@ -86,7 +86,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={() =>

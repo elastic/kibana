@@ -6,19 +6,36 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
+
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
+    });
+
+    it('uses preselected options for a new field', async () => {
+      await testSubjects.click('usePreselected');
+      await testSubjects.click('addField');
+      await testSubjects.existOrFail('flyoutTitle');
+
+      const nameField = await testSubjects.find('nameField');
+      const nameInput = await find.descendantDisplayedByCssSelector(
+        '[data-test-subj=input]',
+        nameField
+      );
+
+      expect(await nameInput.getAttribute('value')).to.equal('testdemo great');
     });
   });
 }
