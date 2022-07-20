@@ -710,6 +710,7 @@ describe('create_signals', () => {
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
+        listClient: getListClientMock(),
       });
       expect(request).toEqual({
         allow_no_indices: true,

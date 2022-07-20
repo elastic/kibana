@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
-import { ListClient } from '@kbn/lists-plugin/server';
-import { ESBoolQuery } from '../../../../common/typed_json';
-import { Index, Query } from '../../../../common/detection_engine/schemas/common';
+import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import type { Index, Query } from '../../../../common/detection_engine/schemas/common';
 import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 export const getQueryFilter = async ({

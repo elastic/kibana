@@ -19,7 +19,6 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import { assertUnreachable } from '../../../../common/utility_types';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import type {
   QueryOrUndefined,
   SavedIdOrUndefined,

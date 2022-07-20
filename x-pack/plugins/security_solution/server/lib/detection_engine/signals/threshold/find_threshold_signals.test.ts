@@ -16,15 +16,8 @@ import { buildTimestampRuntimeMapping } from '../../rule_types/utils';
 import { TIMESTAMP_RUNTIME_FIELD } from '../../rule_types/constants';
 import { getQueryFilter } from '../get_query_filter';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
-const queryFilter = getQueryFilter({
-  query: '',
-  language: 'kuery',
-  filters: [],
-  index: ['*'],
-  lists: [],
-  listClient: getListClientMock(),
-});
 const mockSingleSearchAfter = jest.fn(async () => ({
   searchResult: {
     ...sampleEmptyDocSearchResults(),
@@ -38,14 +31,25 @@ const mockSingleSearchAfter = jest.fn(async () => ({
   searchErrors: [],
 }));
 
+let filter: ESBoolQuery;
+
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
     mockService = alertsMock.createRuleExecutorServices();
+    const { queryFilter } = await getQueryFilter({
+      query: '',
+      language: 'kuery',
+      filters: [],
+      index: ['*'],
+      lists: [],
+      listClient: getListClientMock(),
+    });
+    filter = queryFilter;
   });
 
   it('should generate a threshold signal query when only a value is provided', async () => {
@@ -56,7 +60,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: [],
         value: 100,
@@ -92,7 +96,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name'],
         value: 100,
@@ -153,7 +157,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
@@ -222,7 +226,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         field: ['host.name', 'user.name'],
         value: 100,
@@ -309,7 +313,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         cardinality: [
           {
