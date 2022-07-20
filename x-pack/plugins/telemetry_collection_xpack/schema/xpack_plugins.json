@@ -267,6 +267,9 @@
     },
     "alerts": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
         "error_messages": {
           "type": "array",
           "items": {
