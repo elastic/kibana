@@ -19,7 +19,6 @@ import {
   Direction,
   // EuiSpacer,
   EuiTableActionsColumnType,
-  SearchFilterConfig,
   EuiLink,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
@@ -69,7 +68,6 @@ export interface Props<T> {
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
   tableCaption: string;
-  searchFilters?: SearchFilterConfig[];
   children?: ReactNode | undefined;
 }
 
@@ -110,7 +108,6 @@ function TableListView<T extends UserContentCommonSchema>({
   getDetailViewLink,
   tableCaption,
   customTableColumn,
-  searchFilters,
   initialPageSize,
   listingLimit,
   emptyPrompt,
@@ -466,7 +463,6 @@ function TableListView<T extends UserContentCommonSchema>({
         entityName={entityName}
         entityNamePlural={entityNamePlural}
         deleteItems={deleteItems}
-        searchFilters={searchFilters}
         tableCaption={tableCaption}
         rowHeader={rowHeader}
       />

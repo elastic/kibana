@@ -17,6 +17,7 @@ import {
   PropertySort,
 } from '@elastic/eui';
 
+import { useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
@@ -36,7 +37,6 @@ interface Props<T extends UserContentCommonSchema> {
   tableSort: TableListViewState<T>['tableSort'];
   pagination: TableListViewState<T>['pagination'];
   deleteItems: TableListViewProps<T>['deleteItems'];
-  searchFilters: TableListViewProps<T>['searchFilters'];
   rowHeader: TableListViewProps<T>['rowHeader'];
   tableCaption: TableListViewProps<T>['tableCaption'];
 }
@@ -53,10 +53,11 @@ export function Table<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   deleteItems,
-  searchFilters,
   rowHeader,
   tableCaption,
 }: Props<T>) {
+  const { savedObjectTagging } = useServices();
+
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
       return;
@@ -89,6 +90,10 @@ export function Table<T extends UserContentCommonSchema>({
       }
     : undefined;
 
+  const searchFilters = savedObjectTagging
+    ? [savedObjectTagging.ui.getSearchBarFilter({ useName: true })]
+    : [];
+
   const search = {
     onChange: ({ queryText }: { queryText: string }) =>
       dispatch({ type: 'onSearchQueryChange', data: queryText }),
@@ -98,7 +103,7 @@ export function Table<T extends UserContentCommonSchema>({
       incremental: true,
       'data-test-subj': 'tableListSearchBox',
     },
-    filters: searchFilters ?? [],
+    filters: searchFilters,
   };
 
   const noItemsMessage = (

@@ -8,7 +8,7 @@
 
 import React, { FC, useContext } from 'react';
 import type { Observable } from 'rxjs';
-import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 
 import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '../types';
@@ -42,6 +42,10 @@ export interface Services {
         tagReferences: SavedObjectsFindOptionsReference[];
         valid: boolean;
       };
+      getSearchBarFilter: (options?: {
+        useName?: boolean;
+        tagField?: string;
+      }) => SearchFilterConfig;
     };
   };
   theme: {
