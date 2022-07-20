@@ -12,6 +12,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   let esNode: EsArchiver;
 
   describe('Canvas', function canvasAppTestSuite() {
+    const isRunningInCcsMode = config.get('esTestCluster.ccs') ? true : false;
     describe('Canvas app', () => {
       before(async () => {
         // init data
@@ -23,9 +24,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
           // TODO: Fix permission check, save and return button is disabled when dashboard is disabled
           'global_dashboard_all',
         ];
-        if (config.get('esTestCluster.ccs')) roles.push('ccs_remote_search');
+        if (isRunningInCcsMode) roles.push('ccs_remote_search');
         await security.testUser.setRoles(roles);
-        esNode = config.get('esTestCluster.ccs')
+        esNode = isRunningInCcsMode
           ? getService('remoteEsArchiver' as 'esArchiver')
           : getService('esArchiver');
         await esNode.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -35,7 +36,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await security.testUser.restoreDefaults();
       });
 
-      if (config.get('esTestCluster.ccs')) {
+      if (isRunningInCcsMode) {
         loadTestFile(require.resolve('./smoke_test'));
       } else {
         loadTestFile(require.resolve('./smoke_test'));
@@ -53,7 +54,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       }
     });
     describe('Canvas management', () => {
-      if (config.get('esTestCluster.ccs')) {
+      if (!isRunningInCcsMode) {
         loadTestFile(require.resolve('./migrations_smoke_test'));
       }
     });
