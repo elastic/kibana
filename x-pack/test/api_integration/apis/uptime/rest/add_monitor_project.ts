@@ -11,6 +11,7 @@ import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('[PUT] /api/uptime/service/monitors', function () {
@@ -21,6 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: ProjectMonitorsRequest;
+
+    let agentId = '';
+    const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
@@ -58,6 +62,13 @@ export default function ({ getService }: FtrProviderContext) {
         console.error(e);
       }
     };
+
+    before(async () => {
+      const testPolicyName = 'Fleet test server policy' + Date.now();
+      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
+      agentId = apiResponse.body.item.id;
+      await testPrivateLocations.setTestLocations([agentId]);
+    });
 
     beforeEach(() => {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
@@ -659,6 +670,60 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = response.body;
         expect(monitors[0].attributes.enabled).eql(false);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
+      }
+    });
+
+    it('handles location formatting for both private and public locations', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          });
+
+        const updatedMonitorsResponse = await Promise.all(
+          projectMonitors.monitors.map((monitor) => {
+            return supertest
+              .get(API_URLS.SYNTHETICS_MONITORS)
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+          })
+        );
+
+        updatedMonitorsResponse.forEach((response) => {
+          expect(response.body.monitors[0].attributes.locations).eql([
+            {
+              id: 'localhost',
+              label: 'Local Synthetics Service',
+              geo: { lat: 0, lon: 0 },
+              url: 'mockDevUrl',
+              isServiceManaged: true,
+              status: 'experimental',
+              isInvalid: false,
+            },
+            {
+              label: 'Test private location 0',
+              isServiceManaged: false,
+              isInvalid: false,
+              name: 'Test private location 0',
+              policyHostId: agentId,
+              id: agentId,
+              latLon: '',
+              concurrentMonitors: 1,
+            },
+          ]);
+        });
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {

@@ -47,6 +47,7 @@ export class ProjectMonitorFormatter {
   private spaceId: string;
   private keepStale: boolean;
   private locations: Locations;
+  private privateLocations: Locations;
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
@@ -63,6 +64,7 @@ export class ProjectMonitorFormatter {
 
   constructor({
     locations,
+    privateLocations,
     keepStale,
     savedObjectsClient,
     encryptedSavedObjectsClient,
@@ -73,6 +75,7 @@ export class ProjectMonitorFormatter {
     syntheticsMonitorClient,
   }: {
     locations: Locations;
+    privateLocations: Locations;
     keepStale: boolean;
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -85,6 +88,7 @@ export class ProjectMonitorFormatter {
     this.projectId = projectId;
     this.spaceId = spaceId;
     this.locations = locations;
+    this.privateLocations = privateLocations;
     this.keepStale = keepStale;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
@@ -112,6 +116,7 @@ export class ProjectMonitorFormatter {
       // check to see if monitor already exists
       const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,
+        privateLocations: this.privateLocations,
         monitor,
         projectId: this.projectId,
         namespace: this.spaceId,

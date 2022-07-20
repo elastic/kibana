@@ -28,7 +28,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async generateNewPolicy(
-    config: SyntheticsMonitorWithId,
+    config: SyntheticsMonitorWithId & { fields: Record<string, string> },
     privateLocation: PrivateLocation
   ): Promise<NewPackagePolicy> {
     if (!this.server.authSavedObjectsClient) {
@@ -52,8 +52,10 @@ export class SyntheticsPrivateLocation {
 
     const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
       ...(config as Partial<MonitorFields>),
-      config_id: config.id,
+      config_id: config.fields.config_id,
       location_name: privateLocation.name,
+      'monitor.project.id': config.fields['monitor.project.name'],
+      'monitor.project.name': config.fields['monitor.project.name'],
     });
 
     return formattedPolicy;

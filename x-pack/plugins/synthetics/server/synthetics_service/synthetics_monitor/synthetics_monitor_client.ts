@@ -48,11 +48,9 @@ export class SyntheticsMonitorClient {
       customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
     });
 
-    const { privateLocations, publicLocations } = this.parseLocations(editedConfig);
+    const { publicLocations } = this.parseLocations(editedConfig);
 
-    if (privateLocations.length > 0) {
-      await this.privateLocationAPI.editMonitor(editedConfig);
-    }
+    await this.privateLocationAPI.editMonitor(editedConfig);
 
     if (publicLocations.length > 0) {
       return await this.syntheticsService.editConfig(editedConfig);
