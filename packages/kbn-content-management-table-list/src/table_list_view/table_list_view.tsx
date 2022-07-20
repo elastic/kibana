@@ -29,7 +29,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
 import { SimpleSavedObject, SavedObjectsFindOptionsReference } from '../types';
 
-import { Table, ConfirmDeleteModal } from './components'; // ListingLimitWarning
+import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
 import type { Action } from './actions';
 import { reducer } from './reducer';
@@ -116,7 +116,7 @@ function TableListView<T extends UserContentCommonSchema>({
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
-  const { toast, savedObjectTagging, theme, toMountPoint } = useServices();
+  const { application, toast, savedObjectTagging, theme, toMountPoint } = useServices();
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -171,7 +171,7 @@ function TableListView<T extends UserContentCommonSchema>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    // totalItems,
+    totalItems,
     tableColumns: stateTableColumns,
     pagination,
     tableSort,
@@ -179,7 +179,7 @@ function TableListView<T extends UserContentCommonSchema>({
   const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
-  // const showLimitError = !showFetchError && totalItems > listingLimit;
+  const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
     const columns = stateTableColumns.slice();
@@ -405,17 +405,15 @@ function TableListView<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <div
-      // <KibanaPageTemplate
-      // data-test-subj={pageDataTestSubject}
-      // pageBodyProps={{
-      //   'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-      // }}
-      // isEmptyState={true}
+      <KibanaPageTemplate
+        data-test-subj={pageDataTestSubject}
+        pageBodyProps={{
+          'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
+        }}
+        isEmptyState={true}
       >
         {renderNoItemsMessage()}
-      </div>
-      // </KibanaPageTemplate>
+      </KibanaPageTemplate>
     );
   }
 
@@ -435,9 +433,9 @@ function TableListView<T extends UserContentCommonSchema>({
       {children}
 
       {/* Too many items error */}
-      {/* {showLimitError && (
+      {showLimitError && (
         <ListingLimitWarning
-          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings.save)}
+          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
           advancedSettingsLink={application.getUrlForApp('management', {
             path: `/kibana/settings?query=savedObjects:listingLimit`,
           })}
@@ -445,7 +443,7 @@ function TableListView<T extends UserContentCommonSchema>({
           totalItems={totalItems}
           listingLimit={listingLimit}
         />
-      )} */}
+      )}
 
       {/* Error while fetching items */}
       {showFetchError && renderFetchError()}
