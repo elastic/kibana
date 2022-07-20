@@ -6,20 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const PageObjects = getPageObjects(['common']);
   const esArchiver = getService('esArchiver');
 
   describe('Rules list', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'triggersActions',
-        '/__components_sandbox'
-      );
+      await PageObjects.common.navigateToApp('triggersActionsUiExample/rules_list');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');

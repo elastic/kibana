@@ -86,13 +86,16 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  useBreadcrumb({
-    title,
-    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-      path: { serviceName },
-      query,
+  useBreadcrumb(
+    () => ({
+      title,
+      href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
+        path: { serviceName },
+        query,
+      }),
     }),
-  });
+    [query, router, selectedTab, serviceName, title]
+  );
 
   return (
     <ApmMainTemplate
