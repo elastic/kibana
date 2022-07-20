@@ -54,15 +54,16 @@ export function waitForIndexStatus({
 >;
 
 /**
- * A yellow index status means the index's primary shard is allocated and the
- * index is ready for searching/indexing documents, but ES wasn't able to
- * allocate the replicas. When migrations proceed with a yellow index it means
- * we don't have as much data-redundancy as we could have, but waiting for
- * replicas would mean that v2 migrations fail where v1 migrations would have
- * succeeded. It doesn't feel like it's Kibana's job to force users to keep
- * their clusters green and even if it's green when we migrate it can turn
- * yellow at any point in the future. So ultimately data-redundancy is up to
- * users to maintain.
+ * Wait until an index status become either 'yellow' or 'green'.
+ *
+ * A yellow index status means the index's primary shard was allocated but ES
+ * wasn't able to allocate the replica. Thus a yellow index can be searched
+ * and read from but indexing documents with `wait_for_active_shards='all'`
+ * will fail.
+ *
+ * A green index status means the index's primary and replica shards has been
+ * allocated so we can search, read and index documents with
+ * `wait_for_active_shards='all'`.
  */
 export function waitForIndexStatus({
   client,
