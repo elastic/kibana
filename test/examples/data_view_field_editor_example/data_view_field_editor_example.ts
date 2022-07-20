@@ -25,8 +25,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
     it('uses preconfigured options for a new field', async () => {
-      // wonky way to check the checkbox in a test
-      const controlWrapper = await testSubjects.find('usePreconfigured');
+      // find the checkbox label and click it - `testSubjects.setCheckbox()` is not working for our checkbox
+      const controlWrapper = await testSubjects.find('preconfiguredControlWrapper');
       const control = await find.descendantDisplayedByCssSelector('label', controlWrapper);
       await control.click();
 
