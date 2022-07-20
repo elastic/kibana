@@ -14,6 +14,7 @@ import * as i18n from './translations';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { RelatedCases } from './related_cases';
 import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
@@ -32,8 +33,12 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+    const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
+      'insightsRelatedAlertsByProcessAncestry'
+    );
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
-    const hasProcessEntityInfo = processEntityField && processEntityField.values;
+    const hasProcessEntityInfo =
+      isRelatedAlertsByProcessAncestryEnabled && processEntityField && processEntityField.values;
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
@@ -102,15 +107,17 @@ export const Insights = React.memo<Props>(
             </EuiFlexItem>
           )}
 
-          {processEntityField && processEntityField.values && (
-            <EuiFlexItem>
-              <RelatedAlertsByProcessAncestry
-                data={processEntityField}
-                eventId={eventId}
-                timelineId={timelineId}
-              />
-            </EuiFlexItem>
-          )}
+          {isRelatedAlertsByProcessAncestryEnabled &&
+            processEntityField &&
+            processEntityField.values && (
+              <EuiFlexItem>
+                <RelatedAlertsByProcessAncestry
+                  data={processEntityField}
+                  eventId={eventId}
+                  timelineId={timelineId}
+                />
+              </EuiFlexItem>
+            )}
         </EuiFlexGroup>
       </div>
     );
