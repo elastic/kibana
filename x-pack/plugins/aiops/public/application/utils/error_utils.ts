@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate error utils file in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/error_utils.ts`
+
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import Boom from '@hapi/boom';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

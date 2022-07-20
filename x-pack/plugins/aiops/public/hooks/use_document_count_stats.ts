@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { useAiOpsKibana } from '../kibana_context';
-import { extractErrorProperties } from '../../common/error_utils';
+import { extractErrorProperties } from '../application/utils/error_utils';
 import {
   DocumentCountStats,
   getDocumentCountStatsRequest,
@@ -70,7 +70,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     if (!searchParams) return;
 
     try {
-      const resp: any = await lastValueFrom(
+      const resp = await lastValueFrom(
         data.search.search({
           params: getDocumentCountStatsRequest(searchParams),
         })
