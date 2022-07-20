@@ -181,44 +181,44 @@ const getScoreQuery = (): SearchRequest => ({
   aggs: {
     total_findings: {
       value_count: {
-        field: 'result.evaluation.keyword',
+        field: 'result.evaluation',
       },
     },
     passed_findings: {
       filter: {
         term: {
-          'result.evaluation.keyword': 'passed',
+          'result.evaluation': 'passed',
         },
       },
     },
     failed_findings: {
       filter: {
         term: {
-          'result.evaluation.keyword': 'failed',
+          'result.evaluation': 'failed',
         },
       },
     },
     score_by_cluster_id: {
       terms: {
-        field: 'cluster_id.keyword',
+        field: 'cluster_id',
       },
       aggregations: {
         total_findings: {
           value_count: {
-            field: 'result.evaluation.keyword',
+            field: 'result.evaluation',
           },
         },
         passed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'passed',
+              'result.evaluation': 'passed',
             },
           },
         },
         failed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'failed',
+              'result.evaluation': 'failed',
             },
           },
         },

@@ -31,7 +31,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   },
   latest: {
     sort: '@timestamp',
-    unique_key: ['resource.id.keyword', 'rule.id'],
+    unique_key: ['resource.id', 'rule.id'],
   },
   _meta: {
     managed: 'true',
