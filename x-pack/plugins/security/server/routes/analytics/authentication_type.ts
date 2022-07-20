@@ -100,10 +100,10 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
 }
 
 /**
- * API Key authentication by interactive users is deprecated, this method logs a deprecation warning
+ * API Key authentication by interactive users is deprecated, this method logs a deprecation warning.
  *
- * @param httpAuthenticationScheme A string representing the authentication type event's scheme (ApiKey, etc.) by an interactive user
- * @param logger A reference to the Logger to log the deprecation message
+ * @param httpAuthenticationScheme A string representing the authentication type event's scheme (ApiKey, etc.) by an interactive user.
+ * @param logger A reference to the Logger to log the deprecation message.
  */
 function logApiKeyWithInteractiveUserDeprecated(
   httpAuthenticationScheme: string = '',
