@@ -7,6 +7,7 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
+import { cloneDeep, isNil } from 'lodash';
 
 import type { PackagePolicyConfigRecord } from '../../../../common';
 
@@ -129,6 +130,23 @@ function toJsonHelper(value: any) {
 }
 handlebars.registerHelper('to_json', toJsonHelper);
 
+// toYamlHelper will convert non null object to a YAML string.
+function toYamlHelper(value: any) {
+  switch (typeof value) {
+    case 'string':
+      // Assume serialized yaml
+      return value;
+    case 'object':
+      // Null classified as object
+      if (isNil(value)) return;
+      const safeValue = replaceUndefinedObjectValues(value, true);
+      return safeDump(safeValue).trim();
+    default:
+      return;
+  }
+}
+handlebars.registerHelper('to_yaml', toYamlHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
@@ -143,4 +161,19 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   });
 
   return patchedTemplate;
+}
+
+// Recursively replace keys undefined values with null
+function replaceUndefinedObjectValues(obj: Object, performClone: Boolean) {
+  let workObj = performClone === true ? cloneDeep(obj) : obj;
+  Object.entries(workObj).forEach(([key, val]) => {
+    const val_type = typeof val;
+    if (val_type === 'object') {
+      // Null classified as object
+      if (!isNil(val)) replaceUndefinedObjectValues(val);
+    } else if (val_type === 'undefined') {
+      workObj[key] = null;
+    }
+  });
+  return workObj;
 }

@@ -288,6 +288,198 @@ yaml_var: {{to_json yaml_var}}
     });
   });
 
+  describe('to_yaml helper', () => {
+    const streamTemplateYaml = `
+input: log
+{{#*inline "inlineContent"}}
+{{to_yaml yaml_var}}
+{{/inline}}
+yaml_var:
+  {{> inlineContent}}
+      `;
+
+    const streamTemplateObj = `
+input: log
+{{#*inline "inlineContent"}}
+{{to_yaml obj_var}}
+{{/inline}}
+obj_var:
+  {{> inlineContent}}
+      `;
+
+    const streamTemplateInvalid = `
+input: log
+{{#*inline "inlineContent"}}
+{{to_yaml invalid_var}}
+{{/inline}}
+invalid_var:
+  {{> inlineContent}}
+      `;
+
+    it('should parse a yaml string into object', () => {
+      const vars = {
+        yaml_var: {
+          type: 'yaml',
+          value: `root:
+    sloths:
+      - 26
+      - 4
+      - 92`,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateYaml);
+      expect(output).toEqual({
+        input: 'log',
+        yaml_var: {
+          root: {
+            sloths: [26, 4, 92],
+          },
+        },
+      });
+    });
+
+    it('should parse object into object', () => {
+      const vars = {
+        obj_var: {
+          value: {
+            root: undefined,
+            deep: {
+              root: undefined,
+              sloths: [26, 4, 92],
+            },
+            sloths: [26, 4, 92],
+          },
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateObj);
+      expect(output).toEqual({
+        input: 'log',
+        obj_var: {
+          root: null,
+          deep: {
+            root: null,
+            sloths: [26, 4, 92],
+          },
+          sloths: [26, 4, 92],
+        },
+      });
+    });
+
+    it('should handle undefined value', () => {
+      const vars = {
+        invalid_var: {
+          value: undefined,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle null value', () => {
+      const vars = {
+        invalid_var: {
+          value: null,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle number value', () => {
+      const vars = {
+        invalid_var: {
+          value: 26492,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle boolean value', () => {
+      const vars = {
+        invalid_var: {
+          value: true,
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle bigint value', () => {
+      const vars = {
+        invalid_var: {
+          value: BigInt(26492),
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle symbol value', () => {
+      const vars = {
+        invalid_var: {
+          value: Symbol('sloth'),
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle function value', () => {
+      const vars = {
+        invalid_var: {
+          value: () => {},
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+
+    it('should handle function value', () => {
+      const vars = {
+        invalid_var: {
+          value: () => {},
+        },
+      };
+
+      const output = compileTemplate(vars, streamTemplateInvalid);
+      expect(output).toEqual({
+        input: 'log',
+        invalid_var: null,
+      });
+    });
+  });
+
   it('should support optional yaml values at root level', () => {
     const streamTemplate = `
 input: logs
