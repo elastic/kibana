@@ -123,6 +123,59 @@ interface RuleAlertsAggs {
   alertsChartData: AlertChartData[];
 }
 
+// GET .alerts-observability*/_search
+// {
+//   "size": 0,
+//   "query": {
+//     "bool": {
+//       "must": [
+//         {
+//           "term": {
+//             "kibana.alert.rule.uuid": "df94ce10-06b2-11ed-966a-6f805884113b"
+//           }
+//         },
+//         {
+//           "range": {
+//             "@timestamp": {
+//               // When needed, we can make this range configurable via a function argument.
+//               "gte": "now-30d",
+//               "lt": "now"
+//             }
+//           }
+//         }
+//         ]
+//     }
+//   },
+//   "aggs":{
+//     "filterAggs": {
+//       "filters": {
+//         "filters": {
+//           "alert_active": { "term": { "kibana.alert.status": "active" } },
+//           "alert_recovered": { "term": { "kibana.alert.status": "recovered" } }
+//         }
+//       },
+//       "aggs": {
+//         "status_total": {
+//           "terms": {
+//             "field": "kibana.alert.status"
+//           }
+//         },
+//         "status_per_day": {
+//           "date_histogram": {
+//             "field": "@timestamp",
+//             "fixed_interval": "1d"
+//           },
+//           "aggs": {
+//             "alert_status_aggs_per_day": {
+//               "terms": {
+//                 "field": "kibana.alert.status"
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }}
 export async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
@@ -164,7 +217,6 @@ export async function fetchRuleAlertsAggByTimeRange({
           alert_status_aggs_total: {
             terms: {
               field: 'kibana.alert.status',
-              size: 2,
             },
           },
           alert_status_aggs: {
@@ -176,7 +228,6 @@ export async function fetchRuleAlertsAggByTimeRange({
               alert_status_aggs_per_day: {
                 terms: {
                   field: 'kibana.alert.status',
-                  size: 2,
                 },
               },
             },
