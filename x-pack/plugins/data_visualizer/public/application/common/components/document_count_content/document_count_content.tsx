@@ -90,7 +90,7 @@ export const DocumentCountContent: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <TotalCountHeader totalCount={totalCount} approximate={approximate} />
+        <TotalCountHeader totalCount={totalCount} approximate={approximate} loading={loading} />
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="dscSamplingOptions"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -14,19 +14,23 @@ const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 export const TotalCountHeader = ({
   totalCount,
   approximate,
+  loading,
 }: {
   totalCount: number;
+  loading: boolean;
   approximate?: boolean;
 }) => {
   return (
     <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
-      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader">
+      <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader" textAlign="center">
         <FormattedMessage
           id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
           defaultMessage="Total documents: {prepend}{strongTotalCount}"
           values={{
-            prepend: approximate ? '~' : '',
-            strongTotalCount: (
+            prepend: !loading && approximate ? '~' : '',
+            strongTotalCount: loading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
               <strong data-test-subj="dataVisualizerTotalDocCount">
                 <FormattedMessage
                   id="xpack.dataVisualizer.searchPanel.totalDocCountNumber"
