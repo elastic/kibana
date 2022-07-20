@@ -51,6 +51,7 @@ export interface RuleEventLogDataGrid {
   pageSizeOptions?: number[];
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
+  onFilterChange: (filter: string[]) => void;
   onModalOpen: (runLog: IExecutionLog) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
@@ -68,6 +69,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     setSortingColumns,
     onChangeItemsPerPage,
     onChangePage,
+    onFilterChange,
     onModalOpen,
   } = props;
 
@@ -118,11 +120,39 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       {
         id: 'status',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.status',
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.response',
           {
-            defaultMessage: 'Status',
+            defaultMessage: 'Response',
           }
         ),
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+          additional: [
+            {
+              iconType: 'annotation',
+              label: i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.showOnlyFailures',
+                {
+                  defaultMessage: 'Show only failures',
+                }
+              ),
+              onClick: () => onFilterChange(['failure']),
+              size: 'xs',
+            },
+            {
+              iconType: 'annotation',
+              label: i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.showAll',
+                {
+                  defaultMessage: 'Show all',
+                }
+              ),
+              onClick: () => onFilterChange([]),
+              size: 'xs',
+            },
+          ],
+        },
         isSortable: getIsColumnSortable('status'),
         initialWidth: 100,
       },
@@ -265,7 +295,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isSortable: getIsColumnSortable('timed_out'),
       },
     ],
-    [getPaginatedRowIndex, onModalOpen, logs]
+    [getPaginatedRowIndex, onModalOpen, onFilterChange, logs]
   );
 
   const columnVisibilityProps = useMemo(

@@ -47,7 +47,7 @@ describe('loadExecutionLogAggregations', () => {
       id: 'test-id',
       dateStart: '2022-03-23T16:17:53.482Z',
       dateEnd: '2022-03-23T16:17:53.482Z',
-      filter: ['success', 'unknown'],
+      outcomeFilter: ['success', 'unknown'],
       perPage: 10,
       page: 0,
       sort: [sortTimestamp],

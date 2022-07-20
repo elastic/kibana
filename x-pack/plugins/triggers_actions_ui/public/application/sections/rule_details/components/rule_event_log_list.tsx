@@ -260,6 +260,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
           onModalOpen={onModalOpen}
+          onFilterChange={setFilter}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
         />
