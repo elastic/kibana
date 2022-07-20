@@ -27,9 +27,9 @@ interface RuleAlertsAggs {
   error?: string;
 }
 export interface AlertChartData {
-  active: number;
-  recovered: number;
-  date?: string;
+  status: 'active' | 'recovered';
+  count: number;
+  date: string;
 }
 interface LoadRuleAlertsAggs {
   isLoadingRuleAlertsAggs: boolean;
@@ -123,59 +123,6 @@ interface RuleAlertsAggs {
   alertsChartData: AlertChartData[];
 }
 
-// GET .alerts-observability*/_search
-// {
-//   "size": 0,
-//   "query": {
-//     "bool": {
-//       "must": [
-//         {
-//           "term": {
-//             "kibana.alert.rule.uuid": "df94ce10-06b2-11ed-966a-6f805884113b"
-//           }
-//         },
-//         {
-//           "range": {
-//             "@timestamp": {
-//               // When needed, we can make this range configurable via a function argument.
-//               "gte": "now-30d",
-//               "lt": "now"
-//             }
-//           }
-//         }
-//         ]
-//     }
-//   },
-//   "aggs":{
-//     "filterAggs": {
-//       "filters": {
-//         "filters": {
-//           "alert_active": { "term": { "kibana.alert.status": "active" } },
-//           "alert_recovered": { "term": { "kibana.alert.status": "recovered" } }
-//         }
-//       },
-//       "aggs": {
-//         "status_total": {
-//           "terms": {
-//             "field": "kibana.alert.status"
-//           }
-//         },
-//         "status_per_day": {
-//           "date_histogram": {
-//             "field": "@timestamp",
-//             "fixed_interval": "1d"
-//           },
-//           "aggs": {
-//             "alert_status_aggs_per_day": {
-//               "terms": {
-//                 "field": "kibana.alert.status"
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }}
 export async function fetchRuleAlertsAggByTimeRange({
   http,
   index,
@@ -214,20 +161,18 @@ export async function fetchRuleAlertsAggByTimeRange({
           },
         },
         aggs: {
-          alert_status_aggs_total: {
-            terms: {
-              field: 'kibana.alert.status',
-            },
-          },
-          alert_status_aggs: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: '1d',
+          filterAggs: {
+            filters: {
+              filters: {
+                alert_active: { term: { 'kibana.alert.status': 'active' } },
+                alert_recovered: { term: { 'kibana.alert.status': 'recovered' } },
+              },
             },
             aggs: {
-              alert_status_aggs_per_day: {
-                terms: {
-                  field: 'kibana.alert.status',
+              status_per_day: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: '1d',
                 },
               },
             },
@@ -236,38 +181,26 @@ export async function fetchRuleAlertsAggByTimeRange({
       }),
     });
 
-    const list = res?.aggregations?.alert_status_aggs_total?.buckets as Array<{
-      key: string;
-      doc_count: number;
-    }>;
-    const dataHistogram = res?.aggregations?.alert_status_aggs?.buckets as Array<{
-      alert_status_aggs_per_day: {
-        buckets: Array<{
-          key: string;
-          doc_count: number;
-        }>;
-      };
-      key_as_string: string;
-      doc_count: number;
-    }>;
-
-    const alertsChartData = dataHistogram.map((day) => ({
-      date: day.key_as_string,
-      ...day.alert_status_aggs_per_day.buckets.reduce(
-        (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
-        {
-          active: 0,
-          recovered: 0,
-        }
+    const alertsChartData = [
+      ...res?.aggregations?.filterAggs.buckets.alert_active.status_per_day.buckets.map(
+        (bucket) => ({
+          date: bucket.key_as_string,
+          status: 'active',
+          count: bucket.doc_count,
+        })
       ),
-    })) as AlertChartData[];
-    const ruleAlertsAgg = list.reduce(
-      (acc, alertsStatus) => ({ ...acc, [alertsStatus.key]: alertsStatus.doc_count }),
-      {}
-    ) as RuleAlertsAggs;
+      ...res?.aggregations?.filterAggs.buckets.alert_recovered.status_per_day.buckets.map(
+        (bucket) => ({
+          date: bucket.key_as_string,
+          status: 'active',
+          count: bucket.doc_count,
+        })
+      ),
+    ];
 
     return {
-      ...ruleAlertsAgg,
+      active: res?.aggregations?.filterAggs.buckets.alert_active?.doc_count ?? 0,
+      recovered: res?.aggregations?.filterAggs.buckets.alert_recovered?.doc_count ?? 0,
       alertsChartData,
     };
   } catch (error) {

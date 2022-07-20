@@ -157,24 +157,13 @@ const AlertsChart = ({ data }: AlertsChartProps) => {
       <Settings tooltip={TooltipType.None} theme={theme} />
       <BarSeries
         id="bars"
-        xScaleType={ScaleType.Linear}
+        xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor="x"
         yAccessors={['y']}
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        data={[
-          { x: data[0].active, y: data[0].recovered, g: 'b' },
-          { x: data[1].active, y: data[1].recovered, g: 'b' },
-          { x: 20, y: 300, g: 'a' },
-          // { x: 3, y: 6, g: 'a' },
-          // { x: 0, y: 4, g: 'b' },
-          // { x: 1, y: 5, g: 'b' },
-          // { x: 2, y: 8, g: 'b' },
-          // { x: 3, y: 2, g: 'b' },
-          // { x: 4, y: 1, g: 'b' },
-          // { x: 6, y: 10, g: 'a' },
-        ]}
+        data={data.map((alert) => ({ x: alert.date, y: alert.count, g: alert.status }))}
       />
     </Chart>
   );
