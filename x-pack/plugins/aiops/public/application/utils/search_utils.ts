@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate saved search utils file in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts`
+
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SearchSource } from '@kbn/data-plugin/common';

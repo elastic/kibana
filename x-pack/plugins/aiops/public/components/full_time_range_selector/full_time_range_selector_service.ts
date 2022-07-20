@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate service in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts`
+
 import moment from 'moment';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
