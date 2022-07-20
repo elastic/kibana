@@ -37,188 +37,221 @@ export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {
       agent: {
-        connection_delay: 60
+        connection_delay: null
+      },
+      alerts: {
+        require_user_artifacts: null
       },
       artifacts: {
         global: {
-          base_url: '',
-          manifest_relative_url: '',
-          public_key: '',
-          interval: 300
+          base_url: null,
+          manifest_relative_url: null,
+          public_key: null,
+          interval: null,
+          ca_cert: null
         },
         user: {
-          public_key: '',
-          ca_cert: ''
+          public_key: null,
+          ca_cert: null,
+          base_url: null,
+          interval: null
         }
       },
       elasticsearch: {
-        delay: 600,
+        delay: null,
         tls: {
-          verify_peer: true,
-          verify_hostname: true,
-          ca_cert: ''
+          verify_peer: null,
+          verify_hostname: null,
+          ca_cert: null
         }
       },
+      fanotify: {
+        ignore_unknown_filesystems: null,
+        monitored_filesystems: null,
+        ignored_filesystems: null
+      },
       logging: {
-        file: 'info',
-        syslog: 'off'
+        file: null,
+        stdout: null,
+        stderr: null,
+        syslog: null
       },
       diagnostic: {
-        enabled: true
+        enabled: null
       },
       malware: {
-        quarantine: true
+        quarantine: null
       },
       memory_protection: {
-        memory_scan_collect_sample: false,
-        memory_scan: true
+        memory_scan_collect_sample: null,
+        memory_scan: null
       },
       kernel: {
-        capture_mode: 'auto'
+        capture_mode: null
       },
       event_filter: {
-        default: true
+        default: null
       },
       utilization_limits: {
-        cpu: 50
+        cpu: null
+      },
+      logstash: {
+        delay: null
       }
     }
   },
   mac: {
     advanced: {
       agent: {
-        connection_delay: 60
+        connection_delay: null
       },
       artifacts: {
         global: {
-          base_url: '',
-          manifest_relative_url: '',
-          public_key: '',
-          interval: 300
+          base_url: null,
+          manifest_relative_url: null,
+          public_key: null,
+          interval: null,
+          ca_cert: null
         },
         user: {
-          public_key: '',
-          ca_cert: ''
+          public_key: null,
+          ca_cert: null,
+          base_url: null,
+          interval: null
         }
       },
       elasticsearch: {
-        delay: 600,
+        delay: null,
         tls: {
-          verify_peer: true,
-          verify_hostname: true,
-          ca_cert: ''
+          verify_peer: null,
+          verify_hostname: null,
+          ca_cert: null
         }
       },
       logging: {
-        file: 'info',
-        syslog: 'off'
+        file: null,
+        stdout: null,
+        stderr: null,
+        syslog: null
+      },
+      logstash: {
+        delay: null
       },
       malware: {
-        quarantine: true,
-        threshold: 'normal'
+        quarantine: null,
+        threshold: null
       },
       kernel: {
-        connect: true,
-        process: true,
-        filewrite: true,
-        network: true,
+        connect: null,
+        harden: null,
+        process: null,
+        filewrite: null,
+        network: null,
         network_extension: {
-          enable_content_filtering: true,
-          enable_packet_filtering: true
+          enable_content_filtering: null,
+          enable_packet_filtering: null
         }
       },
       harden: {
-        self_protect: true
+        self_protect: null
       },
       diagnostic: {
-        enabled: true
+        enabled: null
       },
       alerts: {
-        cloud_lookup: true
+        cloud_lookup: null,
+
+        cloud_lookup_url: null,
       },
       memory_protection: {
         memory_scan_collect_sample: false,
-        memory_scan: true
+        memory_scan: null
       },
       event_filter: {
-        default: true
+        default: null
       }
     }
   },
   windows: {
     advanced: {
       agent: {
-        connection_delay: 60
+        connection_delay: null
       },
       artifacts: {
         global: {
-          base_url: '',
-          manifest_relative_url: '',
-          public_key: '',
-          interval: 300
+          base_url: null,
+          manifest_relative_url: null,
+          public_key: null,
+          interval: null,
+          ca_cert: null
         },
         user: {
-          public_key: '',
-          ca_cert: ''
+          public_key: null,
+          ca_cert: null,
+          base_url: null,
+          interval: null
         }
       },
       elasticsearch: {
-        delay: 600,
+        delay: null,
         tls: {
-          verify_peer: true,
-          verify_hostname: true,
-          ca_cert: ''
+          verify_peer: null,
+          verify_hostname: null,
+          ca_cert: null
         }
       },
       logging: {
-        file: 'info',
-        debugview: 'off'
+        file: null,
+        stdout: null,
+        stderr: null,
+        syslog: null
       },
       malware: {
-        quarantine: true,
-        threshold: 'normal'
+        quarantine: null,
+        threshold: null
       },
       kernel: {
-        connect: true,
-        process: true,
-        filewrite: true,
-        network: true,
-        fileopen: true,
-        asyncimageload: true,
-        syncimageload: true,
-        registry: true,
-        fileaccess: true,
-        registryaccess: true
+        connect: null,
+        harden: null,
+        process: null,
+        filewrite: null,
+        network: null,
+        fileopen: null,
+        asyncimageload: null,
+        syncimageload: null,
+        registry: null,
+        fileaccess: null,
+        registryaccess: null,
+        process_handle: null
       },
       diagnostic: {
-        enabled: true,
-        rollback_telemetry_enabled: true
+        enabled: null,
+        rollback_telemetry_enabled: null
       },
       alerts: {
-        cloud_lookup: true
+        cloud_lookup: null,
+        cloud_lookup_url: null,
+        require_user_artifacts: null
       },
       ransomware: {
-        mbr: true,
-        canary: true
+        mbr: null,
+        canary: null
       },
       memory_protection: {
-        shellcode: true,
-        memory_scan: true,
-        shellcode_collect_sample: false,
-        memory_scan_collect_sample: false,
-        shellcode_enhanced_pe_parsing: true,
-        shellcode_trampoline_detection: true
-      },
-      events: {
-        etw: '' // ! Can't find default
+        context_manipulation_detection: null,
+        shellcode: null,
+        memory_scan: null,
+        shellcode_collect_sample: null,
+        memory_scan_collect_sample: null,
+        shellcode_enhanced_pe_parsing: null,
+        shellcode_trampoline_detection: null
       },
       event_filter: {
-        default: true
+        default: null
       },
       utilization_limits: {
-        cpu: 50
-      },
-      rollback: '' // ! Can't find default
+        cpu: null
+      }
     }
   }
 };
