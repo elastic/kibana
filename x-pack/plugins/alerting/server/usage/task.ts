@@ -111,8 +111,17 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
             ]) => {
+              const errorMessages = [
+                totalCountAggregations.errorMessage,
+                totalInUse.errorMessage,
+                dailyExecutionCounts.errorMessage,
+                dailyExecutionTimeoutCounts.errorMessage,
+                dailyFailedAndUnrecognizedTasks.errorMessage,
+              ].filter((message) => message !== undefined);
+
               return {
                 state: {
+                  ...(errorMessages.length > 0 && { error_messages: errorMessages }),
                   runs: (state.runs || 0) + 1,
                   ...totalCountAggregations,
                   count_active_by_type: totalInUse.countByType,

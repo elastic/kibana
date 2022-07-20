@@ -125,12 +125,14 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getTotalCount - {}`
+      `Error executing actions telemetry task: getTotalCount - oh no`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
   "countByType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "success": false,
 }
 `);
   });
@@ -308,7 +310,7 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getInUseTotalCount - {}`
+      `Error executing actions telemetry task: getInUseTotalCount - oh no`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -317,6 +319,7 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 0,
   "countTotal": 0,
+  "errorMessage": "oh no",
 }
 `);
   });
@@ -756,7 +759,7 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
+      `Error executing actions telemetry task: getExecutionsPerDayCount - oh no`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -766,6 +769,7 @@ Object {
   "countFailed": 0,
   "countFailedByType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
 }
 `);
   });

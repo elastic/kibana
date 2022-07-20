@@ -23,8 +23,7 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
-      success: { type: 'boolean' },
-      error_message: { type: 'keyword' },
+      error_messages: { type: 'array', items: { type: 'keyword' } },
       alert_history_connector_enabled: {
         type: 'boolean',
         _meta: { description: 'Indicates if preconfigured alert history connector is enabled.' },
@@ -56,14 +55,12 @@ export function createActionsUsageCollector(
         return {
           ...state,
           alert_history_connector_enabled: config.preconfiguredAlertHistoryEsIndex,
-          success: true,
         };
       } catch (err) {
         const errMessage = err && err.message ? err.message : err.toString();
 
         return {
-          success: false,
-          error_message: errMessage,
+          error_messages: [errMessage],
           alert_history_connector_enabled: false,
           count_total: 0,
           count_by_type: {},

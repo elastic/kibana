@@ -37,6 +37,7 @@ interface Opts {
 }
 
 interface GetExecutionsPerDayCountResults {
+  errorMessage?: string;
   countTotalRuleExecutions: number;
   countRuleExecutionsByType: Record<string, number>;
   countTotalFailedExecutions: number;
@@ -55,6 +56,7 @@ interface GetExecutionsPerDayCountResults {
 }
 
 interface GetExecutionTimeoutsPerDayCountResults {
+  errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
@@ -239,16 +241,17 @@ export async function getExecutionTimeoutsPerDayCount({
       countExecutionTimeoutsByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
     logger.warn(
-      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
-        err
-      )}`,
+      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${errorMessage}`,
       {
         tags: ['alerting', 'telemetry-failed'],
         error: { stack_trace: err.stack },
       }
     );
     return {
+      errorMessage,
       countExecutionTimeouts: 0,
       countExecutionTimeoutsByType: {},
     };

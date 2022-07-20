@@ -1511,13 +1511,14 @@ describe('event log telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - {}"`
+        `"Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
         countExecutionTimeouts: 0,
         countExecutionTimeoutsByType: {},
+        errorMessage: 'oh no',
       });
     });
   });

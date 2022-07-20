@@ -46,32 +46,7 @@ describe('registerActionsUsageCollector', () => {
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');
   });
 
-  it('should return success:true when there is no error', async () => {
-    const mockStats = {
-      count_total: 10,
-      count_active_total: 1,
-    };
-    mockTaskManagerStart.get.mockResolvedValue({
-      id: '1',
-      state: mockStats,
-    } as unknown as ConcreteTaskInstance);
-    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
-      resolve(mockTaskManagerStart);
-    });
-    registerActionsUsageCollector(
-      usageCollectionMock as UsageCollectionSetup,
-      config,
-      taskManagerPromise
-    );
-    // @ts-ignore
-    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual({
-      alert_history_connector_enabled: false,
-      success: true,
-      ...mockStats,
-    });
-  });
-
-  it('should return success:false and an error message when there is error', async () => {
+  it('should return an error message if fetching data fails', async () => {
     mockTaskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
     const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
       resolve(mockTaskManagerStart);
@@ -84,9 +59,34 @@ describe('registerActionsUsageCollector', () => {
     // @ts-ignore
     expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
       expect.objectContaining({
-        success: false,
-        error_message: 'error message',
+        error_messages: ['error message'],
       })
     );
+  });
+
+  it('should return the task state including error messages', async () => {
+    const mockStats = {
+      error_messages: ['an error message'],
+      count_active_total: 1,
+      count_disabled_total: 10,
+    };
+    mockTaskManagerStart.get.mockResolvedValue({
+      id: '1',
+      state: mockStats,
+    } as unknown as ConcreteTaskInstance);
+
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(mockTaskManagerStart);
+    });
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      config,
+      taskManagerPromise
+    );
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual({
+      alert_history_connector_enabled: false,
+      ...mockStats,
+    });
   });
 });

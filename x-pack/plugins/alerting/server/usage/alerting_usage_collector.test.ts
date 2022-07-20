@@ -40,27 +40,7 @@ describe('registerAlertingUsageCollector', () => {
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('alerts');
   });
 
-  it('should return success:true when there is no error', async () => {
-    const mockStats = {
-      count_active_total: 1,
-      count_disabled_total: 10,
-    };
-    taskManagerStart.get.mockResolvedValue({
-      id: '1',
-      state: mockStats,
-    } as unknown as ConcreteTaskInstance);
-    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
-      resolve(taskManagerStart);
-    });
-    registerAlertingUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerPromise);
-    // @ts-ignore
-    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual({
-      success: true,
-      ...mockStats,
-    });
-  });
-
-  it('should return success:false and an error message when there is error', async () => {
+  it('should return an error message if fetching data fails', async () => {
     taskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
     const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
       resolve(taskManagerStart);
@@ -69,9 +49,29 @@ describe('registerAlertingUsageCollector', () => {
     // @ts-ignore
     expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
       expect.objectContaining({
-        success: false,
-        error_message: 'error message',
+        error_messages: ['error message'],
       })
+    );
+  });
+
+  it('should return the task state including error messages', async () => {
+    const mockStats = {
+      error_messages: ['an error message'],
+      count_active_total: 1,
+      count_disabled_total: 10,
+    };
+    taskManagerStart.get.mockResolvedValue({
+      id: '1',
+      state: mockStats,
+    } as unknown as ConcreteTaskInstance);
+
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(taskManagerStart);
+    });
+    registerAlertingUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerPromise);
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
+      mockStats
     );
   });
 });

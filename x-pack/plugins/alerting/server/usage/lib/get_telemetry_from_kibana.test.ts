@@ -124,11 +124,12 @@ describe('kibana index telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getTotalCountAggregations - {}"`
+        `"Error executing alerting telemetry task: getTotalCountAggregations - oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toEqual({
+        errorMessage: 'oh no',
         connectors_per_alert: {
           avg: 0,
           max: 0,
@@ -235,7 +236,7 @@ describe('kibana index telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getTotalCountInUse - {}"`
+        `"Error executing alerting telemetry task: getTotalCountInUse - oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -243,6 +244,7 @@ describe('kibana index telemetry', () => {
         countByType: {},
         countNamespaces: 0,
         countTotal: 0,
+        errorMessage: 'oh no',
       });
     });
   });

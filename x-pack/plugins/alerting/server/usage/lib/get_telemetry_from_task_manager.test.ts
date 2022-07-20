@@ -242,11 +242,12 @@ describe('task manager telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - {}"`
+        `"Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
+        errorMessage: 'oh no',
         countFailedAndUnrecognizedTasks: 0,
         countFailedAndUnrecognizedTasksByStatus: {},
         countFailedAndUnrecognizedTasksByStatusByType: {},

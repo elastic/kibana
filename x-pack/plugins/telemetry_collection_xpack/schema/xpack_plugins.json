@@ -2,11 +2,11 @@
   "properties": {
     "actions": {
       "properties": {
-        "success": {
-          "type": "boolean"
-        },
-        "error_message": {
-          "type": "keyword"
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "alert_history_connector_enabled": {
           "type": "boolean",
@@ -267,11 +267,11 @@
     },
     "alerts": {
       "properties": {
-        "success": {
-          "type": "boolean"
-        },
-        "error_message": {
-          "type": "keyword"
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "count_total": {
           "type": "long"

@@ -43,7 +43,6 @@ export async function getTotalCount(
       `,
     },
   };
-
   try {
     const searchResult = await esClient.search({
       index: kibanaIndex,
@@ -86,8 +85,13 @@ export async function getTotalCount(
       countByType,
     };
   } catch (err) {
-    logger.warn(`Error executing actions telemetry task: getTotalCount - ${JSON.stringify(err)}`);
+    const errorMessage = err && err.message ? err.message : err.toString();
+
+    logger.warn(`Error executing actions telemetry task: getTotalCount - ${errorMessage}`);
+
     return {
+      success: false,
+      errorMessage,
       countTotal: 0,
       countByType: {},
     };
@@ -101,6 +105,7 @@ export async function getInUseTotalCount(
   referenceType?: string,
   preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
+  errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
   countByAlertHistoryConnectorType: number;
@@ -370,10 +375,11 @@ export async function getInUseTotalCount(
       countNamespaces: namespacesList.size,
     };
   } catch (err) {
-    logger.warn(
-      `Error executing actions telemetry task: getInUseTotalCount - ${JSON.stringify(err)}`
-    );
+    const errorMessage = err && err.message ? err.message : err.toString();
+
+    logger.warn(`Error executing actions telemetry task: getInUseTotalCount - ${errorMessage}`);
     return {
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countByAlertHistoryConnectorType: 0,
@@ -410,6 +416,7 @@ export async function getExecutionsPerDayCount(
   eventLogIndex: string,
   logger: Logger
 ): Promise<{
+  errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
   countFailed: number;
@@ -588,10 +595,12 @@ export async function getExecutionsPerDayCount(
       avgExecutionTimeByType,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
+      `Error executing actions telemetry task: getExecutionsPerDayCount - ${errorMessage}`
     );
     return {
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countFailed: 0,
