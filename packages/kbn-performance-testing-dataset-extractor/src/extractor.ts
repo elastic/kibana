@@ -32,7 +32,7 @@ interface CLIParams {
   log: ToolingLog;
 }
 
-interface Stage {
+interface InjectionStep {
   action: string;
   minUsersCount?: number;
   maxUsersCount: number;
@@ -40,8 +40,8 @@ interface Stage {
 }
 
 export interface ScalabilitySetup {
-  warmup: { stages: Stage[] };
-  test: { stages: Stage[] };
+  warmup: InjectionStep[];
+  test: InjectionStep[];
   maxDuration: string;
 }
 
