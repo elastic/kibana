@@ -65,11 +65,6 @@ interface EngineCreationValues {
   isSubmitDisabled: boolean;
 }
 
-const aliasNameErrorMessageTemplate = dedent(`
-  There is an existing index or alias with the name {aliasName}.
-  Please choose another alias name.
-`) as string;
-
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
   path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
   actions: {
@@ -224,7 +219,11 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
           return i18n.translate(
             'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.errorText',
             {
-              defaultMessage: aliasNameErrorMessageTemplate,
+              // ugly, but cannot use dedent here and pass Kibana's Checks
+              defaultMessage: `
+There is an existing index or alias with the name {aliasName}.
+Please choose another alias name.
+`,
               values: { aliasName },
             }
           );

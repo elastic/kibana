@@ -18,8 +18,6 @@ import {
   mockSearchIndexOptions,
 } from '../../__mocks__/engine_creation_logic.mock';
 
-import dedent from 'dedent';
-
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
@@ -434,10 +432,11 @@ describe('EngineCreationLogic', () => {
           indices: mockElasticsearchIndices,
         });
 
-        expect(EngineCreationLogic.values.aliasNameErrorMessage).toEqual(dedent`
-          There is an existing index or alias with the name alias-without-manage-privilege.
-          Please choose another alias name.
-        `);
+        // ugly, but cannot use dedent here and pass Kibana's Checks
+        expect(EngineCreationLogic.values.aliasNameErrorMessage).toEqual(`
+There is an existing index or alias with the name alias-without-manage-privilege.
+Please choose another alias name.
+`);
       });
     });
 
