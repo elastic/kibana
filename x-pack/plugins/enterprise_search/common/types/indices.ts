@@ -15,7 +15,6 @@ import {
 import { Connector } from './connectors';
 import { Crawler } from './crawler';
 
-
 export interface ElasticsearchIndex {
   health?: HealthStatus;
   name: IndexName;
