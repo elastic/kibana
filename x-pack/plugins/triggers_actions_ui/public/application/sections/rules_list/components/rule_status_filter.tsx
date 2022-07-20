@@ -93,7 +93,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton"
-              defaultMessage="View"
+              defaultMessage="State"
             />
           </EuiFilterButton>
         }
