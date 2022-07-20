@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana, useToasts } from '../../../lib/kibana';
 import { CaseDetailsLink } from '../../links';
 import { APP_ID } from '../../../../../common/constants';
+import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
 
 type RelatedCaseList = Array<{ id: string; title: string }>;
@@ -62,34 +63,21 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   }, [eventId, getRelatedCases]);
 
   const caseCount = relatedCases.length;
-  const isEmpty = !areCasesLoading && caseCount === 0;
+
+  let state: InsightAccordionState = 'loading';
+  if (hasError) {
+    state = 'error';
+  } else if (!areCasesLoading && caseCount === 0) {
+    state = 'empty';
+  } else if (relatedCases) {
+    state = 'success';
+  }
 
   return (
     <InsightAccordion
       prefix="RelatedCases"
-      loading={areCasesLoading}
-      loadingText={i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_loading',
-        {
-          defaultMessage: 'Loading related cases',
-        }
-      )}
-      error={hasError}
-      errorText={i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_error',
-        {
-          defaultMessage: 'Failed to load related cases',
-        }
-      )}
-      text={i18n.translate(
-        'xpack.securitySolution.alertDetails.overview.insights_related_cases_found_content_text',
-        {
-          defaultMessage:
-            '{caseCount} {caseCount, plural, =1 {case} other {cases}} related to this alert',
-          values: { caseCount },
-        }
-      )}
-      empty={isEmpty}
+      state={state}
+      text={getTextFromState(state, caseCount)}
       renderContent={renderContent}
     />
   );
@@ -132,3 +120,34 @@ function renderCaseContent(relatedCases: RelatedCaseList) {
 }
 
 RelatedCases.displayName = 'RelatedCases';
+
+function getTextFromState(state: InsightAccordionState, caseCount: number | undefined) {
+  switch (state) {
+    case 'loading':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_cases_loading',
+        {
+          defaultMessage: 'Loading related cases',
+        }
+      );
+    case 'error':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_cases_error',
+        {
+          defaultMessage: 'Failed to load related cases',
+        }
+      );
+    case 'success':
+    case 'empty':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_cases_found_content_text',
+        {
+          defaultMessage:
+            '{caseCount} {caseCount, plural, =1 {case} other {cases}} related to this alert',
+          values: { caseCount },
+        }
+      );
+    default:
+      return '';
+  }
+}

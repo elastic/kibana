@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../mock';
@@ -59,7 +59,7 @@ describe('Related Cases', () => {
     });
 
     describe('When related cases are unable to be retrieved', () => {
-      test('should show 0 related cases when there are none', async () => {
+      test('should show 0 related cases when there are none', () => {
         mockGetRelatedCases.mockReturnValue([]);
         render(
           <TestProviders>
@@ -67,20 +67,22 @@ describe('Related Cases', () => {
           </TestProviders>
         );
 
-        expect(await screen.findByText(/0 cases/)).toBeInTheDocument();
+        expect(screen.getByText(/0 cases/)).toBeInTheDocument();
       });
     });
 
     describe('When 1 related case is retrieved', () => {
-      test('should show 1 related case', async () => {
+      test('should show 1 related case', () => {
         mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
         render(
           <TestProviders>
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        expect(await screen.findByText('1 case:')).toBeInTheDocument();
-        expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
+        waitFor(() => {
+          expect(screen.getByText('1 case:')).toBeInTheDocument();
+          expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
+        });
       });
     });
 
@@ -95,11 +97,14 @@ describe('Related Cases', () => {
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        expect(await screen.findByText('2 cases:')).toBeInTheDocument();
-        const cases = await screen.findAllByTestId('case-details-link');
-        expect(cases).toHaveLength(2);
-        expect(cases[0]).toHaveTextContent('Test Case 1');
-        expect(cases[1]).toHaveTextContent('Test Case 2');
+
+        waitFor(() => {
+          expect(screen.getByText('2 cases:')).toBeInTheDocument();
+          const cases = screen.getAllByTestId('case-details-link');
+          expect(cases).toHaveLength(2);
+          expect(cases[0]).toHaveTextContent('Test Case 1');
+          expect(cases[1]).toHaveTextContent('Test Case 2');
+        });
       });
     });
   });

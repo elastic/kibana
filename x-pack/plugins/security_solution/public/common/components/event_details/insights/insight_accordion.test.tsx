@@ -20,12 +20,8 @@ describe('InsightAccordion', () => {
     render(
       <TestProviders>
         <InsightAccordion
-          loading={true}
-          error={false}
-          loadingText={loadingText}
-          errorText=""
-          text=""
-          empty={false}
+          state="loading"
+          text={loadingText}
           prefix=""
           renderContent={noopRenderer}
         />
@@ -39,16 +35,7 @@ describe('InsightAccordion', () => {
     const errorText = 'error text';
     render(
       <TestProviders>
-        <InsightAccordion
-          loading={false}
-          error={true}
-          errorText={errorText}
-          loadingText=""
-          text=""
-          empty={false}
-          prefix=""
-          renderContent={noopRenderer}
-        />
+        <InsightAccordion state="error" text={errorText} prefix="" renderContent={noopRenderer} />
       </TestProviders>
     );
 
@@ -59,16 +46,7 @@ describe('InsightAccordion', () => {
     const text = 'the text';
     render(
       <TestProviders>
-        <InsightAccordion
-          loading={false}
-          error={false}
-          errorText=""
-          loadingText=""
-          text={text}
-          empty={true}
-          prefix=""
-          renderContent={noopRenderer}
-        />
+        <InsightAccordion state="empty" text={text} prefix="" renderContent={noopRenderer} />
       </TestProviders>
     );
 
@@ -83,16 +61,7 @@ describe('InsightAccordion', () => {
     const contentRenderer = () => <span>{contentText}</span>;
     render(
       <TestProviders>
-        <InsightAccordion
-          loading={false}
-          error={false}
-          errorText=""
-          loadingText=""
-          text={text}
-          empty={false}
-          prefix=""
-          renderContent={contentRenderer}
-        />
+        <InsightAccordion state="success" text={text} prefix="" renderContent={contentRenderer} />
       </TestProviders>
     );
 

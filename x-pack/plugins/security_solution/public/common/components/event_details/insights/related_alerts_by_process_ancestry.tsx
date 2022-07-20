@@ -92,11 +92,8 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
     <InsightAccordion
       prefix="RelatedAlertsByProcessAncestry"
       // `renderContent` and the associated sub-components are making sure to
-      // render the correct loading and error states so we can omit these here
-      loading={false}
-      error={false}
-      loadingText=""
-      errorText=""
+      // render the correct loading and error states so we can omit these states here
+      state={isEmpty ? 'empty' : 'success'}
       text={
         // If we have fetched the alerts, display the count here, otherwise omit the count
         cache.alertIds
@@ -115,7 +112,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
               }
             )
       }
-      empty={isEmpty}
       renderContent={renderContent}
       onToggle={onToggle}
     />

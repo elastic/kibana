@@ -13,6 +13,7 @@ import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
 import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { SimpleAlertTable } from './simple_alert_table';
@@ -36,7 +37,7 @@ interface Props {
 export const RelatedAlertsBySession = React.memo<Props>(
   ({ browserFields, data, eventId, timelineId }) => {
     const { field, values } = data;
-    const { loading, error, count, alertIds } = useAlertPrevalence({
+    const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
       timelineId: timelineId ?? '',
@@ -81,36 +82,20 @@ export const RelatedAlertsBySession = React.memo<Props>(
       );
     }, [alertIds, cellData?.dataProviders]);
 
-    const isEmpty = count === 0;
+    let state: InsightAccordionState = 'loading';
+    if (error) {
+      state = 'error';
+    } else if (count === 0) {
+      state = 'empty';
+    } else if (alertIds) {
+      state = 'success';
+    }
 
     return (
       <InsightAccordion
         prefix="RelatedAlertsBySession"
-        loading={loading}
-        loadingText={i18n.translate(
-          'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session_loading',
-          { defaultMessage: 'Loading related alerts by session' }
-        )}
-        error={error}
-        errorText={i18n.translate(
-          'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session_error',
-          {
-            defaultMessage: 'Failed to load related alerts by session',
-          }
-        )}
-        text={
-          alertIds
-            ? i18n.translate(
-                'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session__found',
-                {
-                  defaultMessage:
-                    '{count} {count, plural, =1 {alert} other {alerts}} related by session',
-                  values: { count },
-                }
-              )
-            : ''
-        }
-        empty={isEmpty}
+        state={state}
+        text={getTextFromState(state, count)}
         renderContent={renderContent}
       />
     );
@@ -118,3 +103,31 @@ export const RelatedAlertsBySession = React.memo<Props>(
 );
 
 RelatedAlertsBySession.displayName = 'RelatedAlertsBySession';
+
+function getTextFromState(state: InsightAccordionState, count: number | undefined) {
+  switch (state) {
+    case 'loading':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_source_event_loading',
+        { defaultMessage: 'Loading related alerts by source event' }
+      );
+    case 'error':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session_error',
+        {
+          defaultMessage: 'Failed to load related alerts by session',
+        }
+      );
+    case 'success':
+    case 'empty':
+      return i18n.translate(
+        'xpack.securitySolution.alertDetails.overview.insights_related_alerts_by_session__found',
+        {
+          defaultMessage: '{count} {count, plural, =1 {alert} other {alerts}} related by session',
+          values: { count },
+        }
+      );
+    default:
+      return '';
+  }
+}
