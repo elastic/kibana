@@ -89,7 +89,7 @@ describe('cases_webhook/utils', () => {
         'Unsupported content type: not/cool in post https://poster.com. Supported content types: application/json'
       );
     });
-    it('Throws error when for bad data', () => {
+    it('Throws error for bad data', () => {
       expect(() =>
         throwDescriptiveErrorIfResponseIsNotValid({
           res: {
@@ -97,7 +97,7 @@ describe('cases_webhook/utils', () => {
             headers: {
               ['content-type']: 'application/json',
             },
-            data: '',
+            data: 'bad',
           },
           requiredAttributesToBeInTheResponse: ['field.simple'],
         })

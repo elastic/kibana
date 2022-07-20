@@ -64,7 +64,7 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
     );
   }
 
-  if (isEmpty(data) || !isObjectLike(data)) {
+  if (!isEmpty(data) && !isObjectLike(data)) {
     throw new Error('Response is not a valid JSON');
   }
 
