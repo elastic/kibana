@@ -167,7 +167,7 @@ describe('Cases webhook service', () => {
         throw error;
       });
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get incident. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -177,7 +177,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
       );
     });
 
@@ -187,7 +187,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.getIncident('1')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get incident. Error: Response is missing the expected fields: fields.created, key, fields.updated'
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected fields: fields.created, key, fields.updated'
       );
     });
   });
@@ -276,7 +276,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create incident. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -286,7 +286,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
 
@@ -294,7 +294,7 @@ describe('Cases webhook service', () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create incident. Error: Response is missing the expected field: id.'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: Response is missing the expected field: id.'
       );
     });
   });
@@ -369,7 +369,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to update incident with id 1. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -379,7 +379,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
@@ -403,13 +403,9 @@ describe('Cases webhook service', () => {
         })
       );
 
-      const res = await service.createComment(commentReq);
+      await service.createComment(commentReq);
 
-      expect(res).toEqual({
-        id: '1',
-        key: 'CK-1',
-        created: '2020-04-27T10:59:46.202Z',
-      });
+      expect(requestMock.mock.calls[0][0].data).toEqual('{"body":"comment"}');
     });
 
     test('it should call request with correct arguments', async () => {
@@ -443,7 +439,7 @@ describe('Cases webhook service', () => {
       });
 
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create comment at incident with id 1. Error: An error has occurred. Reason: Required field'
+        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: An error has occurred. Reason: Required field'
       );
     });
 
@@ -453,7 +449,7 @@ describe('Cases webhook service', () => {
       );
 
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create comment at incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
 

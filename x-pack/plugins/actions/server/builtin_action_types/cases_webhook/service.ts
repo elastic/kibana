@@ -111,7 +111,7 @@ export const createExternalService = (
       const updatedAt = getObjectValueByKey<string>(res.data, getIncidentResponseUpdatedDateKey);
       return { id, title, createdAt, updatedAt };
     } catch (error) {
-      throw createServiceError(error, `Unable to get incident with id ${id}`);
+      throw createServiceError(error, `Unable to get case with id ${id}`);
     }
   };
 
@@ -161,7 +161,7 @@ export const createExternalService = (
         pushedDate: getPushedDate(insertedIncident.createdAt),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to create incident');
+      throw createServiceError(error, 'Unable to create case');
     }
   };
 
@@ -213,7 +213,7 @@ export const createExternalService = (
         pushedDate: getPushedDate(updatedIncident.updatedAt),
       };
     } catch (error) {
-      throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
+      throw createServiceError(error, `Unable to update case with id ${incidentId}`);
     }
   };
 
@@ -244,7 +244,7 @@ export const createExternalService = (
         res,
       });
     } catch (error) {
-      throw createServiceError(error, `Unable to create comment at incident with id ${incidentId}`);
+      throw createServiceError(error, `Unable to create comment at case with id ${incidentId}`);
     }
   };
 

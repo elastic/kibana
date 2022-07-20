@@ -47,7 +47,7 @@ describe('webhook action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        'subActionParams.incident.title': ['Summary is required.'],
+        'subActionParams.incident.title': ['Title is required.'],
       },
     });
   });

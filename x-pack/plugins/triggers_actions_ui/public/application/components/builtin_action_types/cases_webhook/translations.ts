@@ -10,47 +10,47 @@ import { i18n } from '@kbn/i18n';
 export const CREATE_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateUrlText',
   {
-    defaultMessage: 'Create incident URL is required.',
+    defaultMessage: 'Create case URL is required.',
   }
 );
 export const CREATE_INCIDENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateIncidentText',
   {
-    defaultMessage: 'Create incident object is required and must be valid JSON.',
+    defaultMessage: 'Create case object is required and must be valid JSON.',
   }
 );
 
 export const CREATE_METHOD_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredCreateMethodText',
   {
-    defaultMessage: 'Create incident method is required.',
+    defaultMessage: 'Create case method is required.',
   }
 );
 
 export const CREATE_RESPONSE_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredCreateIncidentResponseKeyText',
   {
-    defaultMessage: 'Create incident response incident key is required.',
+    defaultMessage: 'Create case response case id key is required.',
   }
 );
 
 export const UPDATE_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUpdateUrlText',
   {
-    defaultMessage: 'Update incident URL is required.',
+    defaultMessage: 'Update case URL is required.',
   }
 );
 export const UPDATE_INCIDENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredUpdateIncidentText',
   {
-    defaultMessage: 'Update incident object is required and must be valid JSON.',
+    defaultMessage: 'Update case object is required and must be valid JSON.',
   }
 );
 
 export const UPDATE_METHOD_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredUpdateMethodText',
   {
-    defaultMessage: 'Update incident method is required.',
+    defaultMessage: 'Update case method is required.',
   }
 );
 
@@ -77,31 +77,31 @@ export const CREATE_COMMENT_METHOD_REQUIRED = i18n.translate(
 export const GET_INCIDENT_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredGetIncidentUrlText',
   {
-    defaultMessage: 'Get incident URL is required.',
+    defaultMessage: 'Get case URL is required.',
   }
 );
 export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseExternalTitleKeyText',
   {
-    defaultMessage: 'Get incident response external incident title key is re quired.',
+    defaultMessage: 'Get case response external case title key is re quired.',
   }
 );
 export const GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseCreatedKeyText',
   {
-    defaultMessage: 'Get incident response created date key is required.',
+    defaultMessage: 'Get case response created date key is required.',
   }
 );
 export const GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentResponseUpdatedKeyText',
   {
-    defaultMessage: 'Get incident response updated date key is required.',
+    defaultMessage: 'Get case response updated date key is required.',
   }
 );
 export const GET_INCIDENT_VIEW_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentViewUrlKeyText',
   {
-    defaultMessage: 'View incident URL is required.',
+    defaultMessage: 'View case URL is required.',
   }
 );
 
@@ -125,7 +125,7 @@ export const USERNAME_REQUIRED = i18n.translate(
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookSummaryText',
   {
-    defaultMessage: 'Summary is required.',
+    defaultMessage: 'Title is required.',
   }
 );
 
@@ -183,7 +183,7 @@ export const CREATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonHelpText',
   {
     defaultMessage:
-      'JSON object to create incident. Use the variable selector to add Cases data to the payload.',
+      'JSON object to create case. Use the variable selector to add Cases data to the payload.',
   }
 );
 
@@ -210,7 +210,7 @@ export const CREATE_INCIDENT_RESPONSE_KEY = i18n.translate(
 export const CREATE_INCIDENT_RESPONSE_KEY_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentResponseKeyHelpText',
   {
-    defaultMessage: 'JSON key in create incident response that contains the external incident id',
+    defaultMessage: 'JSON key in create case response that contains the external case id',
   }
 );
 
@@ -231,7 +231,7 @@ export const GET_INCIDENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to GET incident details JSON from external system. Use the variable selector to add external system id to the url.',
+      'API URL to GET case details JSON from external system. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -244,7 +244,7 @@ export const GET_INCIDENT_TITLE_KEY = i18n.translate(
 export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalTitleKeyHelp',
   {
-    defaultMessage: 'JSON key in get incident response that contains the external incident title',
+    defaultMessage: 'JSON key in get case response that contains the external case title',
   }
 );
 
@@ -257,8 +257,7 @@ export const GET_INCIDENT_CREATED_KEY = i18n.translate(
 export const GET_INCIDENT_CREATED_KEY_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyHelp',
   {
-    defaultMessage:
-      'JSON key in get incident response that contains the date the incident was created.',
+    defaultMessage: 'JSON key in get case response that contains the date the case was created.',
   }
 );
 
@@ -271,8 +270,7 @@ export const GET_INCIDENT_UPDATED_KEY = i18n.translate(
 export const GET_INCIDENT_UPDATED_KEY_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyHelp',
   {
-    defaultMessage:
-      'JSON key in get incident response that contains the date the incident was updated.',
+    defaultMessage: 'JSON key in get case response that contains the date the case was updated.',
   }
 );
 
@@ -286,7 +284,7 @@ export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlHelp',
   {
     defaultMessage:
-      'URL to view incident in external system. Use the variable selector to add external system id or external system title to the url.',
+      'URL to view case in external system. Use the variable selector to add external system id or external system title to the url.',
   }
 );
 
@@ -307,7 +305,7 @@ export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to update incident. Use the variable selector to add external system id to the url.',
+      'API URL to update case. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -321,7 +319,7 @@ export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonHelpl',
   {
     defaultMessage:
-      'JSON object to update incident. Use the variable selector to add Cases data to the payload.',
+      'JSON object to update case. Use the variable selector to add Cases data to the payload.',
   }
 );
 
@@ -342,7 +340,7 @@ export const CREATE_COMMENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlHelp',
   {
     defaultMessage:
-      'API URL to add comment to incident. Use the variable selector to add external system id to the url.',
+      'API URL to add comment to case. Use the variable selector to add external system id to the url.',
   }
 );
 
@@ -419,14 +417,14 @@ export const STEP_1 = i18n.translate(
 export const STEP_2 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step2',
   {
-    defaultMessage: 'Create incident',
+    defaultMessage: 'Create case',
   }
 );
 
 export const STEP_3 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step3',
   {
-    defaultMessage: 'Get incident information',
+    defaultMessage: 'Get case information',
   }
 );
 

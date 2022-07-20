@@ -107,7 +107,7 @@ export async function executor(
       logger,
     });
 
-    logger.debug(`response push to service for incident id: ${data.id}`);
+    logger.debug(`response push to service for case id: ${data.id}`);
   }
 
   return { status: 'ok', data, actionId };
