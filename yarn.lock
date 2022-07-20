@@ -3048,6 +3048,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-table-list@link:bazel-bin/packages/kbn-content-management-table-list":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
   version "0.0.0"
   uid ""
@@ -6627,6 +6631,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__content-management-table-list@link:bazel-bin/packages/kbn-content-management-table-list/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6767,10 +6775,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6784,6 +6788,10 @@
   uid ""
 
 "@types/kbn__core-http-common@link:bazel-bin/packages/core/http/core-http-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-server@link:bazel-bin/packages/core/http/core-http-server/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserContentPluginSetup {}
 
-export interface UserContentPluginStart {
-  ui: {
-    components: {};
-  };
-}
+export {
+  TableListView,
+  TableListViewKibanaProvider,
+  TableListViewProvider,
+} from './table_list_view';
+
+export type { UserContentCommonSchema } from './table_list_view';

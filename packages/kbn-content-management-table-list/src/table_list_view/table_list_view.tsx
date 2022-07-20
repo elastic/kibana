@@ -13,11 +13,11 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
   EuiButton,
-  EuiCallOut,
+  // EuiCallOut,
   EuiEmptyPrompt,
   Pagination,
   Direction,
-  EuiSpacer,
+  // EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
   EuiLink,
@@ -26,16 +26,20 @@ import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type {
-  ThemeServiceStart,
-  ToastsStart,
-  ApplicationStart,
-  SimpleSavedObject,
-} from '@kbn/core/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { KibanaPageTemplate } from '../../page_template';
-import { toMountPoint } from '../../util';
-import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
+// import type {
+//   ApplicationStart,
+//   ToastsStart,
+//   ThemeServiceStart,
+//   SimpleSavedObject,
+// } from '@kbn/core/public';
+// import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+// import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+// import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+import { SimpleSavedObject } from '../types';
+
+import { Table, ConfirmDeleteModal } from './components'; // ListingLimitWarning
+import { useServices } from './services';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
@@ -57,8 +61,8 @@ export interface Props<T> {
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   tableListTitle: string;
-  toastNotifications: ToastsStart;
-  savedObjectTagging?: SavedObjectsTaggingApi;
+  // toastNotifications: ToastsStart;
+  // savedObjectTagging?: SavedObjectsTaggingApi;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -73,12 +77,12 @@ export interface Props<T> {
    */
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
-  theme: ThemeServiceStart;
-  application: ApplicationStart;
+  // theme: ThemeServiceStart;
+  // application: ApplicationStart;
   children?: ReactNode | undefined;
 }
 
-export interface State<T extends UserContentCommonSchema> {
+export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
@@ -96,6 +100,10 @@ export interface State<T extends UserContentCommonSchema> {
   };
 }
 
+// export interface UserContentCommonSchema {
+//   title: string;
+//   description: string;
+// }
 export type UserContentCommonSchema = SimpleSavedObject<{
   title: string;
   description: string;
@@ -119,14 +127,16 @@ function TableListView<T extends UserContentCommonSchema>({
   initialPageSize,
   listingLimit,
   emptyPrompt,
-  toastNotifications,
-  application,
-  savedObjectTagging,
-  theme,
+  // toastNotifications,
+  // application,
+  // savedObjectTagging,
+  // theme,
   children,
 }: Props<T>) {
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
+
+  const { toast, savedObjectTagging, theme, toMountPoint } = useServices();
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -181,15 +191,15 @@ function TableListView<T extends UserContentCommonSchema>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    totalItems,
+    // totalItems,
     tableColumns: stateTableColumns,
     pagination,
     tableSort,
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
-  const pageDataTestSubject = `${entityName}LandingPage`;
-  const showFetchError = Boolean(fetchError);
-  const showLimitError = !showFetchError && totalItems > listingLimit;
+  // const pageDataTestSubject = `${entityName}LandingPage`;
+  // const showFetchError = Boolean(fetchError);
+  // const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
     const columns = stateTableColumns.slice();
@@ -284,7 +294,7 @@ function TableListView<T extends UserContentCommonSchema>({
     try {
       await deleteItems!(selectedItems);
     } catch (error) {
-      toastNotifications.addDanger({
+      toast.addDanger({
         title: toMountPoint(
           <FormattedMessage
             id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
@@ -307,7 +317,8 @@ function TableListView<T extends UserContentCommonSchema>({
     isDeletingItems,
     selectedItems,
     theme.theme$,
-    toastNotifications,
+    toMountPoint,
+    toast,
   ]);
 
   const renderCreateButton = useCallback(() => {
@@ -352,34 +363,34 @@ function TableListView<T extends UserContentCommonSchema>({
     }
   }, [emptyPrompt, entityNamePlural, renderCreateButton]);
 
-  const renderFetchError = useCallback(() => {
-    return (
-      <React.Fragment>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.fetchErrorTitle"
-              defaultMessage="Fetching listing failed"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.fetchErrorDescription"
-              defaultMessage="The {entityName} listing could not be fetched: {message}."
-              values={{
-                entityName,
-                message: fetchError!.body?.message || fetchError!.message,
-              }}
-            />
-          </p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </React.Fragment>
-    );
-  }, [entityName, fetchError]);
+  // const renderFetchError = useCallback(() => {
+  //   return (
+  //     <React.Fragment>
+  //       <EuiCallOut
+  //         title={
+  //           <FormattedMessage
+  //             id="kibana-react.tableListView.listing.fetchErrorTitle"
+  //             defaultMessage="Fetching listing failed"
+  //           />
+  //         }
+  //         color="danger"
+  //         iconType="alert"
+  //       >
+  //         <p>
+  //           <FormattedMessage
+  //             id="kibana-react.tableListView.listing.fetchErrorDescription"
+  //             defaultMessage="The {entityName} listing could not be fetched: {message}."
+  //             values={{
+  //               entityName,
+  //               message: fetchError!.body?.message || fetchError!.message,
+  //             }}
+  //           />
+  //         </p>
+  //       </EuiCallOut>
+  //       <EuiSpacer size="m" />
+  //     </React.Fragment>
+  //   );
+  // }, [entityName, fetchError]);
 
   // ------------
   // Effects
@@ -403,35 +414,38 @@ function TableListView<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate
-        data-test-subj={pageDataTestSubject}
-        pageBodyProps={{
-          'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-        }}
-        isEmptyState={true}
+      <div
+      // <KibanaPageTemplate
+      // data-test-subj={pageDataTestSubject}
+      // pageBodyProps={{
+      //   'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
+      // }}
+      // isEmptyState={true}
       >
         {renderNoItemsMessage()}
-      </KibanaPageTemplate>
+      </div>
+      // </KibanaPageTemplate>
     );
   }
 
   return (
-    <KibanaPageTemplate
-      data-test-subj={pageDataTestSubject}
-      pageHeader={{
-        pageTitle: <span id={headingId}>{tableListTitle}</span>,
-        rightSideItems: [renderCreateButton()],
-        'data-test-subj': 'top-nav',
-      }}
-      pageBodyProps={{
-        'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-      }}
+    <div
+    // <KibanaPageTemplate
+    // data-test-subj={pageDataTestSubject}
+    // pageHeader={{
+    //   pageTitle: <span id={headingId}>{tableListTitle}</span>,
+    //   rightSideItems: [renderCreateButton()],
+    //   'data-test-subj': 'top-nav',
+    // }}
+    // pageBodyProps={{
+    //   'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
+    // }}
     >
       {/* Any children passed to the component */}
       {children}
 
       {/* Too many items error */}
-      {showLimitError && (
+      {/* {showLimitError && (
         <ListingLimitWarning
           canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings.save)}
           advancedSettingsLink={application.getUrlForApp('management', {
@@ -441,10 +455,10 @@ function TableListView<T extends UserContentCommonSchema>({
           totalItems={totalItems}
           listingLimit={listingLimit}
         />
-      )}
+      )} */}
 
       {/* Error while fetching items */}
-      {showFetchError && renderFetchError()}
+      {/* {showFetchError && renderFetchError()} */}
 
       {/* Table of items */}
       <Table<T>
@@ -475,7 +489,8 @@ function TableListView<T extends UserContentCommonSchema>({
           onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
         />
       )}
-    </KibanaPageTemplate>
+    </div>
+    // </KibanaPageTemplate>
   );
 }
 

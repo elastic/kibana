@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { UserContentPlugin } from './plugin';
+export { TableListView } from './table_list_view';
 
-export type { UserContentPluginSetup, UserContentPluginStart } from './types';
+export type {
+  Props as TableListViewProps,
+  State as TableListViewState,
+  UserContentCommonSchema,
+} from './table_list_view';
 
-export function plugin() {
-  return new UserContentPlugin();
-}
+export { TableListViewKibanaProvider, TableListViewProvider } from './services';

@@ -9,7 +9,7 @@ import React from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { UpdatedAtField } from '../components';
+import { UpdatedAtField } from './components';
 import type { State, UserContentCommonSchema } from './table_list_view';
 import type { Action, OnFetchItemsSuccessAction } from './actions';
 

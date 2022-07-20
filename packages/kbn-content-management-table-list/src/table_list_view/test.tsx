@@ -5,12 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/user_content'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/user_content',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/user_content/{common,public,server}/**/*.{ts,tsx}'],
+export const Test = () => {
+  return <div>It works!!!</div>;
 };

@@ -9,6 +9,5 @@
   "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
   "references": [
     { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../saved_objects_tagging_oss/tsconfig.json" },
   ]
 }
