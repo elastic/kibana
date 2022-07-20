@@ -566,20 +566,21 @@ export class Server {
 
     const ups = this.uptimePerStep;
 
+    const toMs = (sec: number) => Math.round(sec * 100);
     // Report the metric-shaped KIBANA_STARTED_EVENT.
     reportMetricEvent(analyticsStart, {
       eventName: KIBANA_STARTED_EVENT,
-      duration: ups.start!.end - ups.constructor!.start,
-      key1: 'time-to-constructor',
-      value1: ups.constructor?.start,
-      key2: 'constructor-time',
-      value2: ups.constructor!.end - ups.constructor!.start,
-      key3: 'preboot-time',
-      value3: ups.preboot!.end - ups.preboot!.start,
-      key4: 'setup-time',
-      value4: ups.setup!.end - ups.setup!.start,
-      key5: 'start-time',
-      value5: ups.start!.end - ups.start!.start,
+      duration: toMs(ups.start!.end - ups.constructor!.start),
+      key1: 'time_to_constructor',
+      value1: toMs(ups.constructor!.start),
+      key2: 'constructor_time',
+      value2: toMs(ups.constructor!.end - ups.constructor!.start),
+      key3: 'preboot_time',
+      value3: toMs(ups.preboot!.end - ups.preboot!.start),
+      key4: 'setup_time',
+      value4: toMs(ups.setup!.end - ups.setup!.start),
+      key5: 'start_time',
+      value5: toMs(ups.start!.end - ups.start!.start),
     });
   }
 }
