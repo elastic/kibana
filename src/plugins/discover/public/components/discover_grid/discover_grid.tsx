@@ -367,7 +367,7 @@ export const DiscoverGrid = ({
         ? (fieldName: string) => {
             closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
               ctx: {
-                dataView: indexPattern,
+                dataView,
               },
               fieldName,
               onSave: async () => {
@@ -376,7 +376,7 @@ export const DiscoverGrid = ({
             });
           }
         : undefined,
-    [indexPattern, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
   const euiGridColumns = useMemo(

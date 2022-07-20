@@ -110,7 +110,7 @@ describe('Doc table row component', () => {
     const filterInButton = findTestSubject(component, 'docTableCellFilter');
     filterInButton.simulate('click');
     expect(mockInlineFilter).toHaveBeenCalledWith(
-      indexPatternWithTimefieldMock.getFieldByName('bytes'),
+      dataViewWithTimefieldMock.getFieldByName('bytes'),
       20,
       '+'
     );

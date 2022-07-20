@@ -72,7 +72,7 @@ interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
-  dataViews?: DataView[];
+  indexPatterns?: DataView[];
   editable: boolean;
   filterManager: FilterManager;
   services: DiscoverServices;
@@ -105,7 +105,7 @@ export class SavedSearchEmbeddable
       savedSearch,
       editUrl,
       editPath,
-      dataViews,
+      indexPatterns,
       editable,
       filterManager,
       services,
@@ -121,7 +121,7 @@ export class SavedSearchEmbeddable
         editUrl,
         editPath,
         editApp: 'discover',
-        dataViews,
+        indexPatterns,
         editable,
       },
       parent

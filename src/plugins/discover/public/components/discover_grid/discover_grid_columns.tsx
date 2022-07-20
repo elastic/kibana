@@ -79,7 +79,7 @@ function buildEuiGridColumn({
   const editFieldButton =
     editField &&
     dataViewField &&
-    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
+    buildEditFieldButton({ services, dataView, field: dataViewField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),

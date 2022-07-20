@@ -99,7 +99,7 @@ export function DiscoverMainRoute(props: Props) {
         const ip = await loadDataView(index || '', data.dataViews, config);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const dataViewData = resolveIndexPattern(ip, searchSource, toastNotifications);
+        const dataViewData = resolveDataView(ip, searchSource, toastNotifications);
         await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
