@@ -1,3 +1,4 @@
+# Click the run button of each step to enable the module
 # Upload scripts
 # Script to assign risk level based on risk score
 PUT _scripts/ml_hostriskscore_levels_script
@@ -8,7 +9,7 @@ PUT _scripts/ml_hostriskscore_levels_script
   }
 }
 
-# Map script for the Host Risk Score transform 
+# Map script for the Host Risk Score transform
 PUT _scripts/ml_hostriskscore_map_script
 {
   "script": {
@@ -17,7 +18,7 @@ PUT _scripts/ml_hostriskscore_map_script
   }
 }
 
-# Reduce script for the Host Risk Score transform 
+# Reduce script for the Host Risk Score transform
 PUT _scripts/ml_hostriskscore_reduce_script
 {
   "script": {
@@ -185,8 +186,7 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
   }
 }
 
-# Start the pivot transform
-POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
+
 
 
 # Create mappings for the destination index of the Host Risk Score latest transform
@@ -243,6 +243,15 @@ PUT _transform/ml_hostriskscore_latest_transform_{{space_name}}
     }
   }
 }
+
+# Stop the pivot transform first before starting the transform
+POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_stop
+
+# Start the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
+
+# Stop the latest transform first before starting the transform
+POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_stop
 
 # Start the latest transform
 POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_start

@@ -115,10 +115,12 @@ const cloneCommandDefinitionWithNewRenderComponent = (
 
 const createCommandHistoryEntry = (
   command: CommandHistoryItem['command'],
-  state: CommandHistoryItem['state'] = createCommandExecutionState()
+  state: CommandHistoryItem['state'] = createCommandExecutionState(),
+  isValid: CommandHistoryItem['isValid'] = true
 ): CommandHistoryItem => {
   return {
     id: uuidV4(),
+    isValid,
     enteredAt: new Date().toISOString(),
     command,
     state,
@@ -143,14 +145,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (!commandDefinition) {
     return updateStateWithNewCommandHistoryItem(
       state,
-      createCommandHistoryEntry({
-        input: parsedInput.input,
-        args: parsedInput,
-        commandDefinition: {
-          ...UnknownCommandDefinition,
-          RenderComponent: UnknownCommand,
+      createCommandHistoryEntry(
+        {
+          input: parsedInput.input,
+          args: parsedInput,
+          commandDefinition: {
+            ...UnknownCommandDefinition,
+            RenderComponent: UnknownCommand,
+          },
         },
-      })
+        undefined,
+        false
+      )
     );
   }
 
@@ -185,7 +191,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument)
+          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
+          undefined,
+          false
         )
       );
     }
@@ -203,7 +211,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 defaultMessage: 'Command does not support any arguments',
               }
             ),
-          })
+          }),
+          false
         )
       );
     }
@@ -238,7 +247,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 />
               </ConsoleCodeBlock>
             ),
-          })
+          }),
+          false
         )
       );
     }
@@ -265,7 +275,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -280,7 +291,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
           createCommandExecutionState({
             errorMessage: exclusiveOrErrorMessage,
-          })
+          }),
+          false
         )
       );
     }
@@ -309,7 +321,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -332,7 +345,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -357,7 +371,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                     )}
                   </ConsoleCodeBlock>
                 ),
-              })
+              }),
+              false
             )
           );
         }
@@ -381,7 +396,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               })}
             </ConsoleCodeBlock>
           ),
-        })
+        }),
+        false
       )
     );
   } else if (exclusiveOrArgs.length > 0) {
@@ -391,7 +407,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         createCommandExecutionState({
           errorMessage: exclusiveOrErrorMessage,
-        })
+        }),
+        false
       )
     );
   } else if (commandDefinition.mustHaveArgs) {
@@ -407,7 +424,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               })}
             </ConsoleCodeBlock>
           ),
-        })
+        }),
+        false
       )
     );
   }
@@ -423,7 +441,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
           createCommandExecutionState({
             errorMessage: validationResult,
-          })
+          }),
+          false
         )
       );
     }
