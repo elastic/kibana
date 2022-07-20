@@ -8,7 +8,6 @@
 import React, { FC, Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
-
 import type { ExplainLogRateSpikesWrapperProps } from './components/explain_log_rate_spikes';
 
 const ExplainLogRateSpikesWrapperLazy = React.lazy(
