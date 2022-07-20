@@ -12,6 +12,8 @@ import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 
+import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';
+
 import { isVerificationError } from '../../../../../../../../services';
 
 import type { MultiPageStepLayoutProps } from '../../types';
@@ -19,7 +21,7 @@ import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
 import { sendCreatePackagePolicy, useStartServices } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import { Error, ConfirmForceInstallModal } from '../../../../../../components';
+import { Error } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
 import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
@@ -85,7 +87,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const { notifications } = useStartServices();
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
-
+  const confirmForceInstall = useConfirmForceInstall();
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
@@ -164,7 +166,13 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       const { error } = await savePackagePolicy({ newPackagePolicy: packagePolicy, force });
       if (error) {
         if (isVerificationError(error)) {
-          setFormState('CONFIRM_FAILED_VERIFICATION');
+          const forceInstall = await confirmForceInstall(packageInfo);
+
+          if (forceInstall) {
+            onSubmit({ force: true });
+          } else {
+            setFormState('VALID');
+          }
           return;
         }
         notifications.toasts.addError(error, {
@@ -175,7 +183,15 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         onNext();
       }
     },
-    [validationResults, formState, packagePolicy, notifications.toasts, onNext]
+    [
+      validationResults,
+      formState,
+      packagePolicy,
+      notifications.toasts,
+      confirmForceInstall,
+      packageInfo,
+      onNext,
+    ]
   );
 
   useEffect(() => {
@@ -212,13 +228,6 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
   return (
     <>
-      {formState === 'CONFIRM_FAILED_VERIFICATION' && agentPolicy && packageInfo && (
-        <ConfirmForceInstallModal
-          onConfirm={() => onSubmit({ force: true })}
-          onCancel={() => setFormState('VALID')}
-          pkg={packageInfo}
-        />
-      )}
       {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
       <EuiSpacer size={'l'} />
       <StepConfigurePackagePolicy

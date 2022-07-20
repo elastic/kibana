@@ -19,7 +19,6 @@ export type PackagePolicyFormState =
   | 'VALID'
   | 'INVALID'
   | 'CONFIRM'
-  | 'CONFIRM_FAILED_VERIFICATION'
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS';

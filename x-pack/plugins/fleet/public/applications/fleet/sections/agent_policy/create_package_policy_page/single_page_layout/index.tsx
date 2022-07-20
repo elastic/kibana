@@ -26,6 +26,7 @@ import { safeLoad } from 'js-yaml';
 import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
 import type { CreatePackagePolicyRequest } from '../../../../../../../common';
 import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
+import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -40,7 +41,7 @@ import {
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
 } from '../../../../hooks';
-import { Loading, Error, ExtensionWrapper, ConfirmForceInstallModal } from '../../../../components';
+import { Loading, Error, ExtensionWrapper } from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { useUIExtension } from '../../../../hooks';
@@ -153,6 +154,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const navigateAddAgentHelp = (policy?: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
+
+  const confirmForceInstall = useConfirmForceInstall();
+
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -391,7 +395,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         });
       } else {
         if (isVerificationError(error)) {
-          setFormState('CONFIRM_FAILED_VERIFICATION');
+          const forceInstall = await confirmForceInstall(packagePolicy.package!);
+
+          if (forceInstall) {
+            onSubmit({ force: true });
+          } else {
+            setFormState('VALID');
+          }
           return;
         }
         notifications.toasts.addError(error, {
@@ -404,13 +414,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       formState,
       hasErrors,
       agentCount,
-      savePackagePolicy,
-      onSaveNavigate,
-      agentPolicy,
-      notifications.toasts,
-      packagePolicy,
       selectedPolicyTab,
+      savePackagePolicy,
+      packagePolicy,
       createAgentPolicy,
+      notifications.toasts,
+      agentPolicy,
+      onSaveNavigate,
+      confirmForceInstall,
     ]
   );
 
@@ -561,14 +572,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
-          />
-        )}
-
-        {formState === 'CONFIRM_FAILED_VERIFICATION' && agentPolicy && packageInfo && (
-          <ConfirmForceInstallModal
-            onConfirm={() => onSubmit({ force: true })}
-            onCancel={() => setFormState('VALID')}
-            pkg={packageInfo}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
