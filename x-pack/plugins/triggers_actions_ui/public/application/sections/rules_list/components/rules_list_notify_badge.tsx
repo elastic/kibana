@@ -322,6 +322,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
         scheduledSnoozes={rule.snoozeSchedule ?? []}
+        activeSnoozes={rule.activeSnoozes ?? []}
         inPopover
       />
     </EuiPopover>

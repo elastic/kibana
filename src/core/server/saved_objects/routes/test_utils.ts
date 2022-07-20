@@ -11,7 +11,7 @@ import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
 import { contextServiceMock, coreMock } from '../../mocks';
 import { SavedObjectsType } from '../types';
-import { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
+import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 
 const defaultCoreId = Symbol('core');
 
