@@ -25,6 +25,7 @@ import {
   EuiTitle,
   EuiCallOut,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
@@ -70,6 +71,8 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
 
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
+
+  const { euiTheme } = useEuiTheme();
 
   const onChangeValue = useCallback(
     ({ target }) => setIntervalValue(target.value),
@@ -339,8 +342,10 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                       style={{
                         paddingLeft: '9px',
                         paddingRight: '9px',
-                        color: isActive ? '#a8376a' : '#646a77',
-                        backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : 'rgb(247, 248, 252)',
+                        // Replicate euiPanel--accent vs euiPanel--subdued
+                        // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
+                        color: isActive ? '#a8376a' : euiTheme.colors.subduedText,
+                        backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
                       }}
                       className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
                       onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
