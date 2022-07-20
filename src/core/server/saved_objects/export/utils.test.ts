@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { byIdAscComparator, getPreservedOrderComparator } from './utils';
-import { SavedObject } from '../../../types';
 
 const createObj = (id: string): SavedObject => ({
   id,

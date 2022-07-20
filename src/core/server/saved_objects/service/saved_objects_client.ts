@@ -7,6 +7,12 @@
  */
 
 import type {
+  SavedObject,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '@kbn/core-saved-objects-common';
+import type {
   ISavedObjectsRepository,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -18,10 +24,6 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
 } from './lib';
 import {
-  SavedObject,
-  SavedObjectError,
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,

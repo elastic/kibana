@@ -23,13 +23,8 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-} from '../../types';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { SavedObjectsType, SavedObjectsBaseOptions, SavedObjectsFindOptions } from '../../types';
 import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
 import {
   SavedObjectsDeleteByNamespaceOptions,

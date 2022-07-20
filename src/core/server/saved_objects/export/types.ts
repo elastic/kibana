@@ -7,7 +7,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
 export interface SavedObjectExportBaseOptions {

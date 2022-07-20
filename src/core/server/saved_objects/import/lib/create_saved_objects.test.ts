@@ -7,8 +7,9 @@
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject, SavedObjectsImportFailure } from '../../types';
+import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { extractErrors } from './extract_errors';
 

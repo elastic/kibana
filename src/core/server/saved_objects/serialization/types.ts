@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
+import { SavedObjectsMigrationVersion, SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 /**
  * A raw document as represented directly in the saved object index.

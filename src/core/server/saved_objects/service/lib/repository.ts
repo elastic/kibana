@@ -15,6 +15,7 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObject, SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   ISavedObjectsPointInTimeFinder,
@@ -61,10 +62,8 @@ import {
 } from '../saved_objects_client';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import {
-  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
-  SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { SavedObjectsTypeValidator } from '../../validation';

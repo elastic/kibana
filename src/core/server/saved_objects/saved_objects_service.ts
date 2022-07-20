@@ -18,6 +18,7 @@ import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -31,12 +32,7 @@ import {
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsType,
-  SavedObjectStatusMeta,
-  SavedObjectAttributes,
-} from './types';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,

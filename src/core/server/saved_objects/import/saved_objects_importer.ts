@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 import {
-  SavedObjectsImportResponse,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportHook,

@@ -12,14 +12,11 @@ import intersection from 'lodash/intersection';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type {
-  MutatingOperationRefreshSetting,
-  SavedObjectError,
-  SavedObjectsBaseOptions,
-} from '../../types';
+import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from '../../types';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
