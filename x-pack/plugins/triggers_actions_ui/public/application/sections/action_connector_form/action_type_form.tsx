@@ -279,7 +279,7 @@ export const ActionTypeForm = ({
       data-test-subj={`alertActionAccordion-${index}`}
       buttonContent={
         <EuiFlexGroup gutterSize="l" alignItems="center">
-          {showActionGroupErrorIcon() && (
+          {showActionGroupErrorIcon() ? (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
@@ -295,8 +295,7 @@ export const ActionTypeForm = ({
                 />
               </EuiToolTip>
             </EuiFlexItem>
-          )}
-          {!showActionGroupErrorIcon() && (
+          ) : (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
             </EuiFlexItem>
