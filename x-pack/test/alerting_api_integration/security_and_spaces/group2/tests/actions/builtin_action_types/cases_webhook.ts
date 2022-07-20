@@ -67,7 +67,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          summary: 'a title',
+          title: 'a title',
           description: 'a description',
           externalId: null,
         },
@@ -284,7 +284,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.incident.summary]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -310,7 +310,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.incident.summary]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -326,7 +326,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockCasesWebhook.params.subActionParams.incident,
                     description: 'success',
-                    summary: 'success',
+                    title: 'success',
                   },
                   comments: [{ comment: 'comment' }],
                 },
@@ -353,7 +353,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 subActionParams: {
                   incident: {
                     ...mockCasesWebhook.params.subActionParams.incident,
-                    summary: 'success',
+                    title: 'success',
                   },
                   comments: [{ commentId: 'success' }],
                 },

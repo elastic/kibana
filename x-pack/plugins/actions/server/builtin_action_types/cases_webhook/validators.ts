@@ -26,8 +26,8 @@ const validateConfig = (
   } = configObject;
 
   const urls = [
-    createCommentUrl,
     createIncidentUrl,
+    createCommentUrl,
     incidentViewUrl,
     getIncidentUrl,
     updateIncidentUrl,
@@ -41,7 +41,6 @@ const validateConfig = (
         return i18n.INVALID_URL(err, url);
       }
       try {
-        console.log('ensure allowed', url, configurationUtilities.ensureUriAllowed(url));
         configurationUtilities.ensureUriAllowed(url);
       } catch (allowListError) {
         return i18n.CONFIG_ERR(allowListError.message);
