@@ -24,7 +24,6 @@ import { MetricVisualizationState } from './visualization';
 export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;
 
-  const hasSecondaryMetric = Boolean(state.secondaryMetricAccessor);
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
   const idPrefix = htmlIdGenerator()();
 
