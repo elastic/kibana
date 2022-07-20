@@ -128,7 +128,7 @@ const buildFindRulesRoute = ({
         const findResult = await rulesClient.find({
           options,
           excludeFromPublicApi,
-          includeActiveSnoozes: true,
+          includeSnoozeData: true,
         });
         return res.ok({
           body: rewriteBodyRes(findResult),
