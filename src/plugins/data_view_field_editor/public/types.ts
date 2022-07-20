@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { FunctionComponent } from 'react';
-
+import { DeleteFieldProviderProps } from './components';
+import { OpenFieldDeleteModalOptions } from './open_delete_modal';
+import { OpenFieldEditorOptions } from './open_editor';
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import {
   DataPublicPluginStart,
   DataViewsPublicPluginStart,
+  FieldFormatsStart,
   RuntimeField,
   UsageCollectionStart,
-  FieldFormatsStart,
+  RuntimeType,
 } from './shared_imports';
-import { OpenFieldEditorOptions } from './open_editor';
-import { OpenFieldDeleteModalOptions } from './open_delete_modal';
-import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteFieldProviderProps } from './components';
 
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
@@ -48,6 +49,18 @@ export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field extends RuntimeField {
   name: string;
+}
+
+export interface FieldFormatConfig {
+  id: string;
+  params?: SerializableRecord;
+}
+
+export interface EsRuntimeField {
+  type: RuntimeType | string;
+  script?: {
+    source: string;
+  };
 }
 
 export type CloseEditor = () => void;
