@@ -91,7 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
-          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          'timepicker:timeDefaults':
+            '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
+          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
@@ -115,11 +117,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.loadSavedVisualization(
           '[K7.6-eCommerce] Sold Products per Day',
           { navigateToVisualize: false }
-        );
-        log.debug('set time range');
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Apr 15, 2022 @ 00:00:00.000',
-          'May 22, 2022 @ 00:00:00.000'
         );
 
         log.debug('open png reporting panel');
