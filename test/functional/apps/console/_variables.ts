@@ -39,35 +39,35 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(variables).to.eql([]);
     });
 
-    describe('with variables in url', () => {
-      it('should send a successful request', async () => {
-        await PageObjects.console.addNewVariable({ name: 'index3', value: '_search' });
-        await PageObjects.console.enterRequest('\n GET ${index3}');
-        await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    // describe('with variables in url', () => {
+    //   it('should send a successful request', async () => {
+    //     await PageObjects.console.addNewVariable({ name: 'index3', value: '_search' });
+    //     await PageObjects.console.enterRequest('\n GET ${index3}');
+    //     await PageObjects.console.clickPlay();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async () => {
-          const status = await PageObjects.console.getResponseStatus();
-          expect(status).to.eql(200);
-        });
-      });
-    });
+    //     await retry.try(async () => {
+    //       const status = await PageObjects.console.getResponseStatus();
+    //       expect(status).to.eql(200);
+    //     });
+    //   });
+    // });
 
-    describe('with variables in request body', () => {
-      it('should send a successful request', async () => {
-        await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
-        await PageObjects.console.enterRequest('\n GET _search');
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    // describe('with variables in request body', () => {
+    //   it('should send a successful request', async () => {
+    //     await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
+    //     await PageObjects.console.enterRequest('\n GET _search');
+    //     await PageObjects.console.pressEnter();
+    //     await PageObjects.console.enterText(`{\n\t"query": "\${query1}"`);
+    //     await PageObjects.console.pressEnter();
+    //     await PageObjects.console.clickPlay();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async () => {
-          const status = await PageObjects.console.getResponseStatus();
-          expect(status).to.eql(200);
-        });
-      });
-    });
+    //     await retry.try(async () => {
+    //       const status = await PageObjects.console.getResponseStatus();
+    //       expect(status).to.eql(200);
+    //     });
+    //   });
+    // });
   });
 };
