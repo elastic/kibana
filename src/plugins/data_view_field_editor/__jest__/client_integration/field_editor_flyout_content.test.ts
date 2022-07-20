@@ -64,7 +64,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     const { find } = await setup({ fieldToCreate });
 
-    expect(find('flyoutTitle').text()).toBe(`Create field...`);
+    expect(find('flyoutTitle').text()).toBe(`Create field`);
     expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
     expect(find('typeField').props().value).toBe(fieldToCreate.type);
     expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
