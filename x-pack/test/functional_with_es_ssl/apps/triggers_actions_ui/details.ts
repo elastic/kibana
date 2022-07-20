@@ -137,8 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/129337
-  // Failing: See https://github.com/elastic/kibana/issues/129337
-  describe.skip('Rule Details', function () {
+  describe('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -963,6 +962,71 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-timestamp');
         await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-total_search_duration');
+      });
+    });
+
+    describe('Navigate to rule error log', () => {
+      const testRunUuid = uuid.v4();
+      let rule: any;
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
+        const alerts = [{ id: 'us-central' }];
+        rule = await createRuleWithActionsAndParams(
+          testRunUuid,
+          {
+            instances: alerts,
+          },
+          {
+            schedule: { interval: '1s' },
+            throttle: null,
+          }
+        );
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alerts: alertInstances } = await getAlertSummary(rule.id);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
+        });
+      });
+
+       after(async () => {
+         await objectRemover.removeAll();
+       });
+
+      it('renders the error log list', async () => {
+        await browser.refresh();
+
+        // Verify content
+        await testSubjects.existOrFail('errorLogTab');
+
+        // click on errorLogTab
+        await testSubjects.click('errorLogTab');
+
+        // Table and table headers all exists
+        await testSubjects.existOrFail('RuleErrorLog');
+        await testSubjects.existOrFail('tableHeaderSortButton');
+        await testSubjects.existOrFail('tableHeaderCell_type_1');
+        await testSubjects.existOrFail('tableHeaderCell_message_2');
+
+        // Make some basic asserts
+        await browser.refresh();
+        await testSubjects.click('errorLogTab');
+        const errorLogList = await find.byCssSelector('.euiTableRow');
+        const rows = await errorLogList.parseDomContent();
+        expect(rows.length).to.be.greaterThan(0);
+
+        // Clicking is proof it exists, we are not guaranteed to have enough error log data to actually sort it
+        const errorListSortButton = await find.byCssSelector('.euiTableHeaderButton');
+        await errorListSortButton.click();
       });
     });
   });
