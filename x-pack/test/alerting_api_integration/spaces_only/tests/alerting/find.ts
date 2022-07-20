@@ -64,7 +64,6 @@ const findTestUtils = (
         created_by: null,
         api_key_owner: null,
         scheduled_task_id: match.scheduled_task_id,
-        snooze_schedule: match.snooze_schedule,
         updated_by: null,
         throttle: '1m',
         notify_when: 'onThrottleInterval',
@@ -73,7 +72,9 @@ const findTestUtils = (
         created_at: match.created_at,
         updated_at: match.updated_at,
         execution_status: match.execution_status,
-        ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
+        ...(describeType === 'internal'
+          ? { monitoring: match.monitoring, snooze_schedule: match.snooze_schedule }
+          : {}),
       });
       expect(Date.parse(match.created_at)).to.be.greaterThan(0);
       expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -295,7 +296,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           createdBy: null,
           apiKeyOwner: null,
           scheduledTaskId: match.scheduledTaskId,
-          snoozeSchedule: match.snoozeSchedule,
           updatedBy: null,
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',

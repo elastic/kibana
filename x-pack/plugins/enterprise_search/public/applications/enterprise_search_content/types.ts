@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-/**
- * As of 2022-04-04, this shape is still in debate. Specifically, the `source_type` will be changing as we get closer to 8.3.
- * These merely serve as placeholders for static data for now.
- */
-
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
-
-export interface SearchIndex {
-  name: string;
-  elasticsearch_index_name: string;
-  document_count: number;
-  health: HealthStatus;
-  data_ingestion: 'connected' | 'incomplete';
-  storage: string;
+export interface Crawler {
+  domains: [];
 }

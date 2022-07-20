@@ -10,20 +10,19 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  ElasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
 import {
-  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
-  getAgentPolicies,
+  getCspAgentPolicies,
+} from '../../lib/fleet_util';
+import {
+  defineGetBenchmarksRoute,
   createBenchmarkEntry,
   addPackagePolicyCspRules,
 } from './benchmarks';
@@ -69,6 +68,7 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     ...props,
   };
 }
+
 describe('benchmarks API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -307,7 +307,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -320,7 +320,7 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
       });
@@ -356,7 +356,6 @@ describe('benchmarks API', () => {
       it('should build benchmark entry agent policy and package policy', async () => {
         const packagePolicy = createPackagePolicyMock();
         const agentPolicy = createMockAgentPolicy();
-        // @ts-expect-error
         agentPolicy.agents = 3;
 
         const cspRulesStatus = {
