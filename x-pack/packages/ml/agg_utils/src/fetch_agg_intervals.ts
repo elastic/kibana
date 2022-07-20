@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 
-import type { Client } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -16,39 +15,14 @@ import { stringHash } from '@kbn/ml-string-hash';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
-
-// TODO Temporary type definition until we can import from `@kbn/core`.
-// Copied from src/core/server/elasticsearch/client/types.ts
-// as these types aren't part of any package yet. Once they are, remove this completely
-
-/**
- * Client used to query the elasticsearch cluster.
- * @deprecated At some point use the one from src/core/server/elasticsearch/client/types.ts when it is made into a package. If it never is, then keep using this one.
- * @public
- */
-type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
+import type { ElasticsearchClient, HistogramField, NumericColumnStatsMap } from './types';
 
 const MAX_CHART_COLUMNS = 20;
-
-interface HistogramField {
-  fieldName: string;
-  type: string;
-}
-
-interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 /**
  * Returns aggregation intervals for the supplied document fields.
  */
-export const getAggIntervals = async (
+export const fetchAggIntervals = async (
   client: ElasticsearchClient,
   indexPattern: string,
   query: estypes.QueryDslQueryContainer,
