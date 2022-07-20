@@ -32,9 +32,9 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api', () => ({
-  loadRules: jest.fn(),
+  loadRulesWithKueryFilter: jest.fn(),
   loadRuleTypes: jest.fn(),
-  loadRuleAggregations: jest.fn(),
+  loadRuleAggregationsWithKueryFilter: jest.fn(),
   updateAPIKey: jest.fn(),
   loadRuleTags: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
@@ -42,6 +42,9 @@ jest.mock('../../../lib/rule_api', () => ({
     hasPermanentEncryptionKey: true,
   })),
 }));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
+jest.mock('../../../lib/rule_api/rules_kuery_filter');
+
 jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
@@ -70,8 +73,11 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey, loadRuleTags } =
-  jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, updateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../../../lib/rule_api/aggregate_kuery_filter'
+);
+const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -320,7 +326,7 @@ describe.skip('Update Api Key', () => {
   const addError = jest.fn();
 
   beforeAll(() => {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 0,
@@ -368,7 +374,7 @@ describe.skip('Update Api Key', () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRules).toHaveBeenCalledTimes(3);
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledTimes(3);
     expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
     expect(addSuccess).toHaveBeenCalledWith('API key has been updated');
   });
@@ -393,7 +399,7 @@ describe.skip('Update Api Key', () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRules).toHaveBeenCalledTimes(3);
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledTimes(3);
     expect(
       screen.queryByText('You will not be able to recover the old API key')
     ).not.toBeInTheDocument();
@@ -405,7 +411,7 @@ describe.skip('Update Api Key', () => {
 describe.skip('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 0,
@@ -470,7 +476,7 @@ describe('rules_list component with props', () => {
   describe('Status filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
-      loadRules.mockResolvedValue({
+      loadRulesWithKueryFilter.mockResolvedValue({
         page: 1,
         perPage: 10000,
         total: 4,
@@ -488,7 +494,7 @@ describe('rules_list component with props', () => {
       ]);
       loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       loadAllActions.mockResolvedValue([]);
-      loadRuleAggregations.mockResolvedValue({
+      loadRuleAggregationsWithKueryFilter.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },
         ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
         ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -525,16 +531,16 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
 
-      expect(loadRules).toHaveBeenCalled();
+      expect(loadRulesWithKueryFilter).toHaveBeenCalled();
       expect(loadActionTypes).toHaveBeenCalled();
-      expect(loadRuleAggregations).toHaveBeenCalled();
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
     }
     it('can filter by rule states', async () => {
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
 
-      expect(loadRules).toHaveBeenLastCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
           ruleStatusesFilter: ['disabled'],
         })
@@ -544,7 +550,7 @@ describe('rules_list component with props', () => {
 
       wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-      expect(loadRules).toHaveBeenLastCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
           ruleStatusesFilter: ['disabled', 'enabled'],
         })
@@ -561,7 +567,7 @@ describe('rules_list component with props', () => {
   describe('Last response filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
-      loadRules.mockResolvedValue({
+      loadRulesWithKueryFilter.mockResolvedValue({
         page: 1,
         perPage: 10000,
         total: 4,
@@ -579,7 +585,7 @@ describe('rules_list component with props', () => {
       ]);
       loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       loadAllActions.mockResolvedValue([]);
-      loadRuleAggregations.mockResolvedValue({
+      loadRuleAggregationsWithKueryFilter.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },
         ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
         ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -616,16 +622,16 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
 
-      expect(loadRules).toHaveBeenCalled();
+      expect(loadRulesWithKueryFilter).toHaveBeenCalled();
       expect(loadActionTypes).toHaveBeenCalled();
-      expect(loadRuleAggregations).toHaveBeenCalled();
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
     }
     it('can filter by last response', async () => {
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
 
-      expect(loadRules).toHaveBeenLastCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
           ruleExecutionStatusesFilter: ['error'],
         })
@@ -638,7 +644,7 @@ describe('rules_list component with props', () => {
         .first()
         .simulate('click');
 
-      expect(loadRules).toHaveBeenLastCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
           ruleExecutionStatusesFilter: ['error', 'active'],
         })
@@ -656,7 +662,7 @@ describe('rules_list component with props', () => {
         .first()
         .simulate('click');
 
-      expect(loadRules).toHaveBeenLastCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
         expect.objectContaining({
           ruleExecutionStatusesFilter: ['active'],
         })
@@ -670,7 +676,7 @@ describe('rules_list component with props', () => {
   describe('showActionFilter prop', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
-      loadRules.mockResolvedValue({
+      loadRulesWithKueryFilter.mockResolvedValue({
         page: 1,
         perPage: 10000,
         total: 4,
@@ -688,7 +694,7 @@ describe('rules_list component with props', () => {
       ]);
       loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       loadAllActions.mockResolvedValue([]);
-      loadRuleAggregations.mockResolvedValue({
+      loadRuleAggregationsWithKueryFilter.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },
         ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
         ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -725,11 +731,11 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
 
-      expect(loadRules).toHaveBeenCalled();
+      expect(loadRulesWithKueryFilter).toHaveBeenCalled();
       expect(loadActionTypes).toHaveBeenCalled();
-      expect(loadRuleAggregations).toHaveBeenCalled();
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
       expect(wrapper.find('ActionTypeFilter')).toHaveLength(0);
     });
@@ -741,11 +747,11 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
 
-      expect(loadRules).toHaveBeenCalled();
+      expect(loadRulesWithKueryFilter).toHaveBeenCalled();
       expect(loadActionTypes).toHaveBeenCalled();
-      expect(loadRuleAggregations).toHaveBeenCalled();
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
       expect(wrapper.find('ActionTypeFilter')).toHaveLength(1);
     });
@@ -754,7 +760,7 @@ describe('rules_list component with props', () => {
   describe('showCreateRuleButton prop', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
-      loadRules.mockResolvedValue({
+      loadRulesWithKueryFilter.mockResolvedValue({
         page: 1,
         perPage: 10000,
         total: 4,
@@ -772,7 +778,7 @@ describe('rules_list component with props', () => {
       ]);
       loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       loadAllActions.mockResolvedValue([]);
-      loadRuleAggregations.mockResolvedValue({
+      loadRuleAggregationsWithKueryFilter.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },
         ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
         ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -810,7 +816,7 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
       expect(wrapper.find('EuiButton[data-test-subj="createRuleButton"]').length).toEqual(0);
     });
@@ -822,7 +828,7 @@ describe('rules_list component with props', () => {
         wrapper.update();
       });
       (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      loadRules.mockReset();
+      loadRulesWithKueryFilter.mockReset();
       await setup();
       expect(wrapper.find('EuiButton[data-test-subj="createRuleButton"]').length).toEqual(1);
     });
@@ -954,7 +960,7 @@ describe('rules_list component with props', () => {
       },
     ];
     async function setup(editable: boolean = true, filteredRuleTypes: string[]) {
-      loadRules.mockResolvedValue({
+      loadRulesWithKueryFilter.mockResolvedValue({
         page: 1,
         perPage: 10000,
         total: 2,
@@ -976,7 +982,7 @@ describe('rules_list component with props', () => {
         { ...ruleTypeFromApi, id: 'test_rule_type2' },
       ]);
       loadAllActions.mockResolvedValue([]);
-      loadRuleAggregations.mockResolvedValue({
+      loadRuleAggregationsWithKueryFilter.mockResolvedValue({
         ruleEnabledStatus: { enabled: 2, disabled: 0 },
         ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
         ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -1026,7 +1032,7 @@ describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 4,
@@ -1044,7 +1050,7 @@ describe('rules_list component with items', () => {
     ]);
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
-    loadRuleAggregations.mockResolvedValue({
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
       ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
       ruleMutedStatus: { muted: 0, unmuted: 2 },
@@ -1079,9 +1085,9 @@ describe('rules_list component with items', () => {
       wrapper.update();
     });
 
-    expect(loadRules).toHaveBeenCalled();
+    expect(loadRulesWithKueryFilter).toHaveBeenCalled();
     expect(loadActionTypes).toHaveBeenCalled();
-    expect(loadRuleAggregations).toHaveBeenCalled();
+    expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
   }
 
   it('renders table of rules', async () => {
@@ -1253,7 +1259,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    expect(loadRules).toHaveBeenCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: {
           field: percentileFields[Percentiles.P50],
@@ -1268,7 +1274,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    expect(loadRules).toHaveBeenCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: {
           field: percentileFields[Percentiles.P50],
@@ -1326,7 +1332,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    expect(loadRules).toHaveBeenCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: {
           field: percentileFields[Percentiles.P95],
@@ -1341,7 +1347,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    expect(loadRules).toHaveBeenCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: {
           field: percentileFields[Percentiles.P95],
@@ -1388,7 +1394,7 @@ describe('rules_list component with items', () => {
       wrapper.update();
     });
 
-    expect(loadRules).toHaveBeenCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         sort: {
           field: 'name',
@@ -1410,7 +1416,7 @@ describe('rules_list component with items', () => {
       wrapper.update();
     });
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         sort: {
           field: 'enabled',
@@ -1467,10 +1473,10 @@ describe('rules_list component with items', () => {
 
   it('can filter by rule states', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-    loadRules.mockReset();
+    loadRulesWithKueryFilter.mockReset();
     await setup();
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: [],
       })
@@ -1480,7 +1486,7 @@ describe('rules_list component with items', () => {
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['enabled'],
       })
@@ -1488,7 +1494,7 @@ describe('rules_list component with items', () => {
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
@@ -1496,7 +1502,7 @@ describe('rules_list component with items', () => {
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['enabled'],
       })
@@ -1516,10 +1522,10 @@ describe('rules_list component with items', () => {
 
   it('can filter by tags', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-    loadRules.mockReset();
+    loadRulesWithKueryFilter.mockReset();
     await setup();
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         tagsFilter: [],
       })
@@ -1534,7 +1540,7 @@ describe('rules_list component with items', () => {
 
     tagFilterListItems.at(0).simulate('click');
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         tagsFilter: ['a'],
       })
@@ -1542,7 +1548,7 @@ describe('rules_list component with items', () => {
 
     tagFilterListItems.at(1).simulate('click');
 
-    expect(loadRules).toHaveBeenLastCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         tagsFilter: ['a', 'b'],
       })
@@ -1567,7 +1573,7 @@ describe('rules_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 0,
@@ -1610,7 +1616,7 @@ describe('rules_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 2,
@@ -1731,7 +1737,7 @@ describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 2,

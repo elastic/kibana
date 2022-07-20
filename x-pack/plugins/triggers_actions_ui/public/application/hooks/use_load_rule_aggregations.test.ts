@@ -18,17 +18,19 @@ const MOCK_AGGS = {
   ruleTags: MOCK_TAGS,
 };
 
-jest.mock('../lib/rule_api', () => ({
-  loadRuleAggregations: jest.fn(),
+jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
+  loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
 
-const { loadRuleAggregations } = jest.requireMock('../lib/rule_api');
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../lib/rule_api/aggregate_kuery_filter'
+);
 
 const onError = jest.fn();
 
 describe('useLoadRuleAggregations', () => {
   beforeEach(() => {
-    loadRuleAggregations.mockResolvedValue(MOCK_AGGS);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue(MOCK_AGGS);
     jest.clearAllMocks();
   });
 
@@ -54,7 +56,7 @@ describe('useLoadRuleAggregations', () => {
       await waitForNextUpdate();
     });
 
-    expect(loadRuleAggregations).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 
@@ -80,12 +82,12 @@ describe('useLoadRuleAggregations', () => {
       await waitForNextUpdate();
     });
 
-    expect(loadRuleAggregations).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
     expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 
   it('should call onError if API fails', async () => {
-    loadRuleAggregations.mockRejectedValue('');
+    loadRuleAggregationsWithKueryFilter.mockRejectedValue('');
     const params = {
       searchText: '',
       typesFilter: [],

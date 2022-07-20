@@ -88,6 +88,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
+  buildKueryNodeFilter,
 } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
@@ -211,7 +212,7 @@ export interface FindOptions extends IndexType {
     id: string;
   };
   fields?: string[];
-  filter?: string;
+  filter?: string | KueryNode;
 }
 
 export type BulkEditFields = keyof Pick<
@@ -280,7 +281,7 @@ export interface AggregateOptions extends IndexType {
     type: string;
     id: string;
   };
-  filter?: string;
+  filter?: string | KueryNode;
 }
 
 interface IndexType {
@@ -895,7 +896,8 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
+
+    const filterKueryNode = buildKueryNodeFilter(options.filter);
     let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
@@ -1009,12 +1011,14 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter } = authorizationTuple;
+    const filterKueryNode = buildKueryNodeFilter(filter);
+
     const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
       ...options,
       filter:
-        (authorizationFilter && filter
-          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
-          : authorizationFilter) ?? filter,
+        authorizationFilter && filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
+          : authorizationFilter,
       page: 1,
       perPage: 0,
       type: 'alert',
