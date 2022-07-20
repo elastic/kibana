@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { rgbToHex } from '@elastic/eui';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
@@ -38,13 +39,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should be correctly syntax highlighted', async () => {
-        const methodTokenComputedColor = 'rgba(200, 10, 104, 1)';
-        const urlTokenComputedColor = 'rgba(0, 117, 108, 1)';
+        const methodTokenColor = '#c80a68';
+        const urlTokenColor = '#00756c';
         await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": "bar"');
-        const methodTokenColor = await PageObjects.console.getTokenColor('ace_method');
-        const urlColor = await PageObjects.console.getTokenColor('ace_url');
-        expect(methodTokenColor).to.eql(methodTokenComputedColor);
-        expect(urlColor).to.eql(urlTokenComputedColor);
+        const methodTokenColorRGB = await PageObjects.console.getTokenColor('ace_method');
+        const urlColorRGB = await PageObjects.console.getTokenColor('ace_url');
+        // getTokenColor returns rgb value of css color property, we need to convert rgb to hex to compare it to the actual value
+        expect(rgbToHex(methodTokenColorRGB)).to.eql(methodTokenColor);
+        expect(rgbToHex(urlColorRGB)).to.eql(urlTokenColor);
       });
 
       describe('with valid request', () => {
@@ -104,10 +106,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('with inline comments', () => {
       it('should be correctly syntax highlighted', async () => {
-        const commentTokenComputedColor = 'rgba(65, 117, 92, 1)';
+        const commentTokenColor = '#41755c';
         await PageObjects.console.enterRequest('\n GET _search // inline comment');
-        const color = await PageObjects.console.getTokenColor('ace_comment');
-        expect(color).to.eql(commentTokenComputedColor);
+        const commentTokenColorRGB = await PageObjects.console.getTokenColor('ace_comment');
+        expect(rgbToHex(commentTokenColorRGB)).to.eql(commentTokenColor);
       });
 
       it('should allow inline comments in request url row', async () => {
