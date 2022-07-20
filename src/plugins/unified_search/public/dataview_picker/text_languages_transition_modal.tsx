@@ -21,25 +21,25 @@ import {
   EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
-  useEuiTheme,
 } from '@elastic/eui';
 
 export interface TextBasedLanguagesTransitionModalProps {
   closeModal: (dismissFlag: boolean, needsSave?: boolean) => void;
+  setIsTextLangTransitionModalVisible: (flag: boolean) => void;
 }
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function TextBasedLanguagesTransitionModal({
   closeModal,
+  setIsTextLangTransitionModalVisible,
 }: TextBasedLanguagesTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
   const onTransitionModalDismiss = useCallback((e) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 
-  const { euiTheme } = useEuiTheme();
   return (
-    <EuiModal onClose={() => closeModal(dismissModalChecked)} style={{ width: 700 }}>
+    <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>
@@ -70,7 +70,7 @@ export default function TextBasedLanguagesTransitionModal({
           justify-content: space-between;
         `}
       >
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id="dismiss-text-based-languages-transition-modal"
@@ -85,17 +85,12 @@ export default function TextBasedLanguagesTransitionModal({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => closeModal(dismissModalChecked)}
                   color="warning"
                   iconType="merge"
-                  css={css`
-                    color: ${euiTheme.colors.warning};
-                    border: 1px solid ${euiTheme.colors.warning};
-                    background-color: ${euiTheme.colors.emptyShade};
-                  `}
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',

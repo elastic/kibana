@@ -175,7 +175,7 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <>
-          {!hideAnnouncements && (
+          {!hideAnnouncements && !isPlainRecord && (
             <DiscoverTourProvider isPlainRecord={isPlainRecord}>
               <DocumentExplorerUpdateCallout />
             </DiscoverTourProvider>

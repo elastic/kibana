@@ -21,6 +21,7 @@ import {
   EuiPopover,
   EuiResizeObserver,
   EuiOutsideClickDetector,
+  EuiToolTip,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
@@ -308,12 +309,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
-              display={!isWordWrapped ? 'fill' : undefined}
-              color="text"
-              data-test-subj="unifiedTextLangEditor-toggleWordWrap"
-              aria-label={
+            <EuiToolTip
+              position="top"
+              content={
                 isWordWrapped
                   ? i18n.translate(
                       'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
@@ -328,33 +326,65 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       }
                     )
               }
-              isSelected={!isWordWrapped}
-              onClick={() => {
-                editor1.current?.updateOptions({
-                  wordWrap: isWordWrapped ? 'off' : 'on',
-                });
-                setIsWordWrapped(!isWordWrapped);
-              }}
-            />
+            >
+              <EuiButtonIcon
+                iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
+                display={!isWordWrapped ? 'fill' : undefined}
+                color="text"
+                data-test-subj="unifiedTextLangEditor-toggleWordWrap"
+                aria-label={
+                  isWordWrapped
+                    ? i18n.translate(
+                        'unifiedSearch.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                        {
+                          defaultMessage: 'Disable word wrap',
+                        }
+                      )
+                    : i18n.translate(
+                        'unifiedSearch.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                        {
+                          defaultMessage: 'Enable word wrap',
+                        }
+                      )
+                }
+                isSelected={!isWordWrapped}
+                onClick={() => {
+                  editor1.current?.updateOptions({
+                    wordWrap: isWordWrapped ? 'off' : 'on',
+                  });
+                  setIsWordWrapped(!isWordWrapped);
+                }}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="minimize"
-                  color="text"
-                  aria-label={i18n.translate(
-                    'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'unifiedSearch.query.textBasedLanguagesEditor.minimizeTooltip',
                     {
-                      defaultMessage: 'Minimize editor',
+                      defaultMessage: 'Compact query editor',
                     }
                   )}
-                  data-test-subj="unifiedTextLangEditor-minimize"
-                  onClick={() => {
-                    expandCodeEditor(false);
-                    updateLinesFromModel = false;
-                  }}
-                />
+                >
+                  <EuiButtonIcon
+                    iconType="minimize"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'unifiedSearch.query.textBasedLanguagesEditor.MinimizeEditor',
+                      {
+                        defaultMessage: 'Minimize editor',
+                      }
+                    )}
+                    data-test-subj="unifiedTextLangEditor-minimize"
+                    onClick={() => {
+                      expandCodeEditor(false);
+                      updateLinesFromModel = false;
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -364,18 +394,31 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   closePopover={() => setIsHelpOpen(false)}
                   ownFocus={false}
                   button={
-                    <EuiButtonIcon
-                      iconType="documentation"
-                      color="text"
-                      data-test-subj="unifiedTextLangEditor-documentation"
-                      aria-label={i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'unifiedSearch.query.textBasedLanguagesEditor.documentationTooltip',
                         {
-                          defaultMessage: 'Documentation',
+                          defaultMessage: '{lang} reference',
+                          values: {
+                            lang: language.toUpperCase(),
+                          },
                         }
                       )}
-                      onClick={() => setIsHelpOpen(true)}
-                    />
+                    >
+                      <EuiButtonIcon
+                        iconType="documentation"
+                        color="text"
+                        data-test-subj="unifiedTextLangEditor-documentation"
+                        aria-label={i18n.translate(
+                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        )}
+                        onClick={() => setIsHelpOpen(true)}
+                      />
+                    </EuiToolTip>
                   }
                 >
                   <MemoizedDocumentation language={language} sections={documentationSections} />
@@ -453,15 +496,25 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="expand"
-                  size="m"
-                  aria-label="Expand"
-                  onClick={() => expandCodeEditor(true)}
-                  data-test-subj="unifiedTextLangEditor-expand"
-                  css={{ borderRadius: 0 }}
-                />
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'unifiedSearch.query.textBasedLanguagesEditor.expandTooltip',
+                    {
+                      defaultMessage: 'Expand query editor',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    iconType="expand"
+                    size="m"
+                    aria-label="Expand"
+                    onClick={() => expandCodeEditor(true)}
+                    data-test-subj="unifiedTextLangEditor-expand"
+                    css={{ borderRadius: 0 }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -471,15 +524,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   closePopover={() => setIsHelpOpen(false)}
                   ownFocus={false}
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      iconType="documentation"
-                      size="m"
-                      aria-label="Documentation"
-                      data-test-subj="unifiedTextLangEditor-inline-documentation"
-                      onClick={() => setIsHelpOpen(true)}
-                      css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                    />
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'unifiedSearch.query.textBasedLanguagesEditor.documentationTooltip',
+                        {
+                          defaultMessage: '{lang} reference',
+                          values: {
+                            lang: language.toUpperCase(),
+                          },
+                        }
+                      )}
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        iconType="documentation"
+                        size="m"
+                        aria-label="Documentation"
+                        data-test-subj="unifiedTextLangEditor-inline-documentation"
+                        onClick={() => setIsHelpOpen(true)}
+                        css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                      />
+                    </EuiToolTip>
                   }
                 >
                   <MemoizedDocumentation language={language} sections={documentationSections} />

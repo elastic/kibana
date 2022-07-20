@@ -390,6 +390,7 @@ export function ChangeDataView({
   const onModalClose = useCallback(
     (shouldDismissModal: boolean, needsSave?: boolean) => {
       if (Boolean(needsSave)) {
+        setIsTextLangTransitionModalVisible(false);
         onSaveTextLanguageQuery?.({
           onSave: () => {
             cleanup(shouldDismissModal);
@@ -403,7 +404,12 @@ export function ChangeDataView({
   );
 
   if (isTextLangTransitionModalVisible && !isTextLangTransitionModalDismissed) {
-    modal = <TextBasedLanguagesTransitionModal closeModal={onModalClose} />;
+    modal = (
+      <TextBasedLanguagesTransitionModal
+        closeModal={onModalClose}
+        setIsTextLangTransitionModalVisible={setIsTextLangTransitionModalVisible}
+      />
+    );
   }
 
   return (
