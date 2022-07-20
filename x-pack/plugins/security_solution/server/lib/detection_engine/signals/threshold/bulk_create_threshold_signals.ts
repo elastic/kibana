@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import type {
-  AggregationsCardinalityAggregate,
-  AggregationsMaxAggregate,
-  AggregationsMinAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { Logger } from '@kbn/core/server';
@@ -62,22 +57,21 @@ const getTransformedHits = (
         Object.values(bucket.key).sort().join(',')
       ),
       _source: {
-        [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
+        [TIMESTAMP]: bucket.max_timestamp.value_as_string,
         ...bucket.key,
         threshold_result: {
           cardinality: threshold.cardinality?.length
             ? [
                 {
                   field: threshold.cardinality[0].field,
-                  value: (bucket.cardinality_count as AggregationsCardinalityAggregate).value,
+                  value: bucket.cardinality_count?.value,
                 },
               ]
             : undefined,
           count: bucket.doc_count,
-          from:
-            new Date(
-              (bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string
-            ) ?? from,
+          from: bucket.min_timestamp.value_as_string
+            ? new Date(bucket.min_timestamp.value_as_string)
+            : from,
           terms: Object.entries(bucket.key).map(([key, val]) => ({ field: key, value: val })),
         },
       },
