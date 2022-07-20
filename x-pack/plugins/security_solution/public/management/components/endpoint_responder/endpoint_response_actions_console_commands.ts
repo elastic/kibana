@@ -15,7 +15,7 @@ import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 
-const emptyArgumentValidator = (argData: ParsedArgData): boolean | string => {
+const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
     return true;
   } else {
@@ -25,7 +25,7 @@ const emptyArgumentValidator = (argData: ParsedArgData): boolean | string => {
   }
 };
 
-const pidValidator = (argData: ParsedArgData): boolean | string => {
+const pidValidator = (argData: ParsedArgData): true | string => {
   const emptyResult = emptyArgumentValidator(argData);
   if (emptyResult !== true) {
     return emptyResult;
