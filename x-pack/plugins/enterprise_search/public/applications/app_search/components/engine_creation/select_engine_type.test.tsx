@@ -67,7 +67,7 @@ describe('SelectEngineType', () => {
     expect(elasticsearchCardSelectable.isSelected).toBeTruthy();
   });
 
-  it('create Elasticsearch-index based engine is selected if chosen', () => {
+  it('clicking on Elasticsearch-index based engine sets the engineType', () => {
     const wrapper = shallow(<SelectEngineType />);
     const elasticsearchCardSelectable = wrapper
       .find('[data-test-subj="ElasticsearchEngineSelectable"]')
