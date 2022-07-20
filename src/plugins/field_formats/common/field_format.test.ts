@@ -151,7 +151,9 @@ describe('FieldFormat class', () => {
       test('formats a list of values as html', () => {
         const f = getTestFormat();
 
-        expect(f.convert([123, 456, 789], 'html')).toBe('[123, 456, 789]');
+        expect(f.convert([123, 456, 789], 'html')).toMatchInlineSnapshot(
+          `"<span style=\\"color: #98a2b3;\\">[</span>123<span style=\\"color: #98a2b3;\\">,</span> 456<span style=\\"color: #98a2b3;\\">,</span> 789<span style=\\"color: #98a2b3;\\">]</span>"`
+        );
       });
 
       test('formats a list of values containing newlines as html', () => {
@@ -162,16 +164,16 @@ describe('FieldFormat class', () => {
         ];
 
         expect(f.convert(newlineList, 'html')).toMatchInlineSnapshot(`
-          "[
+          "<span style=\\"color: #98a2b3;\\">[</span>
             {
               &quot;foo&quot;: &quot;bar&quot;,
               &quot;fizz&quot;: &quot;buzz&quot;
-            },
+            }<span style=\\"color: #98a2b3;\\">,</span>
             {
               &quot;bar&quot;: &quot;foo&quot;,
               &quot;buzz&quot;: &quot;fizz&quot;
             }
-          ]"
+          <span style=\\"color: #98a2b3;\\">]</span>"
         `);
       });
     });

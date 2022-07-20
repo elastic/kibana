@@ -7,6 +7,7 @@
  */
 
 import { escape, isFunction } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
@@ -33,6 +34,8 @@ export const setup = (
   htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
+  const highlightColor = euiThemeVars.euiColorMediumShade;
+  const highlight = (text: string) => `<span style="color: ${highlightColor};">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
@@ -46,7 +49,7 @@ export const setup = (
     const subValues = value.map((v: unknown) => recurse(v, options));
     const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
-    return subValues.join(',' + (useMultiLine ? '\n' : ' '));
+    return subValues.join(highlight(',') + (useMultiLine ? '\n' : ' '));
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
@@ -59,10 +62,10 @@ export const setup = (
     if (convertedValue.includes('\n')) {
       const indentedValue = convertedValue.replaceAll(/(\n+)/g, '$1  ');
 
-      return `[\n  ${indentedValue}\n]`;
+      return highlight('[') + `\n  ${indentedValue}\n` + highlight(']');
     }
 
-    return `[${convertedValue}]`;
+    return highlight('[') + convertedValue + highlight(']');
   };
 
   return wrap;
