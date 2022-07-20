@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -20,9 +19,8 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 
-import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 import { mockTheme } from '../overview_cti_links/mock';
-import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
+import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 jest.mock('../../../common/lib/kibana');
@@ -31,42 +29,21 @@ jest.mock('../../../common/hooks/use_dashboard_button_href');
 const useRiskyHostsDashboardButtonHrefMock = useDashboardButtonHref as jest.Mock;
 useRiskyHostsDashboardButtonHrefMock.mockReturnValue({ buttonHref: '/test' });
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links');
-const useRiskyHostsDashboardLinksMock = useRiskyHostsDashboardLinks as jest.Mock;
-useRiskyHostsDashboardLinksMock.mockReturnValue({
-  listItemsWithLinks: [{ title: 'a', count: 1, path: '/test' }],
-});
-
-describe('RiskyHostsEnabledModule', () => {
+describe('RiskyHostsPanelView', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
-  it('renders expected children', () => {
     render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <RiskyHostsEnabledModule
-              hostRiskScore={[
-                {
-                  '@timestamp': '1641902481',
-                  host: {
-                    name: 'a',
-                  },
-                  risk_stats: {
-                    risk_score: 1,
-                    rule_risks: [],
-                  },
-                  risk: '',
-                },
-              ]}
+            <RiskyHostsPanelView
+              isInspectEnabled={true}
+              listItems={[{ title: 'a', count: 1, path: '/test' }]}
+              totalCount={1}
               to={'now'}
               from={'now-30d'}
             />
@@ -74,7 +51,19 @@ describe('RiskyHostsEnabledModule', () => {
         </I18nProvider>
       </Provider>
     );
-    expect(screen.getByTestId('risky-hosts-dashboard-links')).toBeInTheDocument();
-    expect(screen.getByTestId('view-dashboard-button')).toBeInTheDocument();
+  });
+
+  it('renders title', () => {
+    expect(screen.getByTestId('header-section-title')).toHaveTextContent(
+      'Current host risk scores'
+    );
+  });
+
+  it('renders host number', () => {
+    expect(screen.getByTestId('header-panel-subtitle')).toHaveTextContent('Showing: 1 host');
+  });
+
+  it('renders view dashboard button', () => {
+    expect(screen.getByTestId('view-dashboard-button')).toHaveAttribute('href', '/test');
   });
 });

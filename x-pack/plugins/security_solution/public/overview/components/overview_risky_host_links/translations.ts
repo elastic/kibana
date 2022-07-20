@@ -65,7 +65,7 @@ export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.
   defaultMessage: 'Import dashboard',
 });
 
-export const IMPORT_DASHBOARD_TOOLTIP = i18n.translate(
+export const IMPORT_DASHBOARD_POPOVER = i18n.translate(
   'xpack.securitySolution.overview.importDasboardPopoverTitle',
   {
     defaultMessage: 'Make sure you have enabled Host risk score before importing the dashboard.',
