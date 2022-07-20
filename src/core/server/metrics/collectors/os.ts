@@ -64,9 +64,12 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
     if (platform === 'linux') {
       try {
         const distro = (await getos()) as LinuxOs;
+        // getos values can sometimes contain newline characters
+        const dist = trimNewlines(distro.dist);
+        const release = trimNewlines(distro.release);
         return {
-          distro: distro.dist,
-          distroRelease: `${distro.dist}-${distro.release}`,
+          distro: dist,
+          distroRelease: `${dist}-${release}`,
         };
       } catch (e) {
         // ignore errors
@@ -76,3 +79,5 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
     return {};
   }
 }
+
+const trimNewlines = (str: string) => str.replace(/[\r\n\t]/g, '').trim();
