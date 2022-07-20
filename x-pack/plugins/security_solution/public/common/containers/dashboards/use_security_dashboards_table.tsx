@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/public';
+import { getSecurityDashboards } from './utils';
 import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
@@ -19,40 +20,10 @@ export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
   description?: string;
 }
 
-const SECURITY_TAG_NAME = 'security' as const;
 const EMPTY_DESCRIPTION = '-' as const;
-
-const getSecurityDashboardItems = async (
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<DashboardTableItem[]> => {
-  if (savedObjectsClient) {
-    const tagResponse = await savedObjectsClient.find<SavedObjectAttributes>({
-      type: 'tag',
-      searchFields: ['name'],
-      search: SECURITY_TAG_NAME,
-    });
-
-    const tagId = tagResponse.savedObjects[0]?.id;
-
-    if (tagId) {
-      const dashboardsResponse = await savedObjectsClient.find<SavedObjectAttributes>({
-        type: 'dashboard',
-        hasReference: { id: tagId, type: 'tag' },
-      });
-
-      return dashboardsResponse.savedObjects.map((item) => ({
-        ...item,
-        title: item.attributes.title?.toString() ?? undefined,
-        description: item.attributes.description?.toString() ?? undefined,
-      }));
-    }
-  }
-  return [];
-};
 
 export const useSecurityDashboardsTableItems = () => {
   const [dashboardItems, setDashboardItems] = useState<DashboardTableItem[]>([]);
-
   const {
     savedObjects: { client: savedObjectsClient },
   } = useKibana().services;
@@ -60,13 +31,23 @@ export const useSecurityDashboardsTableItems = () => {
   useEffect(() => {
     let ignore = false;
     const fetchDashboards = async () => {
-      const items = await getSecurityDashboardItems(savedObjectsClient);
-      if (!ignore) {
-        setDashboardItems(items);
+      if (savedObjectsClient) {
+        const securityDashboards = await getSecurityDashboards(savedObjectsClient);
+
+        if (!ignore) {
+          setDashboardItems(
+            securityDashboards.map((securityDashboard) => ({
+              ...securityDashboard,
+              title: securityDashboard.attributes.title?.toString() ?? undefined,
+              description: securityDashboard.attributes.description?.toString() ?? undefined,
+            }))
+          );
+        }
       }
     };
 
     fetchDashboards();
+
     return () => {
       ignore = true;
     };
@@ -75,8 +56,10 @@ export const useSecurityDashboardsTableItems = () => {
   return dashboardItems;
 };
 
-export const useDashboardsTableColumns = (): Array<EuiBasicTableColumn<DashboardTableItem>> => {
-  const { savedObjectsTagging, dashboard: { locator } = {} } = useKibana().services;
+export const useSecurityDashboardsTableColumns = (): Array<
+  EuiBasicTableColumn<DashboardTableItem>
+> => {
+  const { savedObjectsTagging, dashboard } = useKibana().services;
   const { navigateTo } = useNavigateTo();
 
   const getNavigationHandler = useCallback(
@@ -93,9 +76,9 @@ export const useDashboardsTableColumns = (): Array<EuiBasicTableColumn<Dashboard
       {
         field: 'title',
         name: i18n.DASHBOARD_TITLE,
-        'data-test-subj': 'dashboard-title-field',
+        sortable: true,
         render: (title: string, { id }) => {
-          const href = locator?.getRedirectUrl({ dashboardId: id });
+          const href = dashboard?.locator?.getRedirectUrl({ dashboardId: id });
           return href ? (
             <LinkAnchor href={href} onClick={getNavigationHandler(href)}>
               {title}
@@ -104,18 +87,26 @@ export const useDashboardsTableColumns = (): Array<EuiBasicTableColumn<Dashboard
             title
           );
         },
+        'data-test-subj': 'dashboardTableTitleCell',
       },
       {
         field: 'description',
         name: i18n.DASHBOARDS_DESCRIPTION,
-        'data-test-subj': 'dashboard-description-field',
+        sortable: true,
         render: (description: string) => description || EMPTY_DESCRIPTION,
+        'data-test-subj': 'dashboardTableDescriptionCell',
       },
       // adds the tags table column based on the saved object items
       ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
     ],
-    [getNavigationHandler, locator, savedObjectsTagging]
+    [getNavigationHandler, dashboard, savedObjectsTagging]
   );
 
   return columns;
+};
+
+export const useSecurityDashboardsTable = () => {
+  const items = useSecurityDashboardsTableItems();
+  const columns = useSecurityDashboardsTableColumns();
+  return { items, columns };
 };

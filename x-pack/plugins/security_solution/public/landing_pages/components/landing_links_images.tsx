@@ -84,7 +84,8 @@ const LandingImageCardItem = styled(EuiFlexItem)`
   max-width: 364px;
 `;
 
-const LandingCardDescripton = styled(EuiText)`
+const LandingCardDescription = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
@@ -122,11 +123,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
               <h2>{title}</h2>
             </PrimaryEuiTitle>
           }
-          description={
-            <LandingCardDescripton size="xs" color="text">
-              {description}
-            </LandingCardDescripton>
-          }
+          description={<LandingCardDescription>{description}</LandingCardDescription>}
         />
       </LandingImageCardItem>
     ))}
