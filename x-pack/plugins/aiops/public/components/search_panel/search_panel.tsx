@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { SearchQueryLanguage } from '../../../common/types';
+import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiOpsKibana } from '../../kibana_context';
 import { getPluginsStart } from '../../kibana_services';
 import { createMergedEsQuery } from '../../application/utils/search_utils';

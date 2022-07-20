@@ -21,12 +21,8 @@ import {
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-  isSavedSearchSavedObject,
-  SavedSearchSavedObject,
-} from '../../../common/types';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 const DEFAULT_QUERY = {
   bool: {
@@ -38,8 +34,21 @@ const DEFAULT_QUERY = {
   },
 };
 
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
+
 export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
+}
+
+export type SavedSearchSavedObject = SimpleSavedObject<any>;
+
+export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
+  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
 }
 
 /**
@@ -65,6 +74,7 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
   // after opening a saved search
   if (parsed && Array.isArray(parsed.filter)) {
     parsed.filter.forEach((f) => {
+      // @ts-expect-error indexRefName does appear in meta for newly created saved search
       f.meta.indexRefName = undefined;
     });
   }

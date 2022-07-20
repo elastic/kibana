@@ -26,7 +26,7 @@ import { Filter, Query } from '@kbn/es-query';
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-import { SearchQueryLanguage } from '../../../common/types'; // SEARCH_QUERY_LANGUAGE,
+import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
@@ -115,7 +115,9 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   >(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
+      // @ts-ignore unexpected type
       start: earliest,
+      // @ts-ignore unexpected type
       end: latest,
       // TODO Consider an optional Kuery.
       kuery: '',

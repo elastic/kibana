@@ -17,7 +17,7 @@ import { EuiPageBody } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../../common/types';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiOpsKibana } from '../../kibana_context';
 import {
   Accessor,
@@ -82,8 +82,6 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
     }
   }, [dataView, toasts]);
 
-  if (!dataView) return null;
-
   const setUrlState: SetUrlState = useCallback(
     (
       accessor: Accessor,
@@ -145,6 +143,8 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
     },
     [history, urlSearchString]
   );
+
+  if (!dataView) return null;
 
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
