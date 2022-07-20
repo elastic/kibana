@@ -165,15 +165,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
-    reportMetricEvent(this.services.analytics, {
-      eventName: DASHBOARD_LOADED_EVENT,
-      duration: data.timeToDone,
-      status: data.status,
-      key1: 'time_to_data',
-      value1: data.timeToData,
-      key2: 'num_of_panels',
-      value2: data.numOfPanels,
-    });
+    if (this.services.analytics) {
+      reportMetricEvent(this.services.analytics, {
+        eventName: DASHBOARD_LOADED_EVENT,
+        duration: data.timeToDone,
+        status: data.status,
+        key1: 'time_to_data',
+        value1: data.timeToData,
+        key2: 'num_of_panels',
+        value2: data.numOfPanels,
+      });
+    }
   }
 
   protected createNewPanelState<

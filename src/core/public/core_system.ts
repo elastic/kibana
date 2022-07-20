@@ -26,7 +26,8 @@ import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
-import { registerMetricEvent, reportMetricEvent } from '@kbn/ebt-tools';
+import { reportMetricEvent } from '@kbn/ebt-tools';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { NotificationsService } from './notifications';
@@ -155,7 +156,7 @@ export class CoreSystem {
 
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     /**
-     * @deprecated here for backwards compatibility in Fullstory
+     * @deprecated here for backwards compatibility in FullStory
      **/
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
@@ -170,8 +171,7 @@ export class CoreSystem {
         protocol: window.location.protocol,
       },
       duration: timing[LOAD_FIRST_NAV],
-      // @ts-expect-error 2339
-      ...performance.memory,
+      ...fetchOptionalMemoryInfo(),
       key1: LOAD_START,
       value1: timing[LOAD_START],
       key2: LOAD_BOOTSTRAP_START,
@@ -204,7 +204,6 @@ export class CoreSystem {
       const analytics = this.analytics.setup({ injectedMetadata });
 
       this.registerLoadedKibanaEventType(analytics);
-      registerMetricEvent(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({

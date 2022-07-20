@@ -23,7 +23,8 @@ import {
 } from '@kbn/core-config-server-internal';
 import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import { registerMetricEvent, reportMetricEvent } from '@kbn/ebt-tools';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
+import { reportMetricEvent } from '@kbn/ebt-tools';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
 import {
   ExecutionContextService,
@@ -235,7 +236,7 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
-    registerMetricEvent(analyticsSetup);
+    this.registerKibanaStartedEventType(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -399,25 +400,7 @@ export class Server {
     startTransaction?.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
-
-    const ups = this.uptimePerStep;
-
-    reportMetricEvent(this.coreStart.analytics, {
-      eventName: KIBANA_STARTED_EVENT,
-      duration: ups.start!.end - ups.constructor!.start,
-      key1: 'constructor-time',
-      value1: ups.constructor!.end - ups.constructor!.start,
-      key2: 'preboot-time',
-      value2: ups.preboot!.end - ups.preboot!.start,
-      key3: 'setup-time',
-      value3: ups.setup!.end - ups.setup!.start,
-      key4: 'start-time',
-      value4: ups.start!.end - ups.start!.start,
-      // backwards compatibility
-      meta: {
-        uptime_per_step: this.uptimePerStep,
-      },
-    });
+    this.reportKibanaStartedEvents(analyticsStart);
 
     return this.coreStart;
   }
@@ -477,5 +460,126 @@ export class Server {
       }
       this.configService.setSchema(descriptor.path, descriptor.schema);
     }
+  }
+
+  /**
+   * Register the legacy KIBANA_STARTED_EVENT.
+   * @param analyticsSetup The {@link AnalyticsServiceSetup}
+   * @private
+   */
+  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
+    analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
+      eventType: KIBANA_STARTED_EVENT,
+      schema: {
+        uptime_per_step: {
+          properties: {
+            constructor: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until the constructor was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until the constructor finished',
+                  },
+                },
+              },
+            },
+            preboot: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `preboot` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `preboot` finished',
+                  },
+                },
+              },
+            },
+            setup: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `setup` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `setup` finished',
+                  },
+                },
+              },
+            },
+            start: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `start` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `start` finished',
+                  },
+                },
+              },
+            },
+          },
+          _meta: {
+            description:
+              'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Reports the new and legacy KIBANA_STARTED_EVENT.
+   * @param analyticsStart The {@link AnalyticsServiceStart}.
+   * @private
+   */
+  private reportKibanaStartedEvents(analyticsStart: AnalyticsServiceStart) {
+    // Report the legacy KIBANA_STARTED_EVENT.
+    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
+
+    const ups = this.uptimePerStep;
+
+    // Report the metric-shaped KIBANA_STARTED_EVENT.
+    reportMetricEvent(analyticsStart, {
+      eventName: KIBANA_STARTED_EVENT,
+      duration: ups.start!.end - ups.constructor!.start,
+      key1: 'time-to-constructor',
+      value1: ups.constructor?.start,
+      key2: 'constructor-time',
+      value2: ups.constructor!.end - ups.constructor!.start,
+      key3: 'preboot-time',
+      value3: ups.preboot!.end - ups.preboot!.start,
+      key4: 'setup-time',
+      value4: ups.setup!.end - ups.setup!.start,
+      key5: 'start-time',
+      value5: ups.start!.end - ups.start!.start,
+    });
   }
 }
