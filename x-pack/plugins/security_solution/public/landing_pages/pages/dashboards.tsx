@@ -18,7 +18,7 @@ import { DashboardsTable } from '../../common/components/dashboards/dashboards_t
 import { Title } from '../../common/components/header_page/title';
 import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useCreateSecurityDashboard } from '../../common/containers/dashboards/use_create_security_dashboard';
+import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
 import { useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
@@ -26,7 +26,7 @@ import * as i18n from './translations';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 const Header = () => {
-  const { isLoading, url } = useCreateSecurityDashboard();
+  const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
   return (
     <EuiFlexGroup gutterSize="none" direction="row">
@@ -44,6 +44,7 @@ const Header = () => {
             ev.preventDefault();
             navigateTo({ url });
           }}
+          data-test-subj="createDashboardButton"
         >
           {i18n.DASHBOARDS_PAGE_CREATE_BUTTON}
         </EuiButton>

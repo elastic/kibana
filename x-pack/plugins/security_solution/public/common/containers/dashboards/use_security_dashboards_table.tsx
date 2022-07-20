@@ -87,14 +87,14 @@ export const useSecurityDashboardsTableColumns = (): Array<
             title
           );
         },
-        'data-test-subj': 'dashboard-title-field',
+        'data-test-subj': 'dashboardTableTitleCell',
       },
       {
         field: 'description',
         name: i18n.DASHBOARDS_DESCRIPTION,
         sortable: true,
         render: (description: string) => description || EMPTY_DESCRIPTION,
-        'data-test-subj': 'dashboard-description-field',
+        'data-test-subj': 'dashboardTableDescriptionCell',
       },
       // adds the tags table column based on the saved object items
       ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
@@ -105,7 +105,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
   return columns;
 };
 
-export const useSecurityDashboardTable = () => {
+export const useSecurityDashboardsTable = () => {
   const items = useSecurityDashboardsTableItems();
   const columns = useSecurityDashboardsTableColumns();
   return { items, columns };

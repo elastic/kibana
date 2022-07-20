@@ -11,7 +11,7 @@ import { getSecurityTagId, createSecurityTag } from './utils';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 
-export const useCreateSecurityDashboard: UseCreateDashboard = () => {
+export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
   const {
     dashboard: { locator } = {},
     savedObjects: { client: savedObjectsClient },

@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import type { Search } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { useSecurityDashboardTable } from '../../containers/dashboards/use_security_dashboards_table';
+import { useSecurityDashboardsTable } from '../../containers/dashboards/use_security_dashboards_table';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;
@@ -22,7 +22,7 @@ const DASHBOARDS_TABLE_SORTING = {
 } as const;
 
 export const DashboardsTable: React.FC = () => {
-  const { items, columns } = useSecurityDashboardTable();
+  const { items, columns } = useSecurityDashboardsTable();
   const [filteredItems, setFilteredItems] = useState(items);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -54,7 +54,7 @@ export const DashboardsTable: React.FC = () => {
 
   return (
     <EuiInMemoryTable
-      data-test-subj="dashboards-table"
+      data-test-subj="dashboardsTable"
       items={filteredItems}
       columns={columns}
       search={search}

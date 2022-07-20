@@ -10,7 +10,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock/test_providers';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
-import { useCreateSecurityDashboard } from './use_create_security_dashboard';
+import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 
 jest.mock('../../lib/kibana');
 
@@ -30,20 +30,20 @@ jest.mock('./utils', () => ({
   createSecurityTag: () => mockCreateSecurityTag(),
 }));
 
-const renderUseCreateSecurityDashboard = () =>
-  renderHook(() => useCreateSecurityDashboard(), {
+const renderUseCreateSecurityDashboardLink = () =>
+  renderHook(() => useCreateSecurityDashboardLink(), {
     wrapper: TestProviders,
   });
 
 const asyncRenderUseCreateSecurityDashboard = async () => {
-  const renderedHook = renderUseCreateSecurityDashboard();
+  const renderedHook = renderUseCreateSecurityDashboardLink();
   await act(async () => {
     await renderedHook.waitForNextUpdate();
   });
   return renderedHook;
 };
 
-describe('useCreateSecurityDashboard', () => {
+describe('useCreateSecurityDashboardLink', () => {
   const mockGetRedirectUrl = jest.fn(() => URL);
   useKibana().services.dashboard = {
     locator: { getRedirectUrl: mockGetRedirectUrl },
@@ -96,7 +96,7 @@ describe('useCreateSecurityDashboard', () => {
     });
 
     it('should return isLoading while requesting', async () => {
-      const { result, waitForNextUpdate } = renderUseCreateSecurityDashboard();
+      const { result, waitForNextUpdate } = renderUseCreateSecurityDashboardLink();
 
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.url).toEqual('');

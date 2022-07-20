@@ -52,4 +52,27 @@ describe('dashboards utils', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('createSecurityTag', () => {
+    it('should call saved objects find with security tag name', async () => {
+      await getSecurityTagId(savedObjectsClient);
+
+      expect(mockSavedObjectsFind).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'tag', search: SECURITY_TAG_NAME, searchFields: ['name'] })
+      );
+    });
+
+    it('should find saved object with security tag name', async () => {
+      const result = await getSecurityTagId(savedObjectsClient);
+
+      expect(result).toEqual(TAG_ID);
+    });
+
+    it('should not find saved object with wrong security tag name', async () => {
+      mockSavedObjectsFind.mockResolvedValueOnce({ savedObjects: [DEFAULT_TAGS_RESPONSE[1]] });
+      const result = await getSecurityTagId(savedObjectsClient);
+
+      expect(result).toBeUndefined();
+    });
+  });
 });

@@ -74,7 +74,7 @@ describe('Security Dashboards Table hooks', () => {
   const tagsColumn = {
     field: 'id', // set existing field to prevent test error
     name: 'Tags',
-    'data-test-subj': 'dashboard-tags-field',
+    'data-test-subj': 'dashboardTableTagsCell',
   };
   mockTaggingGetTableColumnDefinition.mockReturnValue(tagsColumn);
 
@@ -178,8 +178,8 @@ describe('Security Dashboards Table hooks', () => {
     expect(result.getByText('title2')).toBeInTheDocument();
     expect(result.getByText('description2')).toBeInTheDocument();
 
-    expect(result.queryAllByTestId('dashboard-title-field')).toHaveLength(2);
-    expect(result.queryAllByTestId('dashboard-description-field')).toHaveLength(2);
-    expect(result.queryAllByTestId('dashboard-tags-field')).toHaveLength(2);
+    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(2);
+    expect(result.queryAllByTestId('dashboardTableDescriptionCell')).toHaveLength(2);
+    expect(result.queryAllByTestId('dashboardTableTagsCell')).toHaveLength(2);
   });
 });
