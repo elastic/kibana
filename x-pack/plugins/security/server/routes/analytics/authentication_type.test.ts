@@ -350,7 +350,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
   describe('logApiKeyWithInteractiveUserDeprecated', () => {
     it('should log a deprecation warning if API key is being used for access via a web browser', async () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'ApiKey' },
+        headers: { authorization: 'ApiKey xxxx' },
       });
 
       const mockAuthc = authenticationServiceMock.createStart();
