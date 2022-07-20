@@ -125,7 +125,7 @@ function getExpressionForLayer(
         const aggId = String(index);
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
-        const wrapInTimeFilter = def.windowable && !hasDateHistogram;
+        const wrapInTimeFilter = def.windowable && !hasDateHistogram && col.window;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
