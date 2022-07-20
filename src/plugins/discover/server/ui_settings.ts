@@ -314,8 +314,17 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     value: false,
     description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enables the SQL queries for searching in Discover.',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      defaultMessage:
+        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches or dashboards. This setting enables SQL as a text-based query language in Discover. If you have feedback on this experience please reach out to us on {link}',
+      values: {
+        link:
+          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.enableSQL.discussLinkText', {
+            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
+          }) +
+          '</a>',
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
     }),
     requiresPageReload: true,
     category: ['discover'],
