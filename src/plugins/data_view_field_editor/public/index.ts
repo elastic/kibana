@@ -21,6 +21,7 @@
 import { IndexPatternFieldEditorPlugin } from './plugin';
 
 export type {
+  Field,
   PluginSetup as IndexPatternFieldEditorSetup,
   PluginStart as IndexPatternFieldEditorStart,
 } from './types';
@@ -35,3 +36,4 @@ export function plugin() {
 export type { FormatEditorServiceStart } from './service';
 export type { OpenFieldEditorOptions } from './open_editor';
 export type { OpenFieldDeleteModalOptions } from './open_delete_modal';
+export type { Sample, SampleInput } from './components/field_format_editor/types';
