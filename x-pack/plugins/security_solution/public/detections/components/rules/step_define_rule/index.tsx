@@ -288,6 +288,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const onChangeDataSource = useCallback(
     (optionId: string) => {
       form.setFieldValue('dataSourceType', optionId);
+      form.getFields().index.reset({
+        resetValue: false,
+      });
+      form.getFields().dataViewId.reset({
+        resetValue: false,
+      });
     },
     [form]
   );
@@ -651,7 +657,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   let dataForDescription: Partial<DefineStepRule> = initialState;
 
   if (dataSourceType === DataSourceType.IndexPatterns) {
-    dataForDescription = omit(initialState, ['dataSourceType', 'dataViewID']);
+    dataForDescription = omit(initialState, ['dataSourceType', 'dataViewId']);
   } else if (dataSourceType === DataSourceType.DataView) {
     dataForDescription = omit(initialState, ['dataSourceType', 'index']);
   }
@@ -672,14 +678,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <StyledVisibleContainer isVisible={false}>
             <UseField
               path="dataSourceType"
-              config={{
-                ...(schema.dataSourceType as {
-                  defaultValue: string;
-                  fieldsToValidateOnChange: string[];
-                  type: string;
-                  validations: [];
-                }),
-              }}
               componentProps={{
                 euiFieldProps: {
                   fullWidth: true,

@@ -551,10 +551,4 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  dataSourceType: {
-    defaultValue: DataSourceType.IndexPatterns,
-    fieldsToValidateOnChange: ['dataSourceType', 'index', 'dataViewId'],
-    type: FIELD_TYPES.TEXT,
-    validations: [],
-  },
 };
