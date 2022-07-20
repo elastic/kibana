@@ -27,6 +27,7 @@ import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
 import { getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { useAiOpsKibana } from '../../../kibana_context';
 
@@ -43,6 +44,7 @@ interface DocumentCountChartProps {
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval: number;
+  changePoint?: ChangePoint;
 }
 
 const SPEC_ID = 'document_count';
@@ -70,6 +72,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   timeRangeEarliest,
   timeRangeLatest,
   interval,
+  changePoint,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -81,9 +84,21 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
-  const seriesName = i18n.translate('xpack.aiops.dataGrid.field.documentCountChart.seriesLabel', {
-    defaultMessage: 'document count',
-  });
+  const overallSeriesName = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
+    {
+      defaultMessage: 'document count',
+    }
+  );
+
+  const overallSeriesNameWithSplit = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
+    {
+      defaultMessage: 'other document count',
+    }
+  );
+
+  const splitSeriesName = `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -242,24 +257,27 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           <Axis id="left" position={Position.Left} />
           <BarSeries
             id={SPEC_ID}
-            name={seriesName}
+            name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="time"
             yAccessors={['value']}
             data={adjustedChartPoints}
+            stackAccessors={[0]}
             timeZone={timeZone}
           />
           {chartPointsSplit && (
             <BarSeries
               id={`${SPEC_ID}_split`}
-              name={seriesName}
+              name={splitSeriesName}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
+              stackAccessors={[0]}
               timeZone={timeZone}
+              color={['orange']}
             />
           )}
           {windowParameters && (

@@ -25,8 +25,7 @@ import {
 
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import type { ChangePoint } from '../../../common/types';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import {
   Accessor,
@@ -209,6 +208,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
                 currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
               }
               totalCount={totalCount}
+              changePoint={currentSelectedChangePoint}
             />
           )}
           <EuiSpacer size="m" />

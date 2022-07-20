@@ -10,8 +10,8 @@ import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import type { ChangePoint } from '../../common/types';
 import { TimeBuckets } from '../../common/time_buckets';
 
 import { useAiOpsKibana } from '../kibana_context';

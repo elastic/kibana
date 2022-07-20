@@ -10,8 +10,7 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
-import type { ChangePoint } from '../common/types';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from './query_utils';
 

@@ -11,11 +11,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
-import type { ChangePoint } from '../../../common/types';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
 
 /**

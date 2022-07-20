@@ -6,7 +6,8 @@
  */
 import React, { FC } from 'react';
 
-import { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
@@ -14,6 +15,7 @@ import { DocumentCountStats } from '../../../get_document_stats';
 
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (d: WindowParameters) => void;
+  changePoint?: ChangePoint;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   totalCount: number;
@@ -21,6 +23,7 @@ export interface DocumentCountContentProps {
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
+  changePoint,
   documentCountStats,
   documentCountStatsSplit,
   totalCount,
@@ -56,6 +59,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
+          changePoint={changePoint}
         />
       )}
     </>
