@@ -221,9 +221,6 @@ describe('metric visualization', () => {
             Object {
               "arguments": Object {
                 "breakdownBy": Array [],
-                "extraText": Array [
-                  "extra-text",
-                ],
                 "max": Array [
                   "max-metric-col-id",
                 ],
@@ -256,6 +253,9 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
+                "secondaryPrefix": Array [
+                  "extra-text",
+                ],
                 "subtitle": Array [
                   "subtitle",
                 ],
@@ -278,9 +278,6 @@ describe('metric visualization', () => {
               "arguments": Object {
                 "breakdownBy": Array [
                   "breakdown-col-id",
-                ],
-                "extraText": Array [
-                  "extra-text",
                 ],
                 "max": Array [
                   "max-metric-col-id",
@@ -315,6 +312,9 @@ describe('metric visualization', () => {
                 ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
+                ],
+                "secondaryPrefix": Array [
+                  "extra-text",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -427,11 +427,11 @@ describe('metric visualization', () => {
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
       Object {
-        "extraText": "extra-text",
         "layerId": "first",
         "layerType": "data",
         "maxCols": 5,
         "progressDirection": "vertical",
+        "secondaryPrefix": "extra-text",
         "subtitle": "subtitle",
       }
     `);
