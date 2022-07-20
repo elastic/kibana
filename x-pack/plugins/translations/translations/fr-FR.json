@@ -13769,7 +13769,6 @@
     "xpack.fleet.upgradeAgents.upgradeMultipleTitle": "Mettre à niveau {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.upgradeSingleDescription": "Cette action met à niveau l'agent qui s'exécute sur \"{hostName}\" vers la version {version}. Impossible d'annuler cette action. Voulez-vous vraiment continuer ?",
     "xpack.fleet.upgradeAgents.upgradeSingleTitle": "Mettre à niveau l'agent",
-    "xpack.fleet.upgradeAgents.warningCallout": "Mise à niveau propagée uniquement disponible pour Elastic Agent à partir de la version 8.3",
     "xpack.fleet.upgradeAgents.warningCalloutErrors": "Erreur lors de la mise à niveau de {count, plural, one {l'agent sélectionné} other {{count} agents sélectionnés}}",
     "xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade": "Mettre à niveau cette intégration et déployer les modifications sur la stratégie d'agent sélectionnée",
     "xpack.fleet.upgradePackagePolicy.pageTitle": "Mettre à niveau l'intégration",

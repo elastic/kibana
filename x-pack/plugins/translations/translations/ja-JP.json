@@ -13761,7 +13761,6 @@
     "xpack.fleet.upgradeAgents.upgradeMultipleTitle": "{count, plural, other  {{count}個のエージェント} =true {すべての選択されたエージェント}}をアップグレード",
     "xpack.fleet.upgradeAgents.upgradeSingleDescription": "このアクションにより、「{hostName}」で実行中のエージェントがバージョン{version}にアップグレードされます。このアクションは元に戻せません。続行していいですか？",
     "xpack.fleet.upgradeAgents.upgradeSingleTitle": "エージェントをアップグレード",
-    "xpack.fleet.upgradeAgents.warningCallout": "ローリングアップグレードは、Elasticエージェントバージョン8.3以降でのみ使用できます",
     "xpack.fleet.upgradeAgents.warningCalloutErrors": "選択した{count, plural,other {{count}個のエージェント}}のアップグレードエラー",
     "xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade": "この統合をアップグレードし、選択したエージェントポリシーに変更をデプロイします",
     "xpack.fleet.upgradePackagePolicy.pageTitle": "統合のアップグレード",
