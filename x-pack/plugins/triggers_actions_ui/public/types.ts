@@ -364,6 +364,7 @@ export interface RuleDefinitionProps {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
+  hideEditButton?: boolean;
   filteredRuleTypes?: string[];
 }
 

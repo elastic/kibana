@@ -167,6 +167,7 @@ export function RuleComponent({
           rule,
           actionTypeRegistry,
           ruleTypeRegistry,
+          hideEditButton: true,
           onEditRule: requestRefresh,
         })}
       </EuiFlexGroup>
