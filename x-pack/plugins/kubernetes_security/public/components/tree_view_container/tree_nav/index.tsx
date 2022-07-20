@@ -5,11 +5,22 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiButtonGroup, useGeneratedHtmlId, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  useGeneratedHtmlId,
+  EuiText,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import {
   TREE_VIEW_INFRASTRUCTURE_VIEW,
   TREE_VIEW_LOGICAL_VIEW,
   TREE_VIEW_SWITCHER_LEGEND,
+  TREE_NAVIGATION_COLLAPSE,
+  TREE_NAVIGATION_EXPAND,
 } from '../../../../common/translations';
 import { useStyles } from './styles';
 import { IndexPattern, GlobalFilter, TreeNavSelection } from '../../../types';
@@ -29,6 +40,16 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
   const styles = useStyles();
   const [tree, setTree] = useState(TREE_VIEW.logical);
   const [selected, setSelected] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const treeNavTypePrefix = useGeneratedHtmlId({
+    prefix: 'treeNavType',
+  });
+  const logicalTreeViewPrefix = `${treeNavTypePrefix}${LOGICAL}`;
+  const [toggleIdSelected, setToggleIdSelected] = useState(logicalTreeViewPrefix);
+
+  const handleToggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   const filterQueryWithTimeRange = useMemo(() => {
     return addTimerangeToQuery(
@@ -37,14 +58,6 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
       globalFilter.endDate
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
-
-  const treeNavTypePrefix = useGeneratedHtmlId({
-    prefix: 'treeNavType',
-  });
-
-  const logicalTreeViewPrefix = `${treeNavTypePrefix}${LOGICAL}`;
-
-  const [toggleIdSelected, setToggleIdSelected] = useState(logicalTreeViewPrefix);
 
   const options: TreeViewOptionsGroup[] = [
     {
@@ -70,43 +83,67 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
 
   return (
     <>
-      <EuiButtonGroup
-        name="coarsness"
-        legend={TREE_VIEW_SWITCHER_LEGEND}
-        options={options}
-        idSelected={toggleIdSelected}
-        onChange={handleTreeViewSwitch}
-        buttonSize="compressed"
-        isFullWidth
-        color="primary"
-        css={styles.treeViewSwitcher}
-      />
-      <EuiSpacer size="xs" />
-      <EuiText color="subdued" size="xs" css={styles.treeViewLegend}>
-        {tree.map((t) => t.name).join(' / ')}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <div css={styles.treeViewContainer} className="eui-scrollBar">
-        <DynamicTreeView
-          query={JSON.parse(filterQueryWithTimeRange)}
-          indexPattern={indexPattern?.title}
-          tree={tree}
-          aria-label="Logical Tree View"
-          selected={selected}
-          onSelect={(selectionDepth, key, type) => {
-            const newSelectionDepth = {
-              ...selectionDepth,
-              [type]: key,
-            };
-            setSelected(
-              Object.entries(newSelectionDepth)
-                .map(([k, v]) => `${k}.${v}`)
-                .join()
-            );
-            onSelect(newSelectionDepth);
-          }}
-          hasSelection={hasSelection}
-        />
+      {isCollapsed && (
+        <EuiToolTip content={TREE_NAVIGATION_EXPAND}>
+          <EuiButtonIcon
+            onClick={handleToggleCollapse}
+            iconType="menuRight"
+            aria-label={TREE_NAVIGATION_EXPAND}
+          />
+        </EuiToolTip>
+      )}
+      <div style={{ display: isCollapsed ? 'none' : 'inherit' }}>
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiButtonGroup
+              name="coarsness"
+              legend={TREE_VIEW_SWITCHER_LEGEND}
+              options={options}
+              idSelected={toggleIdSelected}
+              onChange={handleTreeViewSwitch}
+              buttonSize="compressed"
+              isFullWidth
+              color="primary"
+              css={styles.treeViewSwitcher}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={TREE_NAVIGATION_COLLAPSE}>
+              <EuiButtonIcon
+                onClick={handleToggleCollapse}
+                iconType="menuLeft"
+                aria-label={TREE_NAVIGATION_COLLAPSE}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <EuiText color="subdued" size="xs" css={styles.treeViewLegend}>
+          {tree.map((t) => t.name).join(' / ')}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <div css={styles.treeViewContainer} className="eui-scrollBar">
+          <DynamicTreeView
+            query={JSON.parse(filterQueryWithTimeRange)}
+            indexPattern={indexPattern?.title}
+            tree={tree}
+            aria-label={selectedLabel}
+            selected={selected}
+            onSelect={(selectionDepth, key, type) => {
+              const newSelectionDepth = {
+                ...selectionDepth,
+                [type]: key,
+              };
+              setSelected(
+                Object.entries(newSelectionDepth)
+                  .map(([k, v]) => `${k}.${v}`)
+                  .join()
+              );
+              onSelect(newSelectionDepth);
+            }}
+            hasSelection={hasSelection}
+          />
+        </div>
       </div>
     </>
   );
