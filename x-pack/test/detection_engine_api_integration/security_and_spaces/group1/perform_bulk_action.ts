@@ -567,7 +567,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const dataViewId = 'index1-*';
         const simpleRule = {
           ...getSimpleRule(ruleId),
-          indices: undefined,
+          index: undefined,
           data_view_id: dataViewId,
         };
         await createRule(supertest, log, simpleRule);
@@ -578,7 +578,7 @@ export default ({ getService }: FtrProviderContext): void => {
             action: BulkAction.edit,
             [BulkAction.edit]: [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
                 overwriteDataViews: true,
               },
@@ -590,16 +590,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Check that the updated rule is returned with the response
         expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(undefined);
 
         // Check that the updates have been persisted
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(['initial-index-*']);
-
-        // Check that the updates have been persisted
-        const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(addIndexRule.index).to.eql(['initial-index-*']);
       });
 
       it('should set timeline values in rule', async () => {
