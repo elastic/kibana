@@ -53,7 +53,7 @@ describe('OsMetricsCollector', () => {
   });
 
   it('remove whitespaces and carriage return from getos call', async () => {
-    mockGetOsResult = { dist: ' dist\n', release: 'rel\n ' };
+    mockGetOsResult = { dist: 'dist\n', release: 'rel\n' };
 
     const platform = 'linux';
 
