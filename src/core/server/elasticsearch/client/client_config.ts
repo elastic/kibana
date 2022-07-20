@@ -61,10 +61,10 @@ export function parseClientOptions(
     // do not make assumption on user-supplied data content
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
-    agent: {
-      maxSockets: config.maxSockets,
-      keepAlive: config.keepAlive ?? true,
-    },
+    // agent: {
+    //   maxSockets: config.maxSockets,
+    //   keepAlive: config.keepAlive ?? true,
+    // },
     compression: config.compression,
   };
 
