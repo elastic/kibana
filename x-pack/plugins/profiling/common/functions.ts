@@ -30,7 +30,7 @@ interface TopNFunctionAndFrameGroup {
 
 type TopNFunction = Pick<TopNFunctionAndFrameGroup, 'Frame' | 'CountExclusive' | 'CountInclusive'>;
 
-interface TopNFunctions {
+export interface TopNFunctions {
   TotalCount: number;
   TopN: TopNFunction[];
 }
