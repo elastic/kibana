@@ -57,7 +57,7 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds advanced file monitoring defaulted to false and ensures crendential hardening is added and false.', () => {
+  it('adds advanced file monitoring defaulted to false and ensures credential hardening is added and false.', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
@@ -68,7 +68,7 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
   });
 
-  it('adds advanced file monitoring defaulted to false and preserves existing advanced fields and ensures crendential hardening is added and false.', () => {
+  it('adds advanced file monitoring defaulted to false and preserves existing advanced fields and ensures credential hardening is added and false.', () => {
     const initialDoc = policyDoc({
       linuxAdvanced: { advanced: { existingAdvanced: true } },
     });
