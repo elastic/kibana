@@ -8,6 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObject, SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -15,34 +16,7 @@ import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
 import { SavedObjectsValidationMap } from './validation';
 
-export type {
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportWarning,
-} from './import/types';
-
-import { SavedObject } from '../../types';
-
 type KueryNode = any;
-
-export type {
-  SavedObjectAttributes,
-  SavedObjectAttribute,
-  SavedObjectAttributeSingle,
-  SavedObject,
-  SavedObjectError,
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
-} from '../../types';
 
 /**
  * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
@@ -235,20 +209,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * @public
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
-
-/**
- * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
- *  * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.
- *  * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.
- *  * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be
- *    unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being
- *    converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be *share-capable*,
- *    but will not actually be shareable until the namespace type is changed to "multiple".
- *  * agnostic: This type of saved object is global.
- *
- * @public
- */
-export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 /**
  * @public

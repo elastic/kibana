@@ -6,6 +6,28 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type {
+  SavedObject,
+  SavedObjectsNamespaceType,
+  SavedObjectAttributeSingle,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from './saved_objects';
+
+export type {
+  SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
+  SavedObjectsImportWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportConflictError,
+} from './saved_objects_imports';

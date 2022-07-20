@@ -8,14 +8,15 @@
 
 import { pick, throttle, cloneDeep } from 'lodash';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
-
 import type {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
-  SavedObjectsMigrationVersion,
   SavedObjectsResolveResponse,
 } from '../../server';
 

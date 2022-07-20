@@ -8,7 +8,7 @@
 
 /** This module is intended for consumption by public to avoid import issues with server-side code */
 export type { EnvironmentMode, PackageInfo } from '@kbn/config';
-export type { PluginOpaqueId } from './plugins/types';
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
@@ -26,9 +26,12 @@ export type {
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectsNamespaceType,
   SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
+} from '@kbn/core-saved-objects-common';
+export type {
   SavedObjectStatusMeta,
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
@@ -36,7 +39,6 @@ export type {
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
-  SavedObjectsNamespaceType,
 } from './saved_objects/types';
 export type {
   SavedObjectReferenceWithContext,
