@@ -143,7 +143,9 @@ export const useData = (
   return {
     docStats,
     timefilter,
+    /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,
+    /** End timestamp filter */
     latest: fieldStatsRequest?.latest,
     searchQueryLanguage,
     searchString,
