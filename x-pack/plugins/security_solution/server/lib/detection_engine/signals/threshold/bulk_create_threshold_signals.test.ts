@@ -7,7 +7,7 @@
 
 import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { calculateThresholdSignalUuid } from '../utils';
-import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
+import { getTransformedHits } from './bulk_create_threshold_signals';
 
 describe('transformThresholdNormalizedResultsToEcs', () => {
   it('should return transformed threshold results', () => {
@@ -23,7 +23,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
     };
     const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
-    const transformedResults = transformThresholdResultsToEcs(
+    const transformedResults = getTransformedHits(
       [
         {
           key: {
@@ -102,14 +102,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
     };
     const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
-    const transformedResults = transformThresholdResultsToEcs(
-      [],
-      'test',
-      startedAt,
-      from,
-      threshold,
-      '1234'
-    );
+    const transformedResults = getTransformedHits([], 'test', startedAt, from, threshold, '1234');
     expect(transformedResults).toEqual([]);
   });
 
@@ -126,7 +119,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
     };
     const from = new Date('2020-12-17T16:27:00Z');
     const startedAt = new Date('2020-12-17T16:27:00Z');
-    const transformedResults = transformThresholdResultsToEcs(
+    const transformedResults = getTransformedHits(
       [
         {
           key: {},

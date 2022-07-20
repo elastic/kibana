@@ -37,7 +37,7 @@ interface BulkCreateThresholdSignalsParams {
   wrapHits: WrapHits;
 }
 
-const getTransformedHits = (
+export const getTransformedHits = (
   buckets: ThresholdBucket[],
   inputIndex: string,
   startedAt: Date,
