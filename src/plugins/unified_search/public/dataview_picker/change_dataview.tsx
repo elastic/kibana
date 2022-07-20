@@ -25,6 +25,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
@@ -238,13 +239,37 @@ export function ChangeDataView({
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <h5>
-                  {i18n.translate('unifiedSearch.query.queryBar.indexPattern.dataViewsLabel', {
-                    defaultMessage: 'Data views',
-                  })}
-                </h5>
-              </EuiText>
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  {Boolean(isTextBasedLangSelected) ? (
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
+                        {
+                          defaultMessage:
+                            'The current text-based query will be cleared when switching to a data view. Ensure that you have saved this search to avoid losing your work.',
+                        }
+                      )}
+                    >
+                      <EuiIcon
+                        type="alert"
+                        color="warning"
+                        data-test-subj="textBasedLang-warning"
+                      />
+                    </EuiToolTip>
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <h5>
+                      {i18n.translate('unifiedSearch.query.queryBar.indexPattern.dataViewsLabel', {
+                        defaultMessage: 'Data views',
+                      })}
+                    </h5>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
