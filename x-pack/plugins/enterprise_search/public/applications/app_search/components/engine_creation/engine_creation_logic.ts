@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
 import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
