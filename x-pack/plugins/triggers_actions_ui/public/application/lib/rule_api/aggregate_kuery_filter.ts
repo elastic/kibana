@@ -4,27 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { RuleAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { mapFiltersToKql } from './map_filters_to_kql';
-import {
-  LoadRuleAggregationsProps,
-  rewriteBodyRes,
-  rewriteTagsBodyRes,
-  RuleTagsAggregations,
-} from './aggregate_helpers';
+import { LoadRuleAggregationsProps, rewriteBodyRes } from './aggregate_helpers';
+import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
-// TODO: https://github.com/elastic/kibana/issues/131682
-export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleTagsAggregations> {
-  const res = await http.get<AsApiContract<RuleAggregations>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
-  );
-  return rewriteTagsBodyRes(res);
-}
-
-export async function loadRuleAggregations({
+export async function loadRuleAggregationsWithKueryFilter({
   http,
   searchText,
   typesFilter,
@@ -33,20 +19,20 @@ export async function loadRuleAggregations({
   ruleStatusesFilter,
   tagsFilter,
 }: LoadRuleAggregationsProps): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({
+  const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
     actionTypesFilter,
+    tagsFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
-    tagsFilter,
+    searchText,
   });
+
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       query: {
-        search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
-        search: searchText,
-        filter: filters.length ? filters.join(' and ') : undefined,
+        ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         default_search_operator: 'AND',
       },
     }
