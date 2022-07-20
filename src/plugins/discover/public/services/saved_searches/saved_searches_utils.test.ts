@@ -44,6 +44,7 @@ describe('saved_searches_utils', () => {
           "id": "id",
           "isTextBasedQuery": false,
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
               "aggs": Object {
@@ -123,6 +124,7 @@ describe('saved_searches_utils', () => {
             "searchSourceJSON": "{}",
           },
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "sort": Array [
             Array [
               "a",

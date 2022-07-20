@@ -268,6 +268,8 @@ export function ChangeDataView({
         <DataViewsList
           dataViewsList={dataViewsList}
           onChangeDataView={async (newId) => {
+            const dataView = await data.dataViews.get(newId);
+            await data.dataViews.refreshFields(dataView);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
