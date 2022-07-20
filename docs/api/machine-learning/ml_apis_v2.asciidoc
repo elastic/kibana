@@ -27,6 +27,8 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
 `200`::
 +
 --
+(<<SyncResponse,`SyncResponse`>>)
+
 Indicates a successful call.
 
 --
@@ -36,7 +38,7 @@ Indicates a successful call.
 [source,json]
 --------
 curl -XGET https://localhost:5601/api/ml/saved_objects/sync \
--u USER:KEY
+-u USER:PASSWORD
 --------
 [[ml-sync]]
 === Sync machine learning saved objects
@@ -69,6 +71,8 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models. 
 `200`::
 +
 --
+(<<SyncResponse,`SyncResponse`>>)
+
 Indicates a successful call.
 
 --
@@ -78,7 +82,7 @@ Indicates a successful call.
 [source,json]
 --------
 curl -XGET https://localhost:5601/s/{spaceId}/api/ml/saved_objects/sync \
--u USER:KEY
+-u USER:PASSWORD
 --------
 [[definitions]]
 == Definitions
@@ -87,12 +91,16 @@ curl -XGET https://localhost:5601/s/{spaceId}/api/ml/saved_objects/sync \
 * <<DatafeedsRemoved>>
 * <<SavedObjectsCreated>>
 * <<SavedObjectsDeleted>>
+* <<SyncDatafeed>>
+* <<SyncJob>>
+* <<SyncModel>>
 * <<SyncResponse>>
+* <<SyncSuccess>>
 
 [[DatafeedsAdded]]
 === `DatafeedsAdded`
 
-If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
 
 
 ==== Example
@@ -106,7 +114,7 @@ If a saved object for an anomaly detection job is missing a datafeed identifier,
 [[DatafeedsRemoved]]
 === `DatafeedsRemoved`
 
-If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
 
 
 ==== Example
@@ -120,19 +128,22 @@ If a saved object for an anomaly detection job references a datafeed that no lon
 [[SavedObjectsCreated]]
 === `SavedObjectsCreated`
 
-If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
 
 
 ==== Properties
 
-`anomaly-detector` (++map[string,+++object+++]++)::
-{empty}
+`anomaly-detector` (++map[string,++<<SyncJob,`SyncJob`>>++]++)::
+This object is present if there are anomaly detection jobs affected by the synchronization.
 
-`data-frame-analytics` (++map[string,+++object+++]++)::
-{empty}
 
-`trained-model` (++map[string,+++object+++]++)::
-{empty}
+`data-frame-analytics` (++map[string,++<<SyncJob,`SyncJob`>>++]++)::
+This object is present if there are data frame analytics jobs affected by the synchronization.
+
+
+`trained-model` (++map[string,++<<SyncModel,`SyncModel`>>++]++)::
+This object is present if there are trained models affected by the synchronization.
+
 
 ==== Example
 
@@ -140,13 +151,19 @@ If saved objects are missing for machine learning jobs or trained models, they a
 --------
 {
    "anomaly-detector" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    },
    "data-frame-analytics" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    },
    "trained-model" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    }
 }
 
@@ -155,19 +172,22 @@ If saved objects are missing for machine learning jobs or trained models, they a
 [[SavedObjectsDeleted]]
 === `SavedObjectsDeleted`
 
-If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
 
 
 ==== Properties
 
-`anomaly-detector` (++map[string,+++object+++]++)::
-{empty}
+`anomaly-detector` (++map[string,++<<SyncJob,`SyncJob`>>++]++)::
+This object is present if there are anomaly detection jobs affected by the synchronization.
 
-`data-frame-analytics` (++map[string,+++object+++]++)::
-{empty}
 
-`trained-model` (++map[string,+++object+++]++)::
-{empty}
+`data-frame-analytics` (++map[string,++<<SyncJob,`SyncJob`>>++]++)::
+This object is present if there are data frame analytics jobs affected by the synchronization.
+
+
+`trained-model` (++map[string,++<<SyncModel,`SyncModel`>>++]++)::
+This object is present if there are trained models affected by the synchronization.
+
 
 ==== Example
 
@@ -175,14 +195,86 @@ If saved objects exist for machine learning jobs or trained models that no longe
 --------
 {
    "anomaly-detector" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    },
    "data-frame-analytics" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    },
    "trained-model" : {
-      "some_property" : {}
+      "some_property" : {
+         "success" : {}
+      }
    }
+}
+
+--------
+
+[[SyncDatafeed]]
+=== `SyncDatafeed`
+
+The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.
+
+
+==== Properties
+
+`success` (<<SyncSuccess,`SyncSuccess`>>)::
+The success or failure of the synchronization.
+
+
+==== Example
+
+[source,json]
+--------
+{
+   "success" : {}
+}
+
+--------
+
+[[SyncJob]]
+=== `SyncJob`
+
+The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.
+
+
+==== Properties
+
+`success` (<<SyncSuccess,`SyncSuccess`>>)::
+The success or failure of the synchronization.
+
+
+==== Example
+
+[source,json]
+--------
+{
+   "success" : {}
+}
+
+--------
+
+[[SyncModel]]
+=== `SyncModel`
+
+The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.
+
+
+==== Properties
+
+`success` (<<SyncSuccess,`SyncSuccess`>>)::
+The success or failure of the synchronization.
+
+
+==== Example
+
+[source,json]
+--------
+{
+   "success" : {}
 }
 
 --------
@@ -190,24 +282,25 @@ If saved objects exist for machine learning jobs or trained models that no longe
 [[SyncResponse]]
 === `SyncResponse`
 
-_Intentionally left blank_
+A list of machine learning saved objects that required synchronization.
+
 
 ==== Properties
 
 `datafeedsAdded` (<<DatafeedsAdded,`DatafeedsAdded`>>)::
-If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
 
 
 `datafeedsRemoved` (<<DatafeedsRemoved,`DatafeedsRemoved`>>)::
-If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
 
 
 `savedObjectsCreated` (<<SavedObjectsCreated,`SavedObjectsCreated`>>)::
-If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
 
 
 `savedObjectsDeleted` (<<SavedObjectsDeleted,`SavedObjectsDeleted`>>)::
-If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
 
 
 ==== Example
@@ -219,26 +312,52 @@ If saved objects exist for machine learning jobs or trained models that no longe
    "datafeedsRemoved" : {},
    "savedObjectsCreated" : {
       "anomaly-detector" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       },
       "data-frame-analytics" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       },
       "trained-model" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       }
    },
    "savedObjectsDeleted" : {
       "anomaly-detector" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       },
       "data-frame-analytics" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       },
       "trained-model" : {
-         "some_property" : {}
+         "some_property" : {
+            "success" : {}
+         }
       }
    }
 }
+
+--------
+
+[[SyncSuccess]]
+=== `SyncSuccess`
+
+The success or failure of the synchronization.
+
+
+==== Example
+
+[source,json]
+--------
+{}
 
 --------
