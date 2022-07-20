@@ -19,7 +19,6 @@ import type { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
-import { AlertsView } from '../../../common/components/alerts_viewer';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
 import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
@@ -98,15 +97,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
             {...tabProps}
             pageFilters={pageFilters}
             timelineId={TimelineId.usersPageEvents}
-          />
-        </Route>
-
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.alerts})`}>
-          <AlertsView
-            entityType="events"
-            timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={alertsPageFilters}
-            {...tabProps}
+            externalAlertPageFilters={alertsPageFilters}
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>

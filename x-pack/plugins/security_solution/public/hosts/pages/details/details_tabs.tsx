@@ -84,7 +84,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       updateDateRange,
     };
 
-    const hostPageFilters = useMemo(
+    const hostExternalAlertFilter = useMemo(
       () =>
         pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter,
       [pageFilters]
@@ -110,7 +110,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
             {...tabProps}
             pageFilters={pageFilters}
             timelineId={TimelineId.hostsPageEvents}
-            externalAlertPageFilters={hostPageFilters}
+            externalAlertPageFilters={hostExternalAlertFilter}
           />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>

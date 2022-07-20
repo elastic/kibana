@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -25,8 +25,8 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
-import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 import { TimelineId } from '../../../common/types';
+import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
 export const HostsTabs = memo<HostsTabsProps>(
   ({
@@ -81,6 +81,12 @@ export const HostsTabs = memo<HostsTabsProps>(
       updateDateRange,
     };
 
+    const hostExternalAlertFilter = useMemo(
+      () =>
+        pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter,
+      [pageFilters]
+    );
+
     return (
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
@@ -98,12 +104,10 @@ export const HostsTabs = memo<HostsTabsProps>(
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
             {...tabProps}
-            timelineId={TimelineId.hostsPageEvents}
             pageFilters={pageFilters}
+            timelineId={TimelineId.hostsPageEvents}
+            externalAlertPageFilters={hostExternalAlertFilter}
           />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
-          <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />

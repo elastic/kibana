@@ -26,7 +26,7 @@ import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
-  histogramConfigs,
+  eventsHistogramConfig,
 } from '../../../common/components/events_tab/events_query_tab_body';
 import { HostsTableType } from '../../../hosts/store/model';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
@@ -154,9 +154,9 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
-      ...histogramConfigs,
+      ...eventsHistogramConfig,
       stackByOptions:
-        onlyField != null ? [getHistogramOption(onlyField)] : histogramConfigs.stackByOptions,
+        onlyField != null ? [getHistogramOption(onlyField)] : eventsHistogramConfig.stackByOptions,
       defaultStackByOption:
         onlyField != null
           ? getHistogramOption(onlyField)

@@ -37,12 +37,12 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
+import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
 import { alertsDefaultModel } from '../alerts_viewer/default_headers';
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
-const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
-const ALERT_HISTOGRAM_ID = 'alertsHistogramQuery';
+const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -62,7 +62,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 const DEFAULT_STACK_BY = 'event.action';
 const unit = (n: number) => i18n.EVENTS_UNIT(n);
 
-export const histogramConfigs: MatrixHistogramConfigs = {
+export const eventsHistogramConfig: MatrixHistogramConfigs = {
   defaultStackByOption:
     eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
@@ -73,7 +73,7 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   getLensAttributes: getEventsHistogramLensAttributes,
 };
 
-type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps;
+type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
 export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
@@ -100,7 +100,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const ACTION_BUTTON_COUNT = 5;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const [showExternalAlerts, setShowExternalAlerts] = useState<boolean>(false);
+  const [showExternalAlerts, setShowExternalAlerts] = useState(false);
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
@@ -116,20 +116,14 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       ...(showExternalAlerts
         ? {
             ...alertsHistogramConfig,
-            id: ALERT_HISTOGRAM_ID,
-            defaultModel: alertsDefaultModel,
-            pageFilters: externalAlertPageFilters,
             subtitle: getSubtitle,
           }
         : {
-            ...histogramConfigs,
-            id: EVENTS_HISTOGRAM_ID,
-            defaultModel: eventsDefaultModel,
-            pageFilters,
+            ...eventsHistogramConfig,
             unit,
           }),
     }),
-    [externalAlertPageFilters, getSubtitle, pageFilters, showExternalAlerts]
+    [getSubtitle, showExternalAlerts]
   );
 
   const statefulEventsViewerExtraProps = useMemo(
@@ -168,7 +162,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   useEffect(() => {
     return () => {
       if (deleteQuery) {
-        deleteQuery({ id: EVENTS_HISTOGRAM_ID });
+        deleteQuery({ id: ALERTS_EVENTS_HISTOGRAM_ID });
       }
     };
   }, [deleteQuery]);
@@ -177,6 +171,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     <>
       {!globalFullScreen && (
         <MatrixHistogram
+          id={ALERTS_EVENTS_HISTOGRAM_ID}
           endDate={endDate}
           filterQuery={filterQuery}
           setQuery={setQuery}

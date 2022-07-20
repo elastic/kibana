@@ -17,7 +17,7 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 import type { SetAbsoluteRangeDatePicker } from '../types';
 import type { DocValueFields } from '../../../common/containers/source';
 
-interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
+export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
   filterQuery?: string | ESTermQuery;
   indexNames: string[];

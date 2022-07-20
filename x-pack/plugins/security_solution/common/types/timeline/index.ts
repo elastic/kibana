@@ -315,6 +315,7 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
 export enum TimelineId {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
+  networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
@@ -329,6 +330,7 @@ export enum TimelineId {
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.usersPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageEvents),
+  runtimeTypes.literal(TimelineId.networkPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
