@@ -34,7 +34,7 @@ const tourConfig: TourConfig = [
       'xpack.securitySolution.guided_onboarding.tour.overviewStep.tourContent',
       {
         defaultMessage:
-          'Take a quick tour to explore a unified workflow for  investigating suspicious activity.',
+          'Take a quick tour of the Security solution to get a feel for how it works.',
       }
     ),
     anchor: `[id^="SolutionNav"]`,
@@ -43,14 +43,27 @@ const tourConfig: TourConfig = [
   },
   {
     step: 2,
+    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourTitle', {
+      defaultMessage: 'Define prevention, detection, and response across your entire ecosystem',
+    }),
+    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.manageStep.tourContent', {
+      defaultMessage:
+        'Create rules to detect and prevent malicious activity, and implement threat intelligence to protect endpoints and cloud workloads.',
+    }),
+    anchor: `[data-test-subj="groupedNavItemLink-administration"]`,
+    anchorPosition: 'rightUp',
+    'data-test-subj': 'manageStep',
+  },
+  {
+    step: 3,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.alertsStep.tourTitle', {
-      defaultMessage: 'Get notified when something changes',
+      defaultMessage: 'Get notified when your security rules are triggered',
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.alertsStep.tourContent',
       {
         defaultMessage:
-          "Know when a rule's conditions are met, so you can start your investigation right away. Set up notifications with third-party platforms like Slack, PagerDuty, and ServiceNow.",
+          "Detect, investigate, and respond to evolving threats in your environment.",
       }
     ),
     anchor: `[data-test-subj="groupedNavItemLink-alerts"]`,
@@ -67,13 +80,13 @@ const tourConfig: TourConfig = [
     'data-test-subj': 'alertsStep',
   },
   {
-    step: 3,
+    step: 4,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourTitle', {
-      defaultMessage: 'Create a case to track your investigation',
+      defaultMessage: 'Collect and share information about security issues',
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.casesStep.tourContent', {
       defaultMessage:
-        'Collect evidence, add more collaborators, and even push case details to third-party case management systems.',
+        'Track key investigation details, collect alerts in a central location, and more.',
     }),
     anchor: `[data-test-subj="groupedNavItemLink-cases"]`,
     anchorPosition: 'rightUp',
@@ -89,12 +102,12 @@ const tourConfig: TourConfig = [
     'data-test-subj': 'casesStep',
   },
   {
-    step: 4,
+    step: 5,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourTitle', {
-      defaultMessage: `Start gathering your data!`,
+      defaultMessage: `You're ready!`,
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.dataStep.tourContent', {
-      defaultMessage: `Collect data from your endpoints using Elastic Agent and a variety of third-party integrations.`,
+      defaultMessage: `View and add your first integration to start protecting your environment. Return to the Security solution when you're done.`,
     }),
     anchor: `[data-test-subj="add-data"]`,
     anchorPosition: 'rightUp',
