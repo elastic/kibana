@@ -34,18 +34,15 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
   });
 
   let routeHandler: RequestHandler<any, any, any, any>;
-
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
 
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
-
     defineRecordAnalyticsOnAuthTypeRoutes(routeParamsMock);
 
     const [, recordAnalyticsOnAuthTypeRouteHandler] = routeParamsMock.router.post.mock.calls.find(
       ([{ path }]) => path === '/internal/security/analytics/_record_auth_type'
     )!;
-
     routeHandler = recordAnalyticsOnAuthTypeRouteHandler;
   });
 
@@ -295,13 +292,11 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       });
 
       const mockAuthc = authenticationServiceMock.createStart();
-
       mockAuthc.getCurrentUser.mockReturnValue(
         mockAuthenticatedUser({
           authentication_provider: { type: HTTPAuthenticationProvider.type, name: '__http__' },
         })
       );
-
       routeParamsMock.getAuthenticationService.mockReturnValue(mockAuthc);
 
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
@@ -327,18 +322,14 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
-
       expect(response.payload).toEqual({
         timestamp: initialTimestamp,
         signature: '46d5841ad21d29ca6c7c1c639adc6294c176c394adb0b40dfc05797cfe29218e',
       });
-
       expect(response.payload.signature).not.toEqual(initialSignature);
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
         1
       );
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
         authenticationProviderType: 'http',
         authenticationRealmType: 'native',
@@ -366,17 +357,14 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
         1
       );
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
         authenticationProviderType: 'http',
         authenticationRealmType: 'native',
         httpAuthenticationScheme: 'ApiKey',
       });
-
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
       expect(routeParamsMock.logger.warn).toBeCalledWith(
         'API keys are intended for programatic access. Do not use API keys to authenticate access via a web browser.',
@@ -402,17 +390,14 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledTimes(
         1
       );
-
       expect(routeParamsMock.analyticsService.reportAuthenticationTypeEvent).toHaveBeenCalledWith({
         authenticationProviderType: 'http',
         authenticationRealmType: 'native',
         httpAuthenticationScheme: 'Basic',
       });
-
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(0);
     });
   });

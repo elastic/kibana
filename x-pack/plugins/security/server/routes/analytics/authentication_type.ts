@@ -40,15 +40,12 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const authUser = getAuthenticationService().getCurrentUser(request);
-
         if (!authUser) {
           logger.warn('Cannot record authentication type: current user could not be retrieved.');
-
           return response.noContent();
         }
 
         let timestamp = new Date().getTime();
-
         const {
           signature: previouslyRegisteredSignature,
           timestamp: previousRegistrationTimestamp,
@@ -73,7 +70,6 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
           .digest('hex');
 
         const elapsedTimeInHrs = (timestamp - previousRegistrationTimestamp) / (1000 * 60 * 60);
-
         if (
           elapsedTimeInHrs >= MINIMUM_ELAPSED_TIME_HOURS ||
           previouslyRegisteredSignature !== signature
