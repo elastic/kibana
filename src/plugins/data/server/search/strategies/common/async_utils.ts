@@ -54,7 +54,7 @@ export function getCommonDefaultAsyncGetParams(
     wait_for_completion_timeout: '100ms',
     ...(useSearchSessions && options.isStored
       ? // Use session's keep_alive if search belongs to a stored session
-        options.isSearchStored // if search was already stored and extended, then no need to extend keepAlive
+        options.isSearchStored || options.isRestore // if search was already stored and extended, then no need to extend keepAlive
         ? {}
         : {
             keep_alive: `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`,

@@ -134,6 +134,20 @@ describe('request utils', () => {
       expect(params).not.toHaveProperty('keep_alive');
     });
 
+    test("Don't extend keepAlive if search is being restored", async () => {
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: true,
+      });
+      const params = getCommonDefaultAsyncGetParams(mockConfig, {
+        sessionId: 'foo',
+        isStored: true,
+        isSearchStored: false,
+        isRestore: true,
+      });
+      expect(params).not.toHaveProperty('keep_alive');
+    });
+
     test('Uses `keep_alive` if `sessionId` is provided but sessions disabled', async () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
