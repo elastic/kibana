@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -43,9 +44,15 @@ export function setupRoutes({
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
+      let user: AuthenticatedUser | null = null;
+
       return {
         get user() {
-          return security.authc.getCurrentUser(request);
+          // We want to call getCurrentUser only when needed and only once
+          if (!user) {
+            user = security.authc.getCurrentUser(request);
+          }
+          return user;
         },
         logger,
         esClient: coreContext.elasticsearch.client,
