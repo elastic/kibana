@@ -19,7 +19,6 @@ import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -34,13 +33,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Embedding', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('test/new_visualize_flow/fixtures/es_archiver/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/visualize_flow.json'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize_flow.json'
+      );
+
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('adding a metric visualization', async function () {
