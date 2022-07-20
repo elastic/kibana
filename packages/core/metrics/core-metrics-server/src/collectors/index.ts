@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { MetricsCollector, OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './types';
+export type {
+  MetricsCollector,
+  OpsProcessMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  IEventLoopDelaysMonitor,
+} from './types';

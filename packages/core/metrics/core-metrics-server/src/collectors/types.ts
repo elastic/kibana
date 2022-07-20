@@ -131,3 +131,24 @@ export interface OpsServerMetrics {
   /** number of current concurrent connections to the server */
   concurrent_connections: number;
 }
+
+export interface IEventLoopDelaysMonitor<T> {
+  /**
+   * Collect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay
+   * the histogram calculations start from the last time `reset` was called or this
+   * EventLoopDelaysMonitor instance was created.
+   *
+   * Returns metrics in milliseconds.
+
+   * @returns {IntervalHistogram}
+   */
+  collect(): T;
+  /**
+   * Resets the collected histogram data.
+   */
+  reset(): void;
+  /**
+   * Disables updating the interval timer for collecting new data points.
+   */
+  stop(): void;
+}

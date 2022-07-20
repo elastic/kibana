@@ -18,4 +18,5 @@ export type {
   OpsProcessMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
+  IEventLoopDelaysMonitor,
 } from './collectors';
