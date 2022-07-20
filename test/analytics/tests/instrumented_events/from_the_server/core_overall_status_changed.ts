@@ -25,28 +25,28 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should emit the initial "degraded" event with the context set to `initializing`', () => {
       expect(initialEvent.event_type).to.eql('core-overall_status_changed');
-      expect(initialEvent.context).to.have.property('overall_status_level', 'initializing');
+      expect(initialEvent.context).to.have.property('overallStatusLevel', 'initializing');
       expect(initialEvent.context).to.have.property(
-        'overall_status_summary',
+        'overallStatusSummary',
         'Kibana is starting up'
       );
-      expect(initialEvent.properties).to.have.property('overall_status_level', 'degraded');
-      expect(initialEvent.properties).to.have.property('overall_status_summary');
-      expect(initialEvent.properties.overall_status_summary).to.be.a('string');
+      expect(initialEvent.properties).to.have.property('overallStatusLevel', 'degraded');
+      expect(initialEvent.properties).to.have.property('overallStatusSummary');
+      expect(initialEvent.properties.overallStatusSummary).to.be.a('string');
     });
 
     it('should emit the 2nd event as `available` with the context set to the previous values', () => {
       expect(secondEvent.event_type).to.eql('core-overall_status_changed');
       expect(secondEvent.context).to.have.property(
-        'overall_status_level',
-        initialEvent.properties.overall_status_level
+        'overallStatusLevel',
+        initialEvent.properties.overallStatusLevel
       );
       expect(secondEvent.context).to.have.property(
-        'overall_status_summary',
-        initialEvent.properties.overall_status_summary
+        'overallStatusSummary',
+        initialEvent.properties.overallStatusSummary
       );
-      expect(secondEvent.properties.overall_status_level).to.be.a('string'); // Ideally we would test it as `available`, but we can't do that as it may result flaky for many side effects in the CI.
-      expect(secondEvent.properties.overall_status_summary).to.be.a('string');
+      expect(secondEvent.properties.overallStatusLevel).to.be.a('string'); // Ideally we would test it as `available`, but we can't do that as it may result flaky for many side effects in the CI.
+      expect(secondEvent.properties.overallStatusSummary).to.be.a('string');
     });
   });
 }

@@ -42,8 +42,8 @@ interface StatusLogMeta extends LogMeta {
 }
 
 interface StatusAnalyticsPayload {
-  overall_status_level: string;
-  overall_status_summary: string;
+  overallStatusLevel: string;
+  overallStatusSummary: string;
 }
 
 export interface SetupDeps {
@@ -214,17 +214,17 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private setupAnalyticsContextAndEvents(analytics: AnalyticsServiceSetup) {
     // Set an initial "initializing" status, so we can attach it to early events.
     const context$ = new BehaviorSubject<StatusAnalyticsPayload>({
-      overall_status_level: 'initializing',
-      overall_status_summary: 'Kibana is starting up',
+      overallStatusLevel: 'initializing',
+      overallStatusSummary: 'Kibana is starting up',
     });
 
     // The schema is the same for the context and the events.
     const schema: RootSchema<StatusAnalyticsPayload> = {
-      overall_status_level: {
+      overallStatusLevel: {
         type: 'keyword',
         _meta: { description: 'The current availability level of the service.' },
       },
-      overall_status_summary: {
+      overallStatusSummary: {
         type: 'text',
         _meta: { description: 'A high-level summary of the service status.' },
       },
@@ -238,8 +238,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.overall$!.pipe(
       takeUntil(this.stop$),
       map(({ level, summary }) => ({
-        overall_status_level: level.toString(),
-        overall_status_summary: summary,
+        overallStatusLevel: level.toString(),
+        overallStatusSummary: summary,
       })),
       // Emit the event before spreading the status to the context.
       // This way we see from the context the previous status and the current one.

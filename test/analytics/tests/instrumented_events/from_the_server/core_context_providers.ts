@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
         event = events[i - 1];
         i++;
-      } while (event.properties.overall_status_level !== 'available');
+      } while (event.properties.overallStatusLevel !== 'available');
     });
 
     it('should have the properties provided by the "kibana info" context provider', () => {
@@ -51,19 +51,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "cluster info" context provider', () => {
-      expect(event.context).to.have.property('cluster_uuid');
+      expect(event.context).to.have.property('clusterUuid');
       expect(event.context.cluster_uuid).to.be.a('string');
-      expect(event.context).to.have.property('cluster_name');
+      expect(event.context).to.have.property('clusterName');
       expect(event.context.cluster_name).to.be.a('string');
-      expect(event.context).to.have.property('cluster_version');
+      expect(event.context).to.have.property('clusterVersion');
       expect(event.context.cluster_version).to.be.a('string');
     });
 
     it('should have the properties provided by the "status info" context provider', () => {
-      expect(event.context).to.have.property('overall_status_level');
-      expect(event.context.overall_status_level).to.be.a('string');
-      expect(event.context).to.have.property('overall_status_summary');
-      expect(event.context.overall_status_summary).to.be.a('string');
+      expect(event.context).to.have.property('overallStatusLevel');
+      expect(event.context.overallStatusLevel).to.be.a('string');
+      expect(event.context).to.have.property('overallStatusSummary');
+      expect(event.context.overallStatusSummary).to.be.a('string');
     });
 
     it('should have the properties provided by the "license info" context provider', () => {
