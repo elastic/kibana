@@ -28,6 +28,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
   };
 
   constructor(private readonly server: HapiServer) {
+    /*
     this.server.ext('onRequest', (request, h) => {
       this.requests.total++;
       request.events.once('disconnect', () => {
@@ -49,6 +50,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
       this.responseTimes.total += duration;
       this.responseTimes.max = Math.max(this.responseTimes.max, duration);
     });
+    */
   }
 
   public async collect(): Promise<OpsServerMetrics> {

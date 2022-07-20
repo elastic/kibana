@@ -18,7 +18,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-describe('ServerMetricsCollector', () => {
+describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
