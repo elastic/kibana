@@ -68,33 +68,42 @@ export const createIndexIfNotExists = async (
   }
 };
 
-const createLatestFindingsIndex = async (esClient, logger) => {
-  const isLatestIndexExists = await esClient.indices.exists({
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  });
-
-  if (isLatestIndexExists) {
-    return;
-  }
-
+const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   // We fetch the index template of the findings data stream to clone the mapping to the latest findings
   const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
     name: FINDINGS_INDEX_NAME,
   });
-  const latestFindingsIndexTemplate = { ...findingsIndexTemplateResponse.index_templates[0] };
-  latestFindingsIndexTemplate.index_template.index_patterns = LATEST_FINDINGS_INDEX_DEFAULT_NS;
-  latestFindingsIndexTemplate.index_template.priority = 500;
-  delete latestFindingsIndexTemplate.index_template.data_stream;
+  logger.debug(JSON.stringify(findingsIndexTemplateResponse));
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { template, composed_of, _meta } =
+    findingsIndexTemplateResponse.index_templates[0].index_template;
+
+  if (template?.settings) {
+    template.settings.lifecycle = {
+      name: '',
+    };
+  }
 
   await esClient.indices.putIndexTemplate({
     name: LATEST_FINDINGS_INDEX_NAME,
-    body: latestFindingsIndexTemplate.index_template,
+    index_patterns: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    priority: 500,
+    _meta,
+    composed_of,
+    template,
   });
 
   try {
+    const isLatestIndexExists = await esClient.indices.exists({
+      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    });
+
+    if (isLatestIndexExists) {
+      return;
+    }
+
     await esClient.indices.create({
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-      settings: {},
     });
   } catch (e) {
     logger.warn('Failed to create latest findings index');
