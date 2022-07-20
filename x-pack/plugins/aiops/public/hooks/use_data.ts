@@ -24,6 +24,9 @@ export const useData = (
   const { services } = useAiOpsKibana();
   const { uiSettings } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [fieldStatsRequest, setFieldStatsRequest] = useState<
+    DocumentStatsSearchStrategyParams | undefined
+  >();
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -39,47 +42,31 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(
-    () => {
-      // Obtain the interval to use for date histogram aggregations
-      // (such as the document count chart). Aim for 75 bars.
-      const buckets = _timeBuckets;
-      const tf = timefilter;
-      if (!buckets || !tf || !currentDataView) return;
-      const activeBounds = tf.getActiveBounds();
-      let earliest: number | undefined;
-      let latest: number | undefined;
-      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
-        earliest = activeBounds.min?.valueOf();
-        latest = activeBounds.max?.valueOf();
-      }
-      const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
-      buckets.setInterval('auto');
-      if (bounds) {
-        buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
-      }
-      const aggInterval = buckets.getInterval();
+  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
 
-      return {
-        earliest,
-        latest,
-        intervalMs: aggInterval?.asMilliseconds(),
+  function updateFieldStatsRequest() {
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+    if (timefilterActiveBounds !== undefined) {
+      const BAR_TARGET = 75;
+      _timeBuckets.setInterval('auto');
+      _timeBuckets.setBounds(timefilterActiveBounds);
+      _timeBuckets.setBarTarget(BAR_TARGET);
+      setFieldStatsRequest({
+        earliest: timefilterActiveBounds.min?.valueOf(),
+        latest: timefilterActiveBounds.max?.valueOf(),
+        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
         index: currentDataView.title,
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
-  );
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+      });
+      setLastRefresh(Date.now());
+    }
+  }
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
+      timefilter.getTimeUpdate$(),
       aiopsRefresh$
     ).subscribe(() => {
       if (onUpdate) {
@@ -88,7 +75,19 @@ export const useData = (
           refreshInterval: timefilter.getRefreshInterval(),
         });
       }
-      setLastRefresh(Date.now());
+      updateFieldStatsRequest();
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
+
+  // This hook listens just for an initial update of the timefilter to be switched on.
+  useEffect(() => {
+    const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+      if (fieldStatsRequest === undefined) {
+        updateFieldStatsRequest();
+      }
     });
     return () => {
       timeUpdateSubscription.unsubscribe();
@@ -98,5 +97,7 @@ export const useData = (
   return {
     docStats,
     timefilter,
+    earliest: fieldStatsRequest?.earliest,
+    latest: fieldStatsRequest?.latest,
   };
 };
