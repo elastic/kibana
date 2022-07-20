@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -13,15 +12,20 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
 import type {
-  RouteMethod,
-  KibanaResponseFactory,
-  RequestHandler,
   IRouter,
   CoreStart,
+  CustomRequestHandlerContext,
+  Logger,
+  SavedObjectsClientContract,
+  IScopedClusterClient,
 } from '@kbn/core/server';
-
+import type {
+  AgentService,
+  PackageService,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 
@@ -49,19 +53,22 @@ export interface CspServerPluginStartDeps {
 export type CspServerPluginStartServices = Promise<
   [CoreStart, CspServerPluginStartDeps, CspServerPluginStart]
 >;
-export type CspRequestHandlerContext = FleetRequestHandlerContext;
 
-/**
- * Convenience type for request handlers in CSP that includes the CspRequestHandlerContext type
- * @internal
- */
-export type CspRequestHandler<
-  P = unknown,
-  Q = unknown,
-  B = unknown,
-  Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
-> = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
+interface CspApiRequestHandlerContext {
+  user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+  agentPolicyService: AgentPolicyServiceInterface;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyServiceInterface;
+  packageService: PackageService;
+}
+
+export type CspRequestHandlerContext = CustomRequestHandlerContext<{
+  csp: CspApiRequestHandlerContext;
+  fleet: FleetRequestHandlerContext['fleet'];
+}>;
 
 /**
  * Convenience type for routers in Csp that includes the CspRequestHandlerContext type
