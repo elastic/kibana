@@ -162,9 +162,14 @@ export class AnalyticsService {
    * @private
    */
   private registerElasticsearchInfoContext(injectedMetadata: InternalInjectedMetadataSetup) {
+    const esInfo = injectedMetadata.getElasticsearchInfo();
     this.analyticsClient.registerContextProvider({
       name: 'elasticsearch info',
-      context$: of(injectedMetadata.getElasticsearchInfo()),
+      context$: of({
+        clusterName: esInfo.cluster_name,
+        clusterUuid: esInfo.cluster_uuid,
+        clusterVersion: esInfo.cluster_version,
+      }),
       schema: {
         clusterName: {
           type: 'keyword',
