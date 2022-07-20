@@ -130,7 +130,6 @@ export function createAlertingUsageCollector(
       } catch (err) {
         const errMessage = err && err.message ? err.message : err.toString();
         return {
-          success: false,
           error_messages: [errMessage],
           count_total: 0,
           count_active_total: 0,

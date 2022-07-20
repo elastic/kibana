@@ -131,7 +131,6 @@ Object {
   "countByType": Object {},
   "countTotal": 0,
   "errorMessage": "oh no",
-  "success": false,
 }
 `);
   });

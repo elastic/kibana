@@ -90,7 +90,6 @@ export async function getTotalCount(
     logger.warn(`Error executing actions telemetry task: getTotalCount - ${errorMessage}`);
 
     return {
-      success: false,
       errorMessage,
       countTotal: 0,
       countByType: {},
