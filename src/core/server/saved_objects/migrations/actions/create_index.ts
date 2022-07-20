@@ -77,8 +77,9 @@ export const createIndex = ({
           // wait up to timeout until the following shards are available before
           // creating the index: primary, replica (only on multi node clusters)
           wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-          // Wait up to 60s for the cluster state to update and all shards to be
-          // available
+          // Timeout for the cluster state to update and all shards to become
+          // available. If the request doesn't complete within timeout,
+          // acknowledged or shards_acknowledged would be false.
           timeout: DEFAULT_TIMEOUT,
           body: {
             mappings,
