@@ -23,6 +23,7 @@ export function createActionsUsageCollector(
       return true;
     },
     schema: {
+      has_errors: { type: 'boolean' },
       error_messages: { type: 'array', items: { type: 'keyword' } },
       alert_history_connector_enabled: {
         type: 'boolean',
