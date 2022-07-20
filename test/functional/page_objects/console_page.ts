@@ -269,10 +269,4 @@ export class ConsolePageObject extends FtrService {
       return false;
     }
   }
-
-  public async getResponseStatus() {
-    const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
-    const text = await statusBadge.getVisibleText();
-    return text.replace(/[^\d.]+/, '');
-  }
 }
