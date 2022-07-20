@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-export interface FieldValuePair {
-  fieldName: string;
-  fieldValue: string;
-  isFallbackResult?: boolean;
-}
-
-export interface ChangePoint extends FieldValuePair {
-  doc_count: number;
-  bg_count: number;
-  score: number;
-  pValue: number | null;
-}
+export { MiniHistogram } from './mini_histogram';
