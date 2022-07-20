@@ -110,6 +110,13 @@ export function telemetryTaskRunner(
             dailyExecutionTimeoutCounts,
             dailyFailedAndUnrecognizedTasks,
           ]) => {
+            const hasErrors =
+              totalCountAggregations.hasErrors &&
+              totalInUse.hasErrors &&
+              dailyExecutionCounts.hasErrors &&
+              dailyExecutionTimeoutCounts.hasErrors &&
+              dailyFailedAndUnrecognizedTasks.hasErrors;
+
             const errorMessages = [
               totalCountAggregations.errorMessage,
               totalInUse.errorMessage,
@@ -120,6 +127,7 @@ export function telemetryTaskRunner(
 
             return {
               state: {
+                has_errors: hasErrors,
                 ...(errorMessages.length > 0 && { error_messages: errorMessages }),
                 runs: (state.runs || 0) + 1,
                 ...totalCountAggregations,

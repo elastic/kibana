@@ -130,6 +130,7 @@ export function createAlertingUsageCollector(
       } catch (err) {
         const errMessage = err && err.message ? err.message : err.toString();
         return {
+          has_errors: true,
           error_messages: [errMessage],
           count_total: 0,
           count_active_total: 0,
@@ -202,6 +203,7 @@ export function createAlertingUsageCollector(
       }
     },
     schema: {
+      has_errors: { type: 'boolean' },
       error_messages: { type: 'array', items: { type: 'keyword' } },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },

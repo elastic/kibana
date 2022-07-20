@@ -88,6 +88,7 @@ describe('kibana index telemetry', () => {
           logs__alert__document__count: 1,
         },
         count_total: 4,
+        hasErrors: false,
         schedule_time: {
           avg: '4.5s',
           max: '10s',
@@ -130,6 +131,7 @@ describe('kibana index telemetry', () => {
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toEqual({
         errorMessage: 'oh no',
+        hasErrors: true,
         connectors_per_alert: {
           avg: 0,
           max: 0,
@@ -220,6 +222,7 @@ describe('kibana index telemetry', () => {
         },
         countNamespaces: 1,
         countTotal: 4,
+        hasErrors: false,
       });
     });
 
@@ -245,6 +248,7 @@ describe('kibana index telemetry', () => {
         countNamespaces: 0,
         countTotal: 0,
         errorMessage: 'oh no',
+        hasErrors: true,
       });
     });
   });

@@ -6,6 +6,7 @@
  */
 
 export interface AlertingUsage {
+  has_errors: boolean;
   error_messages?: string[];
   count_total: number;
   count_active_total: number;

@@ -77,6 +77,7 @@ export async function getTotalCount(
       }
     }
     return {
+      hasErrors: false,
       countTotal:
         Object.keys(aggs).reduce(
           (total: number, key: string) => parseInt(aggs[key], 10) + total,
@@ -90,6 +91,7 @@ export async function getTotalCount(
     logger.warn(`Error executing actions telemetry task: getTotalCount - ${errorMessage}`);
 
     return {
+      hasErrors: true,
       errorMessage,
       countTotal: 0,
       countByType: {},
@@ -104,6 +106,7 @@ export async function getInUseTotalCount(
   referenceType?: string,
   preconfiguredActions?: PreConfiguredAction[]
 ): Promise<{
+  hasErrors: boolean;
   errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
@@ -367,6 +370,7 @@ export async function getInUseTotalCount(
     }
 
     return {
+      hasErrors: false,
       countTotal: aggs.total + (preconfiguredActionsAggs?.total ?? 0),
       countByType: countByActionTypeId,
       countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnectors,
@@ -378,6 +382,7 @@ export async function getInUseTotalCount(
 
     logger.warn(`Error executing actions telemetry task: getInUseTotalCount - ${errorMessage}`);
     return {
+      hasErrors: true,
       errorMessage,
       countTotal: 0,
       countByType: {},
@@ -386,21 +391,6 @@ export async function getInUseTotalCount(
       countNamespaces: 0,
     };
   }
-}
-
-export async function getInUseByAlertingTotalCounts(
-  esClient: ElasticsearchClient,
-  kibanaIndex: string,
-  logger: Logger,
-  preconfiguredActions?: PreConfiguredAction[]
-): Promise<{
-  countTotal: number;
-  countByType: Record<string, number>;
-  countByAlertHistoryConnectorType: number;
-  countEmailByService: Record<string, number>;
-  countNamespaces: number;
-}> {
-  return await getInUseTotalCount(esClient, kibanaIndex, logger, 'alert', preconfiguredActions);
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {
@@ -415,6 +405,7 @@ export async function getExecutionsPerDayCount(
   eventLogIndex: string,
   logger: Logger
 ): Promise<{
+  hasErrors: boolean;
   errorMessage?: string;
   countTotal: number;
   countByType: Record<string, number>;
@@ -572,6 +563,7 @@ export async function getExecutionsPerDayCount(
     );
 
     return {
+      hasErrors: false,
       countTotal: aggsExecutions.total,
       countByType: Object.entries(aggsExecutions.connectorTypes).reduce(
         (res: Record<string, number>, [key, value]) => {
@@ -599,6 +591,7 @@ export async function getExecutionsPerDayCount(
       `Error executing actions telemetry task: getExecutionsPerDayCount - ${errorMessage}`
     );
     return {
+      hasErrors: true,
       errorMessage,
       countTotal: 0,
       countByType: {},

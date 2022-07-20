@@ -31,13 +31,14 @@ type GetTotalCountsResults = Pick<
   | 'throttle_time_number_s'
   | 'schedule_time_number_s'
   | 'connectors_per_alert'
-> & { errorMessage?: string };
+> & { errorMessage?: string; hasErrors: boolean };
 
 interface GetTotalCountInUseResults {
   countTotal: number;
   countByType: Record<string, number>;
   countNamespaces: number;
   errorMessage?: string;
+  hasErrors: boolean;
 }
 
 export async function getTotalCountAggregations({
@@ -187,6 +188,7 @@ export async function getTotalCountAggregations({
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
     return {
+      hasErrors: false,
       count_total: totalRulesCount ?? 0,
       count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       throttle_time: {
@@ -226,6 +228,7 @@ export async function getTotalCountAggregations({
       }
     );
     return {
+      hasErrors: true,
       errorMessage,
       count_total: 0,
       count_by_type: {},
@@ -300,6 +303,7 @@ export async function getTotalCountInUse({
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
     return {
+      hasErrors: false,
       countTotal: totalEnabledRulesCount ?? 0,
       countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       countNamespaces: aggregations.namespaces_count.value ?? 0,
@@ -311,6 +315,7 @@ export async function getTotalCountInUse({
       error: { stack_trace: err.stack },
     });
     return {
+      hasErrors: true,
       errorMessage,
       countTotal: 0,
       countByType: {},

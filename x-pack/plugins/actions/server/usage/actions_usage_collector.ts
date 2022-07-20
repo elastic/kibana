@@ -60,6 +60,7 @@ export function createActionsUsageCollector(
         const errMessage = err && err.message ? err.message : err.toString();
 
         return {
+          has_errors: true,
           error_messages: [errMessage],
           alert_history_connector_enabled: false,
           count_total: 0,

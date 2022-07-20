@@ -225,6 +225,7 @@ describe('task manager telemetry', () => {
             logs__alert__document__count: 4,
           },
         },
+        hasErrors: false,
       });
     });
 
@@ -248,6 +249,7 @@ describe('task manager telemetry', () => {
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
         errorMessage: 'oh no',
+        hasErrors: true,
         countFailedAndUnrecognizedTasks: 0,
         countFailedAndUnrecognizedTasksByStatus: {},
         countFailedAndUnrecognizedTasksByStatusByType: {},

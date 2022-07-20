@@ -26,6 +26,7 @@ interface GetFailedAndUnrecognizedTasksAggregationBucket extends AggregationsStr
 }
 
 interface GetFailedAndUnrecognizedTasksResults {
+  hasErrors: boolean;
   errorMessage?: string;
   countFailedAndUnrecognizedTasks: number;
   countFailedAndUnrecognizedTasksByStatus: Record<string, number>;
@@ -116,6 +117,7 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       aggregations.by_status.buckets as GetFailedAndUnrecognizedTasksAggregationBucket[];
 
     return {
+      hasErrors: false,
       ...parseBucket(aggregationsByStatus),
       countFailedAndUnrecognizedTasks: totalFailedAndUnrecognizedTasks ?? 0,
     };
@@ -129,6 +131,7 @@ export async function getFailedAndUnrecognizedTasksPerDay({
       }
     );
     return {
+      hasErrors: true,
       errorMessage,
       countFailedAndUnrecognizedTasks: 0,
       countFailedAndUnrecognizedTasksByStatus: {},

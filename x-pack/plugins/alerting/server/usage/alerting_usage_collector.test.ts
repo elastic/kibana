@@ -49,6 +49,7 @@ describe('registerAlertingUsageCollector', () => {
     // @ts-ignore
     expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
       expect.objectContaining({
+        has_errors: true,
         error_messages: ['error message'],
       })
     );
@@ -56,6 +57,7 @@ describe('registerAlertingUsageCollector', () => {
 
   it('should return the task state including error messages', async () => {
     const mockStats = {
+      has_errors: true,
       error_messages: ['an error message'],
       count_active_total: 1,
       count_disabled_total: 10,

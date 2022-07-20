@@ -1398,6 +1398,7 @@ describe('event log telemetry', () => {
             logs__alert__document__count: 0,
           },
         },
+        hasErrors: false,
       });
     });
 
@@ -1414,11 +1415,13 @@ describe('event log telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getExecutionsPerDayCount - {}"`
+        `"Error executing alerting telemetry task: getExecutionsPerDayCount - oh no"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
       expect(telemetry).toStrictEqual({
+        hasErrors: true,
+        errorMessage: 'oh no',
         countTotalRuleExecutions: 0,
         countRuleExecutionsByType: {},
         countTotalFailedExecutions: 0,
@@ -1495,6 +1498,7 @@ describe('event log telemetry', () => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
         },
+        hasErrors: false,
       });
     });
 
@@ -1519,6 +1523,7 @@ describe('event log telemetry', () => {
         countExecutionTimeouts: 0,
         countExecutionTimeoutsByType: {},
         errorMessage: 'oh no',
+        hasErrors: true,
       });
     });
   });

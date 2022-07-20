@@ -102,6 +102,9 @@ export function telemetryTaskRunner(
           getInUseTotalCount(esClient, kibanaIndex, logger, undefined, preconfiguredActions),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
+          const hasErrors =
+            totalAggegations.hasErrors && totalInUse.hasErrors && totalExecutionsPerDay.hasErrors;
+
           const errorMessages = [
             totalAggegations.errorMessage,
             totalInUse.errorMessage,
@@ -110,6 +113,7 @@ export function telemetryTaskRunner(
 
           return {
             state: {
+              hasErrors,
               ...(errorMessages.length > 0 && { error_messages: errorMessages }),
               runs: (state.runs || 0) + 1,
               count_total: totalAggegations.countTotal,
