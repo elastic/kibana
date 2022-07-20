@@ -6,23 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import {
+  DefaultItemAction,
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
   EuiPage,
-  EuiPageHeader,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiButton,
-  EuiInMemoryTable,
+  EuiPageHeader,
   EuiText,
-  DefaultItemAction,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 interface Props {
   dataView?: DataView;
@@ -33,6 +38,8 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const [fields, setFields] = useState<DataViewField[]>(
     dataView?.fields.getAll().filter((f) => !f.scripted) || []
   );
+  const [preselected, setPreselected] = useState<boolean>(false);
+
   const refreshFields = () => setFields(dataView?.fields.getAll().filter((f) => !f.scripted) || []);
   const columns = [
     {
@@ -75,22 +82,42 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
     },
   ];
 
+  const preselectionId = useGeneratedHtmlId({ prefix: 'usePreselection' });
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
-      <div>
-        <EuiButton
-          onClick={() =>
-            dataViewFieldEditor.openEditor({
-              ctx: { dataView },
-              onSave: refreshFields,
-            })
-          }
-          data-test-subj="addField"
-        >
-          Add field
-        </EuiButton>
-      </div>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={() =>
+              dataViewFieldEditor.openEditor({
+                ctx: { dataView },
+                onSave: refreshFields,
+                fieldToCreate: preselected
+                  ? {
+                      name: 'demotestfield',
+                      type: 'boolean',
+                      script: { source: 'emit(true)' }, // optional
+                      customLabel: 'cool demo test field', // optional
+                      format: { id: 'boolean' }, // optional
+                    }
+                  : undefined,
+              })
+            }
+            data-test-subj="addField"
+          >
+            Add field
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckbox
+            id={preselectionId}
+            label="Use preselected options"
+            checked={preselected}
+            onChange={() => setPreselected(!preselected)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiInMemoryTable<DataViewField>
         items={fields}
         columns={columns}
