@@ -29,10 +29,12 @@ import type {
 
 export interface CustomRasterSourceConfig {
   urlTemplate: string;
+  isTimeAware?: boolean;
 }
 
 type CustomRasterSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
+  isTimeAware: boolean;
 };
 
 export class CustomRasterSource implements ITMSSource {
@@ -40,10 +42,14 @@ export class CustomRasterSource implements ITMSSource {
 
   readonly _descriptor: CustomRasterSourceDescriptor;
 
-  static createDescriptor({ urlTemplate }: CustomRasterSourceConfig): CustomRasterSourceDescriptor {
+  static createDescriptor({
+    urlTemplate,
+    isTimeAware,
+  }: CustomRasterSourceConfig): CustomRasterSourceDescriptor {
     return {
       type: CustomRasterSource.type,
       urlTemplate,
+      isTimeAware: isTimeAware ?? false,
     };
   }
 
@@ -55,6 +61,7 @@ export class CustomRasterSource implements ITMSSource {
     return {
       type: this._descriptor.type,
       urlTemplate: this._descriptor.urlTemplate,
+      isTimeAware: this._descriptor.isTimeAware,
     };
   }
 
@@ -107,7 +114,7 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   getApplyGlobalTime(): boolean {
-    return false;
+    return this._descriptor.isTimeAware;
   }
 
   getApplyForceRefresh(): boolean {
@@ -140,7 +147,7 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   async isTimeAware(): Promise<boolean> {
-    return false;
+    return this._descriptor.isTimeAware;
   }
 
   isFilterByMapBounds(): boolean {
@@ -165,6 +172,13 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   async getUrlTemplate(): Promise<string> {
-    return this._descriptor.urlTemplate;
+    if (!this.getApplyGlobalQuery() && (await !this.isTimeAware())) {
+      return this._descriptor.urlTemplate;
+    }
+
+    // TODO Replace this with date from time picker
+    const date = new Date();
+    date.setHours(date.getHours() - 6); // Data may not be current, use data from 6 hours ago
+    return this._descriptor.urlTemplate.replace('{time}', date.toISOString().split('.')[0] + 'Z');
   }
 }

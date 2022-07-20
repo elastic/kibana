@@ -12,6 +12,7 @@ import type { CustomRasterSourceConfig } from './custom_raster_source';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: CustomRasterSourceConfig | null) => void;
+  defaultUrl: string;
 }
 
 interface State {
@@ -23,12 +24,15 @@ export class CustomRasterEditor extends Component<Props, State> {
     url: '',
   };
 
+  componentDidMount() {
+    this.props.onSourceConfigChange({ urlTemplate: this.props.defaultUrl });
+  }
+
   _previewLayer = _.debounce(() => {
     const { url } = this.state;
-
-    const isUrlValid =
-      url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
-    const sourceConfig = isUrlValid ? { urlTemplate: url } : null;
+    const isUrlValid = ['{x}', '{y}', '{z}'].every((template) => url.indexOf(template) >= 0);
+    const isTimeAware = url.indexOf('{time}') >= 0;
+    const sourceConfig = isUrlValid ? { urlTemplate: url, isTimeAware } : null;
     this.props.onSourceConfigChange(sourceConfig);
   }, 500);
 
@@ -40,7 +44,7 @@ export class CustomRasterEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <EuiFormRow label="Url">
-          <EuiFieldText placeholder={'https://example.com'} onChange={this._onUrlChange} />
+          <EuiFieldText defaultValue={this.props.defaultUrl} onChange={this._onUrlChange} />
         </EuiFormRow>
       </EuiPanel>
     );

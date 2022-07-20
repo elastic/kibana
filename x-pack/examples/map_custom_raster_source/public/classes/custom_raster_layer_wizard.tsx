@@ -13,6 +13,9 @@ import { PLUGIN_ID } from '../../common';
 import { CustomRasterSource, CustomRasterSourceConfig } from './custom_raster_source';
 import { CustomRasterEditor } from './custom_raster_editor';
 
+const defaultUrl =
+  'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GOES-East_ABI_GeoColor/default/{time}/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png';
+
 export const customRasterLayerWizard: LayerWizard = {
   id: PLUGIN_ID,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
@@ -36,10 +39,13 @@ export const customRasterLayerWizard: LayerWizard = {
         style: {
           type: 'RASTER',
         },
+        alpha: 1,
       };
 
       previewLayers([customRasterLayerDescriptor]);
     };
-    return <CustomRasterEditor onSourceConfigChange={onSourceConfigChange} />;
+    return (
+      <CustomRasterEditor onSourceConfigChange={onSourceConfigChange} defaultUrl={defaultUrl} />
+    );
   },
 };
