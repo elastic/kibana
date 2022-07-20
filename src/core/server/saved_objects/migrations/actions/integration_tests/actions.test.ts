@@ -598,6 +598,48 @@ describe('migration actions', () => {
         }
       `);
     });
+    it('resolves left with unavailable_shards_exception if a shard is no longer available', async () => {
+      await client.indices
+        .create({
+          index: 'clone_target',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              number_of_replicas: '1',
+            },
+          },
+        })
+        .catch((e) => {});
+
+      // get the ID for our single node
+      const { nodes } = await client.nodes.stats();
+
+      // initiate node shutdown
+      await client.shutdown.putNode({
+        node_id: Object.keys(nodes)[0],
+        // @ts-expect-error TODO: This request will fail until fix for https://github.com/elastic/elasticsearch-js/issues/1695 is released
+        body: {
+          type: 'restart',
+          reason: 'testing shutdown',
+          allocation_delay: '20m',
+        },
+      });
+
+      const cloneIndexPromise = cloneIndex({
+        client,
+        source: 'existing_index_with_write_block',
+        target: 'clone_target',
+      })();
+      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "unavailable_shards_exception",
+          },
+        }
+      `);
+    });
   });
 
   // Reindex doesn't return any errors on it's own, so we have to test
