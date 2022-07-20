@@ -210,6 +210,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Add Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
@@ -234,6 +235,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Edit Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },

@@ -18,7 +18,7 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../../plugin';
@@ -27,15 +27,22 @@ import { getServiceLocations } from '../../../state/actions';
 import { LocationForm } from './location_form';
 import { PrivateLocationsList } from './locations_list';
 import { useLocationsAPI } from './hooks/use_locations_api';
-import { getAgentPoliciesAction } from '../../../state/private_locations';
+import {
+  getAgentPoliciesAction,
+  selectManageFlyoutOpen,
+  setManageFlyoutOpen,
+} from '../../../state/private_locations';
 
 export const ManageLocationsFlyout = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isAddingNew, setIsAddingNew] = useState(false);
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({ isOpen });
-
   const dispatch = useDispatch();
+
+  const setIsOpen = (val: boolean) => dispatch(setManageFlyoutOpen(val));
+
+  const isOpen = useSelector(selectManageFlyoutOpen);
+
+  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({ isOpen });
 
   const { fleet } = useKibana<ClientPluginsStart>().services;
 

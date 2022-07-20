@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import { AgentPoliciesList } from '.';
 import { createAsyncAction } from '../../../apps/synthetics/state/utils/actions';
 
 export const getAgentPoliciesAction = createAsyncAction<void, AgentPoliciesList>(
   '[AGENT POLICIES] GET'
 );
+
+export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');
