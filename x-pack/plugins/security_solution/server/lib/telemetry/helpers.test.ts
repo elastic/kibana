@@ -794,3 +794,4 @@ describe('test advanced policy config overlap ', () => {
     expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
   });
 });
+
