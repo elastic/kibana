@@ -85,7 +85,6 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
       runtimeMappings={runtimeMappings}
-      timelineId={timelineId}
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
