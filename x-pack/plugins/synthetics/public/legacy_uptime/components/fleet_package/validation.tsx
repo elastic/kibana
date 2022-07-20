@@ -123,7 +123,9 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 
 export const validateParamsValue = (params?: string) => {
   try {
-    JSON.parse(params ?? '');
+    if (params) {
+      JSON.parse(params ?? '');
+    }
   } catch (e) {
     return true;
   }
