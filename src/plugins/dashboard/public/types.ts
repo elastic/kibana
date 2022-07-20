@@ -25,6 +25,7 @@ import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
@@ -42,7 +43,7 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import type { UserContentCommonSchema } from './services/kibana_react';
+import type { DashboardAttributes } from './saved_dashboards';
 
 export type { SavedDashboardPanel };
 
@@ -223,13 +224,12 @@ export interface DashboardAppServices {
   spacesService?: SpacesPluginStart;
 }
 
-export interface DashboardAttributes {
+/** Those are the **required** attributes for UserContent and that TableListView depend on */
+export interface DashboardAttributesUserContent extends DashboardAttributes {
   title: string;
   description: string;
-  error: unknown;
-  timeRestore: boolean;
 }
 
-export interface SimpleDashboardSavedObject extends UserContentCommonSchema {
-  attributes: DashboardAttributes;
+export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  attributes: DashboardAttributesUserContent;
 }

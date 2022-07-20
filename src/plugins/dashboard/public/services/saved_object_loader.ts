@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
 } from '@kbn/core/public';
 import { SavedObject } from '@kbn/saved-objects-plugin/public';
-import { DashboardAttributes } from '../types';
+import { DashboardAttributes } from '../saved_dashboards';
 import { upperFirst } from './string_utils';
 
 /**

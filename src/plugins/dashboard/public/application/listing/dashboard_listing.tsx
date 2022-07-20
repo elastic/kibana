@@ -16,11 +16,16 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
+import { useExecutionContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { TableListViewKibanaProvider, TableListView } from '@kbn/content-management-table-list';
 import useMount from 'react-use/lib/useMount';
 import { attemptLoadDashboardByTitle } from '../lib';
-import { DashboardAppServices, DashboardRedirect, SimpleDashboardSavedObject } from '../../types';
+import {
+  DashboardAppServices,
+  DashboardRedirect,
+  DashboardSavedObjectUserContent,
+} from '../../types';
 import {
   getDashboardBreadcrumb,
   dashboardListingTable,
@@ -28,9 +33,10 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
+import { DashboardAttributes } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListViewV2, useKibana } from '../../services/kibana_react';
+import { useKibana } from '../../services/kibana_react';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
@@ -46,6 +52,19 @@ export interface DashboardListingProps {
   initialFilter?: string;
   title?: string;
 }
+
+const toTableListViewSavedObject = (
+  savedObject: SimpleSavedObject<DashboardAttributes>
+): DashboardSavedObjectUserContent => {
+  return {
+    ...savedObject,
+    attributes: {
+      ...savedObject.attributes,
+      title: savedObject.attributes.title ?? '',
+      description: savedObject.attributes.description ?? '',
+    },
+  };
+};
 
 export const DashboardListing = ({
   title,
@@ -66,7 +85,6 @@ export const DashboardListing = ({
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
-
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
@@ -238,23 +256,29 @@ export const DashboardListing = ({
   ]);
 
   const fetchItems = useCallback(
-    (filter: string) => {
-      let searchTerm = filter;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectsTagging) {
-        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
-          useName: true,
-        });
-        searchTerm = parsed.searchTerm;
-        references = parsed.tagReferences;
-      }
+    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
+      // let searchTerm = filter;
+      // let references: SavedObjectsFindOptionsReference[] | undefined;
+      // if (savedObjectsTagging) {
+      //   const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
+      //     useName: true,
+      //   });
+      //   searchTerm = parsed.searchTerm;
+      //   references = parsed.tagReferences;
+      // }
 
-      return savedDashboards.find(searchTerm, {
-        size: listingLimit,
-        hasReference: references,
-      });
+      return savedDashboards
+        .find(searchTerm, {
+          hasReference: references,
+        })
+        .then(({ total, hits }) => {
+          return {
+            total,
+            hits: hits.map(toTableListViewSavedObject),
+          };
+        });
     },
-    [listingLimit, savedDashboards, savedObjectsTagging]
+    [savedDashboards] // listingLimit, savedObjectsTagging
   );
 
   const deleteItems = useCallback(
@@ -273,10 +297,11 @@ export const DashboardListing = ({
   );
 
   const searchFilters = useMemo(() => {
-    return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-      : [];
-  }, [savedObjectsTagging]);
+    // return savedObjectsTagging
+    //   ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
+    //   : [];
+    return [];
+  }, []); // savedObjectsTagging
 
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
@@ -286,46 +311,55 @@ export const DashboardListing = ({
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <TableListViewV2<SimpleDashboardSavedObject>
-          createItem={!showWriteControls ? undefined : createItem}
-          deleteItems={!showWriteControls ? undefined : deleteItems}
-          initialPageSize={initialPageSize}
-          editItem={!showWriteControls ? undefined : editItem}
-          initialFilter={initialFilter ?? defaultFilter}
-          toastNotifications={core.notifications.toasts}
-          headingId="dashboardListingHeading"
-          findItems={fetchItems}
-          rowHeader="title"
-          getDetailViewLink={(dashboard) =>
-            getDashboardListItemLink(
-              core.application,
-              kbnUrlStateStorage,
-              core.uiSettings.get('state:storeInSessionStorage'),
-              dashboard.id,
-              dashboard.attributes.timeRestore
-            )
-          }
-          entityNamePlural={getEntityNamePlural()}
-          tableListTitle={getTableListTitle()}
-          tableCaption={getTableCaption()}
-          entityName={getEntityName()}
-          {...{
-            emptyPrompt,
-            searchFilters,
-            listingLimit,
+        <TableListViewKibanaProvider
+          savedObjectTaggingApi={savedObjectsTagging!}
+          applicationStart={{
+            getUrlForApp: core.application.getUrlForApp,
+            capabilities: {
+              advancedSettings: core.application.capabilities.advancedSettings,
+            },
           }}
-          theme={core.theme}
-          application={core.application}
-          savedObjectTagging={savedObjectsTagging}
+          kibanaReactToMountPoint={toMountPoint}
+          themeServiceStart={core.theme}
+          toastStart={core.notifications.toasts}
         >
-          <DashboardUnsavedListing
-            redirectTo={redirectTo}
-            unsavedDashboardIds={unsavedDashboardIds}
-            refreshUnsavedDashboards={() =>
-              setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
+          <TableListView<DashboardSavedObjectUserContent>
+            createItem={!showWriteControls ? undefined : createItem}
+            deleteItems={!showWriteControls ? undefined : deleteItems}
+            initialPageSize={initialPageSize}
+            editItem={!showWriteControls ? undefined : editItem}
+            initialFilter={initialFilter ?? defaultFilter}
+            headingId="dashboardListingHeading"
+            findItems={fetchItems}
+            rowHeader="title"
+            getDetailViewLink={(dashboard) =>
+              getDashboardListItemLink(
+                core.application,
+                kbnUrlStateStorage,
+                core.uiSettings.get('state:storeInSessionStorage'),
+                dashboard.id,
+                dashboard.attributes.timeRestore
+              )
             }
-          />
-        </TableListViewV2>
+            entityNamePlural={getEntityNamePlural()}
+            tableListTitle={getTableListTitle()}
+            tableCaption={getTableCaption()}
+            entityName={getEntityName()}
+            {...{
+              emptyPrompt,
+              searchFilters,
+              listingLimit,
+            }}
+          >
+            <DashboardUnsavedListing
+              redirectTo={redirectTo}
+              unsavedDashboardIds={unsavedDashboardIds}
+              refreshUnsavedDashboards={() =>
+                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
+              }
+            />
+          </TableListView>
+        </TableListViewKibanaProvider>
       )}
     </>
   );
