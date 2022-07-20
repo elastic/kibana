@@ -127,8 +127,8 @@ export type {
   NavigateToUrlOptions,
 } from './application';
 
+// TODO: check if can be exported as type.
 export { SimpleSavedObject } from './saved_objects';
-export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -141,17 +141,22 @@ export type {
   SavedObjectsFindResponsePublic,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsClientContract,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  ResolvedSimpleSavedObject,
+} from './saved_objects';
+export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -165,9 +170,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,
