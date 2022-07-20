@@ -33,7 +33,7 @@ export interface CloneIndexParams {
   source: string;
   target: string;
   /** only used for testing */
-  timeout?: number;
+  timeout?: string;
 }
 /**
  * Makes a clone of the source index into the target.
@@ -75,7 +75,7 @@ export const cloneIndex = ({
                 // Set an explicit refresh interval so that we don't inherit the
                 // value from incorrectly configured index templates (not required
                 // after we adopt system indices)
-                refresh_interval: '1000',
+                refresh_interval: '1s',
                 // Bump priority so that recovery happens before newer indices
                 priority: 10,
               },

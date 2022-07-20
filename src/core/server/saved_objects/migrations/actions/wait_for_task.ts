@@ -59,7 +59,7 @@ const catchWaitForTaskCompletionTimeout = (
 export interface WaitForTaskParams {
   client: ElasticsearchClient;
   taskId: string;
-  timeout: number;
+  timeout: string;
 }
 /**
  * Blocks for up to 60s or until a task completes.

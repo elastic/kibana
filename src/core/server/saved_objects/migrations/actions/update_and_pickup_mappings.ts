@@ -46,20 +46,11 @@ export const updateAndPickupMappings = ({
     'update_mappings_succeeded'
   > = () => {
     return client.indices
-      .putMapping(
-        {
-          index,
-          timeout: DEFAULT_TIMEOUT,
-          body: mappings,
-        },
-        {
-          // The client defaults to a 30s request timeout whereas we're
-          // specifying a 50s timeout to Elasticsearch so we need to ensure
-          // the client doesn't timeout the connection before the ES server
-          // responds
-          requestTimeout: DEFAULT_TIMEOUT + 5,
-        }
-      )
+      .putMapping({
+        index,
+        timeout: DEFAULT_TIMEOUT,
+        body: mappings,
+      })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
         // the new cluster state update but not all nodes have applied the

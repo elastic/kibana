@@ -33,7 +33,7 @@ describe('waitForTask', () => {
       const task = waitForTask({
         client,
         taskId: 'my task id',
-        timeout: 60_000,
+        timeout: '60s',
       });
       try {
         await task();

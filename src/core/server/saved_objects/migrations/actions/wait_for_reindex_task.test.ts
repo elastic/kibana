@@ -36,7 +36,7 @@ describe('waitForReindexTask', () => {
   );
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-    const task = waitForReindexTask({ client, taskId: 'my task id', timeout: 60_000 });
+    const task = waitForReindexTask({ client, taskId: 'my task id', timeout: '60s' });
     try {
       await task();
     } catch (e) {

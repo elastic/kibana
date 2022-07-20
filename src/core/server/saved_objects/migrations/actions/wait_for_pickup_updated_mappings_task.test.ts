@@ -38,7 +38,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
     const task = waitForPickupUpdatedMappingsTask({
       client,
       taskId: 'my task id',
-      timeout: 60000,
+      timeout: '60s',
     });
     try {
       await task();

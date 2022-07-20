@@ -11,7 +11,7 @@
  * Uses the default value of 1000 for Elasticsearch reindex operation.
  */
 export const BATCH_SIZE = 1_000;
-export const DEFAULT_TIMEOUT = 50_000;
+export const DEFAULT_TIMEOUT = '60s';
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 export const INDEX_AUTO_EXPAND_REPLICAS = '0-1';
 /** ES rule of thumb: shards should be several GB to 10's of GB, so Kibana is unlikely to cross that limit */

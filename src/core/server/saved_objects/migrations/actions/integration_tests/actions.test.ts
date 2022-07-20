@@ -408,7 +408,7 @@ describe('migration actions', () => {
       const task = waitForIndexStatus({
         client,
         index: 'red_index',
-        timeout: 1_000,
+        timeout: '1s',
         status: 'yellow',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -441,7 +441,7 @@ describe('migration actions', () => {
       const task = waitForIndexStatus({
         client,
         index: 'red_index',
-        timeout: 1_000,
+        timeout: '1s',
         status: 'green',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -561,7 +561,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
-        timeout: 1_000,
+        timeout: '1s',
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -589,7 +589,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
-        timeout: 1_000,
+        timeout: '1s',
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -617,7 +617,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
-        timeout: 30_000,
+        timeout: '30s',
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -674,7 +674,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -714,7 +714,7 @@ describe('migration actions', () => {
           },
         },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -747,7 +747,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -782,7 +782,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -799,7 +799,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -858,7 +858,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -914,7 +914,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -953,7 +953,7 @@ describe('migration actions', () => {
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -976,7 +976,7 @@ describe('migration actions', () => {
           match_all: {},
         },
       })()) as Either.Right<ReindexResponse>;
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -998,7 +998,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -1020,7 +1020,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 10_000 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -1049,7 +1049,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: { match_all: {} },
       })()) as Either.Right<ReindexResponse>;
 
-      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: 0 });
+      const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '0s' });
 
       await expect(task()).resolves.toMatchObject({
         _tag: 'Left',
@@ -1315,7 +1315,7 @@ describe('migration actions', () => {
       const task = waitForPickupUpdatedMappingsTask({
         client,
         taskId: res.right.taskId,
-        timeout: 10_000,
+        timeout: '10s',
       });
 
       // We can't do a snapshot match because the response includes an index
@@ -1334,7 +1334,7 @@ describe('migration actions', () => {
       const task = waitForPickupUpdatedMappingsTask({
         client,
         taskId: res.right.taskId,
-        timeout: 10_000,
+        timeout: '10s',
       });
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
@@ -1349,7 +1349,7 @@ describe('migration actions', () => {
       const task = waitForPickupUpdatedMappingsTask({
         client,
         taskId: res.right.taskId,
-        timeout: 0,
+        timeout: '0s',
       });
 
       await expect(task()).resolves.toMatchObject({
@@ -1372,7 +1372,7 @@ describe('migration actions', () => {
       const task = waitForPickupUpdatedMappingsTask({
         client,
         taskId: res.right.taskId,
-        timeout: 10_000,
+        timeout: '10s',
       });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1432,7 +1432,7 @@ describe('migration actions', () => {
       })();
       expect(Either.isRight(res)).toBe(true);
       const taskId = (res as Either.Right<UpdateAndPickupMappingsResponse>).right.taskId;
-      await waitForPickupUpdatedMappingsTask({ client, taskId, timeout: 60_000 })();
+      await waitForPickupUpdatedMappingsTask({ client, taskId, timeout: '60s' })();
 
       // Repeat the search expecting to be able to find the existing documents
       const pickedUpSearchResults = (
