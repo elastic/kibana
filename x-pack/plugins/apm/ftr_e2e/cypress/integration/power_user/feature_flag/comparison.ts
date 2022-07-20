@@ -49,7 +49,7 @@ describe('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature enabled in services overview', () => {
-      cy.visit('/app/apm/backends');
+      cy.visit('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('not.be.disabled');
     });
@@ -89,7 +89,7 @@ describe('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
-      cy.visit('/app/apm/backends');
+      cy.visit('/app/apm/dependencies');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });

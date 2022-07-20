@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
 
   describe('create and add embeddables', () => {
     before(async () => {
@@ -133,12 +134,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('visualize:enableLabs advanced setting', () => {
       const LAB_VIS_NAME = 'Rendering Test: input control';
 
+      let experimentalTypes: string[] = [];
+
+      before(async () => {
+        // get the data-test-subj values for all experimental visualizations for later tests
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.clickNewVisualization();
+        const experimentalTypeWrappers = await PageObjects.visualize.getExperimentalTypeLinks();
+        experimentalTypes = await Promise.all(
+          experimentalTypeWrappers.map((element) => element.getAttribute('data-test-subj'))
+        );
+      });
+
       it('should display lab visualizations in add panel', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
         await dashboardAddPanel.closeAddPanel();
         expect(exists).to.be(true);
+      });
+
+      it('should display lab visualizations in editor menu', async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        for (const dataTestSubj of experimentalTypes) {
+          await testSubjects.existOrFail(dataTestSubj);
+        }
       });
 
       describe('is false', () => {
@@ -155,6 +175,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
           await dashboardAddPanel.closeAddPanel();
           expect(exists).to.be(false);
+        });
+
+        it('should not display lab visualizations in editor menu', async () => {
+          await dashboardAddPanel.clickEditorMenuButton();
+          for (const dataTestSubj of experimentalTypes) {
+            expect(await testSubjects.exists(dataTestSubj)).to.be(false);
+          }
         });
 
         after(async () => {

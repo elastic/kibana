@@ -6,10 +6,9 @@
  */
 import { Chance } from 'chance';
 import {
-  ElasticsearchClientMock,
   elasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+  ElasticsearchClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { DEFAULT_PIT_KEEP_ALIVE, defineEsPitRoute, esPitInputSchema } from './es_pit';
