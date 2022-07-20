@@ -133,10 +133,9 @@ export const SelectEngineType: React.FC = () => {
               )}
               selectable={{
                 isSelected: engineType === 'appSearch',
-                onClick: () => {
-                  setEngineType('appSearch');
-                },
+                onClick: () => setEngineType('appSearch'),
               }}
+              data-test-subj="AppSearchEngineSelectable"
               hasBorder
             />
           </EuiFlexItem>
@@ -164,10 +163,9 @@ export const SelectEngineType: React.FC = () => {
               }}
               selectable={{
                 isSelected: engineType === 'elasticsearch',
-                onClick: () => {
-                  setEngineType('elasticsearch');
-                },
+                onClick: () => setEngineType('elasticsearch'),
               }}
+              data-test-subj="ElasticsearchEngineSelectable"
               hasBorder
             />
           </EuiFlexItem>
