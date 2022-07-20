@@ -367,7 +367,7 @@ describe('POST /internal/security/analytics/_record_auth_type', () => {
       });
       expect(routeParamsMock.logger.warn).toHaveBeenCalledTimes(1);
       expect(routeParamsMock.logger.warn).toBeCalledWith(
-        'API keys are intended for programatic access. Do not use API keys to authenticate access via a web browser.',
+        'API keys are intended for programmatic access. Do not use API keys to authenticate access via a web browser.',
         { tags: ['deprecation'] }
       );
     });
