@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isUndefined, uniq } from 'lodash';
+import { isUndefined, uniq, find } from 'lodash';
 import React from 'react';
 import moment from 'moment';
-import { Endzones } from '@kbn/charts-plugin/public';
+import dateMath, { Unit } from '@kbn/datemath';
+import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   getAccessorByDimension,
@@ -48,6 +49,8 @@ export const getXDomain = (
   isTimeViz: boolean,
   isHistogram: boolean,
   hasBars: boolean,
+  timeZone: string,
+  useAdjustedInterval?: boolean,
   xExtent?: AxisExtentConfigResult
 ) => {
   const appliedTimeRange = getAppliedTimeRange(datatableUtilitites, layers)?.timeRange;
@@ -91,11 +94,19 @@ export const getXDomain = (
     const domainMaxValue = Math.max(baseDomain.max - baseDomain.minInterval, lastXValue);
     const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
 
+    const duration = moment.duration(baseDomain.minInterval);
+    const selectedUnit = find(dateMath.units, (u) => {
+      const value = duration.as(u);
+      return Number.isInteger(value);
+    }) as Unit;
+
     return {
       extendedDomain: {
         min: domainMin,
         max: domainMax,
-        minInterval: baseDomain.minInterval,
+        minInterval: useAdjustedInterval
+          ? getAdjustedInterval(xValues, duration.as(selectedUnit), selectedUnit, timeZone)
+          : baseDomain.minInterval,
       },
       baseDomain,
     };

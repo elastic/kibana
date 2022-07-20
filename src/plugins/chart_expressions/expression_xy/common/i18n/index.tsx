@@ -133,6 +133,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.handleEmptyXAccessor.help', {
       defaultMessage: 'Allow handling empty x accessor',
     }),
+  getUseAdjustedIntervalHelp: () =>
+    i18n.translate('expressionXY.xyVis.useAdjustedInterval.help', {
+      defaultMessage: 'Use adjusted interval fox x domain',
+    }),
   getLayersHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.layers.help', {
       defaultMessage: 'Layers of visual series',

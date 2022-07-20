@@ -108,4 +108,9 @@ export const commonXYArgs: CommonXYFn['args'] = {
     default: false,
     help: strings.getHandleEmptyXAccessorHelp(),
   },
+  useAdjustedInterval: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getUseAdjustedIntervalHelp(),
+  },
 };

@@ -47,8 +47,8 @@ export const SplitChart = ({ splitColumnAccessor, splitRowAccessor, columns }: S
         />
       )}
       <SmallMultiples
-        splitVertically={splitColumnAccessor ? SPLIT_COLUMN : undefined}
-        splitHorizontally={splitRowAccessor ? SPLIT_ROW : undefined}
+        splitVertically={splitRowAccessor ? SPLIT_ROW : undefined}
+        splitHorizontally={splitColumnAccessor ? SPLIT_COLUMN : undefined}
       />
     </>
   ) : null;
