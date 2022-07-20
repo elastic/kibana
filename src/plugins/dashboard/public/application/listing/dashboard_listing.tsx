@@ -257,19 +257,10 @@ export const DashboardListing = ({
 
   const fetchItems = useCallback(
     (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
-      // let searchTerm = filter;
-      // let references: SavedObjectsFindOptionsReference[] | undefined;
-      // if (savedObjectsTagging) {
-      //   const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
-      //     useName: true,
-      //   });
-      //   searchTerm = parsed.searchTerm;
-      //   references = parsed.tagReferences;
-      // }
-
       return savedDashboards
         .find(searchTerm, {
           hasReference: references,
+          size: listingLimit,
         })
         .then(({ total, hits }) => {
           return {
@@ -278,7 +269,7 @@ export const DashboardListing = ({
           };
         });
     },
-    [savedDashboards] // listingLimit, savedObjectsTagging
+    [savedDashboards, listingLimit]
   );
 
   const deleteItems = useCallback(

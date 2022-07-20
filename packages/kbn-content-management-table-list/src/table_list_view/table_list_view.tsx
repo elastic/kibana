@@ -27,9 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
-// import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { SimpleSavedObject } from '../types';
+import { SimpleSavedObject, SavedObjectsFindOptionsReference } from '../types';
 
 import { Table, ConfirmDeleteModal } from './components'; // ListingLimitWarning
 import { useServices } from './services';
@@ -42,7 +41,10 @@ export interface Props<T> {
   editItem?(item: T): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: T[] }>;
+  findItems(
+    searchQuery: string,
+    references?: SavedObjectsFindOptionsReference[]
+  ): Promise<{ total: number; hits: T[] }>;
   getDetailViewLink(entity: T): string;
   listingLimit: number;
   initialFilter: string;
@@ -112,10 +114,6 @@ function TableListView<T extends UserContentCommonSchema>({
   initialPageSize,
   listingLimit,
   emptyPrompt,
-  // toastNotifications,
-  // application,
-  // savedObjectTagging,
-  // theme,
   children,
 }: Props<T>) {
   const isMounted = useRef(false);
@@ -247,7 +245,18 @@ function TableListView<T extends UserContentCommonSchema>({
 
     try {
       const idx = ++fetchIdx.current;
-      const response = await findItems(searchQuery);
+
+      let searchQuerySerialized = searchQuery;
+      let references: SavedObjectsFindOptionsReference[] | undefined;
+      if (savedObjectTagging) {
+        const parsed = savedObjectTagging.ui.parseSearchQuery(searchQuery, {
+          useName: true,
+        });
+        searchQuerySerialized = parsed.searchTerm;
+        references = parsed.tagReferences;
+      }
+
+      const response = await findItems(searchQuerySerialized, references);
 
       if (!isMounted.current) {
         return;
@@ -267,7 +276,7 @@ function TableListView<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQuery, findItems]);
+  }, [searchQuery, savedObjectTagging, findItems]);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {

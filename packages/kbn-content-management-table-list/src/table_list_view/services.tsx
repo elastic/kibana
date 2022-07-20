@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 
-import type { SavedObject, MountPoint } from '../types';
+import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '../types';
 
 /**
  * Abstract external services for this component.
@@ -31,6 +31,17 @@ export interface Services {
   savedObjectTagging?: {
     ui: {
       getTableColumnDefinition: () => EuiTableFieldDataColumnType<SavedObject>;
+      parseSearchQuery: (
+        query: string,
+        options?: {
+          useName?: boolean;
+          tagField?: string;
+        }
+      ) => {
+        searchTerm: string;
+        tagReferences: SavedObjectsFindOptionsReference[];
+        valid: boolean;
+      };
     };
   };
   theme: {

@@ -59,4 +59,9 @@ export interface SimpleSavedObject<T = unknown> {
   namespaces: SavedObject<T>['namespaces'];
 }
 
+export interface SavedObjectsFindOptionsReference {
+  type: string;
+  id: string;
+}
+
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => () => void;
