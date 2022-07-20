@@ -104,9 +104,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            onClick: () => {
-              setCreationStep(EngineCreationSteps.SelectStep);
-            },
+            onClick: () => setCreationStep(EngineCreationSteps.SelectStep),
             status: 'complete',
             title: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',

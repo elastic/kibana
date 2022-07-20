@@ -65,6 +65,11 @@ interface EngineCreationValues {
   isSubmitDisabled: boolean;
 }
 
+const aliasNameErrorMessageTemplate: string = dedent`
+  There is an existing index or alias with the name {aliasName}.
+  Please choose another alias name.
+`;
+
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
   path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
   actions: {
@@ -217,16 +222,10 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
         const existingAlias = indices.find((el) => el.name === aliasName);
         if (existingAlias) {
           return i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
+            'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.errorText',
             {
-              // FIXME: defaultMessage requires a string or template literal
-              defaultMessage: dedent`
-                There is an existing index or alias with the name {aliasName}.
-                Please choose another alias name.
-              `,
-              values: {
-                aliasName,
-              },
+              defaultMessage: aliasNameErrorMessageTemplate,
+              values: { aliasName },
             }
           );
         } else {

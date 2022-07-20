@@ -46,9 +46,7 @@ export const SelectEngineType: React.FC = () => {
             ),
           },
           {
-            onClick: () => {
-              setCreationStep(EngineCreationSteps.ConfigureStep);
-            },
+            onClick: () => setCreationStep(EngineCreationSteps.ConfigureStep),
             title: i18n.translate(
               'xpack.enterpriseSearch.appSearch.engineCreation.steps.configuration.label',
               {

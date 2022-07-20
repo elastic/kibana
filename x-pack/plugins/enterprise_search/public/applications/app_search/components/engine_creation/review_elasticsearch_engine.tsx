@@ -39,23 +39,34 @@ export const ReviewElasticsearchEngine: React.FC = () => {
       <EuiStepsHorizontal
         steps={[
           {
-            title: 'Search engine type',
+            onClick: () => setCreationStep(EngineCreationSteps.SelectStep),
             status: 'complete',
-            onClick: () => {
-              setCreationStep(EngineCreationSteps.SelectStep);
-            },
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.searchEngineType.label',
+              {
+                defaultMessage: 'Search engine type',
+              }
+            ),
           },
           {
-            title: 'Configuration',
+            onClick: () => setCreationStep(EngineCreationSteps.ConfigureStep),
             status: 'complete',
-            onClick: () => {
-              setCreationStep(EngineCreationSteps.ConfigureStep);
-            },
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.configuration.label',
+              {
+                defaultMessage: 'Configuration',
+              }
+            ),
           },
           {
-            title: 'Review',
-            status: 'current',
             onClick: () => {},
+            status: 'current',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
+              {
+                defaultMessage: 'Review',
+              }
+            ),
           },
         ]}
       />
