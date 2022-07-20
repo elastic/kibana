@@ -20,7 +20,9 @@ export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => 
   return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, { ...params });
 };
 
-export const fetchSyntheticsMonitor = async (monitorId: string): Promise<SyntheticsMonitor> => {
+export const fetchSyntheticsMonitor = async (
+  monitorId: string
+): Promise<SyntheticsMonitor & { updated_at?: string }> => {
   const { attributes } = (await apiService.get(
     `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
   )) as SavedObject<SyntheticsMonitor>;

@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGrid, EuiSpacer, EuiTablePagination } from '@elastic/eui';
-import { selectOverviewState, setOverviewPerPageAction } from '../../../../state/overview';
+import {
+  quietFetchOverviewAction,
+  selectOverviewState,
+  setFlyoutConfig,
+  setOverviewPerPageAction,
+} from '../../../../state/overview';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
@@ -16,15 +21,23 @@ import { MonitorDetailFlyout } from './monitor_detail_flyout';
 export const OverviewGrid = () => {
   const {
     data: { pages },
+    flyoutConfig,
     loaded,
+    pageState,
     pageState: { perPage },
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
-  const [flyoutConfig, setFlyoutConfig] = useState<{ id: string; location: string } | undefined>(
-    undefined
-  );
   const [page, setPage] = useState(0);
   const currentMonitors = pages[page] || [];
+  const setFlyoutConfigCallback = useCallback(
+    (monitorId: string, location: string) => dispatch(setFlyoutConfig({ monitorId, location })),
+    [dispatch]
+  );
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewAction.get(pageState)),
+    [dispatch, pageState]
+  );
 
   const goToPage = (pageNumber: number) => {
     setPage(pageNumber);
@@ -45,7 +58,7 @@ export const OverviewGrid = () => {
             data-test-subj="syntheticsOverviewGridItem"
           >
             <OverviewGridItem
-              onClick={(id: string, location: string) => setFlyoutConfig({ id, location })}
+              onClick={setFlyoutConfigCallback}
               monitorId={monitor.id}
               locationId={monitor.location?.id}
               monitorName={monitor.name}
@@ -65,11 +78,12 @@ export const OverviewGrid = () => {
         onChangeItemsPerPage={changeItemsPerPage}
         itemsPerPageOptions={[10, 20, 40]}
       />
-      {flyoutConfig?.id && flyoutConfig?.location && (
+      {flyoutConfig?.monitorId && flyoutConfig?.location && (
         <MonitorDetailFlyout
-          id={flyoutConfig.id}
+          id={flyoutConfig.monitorId}
           location={flyoutConfig.location}
-          onClose={() => setFlyoutConfig(undefined)}
+          onClose={hideFlyout}
+          onEnabledChange={forceRefreshCallback}
         />
       )}
     </>

@@ -11,12 +11,18 @@ import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
-import { MonitorOverviewPageState } from './models';
-import { fetchMonitorOverviewAction, setOverviewPerPageAction } from './actions';
+import { MonitorOverviewFlyoutConfig, MonitorOverviewPageState } from './models';
+import {
+  fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
+  setFlyoutConfig,
+  setOverviewPerPageAction,
+} from './actions';
 
 export interface MonitorOverviewState {
   data: MonitorOverviewResult;
   pageState: MonitorOverviewPageState;
+  flyoutConfig: MonitorOverviewFlyoutConfig;
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
@@ -31,6 +37,7 @@ const initialState: MonitorOverviewState = {
   pageState: {
     perPage: 20,
   },
+  flyoutConfig: null,
   loading: false,
   loaded: false,
   error: null,
@@ -52,12 +59,21 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.loading = false;
       state.error = serializeHttpFetchError(action.payload);
     })
+    .addCase(quietFetchOverviewAction.success, (state, action) => {
+      state.data = action.payload;
+    })
+    .addCase(quietFetchOverviewAction.fail, (state, action) => {
+      state.error = serializeHttpFetchError(action.payload);
+    })
     .addCase(setOverviewPerPageAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
         perPage: action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(setFlyoutConfig, (state, action) => {
+      state.flyoutConfig = action.payload;
     });
 });
 

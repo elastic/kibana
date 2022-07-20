@@ -8,3 +8,8 @@
 export interface MonitorOverviewPageState {
   perPage: number;
 }
+
+export type MonitorOverviewFlyoutConfig = {
+  monitorId: string;
+  location: string;
+} | null;
