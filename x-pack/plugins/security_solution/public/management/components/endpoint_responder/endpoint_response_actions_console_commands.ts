@@ -23,6 +23,30 @@ const emptyArgumentValidator = (argData: ParsedArgData) => {
   }
 };
 
+const HELP_GROUPS = Object.freeze({
+  responseActions: {
+    position: 0,
+    label: i18n.translate('xpack.securitySolution.endpointConsoleCommands.groups.responseActions', {
+      defaultMessage: 'Response actions',
+    }),
+  },
+});
+
+const ENTER_PID_OR_ENTITY_ID_INSTRUCTION = i18n.translate(
+  'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterPidOrEntityId',
+  { defaultMessage: 'Enter a pid or an entity id to execute' }
+);
+
+const ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION = i18n.translate(
+  'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterOrAddOptionalComment',
+  { defaultMessage: 'Hit enter to execute or add an optional comment' }
+);
+
+const COMMENT_ARG_ABOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.commandArgAbout',
+  { defaultMessage: 'A comment to go along with the action' }
+);
+
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
 ): CommandDefinition[] => {
@@ -37,17 +61,17 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 0,
     },
     {
       name: 'release',
@@ -59,17 +83,17 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'release --comment "isolate this host"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 1,
     },
     {
       name: 'kill-process',
@@ -81,16 +105,13 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
-      exampleInstruction: 'Enter a pid or an entity id to execute',
+      exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       mustHaveArgs: true,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
         pid: {
           required: false,
@@ -114,6 +135,9 @@ export const getEndpointResponseActionsConsoleCommands = (
           validate: emptyArgumentValidator,
         },
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 4,
     },
     {
       name: 'suspend-process',
@@ -125,16 +149,13 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
-      exampleInstruction: 'Enter a pid or an entity id to execute',
+      exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       mustHaveArgs: true,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.suspendProcess.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
         pid: {
           required: false,
@@ -161,6 +182,9 @@ export const getEndpointResponseActionsConsoleCommands = (
           validate: emptyArgumentValidator,
         },
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 5,
     },
     {
       name: 'status',
@@ -171,6 +195,9 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 2,
     },
     {
       name: 'processes',
@@ -182,17 +209,17 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'processes --comment "get the processes"',
-      exampleInstruction: 'Hit enter to execute or add an optional comment',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       args: {
         comment: {
           required: false,
           allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.processes.arg.comment',
-            { defaultMessage: 'A comment to go along with the action' }
-          ),
+          about: COMMENT_ARG_ABOUT,
         },
       },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 3,
     },
   ];
 };
