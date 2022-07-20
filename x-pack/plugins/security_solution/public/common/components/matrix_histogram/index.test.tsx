@@ -262,7 +262,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: undefined,
           pageName: 'network',
-          tabName: 'external-alerts',
+          tabName: 'events',
         },
       ]);
 

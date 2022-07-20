@@ -155,7 +155,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.alerts})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
           <EventsQueryTabBody
             pageFilters={filterNetworkExternalAlertData}
             timelineId={TimelineId.networkPageEvents}

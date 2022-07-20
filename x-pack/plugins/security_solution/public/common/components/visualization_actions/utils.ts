@@ -62,6 +62,29 @@ export const hostNameExistsFilter: Filter[] = [
   },
 ];
 
+export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
+  ipAddress
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'source.ip',
+            params: {
+              query: ipAddress,
+            },
+          },
+          query: {
+            match_phrase: {
+              'source.ip': ipAddress,
+            },
+          },
+        },
+      ]
+    : [];
+
 export const filterNetworkExternalAlertData: Filter[] = [
   {
     query: {

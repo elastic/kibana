@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import { Route } from '@kbn/kibana-react-plugin/public';
-
+import { TimelineId } from '@kbn/timelines-plugin/common';
+import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
@@ -24,7 +26,6 @@ import {
   CountriesQueryTabBody,
   HttpQueryTabBody,
   IPsQueryTabBody,
-  NetworkAlertsQueryTabBody,
   TlsQueryTabBody,
   UsersQueryTabBody,
 } from '../navigation';
@@ -52,6 +53,11 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     const commonProps = { ...rest, type };
     const flowTabProps = { ...commonProps, indexPattern };
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
+
+    const networkDetailsPageFilters: Filter[] = useMemo(
+      () => getNetworkDetailsPageFilter(rest.ip),
+      [rest.ip]
+    );
 
     return (
       <Switch>
@@ -98,8 +104,12 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
             narrowDateRange={narrowDateRange}
           />
         </Route>
-        <Route path={`${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.alerts})`}>
-          <NetworkAlertsQueryTabBody {...commonProps} />
+        <Route path={`${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.events})`}>
+          <EventsQueryTabBody
+            pageFilters={networkDetailsPageFilters}
+            timelineId={TimelineId.networkPageEvents}
+            {...commonProps}
+          />
         </Route>
       </Switch>
     );
