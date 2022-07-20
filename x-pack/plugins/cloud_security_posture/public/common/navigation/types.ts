@@ -17,7 +17,10 @@ export interface CspPageNavigationItem extends CspNavigationItem {
 
 export type CspPage = 'dashboard' | 'findings' | 'benchmarks' | 'rules';
 
-// This needs to match the cloud security posture page entries in `SecurityPageName` in x-pack/plugins/security_solution/common/constants.ts
+/**
+ * All the IDs for the cloud security posture pages.
+ * This needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`.
+ */
 export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-dashboard'
   | 'cloud_security_posture-findings'

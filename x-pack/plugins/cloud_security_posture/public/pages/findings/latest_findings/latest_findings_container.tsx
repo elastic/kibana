@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -70,26 +69,15 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   const error = findingsGroupByNone.error || baseEsQuery.error;
 
-  const securitySolutionContext = useContext(SecuritySolutionContext);
-  const searchBarElement = (
-    <FindingsSearchBar
-      dataView={dataView}
-      setQuery={(query) => {
-        setUrlQuery({ ...query, pageIndex: 0 });
-      }}
-      loading={findingsGroupByNone.isFetching}
-    />
-  );
-
-  let wrappedSearchBarElement = searchBarElement;
-  if (securitySolutionContext) {
-    const FiltersGlobal = securitySolutionContext.getFiltersGlobalComponent();
-    wrappedSearchBarElement = <FiltersGlobal>{searchBarElement}</FiltersGlobal>;
-  }
-
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
-      {wrappedSearchBarElement}
+      <FindingsSearchBar
+        dataView={dataView}
+        setQuery={(query) => {
+          setUrlQuery({ ...query, pageIndex: 0 });
+        }}
+        loading={findingsGroupByNone.isFetching}
+      />
       <PageWrapper>
         <LatestFindingsPageTitle />
         {error && <ErrorCallout error={error} />}
