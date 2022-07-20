@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-// TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
+// TODO Consolidate with duplicate saved search utils file in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts`
+
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { SearchSource } from '@kbn/data-plugin/common';
+import { SavedSearch } from '@kbn/discover-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
@@ -18,13 +22,10 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SearchSource } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/discover-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 const DEFAULT_QUERY = {
   bool: {
@@ -36,8 +37,21 @@ const DEFAULT_QUERY = {
   },
 };
 
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
+
 export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
+}
+
+export type SavedSearchSavedObject = SimpleSavedObject<any>;
+
+export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
+  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
 }
 
 /**
@@ -168,9 +182,10 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
+  // TODO: support saved search
   // If saved search is an json object with the original query and filter
   // retrieve the parsed query and filter
-  const savedSearchData = getQueryFromSavedSearchObject(savedSearch);
+  const savedSearchData = undefined; // getQueryFromSavedSearchObject(savedSearch);
 
   // If no saved search available, use user's query and filters
   if (!savedSearchData && userQuery) {
@@ -193,7 +208,9 @@ export function getEsQueryFromSavedSearch({
   // If saved search available, merge saved search with latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchData) {
+    // @ts-ignore property does not exist on type never
     const currentQuery = userQuery ?? savedSearchData?.query;
+    // @ts-ignore property does not exist on type never
     const currentFilters = userFilters ?? savedSearchData?.filter;
 
     if (filterManager) filterManager.setFilters(currentFilters);
