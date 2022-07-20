@@ -7,7 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiFieldText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiFieldText,
+  EuiToolTip,
+  EuiButtonGroup,
+  EuiFieldNumber,
+} from '@elastic/eui';
+import { htmlIdGenerator } from '@elastic/eui';
+import { LayoutDirection } from '@elastic/charts';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover } from '../../shared_components';
 import { MetricVisualizationState } from './visualization';
@@ -17,6 +26,7 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
 
   const hasSecondaryMetric = Boolean(state.secondaryMetricAccessor);
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
+  const idPrefix = htmlIdGenerator()();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
@@ -25,7 +35,7 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
           defaultMessage: 'Labels',
         })}
         type="labels"
-        groupPosition="none"
+        groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
         <EuiFormRow
@@ -39,7 +49,12 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
             position="right"
             content={
               hasBreakdownBy ? (
-                <p>The subtitle is not visible since a break down by dimension is in use.</p>
+                <p>
+                  {i18n.translate('xpack.lens.metric.subtitleNotVisible', {
+                    defaultMessage:
+                      'The subtitle is not visible since a "break down by" dimension is in use.',
+                  })}
+                </p>
               ) : null
             }
             display="block"
@@ -67,7 +82,12 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
             position="right"
             content={
               hasSecondaryMetric ? (
-                <p>The extra text is not visible since a secondary metric is selected.</p>
+                <p>
+                  {i18n.translate('xpack.lens.metric.extraTextNotVisible', {
+                    defaultMessage:
+                      'The extra text is not visible since a secondary metric is selected.',
+                  })}
+                </p>
               ) : null
             }
             display="block"
@@ -83,6 +103,68 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
               }
             />
           </EuiToolTip>
+        </EuiFormRow>
+      </ToolbarPopover>
+      <ToolbarPopover
+        title={i18n.translate('xpack.lens.metric.appearanceLabel', {
+          defaultMessage: 'Appearance',
+        })}
+        type="visualOptions"
+        groupPosition="right"
+        buttonDataTestSubj="lnsVisualOptionsButton"
+      >
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+            defaultMessage: 'Progress bar direction',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+              defaultMessage: 'Progress bar direction',
+            })}
+            data-test-subj="lnsMetric_progress_direction_buttons"
+            name="alignment"
+            options={[
+              {
+                id: `${idPrefix}vertical`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+                  defaultMessage: 'Vertical',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_vertical',
+              },
+              {
+                id: `${idPrefix}horizontal`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+                  defaultMessage: 'Horizontal',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+              },
+            ]}
+            idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+            onChange={(id) => {
+              const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+              setState({
+                ...state,
+                progressDirection: newDirection,
+              });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.metric.maxColumns', {
+            defaultMessage: 'Max columns',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiFieldNumber
+            value={state.maxCols ?? 5}
+            onChange={(event) => setState({ ...state, maxCols: parseInt(event.target.value, 10) })}
+          />
         </EuiFormRow>
       </ToolbarPopover>
     </EuiFlexGroup>
