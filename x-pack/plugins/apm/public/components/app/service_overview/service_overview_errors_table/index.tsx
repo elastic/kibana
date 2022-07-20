@@ -21,7 +21,7 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useTableSortAndPaginationState } from '../../../../hooks/table_sort_pagination/use_table_sort_pagination_state';
+import { useTableSortAndPagination } from '../../../../hooks/table_sort_pagination/use_table_sort_pagination';
 
 interface Props {
   serviceName: string;
@@ -40,10 +40,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   previousPeriod: {},
 };
 
-const PAGE_INDEX = 0;
-const PAGE_SIZE = 5;
 const SORT_FIELD = 'occurrences';
-const SORT_DIRECTION = 'desc';
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
@@ -76,22 +73,11 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     [environment, kuery, start, end, serviceName]
   );
 
-  const {
-    requestId,
-    tableItems,
-    onTableChange,
-    tablePagination,
-    tableSort,
-    totalItems,
-  } = useTableSortAndPaginationState<typeof data.errorGroups>({
-    items: data.errorGroups,
-    pagination: { pageIndex: PAGE_INDEX, pageSize: PAGE_SIZE },
-    sorting: {
-      sort: { field: SORT_FIELD, direction: SORT_DIRECTION },
-      enableAllColumns: true,
-    },
-    comparison: { offset, comparisonEnabled },
-  });
+  const { requestId, tableItems, onTableChange, tablePagination, tableSort } =
+    useTableSortAndPagination(
+      { items: data.errorGroups, sorting: { sort: { field: 'occurrences' } } },
+      [offset, comparisonEnabled]
+    );
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
@@ -172,7 +158,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         <OverviewTableContainer
           fixedHeight={true}
           isEmptyAndNotInitiated={
-            totalItems === 0 && status === FETCH_STATUS.NOT_INITIATED
+            data.errorGroups.length === 0 &&
+            status === FETCH_STATUS.NOT_INITIATED
           }
         >
           <EuiBasicTable

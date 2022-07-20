@@ -11,44 +11,58 @@ import {
   Pagination,
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
+import { SortDirection } from '../../../common/sort_direction_rt';
+import { replace } from '../../components/shared/links/url_helpers';
 
-export interface TableSortPaginationProps<T extends any[]> {
-  items: T;
-  // totalItemCount is not necessary here
-  pagination: Omit<Pagination, 'totalItemCount'>;
-  sorting?: EuiTableSortingType<T[0]>;
-  // Used to update the tableItems when the comparison values are changed
-  comparison?: {
-    offset?: string;
-    comparisonEnabled?: boolean;
+interface Sorting<T extends any[]>
+  extends Omit<EuiTableSortingType<T[0]>, 'sort'> {
+  sort?: {
+    field: keyof T[0];
+    direction?: SortDirection;
   };
 }
 
-type Props<T extends any[]> = TableSortPaginationProps<T> & {
-  tableOptions: CriteriaWithPagination<T[0]>;
-  onTableChange: (criteriaWithPagination: CriteriaWithPagination<T[0]>) => void;
-};
-
+export interface Props<T extends any[]> {
+  items: T;
+  // totalItemCount is not necessary here
+  pagination?: Partial<Omit<Pagination, 'totalItemCount'>>;
+  sorting?: Sorting<T>;
+  urlState?: boolean;
+}
+const PAGE_INDEX = 0;
+const PAGE_SIZE = 5;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const DESC: SortDirection = 'desc';
 
-export function useTableSortAndPagination<T extends any[]>({
-  items,
-  pagination,
-  sorting,
-  tableOptions,
-  onTableChange,
-  comparison = {},
-}: Props<T>): {
+export function useTableSortAndPagination<T extends any[]>(
+  { items, pagination, sorting, urlState = false }: Props<T>,
+  deps: any[]
+): {
   onTableChange: (criteriaWithPagination: CriteriaWithPagination<T[0]>) => void;
   tableSort?: EuiTableSortingType<T[0]>;
   tablePagination: Pagination;
-  tableItems: any[];
-  totalItems: number;
+  tableItems: T;
   requestId: string;
 } {
-  const { offset, comparisonEnabled } = comparison;
+  const history = useHistory();
+
+  const [tableOptions, setTableOptions] = useState<
+    CriteriaWithPagination<T[0]>
+  >({
+    page: {
+      index: pagination?.pageIndex || PAGE_INDEX,
+      size: pagination?.pageSize || PAGE_SIZE,
+    },
+    sort: sorting?.sort
+      ? {
+          field: sorting.sort.field,
+          direction: sorting.sort.direction || DESC,
+        }
+      : undefined,
+  });
 
   const { tableItems, requestId } = useMemo(
     () => {
@@ -60,20 +74,13 @@ export function useTableSortAndPagination<T extends any[]>({
         ).slice(
           tableOptions.page.index * tableOptions.page.size,
           (tableOptions.page.index + 1) * tableOptions.page.size
-        ),
+        ) as T,
         // Generate a new id everytime the table options are changed
         requestId: uuid(),
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      items,
-      tableOptions,
-      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
-      offset,
-      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
-      comparisonEnabled,
-    ]
+    [items, tableOptions, ...deps]
   );
 
   const tablePagination: Pagination = useMemo(
@@ -81,22 +88,42 @@ export function useTableSortAndPagination<T extends any[]>({
       pageIndex: tableOptions.page.index,
       pageSize: tableOptions.page.size,
       totalItemCount: items.length,
-      pageSizeOptions: pagination.pageSizeOptions || PAGE_SIZE_OPTIONS,
-      showPerPageOptions: pagination.showPerPageOptions || false,
+      pageSizeOptions: pagination?.pageSizeOptions || PAGE_SIZE_OPTIONS,
+      showPerPageOptions: pagination?.showPerPageOptions || false,
     }),
     [tableOptions, items, pagination]
   );
 
   const tableSort: EuiTableSortingType<T[0]> = useMemo(() => {
-    return { ...(sorting || {}), sort: tableOptions.sort };
+    return {
+      sort: tableOptions.sort,
+      allowNeutralSort: sorting?.allowNeutralSort,
+      enableAllColumns: sorting?.enableAllColumns || true,
+      readOnly: sorting?.readOnly,
+    };
   }, [tableOptions, sorting]);
+
+  function handleOnTableChange(newTableOptions: CriteriaWithPagination<T[0]>) {
+    if (urlState) {
+      replace(history, {
+        query: {
+          page: newTableOptions.page.index.toString(),
+          pageSize: newTableOptions.page.size.toString(),
+          sortField: newTableOptions.sort?.field
+            ? newTableOptions.sort.field.toString()
+            : '',
+          sortDirection: newTableOptions.sort?.direction || DESC,
+        },
+      });
+    }
+    setTableOptions(newTableOptions);
+  }
 
   return {
     requestId,
-    onTableChange,
+    onTableChange: handleOnTableChange,
     tableSort,
     tablePagination,
     tableItems,
-    totalItems: items.length,
   };
 }

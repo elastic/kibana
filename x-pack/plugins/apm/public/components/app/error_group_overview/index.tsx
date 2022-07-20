@@ -20,13 +20,13 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTableSortAndPaginationUrl } from '../../../hooks/table_sort_pagination/use_table_sort_pagination_url';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { getColumns } from './get_columns';
+import { useTableSortAndPagination } from '../../../hooks/table_sort_pagination/use_table_sort_pagination';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -105,24 +105,27 @@ export function ErrorGroupOverview() {
   const { errorGroups } = errorGroupListData;
 
   const { tableItems, tablePagination, tableSort, onTableChange, requestId } =
-    useTableSortAndPaginationUrl<typeof errorGroups>({
-      items: errorGroups,
-      pagination: {
-        pageIndex: page || PAGE_INDEX,
-        pageSize: pageSize || PAGE_SIZE,
-        showPerPageOptions: true,
-      },
-      sorting: {
-        sort: {
-          field: sortField
-            ? (sortField as keyof ErrorGroupMainStatistics['errorGroups'][0])
-            : SORT_FIELD,
-          direction: sortDirection || SORT_DIRECTION,
+    useTableSortAndPagination(
+      {
+        items: errorGroups,
+        pagination: {
+          pageIndex: page,
+          pageSize: pageSize || PAGE_SIZE,
+          showPerPageOptions: true,
         },
-        enableAllColumns: true,
+        sorting: {
+          sort: {
+            field:
+              (sortField as
+                | keyof ErrorGroupMainStatistics['errorGroups'][0]
+                | undefined) || SORT_FIELD,
+            direction: sortDirection,
+          },
+        },
+        urlState: true,
       },
-      comparison: { offset, comparisonEnabled },
-    });
+      [offset, comparisonEnabled]
+    );
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
