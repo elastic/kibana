@@ -22,7 +22,6 @@ export const FILE_KIND_API_ROUTES_SERVER = {
   getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
   getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
   getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-  getFindRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/find`,
 };
 
 export const FILE_KIND_API_ROUTES_CLIENT = {
