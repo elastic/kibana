@@ -347,9 +347,9 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
-    "cluster_name": "cluster-name",
-    "cluster_uuid": "cluster-uuid",
-    "cluster_version": "8.0.0",
+    "clusterName": "cluster-name",
+    "clusterUuid": "cluster-uuid",
+    "clusterVersion": "8.0.0",
   },
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -411,9 +411,9 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
-    "cluster_name": "cluster-name",
-    "cluster_uuid": "cluster-uuid",
-    "cluster_version": "8.0.0",
+    "clusterName": "cluster-name",
+    "clusterUuid": "cluster-uuid",
+    "clusterVersion": "8.0.0",
   },
   "csp": Object {
     "warnLegacyBrowsers": true,
@@ -527,9 +527,9 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
-    "cluster_name": "cluster-name",
-    "cluster_uuid": "cluster-uuid",
-    "cluster_version": "8.0.0",
+    "clusterName": "cluster-name",
+    "clusterUuid": "cluster-uuid",
+    "clusterVersion": "8.0.0",
   },
   "csp": Object {
     "warnLegacyBrowsers": true,

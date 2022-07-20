@@ -167,7 +167,7 @@ export class CoreSystem {
     reportMetricEvent(analytics, {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
-        kibana_version: this.coreContext.env.packageInfo.version,
+        kibanaVersion: this.coreContext.env.packageInfo.version,
         protocol: window.location.protocol,
       },
       duration: timing[LOAD_FIRST_NAV],

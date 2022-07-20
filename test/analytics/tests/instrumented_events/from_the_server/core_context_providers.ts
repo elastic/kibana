@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "kibana info" context provider', () => {
-      expect(event.context).to.have.property('kibana_uuid');
+      expect(event.context).to.have.property('kibanaUuid');
       expect(event.context.kibana_uuid).to.be.a('string');
       expect(event.context).to.have.property('pid');
       expect(event.context.pid).to.be.a('number');
@@ -67,11 +67,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "license info" context provider', () => {
-      expect(event.context).to.have.property('license_id');
+      expect(event.context).to.have.property('licenseId');
       expect(event.context.license_id).to.be.a('string');
-      expect(event.context).to.have.property('license_status');
+      expect(event.context).to.have.property('licenseStatus');
       expect(event.context.license_status).to.be.a('string');
-      expect(event.context).to.have.property('license_type');
+      expect(event.context).to.have.property('licenseType');
       expect(event.context.license_type).to.be.a('string');
     });
 

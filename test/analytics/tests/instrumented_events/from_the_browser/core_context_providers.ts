@@ -23,11 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "cluster info" context provider', () => {
-      expect(event.context).to.have.property('cluster_uuid');
+      expect(event.context).to.have.property('clusterUuid');
       expect(event.context.cluster_uuid).to.be.a('string');
-      expect(event.context).to.have.property('cluster_name');
+      expect(event.context).to.have.property('clusterName');
       expect(event.context.cluster_name).to.be.a('string');
-      expect(event.context).to.have.property('cluster_version');
+      expect(event.context).to.have.property('clusterVersion');
       expect(event.context.cluster_version).to.be.a('string');
     });
 
@@ -47,18 +47,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "session-id" context provider', () => {
-      expect(event.context).to.have.property('session_id');
+      expect(event.context).to.have.property('sessionId');
       expect(event.context.session_id).to.be.a('string');
     });
 
     it('should have the properties provided by the "browser info" context provider', () => {
-      expect(event.context).to.have.property('user_agent');
+      expect(event.context).to.have.property('userAgent');
       expect(event.context.user_agent).to.be.a('string');
-      expect(event.context).to.have.property('preferred_language');
-      expect(event.context.preferred_language).to.be.a('string');
-      expect(event.context).to.have.property('preferred_languages');
-      expect(event.context.preferred_languages).to.be.an('array');
-      (event.context.preferred_languages as unknown[]).forEach((lang) =>
+      expect(event.context).to.have.property('preferredLanguage');
+      expect(event.context.preferredLanguage).to.be.a('string');
+      expect(event.context).to.have.property('preferredLanguages');
+      expect(event.context.preferredLanguages).to.be.an('array');
+      (event.context.preferredLanguages as unknown[]).forEach((lang) =>
         expect(lang).to.be.a('string')
       );
     });
@@ -75,11 +75,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should have the properties provided by the "license info" context provider', async () => {
       await common.clickAndValidate('kibanaChrome', 'kibanaChrome');
       [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['click'] }); // Get a later event to ensure license has been obtained already.
-      expect(event.context).to.have.property('license_id');
+      expect(event.context).to.have.property('licenseId');
       expect(event.context.license_id).to.be.a('string');
-      expect(event.context).to.have.property('license_status');
+      expect(event.context).to.have.property('licenseStatus');
       expect(event.context.license_status).to.be.a('string');
-      expect(event.context).to.have.property('license_type');
+      expect(event.context).to.have.property('licenseType');
       expect(event.context.license_type).to.be.a('string');
     });
 

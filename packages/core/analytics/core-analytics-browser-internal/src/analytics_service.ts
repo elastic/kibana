@@ -166,15 +166,15 @@ export class AnalyticsService {
       name: 'elasticsearch info',
       context$: of(injectedMetadata.getElasticsearchInfo()),
       schema: {
-        cluster_name: {
+        clusterName: {
           type: 'keyword',
           _meta: { description: 'The Cluster Name', optional: true },
         },
-        cluster_uuid: {
+        clusterUuid: {
           type: 'keyword',
           _meta: { description: 'The Cluster UUID', optional: true },
         },
-        cluster_version: {
+        clusterVersion: {
           type: 'keyword',
           _meta: { description: 'The Cluster version', optional: true },
         },

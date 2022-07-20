@@ -20,13 +20,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should emit the legacy "Loaded Kibana"', async () => {
-      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
+      const [legacyEvent] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
 
-      expect(event.event_type).to.eql('Loaded Kibana');
-      expect(event.properties).to.have.property('kibana_version');
-      expect(event.properties.kibana_version).to.be.a('string');
-      expect(event.properties).to.have.property('protocol');
-      expect(event.properties.protocol).to.be.a('string');
+      expect(legacyEvent.event_type).to.eql('Loaded Kibana');
+      expect(legacyEvent.properties).to.have.property('kibana_version');
+      expect(legacyEvent.properties.kibana_version).to.be.a('string');
+      expect(legacyEvent.properties).to.have.property('protocol');
+      expect(legacyEvent.properties.protocol).to.be.a('string');
     });
 
     it('should emit the new kibana-loaded events', async () => {
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties).to.have.property('meta');
 
       const meta = event.properties.meta as Record<string, any>;
-      expect(meta.kibana_version).to.be.a('string');
+      expect(meta.kibanaVersion).to.be.a('string');
       expect(meta.protocol).to.be.a('string');
 
       // Kibana Loaded timings

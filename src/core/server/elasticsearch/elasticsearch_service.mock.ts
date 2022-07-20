@@ -91,9 +91,9 @@ const createInternalSetupContractMock = () => {
       kibanaVersion: '8.0.0',
     }),
     clusterInfo$: new BehaviorSubject<ClusterInfo>({
-      cluster_uuid: 'cluster-uuid',
-      cluster_name: 'cluster-name',
-      cluster_version: '8.0.0',
+      clusterUuid: 'cluster-uuid',
+      clusterName: 'cluster-name',
+      clusterVersion: '8.0.0',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,

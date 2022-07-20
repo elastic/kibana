@@ -21,14 +21,14 @@ describe('registerAnalyticsContextProvider', () => {
   test('it provides the context', async () => {
     registerAnalyticsContextProvider(
       analyticsMock,
-      of({ cluster_name: 'cluster-name', cluster_uuid: 'cluster_uuid', cluster_version: '1.2.3' })
+      of({ clusterName: 'cluster-name', clusterUuid: 'cluster_uuid', clusterVersion: '1.2.3' })
     );
     const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
-        "cluster_name": "cluster-name",
-        "cluster_uuid": "cluster_uuid",
-        "cluster_version": "1.2.3",
+        "clusterName": "cluster-name",
+        "clusterUuid": "cluster_uuid",
+        "clusterVersion": "1.2.3",
       }
     `);
   });

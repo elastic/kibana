@@ -39,9 +39,9 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
-        "cluster_name": "cluster-name",
-        "cluster_uuid": "cluster_uuid",
-        "cluster_version": "1.2.3",
+        "clusterName": "cluster-name",
+        "clusterUuid": "cluster_uuid",
+        "clusterVersion": "1.2.3",
       }
     `);
   });
@@ -52,9 +52,9 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
-        "cluster_name": "cluster-name",
-        "cluster_uuid": "cluster_uuid",
-        "cluster_version": "1.2.3",
+        "clusterName": "cluster-name",
+        "clusterUuid": "cluster_uuid",
+        "clusterVersion": "1.2.3",
       }
     `);
     expect(internalClient.info).toHaveBeenCalledTimes(2);
@@ -65,16 +65,16 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
-        "cluster_name": "cluster-name",
-        "cluster_uuid": "cluster_uuid",
-        "cluster_version": "1.2.3",
+        "clusterName": "cluster-name",
+        "clusterUuid": "cluster_uuid",
+        "clusterVersion": "1.2.3",
       }
     `);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
-        "cluster_name": "cluster-name",
-        "cluster_uuid": "cluster_uuid",
-        "cluster_version": "1.2.3",
+        "clusterName": "cluster-name",
+        "clusterUuid": "cluster_uuid",
+        "clusterVersion": "1.2.3",
       }
     `);
     expect(internalClient.info).toHaveBeenCalledTimes(1);

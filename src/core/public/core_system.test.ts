@@ -290,7 +290,7 @@ describe('#start()', () => {
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
-        kibana_version: '1.2.3',
+        kibanaVersion: '1.2.3',
         protocol: 'http:',
       },
       key1: LOAD_START,
@@ -323,7 +323,7 @@ describe('#start()', () => {
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
       eventName: KIBANA_LOADED_EVENT,
       meta: {
-        kibana_version: '1.2.3',
+        kibanaVersion: '1.2.3',
         protocol: 'http:',
       },
       key1: LOAD_START,

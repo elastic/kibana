@@ -38,9 +38,9 @@ describe('AnalyticsService', () => {
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[2][0].context$)
     ).resolves.toEqual({
-      preferred_language: 'en-US',
-      preferred_languages: ['en-US', 'en'],
-      user_agent: expect.any(String),
+      preferredLanguage: 'en-US',
+      preferredLanguages: ['en-US', 'en'],
+      userAgent: expect.any(String),
     });
   });
 
@@ -226,9 +226,9 @@ describe('AnalyticsService', () => {
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
     ).resolves.toMatchInlineSnapshot(`
                   Object {
-                    "cluster_name": "cluster_name",
-                    "cluster_uuid": "cluster_uuid",
-                    "cluster_version": "version",
+                    "clusterName": "cluster_name",
+                    "clusterUuid": "cluster_uuid",
+                    "clusterVersion": "version",
                   }
               `);
   });
