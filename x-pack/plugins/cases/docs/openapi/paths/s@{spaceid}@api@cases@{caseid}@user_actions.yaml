@@ -20,7 +20,7 @@ get:
           schema:
             type: array
             items:
-              $ref: '../components/schemas/user_activity_response_properties.yaml'
+              $ref: '../components/schemas/user_actions_response_properties.yaml'
           examples:
             getCaseActivityResponse:
               $ref: '../components/examples/get_case_activity_response.yaml'
