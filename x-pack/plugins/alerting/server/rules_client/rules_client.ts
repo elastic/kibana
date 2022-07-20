@@ -872,7 +872,12 @@ export class RulesClient {
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
-  }: { options?: FindOptions; excludeFromPublicApi?: boolean } = {}): Promise<FindResult<Params>> {
+    includeActiveSnoozes = false,
+  }: {
+    options?: FindOptions;
+    excludeFromPublicApi?: boolean;
+    includeActiveSnoozes?: boolean;
+  } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -962,7 +967,8 @@ export class RulesClient {
         fields ? (pick(attributes, fields) as RawRule) : attributes,
         references,
         false,
-        excludeFromPublicApi
+        excludeFromPublicApi,
+        includeActiveSnoozes
       );
     });
 
@@ -1155,7 +1161,6 @@ export class RulesClient {
         savedObject: { type: 'alert', id },
       })
     );
-
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
@@ -2645,7 +2650,8 @@ export class RulesClient {
     rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeFromPublicApi: boolean = false
+    excludeFromPublicApi: boolean = false,
+    includeActiveSnoozes: boolean = false
   ): Rule | RuleWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
@@ -2657,7 +2663,8 @@ export class RulesClient {
       rawRule,
       references,
       includeLegacyId,
-      excludeFromPublicApi
+      excludeFromPublicApi,
+      includeActiveSnoozes
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -2687,7 +2694,8 @@ export class RulesClient {
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeFromPublicApi: boolean = false
+    excludeFromPublicApi: boolean = false,
+    includeActiveSnoozes: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
     const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
       ...s,
@@ -2709,7 +2717,7 @@ export class RulesClient {
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
-      ...(includeSnoozeSchedule
+      ...(includeActiveSnoozes && includeSnoozeSchedule
         ? {
             activeSnoozes: getActiveSnoozes({ snoozeSchedule })
               ?.filter((s) => Boolean(s.id))
