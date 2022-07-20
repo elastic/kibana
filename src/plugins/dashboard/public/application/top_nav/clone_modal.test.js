@@ -25,7 +25,7 @@ test('renders DashboardCloneModal', () => {
   const component = shallowWithI18nProvider(
     <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('onClone', () => {
