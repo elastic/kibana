@@ -118,7 +118,7 @@ export const pieVis = () => ({
           { value: 'top', name: strings.getLegendPositionTopOption() },
           { value: 'right', name: strings.getLegendPositionRightOption() },
           { value: 'bottom', name: strings.getLegendPositionBottomOption() },
-          { value: 'left', name: strings.getLegendPositionRightOption() },
+          { value: 'left', name: strings.getLegendPositionLeftOption() },
         ],
       },
     },
