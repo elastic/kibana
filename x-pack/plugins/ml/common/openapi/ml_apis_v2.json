@@ -98,16 +98,13 @@
     }
   },
   "definitions": {
-    "SyncSuccess": {
-      "type" : "boolean",
-      "description": "The success or failure of the synchronization."
-    },
     "SyncJob": {
       "type": "object",
       "description": "The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.",
       "properties": {
         "success": {
-          "$ref": "#/definitions/SyncSuccess"
+          "type" : "boolean",
+          "description": "The success or failure of the synchronization."
         }
       }
     },
@@ -116,7 +113,8 @@
       "description": "The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.",
       "properties": {
         "success": {
-          "$ref": "#/definitions/SyncSuccess"
+          "type" : "boolean",
+          "description": "The success or failure of the synchronization."
         }
       }
     },
@@ -192,7 +190,8 @@
             "description": "The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.",
             "properties" : {
               "success": {
-                "$ref": "#/definitions/SyncSuccess"
+                "type" : "boolean",
+                "description": "The success or failure of the synchronization."
               }
             }
           }
@@ -205,7 +204,8 @@
             "description": "The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.",
             "properties" : {
               "success": {
-                "$ref": "#/definitions/SyncSuccess"
+                "type" : "boolean",
+                "description": "The success or failure of the synchronization."
               }
             }
           }
