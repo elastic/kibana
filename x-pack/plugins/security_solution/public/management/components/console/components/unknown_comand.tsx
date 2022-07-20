@@ -22,7 +22,7 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
       <ConsoleCodeBlock>
         <FormattedMessage
           id="xpack.securitySolution.console.unknownCommand.helpMessage"
-          defaultMessage="The text you entered {userInput} is unsupported! Click {helpIcon} or type {helpCmd} for assistance."
+          defaultMessage="The text you entered {userInput} is unsupported! Click {helpIcon} Help or type {helpCmd} for assistance."
           values={{
             userInput: (
               <ConsoleCodeBlock bold inline>
