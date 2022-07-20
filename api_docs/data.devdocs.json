@@ -11571,7 +11571,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -11668,7 +11678,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -11696,7 +11706,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -13397,7 +13407,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -14522,7 +14538,16 @@
           "\nGet rollup job capabilities"
         ],
         "signature": [
-          "(indices: Record<string, { rollup_jobs: any; }>) => { [key: string]: any; }"
+          "(indices: ",
+          "RollupGetRollupIndexCapsResponse",
+          ") => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "server",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-server.RollupIndexCapability",
+            "text": "RollupIndexCapability"
+          }
         ],
         "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
         "deprecated": false,
@@ -14537,7 +14562,7 @@
               "rollup job index capabilites"
             ],
             "signature": [
-              "Record<string, { rollup_jobs: any; }>"
+              "RollupGetRollupIndexCapsResponse"
             ],
             "path": "src/plugins/data_views/server/fetcher/lib/map_capabilities.ts",
             "deprecated": false,
@@ -18026,7 +18051,17 @@
               "\nMap of field formats by field name"
             ],
             "signature": [
-              "{ [x: string]: any; }"
+              "{ [x: string]: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              ">; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -18123,7 +18158,7 @@
             "label": "flattenHit",
             "description": [],
             "signature": [
-              "(hit: Record<string, any>, deep?: boolean | undefined) => Record<string, any>"
+              "(hit: Record<string, unknown[]>, deep?: boolean | undefined) => Record<string, unknown>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": true,
@@ -18151,7 +18186,7 @@
                 "label": "hit",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: any; }"
+                  "{ [x: string]: unknown[]; }"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
                 "deprecated": false
@@ -20559,7 +20594,13 @@
               "() => Promise<",
               "SavedObject",
               "<",
-              "DataViewSavedObjectAttrs",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSavedObjectAttrs",
+                "text": "DataViewSavedObjectAttrs"
+              },
               ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22596,7 +22637,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -22996,7 +23045,7 @@
               "\nGet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string) => Promise<T>"
+              "<T = unknown>(key: string) => Promise<T | undefined>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -23047,7 +23096,7 @@
               "\nSet a setting value"
             ],
             "signature": [
-              "<T = any>(key: string, value: T) => Promise<void>"
+              "<T = unknown>(key: string, value: T) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -23302,7 +23351,13 @@
           "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
           "<",
-          "DataViewSavedObjectAttrs",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSavedObjectAttrs",
+            "text": "DataViewSavedObjectAttrs"
+          },
           ">[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "dataViews",
@@ -23826,7 +23881,7 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has any user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,

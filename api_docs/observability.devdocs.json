@@ -4565,6 +4565,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.apmServiceGroupMaxNumberOfServices",
+        "type": "string",
+        "tags": [],
+        "label": "apmServiceGroupMaxNumberOfServices",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceGroupMaxNumberOfServices\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.DragHandleProps",
         "type": "Type",
         "tags": [],
@@ -7464,6 +7478,20 @@
         "description": [],
         "signature": [
           "\"observability:apmProgressiveLoading\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmServiceGroupMaxNumberOfServices",
+        "type": "string",
+        "tags": [],
+        "label": "apmServiceGroupMaxNumberOfServices",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceGroupMaxNumberOfServices\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

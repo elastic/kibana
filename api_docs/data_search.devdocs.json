@@ -20681,12 +20681,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.exclude",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "exclude",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20694,12 +20694,38 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.include",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "include",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.includeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.excludeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
