@@ -7,7 +7,6 @@
 
 import path, { join, resolve } from 'path';
 import fs from 'fs';
-import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
@@ -15,6 +14,7 @@ import { DEV_TOOL_CONTENT } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { consoleMappings } from '../console_mappings';
+import { ReadConsoleRequestSchema } from '../schema';
 
 const getReadables = (dataPath: string): Promise<string> =>
   new Promise((resolved, reject) => {
@@ -56,12 +56,6 @@ class ConsoleResponseFactory {
 
 const buildConsoleResponse = (response: KibanaResponseFactory) =>
   new ConsoleResponseFactory(response);
-
-const ReadConsoleRequestSchema = {
-  params: schema.object({
-    console_id: schema.oneOf([schema.literal('enable_host_risk_score')]),
-  }),
-};
 
 export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(

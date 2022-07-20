@@ -75,6 +75,6 @@ describe('RiskyHostsEnabledModule', () => {
       </Provider>
     );
     expect(screen.getByTestId('risky-hosts-dashboard-links')).toBeInTheDocument();
-    expect(screen.getByTestId('view-dashboard-button')).toBeInTheDocument();
+    expect(screen.getByTestId('create-saved-object-success-button')).toBeInTheDocument();
   });
 });

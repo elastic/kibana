@@ -12,9 +12,9 @@ import { DETECTION_ENGINE_SIGNAL_INDEX_URL } from '../../../../../common/constan
 
 import { buildSiemResponse } from '../utils';
 import { isOutdated } from '../../migrations/helpers';
-import { getIndexVersion } from '../index/get_index_version';
-import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
-import { fieldAliasesOutdated } from '../index/check_template_version';
+import { getIndexVersion } from './get_index_version';
+import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import { fieldAliasesOutdated } from './check_template_version';
 
 export const readSignalIndexRoute = (
   router: SecuritySolutionPluginRouter,

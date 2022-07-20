@@ -64,6 +64,12 @@ describe('RiskyHostsPanelView', () => {
   });
 
   it('renders view dashboard button', () => {
-    expect(screen.getByTestId('view-dashboard-button')).toHaveAttribute('href', '/test');
+    expect(screen.getByTestId('create-saved-object-success-button')).toHaveAttribute(
+      'href',
+      '/test'
+    );
+    expect(screen.getByTestId('create-saved-object-success-button')).toHaveTextContent(
+      'View dashboard'
+    );
   });
 });

@@ -71,7 +71,7 @@ import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readPrebuiltDevToolContentRoute } from '../lib/prebuilt_dev_tool_content/routes/read_prebuilt_dev_tool_content_route';
 import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/routes/create_prebuilt_saved_objects';
-import { readSignalIndexRoute } from '../lib/detection_engine/routes/rules/read_signal_index_route';
+import { readSignalIndexRoute } from '../lib/detection_engine/routes/index/read_signal_index_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 
 export const initRoutes = (
@@ -153,12 +153,12 @@ export const initRoutes = (
   createSignalsMigrationRoute(router, security);
   finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
-  readSignalIndexRoute(router, ruleDataService);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
   createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
+  readSignalIndexRoute(router, ruleDataService);
   deleteIndexRoute(router);
 
   readPrebuiltDevToolContentRoute(router);

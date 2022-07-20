@@ -20,16 +20,14 @@ export const bulkCreateSavedObjects = async ({
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const regex = /<REPLACE-WITH-SPACE>/g;
-  let savedObjects;
 
-  try {
-    savedObjects = JSON.stringify(savedObjectsToCreate[savedObjectTemplate]);
-  } catch (e) {
-    return new Error('No saved object template found');
+  const savedObjects = JSON.stringify(savedObjectsToCreate[savedObjectTemplate]);
+
+  if (savedObjects == null) {
+    return new Error('Template not found.');
   }
 
   const replacedSO = spaceId ? savedObjects.replace(regex, spaceId) : savedObjects;
-
   const createSO = await savedObjectsClient.bulkCreate(JSON.parse(replacedSO), {
     overwrite: true,
   });
