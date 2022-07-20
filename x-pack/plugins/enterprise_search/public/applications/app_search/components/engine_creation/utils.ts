@@ -9,7 +9,7 @@ import { generatePath } from 'react-router-dom';
 
 import dedent from 'dedent';
 
-import { ElasticsearchIndex } from '../../../../../common/types';
+import { SearchIndex } from '../../../../../common/types';
 import { ENGINE_CRAWLER_PATH, ENGINE_PATH } from '../../routes';
 
 import { SearchIndexSelectableOption } from './search_index_selectable';
@@ -34,7 +34,7 @@ export const getRedirectToAfterEngineCreation = ({
 };
 
 export const formatIndicesToSelectable = (
-  indices: ElasticsearchIndex[],
+  indices: SearchIndex[],
   selectedIndexName: string
 ): SearchIndexSelectableOption[] => {
   return indices

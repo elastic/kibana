@@ -15,15 +15,10 @@ import {
 import { Connector } from './connectors';
 import { Crawler } from './crawler';
 
+
 export interface ElasticsearchIndex {
-  alias: boolean;
   health?: HealthStatus;
   name: IndexName;
-  privileges: {
-    // these will always be present, but we're fooling TypeScript with the ?'s
-    read?: boolean;
-    manage?: boolean;
-  };
   status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
@@ -44,8 +39,14 @@ export interface ConnectorIndex extends ElasticsearchIndex {
 export interface CrawlerIndex extends ElasticsearchIndex {
   crawler: Crawler;
 }
-export interface ElasticsearchIndexWithIngestion
-  extends Omit<ElasticsearchIndex, 'alias' | 'privileges'> {
+export interface ElasticsearchIndexWithIngestion extends ElasticsearchIndex {
   connector?: Connector;
   crawler?: Crawler;
+}
+export interface SearchIndex extends ElasticsearchIndex {
+  alias: boolean;
+  privileges: {
+    read: boolean;
+    manage: boolean;
+  };
 }
