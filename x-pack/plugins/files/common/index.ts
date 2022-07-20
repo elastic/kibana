@@ -16,5 +16,5 @@ export type {
   FileKind,
   BlobStorageSettings,
   FileJSON,
-  FilesDiagnostics,
+  FilesMetrics,
 } from './types';

@@ -241,7 +241,7 @@ export interface FileKind {
   };
 }
 
-export interface FilesDiagnostics {
+export interface FilesMetrics {
   [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
     /**
      * The total size in bytes that can be used in this storage medium

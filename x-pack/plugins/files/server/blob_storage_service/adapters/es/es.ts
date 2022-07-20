@@ -38,6 +38,9 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     );
   }
 
+  // TODO: We should use a MutEx here to ensure that the initial creation request of this
+  // index only happens once. Otherwise we can hit an edge case where if two files are being
+  // uploaded in the same instant one of the requests to upload can fail.
   private async createIndexIfNotExists(): Promise<void> {
     const index = this.index;
     if (await this.esClient.indices.exists({ index })) {
@@ -62,7 +65,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
-        return;
       }
       throw e;
     }

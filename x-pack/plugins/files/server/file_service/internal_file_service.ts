@@ -26,7 +26,8 @@ import {
   UpdatableFileAttributes,
   FileKind,
   FileJSON,
-  FilesDiagnostics,
+  FilesMetrics,
+  ES_FIXED_SIZE_INDEX_BLOB_STORE,
 } from '../../common';
 import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
@@ -227,7 +228,7 @@ export class InternalFileService {
     return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
   }
 
-  public async getUsageMetrics(): Promise<undefined | FilesDiagnostics> {
+  public async getUsageMetrics(): Promise<FilesMetrics> {
     let pit: undefined | SavedObjectsOpenPointInTimeResponse;
     try {
       pit = await this.soClient.openPointInTimeForType(this.savedObjectType);
@@ -240,23 +241,25 @@ export class InternalFileService {
         aggs: {
           size: {
             sum: {
-              field: 'size',
+              field: `${this.savedObjectType}.attributes.size`,
             },
           },
         },
       });
 
-      if (aggregations?.size.value) {
+      if (aggregations?.size.value != null) {
         const capacity =
           this.blobStorageService.getStaticBlobStorageSettings().esFixedSizeIndex.capacity;
         return {
-          esFixedSizeIndex: {
+          [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
             capacity,
             available: capacity - aggregations.size.value,
             used: aggregations.size.value,
           },
         };
       }
+
+      throw new Error('Could not retrieve usage metrics');
     } finally {
       if (pit) {
         await this.soClient.closePointInTime(pit.id).catch((e) => {

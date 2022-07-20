@@ -7,7 +7,7 @@
 
 import * as qs from 'query-string';
 import { PLUGIN_ID } from './constants';
-import { FileJSON } from './types';
+import type { FileJSON, FilesMetrics } from './types';
 
 const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -40,6 +40,7 @@ export const FILE_KIND_API_ROUTES_CLIENT = {
 
 export const FILES_API_ROUTES = {
   find: `${FILES_API_BASE_PATH}/find`,
+  metrics: `${FILES_API_BASE_PATH}/metrics`,
 };
 
 export interface HttpApiInterfaceEntryDefinition<
@@ -153,4 +154,11 @@ export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
     status?: string[];
   },
   { files: FileJSON[] }
+>;
+
+export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  unknown,
+  unknown,
+  FilesMetrics
 >;
