@@ -477,7 +477,7 @@
     "react-router-dom": "^5.2.0",
     "react-router-redux": "^4.0.8",
     "react-shortcuts": "^2.0.0",
-    "react-sizeme": "^2.3.6",
+    "react-sizeme": "^2.6.6",
     "react-syntax-highlighter": "^15.3.1",
     "react-tiny-virtual-list": "^2.2.0",
     "react-use": "^15.3.8",
