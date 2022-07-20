@@ -158,7 +158,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
           <EuiText color="subdued" textAlign="center">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.elasticsearchIndex.description',
               {
                 defaultMessage:
                   'Provide a unique name and select an index for your App Search engine.',
@@ -291,7 +291,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                   aliasName.length > 0 && aliasRawName !== aliasName ? (
                     <>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
+                        'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.prefixAndNamed.helpText',
                         {
                           defaultMessage:
                             "Alias names must be prefixed with 'search-' in order to be used with App Search engines. Your alias will be named",
@@ -301,7 +301,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                     </>
                   ) : (
                     i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.helpText',
+                      'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.aliasName.prefix.helpText',
                       {
                         defaultMessage:
                           "Alias names must be prefixed with 'search-' in order to be used with App Search engines",

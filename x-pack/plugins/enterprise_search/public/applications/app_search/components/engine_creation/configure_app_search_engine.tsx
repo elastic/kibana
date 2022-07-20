@@ -75,7 +75,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
             onClick: () => {},
             status: 'disabled',
             title: i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.steps.review.label',
+              'xpack.enterpriseSearch.appSearch.engineCreation.steps.finish.label',
               {
                 defaultMessage: 'Finish',
               }
@@ -105,7 +105,7 @@ export const ConfigureAppSearchEngine: React.FC = () => {
 
           <EuiText color="subdued" textAlign="center">
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.description',
+              'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.appSearch.description',
               {
                 defaultMessage:
                   'Provide a unique name and an optional language choice for your App Search engine.',

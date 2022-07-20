@@ -216,7 +216,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
               >
                 {i18n.translate(
                   // FIXME: this and the rest of the paths
-                  'xpack.enterpriseSearch.appSearch.engineCreation.form.backButton.label',
+                  'xpack.enterpriseSearch.appSearch.engineCreation.form.editConfiguration.label',
                   {
                     defaultMessage: 'Edit configuration',
                   }

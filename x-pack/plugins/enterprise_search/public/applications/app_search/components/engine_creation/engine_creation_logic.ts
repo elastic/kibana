@@ -219,10 +219,10 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
           return i18n.translate(
             'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
             {
-              defaultMessage: dedent(`
+              defaultMessage: dedent`
                 There is an existing index or alias with the name {aliasName}.
                 Please choose another alias name.
-              `),
+              `,
               values: {
                 aliasName,
               },
