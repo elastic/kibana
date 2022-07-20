@@ -33,7 +33,7 @@ const mockOption: SearchIndexSelectableOption = {
       size_in_bytes: 'string',
     },
   },
-}
+};
 
 describe('IndexStatusDetails', () => {
   it('does not render anything if an option is not provided', () => {
@@ -42,7 +42,7 @@ describe('IndexStatusDetails', () => {
   });
 
   it('renders if there is an option provided', () => {
-    const wrapper = shallow(<IndexStatusDetails option={mockOption}/>);
+    const wrapper = shallow(<IndexStatusDetails option={mockOption} />);
     expect(wrapper.find('.entSearch__indexListItem')).toHaveLength(1);
   });
 });
