@@ -25,7 +25,13 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
+import {
+  validateConfig,
+  validateSecrets,
+  ActionExecutorContract,
+  validateConnector,
+  trimActionStrings,
+} from './lib';
 import {
   ActionResult,
   FindActionResult,
@@ -175,9 +181,10 @@ export class ActionsClient {
       throw error;
     }
 
+    name = trimActionStrings(name);
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const validatedActionTypeConfig = validateConfig(actionType, trimActionStrings(config));
+    const validatedActionTypeSecrets = validateSecrets(actionType, trimActionStrings(secrets));
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }

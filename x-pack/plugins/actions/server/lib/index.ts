@@ -33,3 +33,4 @@ export {
   asHttpRequestExecutionSource,
   isHttpRequestExecutionSource,
 } from './action_execution_source';
+export { trimActionStrings } from './trim_action_strings';
