@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { capabilitiesServiceMock } from './capabilities_service.mock';
+export type { CapabilitiesServiceContract } from './capabilities_service.mock';

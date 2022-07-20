@@ -9,7 +9,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
-import type { CapabilitiesService } from './capabilities_service';
+import type { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<CapabilitiesSetup> = {
@@ -34,7 +34,8 @@ const createCapabilitiesMock = (): Capabilities => {
   };
 };
 
-type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
+export type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
+
 const createMock = () => {
   const mocked: jest.Mocked<CapabilitiesServiceContract> = {
     preboot: jest.fn(),
