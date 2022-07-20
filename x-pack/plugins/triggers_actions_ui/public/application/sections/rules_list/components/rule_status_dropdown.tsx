@@ -28,7 +28,10 @@ import { Rule } from '../../../../types';
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
-type DropdownRuleRecord = Pick<Rule, 'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule'>;
+type DropdownRuleRecord = Pick<
+  Rule,
+  'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule' | 'activeSnoozes'
+>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
@@ -188,6 +191,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               snoozeRule={onSnoozeRule}
               unsnoozeRule={onUnsnoozeRule}
               scheduledSnoozes={rule.snoozeSchedule}
+              activeSnoozes={rule.activeSnoozes}
             />
           </EuiPopover>
         ) : (
@@ -211,6 +215,7 @@ interface RuleStatusMenuProps {
   snoozeRule: (snoozeSchedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   scheduledSnoozes?: RuleSnooze;
+  activeSnoozes?: string[];
 }
 
 const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
@@ -223,6 +228,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
   snoozeRule,
   unsnoozeRule,
   scheduledSnoozes = [],
+  activeSnoozes = [],
 }) => {
   const enableRule = useCallback(() => {
     if (isSnoozed) {
@@ -280,6 +286,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
                 snoozeRule={snoozeRule}
                 unsnoozeRule={unsnoozeRule}
                 scheduledSnoozes={scheduledSnoozes}
+                activeSnoozes={activeSnoozes}
                 hasTitle={false}
               />
             </EuiPanel>
