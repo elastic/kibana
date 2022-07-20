@@ -120,8 +120,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     eventCategoryField: rule.event_category_override,
     tiebreakerField: rule.tiebreaker_field,
   },
-  // defaulting this since it is set in the component anyways.
-  dataSourceType: DataSourceType.IndexPatterns,
+  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {

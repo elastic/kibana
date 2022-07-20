@@ -191,10 +191,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     index: indicesConfig,
     threatIndex: threatIndicesConfig,
   };
-  initialState.dataSourceType =
-    initialState.dataViewId == null || initialState.dataViewId === ''
-      ? DataSourceType.IndexPatterns
-      : DataSourceType.DataView;
+
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
