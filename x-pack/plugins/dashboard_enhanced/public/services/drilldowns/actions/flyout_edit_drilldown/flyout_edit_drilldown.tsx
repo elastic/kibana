@@ -67,6 +67,10 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
       closed$.next(true);
       handle.close();
     };
+    const closeFlyout = () => {
+      close();
+    };
+
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -85,11 +89,11 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     );
 
     // Close flyout on application change.
-    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
-      close();
-    });
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
 
-    // Close flyout on dashboard switch to "view" mode.
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
     embeddable
       .getInput$()
       .pipe(
@@ -99,8 +103,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
         filter((mode) => mode !== ViewMode.EDIT),
         take(1)
       )
-      .subscribe(() => {
-        close();
-      });
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }
