@@ -13,7 +13,12 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { CapabilitiesProvider, CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import type {
+  CapabilitiesProvider,
+  CapabilitiesSwitcher,
+  CapabilitiesStart,
+  CapabilitiesSetup,
+} from '@kbn/core-capabilities-server';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
