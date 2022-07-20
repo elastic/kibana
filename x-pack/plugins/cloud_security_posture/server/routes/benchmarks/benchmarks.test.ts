@@ -10,10 +10,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  ElasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   benchmarksQueryParamsSchema,
@@ -71,6 +68,7 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     ...props,
   };
 }
+
 describe('benchmarks API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
