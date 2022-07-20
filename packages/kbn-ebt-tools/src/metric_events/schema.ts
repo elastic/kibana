@@ -6,31 +6,100 @@
  * Side Public License, v 1.
  */
 
-export interface MetricEvent extends Record<string, any> {
-  eventName: string;
-  meta?: Record<string, any>;
+import type { RootSchema } from '@kbn/analytics-client';
 
-  // Standardized fields
+/**
+ * Structure of the `metric` event
+ */
+export interface MetricEvent {
+  /**
+   * The name of the action that is tracked in the metrics.
+   */
+  eventName: string;
+  /**
+   * Searchable but not aggregateable metadata relevant to the tracked action.
+   */
+  meta?: Record<string, unknown>;
+
+  /**
+   * @group Standardized fields
+   * The time (in milliseconds) it took to run the entire action.
+   */
   duration?: number;
+  /**
+   * @group Standardized fields
+   * A status relevant to the action (i.e.: `failed`, `succeeded`).
+   */
   status?: string;
+  /**
+   * @group Standardized fields
+   * performance.memory.jsHeapSizeLimit
+   */
   jsHeapSizeLimit?: number;
+  /**
+   * @group Standardized fields
+   * performance.memory.totalJSHeapSize
+   */
   totalJSHeapSize?: number;
+  /**
+   * @group Standardized fields
+   * performance.memory.usedJSHeapSize
+   */
   usedJSHeapSize?: number;
 
-  // Free fields - will be mapped in the index;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 1
+   */
   key1?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 1
+   */
   value1?: number;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 2
+   */
   key2?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 2
+   */
   value2?: number;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 3
+   */
   key3?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 3
+   */
   value3?: number;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 4
+   */
   key4?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 4
+   */
   value4?: number;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 5
+   */
   key5?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 5
+   */
   value5?: number;
 }
 
-export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
+export const METRIC_EVENT_SCHEMA: RootSchema<MetricEvent> = {
   eventName: {
     type: 'keyword',
     _meta: { description: 'Type of the event' },
@@ -61,42 +130,42 @@ export const METRIC_EVENT_SCHEMA: Record<keyof MetricEvent, any> = {
   },
   key1: {
     type: 'keyword',
-    _meta: { description: 'Performance metric label', optional: true },
+    _meta: { description: 'Performance metric label 1', optional: true },
   },
   value1: {
     type: 'long',
-    _meta: { description: 'Performance metric value', optional: true },
+    _meta: { description: 'Performance metric value 1', optional: true },
   },
   key2: {
     type: 'keyword',
-    _meta: { description: 'Performance metric label', optional: true },
+    _meta: { description: 'Performance metric label 2', optional: true },
   },
   value2: {
     type: 'long',
-    _meta: { description: 'Performance metric value', optional: true },
+    _meta: { description: 'Performance metric value 2', optional: true },
   },
   key3: {
     type: 'keyword',
-    _meta: { description: 'Performance metric label', optional: true },
+    _meta: { description: 'Performance metric label 3', optional: true },
   },
   value3: {
     type: 'long',
-    _meta: { description: 'Performance metric value', optional: true },
+    _meta: { description: 'Performance metric value 3', optional: true },
   },
   key4: {
     type: 'keyword',
-    _meta: { description: 'Performance metric label', optional: true },
+    _meta: { description: 'Performance metric label 4', optional: true },
   },
   value4: {
     type: 'long',
-    _meta: { description: 'Performance metric value', optional: true },
+    _meta: { description: 'Performance metric value 4', optional: true },
   },
   key5: {
     type: 'keyword',
-    _meta: { description: 'Performance metric label', optional: true },
+    _meta: { description: 'Performance metric label 5', optional: true },
   },
   value5: {
     type: 'long',
-    _meta: { description: 'Performance metric value', optional: true },
+    _meta: { description: 'Performance metric value 5', optional: true },
   },
 };

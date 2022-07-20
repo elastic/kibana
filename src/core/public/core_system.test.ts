@@ -37,6 +37,7 @@ import {
   AnalyticsServiceConstructor,
   MockAnalyticsService,
   analyticsServiceStartMock,
+  fetchOptionalMemoryInfoMock,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -274,8 +275,8 @@ describe('#start()', () => {
 
   it('reports the deprecated event Loaded Kibana', async () => {
     await startCore();
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(1, 'Loaded Kibana', {
       kibana_version: '1.2.3',
       protocol: 'http:',
     });
@@ -283,12 +284,15 @@ describe('#start()', () => {
     expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
   });
 
-  it('reports the event kibana-loaded and clears marks', async () => {
+  it('reports the metric event kibana-loaded and clears marks', async () => {
     await startCore();
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
-      kibana_version: '1.2.3',
-      protocol: 'http:',
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: '1.2.3',
+        protocol: 'http:',
+      },
       key1: LOAD_START,
       key2: LOAD_BOOTSTRAP_START,
       key3: LOAD_CORE_CREATED,
@@ -306,22 +310,34 @@ describe('#start()', () => {
   });
 
   it('reports the event kibana-loaded (with memory)', async () => {
+    const performanceMemory = {
+      usedJSHeapSize: 1,
+      jsHeapSizeLimit: 3,
+      totalJSHeapSize: 4,
+    };
+    fetchOptionalMemoryInfoMock.mockReturnValue(performanceMemory);
+
     await startCore();
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith(KIBANA_LOADED_EVENT, {
-      kibana_version: '1.2.3',
-      duration: 666,
+
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenNthCalledWith(2, 'metric', {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: '1.2.3',
+        protocol: 'http:',
+      },
       key1: LOAD_START,
       key2: LOAD_BOOTSTRAP_START,
       key3: LOAD_CORE_CREATED,
       key4: LOAD_SETUP_DONE,
       key5: LOAD_START_DONE,
+      ...performanceMemory,
       value1: 111,
       value2: 222,
       value3: 333,
       value4: 444,
       value5: 555,
-      protocol: 'http:',
+      duration: 666,
     });
   });
 

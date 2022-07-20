@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 export type { MetricEvent } from './schema';
-export { registerMetricEvent, reportMetricEvent } from './helpers';
+export { registerMetricEventType, reportMetricEvent } from './helpers';

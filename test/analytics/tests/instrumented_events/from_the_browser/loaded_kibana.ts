@@ -6,41 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { Event } from '@kbn/analytics-client';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
-
-const KIBANA_LOADED_EVENT = 'kibana_loaded';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const { common } = getPageObjects(['common']);
+  const browser = getService('browser');
 
   describe('Loaded Kibana', () => {
     beforeEach(async () => {
       await common.navigateToApp('home');
     });
 
-    it('should emit the legacy "Loaded Kibana" and new kibana-loaded events', async () => {
-      const events = await ebtUIHelper.getEvents(2, {
-        eventTypes: [KIBANA_LOADED_EVENT, 'Loaded Kibana'],
+    it('should emit the legacy "Loaded Kibana"', async () => {
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
+
+      expect(event.event_type).to.eql('Loaded Kibana');
+      expect(event.properties).to.have.property('kibana_version');
+      expect(event.properties.kibana_version).to.be.a('string');
+      expect(event.properties).to.have.property('protocol');
+      expect(event.properties.protocol).to.be.a('string');
+    });
+
+    it('should emit the new kibana-loaded events', async () => {
+      const [event] = await ebtUIHelper.getEvents(1, {
+        eventTypes: ['metric'],
+        filters: { 'properties.eventName': { eq: 'kibana_loaded' } },
       });
-
-      const legacyEvent = events.find(
-        (e) => e.event_type !== KIBANA_LOADED_EVENT
-      ) as unknown as Event;
-      const event = events.find((e) => e.event_type === KIBANA_LOADED_EVENT) as unknown as Event;
-
-      // Legacy event
-      expect(legacyEvent.event_type).to.eql('Loaded Kibana');
-      expect(legacyEvent.properties).to.have.property('kibana_version');
-      expect(legacyEvent.properties.kibana_version).to.be.a('string');
-      expect(legacyEvent.properties).to.have.property('protocol');
-      expect(legacyEvent.properties.protocol).to.be.a('string');
 
       // New event
       expect(event.event_type).to.eql('metric');
-      expect(event.properties.eventName).to.eql(KIBANA_LOADED_EVENT);
+      expect(event.properties.eventName).to.eql('kibana_loaded');
 
       // meta
       expect(event.properties).to.have.property('meta');
@@ -64,6 +61,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.value3).to.be.a('number');
       expect(event.properties.value4).to.be.a('number');
       expect(event.properties.value5).to.be.a('number');
+
+      if (browser.isChromium) {
+        // Kibana Loaded memory
+        expect(event.properties).to.have.property('jsHeapSizeLimit');
+        expect(event.properties.jsHeapSizeLimit).to.be.a('number');
+        expect(event.properties).to.have.property('totalJSHeapSize');
+        expect(event.properties.totalJSHeapSize).to.be.a('number');
+        expect(event.properties).to.have.property('usedJSHeapSize');
+        expect(event.properties.usedJSHeapSize).to.be.a('number');
+      }
     });
   });
 }
