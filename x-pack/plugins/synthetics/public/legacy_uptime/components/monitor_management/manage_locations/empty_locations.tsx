@@ -8,21 +8,33 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
+import { setManageFlyoutOpen } from '../../../state/private_locations';
 
 export const EmptyLocations = ({
   setIsAddingNew,
   disabled,
 }: {
-  disabled: boolean;
-  setIsAddingNew: (val: boolean) => void;
+  disabled?: boolean;
+  setIsAddingNew?: (val: boolean) => void;
 }) => {
+  const dispatch = useDispatch();
+
   return (
     <EuiEmptyPrompt
       iconType="visMapCoordinate"
       title={<h2>{START_ADDING_LOCATIONS}</h2>}
       body={<p>{START_ADDING_LOCATIONS_DESCRIPTION}</p>}
       actions={
-        <EuiButton disabled={disabled} color="primary" fill onClick={() => setIsAddingNew(true)}>
+        <EuiButton
+          disabled={disabled}
+          color="primary"
+          fill
+          onClick={() => {
+            setIsAddingNew?.(true);
+            dispatch(setManageFlyoutOpen(true));
+          }}
+        >
           {ADD_LOCATION}
         </EuiButton>
       }

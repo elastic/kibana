@@ -16,7 +16,6 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ManageLocationsPortal } from '../manage_locations/manage_locations';
 import {
   CommonFields,
   ConfigKey,
@@ -212,7 +211,6 @@ export const MonitorManagementList = ({
   return (
     <EuiPanel hasBorder>
       <ManagementSettingsPortal />
-      <ManageLocationsPortal />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.synthetics.monitorManagement.monitorList.title', {

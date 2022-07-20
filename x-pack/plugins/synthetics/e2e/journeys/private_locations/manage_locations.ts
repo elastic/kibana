@@ -47,6 +47,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
 
   step('Add new private location', async () => {
     await page.waitForTimeout(30 * 1000);
+    await page.click('button:has-text("Close")');
     await page.click('button:has-text("Manage private locations")');
     await page.click('button:has-text("Add location")');
 

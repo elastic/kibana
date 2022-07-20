@@ -10,3 +10,6 @@ import { AppState } from '..';
 
 const getState = (appState: AppState) => appState.agentPolicies;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
+export const selectManageFlyoutOpen = createSelector(getState, (state) =>
+  Boolean(state.isManageFlyoutOpen)
+);

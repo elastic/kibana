@@ -8,7 +8,7 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
-import { getAgentPoliciesAction } from './actions';
+import { getAgentPoliciesAction, setManageFlyoutOpen } from './actions';
 
 export interface AgentPoliciesList {
   items: AgentPolicy[];
@@ -21,12 +21,14 @@ export interface AgentPoliciesState {
   data: AgentPoliciesList | null;
   loading: boolean;
   error: IHttpFetchError<ResponseErrorBody> | null;
+  isManageFlyoutOpen?: boolean;
 }
 
 const initialState: AgentPoliciesState = {
   data: null,
   loading: false,
   error: null,
+  isManageFlyoutOpen: false,
 };
 
 export const agentPoliciesReducer = createReducer(initialState, (builder) => {
@@ -40,6 +42,10 @@ export const agentPoliciesReducer = createReducer(initialState, (builder) => {
     })
     .addCase(getAgentPoliciesAction.fail, (state, action) => {
       state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.loading = false;
+    })
+    .addCase(setManageFlyoutOpen, (state, action) => {
+      state.isManageFlyoutOpen = action.payload;
       state.loading = false;
     });
 });

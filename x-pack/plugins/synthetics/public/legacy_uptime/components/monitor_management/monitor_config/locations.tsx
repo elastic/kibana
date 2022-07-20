@@ -146,6 +146,6 @@ export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.cannotSaveIntegration',
   {
     defaultMessage:
-      'You are not authorized to create integrations. Integrations write permissions are required.',
+      'You are not authorized to update integrations. Integrations write permissions are required.',
   }
 );

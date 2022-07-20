@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocations } from './hooks/use_locations';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../../common/constants';
@@ -29,6 +30,8 @@ export const AddMonitorBtn = () => {
     totalMonitors,
   } = useEnablement();
   const { isEnabled, canEnable, areApiKeysEnabled } = enablement || {};
+
+  const { locations } = useLocations();
 
   useEffect(() => {
     if (isEnabling && isEnabled) {
@@ -130,7 +133,9 @@ export const AddMonitorBtn = () => {
           <EuiButton
             isLoading={loading}
             fill
-            isDisabled={!canSave || !isEnabled || !isAllowed || !canSavePrivate}
+            isDisabled={
+              !canSave || !isEnabled || !isAllowed || !canSavePrivate || locations.length === 0
+            }
             iconType="plus"
             data-test-subj="syntheticsAddMonitorBtn"
             href={history.createHref({
