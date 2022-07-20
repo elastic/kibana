@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AggregationsCardinalityAggregate,
   AggregationsMaxAggregate,
@@ -23,7 +22,7 @@ import type { ThresholdNormalized } from '../../../../../common/detection_engine
 import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
-import type { ThresholdSignalHistory, BulkCreate, WrapHits, SignalSource } from '../types';
+import type { ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import type { ThresholdBucket } from './types';
@@ -43,16 +42,6 @@ interface BulkCreateThresholdSignalsParams {
   wrapHits: WrapHits;
 }
 
-const getThresholdTerms = (bucket: ThresholdBucket): Record<string, unknown> => {
-  return Object.keys(bucket.key).reduce(
-    (acc, val) => ({
-      ...acc,
-      [val]: bucket.key[val],
-    }),
-    {}
-  );
-};
-
 const getTransformedHits = (
   buckets: ThresholdBucket[],
   inputIndex: string,
@@ -64,7 +53,6 @@ const getTransformedHits = (
   buckets.map((bucket, i) => {
     // In case of absent threshold fields, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
     // so the below logic works in either case (whether `terms` or `composite`).
-    const thresholdTerms = getThresholdTerms(bucket);
     return {
       _index: inputIndex,
       _id: calculateThresholdSignalUuid(
@@ -75,7 +63,7 @@ const getTransformedHits = (
       ),
       _source: {
         [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
-        ...thresholdTerms,
+        ...bucket.key,
         threshold_result: {
           cardinality: threshold.cardinality?.length
             ? [
@@ -90,37 +78,17 @@ const getTransformedHits = (
             new Date(
               (bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string
             ) ?? from,
-          terms: Object.entries(thresholdTerms).map(([key, val]) => ({ field: key, value: val })),
+          terms: Object.entries(bucket.key).map(([key, val]) => ({ field: key, value: val })),
         },
       },
     };
   });
 
-export const transformThresholdResultsToEcs = (
-  buckets: ThresholdBucket[],
-  inputIndex: string,
-  startedAt: Date,
-  from: Date,
-  threshold: ThresholdNormalized,
-  ruleId: string
-): Array<estypes.SearchHit<SignalSource>> => {
-  const transformedHits = getTransformedHits(
-    buckets,
-    inputIndex,
-    startedAt,
-    from,
-    threshold,
-    ruleId
-  );
-
-  return transformedHits;
-};
-
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ruleParams = params.completeRule.ruleParams;
-  const ecsResults = transformThresholdResultsToEcs(
+  const ecsResults = getTransformedHits(
     params.buckets,
     params.inputIndexPattern.join(','),
     params.startedAt,

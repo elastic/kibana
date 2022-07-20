@@ -908,25 +908,6 @@ export const getThresholdTermsHash = (
     .digest('hex');
 };
 
-// deprecate
-export const getThresholdTermsHashLegacy = (
-  terms: Array<{
-    field: string;
-    value: string;
-  }>
-): string => {
-  return createHash('sha256')
-    .update(
-      terms
-        .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
-        .map((term) => {
-          return term.value;
-        })
-        .join(',')
-    )
-    .digest('hex');
-};
-
 export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
 export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
   params.type === 'threshold';
