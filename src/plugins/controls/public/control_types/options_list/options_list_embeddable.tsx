@@ -138,9 +138,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe)
-        .pipe(
-          skip(1) // Skip the first input update because options list query will be run by initialize.
-        )
+        .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
         .subscribe(this.runOptionsListQuery)
     );
 
