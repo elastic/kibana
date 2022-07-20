@@ -55,10 +55,10 @@ const parsePayload = (payload: string, traceId: string, log: ToolingLog): string
   return body;
 };
 
-const parseHeaders = (headers: Headers) => {
+const combineHeaderFieldValues = (headers: Headers) => {
   return Object.assign(
     {},
-    ...Object.keys(headers).map((key) => ({ [key]: headers[key].join('') }))
+    ...Object.keys(headers).map((key) => ({ [key]: headers[key].join(', ') }))
   );
 };
 
@@ -86,7 +86,7 @@ const getTraceItems = (
         environment: hit.environment,
         request: {
           path: hit.url.path,
-          headers: parseHeaders(hit.http.request.headers),
+          headers: combineHeaderFieldValues(hit.http.request.headers),
           method: hit.http.request.method,
           body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
           statusCode: hit.http.response.status_code,
