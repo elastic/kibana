@@ -254,7 +254,7 @@ export abstract class Embeddable<
     }
   }
 
-  protected updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
+  public updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {
     const newOutput = {
       ...this.output,
       ...outputChanges,
