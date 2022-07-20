@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
@@ -25,6 +25,8 @@ import {
 
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
+
+import type { ChangePoint } from '../../../common/types';
 
 import {
   Accessor,
@@ -52,8 +54,29 @@ export interface ExplainLogRateSpikesWrapperProps {
 export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const { docStats, timefilter, earliest, latest } = useData(dataView, setGlobalState);
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+
+  const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
+  const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePoint | null>(null);
+
+  // If a row is pinned, still overrule with a potentially hovered row.
+  const currentSelectedChangePoint = useMemo(() => {
+    if (selectedChangePoint) {
+      return selectedChangePoint;
+    } else if (pinnedChangePoint) {
+      return pinnedChangePoint;
+    }
+  }, [pinnedChangePoint, selectedChangePoint]);
+
+  const { overallDocStats, selectedDocStats, timefilter, earliest, latest } = useData(
+    dataView,
+    setGlobalState,
+    currentSelectedChangePoint
+  );
+
+  const totalCount = currentSelectedChangePoint
+    ? overallDocStats.totalCount + selectedDocStats.totalCount
+    : overallDocStats.totalCount;
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -178,11 +201,14 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
         </EuiFlexGroup>
         <EuiHorizontalRule />
         <EuiPageContentBody>
-          {docStats?.totalCount !== undefined && (
+          {overallDocStats?.totalCount !== undefined && (
             <DocumentCountContent
               brushSelectionUpdateHandler={setWindowParameters}
-              documentCountStats={docStats.documentCountStats}
-              totalCount={docStats.totalCount}
+              documentCountStats={overallDocStats.documentCountStats}
+              documentCountStatsSplit={
+                currentSelectedChangePoint ? selectedDocStats.documentCountStats : undefined
+              }
+              totalCount={totalCount}
             />
           )}
           <EuiSpacer size="m" />
@@ -192,6 +218,9 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
               earliest={earliest}
               latest={latest}
               windowParameters={windowParameters}
+              setPinnedChangePoint={setPinnedChangePoint}
+              setSelectedChangePoint={setSelectedChangePoint}
+              selectedChangePoint={currentSelectedChangePoint}
             />
           )}
         </EuiPageContentBody>

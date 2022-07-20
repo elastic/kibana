@@ -15,6 +15,7 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
+import type { ChangePoint } from '../../../common/types';
 import { SpikeAnalysisTable } from '../spike_analysis_table';
 
 /**
@@ -29,6 +30,9 @@ interface ExplainLogRateSpikesProps {
   latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
+  setPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  setSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  selectedChangePoint?: ChangePoint;
 }
 
 export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
@@ -36,6 +40,9 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   earliest,
   latest,
   windowParameters,
+  setPinnedChangePoint,
+  setSelectedChangePoint,
+  selectedChangePoint,
 }) => {
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
@@ -73,7 +80,14 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
         onCancel={cancel}
       />
       {data?.changePoints ? (
-        <SpikeAnalysisTable changePointData={data.changePoints} loading={isRunning} error={error} />
+        <SpikeAnalysisTable
+          changePoints={data.changePoints}
+          loading={isRunning}
+          error={error}
+          setPinnedChangePoint={setPinnedChangePoint}
+          setSelectedChangePoint={setSelectedChangePoint}
+          selectedChangePoint={selectedChangePoint}
+        />
       ) : null}
     </>
   );

@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useAiOpsKibana } from '../kibana_context';
-import { useTimefilter } from './use_time_filter';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+
+import type { ChangePoint } from '../../common/types';
 import { TimeBuckets } from '../../common/time_buckets';
+
+import { useAiOpsKibana } from '../kibana_context';
+import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+
+import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
 import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 export const useData = (
   currentDataView: DataView,
-  onUpdate: (params: Dictionary<unknown>) => void
+  onUpdate: (params: Dictionary<unknown>) => void,
+  selectedChangePoint?: ChangePoint
 ) => {
   const { services } = useAiOpsKibana();
   const { uiSettings } = services;
@@ -42,7 +48,23 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+  const overallStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const selectedChangePointStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
+  const { docStats: selectedDocStats } = useDocumentCountStats(
+    selectedChangePointStatsRequest,
+    lastRefresh
+  );
 
   function updateFieldStatsRequest() {
     const timefilterActiveBounds = timefilter.getActiveBounds();
@@ -95,7 +117,8 @@ export const useData = (
   });
 
   return {
-    docStats,
+    overallDocStats,
+    selectedDocStats,
     timefilter,
     earliest: fieldStatsRequest?.earliest,
     latest: fieldStatsRequest?.latest,

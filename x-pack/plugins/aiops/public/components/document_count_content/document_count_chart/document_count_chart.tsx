@@ -39,6 +39,7 @@ interface DocumentCountChartProps {
   brushSelectionUpdateHandler: (d: WindowParameters) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
+  chartPointsSplit?: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval: number;
@@ -65,6 +66,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   brushSelectionUpdateHandler,
   width,
   chartPoints,
+  chartPointsSplit,
   timeRangeEarliest,
   timeRangeLatest,
   interval,
@@ -106,6 +108,23 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     return chartPoints;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
+
+  const adjustedChartPointsSplit = useMemo(() => {
+    // Display empty chart when no data in range
+    if (!Array.isArray(chartPointsSplit) || chartPointsSplit.length < 1)
+      return [{ time: timeRangeEarliest, value: 0 }];
+
+    // If chart has only one bucket
+    // it won't show up correctly unless we add an extra data point
+    if (chartPointsSplit.length === 1) {
+      return [
+        ...chartPointsSplit,
+        { time: interval ? Number(chartPoints[0].time) + interval : timeRangeEarliest, value: 0 },
+      ];
+    }
+    return chartPointsSplit;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -231,6 +250,18 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             data={adjustedChartPoints}
             timeZone={timeZone}
           />
+          {chartPointsSplit && (
+            <BarSeries
+              id={`${SPEC_ID}_split`}
+              name={seriesName}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="time"
+              yAccessors={['value']}
+              data={adjustedChartPointsSplit}
+              timeZone={timeZone}
+            />
+          )}
           {windowParameters && (
             <>
               <DualBrushAnnotation
