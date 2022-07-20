@@ -5,43 +5,17 @@
  * 2.0.
  */
 
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { RowRendererId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
-export const alertsHeaders: ColumnHeaderOptions[] = [
+export const defaultEventHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.module',
-    linkField: 'rule.reference',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.dataset',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.category',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.severity',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'observer.name',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'host.name',
+    esTypes: ['date'],
+    type: 'date',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -49,16 +23,34 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'agent.id',
+    id: 'host.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'event.module',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'agent.type',
   },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'event.dataset',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'event.action',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'user.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'source.ip',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'destination.ip',
+  },
 ];
-
-export const alertsDefaultModel: SubsetTimelineModel = {
-  ...timelineDefaults,
-  columns: alertsHeaders,
-  excludedRowRendererIds: Object.values(RowRendererId),
-};

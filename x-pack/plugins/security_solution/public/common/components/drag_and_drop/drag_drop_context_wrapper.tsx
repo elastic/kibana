@@ -42,7 +42,7 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { alertsHeaders } from '../alerts_viewer/default_headers';
+import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
 
 // @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -89,7 +89,7 @@ const onDragEndHandler = ({
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
     addFieldToTimelineColumns({
       browserFields,
-      defaultsHeader: alertsHeaders,
+      defaultsHeader: defaultAlertsHeaders,
       dispatch,
       result,
       timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),

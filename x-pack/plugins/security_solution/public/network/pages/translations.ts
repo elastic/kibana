@@ -49,10 +49,3 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
     defaultMessage: 'Anomalies',
   }
 );
-
-export const NAVIGATION_ALERTS_TITLE = i18n.translate(
-  'xpack.securitySolution.network.navigation.alertsTitle',
-  {
-    defaultMessage: 'External alerts',
-  }
-);

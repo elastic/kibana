@@ -102,7 +102,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === HostsTableType.alerts || tabName === HostsTableType.events) {
+    if (tabName === HostsTableType.events) {
       return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
     }
 

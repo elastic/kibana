@@ -5,33 +5,20 @@
  * 2.0.
  */
 
-import type { ColumnHeaderOptions } from '../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 
-export const defaultHeaders: ColumnHeaderOptions[] = [
+export const defaultAlertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-    esTypes: ['date'],
-    type: 'date',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'message',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'host.name',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.module',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'agent.type',
+    linkField: 'rule.reference',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -39,18 +26,30 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.action',
+    id: 'event.category',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'user.name',
+    id: 'event.severity',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'source.ip',
+    id: 'observer.name',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'destination.ip',
+    id: 'host.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'message',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'agent.id',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'agent.type',
   },
 ];

@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import numeral from '@elastic/numeral';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -20,58 +19,30 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import * as i18n from '../../../hosts/pages/translations';
+import * as i18n from './translations';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { SHOWING, UNIT } from '../alerts_viewer/translations';
-import { histogramConfigs as alertsHistogramConfig } from '../alerts_viewer/histogram_configs';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import {
+  alertsHistogramConfig,
+  eventsHistogramConfig,
+  getSubtitle,
+} from './histogram_configurations';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/hosts/events';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
 import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
 import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
-import { alertsDefaultModel } from '../alerts_viewer/default_headers';
+
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
 
+const ACTION_BUTTON_COUNT = 5;
 const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
-
-export const eventsStackByOptions: MatrixHistogramOption[] = [
-  {
-    text: 'event.action',
-    value: 'event.action',
-  },
-  {
-    text: 'event.dataset',
-    value: 'event.dataset',
-  },
-  {
-    text: 'event.module',
-    value: 'event.module',
-  },
-];
-
-const DEFAULT_STACK_BY = 'event.action';
-const unit = (n: number) => i18n.EVENTS_UNIT(n);
-
-export const eventsHistogramConfig: MatrixHistogramConfigs = {
-  defaultStackByOption:
-    eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
-  errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
-  histogramType: MatrixHistogramType.events,
-  stackByOptions: eventsStackByOptions,
-  subtitle: undefined,
-  title: i18n.NAVIGATION_EVENTS_TITLE,
-  getLensAttributes: getEventsHistogramLensAttributes,
-};
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
@@ -97,7 +68,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
-  const ACTION_BUTTON_COUNT = 5;
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showExternalAlerts, setShowExternalAlerts] = useState(false);
@@ -105,25 +75,19 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
 
-  const getSubtitle = useCallback(
-    (totalCount: number) =>
-      `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
-    [defaultNumberFormat]
-  );
-
   const histogramExtraProps = useMemo(
     () => ({
       ...(showExternalAlerts
         ? {
             ...alertsHistogramConfig,
-            subtitle: getSubtitle,
+            subtitle: getSubtitle(defaultNumberFormat),
           }
         : {
             ...eventsHistogramConfig,
-            unit,
+            unit: i18n.EVENTS_UNIT,
           }),
     }),
-    [getSubtitle, showExternalAlerts]
+    [defaultNumberFormat, showExternalAlerts]
   );
 
   const statefulEventsViewerExtraProps = useMemo(
@@ -134,7 +98,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           }
         : {
             pageFilters,
-            unit,
+            unit: i18n.EVENTS_UNIT,
           }),
     }),
     [showExternalAlerts, externalAlertPageFilters, pageFilters]
@@ -152,9 +116,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
               }
             : c
         ),
-        excludedRowRendererIds: showExternalAlerts
-          ? alertsDefaultModel.excludedRowRendererIds
-          : undefined,
+        excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : undefined,
       })
     );
   }, [dispatch, showExternalAlerts, tGridEnabled, timelineId]);
@@ -184,7 +146,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         additionalFilters={
           <EuiCheckbox
             id="showExternalAlertsCheckbox"
-            aria-label="Show external alerts"
+            aria-label={i18n.SHOW_EXTERNAL_ALERTS}
             onChange={toggleExternalAlerts}
             checked={showExternalAlerts}
             color="text"

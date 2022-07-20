@@ -27,7 +27,7 @@ import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
   eventsHistogramConfig,
-} from '../../../common/components/events_tab/events_query_tab_body';
+} from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../hosts/store/model';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';

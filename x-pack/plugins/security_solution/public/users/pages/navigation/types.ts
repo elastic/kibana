@@ -12,8 +12,7 @@ import type { NavTab } from '../../../common/components/navigation/types';
 
 type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers &
   UsersTableType.risk &
-  UsersTableType.events &
-  UsersTableType.alerts;
+  UsersTableType.events;
 
 type KeyUsersNavTabWithMlPermission = KeyUsersNavTabWithoutMlPermission & UsersTableType.anomalies;
 

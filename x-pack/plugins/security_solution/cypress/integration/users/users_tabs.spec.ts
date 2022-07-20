@@ -12,10 +12,6 @@ import {
   AUTHENTICATIONS_TABLE,
 } from '../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../screens/users/user_events';
-import {
-  EXTERNAL_ALERTS_TAB,
-  EXTERNAL_ALERTS_TAB_CONTENT,
-} from '../../screens/users/user_external_alerts';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../screens/users/user_risk_score';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -64,12 +60,6 @@ describe('Users stats and tables', () => {
       cy.get(EVENTS_TAB).click({ force: true });
 
       cy.get(EVENTS_TAB_CONTENT).should('exist');
-    });
-
-    it(`renders external alerts tab`, () => {
-      cy.get(EXTERNAL_ALERTS_TAB).click({ force: true });
-
-      cy.get(EXTERNAL_ALERTS_TAB_CONTENT).should('exist');
     });
 
     it(`renders users risk tab`, () => {
