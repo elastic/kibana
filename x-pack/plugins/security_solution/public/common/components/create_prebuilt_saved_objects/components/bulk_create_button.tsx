@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import type { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import { useKibana, useToasts } from '../../../lib/kibana';
 import { bulkCreatePrebuiltSavedObjects } from '../apis/bulk_create_prebuilt_saved_objects';
-import { IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
+import { IMPORT_SAVED_OBJECTS_FAILURE, IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
 
 const Popover = styled(EuiPanel)`
   position: absolute;
@@ -51,7 +51,7 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
 
   const toasts = useToasts();
 
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>();
 
   const onMouseEnter = () => {
     setIsPopoverOpen(true);
@@ -88,11 +88,11 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
     }
 
     if (status === 'error' && error != null) {
-      toasts.addError(error, { title: 'Import dashboard failed', toastMessage: error.message });
+      toasts.addError(error, { title: IMPORT_SAVED_OBJECTS_FAILURE, toastMessage: error.message });
     }
   }, [error, onSuccessCallback, response, status, toasts]);
 
-  return href || status === 'sccess' ? (
+  return href || status === 'success' ? (
     <EuiButton
       href={href ?? undefined}
       isDisabled={!href}

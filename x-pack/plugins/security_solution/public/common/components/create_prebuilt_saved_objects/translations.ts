@@ -11,3 +11,10 @@ export const IMPORT_SAVED_OBJECTS_SUCCESS = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `Following {totalCount, plural, =1 {saved object} other {saved objects}} has been imported successfully`,
   });
+
+export const IMPORT_SAVED_OBJECTS_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkCreateSavedObjects.bulkCreateFailureTitle',
+  {
+    defaultMessage: `Failed to import saved objects`,
+  }
+);
