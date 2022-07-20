@@ -273,7 +273,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           } = endpoint.endpoint_metrics.Endpoint.metrics;
           const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
           if (endpointPolicyDetail) {
-            endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(endpointPolicyDetail.value);
+            endpointPolicyDetail.value = addDefaultAdvancedPolicyConfigSettings(
+              endpointPolicyDetail.value
+            );
           }
           return {
             '@timestamp': taskExecutionPeriod.current,

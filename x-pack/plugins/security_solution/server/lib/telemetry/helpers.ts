@@ -233,4 +233,4 @@ export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
 
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {
   return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
-}
+};
