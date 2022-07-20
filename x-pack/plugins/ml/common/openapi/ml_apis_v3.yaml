@@ -19,6 +19,7 @@ paths:
         Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      operationId: ml-sync
       tags:
         - ml
       parameters:
@@ -40,6 +41,7 @@ paths:
       description: >
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      operationId: ml-sync-default
       tags:
         - ml
       parameters:
@@ -80,81 +82,72 @@ components:
     in: header
     name: ApiKey
  schemas:
+    syncSuccess:
+      type: boolean
+      description: The success or failure of the synchronization.
+    syncDatafeed:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/syncSuccess'
+    syncJob:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/syncSuccess'
+    syncModel:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/syncSuccess'
     syncResponse:
       type: object
       properties:
         datafeedsAdded:
           type: object
-          description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+          description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
           additionalProperties:
-            type: object
-            properties:
-             success:
-               type: boolean
+           $ref: '#/components/schemas/syncDatafeed'
         datafeedsRemoved:
           type: object
-          description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+          description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
           additionalProperties:
-            type: object
-            properties:
-             success:
-               type: boolean
+            $ref: '#/components/schemas/syncDatafeed'
         savedObjectsCreated:
           type: object
-          description: If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+          description: If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
           properties:
             anomaly-detector:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncJob'
             data-frame-analytics:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncDatafeed'
             trained-model:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncModel'
         savedObjectsDeleted:
           type: object
-          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
           properties:
             anomaly-detector:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncJob'
             data-frame-analytics:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncJob'
             trained-model:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/syncModel'
  examples:
    syncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
