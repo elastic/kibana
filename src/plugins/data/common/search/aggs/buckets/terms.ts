@@ -45,8 +45,10 @@ export interface AggParamsTerms extends BaseAggParams {
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string;
-  include?: string;
+  exclude?: string[] | number[];
+  include?: string[] | number[];
+  includeIsRegex?: boolean;
+  excludeIsRegex?: boolean;
 }
 
 export const getTermsBucketAgg = () =>
@@ -177,6 +179,16 @@ export const getTermsBucketAgg = () =>
         advanced: true,
         shouldShow: isStringOrNumberType,
         ...migrateIncludeExcludeFormat,
+      },
+      {
+        name: 'includeIsRegex',
+        default: true,
+        write: noop,
+      },
+      {
+        name: 'excludeIsRegex',
+        default: true,
+        write: noop,
       },
     ],
   });
