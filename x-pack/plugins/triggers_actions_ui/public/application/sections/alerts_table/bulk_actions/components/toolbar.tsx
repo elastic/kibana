@@ -8,9 +8,9 @@
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
-// import styled from 'styled-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { BulkActionsConfig, BulkActionsVerbs } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
@@ -21,22 +21,48 @@ interface BulkActionsProps {
   alerts: EcsFieldsResponse[];
 }
 
+// Duplicated just for legacy reasons. Timelines plugin will be removed but
+// as long as the integration still work with Timelines we have to keep it
+export interface TimelineItem {
+  _id: string;
+  _index?: string | null;
+  data: TimelineNonEcsData[];
+  ecs: { _id: string; _index: string };
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+  value?: string[] | null;
+}
+
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+
+const selectedIdsToTimelineItemMapper = (
+  alerts: EcsFieldsResponse[],
+  rowSelection: Set<number>
+): TimelineItem[] => {
+  return Array.from(rowSelection.values()).map((rowIndex: number) => {
+    const alert = alerts[rowIndex];
+    return {
+      _id: alert._id,
+      _index: alert._index,
+      data: [
+        { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] },
+        { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
+      ],
+      ecs: {
+        _id: alert._id,
+        _index: alert._index,
+      },
+    };
+  });
+};
 
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
   alerts: EcsFieldsResponse[]
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
-
-  const selectedAlertIds = useMemo(
-    () =>
-      Array.from(rowSelection.values()).map((rowIndex: number) => ({
-        id: alerts[rowIndex]._id,
-        index: alerts[rowIndex]._index,
-      })),
-    [rowSelection, alerts]
-  );
 
   const bulkActionsItems = useMemo(
     () =>
@@ -48,16 +74,15 @@ const useBulkActionsToMenuItemMapper = (
             data-test-subj={item['data-test-subj']}
             disabled={isDisabled}
             onClick={() => {
+              const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
               item.onClick(selectedAlertIds, isAllSelected);
             }}
           >
-            {isDisabled && item.disableOnQuery && item.disabledLabel
-              ? item.disabledLabel
-              : item.label}
+            {isDisabled && item.disabledLabel ? item.disabledLabel : item.label}
           </EuiContextMenuItem>
         );
       }),
-    [isAllSelected, items, selectedAlertIds]
+    [alerts, isAllSelected, items, rowSelection]
   );
 
   return bulkActionsItems;

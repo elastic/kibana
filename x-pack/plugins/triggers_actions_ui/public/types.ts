@@ -67,6 +67,7 @@ import type {
   BrowserFieldItem,
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -429,13 +430,18 @@ export type AlertTableFlyoutComponent =
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
 
+export interface AlertsTableFlyoutBaseProps {
+  alert: EcsFieldsResponse;
+  isLoading: boolean;
+}
+
 export interface BulkActionsConfig {
   label: string;
   key: string;
-  'data-test-subj': string;
+  'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: Array<{ id: string; index: string }>, isAllSelected: boolean) => void;
+  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
 }
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
@@ -477,11 +483,6 @@ export interface BulkActionsState {
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
-}
-
-export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
-  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
