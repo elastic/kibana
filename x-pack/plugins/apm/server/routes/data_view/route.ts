@@ -16,7 +16,22 @@ const staticDataViewRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ created: boolean }> => {
     const setup = await setupRequest(resources);
-    const didCreateDataView = await createStaticDataView({ resources, setup });
+    const { context, plugins, request, config } = resources;
+
+    const coreContext = await context.core;
+    const dataViewStart = await plugins.dataViews.start();
+    const dataViewService = await dataViewStart.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asCurrentUser,
+      request,
+      true
+    );
+
+    const didCreateDataView = await createStaticDataView({
+      dataViewService,
+      config,
+      setup,
+    });
 
     return { created: didCreateDataView };
   },

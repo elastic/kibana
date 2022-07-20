@@ -13,34 +13,25 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
-import { APMRouteHandlerResources } from '../typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { Setup } from '../../lib/helpers/setup_request';
+import { APMConfig } from '../..';
 
 export async function createStaticDataView({
-  resources,
+  dataViewService,
+  config,
   setup,
 }: {
-  resources: APMRouteHandlerResources;
+  dataViewService: DataViewsService;
+  config: APMConfig;
   setup: Setup;
 }): Promise<boolean> {
   return withApmSpan('create_static_data_view', async () => {
-    const { context, request, plugins, config } = resources;
-
     // don't auto-create APM data view if it's been disabled via the config
     if (!config.autoCreateApmDataView) {
       return false;
     }
-
-    const coreContext = await context.core;
-    const dataViewStart = await plugins.dataViews.start();
-    const dataViewService = await dataViewStart.dataViewsServiceFactory(
-      coreContext.savedObjects.client,
-      coreContext.elasticsearch.client.asCurrentUser,
-      request,
-      true
-    );
 
     // Discover and other apps will throw errors if an data view exists without having matching indices.
     // The following ensures the data view is only created if APM data is found
