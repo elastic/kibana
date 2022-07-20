@@ -162,7 +162,6 @@ export const ContainerNameWidget = ({
           const indexHelper = containerNameArray.findIndex((obj) => {
             return obj.name === name;
           });
-
           return (
             <ContainerNameRow
               name={name}
@@ -199,6 +198,12 @@ export const ContainerNameWidget = ({
     },
   });
 
+  const cellProps = () => {
+    return {
+      css: styles.cellPad,
+    };
+  };
+
   return (
     <div
       data-test-subj={CONTAINER_NAME_TABLE_TEST_ID}
@@ -220,6 +225,7 @@ export const ContainerNameWidget = ({
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
+        cellProps={cellProps}
       />
     </div>
   );

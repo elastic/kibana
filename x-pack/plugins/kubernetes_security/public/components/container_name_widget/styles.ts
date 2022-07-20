@@ -14,7 +14,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font, colors } = euiTheme;
+    const { size, colors } = euiTheme;
 
     const container: CSSObject = {
       paddingTop: size.s,
@@ -32,7 +32,6 @@ export const useStyles = () => {
     };
 
     const dataInfo: CSSObject = {
-      marginBottom: size.xs,
       display: 'flex',
       alignItems: 'center',
       height: size.base,
@@ -51,12 +50,12 @@ export const useStyles = () => {
     };
 
     const countValue: CSSObject = {
-      fontWeight: font.weight.semiBold,
+      fontSize: size.m,
       minWidth: '76px',
     };
 
     const truncate: CSSObject = {
-      width: '74%',
+      width: '100%',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
       textOverflow: 'ellipsis',
@@ -66,6 +65,11 @@ export const useStyles = () => {
       width: '100%',
     };
 
+    const cellPad: CSSObject = {
+      paddingBottom: '5px',
+      paddingTop: '5px',
+    };
+
     return {
       container,
       dataInfo,
@@ -73,6 +77,7 @@ export const useStyles = () => {
       countValue,
       truncate,
       flexWidth,
+      cellPad,
     };
   }, [euiTheme]);
 
