@@ -38,7 +38,7 @@ export interface ExplainLogRateSpikesWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The saved search to analyze. */
-  savedSearch: SavedSearch | SavedSearchSavedObject;
+  savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 
 const defaultSearchQuery = {

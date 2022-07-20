@@ -27,7 +27,7 @@ export const useData = (
   {
     currentDataView,
     currentSavedSearch,
-  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject },
+  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
