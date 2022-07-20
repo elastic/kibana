@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionDetails } from '../../../../common/endpoint/types';
@@ -92,14 +91,7 @@ export const KillProcessActionResult = memo<
   // Show API errors if perform action fails
   if (isError && apiError) {
     return (
-      <ResultComponent
-        showAs="failure"
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessageTitle',
-          { defaultMessage: 'Kill process action failed' }
-        )}
-        data-test-subj="killProcessAPIErrorCallout"
-      >
+      <ResultComponent showAs="failure" data-test-subj="killProcessAPIErrorCallout">
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
           defaultMessage="The following error was encountered: {error}"

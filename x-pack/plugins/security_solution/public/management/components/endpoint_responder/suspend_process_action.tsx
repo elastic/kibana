@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionDetails } from '../../../../common/endpoint/types';
@@ -87,14 +86,7 @@ export const SuspendProcessActionResult = memo<
   // Show API errors if perform action fails
   if (isError && apiError) {
     return (
-      <ResultComponent
-        showAs="failure"
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.suspendProcess.performApiErrorMessageTitle',
-          { defaultMessage: 'Suspend process action failed' }
-        )}
-        data-test-subj="suspendProcessAPIErrorCallout"
-      >
+      <ResultComponent showAs="failure" data-test-subj="suspendProcessAPIErrorCallout">
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.suspendProcess.performApiErrorMessage"
           defaultMessage="The following error was encountered: {error}"
