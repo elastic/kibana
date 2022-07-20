@@ -15,8 +15,6 @@ import type { CoreTheme } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import type { FleetErrorResponse } from '../../../../common';
-
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 
@@ -39,8 +37,7 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   fromUpdate?: boolean;
   force?: boolean;
 };
-type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> &
-  PackageInstallItem & { error?: FleetErrorResponse };
+type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
 function usePackageInstall({
   notifications,
