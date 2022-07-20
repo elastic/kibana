@@ -188,6 +188,18 @@ function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HT
   toasts.addError(error, { title, toastMessage });
 }
 
+const getExportToastMessage = (succeeded: number, total: number) => {
+  const message = [i18n.RULES_BULK_EXPORT_SUCCESS_DESCRIPTION(succeeded, total)];
+
+  // if not all rules are successfully exported it means there included prebuilt rules
+  // display message to users that prebuilt rules were excluded
+  if (total > succeeded) {
+    message.push(i18n.RULES_BULK_EXPORT_PREBUILT_RULES_EXCLUDED_DESCRIPTION);
+  }
+
+  return message.join(' ');
+};
+
 async function defaultSuccessHandler(
   toasts: UseAppToasts,
   action: BulkAction,
@@ -199,7 +211,7 @@ async function defaultSuccessHandler(
   switch (action) {
     case BulkAction.export:
       title = i18n.RULES_BULK_EXPORT_SUCCESS;
-      text = i18n.RULES_BULK_EXPORT_SUCCESS_DESCRIPTION(summary.succeeded, summary.total);
+      text = getExportToastMessage(summary.succeeded, summary.total);
       break;
     case BulkAction.duplicate:
       title = i18n.RULES_BULK_DUPLICATE_SUCCESS;

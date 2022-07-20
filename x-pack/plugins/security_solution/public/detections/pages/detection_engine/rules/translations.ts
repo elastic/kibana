@@ -924,9 +924,16 @@ export const RULES_BULK_EXPORT_SUCCESS_DESCRIPTION = (exportedRules: number, tot
     {
       values: { totalRules, exportedRules },
       defaultMessage:
-        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}.',
     }
   );
+
+export const RULES_BULK_EXPORT_PREBUILT_RULES_EXCLUDED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.prebuiltRulesExcludedToastDescription',
+  {
+    defaultMessage: 'Prebuilt rules were excluded from the resulting file.',
+  }
+);
 
 export const RULES_BULK_EXPORT_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.errorToastTitle',

@@ -45,10 +45,7 @@ describe('Export rules', () => {
     exportFirstRule();
     cy.wait('@bulk_action').then(({ response }) => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
-      cy.get(TOASTER_BODY).should(
-        'have.text',
-        'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.'
-      );
+      cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
     });
   });
 
@@ -86,7 +83,7 @@ describe('Export rules', () => {
 
     cy.get(TOASTER_BODY).should(
       'contain',
-      `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules`
+      `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules. Prebuilt rules were excluded from the resulting file.`
     );
   });
 });
