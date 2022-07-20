@@ -3163,6 +3163,30 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-elasticsearch-client-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-client-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-client-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
   version "0.0.0"
   uid ""
@@ -6891,6 +6915,30 @@
   uid ""
 
 "@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-client-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-client-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-client-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-elasticsearch-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server/npm_module_types":
   version "0.0.0"
   uid ""
 

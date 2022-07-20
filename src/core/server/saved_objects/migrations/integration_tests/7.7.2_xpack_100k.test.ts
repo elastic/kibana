@@ -11,8 +11,8 @@ import { unlink } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { ElasticsearchClient } from '../../../elasticsearch';
 import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 

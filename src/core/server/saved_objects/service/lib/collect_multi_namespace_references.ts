@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';

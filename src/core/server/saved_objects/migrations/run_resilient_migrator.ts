@@ -8,7 +8,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import { ElasticsearchClient } from '../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexMapping } from '../mappings';
 import type { SavedObjectsMigrationVersion } from '../types';
 import type { TransformRawDocs } from './types';

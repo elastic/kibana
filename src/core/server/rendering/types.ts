@@ -14,7 +14,7 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import { UiPlugins } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';

@@ -12,9 +12,9 @@ import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types'
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { Root } from '../../../root';
-import type { ElasticsearchClient } from '../../../elasticsearch';
 
 const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 

@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -25,6 +25,7 @@ import {
 } from './constants';
 import { isClusterShardLimitExceeded } from './es_errors';
 import { ClusterShardLimitExceeded } from './create_index';
+
 export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */

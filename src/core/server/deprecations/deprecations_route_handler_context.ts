@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreElasticsearchRouteHandlerContext } from '../elasticsearch';
+import type { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { CoreSavedObjectsRouteHandlerContext } from '../saved_objects';
 import type { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations_service';
 

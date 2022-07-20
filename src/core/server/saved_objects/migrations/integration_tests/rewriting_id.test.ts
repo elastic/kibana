@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Util from 'util';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '../../../root';
 import { deterministicallyRegenerateObjectId } from '../core/document_migrator';
 

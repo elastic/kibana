@@ -19,8 +19,8 @@ import type {
 } from '@kbn/config';
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
+import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 

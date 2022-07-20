@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-'@kbn/core/server/elasticsearch/client/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 
