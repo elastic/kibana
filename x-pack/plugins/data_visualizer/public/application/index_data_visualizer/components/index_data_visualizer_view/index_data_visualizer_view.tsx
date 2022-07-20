@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { Filter, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { DV_RANDOM_SAMPLER_AUTO_SET_P, useStorage } from '../../hooks/use_storage';
+import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
 import {
@@ -53,7 +53,7 @@ import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
-import { isDefined } from '../../../common/util/is_defined';
+import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -106,7 +106,7 @@ export const getDefaultDataVisualizerListState = (
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
-  autoProbability: true,
+  rndSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
   ...overrides,
 });
 
@@ -118,18 +118,16 @@ export interface IndexDataVisualizerViewProps {
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
-  const [savedAutoPickProbabilityPreference, saveAutoPickProbabilityPreference] = useStorage<
-    'true' | 'false'
-  >(
-    DV_RANDOM_SAMPLER_AUTO_SET_P,
-    // By default we will always update to the most suitable probability value
-    'true'
-  );
+  const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
+    useStorage<RandomSamplerOption>(
+      DV_RANDOM_SAMPLER_PREFERENCE,
+      RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
+    );
 
   const restorableDefaults = useMemo(
     () =>
       getDefaultDataVisualizerListState({
-        autoProbability: savedAutoPickProbabilityPreference === 'true',
+        rndSamplerPref: savedRandomSamplerPreference,
       }),
     // We just  need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -256,14 +254,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
 
-  const autoPickProbability = isDefined(dataVisualizerListState.autoProbability)
-    ? dataVisualizerListState.autoProbability
-    : restorableDefaults.autoProbability;
-  const setAutoPickProbability = (value: boolean) => {
-    saveAutoPickProbabilityPreference(value ? 'true' : 'false');
-    setDataVisualizerListState({ ...dataVisualizerListState, autoProbability: value });
-  };
-
   const {
     configs,
     searchQueryLanguage,
@@ -277,27 +267,41 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     progress,
     extendedColumns,
     overallStatsProgress,
-  } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+  } = useDataVisualizerGridData(
+    input,
+    dataVisualizerListState,
+    savedRandomSamplerPreference,
+    setGlobalState
+  );
 
-  const probability = isDefined(dataVisualizerListState.probability)
-    ? dataVisualizerListState.probability
-    : documentCountStats?.probability;
+  useEffect(
+    () => {
+      switch (savedRandomSamplerPreference) {
+        case RANDOM_SAMPLER_OPTION.OFF:
+          setSamplingProbability(1);
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+          setSamplingProbability(
+            dataVisualizerListState?.probability ?? documentCountStats?.probability ?? null
+          );
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+        default:
+          setSamplingProbability(null);
+          return;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      dataVisualizerListState.probability,
+      documentCountStats?.probability,
+      savedRandomSamplerPreference,
+    ]
+  );
 
-  const setSamplingProbability = (value: number) => {
+  const setSamplingProbability = (value: number | null) => {
     setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
   };
-
-  useEffect(() => {
-    const autopickedProbability = documentCountStats?.probability;
-    if (
-      autoPickProbability === false &&
-      isDefined(autopickedProbability) &&
-      autopickedProbability !== probability
-    ) {
-      setSamplingProbability(autopickedProbability);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPickProbability, documentCountStats?.probability]);
 
   useEffect(() => {
     return () => {
@@ -512,10 +516,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                         documentCountStats={documentCountStats}
                         totalCount={overallStats.totalCount}
                         setSamplingProbability={setSamplingProbability}
-                        samplingProbability={probability}
+                        samplingProbability={
+                          dataVisualizerListState.probability === null
+                            ? documentCountStats?.probability
+                            : dataVisualizerListState.probability
+                        }
                         loading={overallStatsProgress.loaded < 100}
-                        setAutoPickProbability={setAutoPickProbability}
-                        autoPickProbability={autoPickProbability}
+                        randomSamplerPreference={savedRandomSamplerPreference}
+                        setRandomSamplerPreference={saveRandomSamplerPreference}
                       />
                     </EuiFlexItem>
                   </>

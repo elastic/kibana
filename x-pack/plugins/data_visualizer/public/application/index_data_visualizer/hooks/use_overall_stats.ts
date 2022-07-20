@@ -92,6 +92,7 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
+  browserSessionSeed: number,
   probability?: number | null
 ): {
   progress: DataStatsFetchProgress;
@@ -206,7 +207,15 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       | undefined
     >(
       [
-        from(getDocumentCountStats(data.search, searchStrategyParams, searchOptions, probability)),
+        from(
+          getDocumentCountStats(
+            data.search,
+            searchStrategyParams,
+            searchOptions,
+            browserSessionSeed,
+            probability
+          )
+        ),
         ...aggregatableOverallStatsObs,
         ...nonAggregatableFieldsObs,
       ],
@@ -265,6 +274,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {

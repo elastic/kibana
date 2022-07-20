@@ -69,12 +69,11 @@ export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
+  browserSessionSeed: number,
   probability?: number | null,
   minimumRandomSamplerDocCount?: number
 ): Promise<DocumentCountStats> => {
-  // @TODO: move this to user/browser session
-  // Create a unique `seed` for browser session - To give repeatable results, the seed should be set based on the user's browser session
-  const seed = Math.abs(seedrandom().int32());
+  const seed = browserSessionSeed ?? Math.abs(seedrandom().int32());
 
   const {
     index,
@@ -158,7 +157,7 @@ export const getDocumentCountStats = async (
       ...result,
       randomlySampled: probability === 1 ? false : true,
       took: firstResp.rawResponse?.took,
-      probability: initialDefaultProbability,
+      probability,
       ...processDocumentCountStats(firstResp.rawResponse, params, true),
     };
   }
@@ -186,6 +185,7 @@ export const getDocumentCountStats = async (
         randomlySampled: false,
         took: firstResp.rawResponse.took + (vanillaAggResp?.rawResponse?.took ?? 0),
         ...processDocumentCountStats(vanillaAggResp?.rawResponse, params, true),
+        probability: 1,
       };
     } else {
       // Else, make second random sampler
