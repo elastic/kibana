@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   savedObjectsClientMock,
   httpServiceMock,
@@ -140,6 +139,7 @@ describe('Update rules configuration API', () => {
             enabled: true,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -149,6 +149,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -158,6 +159,7 @@ describe('Update rules configuration API', () => {
             enabled: true,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -181,6 +183,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -190,6 +193,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -199,6 +203,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -253,6 +258,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -262,6 +268,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -271,6 +278,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -315,6 +323,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -324,6 +333,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -333,6 +343,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
@@ -389,6 +400,7 @@ describe('Update rules configuration API', () => {
             enabled: false,
             metadata: {
               rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
             },
           },
         },
