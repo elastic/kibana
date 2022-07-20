@@ -73,7 +73,6 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
   const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
     name: FINDINGS_INDEX_NAME,
   });
-  logger.debug(JSON.stringify(findingsIndexTemplateResponse));
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { template, composed_of, _meta } =
     findingsIndexTemplateResponse.index_templates[0].index_template;
