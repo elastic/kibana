@@ -76,7 +76,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
       <EuiPanel hasBorder>
         <EuiForm
           component="form"
-          data-test-subj="EngineCreationForm"
+          data-test-subj="ElasticsearchEngineCreationForm"
           onSubmit={(e) => {
             e.preventDefault();
             submitEngine();
@@ -192,6 +192,7 @@ export const ReviewElasticsearchEngine: React.FC = () => {
 
           {aliasName.length > 0 && (
             <EuiCallOut
+              data-test-subj="ElasticsearchEngineCreationFormAliasNameCallout"
               size="m"
               title={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engineCreation.configureElasticsearchEngine.callout.title',
