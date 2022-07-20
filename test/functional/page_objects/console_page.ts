@@ -227,6 +227,16 @@ export class ConsolePageObject extends FtrService {
     return await this.find.existsByCssSelector('.ace_error');
   }
 
+  public async getTokenColor(token: string) {
+    const element = await this.find.byClassName(token);
+    return await element.getComputedStyle('color');
+  }
+
+  public async responseHasDeprecationWarning() {
+    const response = await this.getResponse();
+    return response.trim().startsWith('#!');
+  }
+
   public async clickFoldWidget() {
     const widget = await this.find.byCssSelector('.ace_fold-widget');
     await widget.click();
