@@ -230,9 +230,12 @@ const MetricVisComponent = ({
       subtitle,
       extra: (
         <span>
+          {config.metric.secondaryPrefix}
           {secondaryMetricColumn
-            ? formatSecondaryMetric!(row[secondaryMetricColumn.id])
-            : config.metric.extraText}
+            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+                row[secondaryMetricColumn.id]
+              )}`
+            : undefined}
         </span>
       ),
       color: getColor(

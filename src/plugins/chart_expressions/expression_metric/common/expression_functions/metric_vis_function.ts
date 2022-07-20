@@ -57,10 +57,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
-    extraText: {
+    secondaryPrefix: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.extra.help', {
-        defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
+      help: i18n.translate('expressionMetricVis.function.secondaryPrefix.help', {
+        defaultMessage: 'Optional text to be show before secondaryMetric.',
       }),
     },
     progressDirection: {
@@ -151,7 +151,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
-            extraText: args.extraText,
+            secondaryPrefix: args.secondaryPrefix,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,

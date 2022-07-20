@@ -231,12 +231,12 @@ describe('MetricVisComponent', function () {
         }
       `);
     });
-    it('should display subtitle and extra text', () => {
+    it('should display subtitle and secondary prefix', () => {
       const component = shallow(
         <MetricVis
           config={{
             ...config,
-            metric: { ...config.metric, subtitle: 'subtitle', extraText: 'extra text' },
+            metric: { ...config.metric, subtitle: 'subtitle' },
           }}
           data={table}
           renderComplete={() => {}}
@@ -247,14 +247,11 @@ describe('MetricVisComponent', function () {
       const [[visConfig]] = component.find(Metric).props().data!;
 
       expect(visConfig!.subtitle).toBe('subtitle');
-      expect(visConfig!.extra).toEqual(<span>extra text</span>);
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
           "color": "#343741",
-          "extra": <span>
-            extra text
-          </span>,
+          "extra": <span />,
           "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -267,7 +264,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             ...config,
-            metric: { ...config.metric, subtitle: 'subtitle', extraText: 'extra text' },
+            metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
             dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
           }}
           data={table}
@@ -278,13 +275,19 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      expect(visConfig!.extra).toEqual(<span>13.63</span>);
+      expect(visConfig!.extra).toEqual(
+        <span>
+          {'secondary prefix'}
+          {' ' + 13.63}
+        </span>
+      );
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
           "color": "#343741",
           "extra": <span>
-            13.63
+            secondary prefix
+             13.63
           </span>,
           "subtitle": "subtitle",
           "title": "Median products.base_price",
@@ -417,14 +420,14 @@ describe('MetricVisComponent', function () {
       `);
     });
 
-    it('should display extra text or secondary metric', () => {
+    it('should display secondary prefix or secondary metric', () => {
       const componentWithSecondaryDimension = shallow(
         <MetricVis
           config={{
             ...config,
             dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-            // extra text included to make sure it's overridden
-            metric: { ...config.metric, extraText: 'howdy' },
+            // secondary prefix included to make sure it's overridden
+            metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
           renderComplete={() => {}}
@@ -440,19 +443,24 @@ describe('MetricVisComponent', function () {
       ).toMatchInlineSnapshot(`
         Array [
           <span>
-            13.63
+            howdy
+             13.63
           </span>,
           <span>
-            13.64
+            howdy
+             13.64
           </span>,
           <span>
-            13.34
+            howdy
+             13.34
           </span>,
           <span>
-            13.49
+            howdy
+             13.49
           </span>,
           <span>
-            13.34
+            howdy
+             13.34
           </span>,
         ]
       `);
@@ -461,7 +469,7 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             ...config,
-            metric: { ...config.metric, extraText: 'howdy' },
+            metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
           renderComplete={() => {}}
@@ -926,7 +934,7 @@ describe('MetricVisComponent', function () {
         extra,
       } = component.find(Metric).props().data?.[0][0]!;
 
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children };
+      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
 
     it('correctly formats plain numbers', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { PaletteRegistry } from '@kbn/coloring';
 
@@ -13,8 +13,15 @@ import { MetricVisualizationState } from './visualization';
 import { MetricDimensionEditor } from './dimension_editor';
 import { shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { EuiFieldText } from '@elastic/eui';
 
-describe('metric dimension editor', () => {
+const SELECTORS = {
+  PRIMARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_primary_metric"]',
+  SECONDARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_secondary_metric"]',
+  BREAKDOWN_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_breakdown"]',
+};
+
+describe('dimension editor', () => {
   let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
     paletteService: PaletteRegistry;
   };
@@ -35,8 +42,10 @@ describe('metric dimension editor', () => {
           accessor={accessor}
         />
       );
-      expect(component.exists(CollapseSetting)).toBeTruthy();
-      expect(component.exists('[data-test-subj="lnsDynamicColoringMetricSwitch"]')).toBeFalsy();
+
+      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeTruthy();
+      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
     });
 
     it('supports setting a collapse function', () => {
@@ -58,5 +67,43 @@ describe('metric dimension editor', () => {
       expect(setState).toHaveBeenCalledWith({ ...localState, collapseFn: newCollapseFunc });
     });
   });
+
+  describe('secondary metric dimension', () => {
+    const accessor = 'secondary-metric-col-id';
+
+    it('renders when the accessor matches', () => {
+      const component = shallow(
+        <MetricDimensionEditor
+          {...props}
+          state={{ ...state, secondaryMetricAccessor: accessor }}
+          accessor={accessor}
+        />
+      );
+
+      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeTruthy();
+      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
+    });
+
+    it('sets metric prefix', () => {
+      const setState = jest.fn();
+      const localState = { ...state, secondaryMetricAccessor: accessor };
+      const component = shallow(
+        <MetricDimensionEditor
+          {...props}
+          state={localState}
+          setState={setState}
+          accessor={accessor}
+        />
+      );
+
+      const newVal = 'Metric explanation';
+      component.find(EuiFieldText).props().onChange!({
+        target: { value: newVal },
+      } as ChangeEvent<HTMLInputElement>);
+      expect(setState).toHaveBeenCalledWith({ ...localState, extraText: newVal });
+    });
+  });
+
   // TODO - test palette picker
 });

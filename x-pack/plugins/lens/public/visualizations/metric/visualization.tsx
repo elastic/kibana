@@ -34,7 +34,7 @@ export interface MetricVisualizationState {
   // computed by collapsing all rows
   collapseFn?: string;
   subtitle?: string;
-  extraText?: string;
+  secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
@@ -116,11 +116,11 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
+          secondaryPrefix: state.secondaryPrefix ? [state.secondaryPrefix] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
-          extraText: state.extraText ? [state.extraText] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
           palette: state.palette?.params
             ? [
@@ -244,7 +244,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.secondaryMetricAccessor,
           filterOperations: isSupportedMetricOperation,
-          enableDimensionEditor: false,
+          enableDimensionEditor: true,
           supportFieldFormat: false,
           required: false,
         },

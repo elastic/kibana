@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiFieldText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -42,17 +43,37 @@ export function MetricDimensionEditor(props: Props) {
   switch (accessor) {
     case state?.metricAccessor:
       return <PrimaryMetricEditor {...props} />;
+    case state.secondaryMetricAccessor:
+      return (
+        <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
+          <EuiFormRow
+            display="columnCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.metric.prefixText.label', {
+              defaultMessage: 'Prefix',
+            })}
+          >
+            <EuiFieldText
+              compressed
+              value={state.secondaryPrefix}
+              onChange={({ target: { value } }) => setState({ ...state, secondaryPrefix: value })}
+            />
+          </EuiFormRow>
+        </div>
+      );
     case state.breakdownByAccessor:
       return (
-        <CollapseSetting
-          value={state.collapseFn || ''}
-          onChange={(collapseFn: string) => {
-            setState({
-              ...state,
-              collapseFn,
-            });
-          }}
-        />
+        <div data-test-subj="lnsMetricDimensionEditor_breakdown">
+          <CollapseSetting
+            value={state.collapseFn || ''}
+            onChange={(collapseFn: string) => {
+              setState({
+                ...state,
+                collapseFn,
+              });
+            }}
+          />
+        </div>
       );
     default:
       return null;
@@ -92,7 +113,7 @@ function PrimaryMetricEditor(props: Props) {
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
   return (
-    <>
+    <div data-test-subj="lnsMetricDimensionEditor_primary_metric">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -200,6 +221,6 @@ function PrimaryMetricEditor(props: Props) {
           </EuiFormRow>
         </>
       )}
-    </>
+    </div>
   );
 }

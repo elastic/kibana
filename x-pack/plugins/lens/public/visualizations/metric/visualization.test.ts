@@ -44,7 +44,7 @@ describe('metric visualization', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: 'subtitle',
-    extraText: 'extra-text',
+    secondaryPrefix: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
     palette,

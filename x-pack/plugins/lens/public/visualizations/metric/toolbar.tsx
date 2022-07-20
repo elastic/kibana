@@ -71,39 +71,6 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
             />
           </EuiToolTip>
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.metric.extraTextLabel', {
-            defaultMessage: 'Extra text',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiToolTip
-            position="right"
-            content={
-              hasSecondaryMetric ? (
-                <p>
-                  {i18n.translate('xpack.lens.metric.extraTextNotVisible', {
-                    defaultMessage:
-                      'The extra text is not visible since a secondary metric is selected.',
-                  })}
-                </p>
-              ) : null
-            }
-            display="block"
-          >
-            <EuiFieldText
-              disabled={hasSecondaryMetric}
-              value={state.extraText}
-              onChange={(event) =>
-                setState({
-                  ...state,
-                  extraText: event.target.value,
-                })
-              }
-            />
-          </EuiToolTip>
-        </EuiFormRow>
       </ToolbarPopover>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.metric.appearanceLabel', {

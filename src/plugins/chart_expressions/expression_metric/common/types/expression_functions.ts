@@ -24,7 +24,7 @@ export interface MetricArguments {
   max?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
   subtitle?: string;
-  extraText?: string;
+  secondaryPrefix?: string;
   progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
