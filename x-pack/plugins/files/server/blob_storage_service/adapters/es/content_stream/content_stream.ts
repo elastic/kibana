@@ -20,7 +20,7 @@ import type { FileChunkDocument } from '../mappings';
 //       we should clean this up.
 //       Also opened the following issue: https://github.com/kriszyp/cbor-x/issues/36
 // TODO: use import once type declarations for the lib are fixed
-// eslint-disable-next-line
+
 const { encode } = require('cbor-x');
 
 /**
