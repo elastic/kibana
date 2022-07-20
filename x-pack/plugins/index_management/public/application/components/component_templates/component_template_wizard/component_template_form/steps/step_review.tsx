@@ -69,7 +69,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     } = serializedComponentTemplate;
 
     const isFleetDatastreamsVisible =
-      dataStreams?.length && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
+      Boolean(dataStreams?.length) && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -125,7 +125,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
-          {isFleetDatastreamsVisible && (
+          {isFleetDatastreamsVisible && dataStreams && (
             <EuiFlexItem>
               {/* Datastream mappings */}
               <FormattedMessage
