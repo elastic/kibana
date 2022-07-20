@@ -12,11 +12,11 @@ import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-import { IScopedClusterClient } from '../elasticsearch/client';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 
 /**

@@ -65,21 +65,26 @@ export const getCspRules = (
   });
 };
 
+const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
+  rules.reduce<CspRulesConfiguration['data_yaml']['activated_rules']>(
+    (benchmarks, rule) => {
+      const benchmark = benchmarks[rule.attributes.metadata.benchmark.id];
+      if (!rule.attributes.enabled || !benchmark) return benchmarks;
+
+      benchmark.push(rule.attributes.metadata.rego_rule_id);
+
+      return benchmarks;
+    },
+    { cis_k8s: [], cis_eks: [] }
+  );
+
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRule>
-): CspRulesConfiguration => {
-  const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
-  const config = {
-    data_yaml: {
-      activated_rules: {
-        cis_k8s: activatedRules.map(
-          (activatedRule) => activatedRule.attributes.metadata.rego_rule_id
-        ),
-      },
-    },
-  };
-  return config;
-};
+): CspRulesConfiguration => ({
+  data_yaml: {
+    activated_rules: getEnabledRulesByBenchmark(cspRules.saved_objects),
+  },
+});
 
 export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string => {
   return yaml.safeDump(config);
