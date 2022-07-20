@@ -287,13 +287,6 @@ export const DashboardListing = ({
     [redirectTo]
   );
 
-  const searchFilters = useMemo(() => {
-    // return savedObjectsTagging
-    //   ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-    //   : [];
-    return [];
-  }, []); // savedObjectsTagging
-
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
   return (
@@ -338,7 +331,6 @@ export const DashboardListing = ({
             entityName={getEntityName()}
             {...{
               emptyPrompt,
-              searchFilters,
               listingLimit,
             }}
           >
