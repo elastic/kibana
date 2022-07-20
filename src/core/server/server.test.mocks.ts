@@ -20,10 +20,10 @@ jest.doMock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 export const mockElasticsearchService = elasticsearchServiceMock.create();
-jest.doMock('./elasticsearch/elasticsearch_service', () => ({
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
