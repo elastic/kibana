@@ -57,8 +57,7 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricVisualizationState,
   datasourceLayers: DatasourceLayers,
-  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
-  isSuggestion: boolean = false
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.metricAccessor) {
     return null;
@@ -69,7 +68,7 @@ const toExpression = (
 
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
-    state.breakdownByAccessor && !isSuggestion && !state.collapseFn
+    state.breakdownByAccessor && !state.collapseFn
       ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
@@ -319,9 +318,6 @@ export const getMetricVisualization = ({
 
   toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
-
-  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
-    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, true),
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };

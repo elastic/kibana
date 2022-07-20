@@ -6,6 +6,7 @@
  */
 
 import type { TableSuggestion, Visualization } from '../../types';
+import { LensIconChartMetric } from '../../assets/chart_metric';
 import { layerTypes } from '../../../common';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
@@ -50,7 +51,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       layerType: layerTypes.DATA,
     },
     title: metricLabel,
-    previewIcon: 'empty',
+    previewIcon: LensIconChartMetric,
     score: 0.5,
     // don't show suggestions since we're in tech preview
     hide: true,
@@ -81,6 +82,8 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     accessorMappings.metricAccessor = metricColumns[0]?.columnId;
     accessorMappings.breakdownByAccessor = bucketedColumns[0]?.columnId;
   }
+
+  baseSuggestion.score += 0.01 * Object.values(accessorMappings).filter(Boolean).length;
 
   const suggestion = {
     ...baseSuggestion,

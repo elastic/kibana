@@ -399,28 +399,6 @@ describe('metric visualization', () => {
       });
     });
 
-    it('builds version for suggestions', () => {
-      const state: MetricVisualizationState = {
-        layerId: 'first',
-        layerType: 'data',
-        metricAccessor: 'metric-col-id',
-        secondaryMetricAccessor: 'secondary-metric-col-id',
-        maxAccessor: 'max-metric-col-id',
-        breakdownByAccessor: 'breakdown-col-id',
-        subtitle: 'subtitle',
-        extraText: 'extra-text',
-        progressDirection: 'vertical',
-        maxCols: 5,
-      };
-
-      const expression = visualization.toPreviewExpression!(
-        state,
-        datasourceLayers
-      ) as ExpressionAstExpression;
-
-      expect(expression.chain[0].arguments.minTiles).toHaveLength(0);
-    });
-
     it('incorporates datasource expression if provided', () => {
       const datasourceFn: ExpressionAstFunction = {
         type: 'function',
