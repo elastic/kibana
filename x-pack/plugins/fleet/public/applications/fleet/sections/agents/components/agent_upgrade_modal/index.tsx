@@ -25,6 +25,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
@@ -36,7 +37,7 @@ import {
   useKibanaVersion,
 } from '../../../../hooks';
 
-import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import { FALLBACK_VERSIONS, MAINTENANCE_VALUES, MINIMUM_SUPPORTED_VERSION } from './constants';
 import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
@@ -47,6 +48,10 @@ export interface AgentUpgradeAgentModalProps {
 }
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
+
+function isVersionUnsupported(version: string) {
+  return semverLt(version, MINIMUM_SUPPORTED_VERSION);
+}
 
 export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
   onClose,
@@ -93,7 +98,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }, [fallbackVersions, minVersion]);
   const noVersions = versionOptions[0]?.value === '';
 
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
@@ -325,14 +330,21 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           customOptionText="Input the desired version"
         />
       </EuiFormRow>
-      {!isSingleAgent ? (
+      {Array.isArray(agents) &&
+      agents.some((agent) =>
+        isVersionUnsupported(agent.local_metadata?.elastic?.agent?.version)
+      ) ? (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
             color="warning"
-            title={i18n.translate('xpack.fleet.upgradeAgents.warningCallout', {
-              defaultMessage: 'Rolling upgrade only available for Elastic Agent versions 8.3+',
-            })}
+            title={
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.warningCallout"
+                defaultMessage="Rolling upgrades are only available for Elastic Agent versions {version} and higher"
+                values={{ version: <strong>{MINIMUM_SUPPORTED_VERSION}</strong> }}
+              />
+            }
           />
         </>
       ) : null}
