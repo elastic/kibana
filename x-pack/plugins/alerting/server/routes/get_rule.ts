@@ -37,6 +37,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
+  activeSnoozes,
   ...rest
 }) => ({
   ...rest,
@@ -50,6 +51,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   muted_alert_ids: mutedInstanceIds,
   mute_all: muteAll,
   ...(isSnoozedUntil !== undefined ? { is_snoozed_until: isSnoozedUntil } : {}),
+  ...(activeSnoozes !== undefined ? { active_snoozes: activeSnoozes } : {}),
   snooze_schedule: snoozeSchedule,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
