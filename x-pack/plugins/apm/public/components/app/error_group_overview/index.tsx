@@ -42,10 +42,8 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   previousPeriod: {},
 };
 
-const PAGE_INDEX = 0;
 const PAGE_SIZE = 25;
 const SORT_FIELD = 'occurrences';
-const SORT_DIRECTION = 'desc';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();

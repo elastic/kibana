@@ -40,8 +40,6 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   previousPeriod: {},
 };
 
-const SORT_FIELD = 'occurrences';
-
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
 
