@@ -23,7 +23,6 @@ import {
   latencyDistributionChartTypeRt,
   LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
-import { getDurationField } from '../correlations/utils';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -96,19 +95,6 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
               (fieldValuePair): QueryDslQueryContainer[] =>
                 termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),
-            // when using metrics data, ensure we filter by docs with the appropriate duration field
-            ...(searchAggregatedTransactions
-              ? [
-                  {
-                    exists: {
-                      field: getDurationField(
-                        chartType,
-                        searchAggregatedTransactions
-                      ),
-                    },
-                  },
-                ]
-              : []),
           ],
         },
       },

@@ -18,6 +18,8 @@ import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type { OverallLatencyDistributionResponse } from './types';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
+import { getDurationField } from '../correlations/utils';
+import { appendFilterQuery } from './utils/append_filtery_query';
 
 export async function getOverallLatencyDistribution({
   chartType,
@@ -40,6 +42,15 @@ export async function getOverallLatencyDistribution({
   percentileThreshold: number;
   searchAggregatedTransactions?: boolean;
 }) {
+  // when using metrics data, ensure we filter by docs with the appropriate duration field
+  const filteredQuery = searchAggregatedTransactions
+    ? appendFilterQuery(query, {
+        exists: {
+          field: getDurationField(chartType, searchAggregatedTransactions),
+        },
+      })
+    : query;
+
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
@@ -52,7 +63,7 @@ export async function getOverallLatencyDistribution({
         end,
         environment,
         kuery,
-        query,
+        query: filteredQuery,
         percentileThreshold,
         searchAggregatedTransactions,
       });
@@ -70,7 +81,7 @@ export async function getOverallLatencyDistribution({
       end,
       environment,
       kuery,
-      query,
+      query: filteredQuery,
       searchAggregatedTransactions,
     });
 
@@ -87,7 +98,7 @@ export async function getOverallLatencyDistribution({
       end,
       environment,
       kuery,
-      query,
+      query: filteredQuery,
       rangeSteps,
       searchAggregatedTransactions,
     });
