@@ -110,7 +110,7 @@ import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
-import { getActiveSnoozes } from '../lib/is_rule_snoozed';
+import { getActiveRecurringSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
@@ -2719,9 +2719,7 @@ export class RulesClient {
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(includeSnoozeData && includeSnoozeSchedule
         ? {
-            activeSnoozes: getActiveSnoozes({ snoozeSchedule })
-              ?.filter((s) => Boolean(s.id))
-              .map((s) => s.id),
+            activeSnoozes: getActiveRecurringSnoozes({ snoozeSchedule })?.map((s) => s.id),
           }
         : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
@@ -2959,7 +2957,7 @@ function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; mut
   // First attempt to cancel a simple (unscheduled) snooze
   const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
   // Now clear any scheduled snoozes that are currently active and never recur
-  const activeSnoozes = getActiveSnoozes(attributes);
+  const activeSnoozes = getActiveRecurringSnoozes(attributes);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
   const recurringSnoozesToSkip: string[] = [];
   const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
