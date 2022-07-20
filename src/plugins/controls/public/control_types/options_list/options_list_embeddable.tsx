@@ -88,7 +88,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   >;
 
   constructor(input: OptionsListEmbeddableInput, output: ControlOutput, parent?: IContainer) {
-    super(input, output, parent); // get filters for initial output...
+    super(input, output, parent);
 
     // Destructure controls services
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
@@ -216,22 +216,29 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
-      const originalField = this.dataView?.getFieldByName(fieldName);
-      const childField =
-        (childFieldName && this.dataView?.getFieldByName(childFieldName)) || undefined;
-      const parentField =
-        (parentFieldName && this.dataView?.getFieldByName(parentFieldName)) || undefined;
+      try {
+        const originalField = this.dataView.getFieldByName(fieldName);
+        if (!originalField) {
+          throw new Error(OptionsListStrings.errors.getfieldNotFoundError(fieldName));
+        }
 
-      const textFieldName = childField?.esTypes?.includes('text')
-        ? childField.name
-        : parentField?.esTypes?.includes('text')
-        ? parentField.name
-        : undefined;
-      (originalField as OptionsListField).textFieldName = textFieldName;
-      this.field = originalField?.toSpec();
+        // pair up keyword / text fields for case insensitive search
+        const childField =
+          (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
+        const parentField =
+          (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
+        const textFieldName = childField?.esTypes?.includes('text')
+          ? childField.name
+          : parentField?.esTypes?.includes('text')
+          ? parentField.name
+          : undefined;
 
-      if (this.field === undefined) {
-        this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
+        const optionsListField: OptionsListField = originalField.toSpec();
+        optionsListField.textFieldName = textFieldName;
+
+        this.field = optionsListField;
+      } catch (e) {
+        this.onFatalError(e);
       }
       dispatch(setField(this.field));
     }
