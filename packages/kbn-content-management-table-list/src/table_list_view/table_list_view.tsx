@@ -13,11 +13,11 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
   EuiButton,
-  // EuiCallOut,
+  EuiCallOut,
   EuiEmptyPrompt,
   Pagination,
   Direction,
-  // EuiSpacer,
+  EuiSpacer,
   EuiTableActionsColumnType,
   EuiLink,
 } from '@elastic/eui';
@@ -178,7 +178,7 @@ function TableListView<T extends UserContentCommonSchema>({
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
   const pageDataTestSubject = `${entityName}LandingPage`;
-  // const showFetchError = Boolean(fetchError);
+  const showFetchError = Boolean(fetchError);
   // const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
@@ -354,34 +354,34 @@ function TableListView<T extends UserContentCommonSchema>({
     }
   }, [emptyPrompt, entityNamePlural, renderCreateButton]);
 
-  // const renderFetchError = useCallback(() => {
-  //   return (
-  //     <React.Fragment>
-  //       <EuiCallOut
-  //         title={
-  //           <FormattedMessage
-  //             id="kibana-react.tableListView.listing.fetchErrorTitle"
-  //             defaultMessage="Fetching listing failed"
-  //           />
-  //         }
-  //         color="danger"
-  //         iconType="alert"
-  //       >
-  //         <p>
-  //           <FormattedMessage
-  //             id="kibana-react.tableListView.listing.fetchErrorDescription"
-  //             defaultMessage="The {entityName} listing could not be fetched: {message}."
-  //             values={{
-  //               entityName,
-  //               message: fetchError!.body?.message || fetchError!.message,
-  //             }}
-  //           />
-  //         </p>
-  //       </EuiCallOut>
-  //       <EuiSpacer size="m" />
-  //     </React.Fragment>
-  //   );
-  // }, [entityName, fetchError]);
+  const renderFetchError = useCallback(() => {
+    return (
+      <React.Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="kibana-react.tableListView.listing.fetchErrorTitle"
+              defaultMessage="Fetching listing failed"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="kibana-react.tableListView.listing.fetchErrorDescription"
+              defaultMessage="The {entityName} listing could not be fetched: {message}."
+              values={{
+                entityName,
+                message: fetchError!.body?.message || fetchError!.message,
+              }}
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </React.Fragment>
+    );
+  }, [entityName, fetchError]);
 
   // ------------
   // Effects
@@ -448,7 +448,7 @@ function TableListView<T extends UserContentCommonSchema>({
       )} */}
 
       {/* Error while fetching items */}
-      {/* {showFetchError && renderFetchError()} */}
+      {showFetchError && renderFetchError()}
 
       {/* Table of items */}
       <Table<T>
