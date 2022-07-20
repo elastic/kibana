@@ -49,11 +49,15 @@ export const TopNFunctionsTable = () => {
   const columns = [
     {
       field: 'rank',
-      name: 'Rank',
+      name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
+        defaultMessage: 'Rank',
+      }),
     },
     {
       field: 'frame',
-      name: 'Function',
+      name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
+        defaultMessage: 'Function',
+      }),
       width: '50%',
       render: (f: StackFrameMetadata, row: Row) => (
         <EuiText size="s">
@@ -64,16 +68,22 @@ export const TopNFunctionsTable = () => {
     },
     {
       field: 'samples',
-      name: 'Samples',
+      name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
+        defaultMessage: 'Samples',
+      }),
     },
     {
       field: 'exclusiveCPU',
-      name: 'Exclusive CPU',
+      name: i18n.translate('xpack.profiling.functionsView.exclusiveCpuColumnLabel', {
+        defaultMessage: 'Exclusive CPU',
+      }),
       render: (n: number, row: Row) => `${n.toFixed(2)}%`,
     },
     {
       field: 'inclusiveCPU',
-      name: 'Inclusive CPU',
+      name: i18n.translate('xpack.profiling.functionsView.inclusiveCpuColumnLabel', {
+        defaultMessage: 'Inclusive CPU',
+      }),
       render: (n: number, row: Row) => `${n.toFixed(2)}%`,
     },
   ];
