@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -81,10 +80,6 @@ export const IsolateActionResult = memo<
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle',
-          { defaultMessage: 'Error. Isolate action failed.' }
-        )}
         dataTestSubj={'isolateErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -93,14 +88,6 @@ export const IsolateActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle',
-        { defaultMessage: 'Success. Host isolated.' }
-      )}
-      data-test-subj="isolateSuccessCallout"
-    />
-  );
+  return <ResultComponent showAs="success" data-test-subj="isolateSuccessCallout" />;
 });
 IsolateActionResult.displayName = 'IsolateActionResult';
