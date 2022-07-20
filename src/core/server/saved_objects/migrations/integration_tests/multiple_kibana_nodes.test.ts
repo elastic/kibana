@@ -11,7 +11,7 @@ import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsType } from '../../types';
 import type { Root } from '../../../root';
 
