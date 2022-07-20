@@ -47,6 +47,10 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
+/**
+ * The data model for the field editor
+ * @public
+ */
 export interface Field {
   name: string;
   type: RuntimeField['type'] | string;
@@ -56,6 +60,10 @@ export interface Field {
   format?: FieldFormatConfig;
 }
 
+/**
+ * The configuration of a field formatter, as viewed in the editor
+ * @public
+ */
 export interface FieldFormatConfig {
   id: string;
   params?: SerializableRecord;
