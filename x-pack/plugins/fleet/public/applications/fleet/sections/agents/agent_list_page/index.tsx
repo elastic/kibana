@@ -632,6 +632,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
+        onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
       />
       <EuiSpacer size="m" />

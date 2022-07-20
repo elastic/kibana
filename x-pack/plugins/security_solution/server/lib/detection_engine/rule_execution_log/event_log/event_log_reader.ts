@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
-import {
+import type {
   RuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { invariant } from '../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { GetAggregateExecutionEventsArgs } from '../client_for_routes/client_interface';
+import type { GetAggregateExecutionEventsArgs } from '../client_for_routes/client_interface';
 import {
   RULE_EXECUTION_LOG_PROVIDER,
   RULE_SAVED_OBJECT_TYPE,
@@ -27,10 +27,8 @@ import {
   getExecutionEventAggregation,
   mapRuleExecutionStatusToPlatformStatus,
 } from './get_execution_event_aggregation';
-import {
-  EXECUTION_UUID_FIELD,
-  ExecutionUuidAggResult,
-} from './get_execution_event_aggregation/types';
+import type { ExecutionUuidAggResult } from './get_execution_event_aggregation/types';
+import { EXECUTION_UUID_FIELD } from './get_execution_event_aggregation/types';
 
 export interface IEventLogReader {
   getAggregateExecutionEvents(
@@ -81,7 +79,15 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
             filteredExecutionUUIDs: {
               terms: {
                 field: EXECUTION_UUID_FIELD,
+                order: { executeStartTime: 'desc' },
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: '@timestamp',
+                  },
+                },
               },
             },
           },
@@ -113,7 +119,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
           page,
           perPage,
-          sort: [{ [sortField]: { order: sortOrder } }] as estypes.Sort,
+          sort: [{ [sortField]: { order: sortOrder } }],
         }),
       });
 

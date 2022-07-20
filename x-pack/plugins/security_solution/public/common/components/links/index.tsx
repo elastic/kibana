@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useMemo, useCallback, SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
@@ -26,27 +21,25 @@ import {
   useFormatUrl,
   useGetSecuritySolutionUrl,
 } from '../link_to';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution/network';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import type { ReputationLinkSetting } from './helpers';
 import {
   LinkAnchor,
   GenericLinkButton,
   PortContainer,
   Comma,
   LinkButton,
-  ReputationLinkSetting,
   ReputationLinksOverflow,
 } from './helpers';
-import { HostsTableType } from '../../../hosts/store/model';
-import { UsersTableType } from '../../../users/store/model';
+import type { HostsTableType } from '../../../hosts/store/model';
+import type { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 

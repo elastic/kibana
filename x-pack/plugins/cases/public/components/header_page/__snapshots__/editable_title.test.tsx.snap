@@ -35,13 +35,21 @@ exports[`EditableTitle renders 1`] = `
           value={
             Object {
               "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
-                "attachmentTypes": Map {},
+                "collection": Map {},
+                "name": "ExternalReferenceAttachmentTypeRegistry",
               },
               "features": undefined,
               "owner": Array [
                 "securitySolution",
               ],
-              "userCanCrud": true,
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
+              },
             }
           }
         >
@@ -49,7 +57,6 @@ exports[`EditableTitle renders 1`] = `
             isLoading={false}
             onSubmit={[MockFunction]}
             title="Test title"
-            userCanCrud={true}
           />
         </CasesProvider>
       </QueryClientProvider>

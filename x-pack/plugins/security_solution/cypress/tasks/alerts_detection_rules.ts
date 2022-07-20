@@ -46,7 +46,10 @@ import {
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
   RULES_TAGS_POPOVER_WRAPPER,
+  INTEGRATIONS_POPOVER,
   SELECTED_RULES_NUMBER_LABEL,
+  REFRESH_SETTINGS_POPOVER,
+  REFRESH_SETTINGS_SWITCH,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -160,9 +163,13 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN)
-    .should('exist')
+    .should('be.enabled')
     .pipe(($el) => $el.trigger('click'))
     .should('be.disabled');
+};
+
+export const openIntegrationsPopover = () => {
+  cy.get(INTEGRATIONS_POPOVER).click();
 };
 
 export const reloadDeletedRules = () => {
@@ -188,6 +195,11 @@ export const selectNumberOfRules = (numberOfRules: number) => {
 export const selectAllRules = () => {
   cy.get(SELECT_ALL_RULES_BTN).contains('Select all').click();
   cy.get(SELECT_ALL_RULES_BTN).contains('Clear');
+};
+
+export const clearAllRuleSelection = () => {
+  cy.get(SELECT_ALL_RULES_BTN).contains('Clear').click();
+  cy.get(SELECT_ALL_RULES_BTN).contains('Select all');
 };
 
 export const confirmRulesDelete = () => {
@@ -291,4 +303,32 @@ export const testAllTagsBadges = (tags: string[]) => {
 
 export const testMultipleSelectedRulesLabel = (rulesCount: number) => {
   cy.get(SELECTED_RULES_NUMBER_LABEL).should('have.text', `Selected ${rulesCount} rules`);
+};
+
+export const openRefreshSettingsPopover = () => {
+  cy.get(REFRESH_SETTINGS_POPOVER).click();
+  cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
+};
+
+export const checkAutoRefreshIsDisabled = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+};
+
+export const checkAutoRefreshIsEnabled = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+};
+
+export const disableAutoRefresh = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  checkAutoRefreshIsDisabled();
+};
+
+export const mockGlobalClock = () => {
+  /**
+   * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
+   * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
+   * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+   */
+
+  cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 };

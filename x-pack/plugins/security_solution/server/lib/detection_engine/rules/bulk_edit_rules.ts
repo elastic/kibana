@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { BulkActionEditPayload } from '../../../../common/detection_engine/schemas/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { BulkActionEditPayload } from '../../../../common/detection_engine/schemas/common';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
-import { MlAuthz } from '../../machine_learning/authz';
+import type { MlAuthz } from '../../machine_learning/authz';
 import { throwAuthzError } from '../../machine_learning/validation';
 
 import { ruleParamsModifier } from './bulk_edit/rule_params_modifier';
 import { splitBulkEditActions } from './bulk_edit/split_bulk_edit_actions';
 import { bulkEditActionToRulesClientOperation } from './bulk_edit/action_to_rules_client_operation';
 
-import { RuleAlertType } from './types';
+import type { RuleAlertType } from './types';
 
 export interface BulkEditRulesArguments {
   rulesClient: RulesClient;

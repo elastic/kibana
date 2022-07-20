@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { Inspect, Maybe } from '../../../../common';
-import { RequestBasicOptions } from '../../..';
+import type { Inspect, Maybe } from '../../../../common';
+import type { RequestBasicOptions } from '../../..';
 
 export type NetworkKpiDnsRequestOptions = RequestBasicOptions;
 

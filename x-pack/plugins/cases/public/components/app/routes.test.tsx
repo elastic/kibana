@@ -10,8 +10,9 @@ import React from 'react';
 import { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { TestProviders } from '../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { CasesRoutes } from './routes';
+import { CasesPermissions } from '../../client/helpers/capabilities';
 
 jest.mock('../all_cases', () => ({
   AllCases: () => <div>{'All cases'}</div>,
@@ -29,10 +30,10 @@ const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
 
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/cases'],
-  userCanCrud = true
+  permissions?: CasesPermissions
 ) => {
   return render(
-    <TestProviders userCanCrud={userCanCrud}>
+    <TestProviders permissions={permissions}>
       <MemoryRouter initialEntries={initialEntries}>
         <CasesRoutes useFetchAlertData={(alertIds) => [false, {}]} />
       </MemoryRouter>
@@ -48,8 +49,8 @@ describe('Cases routes', () => {
     });
 
     // User has read only privileges
-    it('user can navigate to the all cases page with userCanCrud = false', () => {
-      renderWithRouter(['/cases'], false);
+    it('user can navigate to the all cases page with only read permissions', () => {
+      renderWithRouter(['/cases'], readCasesPermissions());
       expect(screen.getByText('All cases')).toBeInTheDocument();
     });
   });
@@ -68,9 +69,9 @@ describe('Cases routes', () => {
     );
 
     it.each(getCaseViewPaths())(
-      'user can navigate to the cases view page with userCanCrud = false and path: %s',
+      'user can navigate to the cases view page with read permissions and path: %s',
       async (path: string) => {
-        renderWithRouter([path], false);
+        renderWithRouter([path], readCasesPermissions());
         await waitFor(() => {
           expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
         });
@@ -84,8 +85,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Create case')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if userCanCrud = false', () => {
-      renderWithRouter(['/cases/create'], false);
+    it('shows the no privileges page if user is read only', () => {
+      renderWithRouter(['/cases/create'], readCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
@@ -96,8 +97,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Configure cases')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if userCanCrud = false', () => {
-      renderWithRouter(['/cases/configure'], false);
+    it('shows the no privileges page if user is read only', () => {
+      renderWithRouter(['/cases/configure'], readCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
