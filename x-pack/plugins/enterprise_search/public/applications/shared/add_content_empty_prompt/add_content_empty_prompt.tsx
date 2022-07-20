@@ -25,8 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
-import welcomeGraphicDark from '../../../assets/images/welcome--dark.svg';
-import welcomeGraphicLight from '../../../assets/images/welcome--light.svg';
+import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
+import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
 import { NEW_INDEX_PATH } from '../../enterprise_search_content/routes';
 import { EuiLinkTo } from '../react_router_helpers';
 
