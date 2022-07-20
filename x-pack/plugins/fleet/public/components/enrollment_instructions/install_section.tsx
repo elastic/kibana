@@ -43,7 +43,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         linuxDebCommand={installCommand.deb}
         linuxRpmCommand={installCommand.rpm}
         k8sCommand={installCommand.kubernetes}
-        isK8s={isK8s === 'IS_KUBERNETES'}
+        hasK8sIntegration={isK8s === 'IS_KUBERNETES'}
         isManaged={isManaged}
         enrollToken={enrollToken}
       />

@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
+  EuiText,
   EuiSpacer,
   EuiCodeBlock,
   EuiButtonGroup,
@@ -19,9 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../hooks';
-import { PLATFORM_OPTIONS, usePlatform } from '../hooks';
+import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
-import { DownloadInstructions } from './agent_enrollment_flyout/download_instructions';
+import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 
 interface Props {
   linuxCommand: string;
@@ -30,9 +31,9 @@ interface Props {
   linuxDebCommand: string;
   linuxRpmCommand: string;
   k8sCommand: string;
-  isK8s: boolean;
+  hasK8sIntegration: boolean;
   isManaged?: boolean;
-  isFleet?: boolean;
+  hasFleetServer?: boolean;
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
   onCopy?: () => void;
@@ -50,29 +51,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   k8sCommand,
-  isK8s,
+  hasK8sIntegration,
   isManaged,
   enrollToken,
-  isFleet,
+  hasFleetServer,
   fullCopyButton,
   onCopy,
 }) => {
   const { platform, setPlatform } = usePlatform();
 
   useEffect(() => {
-    setPlatform(isK8s ? 'kubernetes' : 'linux');
-  }, [isK8s, isManaged, setPlatform]);
+    setPlatform(hasK8sIntegration ? 'kubernetes' : 'linux');
+  }, [hasK8sIntegration, setPlatform]);
 
-  // In case of fleet server installation remove Kubernetes as platform option
-  const REDUCED_PLATFORM_OPTIONS = [...PLATFORM_OPTIONS];
-  const indexOfK8s = REDUCED_PLATFORM_OPTIONS.findIndex((object) => {
-    return object.id === 'kubernetes';
-  });
-  if (indexOfK8s !== -1) {
-    REDUCED_PLATFORM_OPTIONS.splice(indexOfK8s, 1);
-  }
-  const useReduce = isFleet || (!isManaged && !isK8s) ? true : false;
-  const options = useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
+  // In case of fleet server installation or standalone agent without
+  // Kubernetes integration in the policy use reduced platform options
+  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration) ? true : false;
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -119,7 +113,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <>
       <>
         <EuiButtonGroup
-          options={options}
+          options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
           idSelected={platform}
           onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
           legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
@@ -133,7 +127,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {platform === 'kubernetes' && !isK8s && (
+        {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
             <EuiSpacer size="m" />
@@ -141,9 +135,19 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         )}
         {platform === 'kubernetes' && isManaged && (
           <>
-            <DownloadInstructions hasFleetServer={false} enrollmentAPIKey={enrollToken} />
+            <KubernetesInstructions enrollmentAPIKey={enrollToken} />
             <EuiSpacer size="s" />
           </>
+        )}
+        {platform === 'kubernetes' && (
+          <EuiText>
+            <EuiSpacer size="s" />
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.kubernetesCommandInstructions"
+              defaultMessage="From the directory where the manifest is downloaded, run the apply command."
+            />
+            <EuiSpacer size="m" />
+          </EuiText>
         )}
         <EuiCodeBlock
           onClick={onTextAreaClick}

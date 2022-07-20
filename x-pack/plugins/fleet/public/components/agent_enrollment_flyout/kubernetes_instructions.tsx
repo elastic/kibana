@@ -25,14 +25,10 @@ import { agentPolicyRouteService } from '../../../common';
 import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
 
 interface Props {
-  hasFleetServer: boolean;
   enrollmentAPIKey?: string;
 }
 
-export const DownloadInstructions: React.FunctionComponent<Props> = ({
-  hasFleetServer,
-  enrollmentAPIKey,
-}) => {
+export const KubernetesInstructions: React.FunctionComponent<Props> = ({ enrollmentAPIKey }) => {
   const core = useStartServices();
   const settings = useGetSettings();
   const { notifications } = core;
@@ -71,15 +67,10 @@ export const DownloadInstructions: React.FunctionComponent<Props> = ({
     fetchK8sManifest();
   }, [notifications.toasts, enrollmentAPIKey, settings.data?.item.fleet_server_hosts]);
 
-  const downloadDescription = hasFleetServer ? (
-    <FormattedMessage
-      id="xpack.fleet.agentEnrollment.downloadDescriptionForFleetServer"
-      defaultMessage="Fleet Server runs on an Elastic Agent. Install this agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
-    />
-  ) : (
+  const downloadDescription = (
     <FormattedMessage
       id="xpack.fleet.agentEnrollment.downloadDescriptionForK8s"
-      defaultMessage="Copy or download the Kubernetes manifest. From the directory where the manifest is downloaded, run the apply command."
+      defaultMessage="Copy or download the Kubernetes manifest."
     />
   );
 
