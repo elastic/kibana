@@ -65,10 +65,10 @@ interface EngineCreationValues {
   isSubmitDisabled: boolean;
 }
 
-const aliasNameErrorMessageTemplate: string = dedent`
+const aliasNameErrorMessageTemplate = dedent(`
   There is an existing index or alias with the name {aliasName}.
   Please choose another alias name.
-`;
+`) as string;
 
 export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
   path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
