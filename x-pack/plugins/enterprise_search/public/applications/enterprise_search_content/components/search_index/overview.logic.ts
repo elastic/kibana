@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { Status } from '../../../../../common/types/api';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
-import { FetchIndexApiLogic, IndexData } from '../../api/index/fetch_index_api_logic';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
 interface OverviewLogicActions {
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
@@ -25,7 +25,7 @@ interface OverviewLogicValues {
   apiKeyData: typeof GenerateApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
   data: typeof FetchIndexApiLogic.values.data;
-  indexData: IndexData;
+  indexData: typeof FetchIndexApiLogic.values.data;
   isClientsPopoverOpen: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
