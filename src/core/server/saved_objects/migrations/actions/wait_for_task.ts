@@ -10,11 +10,12 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+
 /** @internal */
 export interface WaitForTaskResponse {
   error: Option.Option<{ type: string; reason: string; index?: string }>;
