@@ -119,8 +119,11 @@ const dropProps = {
   order: [1, 0, 0, 0],
 };
 
-const executingContext: KibanaExecutionContext = {
-  type: 'lens',
+const executionContext: KibanaExecutionContext = {
+  type: 'application',
+  child: {
+    type: 'lens',
+  },
 };
 
 // Exported for testing purposes only.
@@ -845,7 +848,7 @@ export const VisualizationWrapper = ({
         onData$={onData$}
         onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}
-        executionContext={executingContext}
+        executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
