@@ -137,7 +137,7 @@ describe('Cases webhook service', () => {
       },
     };
 
-    test.only('it returns the incident correctly', async () => {
+    test('it returns the incident correctly', async () => {
       requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
       const res = await service.getIncident('1');
       expect(res).toEqual({
