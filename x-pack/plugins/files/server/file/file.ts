@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import Puid from 'puid';
+import cuid from 'cuid';
 import mimeType from 'mime';
 import { Readable } from 'stream';
 import type { FileCompression, FileShareJSON } from '../../common/types';
@@ -253,8 +253,7 @@ export class File<M = unknown> implements IFile {
     }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
     internalFileService: InternalFileService
   ) {
-    const puid = new Puid();
-    const fileSO = await internalFileService.createSO(puid.generate(), {
+    const fileSO = await internalFileService.createSO(cuid(), {
       ...createDefaultFileAttributes(),
       name,
       mime_type: mime,
