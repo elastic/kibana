@@ -50,10 +50,11 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./embeddables/visualization'));
         loadTestFile(require.resolve('./reports'));
         loadTestFile(require.resolve('./saved_object_resolve'));
-
-        describe('Canvas management', () => {
-          loadTestFile(require.resolve('./migrations_smoke_test'));
-        });
+      }
+    });
+    describe('Canvas management', () => {
+      if (config.get('esTestCluster.ccs')) {
+        loadTestFile(require.resolve('./migrations_smoke_test'));
       }
     });
   });
