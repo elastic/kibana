@@ -105,18 +105,26 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                              <EuiFlexGroup gutterSize="s" alignItems="center">
                                 <EuiFlexItem grow={false}>
-                                  <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  {i18n.translate(
-                                    'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
-                                    {
-                                      defaultMessage: 'Line {lineNumber}',
-                                      values: { lineNumber: error.startLineNumber },
-                                    }
-                                  )}
+                                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                                    <EuiFlexItem grow={false}>
+                                      <EuiIcon
+                                        type="crossInACircleFilled"
+                                        color="danger"
+                                        size="s"
+                                      />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                                      {i18n.translate(
+                                        'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
+                                        {
+                                          defaultMessage: 'Line {lineNumber}',
+                                          values: { lineNumber: error.startLineNumber },
+                                        }
+                                      )}
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
                                 </EuiFlexItem>
                                 <EuiFlexItem grow={false}>{error.message}</EuiFlexItem>
                               </EuiFlexGroup>

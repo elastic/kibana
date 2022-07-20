@@ -7,6 +7,7 @@
  */
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
@@ -36,6 +37,8 @@ import {
 import { MemoizedDocumentation, DocumentationSections } from './documentation';
 import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
 import { EditorFooter } from './editor_footer';
+
+import './overwrite.scss';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -83,6 +86,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
+  const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
@@ -96,11 +100,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCompactFocused,
     editorHeight,
     isCodeEditorExpanded,
-    Boolean(errors?.length)
+    Boolean(errors?.length),
+    isCodeEditorExpandedFocused
   );
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
+
+  const editorClassName = classNames('unifiedTextLangEditor', {
+    'unifiedTextLangEditor--expanded': isCompactFocused,
+  });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
@@ -142,6 +151,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   };
 
   const restoreInitialMode = () => {
+    setIsCodeEditorExpandedFocused(false);
     if (isCodeEditorExpanded) return;
     setEditorHeight(EDITOR_INITIAL_HEIGHT);
     setIsCompactFocused(false);
@@ -169,6 +179,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       });
       editor1.current?.onDidFocusEditorText(() => {
         setIsCompactFocused(true);
+        setIsCodeEditorExpandedFocused(true);
         setShowLineNumbers(true);
         setCodeOneLiner('');
         clickedOutside = false;
@@ -441,7 +452,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="unifiedTextLangEditor">
+                <EuiFlexItem data-test-subj="unifiedTextLangEditor" className={editorClassName}>
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
