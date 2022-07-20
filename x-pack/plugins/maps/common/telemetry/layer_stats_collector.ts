@@ -195,6 +195,10 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
     return LAYER_KEYS.ES_POINT_TO_POINT;
   }
 
+  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_ML_ANOMALIES) {
+    return LAYER_KEYS.ES_ML_ANOMALIES;
+  }
+
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH) {
     const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
 
