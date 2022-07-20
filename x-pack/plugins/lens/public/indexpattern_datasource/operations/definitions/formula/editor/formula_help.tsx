@@ -496,6 +496,11 @@ export function getFunctionSignatureLabel(
         defaultMessage: '[shift]?: string',
       });
     }
+    if (def.windowable) {
+      extraArgs += i18n.translate('xpack.lens.formula.windowExtraArguments', {
+        defaultMessage: '[window]?: string',
+      });
+    }
     return `${name}(${def.documentation?.signature}${extraArgs})`;
   }
   return '';

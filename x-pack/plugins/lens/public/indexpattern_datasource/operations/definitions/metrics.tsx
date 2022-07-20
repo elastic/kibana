@@ -61,7 +61,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption,
   aggConfigParams,
   documentationDescription,
-  windowable,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -73,7 +72,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   hideZeroOption?: boolean;
   aggConfigParams?: Record<string, string | number | boolean>;
   documentationDescription?: string;
-  windowable?: boolean;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -133,7 +131,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
-        window: !windowable ? undefined : columnParams?.window || previousColumn?.window,
+        window: columnParams?.window || previousColumn?.window,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
@@ -209,7 +207,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         getDisallowedPreviousShiftMessage(layer, columnId),
       ]),
     filterable: true,
-    windowable,
+    windowable: true,
     documentation: {
       section: 'elasticsearch',
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
@@ -258,7 +256,6 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
   }),
   supportsDate: true,
-  windowable: true,
 });
 
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
@@ -276,7 +273,6 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
   }),
   supportsDate: true,
-  windowable: true,
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
@@ -294,7 +290,6 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
   }),
-  windowable: true,
 });
 
 export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
@@ -315,7 +310,6 @@ export const standardDeviationOperation = buildMetricOperation<StandardDeviation
     aggConfigParams: {
       showBounds: false,
     },
-    windowable: true,
     documentationDescription: i18n.translate(
       'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
       {
@@ -367,5 +361,4 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',
   }),
-  windowable: true,
 });

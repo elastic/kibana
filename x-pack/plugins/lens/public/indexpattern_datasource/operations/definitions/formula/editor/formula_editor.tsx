@@ -24,6 +24,7 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { getColumnWindowWarnings } from '../../../../window_utils';
 import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
@@ -342,6 +343,22 @@ export function FormulaEditor({
                   });
                 }
               }
+              if (def.windowable && column.window) {
+                const startPosition = offsetToRowColumn(text, locations[id].min);
+                const endPosition = offsetToRowColumn(text, locations[id].max);
+                newWarnings.push(
+                  ...getColumnWindowWarnings(dateHistogramInterval, column, indexPattern).map(
+                    (message) => ({
+                      message,
+                      startColumn: startPosition.column + 1,
+                      startLineNumber: startPosition.lineNumber,
+                      endColumn: endPosition.column + 1,
+                      endLineNumber: endPosition.lineNumber,
+                      severity: monaco.MarkerSeverity.Warning,
+                    })
+                  )
+                );
+              }
               if (def.shiftable && column.timeShift) {
                 const startPosition = offsetToRowColumn(text, locations[id].min);
                 const endPosition = offsetToRowColumn(text, locations[id].max);
@@ -535,7 +552,8 @@ export function FormulaEditor({
             tokenInfo.ast.type !== 'namedArgument' ||
             (tokenInfo.ast.name !== 'kql' &&
               tokenInfo.ast.name !== 'lucene' &&
-              tokenInfo.ast.name !== 'shift') ||
+              tokenInfo.ast.name !== 'shift' &&
+              tokenInfo.ast.name !== 'window') ||
             (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
               !isSingleQuoteCase.test(tokenInfo.ast.value))
           ) {
@@ -555,7 +573,7 @@ export function FormulaEditor({
               text: `''`,
             };
           }
-          if (char === "'" && tokenInfo.ast.name !== 'shift') {
+          if (char === "'" && tokenInfo.ast.name !== 'shift' && tokenInfo.ast.name !== 'window') {
             editOperation = {
               range: {
                 ...currentPosition,

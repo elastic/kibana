@@ -870,6 +870,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   <Window
                     selectedColumn={selectedColumn}
                     columnId={columnId}
+                    indexPattern={currentIndexPattern}
                     layer={state.layers[layerId]}
                     updateLayer={setStateWrapper}
                   />

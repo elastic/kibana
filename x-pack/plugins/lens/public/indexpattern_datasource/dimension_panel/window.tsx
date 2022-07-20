@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { Duration } from 'moment';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
-import { IndexPatternLayer } from '../types';
+import { IndexPattern, IndexPatternLayer } from '../types';
 import { windowOptions } from '../window_utils';
 
 export function setWindow(columnId: string, layer: IndexPatternLayer, window: string | undefined) {
@@ -39,11 +39,13 @@ export function Window({
   columnId,
   layer,
   updateLayer,
+  indexPattern,
 }: {
   selectedColumn: GenericIndexPatternColumn;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
+  indexPattern: IndexPattern;
 }) {
   const [localValue, setLocalValue] = useState(selectedColumn.window);
   useEffect(() => {
@@ -53,7 +55,7 @@ export function Window({
   const hasDateHistogram = Object.values(layer.columns).some(
     (c) => c.operationType === 'date_histogram'
   );
-  if (!selectedOperation.windowable || hasDateHistogram) {
+  if (!selectedOperation.windowable || hasDateHistogram || !indexPattern.timeFieldName) {
     return null;
   }
 

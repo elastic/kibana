@@ -103,6 +103,7 @@ export const cardinalityOperation: OperationDefinition<
   },
   filterable: true,
   shiftable: true,
+  windowable: true,
   getDefaultLabel: (column, indexPattern) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   buildColumn({ field, previousColumn }, columnParams) {
@@ -115,6 +116,7 @@ export const cardinalityOperation: OperationDefinition<
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:

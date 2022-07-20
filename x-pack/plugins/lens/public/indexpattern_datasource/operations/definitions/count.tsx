@@ -100,6 +100,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -162,6 +163,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   timeScalingMode: 'optional',
   filterable: true,
+  windowable: true,
   documentation: {
     section: 'elasticsearch',
     signature: '',
