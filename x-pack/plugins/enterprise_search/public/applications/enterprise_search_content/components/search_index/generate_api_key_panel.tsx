@@ -54,7 +54,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
