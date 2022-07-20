@@ -75,6 +75,6 @@ export interface BasicFields {
 export type EcsFieldsResponse = {
   [Property in EcsFields]: string[];
 } & BasicFields & {
-    [Property in TechnicalRuleDataFieldName]: string[];
+    [Property in TechnicalRuleDataFieldName]?: string[];
   };
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;
