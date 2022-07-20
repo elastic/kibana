@@ -41,7 +41,7 @@ export async function getDependencyLatencyDistribution({
   failedSpansDistribution: OverallLatencyDistributionResponse;
 }> {
   const commonProps = {
-    chartType: LatencyDistributionChartType.dependencyLatencyDistribution,
+    chartType: LatencyDistributionChartType.dependencyLatency,
     setup,
     start,
     end,

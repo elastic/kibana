@@ -11,11 +11,11 @@ export enum LatencyDistributionChartType {
   transactionLatency = 'transactionLatency',
   latencyCorrelations = 'latencyCorrelations',
   failedTransactionsCorrelations = 'failedTransactionsCorrelations',
-  dependencyLatencyDistribution = 'dependencyLatencyDistribution',
+  dependencyLatency = 'dependencyLatency',
 }
 export const latencyDistributionChartTypeRt = t.union([
   t.literal(LatencyDistributionChartType.transactionLatency),
   t.literal(LatencyDistributionChartType.latencyCorrelations),
   t.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
-  t.literal(LatencyDistributionChartType.dependencyLatencyDistribution),
+  t.literal(LatencyDistributionChartType.dependencyLatency),
 ]);
