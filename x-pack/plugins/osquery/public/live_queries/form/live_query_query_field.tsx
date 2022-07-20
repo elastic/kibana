@@ -9,8 +9,7 @@ import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { OsquerySchemaLink } from '../../components/osquery_schema_link';
-import { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
+import type { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -45,7 +44,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       isInvalid={typeof error === 'string'}
       error={error}
       fullWidth
-      labelAppend={<OsquerySchemaLink />}
       isDisabled={!permissions.writeLiveQueries || disabled}
     >
       {!permissions.writeLiveQueries || disabled ? (

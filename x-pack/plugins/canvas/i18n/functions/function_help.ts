@@ -30,7 +30,6 @@ import { help as eq } from './dict/eq';
 import { help as embeddable } from './dict/embeddable';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
-import { help as essql } from './dict/essql';
 import { help as exactly } from './dict/exactly';
 import { help as filterrows } from './dict/filterrows';
 import { help as filters } from './dict/filters';
@@ -186,7 +185,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   embeddable,
   escount,
   esdocs,
-  essql,
   exactly,
   filterrows,
   filters,

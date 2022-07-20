@@ -7,7 +7,7 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Gloria Hornero, Frank Hassanabad and Patryk Kopycinsky 
+  - Gloria Hornero and Patryk Kopycinsky 
   
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
@@ -63,6 +63,18 @@ A headless browser is a browser simulation program that does not have a user int
 #### FTR (CI)
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
+
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism` 
+
+```yml
+    ...
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 4
+    ...
+```
 
 #### Custom Targets
 

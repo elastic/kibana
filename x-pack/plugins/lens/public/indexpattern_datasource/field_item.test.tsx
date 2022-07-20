@@ -148,6 +148,29 @@ describe('IndexPattern Field Item', () => {
     expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
 
+  it('should not render edit field button for document field', () => {
+    core.http.post.mockImplementation(() => {
+      return new Promise(() => {});
+    });
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={documentField}
+        editField={editFieldSpy}
+        hideDetails
+      />
+    );
+    clickField(wrapper, documentField.name);
+    wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    expect(
+      mountWithIntl(popoverContent as ReactElement)
+        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .exists()
+    ).toBeFalsy();
+  });
+
   it('should request field stats every time the button is clicked', async () => {
     let resolveFunction: (arg: unknown) => void;
 

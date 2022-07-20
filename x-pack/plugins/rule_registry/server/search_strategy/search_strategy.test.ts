@@ -426,4 +426,104 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
     );
   });
+
+  it('passes the query ids if provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          body: {
+            _source: false,
+            fields: [
+              {
+                field: '*',
+                include_unmapped: true,
+              },
+            ],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
+    );
+  });
+
+  it('passes the fields if provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+      fields: [{ field: '@timestamp', include_unmapped: true }],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          body: {
+            _source: false,
+            fields: [{ field: '@timestamp', include_unmapped: true }],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
+    );
+  });
 });

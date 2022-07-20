@@ -46,7 +46,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import { LensFieldIcon } from './lens_field_icon';
+import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { FieldGroups, FieldList } from './field_list';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
@@ -671,7 +671,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }
             >
               <EuiContextMenuPanel
-                watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
                 items={(availableFieldTypes as DataType[]).map((type) => (
                   <EuiContextMenuItem

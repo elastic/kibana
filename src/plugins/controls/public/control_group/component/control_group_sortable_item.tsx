@@ -15,6 +15,7 @@ import classNames from 'classnames';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface DragInfo {
   isOver?: boolean;
@@ -60,44 +61,57 @@ export const SortableControl = (frameProps: SortableControlProps) => {
 const SortableControlInner = forwardRef<
   HTMLButtonElement,
   SortableControlProps & { style: HTMLAttributes<HTMLButtonElement>['style'] }
->(({ embeddableId, dragInfo, style, isEditable, ...dragHandleProps }, dragHandleRef) => {
-  const { isOver, isDragging, draggingIndex, index } = dragInfo;
-  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
-  const { panels } = useEmbeddableSelector((state) => state);
+>(
+  (
+    { embeddableId, embeddableType, dragInfo, style, isEditable, ...dragHandleProps },
+    dragHandleRef
+  ) => {
+    const { isOver, isDragging, draggingIndex, index } = dragInfo;
+    const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
+    const { panels } = useEmbeddableSelector((state) => state);
 
-  const width = panels[embeddableId].width;
+    const grow = panels[embeddableId].grow;
+    const width = panels[embeddableId].width;
+    const title = panels[embeddableId].explicitInput.title;
 
-  const dragHandle = (
-    <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
-      <EuiIcon type="grabHorizontal" />
-    </button>
-  );
+    const dragHandle = (
+      <button
+        ref={dragHandleRef}
+        {...dragHandleProps}
+        aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
+        className="controlFrame__dragHandle"
+      >
+        <EuiIcon type="grabHorizontal" />
+      </button>
+    );
 
-  return (
-    <EuiFlexItem
-      grow={width === 'auto'}
-      data-control-id={embeddableId}
-      data-test-subj={`control-frame`}
-      data-render-complete="true"
-      className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper-isDragging': isDragging,
-        'controlFrameWrapper-isEditable': isEditable,
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--large': width === 'large',
-        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
-      })}
-      style={style}
-    >
-      <ControlFrame
-        enableActions={isEditable && draggingIndex === -1}
-        embeddableId={embeddableId}
-        customPrepend={isEditable ? dragHandle : undefined}
-      />
-    </EuiFlexItem>
-  );
-});
+    return (
+      <EuiFlexItem
+        grow={grow}
+        data-control-id={embeddableId}
+        data-test-subj={`control-frame`}
+        data-render-complete="true"
+        className={classNames('controlFrameWrapper', {
+          'controlFrameWrapper-isDragging': isDragging,
+          'controlFrameWrapper-isEditable': isEditable,
+          'controlFrameWrapper--small': width === 'small',
+          'controlFrameWrapper--medium': width === 'medium',
+          'controlFrameWrapper--large': width === 'large',
+          'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+          'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+        })}
+        style={style}
+      >
+        <ControlFrame
+          enableActions={isEditable && draggingIndex === -1}
+          embeddableId={embeddableId}
+          embeddableType={embeddableType}
+          customPrepend={isEditable ? dragHandle : undefined}
+        />
+      </EuiFlexItem>
+    );
+  }
+);
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows

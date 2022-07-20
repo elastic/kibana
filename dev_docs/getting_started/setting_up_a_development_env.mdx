@@ -13,9 +13,11 @@ Setting up a development environment is pretty easy.
   In order to support Windows development we currently require you to use one of the following:
 
 - [Git Bash](https://git-scm.com/download/win)
-- [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about)
+- [Windows Subsystem for Linux (recommended)](https://docs.microsoft.com/en-us/windows/wsl/about)
 
-Before running the steps below, please make sure you have installed [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) and that you are running all commands in either Git Bash or WSL.
+  If you want to know more about how to setup and use WSL for development on Windows, which will become our only supported way in the upcoming future, please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/>.
+
+  Before running the steps below, please make sure you have installed [Visual C++ Redistributable for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145) and that you are running all commands in either Git Bash or WSL.
 
 </DocCallOut>
 
@@ -42,6 +44,14 @@ Then, install the latest version of yarn using:
 
 ```sh
 npm install -g yarn
+```
+
+If you have Yarn installed, make sure you are using 1.22.19 or later. 2.0 and later are unsupported.
+
+. If you are using an unsupported Yarn version, run:
++
+```sh
+yarn set version 1.22.19
 ```
 
 Finally, bootstrap Kibana and install all of the remaining dependencies:

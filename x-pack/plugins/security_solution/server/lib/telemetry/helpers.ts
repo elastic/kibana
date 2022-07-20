@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
-import { PolicyData } from '../../../common/endpoint/types';
+import type { PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
   ESClusterInfo,

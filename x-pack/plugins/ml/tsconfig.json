@@ -24,6 +24,7 @@
     { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../data_visualizer/tsconfig.json"},
+    { "path": "../aiops/tsconfig.json"},
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },

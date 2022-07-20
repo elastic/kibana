@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { KibanaPageTemplateProps, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
@@ -38,7 +39,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
         solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
           defaultMessage: 'Observability',
         }),
-        actions: {
+        action: {
           beats: {
             title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
               defaultMessage: 'Add a logging integration',
@@ -57,6 +58,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
+      isPageDataLoaded={hasData}
       {...pageTemplateProps}
     />
   );

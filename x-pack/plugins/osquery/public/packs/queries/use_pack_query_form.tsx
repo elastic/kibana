@@ -11,7 +11,8 @@ import { produce } from 'immer';
 
 import { useMemo } from 'react';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import { FormConfig, useForm } from '../../shared_imports';
+import type { FormConfig } from '../../shared_imports';
+import { useForm } from '../../shared_imports';
 import { createFormSchema } from './schema';
 
 const FORM_ID = 'editQueryFlyoutForm';
@@ -87,11 +88,6 @@ export const usePackQueryForm = ({
       produce(payload, (draft) => {
         if (isArray(draft.platform)) {
           draft.platform.join(',');
-        }
-
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          delete draft.platform;
         }
 
         if (isArray(draft.version)) {

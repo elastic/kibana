@@ -6,11 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { CREATED_BY, LAST_UPDATED_BY } from './translations';
 import { TextValueDisplay } from './text_value_display';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   margin: 6px;

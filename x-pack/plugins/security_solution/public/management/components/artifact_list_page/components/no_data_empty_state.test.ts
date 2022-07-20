@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  trustedAppsAllHttpMocks,
-  TrustedAppsGetListHttpMocksInterface,
-} from '../../../pages/mocks';
+import type { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ArtifactListPageProps } from '../artifact_list_page';
-import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { getArtifactListPageRenderingSetup, getFormComponentMock } from '../mocks';
+import type { ArtifactListPageProps } from '../artifact_list_page';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import type { getFormComponentMock } from '../mocks';
+import { getArtifactListPageRenderingSetup } from '../mocks';
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (

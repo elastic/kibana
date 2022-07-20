@@ -53,6 +53,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -67,6 +68,8 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
   registerPreconfigurationRoutes,
+  registerDownloadSourcesRoutes,
+  registerHealthCheckRoutes,
 } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
@@ -139,6 +142,7 @@ const allSavedObjectTypes = [
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -284,18 +288,11 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
-          {
-            defaultMessage: 'All Spaces is required for All Integrations access.',
-          }
-        ),
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -373,6 +370,8 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerDownloadSourcesRoutes(fleetAuthzRouter);
+    registerHealthCheckRoutes(fleetAuthzRouter);
 
     // Conditional config routes
     if (config.agents.enabled) {

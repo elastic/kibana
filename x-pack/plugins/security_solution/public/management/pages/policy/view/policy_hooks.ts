@@ -13,8 +13,8 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
-import { State } from '../../../../common/store';
+import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
+import type { State } from '../../../../common/store';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
@@ -26,6 +26,7 @@ import {
   getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
 import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
+import { POLICIES_PATH } from '../../../../../common/constants';
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector
@@ -101,3 +102,10 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
     [getPath, history]
   );
 }
+
+export const useIsPolicySettingsBarVisible = () => {
+  return (
+    window.location.pathname.includes(POLICIES_PATH) &&
+    window.location.pathname.includes('/settings')
+  );
+};

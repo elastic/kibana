@@ -228,15 +228,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this._style;
   }
 
-  destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
-    }
-    this.getJoins().forEach((joinSource) => {
-      joinSource.destroy();
-    });
-  }
-
   getJoins() {
     return this._joins.slice();
   }
@@ -421,6 +412,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     stopLoading,
     onLoadError,
     registerCancelCallback,
+    inspectorAdapters,
   }: {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
@@ -462,6 +454,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         sourceQuery: nextMeta.sourceQuery,
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
+        inspectorAdapters,
       });
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
@@ -551,6 +544,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     dataFilters,
     isForceRefresh,
     isFeatureEditorOpenForLayer,
+    inspectorAdapters,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
@@ -591,7 +585,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
-        registerCancelCallback.bind(null, requestToken)
+        registerCancelCallback.bind(null, requestToken),
+        inspectorAdapters
       );
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -741,7 +736,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     }
 
+    const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getPointFilterExpression(
+      isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
@@ -848,6 +846,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getLabelFilterExpression(
       isSourceGeoJson,
+      this.getSource().isESSource(),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );

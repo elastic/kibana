@@ -7,30 +7,37 @@
 Retrieves a list of all connector types.
 
 [[list-connector-types-api-request]]
-==== Request
+==== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connector_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector_types`
 
+
+[discrete]
+=== {api-prereq-title}
+
+You do not need any <<kibana-feature-privileges,{kib} feature privileges>> to
+run this API.
+
 [[list-connector-types-api-path-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[list-connector-types-api-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[list-connector-types-api-example]]
-==== Example
+==== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions/connector_types
+GET api/actions/connector_types
 --------------------------------------------------
 // KIBANA
 
@@ -45,7 +52,7 @@ The API returns the following:
     "minimum_license_required": "gold", <3>
     "enabled": false, <4>
     "enabled_in_config": true, <5>
-    "enabled_in_license": false <6>
+    "enabled_in_license": true <6>
   },
   {
     "id": ".index",
@@ -54,14 +61,13 @@ The API returns the following:
     "enabled": true,
     "enabled_in_config": true,
     "enabled_in_license": true
-  }
+  },
+  ...
 ]
 --------------------------------------------------
-
-
 <1> `id` - The unique ID of the connector type.
 <2> `name` - The name of the connector type.
 <3> `minimum_license_required` - The license required to use the connector type.
 <4> `enabled` - Specifies if the connector type is enabled or disabled in {kib}.
-<5> `enabled_in_config` - Specifies if the connector type is enabled or enabled in the {kib} .yml file.
+<5> `enabled_in_config` - Specifies if the connector type is enabled or enabled in the {kib} `.yml` file.
 <6> `enabled_in_license` - Specifies if the connector type is enabled or disabled in the license.

@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
@@ -380,6 +381,7 @@ export function getIndexPatternDatasource({
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
@@ -407,6 +409,7 @@ export function getIndexPatternDatasource({
                 replaceIfPossible: true,
                 storage,
                 indexPatternsService,
+                uiActions,
               });
             }}
             {...props}
@@ -532,8 +535,14 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData']) =>
-          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
+          getFiltersInLayer(
+            layer,
+            visibleColumnIds,
+            activeData?.[layerId],
+            state.indexPatterns[layer.indexPatternId],
+            timeRange
+          ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
@@ -610,8 +619,14 @@ export function getIndexPatternDatasource({
     },
     getWarningMessages: (state, frame, setState) => {
       return [
-        ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
+        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frame,
+          core.docLinks,
+          setState
+        ),
       ];
     },
     checkIntegrity: (state) => {
@@ -649,6 +664,9 @@ export function getIndexPatternDatasource({
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
+    getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
+      return state.layers[layerId].indexPatternId;
+    },
   };
 
   return indexPatternDatasource;

@@ -8,31 +8,24 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
-import { AppLeaveHandler } from '@kbn/core/public';
-import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { AppLeaveHandler } from '@kbn/core/public';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
 import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
 export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    const [showTimeline] = useShowTimeline();
-
-    const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
-
     useResolveRedirect();
-    return (indicesExist || dataViewId === null) && showTimeline ? (
+    return (
       <>
         <AutoSaveWarningMsg />
         <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
       </>
-    ) : null;
+    );
   }
 );
 

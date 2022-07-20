@@ -15,7 +15,7 @@ import {
   NetworkUsersFields,
   RiskScoreFields,
 } from '../../../common/search_strategy';
-import { State } from '../store';
+import type { State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
@@ -30,7 +30,7 @@ import {
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
-import { ManagementState } from '../../management/types';
+import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../store/sourcerer/helpers';
@@ -327,7 +327,14 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
@@ -381,6 +388,7 @@ export const mockGlobalState: State = {
       },
     },
   },
+  globalUrlParam: {},
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

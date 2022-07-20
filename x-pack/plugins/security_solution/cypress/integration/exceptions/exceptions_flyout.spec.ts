@@ -13,10 +13,17 @@ import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
-import { openExceptionFlyoutFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
 import {
+  openExceptionFlyoutFromRuleSettings,
+  goToExceptionsTab,
+  editException,
+} from '../../tasks/rule_details';
+import {
+  addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueOfItemX,
+  addExceptionEntryFieldValueValue,
+  addExceptionEntryOperatorValue,
   closeExceptionBuilderFlyout,
 } from '../../tasks/exceptions';
 import {
@@ -29,10 +36,12 @@ import {
   EXCEPTION_ITEM_CONTAINER,
   ADD_EXCEPTIONS_BTN,
   EXCEPTION_FIELD_LIST,
-  EDIT_EXCEPTIONS_BTN,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
   EXCEPTION_FLYOUT_VERSION_CONFLICT,
   EXCEPTION_FLYOUT_LIST_DELETED_ERROR,
+  CONFIRM_BTN,
+  VALUES_INPUT,
+  EXCEPTION_FLYOUT_TITLE,
 } from '../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -80,6 +89,35 @@ describe('Exceptions flyout', () => {
 
   after(() => {
     esArchiverUnload('exceptions');
+  });
+
+  it('Validates empty entry values correctly', () => {
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_EXCEPTIONS_BTN).trigger('click');
+        return $el.find(ADD_AND_BTN);
+      })
+      .should('be.visible');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.name', 0);
+    addExceptionEntryFieldValueValue('test', 0);
+    cy.get(CONFIRM_BTN).should('be.enabled');
+
+    // remove the value and should see warning and button disabled
+    cy.get(VALUES_INPUT).eq(0).type('{backspace}{enter}');
+    cy.get(EXCEPTION_FLYOUT_TITLE).click();
+    cy.get(CONFIRM_BTN).should('be.disabled');
+
+    // change operators
+    addExceptionEntryOperatorValue('is one of', 0);
+    cy.get(CONFIRM_BTN).should('be.disabled');
+
+    // add value again and button should be enabled again
+    addExceptionEntryFieldMatchAnyValue('test', 0);
+    cy.get(CONFIRM_BTN).should('be.enabled');
+
+    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values and-ed together', () => {
@@ -267,8 +305,7 @@ describe('Exceptions flyout', () => {
 
     context('When updating an item with version conflict', () => {
       it('Displays version conflict error', () => {
-        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
-        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+        editException();
 
         // update exception item via api
         updateExceptionListItem('simple_list_item', {
@@ -299,8 +336,7 @@ describe('Exceptions flyout', () => {
 
     context('When updating an item for a list that has since been deleted', () => {
       it('Displays missing exception list error', () => {
-        cy.get(EDIT_EXCEPTIONS_BTN).should('be.visible');
-        cy.get(EDIT_EXCEPTIONS_BTN).click({ force: true });
+        editException();
 
         // delete exception list via api
         deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);

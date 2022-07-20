@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -27,14 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FAILING: https://github.com/elastic/kibana/issues/132049
-  describe.skip('Dashboard options list integration', () => {
+  const DASHBOARD_NAME = 'Test Options List Control';
+
+  describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await elasticChart.setNewChartUiDebugFlag();
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
@@ -58,7 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('selects the last used data view by default', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -71,15 +75,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List Control creation and editing experience', async () => {
       it('can add a new options list control from a blank state', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'machine.os.raw',
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can add a second options list control with a non-default data view', async () => {
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
         });
@@ -87,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,animals-*');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('renames an existing control', async () => {
@@ -97,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can change the data view and field of an existing options list', async () => {
@@ -107,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('animals-*');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
@@ -117,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
+        await dashboard.clearUnsavedChanges();
       });
 
       it('editing field clears selections', async () => {
@@ -126,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
         await dashboardControls.editExistingControl(secondId);
-        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
@@ -154,6 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       after(async () => {
@@ -187,7 +198,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-        await dashboardControls.createOptionsListControl({
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'animals-*',
           fieldName: 'sound.keyword',
           title: 'Animal Sounds',
@@ -267,12 +279,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await retry.try(async () => {
+            await ensureAvailableOptionsEql(allAvailableOptions);
+          });
         });
 
         it('Can search options list for available options', async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSearchForOption('meo');
+          await ensureAvailableOptionsEql(['meow'], true);
+          await dashboardControls.optionsListPopoverClearSearch();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can search options list for available options case insensitive', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSearchForOption('MEO');
           await ensureAvailableOptionsEql(['meow'], true);
           await dashboardControls.optionsListPopoverClearSearch();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -299,15 +325,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('Applies options list control options to dashboard by default on open', async () => {
           await dashboard.gotoDashboardLandingPage();
           await header.waitUntilLoadingHasFinished();
-          await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
+          await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
           await header.waitUntilLoadingHasFinished();
           expect(await pieChart.getPieSliceCount()).to.be(2);
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
-        });
 
-        after(async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverClearSelections();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);

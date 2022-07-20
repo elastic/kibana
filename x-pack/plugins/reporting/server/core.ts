@@ -7,7 +7,7 @@
 
 import Hapi from '@hapi/hapi';
 import type {
-  BasePath,
+  IBasePath,
   IClusterClient,
   Logger,
   PackageInfo,
@@ -17,7 +17,7 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { KibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { KibanaRequest, CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -35,6 +35,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
@@ -47,11 +48,12 @@ import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/t
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
-  basePath: Pick<BasePath, 'set'>;
+  basePath: Pick<IBasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  usageCounter?: UsageCounter;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
@@ -245,6 +247,14 @@ export class ReportingCore {
   }
 
   /*
+   *
+   * Track usage of code paths for telemetry
+   */
+  public getUsageCounter(): UsageCounter | undefined {
+    return this.pluginSetupDeps?.usageCounter;
+  }
+
+  /*
    * Gives async access to the startDeps
    */
   public async getPluginStartDeps() {
@@ -312,7 +322,7 @@ export class ReportingCore {
   }
 
   public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = KibanaRequest.from({
+    const fakeRequest = CoreKibanaRequest.from({
       path: '/',
       route: { settings: {} },
       url: { href: '/' },

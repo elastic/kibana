@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '../../types';
 import type { ISavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';

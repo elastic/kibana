@@ -21,6 +21,7 @@ import {
   mockLoggingService,
   mockI18nService,
   mockEnvironmentService,
+  mockNodeService,
   mockPrebootService,
   mockDeprecationService,
   mockDocLinksService,
@@ -28,11 +29,11 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
-import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
-import { Env } from './config';
+import { Env } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
 
-import { loggingSystemMock } from './logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
@@ -62,6 +63,7 @@ test('preboot services on "preboot"', async () => {
   const server = new Server(rawConfigService, env, logger);
 
   expect(mockEnvironmentService.preboot).not.toHaveBeenCalled();
+  expect(mockNodeService.preboot).not.toHaveBeenCalled();
   expect(mockContextService.preboot).not.toHaveBeenCalled();
   expect(mockHttpService.preboot).not.toHaveBeenCalled();
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
@@ -75,6 +77,7 @@ test('preboot services on "preboot"', async () => {
   await server.preboot();
 
   expect(mockEnvironmentService.preboot).toHaveBeenCalledTimes(1);
+  expect(mockNodeService.preboot).toHaveBeenCalledTimes(1);
   expect(mockContextService.preboot).toHaveBeenCalledTimes(1);
   expect(mockHttpService.preboot).toHaveBeenCalledTimes(1);
   expect(mockI18nService.preboot).toHaveBeenCalledTimes(1);
@@ -201,6 +204,7 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).not.toHaveBeenCalled();
   expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
+  expect(mockNodeService.stop).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
@@ -212,6 +216,7 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
+  expect(mockNodeService.stop).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);

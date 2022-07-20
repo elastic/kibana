@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { FieldHook } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
 import { AgentsTable } from '../../agents/agents_table';
-import { AgentSelection } from '../../agents/types';
+import type { AgentSelection } from '../../agents/types';
 
 interface AgentsTableFieldProps {
   field: FieldHook<AgentSelection>;

@@ -70,6 +70,7 @@ export function getInterval(min: number, max: number, steps = 6): number {
 }
 
 export interface TimeSliderProps {
+  id: string;
   range?: [number | undefined, number | undefined];
   value: [number | null, number | null];
   onChange: (range: [number | null, number | null]) => void;
@@ -167,10 +168,15 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
   }
 
   const button = (
-    <button className="timeSlider__anchor eui-textTruncate" color="text" onClick={togglePopover}>
+    <button
+      className="timeSlider__anchor eui-textTruncate"
+      color="text"
+      onClick={togglePopover}
+      data-test-subj={`timeSlider-${props.id}`}
+    >
       {valueText}
       {!hasRange ? (
-        <div className="timeSliderAnchor__spinner">
+        <div data-test-subj="timeSlider-loading-spinner" className="timeSliderAnchor__spinner">
           <EuiLoadingSpinner />
         </div>
       ) : undefined}
@@ -192,6 +198,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
     >
       {isValidRange(range) ? (
         <TimeSliderComponentPopover
+          id={props.id}
           range={range}
           value={value}
           onChange={props.onChange}

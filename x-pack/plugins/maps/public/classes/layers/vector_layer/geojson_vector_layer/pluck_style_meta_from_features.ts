@@ -113,18 +113,22 @@ function pluckOrdinalStyleMetaFromFeatures(
   property: IDynamicStyleProperty<DynamicStylePropertyOptions>,
   features: Feature[]
 ): RangeFieldMeta | null {
-  if (!property.isOrdinal()) {
+  const field = property.getField();
+  if (!field || !property.isOrdinal()) {
     return null;
   }
 
   const name = property.getFieldName();
-  let min = Infinity;
+  const isCount = field.isCount();
+  let min = isCount ? 1 : Infinity;
   let max = -Infinity;
   for (let i = 0; i < features.length; i++) {
     const feature = features[i];
     const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
     if (!isNaN(newValue)) {
-      min = Math.min(min, newValue);
+      if (!isCount) {
+        min = Math.min(min, newValue);
+      }
       max = Math.max(max, newValue);
     }
   }

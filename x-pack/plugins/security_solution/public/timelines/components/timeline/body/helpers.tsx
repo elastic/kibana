@@ -7,14 +7,11 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { Ecs } from '../../../../../common/ecs';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import {
-  TimelineEventsType,
-  TimelineTypeLiteral,
-  TimelineType,
-} from '../../../../../common/types/timeline';
-import { OnPinEvent, OnUnPinEvent } from '../events';
+import type { Ecs } from '../../../../../common/ecs';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
+import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
 export const omitTypenameAndEmpty = (
@@ -28,22 +25,27 @@ export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitType
 export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
+  isAlert,
   isPinned,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
+  isAlert: boolean;
   isPinned: boolean;
   eventHasNotes: boolean;
   timelineType: TimelineTypeLiteral;
-}) =>
-  timelineType === TimelineType.template
-    ? i18n.DISABLE_PIN
-    : isPinned && eventHasNotes
-    ? i18n.PINNED_WITH_NOTES
-    : isPinned
-    ? i18n.PINNED
-    : i18n.UNPINNED;
+}) => {
+  if (timelineType === TimelineType.template) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (isPinned && eventHasNotes) {
+    return i18n.PINNED_WITH_NOTES(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
 
 export interface IsPinnedParams {
   eventId: string;

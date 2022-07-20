@@ -105,3 +105,11 @@ export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
 export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
   defaultMessage: 'Change status',
 });
+
+export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
+  defaultMessage: 'Average time to close',
+});
+
+export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
+  defaultMessage: 'The average duration (from creation to closure) for your current cases',
+});

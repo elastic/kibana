@@ -7,7 +7,8 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -22,7 +23,7 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest } from '../reducers/non_serializable_instances';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -49,7 +50,6 @@ import {
   syncDataForLayerId,
   updateStyleMeta,
 } from './data_request_actions';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
@@ -66,6 +66,7 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
@@ -239,10 +240,6 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     // If the layer visibility is already what we want it to be, do nothing
     if (!layer || layer.isVisible() === makeVisible) {
       return;
-    }
-
-    if (!makeVisible) {
-      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -451,6 +448,7 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    clearInspectorAdapters(layer, getInspectorAdapters(getState()));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
@@ -466,6 +464,15 @@ export function updateLayerLabel(id: string, newLabel: string) {
     id,
     propName: 'label',
     newValue: newLabel,
+  };
+}
+
+export function updateLayerLocale(id: string, locale: string) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'locale',
+    newValue: locale,
   };
 }
 
@@ -585,8 +592,7 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
-    layerGettingRemoved.destroy();
+    clearInspectorAdapters(layerGettingRemoved, getInspectorAdapters(getState()));
     dispatch({
       type: REMOVE_LAYER,
       id: layerId,
@@ -717,4 +723,22 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
     });
     await dispatch(updateStyleMeta(layerId));
   };
+}
+
+function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
+  if (!layer.getSource().isESSource()) {
+    return;
+  }
+
+  if (adapters.vectorTiles) {
+    adapters.vectorTiles.removeLayer(layer.getId());
+  }
+
+  if (adapters.requests && 'getValidJoins' in layer) {
+    const vectorLayer = layer as IVectorLayer;
+    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
+    vectorLayer.getValidJoins().forEach((join) => {
+      adapters.requests!.resetRequest(join.getRightJoinSource().getId());
+    });
+  }
 }

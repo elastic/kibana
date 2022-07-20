@@ -10,13 +10,8 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
-import {
-  AppToast,
-  useStateToaster,
-  ManageGlobalToaster,
-  GlobalToaster,
-  displayErrorToast,
-} from '.';
+import type { AppToast } from '.';
+import { useStateToaster, ManageGlobalToaster, GlobalToaster, displayErrorToast } from '.';
 
 jest.mock('uuid', () => {
   return {

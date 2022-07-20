@@ -15,7 +15,7 @@ import { BoolQuery } from './types';
 /** @internal */
 export function buildQueryFromLucene(
   queries: Query[],
-  queryStringOptions: SerializableRecord,
+  queryStringOptions: SerializableRecord = {},
   dateFormatTZ?: string
 ): BoolQuery {
   const combinedQueries = (queries || []).map((query) => {

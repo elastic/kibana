@@ -7,7 +7,7 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   aggAvg,
   aggBucketAvg,
@@ -56,6 +56,7 @@ import {
   AggParamsMax,
   AggParamsMedian,
   AggParamsSinglePercentile,
+  AggParamsSinglePercentileRank,
   AggParamsMin,
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
@@ -89,6 +90,8 @@ import {
   METRIC_TYPES,
   aggFilteredMetric,
   aggSinglePercentile,
+  aggSinglePercentileRank,
+  AggConfigsOptions,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
@@ -98,7 +101,7 @@ import { aggTopMetrics } from './metrics/top_metrics_fn';
 import { AggParamsCount } from './metrics';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
-export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
 export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
@@ -113,8 +116,9 @@ export interface AggsCommonSetup {
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
-    indexPattern: IndexPattern,
-    configStates?: CreateAggConfigParams[]
+    indexPattern: DataView,
+    configStates?: CreateAggConfigParams[],
+    options?: Partial<AggConfigsOptions>
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;
 }
@@ -175,6 +179,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MAX]: AggParamsMax;
   [METRIC_TYPES.MEDIAN]: AggParamsMedian;
   [METRIC_TYPES.SINGLE_PERCENTILE]: AggParamsSinglePercentile;
+  [METRIC_TYPES.SINGLE_PERCENTILE_RANK]: AggParamsSinglePercentileRank;
   [METRIC_TYPES.MIN]: AggParamsMin;
   [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
   [METRIC_TYPES.SUM]: AggParamsSum;
@@ -225,6 +230,7 @@ export interface AggFunctionsMapping {
   aggMax: ReturnType<typeof aggMax>;
   aggMedian: ReturnType<typeof aggMedian>;
   aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
+  aggSinglePercentileRank: ReturnType<typeof aggSinglePercentileRank>;
   aggMin: ReturnType<typeof aggMin>;
   aggMovingAvg: ReturnType<typeof aggMovingAvg>;
   aggPercentileRanks: ReturnType<typeof aggPercentileRanks>;

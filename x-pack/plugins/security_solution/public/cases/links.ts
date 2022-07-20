@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import {
+  CREATE_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { CASES_PATH, SecurityPageName } from '../../common/constants';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
+import type { LinkItem } from '../common/links/types';
 
 export const getCasesLinkItems = (): LinkItem => {
   const casesLinks = getCasesDeepLinks<LinkItem>({
@@ -15,15 +20,19 @@ export const getCasesLinkItems = (): LinkItem => {
     extend: {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
-        globalNavOrder: 9006,
-        features: [FEATURE.casesRead],
+        globalNavOrder: 5,
+        capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {
-        features: [FEATURE.casesCrud],
+        capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
         licenseType: 'gold',
+        sideNavDisabled: true,
+        hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
-        features: [FEATURE.casesCrud],
+        capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
+        sideNavDisabled: true,
+        hideTimeline: true,
       },
     },
   });

@@ -14,6 +14,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
 import { useParams } from 'react-router-dom';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const chance = new Chance();
 
@@ -34,9 +35,21 @@ const queryClient = new QueryClient({
 });
 
 const getWrapper =
-  (): React.FC =>
-  ({ children }) =>
-    <TestProvider>{children}</TestProvider>;
+  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): React.FC =>
+  ({ children }) => {
+    const coreStart = coreMock.createStart();
+    const core = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          siem: { crud: canUpdate },
+        },
+      },
+    };
+    return <TestProvider core={core}>{children}</TestProvider>;
+  };
 
 const getRuleMock = ({
   packagePolicyId = chance.guid(),
@@ -50,16 +63,35 @@ const getRuleMock = ({
   savedObjectId?: string;
   id?: string;
   enabled: boolean;
-}) =>
+}): RuleSavedObject =>
   ({
     id: savedObjectId,
     updatedAt: chance.date().toISOString(),
     attributes: {
-      id,
-      name: chance.sentence(),
+      metadata: {
+        audit: chance.sentence(),
+        benchmark: {
+          name: chance.word(),
+          version: chance.sentence(),
+        },
+        default_value: chance.sentence(),
+        description: chance.sentence(),
+        id,
+        impact: chance.sentence(),
+        name: chance.sentence(),
+        profile_applicability: chance.sentence(),
+        rationale: chance.sentence(),
+        references: chance.sentence(),
+        rego_rule_id: chance.word(),
+        remediation: chance.sentence(),
+        section: chance.sentence(),
+        tags: [chance.word(), chance.word()],
+        version: chance.sentence(),
+      },
       package_policy_id: packagePolicyId,
       policy_id: policyId,
       enabled,
+      muted: false,
     },
   } as RuleSavedObject);
 
@@ -111,7 +143,7 @@ describe('<RulesContainer />', () => {
     );
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
-    expect(await screen.findByText(rule1.attributes.name)).toBeInTheDocument();
+    expect(await screen.findByText(rule1.attributes.metadata.name)).toBeInTheDocument();
     expect(
       screen
         .getByTestId(TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id))
@@ -431,5 +463,80 @@ describe('<RulesContainer />', () => {
       packagePolicyId: params.packagePolicyId,
       savedObjectRules: [getSavedObjectRuleEnable(rule, !rule.attributes.enabled)],
     });
+  });
+
+  it("disables rule toggling in table for users without 'crud' ui-capability", async () => {
+    const Wrapper = getWrapper({ canUpdate: false });
+    const rule1 = getRuleMock({ enabled: true });
+
+    (useFindCspRules as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: {
+        total: 1,
+        savedObjects: [rule1],
+      },
+    });
+
+    render(
+      <Wrapper>
+        <RulesContainer />
+      </Wrapper>
+    );
+
+    expect(
+      screen.getByTestId(TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id))
+    ).toBeDisabled();
+  });
+
+  it("disables bulk rule toggling in table for users without 'crud' ui-capability", async () => {
+    const Wrapper = getWrapper({ canUpdate: false });
+    const rule1 = getRuleMock({ enabled: true });
+
+    (useFindCspRules as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: {
+        total: 1,
+        savedObjects: [rule1],
+      },
+    });
+
+    render(
+      <Wrapper>
+        <RulesContainer />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_TABLE_BULK_MENU_BUTTON));
+
+    expect(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON)).toBeDisabled();
+    expect(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON)).toBeDisabled();
+  });
+
+  it("disables rule toggling in flyout for users without 'crud' ui-capability", async () => {
+    const Wrapper = getWrapper({ canUpdate: false });
+    const rule1 = getRuleMock({ enabled: true });
+
+    (useFindCspRules as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: {
+        total: 1,
+        savedObjects: [rule1],
+      },
+    });
+
+    render(
+      <Wrapper>
+        <RulesContainer />
+      </Wrapper>
+    );
+
+    const rowId = TEST_SUBJECTS.getCspRulesTableRowItemTestId(rule1.id);
+    const switchId = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id);
+
+    fireEvent.click(screen.getByTestId(rowId)); // open flyout
+
+    const flyout = screen.getByTestId(TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER);
+
+    expect(within(flyout).getByTestId(switchId)).toBeDisabled();
   });
 });

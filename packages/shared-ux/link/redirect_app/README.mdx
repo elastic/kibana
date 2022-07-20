@@ -70,17 +70,17 @@ This is the component is likely the most useful to solutions in Kibana.  It assu
 ```tsx
 import { RedirectAppLinks } from '@kbn/shared-ux-links-redirect-app';
 
-<RedirectAppLinksProvider currentAppId="appId" navigateToUrl={(url) => { ... }}>
+<RedirectAppLinks currentAppId="appId" navigateToUrl={(url) => { ... }}>
   .
   <a href="/base-path/app/another-app/some-path">Go to another-app</a>
   .
-</RedirectAppLinksProvider>
+</RedirectAppLinks>
 
 {/* OR */}
 
-<RedirectAppLinksProvider {...coreStart}>
+<RedirectAppLinks {...coreStart}>
   .
   <a href="/base-path/app/another-app/some-path">Go to another-app</a>
   .
-</RedirectAppLinksProvider>
+</RedirectAppLinks>
 ```

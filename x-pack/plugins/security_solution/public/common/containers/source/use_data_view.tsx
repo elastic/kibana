@@ -6,19 +6,20 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
-import {
+import type {
   BrowserField,
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
   DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
-import { FieldSpec, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
@@ -47,7 +48,7 @@ interface DataViewInfo {
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
  */
-const getDataViewStateFromIndexFields = memoizeOne(
+export const getDataViewStateFromIndexFields = memoizeOne(
   (_title: string, fields: IndexField[]): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;

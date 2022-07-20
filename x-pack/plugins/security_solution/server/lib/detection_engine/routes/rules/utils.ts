@@ -7,25 +7,27 @@
 
 import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
-import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Action } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
-import { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
-import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { RuleAlertType, isAlertType } from '../../rules/types';
-import { createBulkErrorObject, BulkError, OutputError } from '../utils';
+import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
+import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import type { RuleAlertType } from '../../rules/types';
+import { isAlertType } from '../../rules/types';
+import type { BulkError, OutputError } from '../utils';
+import { createBulkErrorObject } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import type { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
-type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
+type PromiseFromStreams = ImportRulesSchema | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
 
 export const getIdError = ({
@@ -245,7 +247,7 @@ export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<PromiseFromStreams[]> => {
-  const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
+  const isImportRule = (r: unknown): r is ImportRulesSchema => !(r instanceof Error);
 
   const toReturn = await pMap(
     rules,
@@ -254,7 +256,7 @@ export const migrateLegacyActionsIds = async (
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<Action | Error> = await pMap(
-          rule.actions,
+          rule.actions ?? [],
           (action: Action) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
@@ -332,13 +334,15 @@ export const getInvalidConnectors = async (
         acc.rulesAcc.set(uuid.v4(), parsedRule);
       } else {
         const { rule_id: ruleId, actions } = parsedRule;
-        const missingActionIds = actions.flatMap((action) => {
-          if (!actionIds.has(action.id)) {
-            return [action.id];
-          } else {
-            return [];
-          }
-        });
+        const missingActionIds = actions
+          ? actions.flatMap((action) => {
+              if (!actionIds.has(action.id)) {
+                return [action.id];
+              } else {
+                return [];
+              }
+            })
+          : [];
         if (missingActionIds.length === 0) {
           acc.rulesAcc.set(ruleId, parsedRule);
         } else {

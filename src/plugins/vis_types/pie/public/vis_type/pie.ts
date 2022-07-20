@@ -33,6 +33,7 @@ export const getPieVisTypeDefinition = ({
   description: i18n.translate('visTypePie.pie.pieDescription', {
     defaultMessage: 'Compare data in proportion to a whole.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
@@ -63,6 +64,7 @@ export const getPieVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,

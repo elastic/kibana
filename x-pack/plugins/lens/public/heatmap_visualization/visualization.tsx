@@ -14,6 +14,7 @@ import { Position } from '@elastic/charts';
 import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
@@ -153,6 +154,8 @@ export const getHeatmapVisualization = ({
   },
 
   getSuggestions,
+
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
   getConfiguration({ state, frame, layerId }) {
     const datasourceLayer = frame.datasourceLayers[layerId];

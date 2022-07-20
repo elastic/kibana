@@ -46,7 +46,7 @@ export function Example({}: {} & StorybookParams) {
     });
   };
 
-  const triggerLabel = dataView?.title || 'Choose Data View';
+  const triggerLabel = dataView?.getName() || 'Choose Data View';
 
   return (
     <DataViewPicker

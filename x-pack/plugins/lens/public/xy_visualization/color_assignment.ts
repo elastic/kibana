@@ -9,12 +9,20 @@ import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin';
 import { euiLightVars } from '@kbn/ui-theme';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  isRangeAnnotation,
+} from '@kbn/event-annotation-plugin/public';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../common';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
-import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
+import {
+  getReferenceLineAccessorColorConfig,
+  getSingleColorConfig,
+} from './reference_line_helpers';
 import { XYDataLayerConfig, XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
@@ -48,7 +56,7 @@ export function getColorAssignments(
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
-      if (!layer.splitAccessor) {
+      if (layer.collapseFn || !layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
       const splitAccessor = layer.splitAccessor;
@@ -96,7 +104,67 @@ export function getColorAssignments(
   });
 }
 
-export function getAccessorColorConfig(
+function getDisabledConfig(accessor: string) {
+  return {
+    columnId: accessor as string,
+    triggerIcon: 'disabled' as const,
+  };
+}
+
+export function getAssignedColorConfig(
+  layer: XYLayerConfig,
+  accessor: string,
+  colorAssignments: ColorAssignments,
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>,
+  paletteService: PaletteRegistry
+): AccessorConfig {
+  if (isReferenceLayer(layer)) {
+    return getSingleColorConfig(accessor);
+  }
+  if (isAnnotationsLayer(layer)) {
+    const annotation = layer.annotations.find((a) => a.id === accessor);
+    return {
+      columnId: accessor,
+      triggerIcon: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
+      color: isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor,
+    };
+  }
+  const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
+
+  if (layerContainsSplits) {
+    return getDisabledConfig(accessor);
+  }
+
+  const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+  const rank = colorAssignments[currentPalette.name].getRank(
+    layer,
+    columnToLabel[accessor] || accessor,
+    accessor
+  );
+  const assignedColor =
+    totalSeriesCount != null
+      ? paletteService.get(currentPalette.name).getCategoricalColor(
+          [
+            {
+              name: columnToLabel[accessor] || accessor,
+              rankAtDepth: rank,
+              totalSeriesAtDepth: totalSeriesCount,
+            },
+          ],
+          { maxDepth: 1, totalSeries: totalSeriesCount },
+          currentPalette.params
+        )
+      : undefined;
+  return {
+    columnId: accessor as string,
+    triggerIcon: assignedColor ? 'color' : 'disabled',
+    color: assignedColor ?? undefined,
+  };
+}
+
+export function getAccessorColorConfigs(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
   layer: XYLayerConfig,
@@ -108,43 +176,19 @@ export function getAccessorColorConfig(
   if (isAnnotationsLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
-  const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
+  const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
   return layer.accessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
+      return getDisabledConfig(accessor);
+    }
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    if (currentYConfig?.color) {
       return {
         columnId: accessor as string,
-        triggerIcon: 'disabled',
+        triggerIcon: 'color',
+        color: currentYConfig.color,
       };
     }
-
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-    const rank = colorAssignments[currentPalette.name].getRank(
-      layer,
-      columnToLabel[accessor] || accessor,
-      accessor
-    );
-    const customColor =
-      currentYConfig?.color ||
-      (totalSeriesCount != null
-        ? paletteService.get(currentPalette.name).getCategoricalColor(
-            [
-              {
-                name: columnToLabel[accessor] || accessor,
-                rankAtDepth: rank,
-                totalSeriesAtDepth: totalSeriesCount,
-              },
-            ],
-            { maxDepth: 1, totalSeries: totalSeriesCount },
-            currentPalette.params
-          )
-        : undefined);
-    return {
-      columnId: accessor as string,
-      triggerIcon: customColor ? 'color' : 'disabled',
-      color: customColor ?? undefined,
-    };
+    return getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService);
   });
 }

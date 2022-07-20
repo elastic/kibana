@@ -55,6 +55,10 @@ export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 
+export { SubActionConnector } from './sub_action_framework/sub_action_connector';
+export { CaseConnector } from './sub_action_framework/case';
+export type { ServiceParams } from './sub_action_framework/types';
+
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {

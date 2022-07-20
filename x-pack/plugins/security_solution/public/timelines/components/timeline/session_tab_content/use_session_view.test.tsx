@@ -61,7 +61,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () =>
             jest.fn().mockReturnValue({
               onBlur: jest.fn(),
@@ -145,7 +144,7 @@ describe('useSessionView with active timeline and a session id and graph event i
     );
     const navigation = result.current.Navigation;
     const renderResult = render(<TestProviders>{navigation}</TestProviders>);
-    expect(renderResult.getByText('Close session')).toBeTruthy();
+    expect(renderResult.getByText('Close session viewer')).toBeTruthy();
   });
 
   it('uses an optional height when passed', () => {

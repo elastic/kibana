@@ -20,6 +20,10 @@ import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import type { DataView } from '@kbn/data-plugin/common';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -31,11 +35,15 @@ beforeEach(() => {
 const Wrapper = ({
   data = dataPluginMock.createStartContract(),
   unifiedSearch = unifiedSearchPluginMock.createStartContract(),
+  charts = chartPluginMock.createStartContract(),
+  discover = discoverPluginMock.createStartContract(),
 }: {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  charts: ChartsPluginStart;
+  discover: DiscoverStart;
 }) => (
-  <TestProvider deps={{ data, unifiedSearch }}>
+  <TestProvider deps={{ data, unifiedSearch, charts, discover }}>
     <Findings />
   </TestProvider>
 );
@@ -44,6 +52,8 @@ describe.skip('<Findings />', () => {
   it("renders the success state component when 'latest findings' DataView exists and request status is 'success'", async () => {
     const data = dataPluginMock.createStartContract();
     const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+    const charts = chartPluginMock.createStartContract();
+    const discover = discoverPluginMock.createStartContract();
     const source = await data.search.searchSource.create();
 
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
@@ -60,7 +70,9 @@ describe.skip('<Findings />', () => {
       }),
     } as UseQueryResult<DataView>);
 
-    render(<Wrapper data={data} unifiedSearch={unifiedSearch} />);
+    render(
+      <Wrapper data={data} unifiedSearch={unifiedSearch} charts={charts} discover={discover} />
+    );
 
     expect(await screen.findByTestId(TEST_SUBJECTS.FINDINGS_CONTAINER)).toBeInTheDocument();
   });

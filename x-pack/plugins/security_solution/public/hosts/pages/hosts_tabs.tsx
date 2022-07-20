@@ -6,22 +6,22 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
-import { HostsTabsProps } from './types';
+import type { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
-import { Anomaly } from '../../common/components/ml/types';
+import type { Anomaly } from '../../common/components/ml/types';
 import { HostsTableType } from '../store/model';
 import { AnomaliesQueryTabBody } from '../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesHostTable } from '../../common/components/ml/tables/anomalies_host_table';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { EventsQueryTabBody } from '../../common/components/events_tab/events_query_tab_body';
 import { HOSTS_PATH } from '../../../common/constants';
 
 import {
   HostsQueryTabBody,
   HostRiskScoreQueryTabBody,
-  AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
@@ -31,7 +31,6 @@ import { TimelineId } from '../../../common/types';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
-    docValueFields,
     filterQuery,
     pageFilters,
     from,
@@ -85,10 +84,7 @@ export const HostsTabs = memo<HostsTabsProps>(
     return (
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <HostsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
           <HostRiskScoreQueryTabBody {...tabProps} />

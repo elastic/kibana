@@ -118,15 +118,15 @@ With PATH_TO_CONFIG and other options as follows.
     Group | PATH_TO_CONFIG
     ----- | --------------
     anomaly detection | `test/functional/apps/ml/anomaly_detection/config.ts`
-    data frame analytics | `test/functional/apps/ml/anomaly_detection/config.ts`
-    data visualizer | `test/functional/apps/ml/data_frame_analytics/config.ts`
+    data frame analytics | `test/functional/apps/ml/data_frame_analytics/config.ts`
+    data visualizer | `test/functional/apps/ml/data_visualizer/config.ts`
     permissions | `test/functional/apps/ml/permissions/config.ts`
     stack management jobs | `test/functional/apps/ml/stack_management_jobs/config.ts`
     short tests | `test/functional/apps/ml/short_tests/config.ts`
 
     The `short tests` group contains tests for page navigation, model management,
     feature controls, settings and embeddables. Test files for each group are located
-    in the directory of their copnfiguration file.
+    in the directory of their configuration file.
   
 1.  Functional UI tests with `Basic` license:
 

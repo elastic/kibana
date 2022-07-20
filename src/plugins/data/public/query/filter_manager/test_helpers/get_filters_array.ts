@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../../../../common';
+import type { Filter } from '@kbn/es-query';
 
 export function getFiltersArray(): Filter[] {
   return [

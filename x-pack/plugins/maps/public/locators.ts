@@ -9,8 +9,8 @@
 
 import rison from 'rison-node';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, isFilterPinned } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
@@ -78,7 +78,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
       filters?: Filter[];
       vis?: unknown;
     } = {};
-    const queryState: QueryState = {};
+    const queryState: GlobalQueryStateFromUrl = {};
 
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
@@ -87,7 +87,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let path = `/map#/${mapId || ''}`;
-    path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {

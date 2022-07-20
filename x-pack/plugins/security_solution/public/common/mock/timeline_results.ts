@@ -7,18 +7,19 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
+import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TimelineResult,
 } from '../../../common/types/timeline';
 
-import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { Direction, TimelineEventsDetailsItem } from '../../../common/search_strategy';
-import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import { Direction } from '../../../common/search_strategy';
+import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
+import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export const mockOpenTimelineQueryResults = {
@@ -2017,7 +2018,8 @@ export const mockTimelineModel: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -2066,7 +2068,13 @@ export const mockTimelineResult = {
 };
 
 const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    type: 'date',
+    esTypes: ['date'],
+    initialWidth: 190,
+  },
   { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
@@ -2136,7 +2144,14 @@ export const defaultTimelineProps: CreateTimelineProps = {
     sessionViewConfig: null,
     show: false,
     showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+    sort: [
+      {
+        columnId: '@timestamp',
+        columnType: 'date',
+        esTypes: ['date'],
+        sortDirection: Direction.desc,
+      },
+    ],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,

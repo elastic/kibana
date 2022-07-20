@@ -16,10 +16,12 @@ import React from 'react';
 import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { TABLE_COLUMN_HEADERS } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { allNavigationItems } from '../../common/navigation/constants';
+import * as TEST_SUBJ from './test_subjects';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -50,7 +52,9 @@ const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: strin
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.name',
-    name: TABLE_COLUMN_HEADERS.INTEGRATION,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
+      defaultMessage: 'Integration',
+    }),
     render: (packageName, benchmark) => (
       <Link
         to={generatePath(allNavigationItems.rules.path, {
@@ -67,48 +71,72 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     ),
     truncateText: true,
     sortable: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
+  },
+  {
+    field: 'rules',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
+      defaultMessage: 'Active Rules',
+    }),
+    truncateText: true,
+    render: ({ enabled, all }: Benchmark['rules']) => (
+      <FormattedMessage
+        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
+        defaultMessage="{enabled} of {all}"
+        values={{ enabled, all }}
+      />
+    ),
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
   },
   {
     field: 'package_policy.package.title',
-    name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationTypeColumnTitle', {
+      defaultMessage: 'Integration Type',
+    }),
     dataType: 'string',
     truncateText: true,
     sortable: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_TYPE,
   },
   {
     field: 'agent_policy.name',
-    name: TABLE_COLUMN_HEADERS.AGENT_POLICY,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.agentPolicyColumnTitle', {
+      defaultMessage: 'Agent Policy',
+    }),
     render: (name, benchmark) => (
       <AgentPolicyButtonLink name={name} id={benchmark.agent_policy.id} />
     ),
     truncateText: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.AGENT_POLICY,
   },
   {
     field: 'agent_policy.agents',
-    name: TABLE_COLUMN_HEADERS.NUMBER_OF_AGENTS,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.numberOfAgentsColumnTitle', {
+      defaultMessage: 'Number of Agents',
+    }),
     truncateText: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.NUMBER_OF_AGENTS,
   },
   {
     field: 'package_policy.created_by',
-    name: TABLE_COLUMN_HEADERS.CREATED_BY,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdByColumnTitle', {
+      defaultMessage: 'Created by',
+    }),
     dataType: 'string',
     truncateText: true,
     sortable: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_BY,
   },
   {
     field: 'package_policy.created_at',
-    name: TABLE_COLUMN_HEADERS.CREATED_AT,
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdAtColumnTitle', {
+      defaultMessage: 'Created at',
+    }),
     dataType: 'date',
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
     sortable: true,
-  },
-  {
-    field: 'package_policy.rules', // TODO: add fields
-    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
-    truncateText: true,
-    // render: (benchmarkIntegration) =>
-    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
   },
 ];
 

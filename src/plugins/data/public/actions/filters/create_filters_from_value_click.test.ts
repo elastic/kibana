@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsContract } from '../..';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
@@ -68,7 +68,7 @@ describe('createFiltersFromValueClick', () => {
         },
         getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
-    } as unknown as IndexPatternsContract);
+    } as unknown as DataViewsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {

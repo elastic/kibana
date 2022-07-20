@@ -100,6 +100,7 @@ export const useVisualizeAppState = (
         const { aggs, ...visState } = currentAppState.vis;
         const query = currentAppState.query;
         const filter = currentAppState.filters;
+
         const visSearchSource = instance.vis.data.searchSource?.getSerializedFields() || {};
         instance.vis
           .setState({

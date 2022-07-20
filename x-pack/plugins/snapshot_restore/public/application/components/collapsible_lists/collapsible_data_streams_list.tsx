@@ -28,15 +28,13 @@ export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dat
   ) : (
     <>
       <EuiText>
-        <ul>
-          {items.map((dataStream) => (
-            <li key={dataStream}>
-              <EuiTitle size="xs">
-                <span>{dataStream}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
+        {items.map((dataStream) => (
+          <div key={dataStream}>
+            <EuiTitle size="xs">
+              <span>{dataStream}</span>
+            </EuiTitle>
+          </div>
+        ))}
       </EuiText>
       {hiddenItemsCount ? (
         <>

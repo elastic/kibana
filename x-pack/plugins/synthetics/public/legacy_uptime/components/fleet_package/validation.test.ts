@@ -9,9 +9,9 @@ import {
   ConfigKey,
   DataStream,
   HTTPFields,
-  BrowserFields,
   MonitorFields,
   ScheduleUnit,
+  SyntheticsMonitor,
 } from '../../../../common/runtime_types';
 import { validate } from './validation';
 
@@ -53,18 +53,20 @@ describe('[Monitor Management] validation', () => {
     [ConfigKey.SOURCE_INLINE, 'step(() => {});'],
     [ConfigKey.SOURCE_ZIP_URL, 'https://test.zip'],
   ])('Browser', (configKey, value) => {
-    const browserProps: Partial<BrowserFields> = {
+    const browserProps = {
       ...commonPropsValid,
       [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
       [ConfigKey.TIMEOUT]: null,
+      [ConfigKey.URLS]: null,
+      [ConfigKey.PORT]: null,
       [configKey]: value,
-    };
+    } as SyntheticsMonitor;
 
     it('should return false for all valid props', () => {
       const validators = validate[DataStream.BROWSER];
       const keysToValidate = [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT, configKey];
       const validatorFns = keysToValidate.map((key) => validators[key]);
-      const result = validatorFns.map((fn) => fn?.(browserProps) ?? true);
+      const result = validatorFns.map((fn) => fn?.(browserProps as Partial<MonitorFields>) ?? true);
 
       expect(result).not.toEqual(expect.arrayContaining([true]));
     });

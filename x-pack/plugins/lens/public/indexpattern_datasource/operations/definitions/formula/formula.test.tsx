@@ -194,6 +194,30 @@ describe('formula', () => {
       });
     });
 
+    it("should start with an empty formula if previous operation can't be converted", () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            dataType: 'date',
+            filter: { language: 'kuery', query: 'ABC: DEF' },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        filter: undefined,
+        timeScale: undefined,
+        scale: 'ratio',
+        params: {},
+        references: [],
+      });
+    });
+
     it('it should move over explicit format param if set', () => {
       expect(
         formulaOperation.buildColumn({
@@ -1522,7 +1546,10 @@ invalid: "
           `${fn}(${Array(nArgs.length).fill('bytes').join(', ')})`,
         ];
         // add the fourth check only for those functions with more than 1 arg required
-        const enableFourthCheck = nArgs.filter(({ optional }) => !optional).length > 1;
+        const enableFourthCheck =
+          nArgs.filter(
+            ({ optional, alternativeWhenMissing }) => !optional && !alternativeWhenMissing
+          ).length > 1;
         if (enableFourthCheck) {
           formulas.push(`${fn}(1)`);
         }
@@ -1538,6 +1565,24 @@ invalid: "
         });
       });
     }
+
+    it('returns an error suggesting to use an alternative function', () => {
+      const formulas = [`clamp(1)`, 'clamp(1, 5)'];
+      const errorsWithSuggestions = [
+        'The operation clamp in the Formula is missing the min argument: use the pick_max operation instead.',
+        'The operation clamp in the Formula is missing the max argument: use the pick_min operation instead.',
+      ];
+      formulas.forEach((formula, i) => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([errorsWithSuggestions[i]]);
+      });
+    });
 
     it('returns error if formula filter has not same type of inner operations filter', () => {
       const formulas = [

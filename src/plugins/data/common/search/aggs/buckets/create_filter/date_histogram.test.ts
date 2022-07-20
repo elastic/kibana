@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions, autoInterval } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
@@ -49,12 +49,13 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(),
-        }
+        },
+        jest.fn()
       );
       const bucketKey = 1422579600000;
 
       agg = aggConfigs.aggs[0] as IBucketDateHistogramAggConfig;
-      bucketStart = moment(bucketKey);
+      bucketStart = moment.tz(bucketKey, aggConfigs.timeZone);
 
       const timePad = moment.duration(duration / 2);
 

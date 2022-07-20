@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { showInitialLoadingSpinner } from './helpers';
+import { formatAlertsData, showInitialLoadingSpinner } from './helpers';
+import { result, textResult, stackedByBooleanField, stackedByTextField } from './mock_data';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {
@@ -32,5 +33,17 @@ describe('helpers', () => {
         false
       );
     });
+  });
+});
+
+describe('formatAlertsData', () => {
+  test('stack by a boolean field', () => {
+    const res = formatAlertsData(stackedByBooleanField);
+    expect(res).toEqual(result);
+  });
+
+  test('stack by a text field', () => {
+    const res = formatAlertsData(stackedByTextField);
+    expect(res).toEqual(textResult);
   });
 });

@@ -91,7 +91,7 @@ export const ControlGroup = () => {
     return null;
   }
 
-  let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
+  let panelBg: 'transparent' | 'plain' | 'success' = 'transparent';
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
@@ -115,7 +115,6 @@ export const ControlGroup = () => {
             responsive={false}
             alignItems="center"
             data-test-subj="controls-group"
-            data-shared-items-count={idsInOrder.length}
           >
             <EuiFlexItem>
               <DndContext
@@ -144,6 +143,7 @@ export const ControlGroup = () => {
                             isEditable={isEditable}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
+                            embeddableType={panels[controlId].type}
                             key={controlId}
                           />
                         )

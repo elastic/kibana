@@ -23,7 +23,7 @@ describe('ScriptingWarningCallOut', () => {
       },
     });
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {

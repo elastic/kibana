@@ -209,7 +209,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+              <EuiCodeBlock language="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
             </EuiDescriptionListDescription>
           </>
         )}

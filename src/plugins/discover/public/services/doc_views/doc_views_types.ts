@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { ElasticSearchHit } from '../../types';
+import { DataTableRecord } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export interface FieldMapping {
@@ -26,7 +26,7 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
-  hit: ElasticSearchHit;
+  hit: DataTableRecord;
   indexPattern: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
@@ -41,7 +41,7 @@ export type DocViewRenderFn = (
 
 export interface BaseDocViewInput {
   order: number;
-  shouldShow?: (hit: ElasticSearchHit) => boolean;
+  shouldShow?: (hit: DataTableRecord) => boolean;
   title: string;
 }
 

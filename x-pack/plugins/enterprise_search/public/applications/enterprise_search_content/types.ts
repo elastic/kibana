@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-/**
- * As of 2022-04-04, this shape is still in debate. Specifically, the `source_type` will be changing as we get closer to 8.3.
- * These merely serve as placeholders for static data for now.
- */
-export interface SearchIndex {
-  name: string;
-  indexSlug: string;
-  source_type: string;
-  elasticsearch_index_name: string;
-  search_engines: string;
-  document_count: number;
+export interface Crawler {
+  domains: [];
 }

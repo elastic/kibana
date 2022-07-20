@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const reporting = getService('reporting');
 
-  describe('dashboard reporting', () => {
+  describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await PageObjects.reporting.getReportURL(60000);
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await reporting.deleteAllReports();
     });
 
-    it('creates a map report using sample geo data', async function () {
+    it('PNG file matches the baseline image, using sample geo data', async function () {
       await reporting.initEcommerce();
 
       await PageObjects.common.navigateToApp('dashboard');
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await reporting.teardownEcommerce();
     });
 
-    it('creates a map report using embeddable example', async function () {
+    it('PNG file matches the baseline image, using embeddable example', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openPngReportingPanel();

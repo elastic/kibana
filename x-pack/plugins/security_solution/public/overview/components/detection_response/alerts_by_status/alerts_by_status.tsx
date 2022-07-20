@@ -7,16 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { ShapeTreeNode } from '@elastic/charts';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ShapeTreeNode } from '@elastic/charts';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
-import { DonutChart, FillColor } from '../../../../common/components/charts/donutchart';
+import type { FillColor } from '../../../../common/components/charts/donutchart';
+import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
-import { LegendItem } from '../../../../common/components/charts/legend_item';
+import type { LegendItem } from '../../../../common/components/charts/legend_item';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
@@ -47,11 +48,6 @@ const StyledFlexItem = styled(EuiFlexItem)`
 const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-left: 32px;
   padding-top: 45px;
-`;
-
-// To Do remove this styled component once togglequery is updated: #131405
-const StyledEuiPanel = styled(EuiPanel)`
-  height: fit-content;
 `;
 
 interface AlertsByStatusProps {
@@ -124,10 +120,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   return (
     <>
       <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-        <StyledEuiPanel
-          hasBorder
-          data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}
-        >
+        <EuiPanel hasBorder data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}>
           {loading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
@@ -139,6 +132,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
             title={ALERTS_TEXT}
+            titleSize="s"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}
@@ -212,7 +206,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
               <EuiSpacer size="m" />
             </>
           )}
-        </StyledEuiPanel>
+        </EuiPanel>
       </HoverVisibilityContainer>
     </>
   );

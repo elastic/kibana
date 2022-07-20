@@ -85,6 +85,7 @@ export interface CreateOptions {
 }
 
 interface ConstructorOptions {
+  logger: Logger;
   defaultKibanaIndex: string;
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
@@ -106,6 +107,7 @@ export interface UpdateOptions {
 }
 
 export class ActionsClient {
+  private readonly logger: Logger;
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -121,6 +123,7 @@ export class ActionsClient {
   private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   constructor({
+    logger,
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
@@ -135,6 +138,7 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
   }: ConstructorOptions) {
+    this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
@@ -282,6 +286,14 @@ export class ActionsClient {
         isUndefined
       )
     );
+
+    try {
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
+      );
+    }
 
     return {
       id,
@@ -468,7 +480,6 @@ export class ActionsClient {
 
   public async getOAuthAccessToken(
     { type, options }: OAuthParams,
-    logger: Logger,
     configurationUtilities: ActionsConfigurationUtilities
   ) {
     // Verify that user has edit access
@@ -502,7 +513,7 @@ export class ActionsClient {
 
       try {
         accessToken = await getOAuthJwtAccessToken({
-          logger,
+          logger: this.logger,
           configurationUtilities,
           credentials: {
             config: tokenOpts.config as GetOAuthJwtConfig,
@@ -511,13 +522,13 @@ export class ActionsClient {
           tokenUrl: tokenOpts.tokenUrl,
         });
 
-        logger.debug(
+        this.logger.debug(
           `Successfully retrieved access token using JWT OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           } and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
-        logger.debug(
+        this.logger.debug(
           `Failed to retrieve access token using JWT OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
@@ -528,7 +539,7 @@ export class ActionsClient {
       const tokenOpts = options as OAuthClientCredentialsParams;
       try {
         accessToken = await getOAuthClientCredentialsAccessToken({
-          logger,
+          logger: this.logger,
           configurationUtilities,
           credentials: {
             config: tokenOpts.config as GetOAuthClientCredentialsConfig,
@@ -538,13 +549,13 @@ export class ActionsClient {
           oAuthScope: tokenOpts.scope,
         });
 
-        logger.debug(
+        this.logger.debug(
           `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
         );
       } catch (err) {
-        logger.debug(
+        this.logger.debug(
           `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
             tokenOpts.tokenUrl
           }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
@@ -600,15 +611,12 @@ export class ActionsClient {
 
     try {
       await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (error) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.DELETE,
-          savedObject: { type: 'action', id },
-          error,
-        })
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
       );
     }
+
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 

@@ -38,6 +38,7 @@ import {
   CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const getCase = async (
   caseId: string,
@@ -133,3 +134,8 @@ export const pushCase = async (
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);
+
+export const getFeatureIds = async (
+  _query: { registrationContext: string[] },
+  _signal: AbortSignal
+): Promise<ValidFeatureId[]> => Promise.resolve(['siem', 'observability']);

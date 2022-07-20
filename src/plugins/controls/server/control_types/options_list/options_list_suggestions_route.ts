@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { get, isEmpty } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { Observable } from 'rxjs';
+import { get } from 'lodash';
 
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { FieldSpec, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { SearchRequest } from '@kbn/data-plugin/common';
+import { schema } from '@kbn/config-schema';
+
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
+import {
+  getSuggestionAggregationBuilder,
+  getValidationAggregationBuilder,
+} from './options_list_queries';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -82,93 +85,40 @@ export const setupOptionsListSuggestionsRoute = (
     const abortController = new AbortController();
     abortedEvent$.subscribe(() => abortController.abort());
 
-    const { fieldName, searchString, selectedOptions, filters, fieldSpec } = request;
-    const body = getOptionsListBody(fieldName, fieldSpec, searchString, selectedOptions, filters);
-
-    const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
-
-    // parse raw ES response into OptionsListSuggestionResponse
-    const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
-
-    const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.map(
-      (suggestion: { key: string; key_as_string: string }) =>
-        fieldSpec?.type === 'string' ? suggestion.key : suggestion.key_as_string
-    );
-
-    const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets') as {
-      [key: string]: { doc_count: number };
-    };
-    const invalidSelections =
-      rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
-        ? Object.entries(rawInvalidSuggestions)
-            ?.filter(([, value]) => value?.doc_count === 0)
-            ?.map(([key]) => key)
-        : undefined;
-
-    return {
-      suggestions,
-      totalCardinality,
-      invalidSelections,
-    };
-  };
-
-  const getOptionsListBody = (
-    fieldName: string,
-    fieldSpec?: FieldSpec,
-    searchString?: string,
-    selectedOptions?: string[],
-    filters: estypes.QueryDslQueryContainer[] = []
-  ) => {
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-    const getEscapedQuery = (q: string = '') =>
-      q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
-
-    // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-    const executionHint = 'map' as const;
-
-    // Suggestions
-    const shardSize = 10;
-    const suggestionsAgg = {
-      terms: {
-        field: fieldName,
-        // terms on boolean fields don't support include
-        ...(fieldSpec?.type !== 'boolean' && {
-          include: `${getEscapedQuery(searchString ?? '')}.*`,
-        }),
-        execution_hint: executionHint,
-        shard_size: shardSize,
-      },
-    };
-
-    // Validation
-    const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
-      acc[currentOption] = { match: { [fieldName]: currentOption } };
-      return acc;
-    }, {} as { [key: string]: { match: { [key: string]: string } } });
-
-    const validationAgg =
-      selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
-        ? {
-            filters: {
-              filters: selectedOptionsFilters,
-            },
-          }
-        : undefined;
+    /**
+     * Build ES Query
+     */
+    const { runPastTimeout, filters, fieldName } = request;
 
     const { terminateAfter, timeout } = getAutocompleteSettings();
+    const timeoutSettings = runPastTimeout
+      ? {}
+      : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
 
-    const body = {
+    const suggestionBuilder = getSuggestionAggregationBuilder(request);
+    const validationBuilder = getValidationAggregationBuilder();
+
+    const suggestionAggregations = {
+      suggestions: suggestionBuilder.buildAggregation(request),
+    };
+    const builtValidationAggregation = validationBuilder.buildAggregation(request);
+    const validationAggregations = builtValidationAggregation
+      ? {
+          validation: builtValidationAggregation,
+        }
+      : {};
+
+    const body: SearchRequest['body'] = {
       size: 0,
-      timeout: `${timeout}ms`,
-      terminate_after: terminateAfter,
+      ...timeoutSettings,
       query: {
         bool: {
           filter: filters,
         },
       },
       aggs: {
-        suggestions: suggestionsAgg,
-        ...(validationAgg ? { validation: validationAgg } : {}),
+        ...suggestionAggregations,
+        ...validationAggregations,
         unique_terms: {
           cardinality: {
             field: fieldName,
@@ -177,21 +127,22 @@ export const setupOptionsListSuggestionsRoute = (
       },
     };
 
-    const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
-    if (subTypeNested) {
-      return {
-        ...body,
-        aggs: {
-          nestedSuggestions: {
-            nested: {
-              path: subTypeNested.nested.path,
-            },
-            aggs: body.aggs,
-          },
-        },
-      };
-    }
+    /**
+     * Run ES query
+     */
+    const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
-    return body;
+    /**
+     * Parse ES response into Options List Response
+     */
+    const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
+    const suggestions = suggestionBuilder.parse(rawEsResult);
+    const invalidSelections = validationBuilder.parse(rawEsResult);
+
+    return {
+      suggestions,
+      totalCardinality,
+      invalidSelections,
+    };
   };
 };
