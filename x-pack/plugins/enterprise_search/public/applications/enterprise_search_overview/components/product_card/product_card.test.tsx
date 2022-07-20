@@ -11,88 +11,77 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { snakeCase } from 'lodash';
+
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import {
-  APP_SEARCH_PLUGIN,
-  ELASTICSEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
-} from '../../../../../common/constants';
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
-import { ProductCard } from '.';
+import { ProductCard, ProductCardProps } from './product_card';
+
+const MOCK_VALUES: ProductCardProps = {
+  cta: 'Click me',
+  description: 'Mock description',
+  features: ['first feature', 'second feature'],
+  icon: 'logoElasticsearch',
+  name: 'Mock product',
+  productId: 'mockProduct',
+  resourceLinks: [
+    {
+      label: 'Link one',
+      to: 'https://www.elastic.co/guide/one',
+    },
+    {
+      label: 'Link twwo',
+      to: 'https://www.elastic.co/guide/two',
+    },
+  ],
+  url: '/app/mock_app',
+};
 
 describe('ProductCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders an Elasticsearch card', () => {
-    const wrapper = shallow(<ProductCard product={ELASTICSEARCH_PLUGIN} />);
+  it('renders a product card', () => {
+    const wrapper = shallow(<ProductCard {...MOCK_VALUES} />);
+    const card = wrapper.find(EuiPanel);
+
+    expect(card.find('h3').text()).toEqual(MOCK_VALUES.name);
+    expect(card.find(EuiListGroup).children()).toHaveLength(MOCK_VALUES.features.length);
+    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
+    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
+      MOCK_VALUES.resourceLinks.length
+    );
+
+    const button = card.find(EuiButtonEmptyTo);
+
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual(MOCK_VALUES.url);
+    expect(card.find(EuiButtonTo)).toHaveLength(0);
+
+    button.simulate('click');
+
+    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: snakeCase(MOCK_VALUES.productId),
+    });
+  });
+
+  it('renders an empty cta', () => {
+    const wrapper = shallow(<ProductCard {...MOCK_VALUES} emptyCta />);
     const card = wrapper.find(EuiPanel);
     const button = card.find(EuiButtonTo);
 
-    expect(card.find('h3').text()).toEqual('Elasticsearch');
-    expect(card.find(EuiListGroup).children()).toHaveLength(ELASTICSEARCH_PLUGIN.FEATURES.length);
     expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual(MOCK_VALUES.url);
     expect(card.find(EuiButtonEmptyTo)).toHaveLength(0);
-    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
-      ELASTICSEARCH_PLUGIN.RESOURCE_LINKS.length
-    );
-    expect(card.find(EuiButtonTo).prop('to')).toEqual(ELASTICSEARCH_PLUGIN.URL);
 
     button.simulate('click');
     expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
       action: 'clicked',
-      metric: 'elasticsearch',
-    });
-  });
-
-  it('renders an App Search card', () => {
-    const wrapper = shallow(<ProductCard product={APP_SEARCH_PLUGIN} />);
-    const card = wrapper.find(EuiPanel);
-    const button = card.find(EuiButtonEmptyTo);
-
-    expect(card.find('h3').text()).toEqual('App Search');
-
-    expect(card.find(EuiListGroup).children()).toHaveLength(APP_SEARCH_PLUGIN.FEATURES.length);
-    // App Search and Workplace Search cards have empty buttons
-    expect(card.find(EuiButtonTo)).toHaveLength(0);
-    expect(button).toHaveLength(1);
-    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
-      APP_SEARCH_PLUGIN.RESOURCE_LINKS.length
-    );
-    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(APP_SEARCH_PLUGIN.URL);
-
-    button.simulate('click');
-    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
-      action: 'clicked',
-      metric: 'app_search',
-    });
-  });
-
-  it('renders a Workplace Search card', () => {
-    const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} />);
-    const card = wrapper.find(EuiPanel);
-    const button = card.find(EuiButtonEmptyTo);
-
-    expect(card.find('h3').text()).toEqual('Workplace Search');
-
-    // App Search and Workplace Search cards have empty buttons
-    expect(card.find(EuiButtonTo)).toHaveLength(0);
-    expect(button).toHaveLength(1);
-    expect(card.find('[data-test-subj="productCard-resources"]').text()).toEqual('Resources');
-    expect(card.find('[data-test-subj="productCard-resourceLinks"]').children()).toHaveLength(
-      WORKPLACE_SEARCH_PLUGIN.RESOURCE_LINKS.length
-    );
-    expect(card.find(EuiButtonEmptyTo).prop('to')).toEqual(WORKPLACE_SEARCH_PLUGIN.URL);
-
-    button.simulate('click');
-    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
-      action: 'clicked',
-      metric: 'workplace_search',
+      metric: snakeCase(MOCK_VALUES.productId),
     });
   });
 });

@@ -89,18 +89,211 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <ProductCard data-test-subj="productCard-elasticsearch" product={ELASTICSEARCH_PLUGIN} />
+          <ProductCard
+            data-test-subj="productCard-elasticsearch"
+            cta={i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardCTA', {
+              defaultMessage: 'View the setup guide',
+            })}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.elasticsearch.productCardDescription',
+              {
+                defaultMessage:
+                  'Ideal for bespoke applications, Elasticsearch helps you build highly customizable search and offers many different ingestion methods.',
+              }
+            )}
+            features={[
+              i18n.translate('xpack.enterpriseSearch.elasticsearch.features.integrate', {
+                defaultMessage: 'Integrate with databases, websites, and more',
+              }),
+              i18n.translate('xpack.enterpriseSearch.elasticsearch.features.buildTooling', {
+                defaultMessage: 'Build custom tooling',
+              }),
+              i18n.translate(
+                'xpack.enterpriseSearch.elasticsearch.features.buildSearchExperiences',
+                {
+                  defaultMessage: 'Build custom search experiences',
+                }
+              ),
+            ]}
+            emptyCta
+            icon="logoElasticsearch"
+            name={ELASTICSEARCH_PLUGIN.NAME}
+            productId={ELASTICSEARCH_PLUGIN.ID}
+            resourceLinks={[
+              {
+                label: i18n.translate(
+                  'xpack.enterpriseSearch.elasticsearch.resources.gettingStartedLabel',
+                  {
+                    defaultMessage: 'Getting started with Elasticsearch',
+                  }
+                ),
+                to: '', // TODO Update docLink
+              },
+              {
+                label: i18n.translate(
+                  'xpack.enterpriseSearch.elasticsearch.resources.createNewIndexLabel',
+                  {
+                    defaultMessage: 'Create a new index',
+                  }
+                ),
+                to: '', // TODO Update docLink
+              },
+              {
+                label: i18n.translate(
+                  'xpack.enterpriseSearch.elasticsearch.resources.languageClientLabel',
+                  {
+                    defaultMessage: 'Set up a language client',
+                  }
+                ),
+                to: '', // TODO Update docLink
+              },
+              {
+                label: i18n.translate(
+                  'xpack.enterpriseSearch.elasticsearch.resources.searchUILabel',
+                  {
+                    defaultMessage: 'Search UI for Elasticsearch',
+                  }
+                ),
+                to: '', // TODO Update docLink
+              },
+            ]}
+            url={ELASTICSEARCH_PLUGIN.URL}
+          />
         </EuiFlexItem>
         {shouldShowAppSearchCard && (
           <EuiFlexItem>
-            <ProductCard data-test-subj="productCard-appSearch" product={APP_SEARCH_PLUGIN} />
+            <ProductCard
+              data-test-subj="productCard-appSearch"
+              cta={i18n.translate('xpack.enterpriseSearch.appSearch.productCardCTA', {
+                defaultMessage: 'Open App Search',
+              })}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.productCardDescription',
+                {
+                  defaultMessage:
+                    'Ideal for apps and websites, App Search helps you design, deploy, and manage powerful search experiences.',
+                }
+              )}
+              features={[
+                i18n.translate('xpack.enterpriseSearch.appSearch.features.ingest', {
+                  defaultMessage: 'Ingest with a web crawler, API, or Elasticsearch',
+                }),
+                i18n.translate('xpack.enterpriseSearch.appSearch.features.managementDashboards', {
+                  defaultMessage: 'Search management dashboards',
+                }),
+                i18n.translate('xpack.enterpriseSearch.appSearch.features.searchApis', {
+                  defaultMessage: 'Search-optimized APIs',
+                }),
+              ]}
+              icon="logoAppSearch"
+              name={APP_SEARCH_PLUGIN.NAME}
+              productId={APP_SEARCH_PLUGIN.ID}
+              resourceLinks={[
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.resources.gettingStartedLabel',
+                    {
+                      defaultMessage: 'Getting started with App Search',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.resources.searchUILabel',
+                    {
+                      defaultMessage: 'Search UI for App Search',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.resources.searchRelevanceLabel',
+                    {
+                      defaultMessage: 'Tune your search relevance',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.resources.adaptiveRelevanceLabel',
+                    {
+                      defaultMessage: 'Automate with Adaptive Relevance',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+              ]}
+              url={APP_SEARCH_PLUGIN.URL}
+            />
           </EuiFlexItem>
         )}
         {shouldShowWorkplaceSearchCard && (
           <EuiFlexItem>
             <ProductCard
               data-test-subj="productCard-workplaceSearch"
-              product={{ ...WORKPLACE_SEARCH_PLUGIN, URL: WORKPLACE_SEARCH_URL }}
+              cta={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productCardCTA', {
+                defaultMessage: 'Open Workplace Search',
+              })}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
+                {
+                  defaultMessage:
+                    'Ideal for internal teams, Workplace Search helps unify your content in one place with instant connectivity to popular productivity tools.',
+                }
+              )}
+              features={[
+                i18n.translate('xpack.enterpriseSearch.workplaceSearch.features.ingest', {
+                  defaultMessage: 'Ingest from third-party sources',
+                }),
+                i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.features.managementDashboards',
+                  {
+                    defaultMessage: 'Search management dashboards',
+                  }
+                ),
+                i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.features.searchExperiences',
+                  {
+                    defaultMessage: 'Search experiences for authenticated users',
+                  }
+                ),
+              ]}
+              icon="logoWorkplaceSearch"
+              name={WORKPLACE_SEARCH_PLUGIN.NAME}
+              productId={WORKPLACE_SEARCH_PLUGIN.ID}
+              resourceLinks={[
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.resources.gettingStartedLabel',
+                    {
+                      defaultMessage: 'Getting started with Workplace Search',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.resources.setUpConnectorsLabel',
+                    {
+                      defaultMessage: 'Set up your connectors',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.resources.managePermissionsLabel',
+                    {
+                      defaultMessage: 'Manage permissions',
+                    }
+                  ),
+                  to: '', // TODO Update docLink
+                },
+              ]}
+              url={WORKPLACE_SEARCH_URL}
             />
           </EuiFlexItem>
         )}

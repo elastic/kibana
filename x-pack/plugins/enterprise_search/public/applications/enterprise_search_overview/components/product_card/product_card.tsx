@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  IconType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,72 +36,80 @@ interface ProductResourceLink {
   to: string;
 }
 
-interface ProductCardProps {
-  // Expects product plugin constants (@see common/constants.ts)
-  product: {
-    ID: string;
-    NAME: string;
-    CARD_DESCRIPTION: string;
-    URL: string;
-    ICON: string;
-    RESOURCE_LINKS: ProductResourceLink[];
-    PRODUCT_CARD_CTA: string;
-    FEATURES: string[];
-  };
+export interface ProductCardProps {
+  cta: string;
+  description: string;
+  emptyCta?: boolean;
+  features: string[];
+  icon: IconType;
+  name: string;
+  productId: string;
+  resourceLinks: ProductResourceLink[];
+  url: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  cta,
+  description,
+  emptyCta = false,
+  features,
+  icon,
+  productId,
+  name,
+  resourceLinks,
+  url,
+}) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
+    <EuiPanel hasBorder paddingSize="l" data-test-subj={`${productId}ProductCard`}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false} data-test-subj="productCard-icon">
-          <EuiIcon size="xl" type={product.ICON} />
+          <EuiIcon size="xl" type={icon} />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-details">
           <EuiTitle size="s">
-            <h3>{product.NAME}</h3>
+            <h3>{name}</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            {product.CARD_DESCRIPTION}
+            {description}
           </EuiText>
           <EuiSpacer />
           <div>
-            {product.NAME.toLowerCase() === 'elasticsearch' ? (
+            {emptyCta ? (
               <EuiButtonTo
-                to={product.URL}
+                to={url}
                 shouldNotCreateHref
                 onClick={() =>
                   sendEnterpriseSearchTelemetry({
                     action: 'clicked',
-                    metric: snakeCase(product.ID),
+                    metric: snakeCase(productId),
                   })
                 }
               >
-                {product.PRODUCT_CARD_CTA}
+                {cta}
               </EuiButtonTo>
             ) : (
               <EuiButtonEmptyTo
                 flush="both"
-                to={product.URL}
+                to={url}
                 shouldNotCreateHref
                 onClick={() =>
                   sendEnterpriseSearchTelemetry({
                     action: 'clicked',
-                    metric: snakeCase(product.ID),
+                    metric: snakeCase(productId),
                   })
                 }
               >
-                {product.PRODUCT_CARD_CTA}
+                {cta}
               </EuiButtonEmptyTo>
             )}
           </div>
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-features">
           <EuiListGroup flush style={{ paddingTop: '1.5rem' }}>
-            {product.FEATURES.map((item: string, index: number) => (
+            {features.map((item: string, index: number) => (
               <EuiListGroupItem
                 key={index}
                 size="s"
@@ -124,7 +133,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             gutterSize="m"
             data-test-subj="productCard-resourceLinks"
           >
-            {product.RESOURCE_LINKS.map((resource, index) => (
+            {resourceLinks.map((resource, index) => (
               <EuiFlexItem key={index} grow={false}>
                 <EuiLink href={resource.to} external>
                   {resource.label}

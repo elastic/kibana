@@ -46,10 +46,9 @@ describe('ProductSelector', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector {...props} isWorkplaceSearchAdmin={false} />);
 
-    expect(wrapper.find(ProductCard).last().prop('product')).toEqual({
-      ...WORKPLACE_SEARCH_PLUGIN,
-      URL: WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL,
-    });
+    expect(wrapper.find(ProductCard).last().prop('url')).toEqual(
+      WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL
+    );
   });
 
   describe('access checks when host is set', () => {
