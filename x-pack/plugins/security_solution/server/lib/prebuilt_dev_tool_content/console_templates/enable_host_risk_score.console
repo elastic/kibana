@@ -186,8 +186,7 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
   }
 }
 
-# Start the pivot transform
-POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
+
 
 
 # Create mappings for the destination index of the Host Risk Score latest transform
@@ -244,6 +243,15 @@ PUT _transform/ml_hostriskscore_latest_transform_{{space_name}}
     }
   }
 }
+
+# Stop the pivot transform first before starting the transform
+POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_stop
+
+# Start the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
+
+# Stop the latest transform first before starting the transform
+POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_stop
 
 # Start the latest transform
 POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_start
