@@ -24,6 +24,7 @@ describe('Discover grid columns', function () {
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -134,6 +135,7 @@ describe('Discover grid columns', function () {
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [
@@ -238,6 +240,7 @@ describe('Discover grid columns', function () {
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
       services: discoverServiceMock,
+      onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
       Array [

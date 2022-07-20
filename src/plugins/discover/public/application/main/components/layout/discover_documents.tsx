@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -28,7 +28,7 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../hooks/use_saved_search';
+import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -37,6 +37,7 @@ import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -56,7 +57,7 @@ function DiscoverDocumentsComponent({
   expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
-  onAddFilter: DocViewFilterFn;
+  onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
@@ -71,7 +72,10 @@ function DiscoverDocumentsComponent({
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
-
+  const isPlainRecord = useMemo(
+    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
+    [state.query]
+  );
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
@@ -112,8 +116,11 @@ function DiscoverDocumentsComponent({
   );
 
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName]
+    () =>
+      !isPlainRecord &&
+      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
+      !!indexPattern.timeFieldName,
+    [isPlainRecord, uiSettings, indexPattern.timeFieldName]
   );
 
   if (
@@ -153,7 +160,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={onSort}
+            onSort={!isPlainRecord ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -162,7 +169,7 @@ function DiscoverDocumentsComponent({
       {!isLegacy && (
         <>
           {!hideAnnouncements && (
-            <DiscoverTourProvider>
+            <DiscoverTourProvider isPlainRecord={isPlainRecord}>
               <DocumentExplorerUpdateCallout />
             </DiscoverTourProvider>
           )}
@@ -178,18 +185,20 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={setExpandedDoc}
+              setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={onSort}
+              onSort={!isPlainRecord ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
+              isSortEnabled={!isPlainRecord}
+              isPlainRecord={isPlainRecord}
               onFieldEdited={onFieldEdited}
             />
           </div>

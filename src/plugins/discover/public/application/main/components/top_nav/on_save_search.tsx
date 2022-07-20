@@ -23,6 +23,7 @@ async function saveDataSource({
   saveOptions,
   services,
   state,
+  navigateOrReloadSavedSearch,
 }: {
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -30,6 +31,7 @@ async function saveDataSource({
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
   state: GetStateReturn;
+  navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
   function onSuccess(id: string) {
@@ -43,20 +45,22 @@ async function saveDataSource({
         }),
         'data-test-subj': 'saveSearchSuccess',
       });
-      if (id !== prevSavedSearchId) {
-        navigateTo(`/view/${encodeURIComponent(id)}`);
-      } else {
-        // Update defaults so that "reload saved query" functions correctly
-        state.resetAppState();
-        services.chrome.docTitle.change(savedSearch.title!);
+      if (navigateOrReloadSavedSearch) {
+        if (id !== prevSavedSearchId) {
+          navigateTo(`/view/${encodeURIComponent(id)}`);
+        } else {
+          // Update defaults so that "reload saved query" functions correctly
+          state.resetAppState();
+          services.chrome.docTitle.change(savedSearch.title!);
 
-        setBreadcrumbsTitle(
-          {
-            ...savedSearch,
-            id: prevSavedSearchId ?? id,
-          },
-          services.chrome
-        );
+          setBreadcrumbsTitle(
+            {
+              ...savedSearch,
+              id: prevSavedSearchId ?? id,
+            },
+            services.chrome
+          );
+        }
       }
     }
   }
@@ -89,6 +93,7 @@ export async function onSaveSearch({
   services,
   state,
   onClose,
+  onSaveCb,
 }: {
   indexPattern: DataView;
   navigateTo: (path: string) => void;
@@ -96,6 +101,7 @@ export async function onSaveSearch({
   services: DiscoverServices;
   state: GetStateReturn;
   onClose?: () => void;
+  onSaveCb?: () => void;
 }) {
   const onSave = async ({
     newTitle,
@@ -118,6 +124,7 @@ export async function onSaveSearch({
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
     };
+    const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
       indexPattern,
       saveOptions,
@@ -125,6 +132,7 @@ export async function onSaveSearch({
       navigateTo,
       savedSearch,
       state,
+      navigateOrReloadSavedSearch,
     });
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
@@ -132,6 +140,7 @@ export async function onSaveSearch({
     } else {
       state.resetInitialAppState();
     }
+    onSaveCb?.();
     return response;
   };
 

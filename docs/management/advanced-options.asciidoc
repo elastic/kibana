@@ -316,6 +316,9 @@ The default sort direction for time-based data views.
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 
+[[discover:enableSql]]`discover:enableSql`::
+When enabled, allows SQL queries for search.
+
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.

@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
-
 import { setQuery } from '../state';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
@@ -100,7 +99,7 @@ export const syncDashboardFilterState = ({
   // apply filters when the filter manager changes
   const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
     .pipe(debounceTime(100))
-    .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));
+    .subscribe(() => applyFilters(queryString.getQuery() as Query, filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
     timefilterService.getRefreshIntervalUpdate$(),

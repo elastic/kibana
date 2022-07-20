@@ -29,7 +29,12 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
+  ENABLE_SQL,
 } from '../common';
+
+const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
+  defaultMessage: 'technical preview',
+});
 
 export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup
@@ -287,5 +292,18 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+  },
+  [ENABLE_SQL]: {
+    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
+      defaultMessage: 'Enable SQL',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enables the SQL queries for searching in Discover.',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    requiresPageReload: true,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 });

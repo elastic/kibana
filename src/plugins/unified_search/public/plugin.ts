@@ -82,6 +82,7 @@ export class UnifiedSearchPublicPlugin
       ui: {
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
+        AggregateQuerySearchBar: SearchBar,
       },
       autocomplete: autocompleteStart,
     };

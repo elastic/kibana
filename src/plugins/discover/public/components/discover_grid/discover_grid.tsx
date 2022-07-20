@@ -121,7 +121,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -167,6 +167,10 @@ export interface DiscoverGridProps {
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
   /**
+   * Is text base lang mode enabled
+   */
+  isPlainRecord?: boolean;
+  /**
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
@@ -203,6 +207,7 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  isPlainRecord = false,
   onFieldEdited,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -364,9 +369,11 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
+        onFilter,
         editField,
       }),
     [
+      onFilter,
       displayedColumns,
       displayedRows,
       indexPattern,
@@ -401,8 +408,8 @@ export const DiscoverGrid = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(
-    () => getLeadControlColumns().filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds]
+    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, setExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -512,7 +519,11 @@ export const DiscoverGrid = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(className, 'dscDiscoverGrid__table')}
+          className={classnames(
+            className,
+            'dscDiscoverGrid__table',
+            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
+          )}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -576,7 +587,7 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {expandedDoc && (
+        {setExpandedDoc && expandedDoc && (
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}

@@ -21,7 +21,7 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -164,6 +164,29 @@ describe('discover responsive sidebar', function () {
   it('should show "Add a field" button to create a runtime field', () => {
     expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
     expect(findTestSubject(comp, 'indexPattern-add-field_btn').length).toBe(1);
+  });
+
+  it('should not show "Add a field" button on the sql mode', () => {
+    const initialProps = getCompProps();
+    const propsWithTextBasedMode = {
+      ...initialProps,
+      onAddFilter: undefined,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.PLAIN,
+        result: getDataTableRecords(stubLogstashIndexPattern),
+      }) as DataDocuments$,
+      state: {
+        ...initialProps.state,
+        query: { sql: 'SELECT * FROM `index`' },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+      </KibanaContextProvider>
+    );
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
   });
 
   it('should not show "Add a field" button in viewer mode', () => {

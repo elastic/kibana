@@ -9,7 +9,7 @@
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
@@ -63,6 +63,10 @@ const noop = () => {
 const kqlQuery = {
   query: 'response:200',
   language: 'kuery',
+};
+
+const sqlQuery = {
+  sql: 'SELECT * FROM test',
 };
 
 const createMockWebStorage = () => ({
@@ -256,5 +260,22 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
+  });
+
+  it('Should NOT render query input bar if on text based languages mode', () => {
+    const component = shallow(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [stubIndexPattern],
+        showDatePicker: false,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
   });
 });

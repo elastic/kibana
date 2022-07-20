@@ -45,6 +45,7 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
     },
   },
   async fn(input, args) {
+    const query = input.query as Query;
     return {
       type: 'render',
       as: TILE_MAP_RENDER,
@@ -52,7 +53,7 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
         visType: TILE_MAP_VIS_TYPE,
         visConfig: JSON.parse(args.visConfig),
         filters: input.filters,
-        query: Array.isArray(input.query) ? input.query[0] : input.query,
+        query: Array.isArray(query) ? query[0] : query,
         timeRange: input.timeRange,
       },
     };

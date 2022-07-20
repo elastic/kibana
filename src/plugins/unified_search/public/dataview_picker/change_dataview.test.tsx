@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { EuiTourStep } from '@elastic/eui';
-import type { DataViewPickerProps } from '.';
+import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -41,7 +41,7 @@ describe('DataView component', () => {
   };
 
   function wrapDataViewComponentInContext(
-    testProps: DataViewPickerProps,
+    testProps: DataViewPickerPropsExtended,
     storageValue: boolean,
     uiSettingValue: boolean = false
   ) {
@@ -69,7 +69,7 @@ describe('DataView component', () => {
       </I18nProvider>
     );
   }
-  let props: DataViewPickerProps;
+  let props: DataViewPickerPropsExtended;
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -80,6 +80,7 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
+      onTextLangQuerySubmit: jest.fn(),
     };
   });
   it('should not render the tour component by default', async () => {
@@ -148,5 +149,22 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
+  });
+
+  it('should render the text based languages panels if languages are given', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          showNewMenuTour: true,
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
+          textBasedLanguage: TextBasedLanguages.SQL,
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
+    expect(text.length).not.toBe(0);
   });
 });

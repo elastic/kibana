@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { AppState, AppStateUrl } from '../services/discover_state';
 
@@ -13,7 +14,12 @@ import { AppState, AppStateUrl } from '../services/discover_state';
  * @param appStateFromUrl
  */
 export function cleanupUrlState(appStateFromUrl: AppStateUrl): AppState {
-  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
+  if (
+    appStateFromUrl &&
+    appStateFromUrl.query &&
+    !isOfAggregateQueryType(appStateFromUrl.query) &&
+    !appStateFromUrl.query.language
+  ) {
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 

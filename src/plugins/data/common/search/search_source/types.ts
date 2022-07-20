@@ -7,13 +7,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigSerialized, IAggConfigs } from '../../../public';
-import { Query } from '../..';
 import type { SearchSource } from './search_source';
 
 /**
@@ -78,7 +78,7 @@ export interface SearchSourceFields {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
@@ -125,7 +125,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
