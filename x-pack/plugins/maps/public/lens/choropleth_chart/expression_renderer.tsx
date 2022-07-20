@@ -85,7 +85,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
 
         if (containerType && visualizationType) {
           plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
-            `render_${visualizationType}_map`,
+            `render_${visualizationType}_regionmap`,
           ]);
         }
 
