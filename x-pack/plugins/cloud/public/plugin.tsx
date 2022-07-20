@@ -259,7 +259,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (security) {
       analytics.registerContextProvider({
-        name: 'cloud_user_id',
+        name: 'cloud user id',
         context$: from(security.authc.getCurrentUser()).pipe(
           map((user) => {
             if (user.elastic_cloud_user) {

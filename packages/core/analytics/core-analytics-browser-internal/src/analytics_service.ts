@@ -77,10 +77,10 @@ export class AnalyticsService {
    */
   private registerSessionIdContext() {
     this.analyticsClient.registerContextProvider({
-      name: 'session-id',
-      context$: of({ session_id: getSessionId() }),
+      name: 'session id',
+      context$: of({ sessionId: getSessionId() }),
       schema: {
-        session_id: {
+        sessionId: {
           type: 'keyword',
           _meta: { description: 'Unique session ID for every browser session' },
         },
@@ -132,20 +132,20 @@ export class AnalyticsService {
     this.analyticsClient.registerContextProvider({
       name: 'browser info',
       context$: of({
-        user_agent: navigator.userAgent,
-        preferred_language: navigator.language,
-        preferred_languages: navigator.languages,
+        userAgent: navigator.userAgent,
+        preferredLanguage: navigator.language,
+        preferredLanguages: navigator.languages,
       }),
       schema: {
-        user_agent: {
+        userAgent: {
           type: 'keyword',
           _meta: { description: 'User agent of the browser.' },
         },
-        preferred_language: {
+        preferredLanguage: {
           type: 'keyword',
           _meta: { description: 'Preferred language of the browser.' },
         },
-        preferred_languages: {
+        preferredLanguages: {
           type: 'array',
           items: {
             type: 'keyword',

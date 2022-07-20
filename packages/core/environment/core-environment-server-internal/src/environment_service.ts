@@ -91,11 +91,11 @@ export class EnvironmentService {
     analytics.registerContextProvider({
       name: 'kibana info',
       context$: of({
-        kibana_uuid: this.uuid,
+        kibanaUuid: this.uuid,
         pid: process.pid,
       }),
       schema: {
-        kibana_uuid: {
+        kibanaUuid: {
           type: 'keyword',
           _meta: { description: 'Kibana instance UUID' },
         },

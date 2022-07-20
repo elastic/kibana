@@ -19,21 +19,21 @@ export function registerAnalyticsContextProvider(
     name: 'license info',
     context$: license$.pipe(
       map((license) => ({
-        license_id: license.uid,
-        license_status: license.status,
-        license_type: license.type,
+        licenseId: license.uid,
+        licenseStatus: license.status,
+        licenseType: license.type,
       }))
     ),
     schema: {
-      license_id: {
+      licenseId: {
         type: 'keyword',
         _meta: { description: 'The license ID', optional: true },
       },
-      license_status: {
+      licenseStatus: {
         type: 'keyword',
         _meta: { description: 'The license Status (active/invalid/expired)', optional: true },
       },
-      license_type: {
+      licenseType: {
         type: 'keyword',
         _meta: {
           description: 'The license Type (basic/standard/gold/platinum/enterprise/trial)',

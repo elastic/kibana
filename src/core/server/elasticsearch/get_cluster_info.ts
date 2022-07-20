@@ -12,9 +12,9 @@ import type { ElasticsearchClient } from './client';
 
 /** @private */
 export interface ClusterInfo {
-  cluster_name: string;
-  cluster_uuid: string;
-  cluster_version: string;
+  clusterName: string;
+  clusterUuid: string;
+  clusterVersion: string;
 }
 
 /**
@@ -25,9 +25,9 @@ export interface ClusterInfo {
 export function getClusterInfo$(internalClient: ElasticsearchClient): Observable<ClusterInfo> {
   return defer(() => internalClient.info()).pipe(
     map((info) => ({
-      cluster_name: info.cluster_name,
-      cluster_uuid: info.cluster_uuid,
-      cluster_version: info.version.number,
+      clusterName: info.cluster_name,
+      clusterUuid: info.cluster_uuid,
+      clusterVersion: info.version.number,
     })),
     retry({ delay: 1000 }),
     shareReplay(1)

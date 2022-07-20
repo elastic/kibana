@@ -24,9 +24,9 @@ export function registerAnalyticsContextProvider(
     name: 'elasticsearch info',
     context$,
     schema: {
-      cluster_name: { type: 'keyword', _meta: { description: 'The Cluster Name' } },
-      cluster_uuid: { type: 'keyword', _meta: { description: 'The Cluster UUID' } },
-      cluster_version: { type: 'keyword', _meta: { description: 'The Cluster version' } },
+      clusterName: { type: 'keyword', _meta: { description: 'The Cluster Name' } },
+      clusterUuid: { type: 'keyword', _meta: { description: 'The Cluster UUID' } },
+      clusterVersion: { type: 'keyword', _meta: { description: 'The Cluster version' } },
     },
   });
 }
