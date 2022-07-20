@@ -17,7 +17,8 @@ import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
-describe('When using the kill-process action from response actions console', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/136779
+describe.skip('When using the kill-process action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
