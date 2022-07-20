@@ -87,43 +87,11 @@ curl -XGET https://localhost:5601/s/{spaceId}/api/ml/saved_objects/sync \
 [[definitions]]
 == Definitions
 
-* <<DatafeedsAdded>>
-* <<DatafeedsRemoved>>
 * <<SavedObjectsCreated>>
 * <<SavedObjectsDeleted>>
-* <<SyncDatafeed>>
 * <<SyncJob>>
 * <<SyncModel>>
 * <<SyncResponse>>
-* <<SyncSuccess>>
-
-[[DatafeedsAdded]]
-=== `DatafeedsAdded`
-
-If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
-
-
-==== Example
-
-[source,json]
---------
-{}
-
---------
-
-[[DatafeedsRemoved]]
-=== `DatafeedsRemoved`
-
-If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
-
-
-==== Example
-
-[source,json]
---------
-{}
-
---------
 
 [[SavedObjectsCreated]]
 === `SavedObjectsCreated`
@@ -152,17 +120,17 @@ This object is present if there are trained models affected by the synchronizati
 {
    "anomaly-detector" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    },
    "data-frame-analytics" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    },
    "trained-model" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    }
 }
@@ -196,41 +164,19 @@ This object is present if there are trained models affected by the synchronizati
 {
    "anomaly-detector" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    },
    "data-frame-analytics" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    },
    "trained-model" : {
       "some_property" : {
-         "success" : {}
+         "success" : true
       }
    }
-}
-
---------
-
-[[SyncDatafeed]]
-=== `SyncDatafeed`
-
-The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.
-
-
-==== Properties
-
-`success` (<<SyncSuccess,`SyncSuccess`>>)::
-The success or failure of the synchronization.
-
-
-==== Example
-
-[source,json]
---------
-{
-   "success" : {}
 }
 
 --------
@@ -243,7 +189,7 @@ The sync machine learning saved objects API response contains this object when t
 
 ==== Properties
 
-`success` (<<SyncSuccess,`SyncSuccess`>>)::
+`success` (+boolean+)::
 The success or failure of the synchronization.
 
 
@@ -252,7 +198,7 @@ The success or failure of the synchronization.
 [source,json]
 --------
 {
-   "success" : {}
+   "success" : true
 }
 
 --------
@@ -265,7 +211,7 @@ The sync machine learning saved objects API response contains this object when t
 
 ==== Properties
 
-`success` (<<SyncSuccess,`SyncSuccess`>>)::
+`success` (+boolean+)::
 The success or failure of the synchronization.
 
 
@@ -274,7 +220,7 @@ The success or failure of the synchronization.
 [source,json]
 --------
 {
-   "success" : {}
+   "success" : true
 }
 
 --------
@@ -287,11 +233,11 @@ A list of machine learning saved objects that required synchronization.
 
 ==== Properties
 
-`datafeedsAdded` (<<DatafeedsAdded,`DatafeedsAdded`>>)::
+`datafeedsAdded` (++map[string,+++object+++]++)::
 If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
 
 
-`datafeedsRemoved` (<<DatafeedsRemoved,`DatafeedsRemoved`>>)::
+`datafeedsRemoved` (++map[string,+++object+++]++)::
 If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
 
 
@@ -308,56 +254,46 @@ If saved objects exist for machine learning jobs or trained models that no longe
 [source,json]
 --------
 {
-   "datafeedsAdded" : {},
-   "datafeedsRemoved" : {},
+   "datafeedsAdded" : {
+      "some_property" : {}
+   },
+   "datafeedsRemoved" : {
+      "some_property" : {}
+   },
    "savedObjectsCreated" : {
       "anomaly-detector" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       },
       "data-frame-analytics" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       },
       "trained-model" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       }
    },
    "savedObjectsDeleted" : {
       "anomaly-detector" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       },
       "data-frame-analytics" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       },
       "trained-model" : {
          "some_property" : {
-            "success" : {}
+            "success" : true
          }
       }
    }
 }
-
---------
-
-[[SyncSuccess]]
-=== `SyncSuccess`
-
-The success or failure of the synchronization.
-
-
-==== Example
-
-[source,json]
---------
-{}
 
 --------
