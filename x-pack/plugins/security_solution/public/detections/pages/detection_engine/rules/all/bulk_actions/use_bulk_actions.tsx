@@ -215,7 +215,7 @@ export const useBulkActions = ({
 
         const details = await getExportedRulesDetails(response);
 
-        // if there are failed exported rules notify users.
+        // if there are failed exported rules, show modal window to users.
         // they can either cancel action or proceed with export of succeeded rules
         if (
           (await showBulkActionConfirmation(

@@ -45,7 +45,7 @@ export const transformExportDetailsToDryRunResult = (details: ExportRulesDetails
       ? [
           {
             errorCode: BulkActionsDryRunErrCode.IMMUTABLE,
-            message: BulkActionsDryRunErrCode.IMMUTABLE,
+            message: "Prebuilt rules can't be exported.",
             ruleIds: details.missing_rules.map(({ rule_id: ruleId }) => ruleId),
           },
         ]

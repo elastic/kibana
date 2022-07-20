@@ -188,7 +188,7 @@ function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HT
   toasts.addError(error, { title, toastMessage });
 }
 
-const getExportToastMessage = (succeeded: number, total: number) => {
+const getExportSuccessToastMessage = (succeeded: number, total: number) => {
   const message = [i18n.RULES_BULK_EXPORT_SUCCESS_DESCRIPTION(succeeded, total)];
 
   // if not all rules are successfully exported it means there included prebuilt rules
@@ -211,7 +211,7 @@ async function defaultSuccessHandler(
   switch (action) {
     case BulkAction.export:
       title = i18n.RULES_BULK_EXPORT_SUCCESS;
-      text = getExportToastMessage(summary.succeeded, summary.total);
+      text = getExportSuccessToastMessage(summary.succeeded, summary.total);
       break;
     case BulkAction.duplicate:
       title = i18n.RULES_BULK_DUPLICATE_SUCCESS;
