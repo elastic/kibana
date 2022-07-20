@@ -36,6 +36,7 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { BetaBadge } from '../../../shared/beta_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -261,9 +262,18 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate('xpack.apm.home.infraTabLabel', {
-        defaultMessage: 'Infrastructure',
-      }),
+      label: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.apm.home.infraTabLabel', {
+              defaultMessage: 'Infrastructure',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <BetaBadge icon="beaker" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       hidden: !showInfraTab,
     },
     {
