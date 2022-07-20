@@ -15,7 +15,9 @@ import {
   DatasourcePublicAPI,
   OperationDescriptor,
   OperationMetadata,
+  Visualization,
 } from '../../types';
+import { GROUP_ID } from './constants';
 import { getMetricVisualization, MetricVisualizationState } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -419,6 +421,154 @@ describe('metric visualization', () => {
 
       expect(ast.chain).toHaveLength(3);
       expect(ast.chain[0]).toEqual(datasourceFn);
+    });
+  });
+
+  it('clears a layer', () => {
+    expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
+      Object {
+        "extraText": "extra-text",
+        "layerId": "first",
+        "layerType": "data",
+        "maxCols": 5,
+        "progressDirection": "vertical",
+        "subtitle": "subtitle",
+      }
+    `);
+  });
+
+  test('getLayerIds returns the single layer ID', () => {
+    expect(visualization.getLayerIds(fullState)).toEqual([fullState.layerId]);
+  });
+
+  it('gives a description', () => {
+    expect(visualization.getDescription(fullState)).toMatchInlineSnapshot(`
+      Object {
+        "icon": [Function],
+        "label": "Metric",
+      }
+    `);
+  });
+
+  describe('getting supported layers', () => {
+    it('works without state', () => {
+      const supportedLayers = visualization.getSupportedLayers();
+      expect(supportedLayers[0].initialDimensions).toBeUndefined();
+      expect(supportedLayers).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "initialDimensions": undefined,
+            "label": "Visualization",
+            "type": "data",
+          },
+        ]
+      `);
+    });
+
+    it('includes max static value dimension when state provided', () => {
+      const supportedLayers = visualization.getSupportedLayers(fullState);
+      expect(supportedLayers[0].initialDimensions).toHaveLength(1);
+      expect(supportedLayers[0].initialDimensions![0]).toEqual(
+        expect.objectContaining({
+          groupId: GROUP_ID.MAX,
+          staticValue: 0,
+        })
+      );
+    });
+  });
+
+  it('sets dimensions', () => {
+    const state = {} as MetricVisualizationState;
+    const columnId = 'col-id';
+    expect(
+      visualization.setDimension({
+        prevState: state,
+        columnId,
+        groupId: GROUP_ID.METRIC,
+        layerId: 'some-id',
+        frame: mockFrameApi,
+      })
+    ).toEqual({
+      metricAccessor: columnId,
+    });
+    expect(
+      visualization.setDimension({
+        prevState: state,
+        columnId,
+        groupId: GROUP_ID.SECONDARY_METRIC,
+        layerId: 'some-id',
+        frame: mockFrameApi,
+      })
+    ).toEqual({
+      secondaryMetricAccessor: columnId,
+    });
+    expect(
+      visualization.setDimension({
+        prevState: state,
+        columnId,
+        groupId: GROUP_ID.MAX,
+        layerId: 'some-id',
+        frame: mockFrameApi,
+      })
+    ).toEqual({
+      maxAccessor: columnId,
+    });
+    expect(
+      visualization.setDimension({
+        prevState: state,
+        columnId,
+        groupId: GROUP_ID.BREAKDOWN_BY,
+        layerId: 'some-id',
+        frame: mockFrameApi,
+      })
+    ).toEqual({
+      breakdownByAccessor: columnId,
+    });
+  });
+
+  describe('removing a dimension', () => {
+    const removeDimensionParam: Parameters<
+      Visualization<MetricVisualizationState>['removeDimension']
+    >[0] = {
+      layerId: 'some-id',
+      columnId: '',
+      frame: mockFrameApi,
+      prevState: fullState,
+    };
+
+    it('removes metric dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullState.metricAccessor!,
+      });
+
+      expect(removed).not.toHaveProperty('metricAccessor');
+      expect(removed).not.toHaveProperty('palette');
+    });
+    it('removes secondary metric dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullState.secondaryMetricAccessor!,
+      });
+
+      expect(removed).not.toHaveProperty('secondaryMetricAccessor');
+    });
+    it('removes max dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullState.maxAccessor!,
+      });
+
+      expect(removed).not.toHaveProperty('maxAccessor');
+    });
+    it('removes breakdown-by dimension', () => {
+      const removed = visualization.removeDimension({
+        ...removeDimensionParam,
+        columnId: fullState.breakdownByAccessor!,
+      });
+
+      expect(removed).not.toHaveProperty('breakdownByAccessor');
+      expect(removed).not.toHaveProperty('collapseFn');
     });
   });
 
