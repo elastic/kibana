@@ -30,6 +30,11 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderBottom: isCodeEditorExpanded
+        ? 'none'
+        : isCompactFocused
+        ? euiTheme.border.thin
+        : 'none',
     },
     resizableContainer: {
       display: 'flex',
@@ -41,25 +46,30 @@ export const textBasedLanguagedEditorStyles = (
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
-      right: hasErrors ? '64px' : '16px',
+      right: hasErrors ? '60px' : '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },
     errorsBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
-      right: '16px',
+      right: '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
       border: euiTheme.border.thin,
-      borderTop: isCodeEditorExpanded ? 'none' : `1px solid ${bottomContainerBorderColor}`,
+      borderTop: isCodeEditorExpanded
+        ? euiTheme.border.thin
+        : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
-      paddingLeft: euiTheme.size.s,
-      paddingRight: euiTheme.size.s,
+      paddingLeft: euiTheme.size.base,
+      paddingRight: euiTheme.size.base,
+      paddingTop: euiTheme.size.xs,
+      paddingBottom: euiTheme.size.xs,
+      width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
-      marginTop: 0,
+      marginTop: '1px',
       marginLeft: 0,
     },
     topContainer: {
@@ -67,6 +77,7 @@ export const textBasedLanguagedEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
+      width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,
       marginTop: euiTheme.size.s,

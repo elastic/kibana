@@ -10,7 +10,7 @@ import React, { memo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBadge,
+  EuiCode,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,9 +46,9 @@ export const EditorFooter = memo(function EditorFooter({
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
+            <EuiText size="xs" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
               <p>
                 {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
                   defaultMessage: '{count} {count, plural, one {line} other {lines}}',
@@ -67,7 +67,7 @@ export const EditorFooter = memo(function EditorFooter({
                   <EuiPopover
                     button={
                       <EuiText
-                        size="s"
+                        size="xs"
                         color="danger"
                         css={css`
                           &:hover {
@@ -75,7 +75,7 @@ export const EditorFooter = memo(function EditorFooter({
                             text-decoration: underline;
                           }
                         `}
-                        onClick={() => setIsPopoverOpen(true)}
+                        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                       >
                         <p>
                           {i18n.translate(
@@ -109,7 +109,7 @@ export const EditorFooter = memo(function EditorFooter({
                                 <EuiFlexItem grow={false}>
                                   <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
                                 </EuiFlexItem>
-                                <EuiFlexItem>
+                                <EuiFlexItem grow={false}>
                                   {i18n.translate(
                                     'unifiedSearch.query.textBasedLanguagesEditor.lineNumber',
                                     {
@@ -133,9 +133,9 @@ export const EditorFooter = memo(function EditorFooter({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" responsive={false}>
+        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <EuiText size="xs" color="subdued">
               <p>
                 {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.runQuery', {
                   defaultMessage: 'Run query',
@@ -144,7 +144,11 @@ export const EditorFooter = memo(function EditorFooter({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{`${COMMAND_KEY} + Enter`} </EuiBadge>
+            <EuiCode
+              css={css`
+                font-size: 12px;
+              `}
+            >{`${COMMAND_KEY} + Enter`}</EuiCode>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -215,7 +215,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (hasLines && !updateLinesFromModel) {
           setLines(queryString.split(/\r|\n/).length);
         }
-        const text = hasLines ? queryString.split(/\r|\n/)[0] : queryString;
+        const trimmedText = queryString.replace(/\r?\n|\r/g, ' ');
+        const text = hasLines ? trimmedText : queryString;
         const queryLength = text.length;
         const unusedSpace =
           errors && errors.length
@@ -226,7 +227,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           const shortedCode = text.substring(0, charactersAlowed) + '...';
           setCodeOneLiner(shortedCode);
         } else {
-          const shortedCode = hasLines ? `${text}...` : text;
+          const shortedCode = text;
           setCodeOneLiner(shortedCode);
         }
       }
@@ -262,6 +263,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
+  const toggleDocumentationPopover = useCallback(() => {
+    setIsHelpOpen(!isHelpOpen);
+  }, [isHelpOpen]);
+
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections(language);
@@ -280,14 +285,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
-    lineDecorationsWidth: 16,
+    lineDecorationsWidth: 12,
     accessibilitySupport: 'off',
     autoIndent: 'none',
     wrappingIndent: 'none',
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'auto',
+      vertical: 'hidden',
       horizontal: 'hidden',
     },
     overviewRulerBorder: false,
@@ -329,7 +334,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             >
               <EuiButtonIcon
                 iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
-                display={!isWordWrapped ? 'fill' : undefined}
                 color="text"
                 data-test-subj="unifiedTextLangEditor-toggleWordWrap"
                 aria-label={
@@ -416,7 +420,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             defaultMessage: 'Documentation',
                           }
                         )}
-                        onClick={() => setIsHelpOpen(true)}
+                        onClick={toggleDocumentationPopover}
                       />
                     </EuiToolTip>
                   }
@@ -506,13 +510,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   )}
                 >
                   <EuiButtonIcon
-                    display="base"
+                    display="empty"
                     iconType="expand"
                     size="m"
                     aria-label="Expand"
                     onClick={() => expandCodeEditor(true)}
                     data-test-subj="unifiedTextLangEditor-expand"
-                    css={{ borderRadius: 0 }}
+                    css={{
+                      borderRadius: 0,
+                      backgroundColor: '#e9edf3',
+                      border: '1px solid rgb(17 43 134 / 10%) !important',
+                    }}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -537,13 +545,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       )}
                     >
                       <EuiButtonIcon
-                        display="base"
+                        display="empty"
                         iconType="documentation"
                         size="m"
                         aria-label="Documentation"
                         data-test-subj="unifiedTextLangEditor-inline-documentation"
-                        onClick={() => setIsHelpOpen(true)}
-                        css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                        onClick={toggleDocumentationPopover}
+                        css={{
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                          backgroundColor: '#e9edf3',
+                          border: '1px solid rgb(17 43 134 / 10%) !important',
+                          borderLeft: 'transparent !important',
+                        }}
                       />
                     </EuiToolTip>
                   }
