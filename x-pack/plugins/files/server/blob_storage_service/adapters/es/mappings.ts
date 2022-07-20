@@ -37,7 +37,7 @@ export const mappings: MappingTypeMapping = {
   dynamic: false,
   properties: {
     data: { type: 'binary' }, // Binary fields are automatically marked as not searchable by ES
-    bid: { type: 'keyword', index: true },
+    bid: { type: 'keyword', index: false },
     last: { type: 'boolean', index: false },
   } as Record<keyof FileChunkDocument, MappingProperty>, // Ensure that our ES types and TS types stay somewhat in sync
 } as const;
