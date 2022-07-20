@@ -512,10 +512,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableTimeShift() {
-      await testSubjects.click('indexPattern-advanced-popover');
-      await retry.try(async () => {
-        await testSubjects.click('indexPattern-time-shift-enable');
-      });
+      await testSubjects.click('indexPattern-advanced-accordion');
     },
 
     async setTimeShift(shift: string) {
@@ -523,9 +520,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async enableFilter() {
-      await testSubjects.click('indexPattern-advanced-popover');
+      await testSubjects.click('indexPattern-advanced-accordion');
       await retry.try(async () => {
-        await testSubjects.click('indexPattern-filter-by-enable');
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       });
     },
 
@@ -1271,8 +1268,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
               dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
               const dragEndEvent = createEvent('dragend');
               dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
-            }, 100)
-          }, 100);
+            }, 200)
+          }, 200);
       `,
         dragging,
         draggedOver,
