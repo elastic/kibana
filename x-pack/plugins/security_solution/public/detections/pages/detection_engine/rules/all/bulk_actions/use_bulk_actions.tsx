@@ -28,7 +28,7 @@ import { executeRulesBulkAction, downloadExportedRules } from '../actions';
 import { getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { transformExportDetailsToDryRunResult } from './utils/dry_run';
+import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';

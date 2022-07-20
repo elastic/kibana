@@ -15,7 +15,7 @@ import type {
 import type { BulkActionResponse } from '../../../../../containers/detection_engine/rules';
 import { performBulkAction } from '../../../../../containers/detection_engine/rules';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';
-import { processDryRunResult } from './utils/dry_run';
+import { processDryRunResult } from './utils/dry_run_result';
 
 import type { DryRunResult } from './types';
 
