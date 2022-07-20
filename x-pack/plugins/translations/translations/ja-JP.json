@@ -2896,8 +2896,6 @@
     "discover.advancedSettings.params.maxCellHeightTitle": "クラシック表の最大セル高さ",
     "discover.advancedSettings.params.rowHeightText": "行に追加できる線数。値-1は、コンテンツに合わせて、行の高さを自動的に調整します。値0はコンテンツが1行に表示されます。",
     "discover.advancedSettings.params.rowHeightTitle": "ドキュメントエクスプローラーの行高さ",
-    "discover.advancedSettings.sampleSizeText": "表に表示する行数です",
-    "discover.advancedSettings.sampleSizeTitle": "行数",
     "discover.advancedSettings.searchOnPageLoadText": "Discover の最初の読み込み時に検索を実行するかを制御します。この設定は、保存された検索の読み込み時には影響しません。",
     "discover.advancedSettings.searchOnPageLoadTitle": "ページの読み込み時の検索",
     "discover.advancedSettings.sortDefaultOrderText": "Discover アプリのデータビューに基づく時刻のデフォルトの並べ替え方向をコントロールします。",

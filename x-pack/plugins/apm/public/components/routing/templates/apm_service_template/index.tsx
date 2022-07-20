@@ -17,7 +17,7 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
@@ -37,6 +37,7 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -87,13 +88,16 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  useBreadcrumb({
-    title,
-    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-      path: { serviceName },
-      query,
+  useBreadcrumb(
+    () => ({
+      title,
+      href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
+        path: { serviceName },
+        query,
+      }),
     }),
-  });
+    [query, router, selectedTab, serviceName, title]
+  );
 
   return (
     <ApmMainTemplate
@@ -146,7 +150,7 @@ export function isMetricsTabHidden({
     !agentName ||
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
-    isIosAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
     isJRubyAgent(agentName, runtimeName) ||
     isServerlessAgent(runtimeName)
   );
@@ -222,7 +226,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Dependencies',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'errors',
@@ -296,7 +300,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Logs',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'profiling',
@@ -340,9 +344,18 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
-        defaultMessage: 'Alerts',
-      }),
+      label: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.apm.home.alertsTabLabel', {
+              defaultMessage: 'Alerts',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TechnicalPreviewBadge icon="beaker" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];

@@ -19,6 +19,7 @@ import {
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
+  apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
 } from '../common/ui_settings_keys';
@@ -188,6 +189,17 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: false,
     type: 'boolean',
+  },
+  [apmServiceGroupMaxNumberOfServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
+      defaultMessage: 'Maximum services in a service group',
+    }),
+    value: 500,
+    description: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingDescription', {
+      defaultMessage: 'Limit the number of services in a given service group',
+    }),
+    schema: schema.number({ min: 1 }),
   },
   [apmTraceExplorerTab]: {
     category: [observabilityFeatureId],
