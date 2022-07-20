@@ -26,7 +26,7 @@ function getActiveSnoozes(rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>): Active
   );
 }
 
-export function getActiveRecurringSnoozes(
+export function getActiveScheduledSnoozes(
   rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
 ): ActiveSnoozes | null {
   return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
