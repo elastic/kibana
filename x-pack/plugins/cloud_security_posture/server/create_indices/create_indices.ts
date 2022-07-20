@@ -69,7 +69,7 @@ export const createIndexIfNotExists = async (
 };
 
 const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
-  // We fetch the index template of the findings data stream to clone the mapping to the latest findings
+  // We want that our latest findings index template would be identical to the findings index template
   const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
     name: FINDINGS_INDEX_NAME,
   });
