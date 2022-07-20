@@ -19,20 +19,18 @@ import {
 
 describe('NewSearchIndexTemplate', () => {
   const mockProps: NewSearchIndexTemplateProps = {
-    title: 'Index using the API',
-    description: 'Provide a name and optionally select a language analyzer.',
-    docsUrl: 'http://www.elastic.co/guide',
     onSubmit: jest.fn(),
+    title: 'Index using the API',
     type: 'api',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({
-      name: 'my-name',
-      rawName: 'MY$_RAW_$NAME',
       language: null,
       languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
+      name: 'my-name',
+      rawName: 'MY$_RAW_$NAME',
     });
     setMockActions({ makeRequest: jest.fn(), setLanguageSelectValue: jest.fn() });
   });

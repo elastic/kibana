@@ -1065,6 +1065,19 @@ describe('when on the endpoint list page', () => {
       jest.clearAllMocks();
     });
 
+    it('navigates to the Actions log flyout', async () => {
+      const actionsLink = await renderResult.findByTestId('actionsLink');
+
+      expect(actionsLink.getAttribute('href')).toEqual(
+        `${APP_PATH}${getEndpointDetailsPath({
+          name: 'endpointActivityLog',
+          page_index: '0',
+          page_size: '10',
+          selected_endpoint: hostInfo.metadata.agent.id,
+        })}`
+      );
+    });
+
     it('navigates to the Host Details Isolate flyout', async () => {
       const isolateLink = await renderResult.findByTestId('isolateLink');
       expect(isolateLink.getAttribute('href')).toEqual(
