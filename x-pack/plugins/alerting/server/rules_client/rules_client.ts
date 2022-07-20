@@ -872,11 +872,11 @@ export class RulesClient {
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
-    includeActiveSnoozes = false,
+    includeSnoozeData = false,
   }: {
     options?: FindOptions;
     excludeFromPublicApi?: boolean;
-    includeActiveSnoozes?: boolean;
+    includeSnoozeData?: boolean;
   } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
@@ -968,7 +968,7 @@ export class RulesClient {
         references,
         false,
         excludeFromPublicApi,
-        includeActiveSnoozes
+        includeSnoozeData
       );
     });
 
@@ -2651,7 +2651,7 @@ export class RulesClient {
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false,
-    includeActiveSnoozes: boolean = false
+    includeSnoozeData: boolean = false
   ): Rule | RuleWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
@@ -2664,7 +2664,7 @@ export class RulesClient {
       references,
       includeLegacyId,
       excludeFromPublicApi,
-      includeActiveSnoozes
+      includeSnoozeData
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -2695,7 +2695,7 @@ export class RulesClient {
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false,
-    includeActiveSnoozes: boolean = false
+    includeSnoozeData: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
     const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
       ...s,
@@ -2717,7 +2717,7 @@ export class RulesClient {
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
-      ...(includeActiveSnoozes && includeSnoozeSchedule
+      ...(includeSnoozeData && includeSnoozeSchedule
         ? {
             activeSnoozes: getActiveSnoozes({ snoozeSchedule })
               ?.filter((s) => Boolean(s.id))
