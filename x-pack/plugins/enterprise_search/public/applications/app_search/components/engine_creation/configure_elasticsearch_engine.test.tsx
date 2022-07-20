@@ -55,10 +55,7 @@ describe('ConfigureElasticsearchEngine', () => {
 
   it('NewEngineBackButton calls setCreationStep when clicked', () => {
     const wrapper = shallow(<ConfigureElasticsearchEngine />);
-    const simulatedEvent = {
-      preventDefault: jest.fn(),
-    };
-    wrapper.find('[data-test-subj="NewEngineBackButton"]').simulate('submit', simulatedEvent);
+    wrapper.find('[data-test-subj="NewEngineBackButton"]').simulate('click');
 
     expect(MOCK_ACTIONS.setCreationStep).toHaveBeenCalledWith(EngineCreationSteps.SelectStep);
   });
@@ -127,8 +124,10 @@ describe('ConfigureElasticsearchEngine', () => {
       });
       const wrapper = shallow(<ConfigureElasticsearchEngine />);
       const formRow = wrapper.find('[data-test-subj="AliasNameFormRow"]').dive();
+      const expectedMessage =
+        "Alias names must be prefixed with 'search-' in order to be used with App Search engines. Your alias will be named";
 
-      expect(formRow.contains('Your alias will be named')).toBeTruthy();
+      expect(formRow.contains(expectedMessage)).toBeTruthy();
     });
 
     it('renders prefix helptext when aliasRawName and aliasName match', () => {
@@ -139,13 +138,10 @@ describe('ConfigureElasticsearchEngine', () => {
       });
       const wrapper = shallow(<ConfigureElasticsearchEngine />);
       const formRow = wrapper.find('[data-test-subj="AliasNameFormRow"]').dive();
+      const expectedMessage =
+        "Alias names must be prefixed with 'search-' in order to be used with App Search engines";
 
-      expect(
-        formRow.contains(
-          "Alias names must be prefixed with 'search-' in order to be used with App Search engines."
-        )
-      ).toBeTruthy();
-      expect(formRow.contains('Your alias will be named')).toBeFalsy();
+      expect(formRow.contains(expectedMessage)).toBeTruthy();
     });
   });
 

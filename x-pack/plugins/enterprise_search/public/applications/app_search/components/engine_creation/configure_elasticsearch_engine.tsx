@@ -334,9 +334,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
                 data-test-subj="NewEngineBackButton"
                 color="primary"
                 iconType="arrowLeft"
-                onClick={() => {
-                  setCreationStep(EngineCreationSteps.SelectStep);
-                }}
+                onClick={() => setCreationStep(EngineCreationSteps.SelectStep)}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engineCreation.configureForm.backButton.label',
