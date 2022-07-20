@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
-import { clusterResponseMock } from '../dynamic_tree_view/mocks';
+import { clusterResponseMock } from '../mocks';
 import { TreeNav } from '.';
 
 describe('TreeNav component', () => {
