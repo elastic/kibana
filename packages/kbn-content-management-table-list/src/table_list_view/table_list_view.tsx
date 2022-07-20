@@ -26,14 +26,7 @@ import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-// import type {
-//   ApplicationStart,
-//   ToastsStart,
-//   ThemeServiceStart,
-//   SimpleSavedObject,
-// } from '@kbn/core/public';
-// import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-// import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 // import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { SimpleSavedObject } from '../types';
@@ -61,8 +54,6 @@ export interface Props<T> {
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
   tableListTitle: string;
-  // toastNotifications: ToastsStart;
-  // savedObjectTagging?: SavedObjectsTaggingApi;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -77,8 +68,6 @@ export interface Props<T> {
    */
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
-  // theme: ThemeServiceStart;
-  // application: ApplicationStart;
   children?: ReactNode | undefined;
 }
 
@@ -100,10 +89,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   };
 }
 
-// export interface UserContentCommonSchema {
-//   title: string;
-//   description: string;
-// }
 export type UserContentCommonSchema = SimpleSavedObject<{
   title: string;
   description: string;
@@ -197,7 +182,7 @@ function TableListView<T extends UserContentCommonSchema>({
     tableSort,
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !searchQuery;
-  // const pageDataTestSubject = `${entityName}LandingPage`;
+  const pageDataTestSubject = `${entityName}LandingPage`;
   // const showFetchError = Boolean(fetchError);
   // const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -429,17 +414,16 @@ function TableListView<T extends UserContentCommonSchema>({
   }
 
   return (
-    <div
-    // <KibanaPageTemplate
-    // data-test-subj={pageDataTestSubject}
-    // pageHeader={{
-    //   pageTitle: <span id={headingId}>{tableListTitle}</span>,
-    //   rightSideItems: [renderCreateButton()],
-    //   'data-test-subj': 'top-nav',
-    // }}
-    // pageBodyProps={{
-    //   'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-    // }}
+    <KibanaPageTemplate
+      data-test-subj={pageDataTestSubject}
+      pageHeader={{
+        pageTitle: <span id={headingId}>{tableListTitle}</span>,
+        rightSideItems: [renderCreateButton()],
+        'data-test-subj': 'top-nav',
+      }}
+      pageBodyProps={{
+        'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
+      }}
     >
       {/* Any children passed to the component */}
       {children}
@@ -489,8 +473,7 @@ function TableListView<T extends UserContentCommonSchema>({
           onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
         />
       )}
-    </div>
-    // </KibanaPageTemplate>
+    </KibanaPageTemplate>
   );
 }
 

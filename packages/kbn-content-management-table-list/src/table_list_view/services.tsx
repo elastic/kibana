@@ -17,7 +17,6 @@ import type { SavedObject, MountPoint } from '../types';
  * Abstract external services for this component.
  */
 export interface Services {
-  // setIsFullscreen: (isFullscreen: boolean) => void;
   application: {
     capabilities: {
       advancedSettings?: {
