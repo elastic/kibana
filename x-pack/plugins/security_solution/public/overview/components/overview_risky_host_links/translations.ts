@@ -24,15 +24,14 @@ export const WARNING_BODY = i18n.translate(
 export const DANGER_TITLE = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardDangerPanelTitle',
   {
-    defaultMessage: 'No host risk score data to display',
+    defaultMessage: 'No host risk score data',
   }
 );
 
 export const DANGER_BODY = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardEnableThreatIntel',
   {
-    defaultMessage:
-      'Please enable the host risk score module in order to view the list of risky hosts.',
+    defaultMessage: 'You must enable the host risk module to view risky hosts.',
   }
 );
 
@@ -65,16 +64,9 @@ export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.
   defaultMessage: 'Import dashboard',
 });
 
-export const IMPORT_DASHBOARD_POPOVER = i18n.translate(
-  'xpack.securitySolution.overview.importDasboardPopoverTitle',
-  {
-    defaultMessage: 'Make sure you have enabled Host risk score before importing the dashboard.',
-  }
-);
-
-export const ENABLE_RISK_SCORE_TOOLTIP = i18n.translate(
+export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
   'xpack.securitySolution.overview.enableRiskScorePopoverTitle',
   {
-    defaultMessage: 'Make sure you have alerts available before enabling the module.',
+    defaultMessage: 'Alerts need to be available before enabling module',
   }
 );

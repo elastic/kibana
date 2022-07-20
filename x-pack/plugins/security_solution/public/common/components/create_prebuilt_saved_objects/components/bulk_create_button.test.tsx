@@ -26,38 +26,22 @@ describe('ImportSavedObjectsButton', () => {
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
-  it('renders disabled button', () => {
-    render(
+  it('renders null', () => {
+    const { container } = render(
       <ImportSavedObjectsButton
-        enableButton={false}
+        hide={true}
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
         title="Import saved objects"
       />
     );
-    expect(screen.getByTestId('disabled-create-saved-object-button')).toBeInTheDocument();
-  });
-
-  it('renders disabled button with popover', () => {
-    render(
-      <ImportSavedObjectsButton
-        enableButton={false}
-        popoverContent="popover"
-        successTitle="Success"
-        templateName="hostRiskScoreDashboards"
-        title="Import saved objects"
-      />
-    );
-    expect(
-      screen.getByTestId('disabled-create-saved-object-button-with-popover')
-    ).toBeInTheDocument();
+    expect(container.childElementCount).toEqual(0);
   });
 
   it('renders bulk create button', () => {
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
         title="Import saved objects"
@@ -69,8 +53,7 @@ describe('ImportSavedObjectsButton', () => {
   it('show loading icon when import saved objects', async () => {
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
         title="Import saved objects"
@@ -91,8 +74,7 @@ describe('ImportSavedObjectsButton', () => {
   it('renders button with successLink if successLink is given', () => {
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successLink="/test"
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
@@ -116,8 +98,7 @@ describe('ImportSavedObjectsButton', () => {
 
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
         title="Import saved objects"
@@ -147,8 +128,7 @@ describe('ImportSavedObjectsButton', () => {
 
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successTitle="Success"
         templateName="hostRiskScoreDashboards"
         title="Import saved objects"
@@ -172,8 +152,7 @@ describe('ImportSavedObjectsButton', () => {
 
     render(
       <ImportSavedObjectsButton
-        enableButton={true}
-        popoverContent="popover"
+        hide={false}
         successTitle="Success"
         templateName="errorTemplate"
         title="Import saved objects"

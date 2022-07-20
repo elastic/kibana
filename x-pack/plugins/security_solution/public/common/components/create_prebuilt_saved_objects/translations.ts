@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const IMPORT_SAVED_OBJECTS_SUCCESS = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.bulkCreateSavedObjects.bulkCreateSuccessTitle', {
     values: { totalCount },
-    defaultMessage: `Following {totalCount, plural, =1 {saved object} other {saved objects}} has been imported successfully`,
+    defaultMessage: `{totalCount} {totalCount, plural, =1 {saved object} other {saved objects}} imported successfully`,
   });
 
 export const IMPORT_SAVED_OBJECTS_FAILURE = i18n.translate(

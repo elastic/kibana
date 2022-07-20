@@ -123,7 +123,7 @@ const RiskyHostsPanelViewComponent: React.FC<LinkPanelViewProps> = ({
       {...{
         button: (
           <ImportSavedObjectsButton
-            enableButton={listItems.length > 0}
+            hide={listItems == null || listItems.length === 0}
             onSuccessCallback={onImportDashboardSuccessCallback}
             popoverContent={i18n.IMPORT_DASHBOARD_POPOVER}
             successLink={buttonHref || dashboardUrl}
