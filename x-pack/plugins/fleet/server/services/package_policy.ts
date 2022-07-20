@@ -878,7 +878,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           throw new Error('Default output is not set');
         }
         return packageToPackagePolicy(packageInfo, '', defaultOutputId);
+      } else {
+        throw new Error('PackageInfo not found.');
       }
+    } else {
+      throw new Error(pkgName + ' Package is not installed.');
     }
   }
 
