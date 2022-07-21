@@ -9,6 +9,7 @@ import { EuiCheckbox } from '@elastic/eui';
 import React, { ChangeEvent, useContext } from 'react';
 import { BulkActionsVerbs } from '../../../../../types';
 import { BulkActionsContext } from '../context';
+import { COLUMN_HEADER_ARIA_LABEL } from '../translations';
 
 const BulkActionsHeaderComponent: React.FunctionComponent = () => {
   const [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows] =
@@ -17,7 +18,7 @@ const BulkActionsHeaderComponent: React.FunctionComponent = () => {
   return (
     <EuiCheckbox
       id="selection-toggle"
-      aria-label="Select all rows"
+      aria-label={COLUMN_HEADER_ARIA_LABEL}
       checked={isAllSelected || areAllVisibleRowsSelected}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {

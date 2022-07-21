@@ -27,3 +27,10 @@ export const CLEAR_SELECTION = i18n.translate(
     defaultMessage: 'Clear selection',
   }
 );
+
+export const COLUMN_HEADER_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.bulkActions.columnHeader.AriaLabel',
+  {
+    defaultMessage: 'Select all rows',
+  }
+);
