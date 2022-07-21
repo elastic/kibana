@@ -19,8 +19,8 @@ import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '
 export interface Services {
   application: {
     capabilities: {
-      advancedSettings: {
-        save?: boolean;
+      advancedSettings?: {
+        save: boolean;
       };
     };
     getUrlForApp: (
@@ -102,7 +102,7 @@ export function useServices() {
 
   if (!context) {
     throw new Error(
-      'ExitFullScreenButtonContext is missing.  Ensure your component or React root is wrapped with ExitFullScreenButtonProvider.'
+      'TableListViewContext is missing. Ensure your component or React root is wrapped with <TableListViewProvider /> or <TableListViewKibanaProvider />.'
     );
   }
 
