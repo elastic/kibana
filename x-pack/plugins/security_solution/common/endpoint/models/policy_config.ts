@@ -153,7 +153,7 @@ export const policyFactoryWithoutPaidFeatures = (
 ): PolicyConfig => {
   const rollbackConfig = {
     rollback: {
-      remidiation: {
+      remediation: {
         enabled: false,
       },
     },

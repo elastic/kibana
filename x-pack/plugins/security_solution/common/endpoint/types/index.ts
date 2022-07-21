@@ -916,7 +916,7 @@ export interface PolicyConfig {
       alerts?: {
         [key: string]: unknown;
         rollback: {
-          remidiation: {
+          remediation: {
             enabled: boolean;
           };
         };
