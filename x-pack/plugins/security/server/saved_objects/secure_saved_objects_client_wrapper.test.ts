@@ -11,7 +11,7 @@ import type {
   EcsEventOutcome,
   SavedObject,
   SavedObjectReferenceWithContext,
-  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core/server';
@@ -54,7 +54,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
     createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
-  } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
   const getSpacesService = jest.fn().mockReturnValue({
     namespaceToSpaceId: (namespace?: string) => (namespace ? namespace : 'default'),
   });
