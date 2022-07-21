@@ -439,6 +439,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
 
+  const isCloudUser = user.elastic_cloud_user;
+
   const rightSideItems = [
     {
       title: (
@@ -559,7 +561,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           >
             <Form aria-labelledby={titleId}>
               <UserDetailsEditor user={user} />
-              <UserAvatarEditor user={user} formik={formik} />
+              {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
               <UserPasswordEditor
                 user={user}
                 onShowPasswordForm={() => setShowChangePasswordForm(true)}
