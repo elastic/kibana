@@ -71,8 +71,9 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--env.prod",
-    "--display=minimal"
+    "--env",
+    "prod",
+    "--no-stats"
   ],
 )
 
