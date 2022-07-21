@@ -12,6 +12,7 @@ import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { string } from 'io-ts';
 import { i18n } from '@kbn/i18n';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '../..';
 import type { CspNavigationItem } from './types';
 
 const getClickableBreadcrumb = (
@@ -58,7 +59,7 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
         }),
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          history.push(`/`);
+          history.push(CLOUD_SECURITY_POSTURE_BASE_PATH);
         },
       },
       ...additionalBreadCrumbs,

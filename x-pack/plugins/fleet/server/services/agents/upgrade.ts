@@ -8,6 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import pMap from 'p-map';
+import uuid from 'uuid/v4';
 
 import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
 import {
@@ -100,6 +101,7 @@ export async function sendUpgradeAgentsActions(
       }
     }
   } else if ('kuery' in options) {
+    const actionId = uuid();
     return await processAgentsInBatches(
       esClient,
       {
@@ -108,7 +110,14 @@ export async function sendUpgradeAgentsActions(
         batchSize: options.batchSize,
       },
       async (agents: Agent[], skipSuccess: boolean) =>
-        await upgradeBatch(soClient, esClient, agents, outgoingErrors, options, skipSuccess)
+        await upgradeBatch(
+          soClient,
+          esClient,
+          agents,
+          outgoingErrors,
+          { ...options, actionId },
+          skipSuccess
+        )
     );
   }
 
@@ -121,6 +130,7 @@ async function upgradeBatch(
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    actionId?: string;
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
@@ -183,6 +193,7 @@ async function upgradeBatch(
   );
 
   await createAgentAction(esClient, {
+    id: options.actionId,
     created_at: now,
     data,
     ack_data: data,
