@@ -22,7 +22,7 @@ export function nsToMs(metric: number) {
   return metric / ONE_MILLISECOND_AS_NANOSECONDS;
 }
 
-export class EventLoopDelaysMonitor implements IEventLoopDelaysMonitor<IntervalHistogram> {
+export class EventLoopDelaysMonitor implements IEventLoopDelaysMonitor {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
 

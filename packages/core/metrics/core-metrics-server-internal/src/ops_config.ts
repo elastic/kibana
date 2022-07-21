@@ -7,7 +7,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-// import type { IOpsConfigType } from '@kbn/core-metrics-server';
 
 export const opsConfig = {
   path: 'ops',
@@ -21,4 +20,3 @@ export const opsConfig = {
 };
 
 export type OpsConfigType = TypeOf<typeof opsConfig.schema>;
-// export type OpsConfigType = IOpsConfigType;

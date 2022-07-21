@@ -402,10 +402,9 @@ export type {
   MetricsServiceSetup,
   MetricsServiceStart,
   IntervalHistogram,
+  IEventLoopDelaysMonitor,
 } from '@kbn/core-metrics-server';
-// TODO: not sure if the class export is needed, see https://github.com/elastic/kibana/issues/136051
 export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
-// export type { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
 export type { I18nServiceSetup } from './i18n';
 export type {

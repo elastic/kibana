@@ -5,15 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { MaybePromise } from '@kbn/utility-types';
-import type { IntervalHistogram } from '../types';
 
-/** Base interface for all metrics gatherers */
-export interface MetricsCollector<T> {
-  /** collect the data currently gathered by the collector */
-  collect(): MaybePromise<T>;
-  /** reset the internal state of the collector */
-  reset(): void;
+/**
+ * an IntervalHistogram object that samples and reports the event loop delay over time.
+ * The delays will be reported in milliseconds.
+ *
+ * @public
+ */
+export interface IntervalHistogram {
+  // The first timestamp the interval timer kicked in for collecting data points.
+  fromTimestamp: string;
+  // Last timestamp the interval timer kicked in for collecting data points.
+  lastUpdatedAt: string;
+  // The minimum recorded event loop delay.
+  min: number;
+  // The maximum recorded event loop delay.
+  max: number;
+  // The mean of the recorded event loop delays.
+  mean: number;
+  // The number of times the event loop delay exceeded the maximum 1 hour event loop delay threshold.
+  exceeds: number;
+  // The standard deviation of the recorded event loop delays.
+  stddev: number;
+  // An object detailing the accumulated percentile distribution.
+  percentiles: {
+    // 50th percentile of delays of the collected data points.
+    50: number;
+    // 75th percentile of delays of the collected data points.
+    75: number;
+    // 95th percentile of delays of the collected data points.
+    95: number;
+    // 99th percentile of delays of the collected data points.
+    99: number;
+  };
 }
 
 /**
@@ -132,23 +156,29 @@ export interface OpsServerMetrics {
   concurrent_connections: number;
 }
 
-export interface IEventLoopDelaysMonitor<T> {
+/**
+ * Regroups metrics gathered by all the collectors.
+ * This contains metrics about the os/runtime, the kibana process and the http server.
+ *
+ * @public
+ */
+export interface OpsMetrics {
+  /** Time metrics were recorded at. */
+  collected_at: Date;
   /**
-   * Collect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay
-   * the histogram calculations start from the last time `reset` was called or this
-   * EventLoopDelaysMonitor instance was created.
-   *
-   * Returns metrics in milliseconds.
-
-   * @returns {IntervalHistogram}
+   * Process related metrics.
+   * @deprecated use the processes field instead.
+   * @removeBy 8.8.0
    */
-  collect(): T;
-  /**
-   * Resets the collected histogram data.
-   */
-  reset(): void;
-  /**
-   * Disables updating the interval timer for collecting new data points.
-   */
-  stop(): void;
+  process: OpsProcessMetrics;
+  /** Process related metrics. Reports an array of objects for each kibana pid.*/
+  processes: OpsProcessMetrics[];
+  /** OS related metrics */
+  os: OpsOsMetrics;
+  /** server response time stats */
+  response_times: OpsServerMetrics['response_times'];
+  /** server requests stats */
+  requests: OpsServerMetrics['requests'];
+  /** number of current concurrent connections to the server */
+  concurrent_connections: OpsServerMetrics['concurrent_connections'];
 }

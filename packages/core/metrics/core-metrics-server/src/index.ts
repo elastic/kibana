@@ -6,17 +6,12 @@
  * Side Public License, v 1.
  */
 
+export type { MetricsServiceSetup, MetricsServiceStart } from './contracts';
+export type { MetricsCollector, IEventLoopDelaysMonitor } from './collectors';
 export type {
-  MetricsServiceSetup,
-  MetricsServiceStart,
-  // IOpsConfigType,
   OpsMetrics,
   IntervalHistogram,
-} from './types';
-export type {
-  MetricsCollector,
   OpsProcessMetrics,
   OpsOsMetrics,
   OpsServerMetrics,
-  IEventLoopDelaysMonitor,
-} from './collectors';
+} from './metrics';
