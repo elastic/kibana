@@ -6,14 +6,14 @@
  */
 import type { ThreatIndex } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
-import {
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { ListClient } from '@kbn/lists-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import type { SignalSourceHit } from '../types';
 import { buildThreatMappingFilter } from '../threat_mapping/build_threat_mapping_filter';
 import { getAllThreatListHits } from '../threat_mapping/get_threat_list';
@@ -25,7 +25,7 @@ import {
   THREAT_PIT_KEEP_ALIVE,
   EVENT_ENRICHMENT_INDICATOR_FIELD_MAP,
 } from '../../../../../common/cti/constants';
-import { BuildRuleMessage } from '../rule_messages';
+import type { BuildRuleMessage } from '../rule_messages';
 import { validEventFields } from '../../../../../common/search_strategy/security_solution/cti';
 
 export const createThreatEnrichments = async ({
