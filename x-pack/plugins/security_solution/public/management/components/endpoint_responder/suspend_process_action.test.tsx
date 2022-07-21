@@ -120,6 +120,24 @@ describe('When using the suspend-process action from response actions console', 
     );
   });
 
+  it('should check the pid has a non-negative value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'suspend-process --pid -123');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
+  it('should check the pid is a number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'suspend-process --pid asd');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
   it('should check the entityId has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'suspend-process --entityId');
@@ -178,6 +196,21 @@ describe('When using the suspend-process action from response actions console', 
     await waitFor(() => {
       expect(renderResult.getByTestId('suspendProcessErrorCallout').textContent).toMatch(
         /error one \| error two/
+      );
+    });
+  });
+
+  it('should show error if kill-process API fails', async () => {
+    apiMocks.responseProvider.suspendProcess.mockRejectedValueOnce({
+      status: 500,
+      message: 'this is an error',
+    } as never);
+    await render();
+    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('suspendProcessAPIErrorCallout').textContent).toMatch(
+        /this is an error/
       );
     });
   });
