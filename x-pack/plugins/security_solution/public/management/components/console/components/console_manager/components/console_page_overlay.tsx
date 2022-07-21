@@ -16,7 +16,7 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
 const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.backButtonLabel', {
-  defaultMessage: 'Return to page content',
+  defaultMessage: 'Back',
 });
 
 export interface ConsolePageOverlayProps {
