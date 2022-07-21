@@ -1731,7 +1731,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1863,7 +1863,7 @@
                 "section": "def-common.ExpressionAstExpression",
                 "text": "ExpressionAstExpression"
               },
-              "; }"
+              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -2080,7 +2080,7 @@
             "section": "def-common.SavedDashboardPanel730ToLatest",
             "text": "SavedDashboardPanel730ToLatest"
           },
-          "[] | undefined; savedQuery?: string | undefined; options?: ",
+          "[] | undefined; savedQuery?: string | undefined; tags?: string[] | undefined; options?: ",
           "DashboardOptions",
           " | undefined; controlGroupInput?: ",
           {
@@ -2114,7 +2114,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2785,7 +2785,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel640To720",
-          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
+          ", \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
@@ -2801,7 +2801,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel610",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2817,7 +2817,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2833,7 +2833,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2849,7 +2849,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel640To720",
-          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2871,7 +2871,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2887,7 +2887,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanelTo60",
-          ", \"title\" | \"columns\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
+          ", \"title\" | \"row\" | \"columns\" | \"sort\" | \"size_x\" | \"size_y\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,

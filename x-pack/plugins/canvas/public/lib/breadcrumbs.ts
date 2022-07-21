@@ -8,6 +8,7 @@
 import { MouseEvent } from 'react';
 import { History } from 'history';
 import { ChromeBreadcrumb } from '@kbn/core/public';
+import { getUntitledWorkpadLabel } from './doc_title';
 
 const isModifiedEvent = (event: MouseEvent) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
@@ -47,8 +48,6 @@ export const getBaseBreadcrumb = (history: History): ChromeBreadcrumb => {
   };
 };
 
-export const getWorkpadBreadcrumb = ({
-  name = 'Workpad',
-}: { name?: string } = {}): ChromeBreadcrumb => ({
-  text: name,
+export const getWorkpadBreadcrumb = ({ name }: { name?: string }): ChromeBreadcrumb => ({
+  text: name || getUntitledWorkpadLabel(),
 });
