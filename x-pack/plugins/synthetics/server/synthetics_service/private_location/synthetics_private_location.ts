@@ -30,36 +30,41 @@ export class SyntheticsPrivateLocation {
   async generateNewPolicy(
     config: SyntheticsMonitorWithId & { fields: Record<string, string> },
     privateLocation: PrivateLocation
-  ): Promise<NewPackagePolicy> {
+  ): Promise<NewPackagePolicy | null> {
     if (!this.server.authSavedObjectsClient) {
       throw new Error('Could not find authSavedObjectsClient');
     }
 
-    const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      this.server.authSavedObjectsClient,
-      'synthetics',
-      this.server.logger
-    );
+    try {
+      const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
+        this.server.authSavedObjectsClient,
+        'synthetics',
+        this.server.logger
+      );
 
-    if (!newPolicy) {
-      throw new Error('Could not create new synthetics policy');
+      if (!newPolicy) {
+        throw new Error('Could not create new synthetics policy');
+      }
+
+      newPolicy.is_managed = true;
+      newPolicy.policy_id = privateLocation.policyHostId;
+      newPolicy.name = config[ConfigKey.NAME] + '-' + privateLocation.name;
+      newPolicy.output_id = '';
+      newPolicy.namespace = 'default';
+
+      const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
+        ...(config as Partial<MonitorFields>),
+        config_id: config.fields.config_id,
+        location_name: privateLocation.name,
+        'monitor.project.id': config.fields['monitor.project.name'],
+        'monitor.project.name': config.fields['monitor.project.name'],
+      });
+
+      return formattedPolicy;
+    } catch (e) {
+      this.server.logger.error(e);
+      return null;
     }
-
-    newPolicy.is_managed = true;
-    newPolicy.policy_id = privateLocation.policyHostId;
-    newPolicy.name = config[ConfigKey.NAME] + '-' + privateLocation.name;
-    newPolicy.output_id = '';
-    newPolicy.namespace = 'default';
-
-    const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
-      ...(config as Partial<MonitorFields>),
-      config_id: config.fields.config_id,
-      location_name: privateLocation.name,
-      'monitor.project.id': config.fields['monitor.project.name'],
-      'monitor.project.name': config.fields['monitor.project.name'],
-    });
-
-    return formattedPolicy;
   }
 
   async createMonitor(config: SyntheticsMonitorWithId) {
@@ -76,10 +81,15 @@ export class SyntheticsPrivateLocation {
         const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
         const newPolicy = await this.generateNewPolicy(config, location);
 
+        if (!newPolicy) {
+          return null;
+        }
+
         await this.createPolicy(newPolicy, getPolicyId(config, location));
       }
     } catch (e) {
       this.server.logger.error(e);
+      return null;
     }
   }
 
@@ -119,10 +129,15 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
-      return await this.server.fleet.packagePolicyService.create(soClient, esClient, newPolicy, {
-        id,
-        overwrite: true,
-      });
+      try {
+        return await this.server.fleet.packagePolicyService.create(soClient, esClient, newPolicy, {
+          id,
+          overwrite: true,
+        });
+      } catch (e) {
+        this.server.logger.error(e);
+        return null;
+      }
     }
   }
 
@@ -130,15 +145,20 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
-      return await this.server.fleet.packagePolicyService.update(
-        soClient,
-        esClient,
-        id,
-        updatedPolicy,
-        {
-          force: true,
-        }
-      );
+      try {
+        return await this.server.fleet.packagePolicyService.update(
+          soClient,
+          esClient,
+          id,
+          updatedPolicy,
+          {
+            force: true,
+          }
+        );
+      } catch (e) {
+        this.server.logger.error(e);
+        return null;
+      }
     }
   }
 
@@ -147,27 +167,32 @@ export class SyntheticsPrivateLocation {
       const soClient = this.server.authSavedObjectsClient;
       return await this.server.fleet.packagePolicyService.get(soClient!, id);
     } catch (e) {
-      return;
+      return null;
     }
   }
 
   async findMonitor(config: SyntheticsMonitorWithId) {
     const soClient = this.server.authSavedObjectsClient;
-    const list = await this.server.fleet.packagePolicyService.list(soClient!, {
-      page: 1,
-      perPage: 10000,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:synthetics`,
-    });
+    try {
+      const list = await this.server.fleet.packagePolicyService.list(soClient!, {
+        page: 1,
+        perPage: 10000,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:synthetics`,
+      });
 
-    const { locations } = config;
+      const { locations } = config;
 
-    const fleetManagedLocationIds = locations
-      .filter((loc) => !loc.isServiceManaged)
-      .map((loc) => config.id + '-' + loc.id);
+      const fleetManagedLocationIds = locations
+        .filter((loc) => !loc.isServiceManaged)
+        .map((loc) => config.id + '-' + loc.id);
 
-    return list.items.filter((policy) => {
-      return fleetManagedLocationIds.includes(policy.name);
-    });
+      return list.items.filter((policy) => {
+        return fleetManagedLocationIds.includes(policy.name);
+      });
+    } catch (e) {
+      this.server.logger.error(e);
+      return null;
+    }
   }
 
   async deleteMonitor(config: SyntheticsMonitorWithId) {
@@ -183,14 +208,18 @@ export class SyntheticsPrivateLocation {
       for (const privateLocation of monitorPrivateLocations) {
         const location = allPrivateLocations?.find((loc) => loc.id === privateLocation.id);
         if (location) {
-          await this.server.fleet.packagePolicyService.delete(
-            soClient,
-            esClient,
-            [getPolicyId(config, location)],
-            {
-              force: true,
-            }
-          );
+          try {
+            await this.server.fleet.packagePolicyService.delete(
+              soClient,
+              esClient,
+              [getPolicyId(config, location)],
+              {
+                force: true,
+              }
+            );
+          } catch (e) {
+            this.server.logger.error(e);
+          }
         }
       }
     }

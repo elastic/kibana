@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
 
@@ -371,7 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        await supertest
+        await supertestWithoutAuth
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
@@ -381,14 +382,14 @@ export default function ({ getService }: FtrProviderContext) {
             monitors: testMonitors,
           })
           .expect(200);
-        const projectResponse = await supertest
+        const projectResponse = await supertestWithoutAuth
           .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send({ ...projectMonitors, keep_stale: false })
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertest
+        const getResponse = await supertestWithoutAuth
           .get(API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .query({
@@ -450,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
                 match: 'check if title is present',
               },
               id: projectMonitors.monitors[0].id,
-              locations: ['us-east4-a'],
+              locations: ['localhost'],
               name: 'check if title is present',
               params: {},
               playwrightOptions: {
@@ -501,14 +502,14 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        await supertest
+        await supertestWithoutAuth
           .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertest
+        const getResponse = await supertestWithoutAuth
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
@@ -555,14 +556,14 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        await supertest
+        await supertestWithoutAuth
           .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(projectMonitors)
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertest
+        const getResponse = await supertestWithoutAuth
           .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
@@ -730,6 +731,154 @@ export default function ({ getService }: FtrProviderContext) {
             return deleteMonitor(monitor.id, projectMonitors.project);
           }),
         ]);
+      }
+    });
+
+    it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
+      const secondMonitor = {
+        ...projectMonitors.monitors[0],
+        id: 'test-id-2',
+        privateLocations: ['Test private location 0'],
+      };
+      const testMonitors = [projectMonitors.monitors[0], secondMonitor];
+      const username = 'meep';
+      const roleName = `meep2`;
+      const password = `${username}-password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const projectResponse = await supertestWithoutAuth
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            keep_stale: false,
+            monitors: testMonitors,
+          });
+
+        expect(projectResponse.body.createdMonitors).eql([testMonitors[0].id]);
+        expect(projectResponse.body.failedMonitors).eql([
+          {
+            details:
+              'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
+            id: 'test-id-2',
+            payload: {
+              content:
+                'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+              filter: {
+                match: 'check if title is present',
+              },
+              id: 'test-id-2',
+              locations: ['localhost'],
+              name: 'check if title is present',
+              params: {},
+              playwrightOptions: {
+                chromiumSandbox: false,
+                headless: true,
+              },
+              privateLocations: ['Test private location 0'],
+              schedule: 10,
+              tags: [],
+              throttling: {
+                download: 5,
+                latency: 20,
+                upload: 3,
+              },
+            },
+            reason: 'Failed to create or update monitor',
+          },
+        ]);
+        expect(projectResponse.body.deletedMonitors).eql([]);
+        expect(projectResponse.body.updatedMonitors).eql([]);
+        expect(projectResponse.body.staleMonitors).eql([]);
+      } finally {
+        await Promise.all([
+          testMonitors.map((monitor) => {
+            return deleteMonitor(
+              monitor.id,
+              projectMonitors.project,
+              'default',
+              username,
+              password
+            );
+          }),
+        ]);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
+
+    it('project monitors - returns a successful monitor when user defines a private location with fleet permissions', async () => {
+      const secondMonitor = {
+        ...projectMonitors.monitors[0],
+        id: 'test-id-2',
+        privateLocations: ['Test private location 0'],
+      };
+      const testMonitors = [projectMonitors.monitors[0], secondMonitor];
+      const username = 'meep';
+      const roleName = `meep2`;
+      const password = `${username}-password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+                fleetv2: ['all'],
+                fleet: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+        const projectResponse = await supertestWithoutAuth
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            keep_stale: false,
+            monitors: testMonitors,
+          });
+
+        expect(projectResponse.body.createdMonitors).eql([testMonitors[0].id, testMonitors[1].id]);
+        expect(projectResponse.body.failedMonitors).eql([]);
+        expect(projectResponse.body.deletedMonitors).eql([]);
+        expect(projectResponse.body.updatedMonitors).eql([]);
+        expect(projectResponse.body.staleMonitors).eql([]);
+      } finally {
+        await Promise.all([
+          testMonitors.map((monitor) => {
+            return deleteMonitor(
+              monitor.id,
+              projectMonitors.project,
+              'default',
+              username,
+              password
+            );
+          }),
+        ]);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
       }
     });
   });

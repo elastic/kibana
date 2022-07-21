@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
@@ -61,6 +62,7 @@ export class ProjectMonitorFormatter {
   private server: UptimeServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
+  private request: KibanaRequest;
 
   constructor({
     locations,
@@ -73,6 +75,7 @@ export class ProjectMonitorFormatter {
     monitors,
     server,
     syntheticsMonitorClient,
+    request,
   }: {
     locations: Locations;
     privateLocations: Locations;
@@ -84,6 +87,7 @@ export class ProjectMonitorFormatter {
     monitors: ProjectBrowserMonitor[];
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
+    request: KibanaRequest;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
@@ -96,6 +100,7 @@ export class ProjectMonitorFormatter {
     this.monitors = monitors;
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.request = request;
   }
 
   public configureAllProjectMonitors = async () => {
@@ -113,6 +118,16 @@ export class ProjectMonitorFormatter {
 
   private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
     try {
+      const {
+        integrations: { writeIntegrationPolicies },
+      } = await this.server.fleet.authz.fromRequest(this.request);
+
+      if (monitor.privateLocations?.length && !writeIntegrationPolicies) {
+        throw new Error(
+          'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.'
+        );
+      }
+
       // check to see if monitor already exists
       const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,

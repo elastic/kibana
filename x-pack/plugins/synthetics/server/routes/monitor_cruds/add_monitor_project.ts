@@ -53,6 +53,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       monitors,
       server,
       syntheticsMonitorClient,
+      request,
     });
 
     await pushMonitorFormatter.configureAllProjectMonitors();
