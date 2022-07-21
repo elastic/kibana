@@ -37,7 +37,11 @@ import {
   useKibanaVersion,
 } from '../../../../hooks';
 
-import { FALLBACK_VERSIONS, MAINTENANCE_VALUES, MINIMUM_SUPPORTED_VERSION } from './constants';
+import {
+  FALLBACK_VERSIONS,
+  MAINTENANCE_VALUES,
+  ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION,
+} from './constants';
 import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
@@ -49,8 +53,12 @@ export interface AgentUpgradeAgentModalProps {
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
 
-function isVersionUnsupported(version: string) {
-  return semverLt(version, MINIMUM_SUPPORTED_VERSION);
+function isVersionUnsupported(version?: string) {
+  if (!version) {
+    return false;
+  }
+
+  return semverLt(version, ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION);
 }
 
 export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
@@ -98,11 +106,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }, [fallbackVersions, minVersion]);
   const noVersions = versionOptions[0]?.value === '';
 
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
+  const maintenanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTENANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
-          ? i18n.translate('xpack.fleet.upgradeAgents.noMaintainanceWindowOption', {
+          ? i18n.translate('xpack.fleet.upgradeAgents.noMaintenanceWindowOption', {
               defaultMessage: 'Immediately',
             })
           : i18n.translate('xpack.fleet.upgradeAgents.hourLabel', {
@@ -113,8 +121,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     })
   );
   const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
-  const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
+  const [selectedMaintenanceWindow, setSelectedMaintenanceWindow] = useState([
+    isSmallBatch ? maintenanceOptions[0] : maintenanceOptions[1],
   ]);
 
   const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
@@ -124,8 +132,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     const version = getVersion(selectedVersion);
     const rolloutOptions = {
       rollout_duration_seconds:
-        selectedMantainanceWindow.length > 0 && (selectedMantainanceWindow[0]?.value as number) > 0
-          ? selectedMantainanceWindow[0].value
+        selectedMaintenanceWindow.length > 0 && (selectedMaintenanceWindow[0]?.value as number) > 0
+          ? selectedMaintenanceWindow[0].value
           : undefined,
       start_time: startDatetime.toISOString(),
     };
@@ -343,7 +351,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               <FormattedMessage
                 id="xpack.fleet.upgradeAgents.warningCallout"
                 defaultMessage="Rolling upgrades are only available for Elastic Agent versions {version} and higher"
-                values={{ version: <strong>{MINIMUM_SUPPORTED_VERSION}</strong> }}
+                values={{ version: <strong>{ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION}</strong> }}
               />
             }
           />
@@ -378,7 +386,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           label={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.fleet.upgradeAgents.maintainanceAvailableLabel', {
+                {i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableLabel', {
                   defaultMessage: 'Maintenance window available',
                 })}
               </EuiFlexItem>
@@ -386,13 +394,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate(
-                    'xpack.fleet.upgradeAgents.maintainanceAvailableTooltip',
-                    {
-                      defaultMessage:
-                        'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableTooltip', {
+                    defaultMessage:
+                      'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                  })}
                 >
                   <EuiIcon type="iInCircle" title="TooltipIcon" />
                 </EuiToolTip>
@@ -406,13 +411,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             fullWidth
             isClearable={false}
             singleSelection={{ asPlainText: true }}
-            options={maintainanceOptions}
-            selectedOptions={selectedMantainanceWindow}
+            options={maintenanceOptions}
+            selectedOptions={selectedMaintenanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
               if (!selected.length) {
                 return;
               }
-              setSelectedMantainanceWindow(selected);
+              setSelectedMaintenanceWindow(selected);
             }}
           />
         </EuiFormRow>

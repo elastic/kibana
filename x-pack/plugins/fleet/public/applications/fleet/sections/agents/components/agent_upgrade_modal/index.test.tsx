@@ -59,7 +59,6 @@ describe('AgentUpgradeAgentModal', () => {
       '[data-test-subj="agentUpgradeModal.MaintenanceCombobox"]'
     );
     expect(el).not.toBeNull();
-    expect(el).not.toBeNull();
     expect(el?.textContent).toBe('Immediately');
   });
 
