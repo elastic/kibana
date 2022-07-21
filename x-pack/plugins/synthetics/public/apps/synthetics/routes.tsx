@@ -40,11 +40,6 @@ type RouteProps = {
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  pageHeader?: {
-    pageTitle: string | JSX.Element;
-    children?: JSX.Element;
-    rightSideItems?: JSX.Element[];
-  };
 } & EuiPageTemplateProps;
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
