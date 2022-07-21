@@ -14,14 +14,7 @@ import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
 
-// TODO: cbor-x uses ESM modules and attempts to load a dependency when imported.
-//       When running in a Jest test environment detects "window" and causes
-//       a warning to be printed to the console: "For browser usage, directly use cbor-x/decode or cbor-x/encode modules..."
-//       we should clean this up.
-//       Also opened the following issue: https://github.com/kriszyp/cbor-x/issues/36
-// TODO: use import once type declarations for the lib are fixed
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cborx = require('cbor-x');
+import * as cborx from './cborx';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -133,7 +126,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const source: undefined | FileChunkDocument = buffer.byteLength
-        ? cborx.decode(Buffer.concat(chunks))?._source
+        ? cborx.decode<{ _source?: FileChunkDocument }>(Buffer.concat(chunks))?._source
         : undefined;
 
       const dataBuffer = source?.data as unknown as Buffer;

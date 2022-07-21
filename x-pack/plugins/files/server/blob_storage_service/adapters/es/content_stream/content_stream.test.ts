@@ -11,9 +11,8 @@ import { Readable } from 'stream';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-// TODO: use import once type declarations for the lib are fixed
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { encode } = require('cbor-x');
+
+import { encode } from './cborx';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
