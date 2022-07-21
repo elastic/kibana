@@ -38,7 +38,7 @@ describe('Setup Indices', () => {
         type: 'object',
       },
       error: { type: 'keyword' },
-      index_name: { type: 'text' },
+      index_name: { type: 'keyword' },
       language: { type: 'keyword' },
       last_seen: { type: 'date' },
       last_sync_error: { type: 'keyword' },
