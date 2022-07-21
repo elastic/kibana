@@ -10439,7 +10439,6 @@
     "xpack.csp.findings.groupBySelector.groupByResourceIdLabel": "Ressource",
     "xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel": "Retour à la vue de regroupement par ressource",
     "xpack.csp.findings.searchBar.searchPlaceholder": "Rechercher dans les résultats (par ex. rule.section.keyword : \"serveur d'API\")",
-    "xpack.csp.navigation.cloudPostureBreadcrumbLabel": "Niveau du cloud",
     "xpack.csp.rules.activateAllButtonLabel": "Activer {count, plural, one {# règle} other {# règles}}",
     "xpack.csp.rules.clearSelectionButtonLabel": "Effacer la sélection",
     "xpack.csp.rules.deactivateAllButtonLabel": "Désactiver {count, plural, one {# règle} other {# règles}}",

@@ -10431,7 +10431,6 @@
     "xpack.csp.findings.groupBySelector.groupByResourceIdLabel": "リソース",
     "xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel": "リソース別グループビューに戻る",
     "xpack.csp.findings.searchBar.searchPlaceholder": "検索結果（例：rule.section.keyword：\"API Server\"）",
-    "xpack.csp.navigation.cloudPostureBreadcrumbLabel": "クラウド態勢",
     "xpack.csp.rules.activateAllButtonLabel": "{count, plural, other {#個のルール}}をアクティブ化",
     "xpack.csp.rules.clearSelectionButtonLabel": "選択した項目をクリア",
     "xpack.csp.rules.deactivateAllButtonLabel": "{count, plural, other {#個のルール}}を非アクティブ化",
