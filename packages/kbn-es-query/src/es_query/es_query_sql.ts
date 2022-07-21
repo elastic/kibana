@@ -7,6 +7,8 @@
  */
 import type { Query, AggregateQuery } from '../filters';
 
+type Language = keyof AggregateQuery;
+
 // Checks if the query is of type Query
 export function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);
@@ -22,8 +24,8 @@ export function isOfAggregateQueryType(
 }
 
 // returns the language of the aggregate Query, sql, esql etc
-export function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
+export function getAggregateQueryMode(query: AggregateQuery): Language {
+  return Object.keys(query)[0] as Language;
 }
 
 // retrieves the index pattern from the aggregate query

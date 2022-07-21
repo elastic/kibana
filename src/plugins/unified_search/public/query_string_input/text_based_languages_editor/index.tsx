@@ -76,8 +76,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
-  const language = getAggregateQueryMode(query) as 'sql' | 'esql';
-  const queryString = query[language] ?? '';
+  const language = getAggregateQueryMode(query);
+  const queryString: string = query[language] ?? '';
   const [lines, setLines] = useState(1);
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
@@ -272,7 +272,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
-      onTextLangQueryChange({ [language]: value });
+      onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
   );
@@ -421,7 +421,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {
                           defaultMessage: '{lang} reference',
                           values: {
-                            lang: language.toUpperCase(),
+                            lang: String(language).toUpperCase(),
                           },
                         }
                       )}
@@ -555,7 +555,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {
                           defaultMessage: '{lang} reference',
                           values: {
-                            lang: language.toUpperCase(),
+                            lang: String(language).toUpperCase(),
                           },
                         }
                       )}
