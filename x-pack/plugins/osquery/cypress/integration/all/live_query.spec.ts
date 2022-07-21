@@ -17,6 +17,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import {
+  LIVE_QUERY_EDITOR,
   RESULTS_TABLE,
   RESULTS_TABLE_BUTTON,
   RESULTS_TABLE_CELL_WRRAPER,
@@ -91,5 +92,25 @@ describe('ALL - Live Query', () => {
       .click();
 
     cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
+  });
+  it('should run live pack', () => {
+    cy.contains('New live query').click();
+    cy.contains('Run a set of queries in a pack.').click();
+    selectAllAgents();
+    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+    cy.getBySel('select-live-pack').click();
+    cy.contains('osquery-monitoring').click();
+    cy.contains('This table contains 3 rows.');
+    cy.contains('osquery-monitoring (e137a1e0-08d1-11ed-9aa7-ef0d3cddc662)');
+    cy.contains('schedule');
+    cy.contains('events');
+    cy.contains('osquery_info');
+    submitQuery();
+    cy.getBySel('live-query-loading').should('exist');
+    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
+    cy.getBySel('toggleIcon-events').click();
+    checkResults();
+    navigateTo('/app/osquery');
+    cy.contains('osquery-monitoring');
   });
 });

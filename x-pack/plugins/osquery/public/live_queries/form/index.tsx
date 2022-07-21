@@ -114,8 +114,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
   const [isLive, setIsLive] = useState(false);
 
-  const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
-  const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
+  const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
+  const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
   const { data, isLoading, mutateAsync, isError, isSuccess } = useCreateLiveQuery({ onSuccess });
 
@@ -279,7 +279,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   !queryValueProvided ||
                   resultsStatus === 'disabled'
                 }
-                onClick={handleShowSaveQueryFlout}
+                onClick={handleShowSaveQueryFlyout}
               >
                 <FormattedMessage
                   id="xpack.osquery.liveQueryForm.form.saveForLaterButtonLabel"
@@ -313,7 +313,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       agentSelected,
       enabled,
       formType,
-      handleShowSaveQueryFlout,
+      handleShowSaveQueryFlyout,
       isSubmitting,
       packId,
       permissions.writeSavedQueries,
@@ -524,6 +524,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   component={SuperSelectField}
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   euiFieldProps={{
+                    'data-test-subj': 'select-live-pack',
                     options: packOptions,
                     itemLayoutAlign: 'top',
                     hasDividers: true,
@@ -532,7 +533,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFlexItem>
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries) && (
+              {(liveQueryDetails?.queries?.length ||
+                selectedPackData?.attributes?.queries?.length) && (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable
@@ -556,7 +558,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
           isExternal={!!addToTimeline}
-          onClose={handleCloseSaveQueryFlout}
+          onClose={handleCloseSaveQueryFlyout}
           defaultValue={flyoutFormDefaultValue}
         />
       ) : null}

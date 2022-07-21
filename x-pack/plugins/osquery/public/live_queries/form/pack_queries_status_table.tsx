@@ -394,7 +394,7 @@ const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) 
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
     </EuiFlexItem>
     {isLive ? (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
         <EuiLoadingSpinner />
       </EuiFlexItem>
     ) : null}
@@ -620,6 +620,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     (item) =>
       item?.action_id ? (
         <EuiButtonIcon
+          data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
