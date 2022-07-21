@@ -228,10 +228,12 @@ describe('DetailPanelMetadataTab component', () => {
 
       // expand Cloud Accordion
       renderResult.queryByText('Cloud')?.click();
+      expect(renderResult.queryByText('instance.name')).toBeVisible();
       expect(renderResult.queryByText('provider')).toBeVisible();
       expect(renderResult.queryByText('region')).toBeVisible();
       expect(renderResult.queryByText('account.id')).toBeVisible();
       expect(renderResult.queryByText('project.id')).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_INSTANCE_NAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_PROVIDER)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_REGION)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_ACCOUNT_ID)).toBeVisible();
