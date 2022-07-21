@@ -6,14 +6,14 @@
  */
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
-import { getLanguageForOptimizatioin } from './utils';
+import { getLanguageForOptimization } from './utils';
 
 describe('getLanguageForOptimizatioin', () => {
   it('returns null for the universal language option', () => {
-    expect(getLanguageForOptimizatioin(UNIVERSAL_LANGUAGE_VALUE)).toEqual(null);
+    expect(getLanguageForOptimization(UNIVERSAL_LANGUAGE_VALUE)).toEqual(null);
   });
 
   it('returns the language code for non-Universal languageoptions', () => {
-    expect(getLanguageForOptimizatioin('zh')).toEqual('zh');
+    expect(getLanguageForOptimization('zh')).toEqual('zh');
   });
 });
