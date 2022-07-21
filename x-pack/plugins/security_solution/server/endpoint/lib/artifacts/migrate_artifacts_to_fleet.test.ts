@@ -10,7 +10,12 @@ import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import type { Logger, SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObjectsClient,
+  Logger,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
 import type { InternalArtifactCompleteSchema } from '../../schemas';
@@ -19,7 +24,7 @@ import type { NewArtifact } from '@kbn/fleet-plugin/server/services';
 import type { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {
-  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let soClient: jest.Mocked<SavedObjectsClient>;
   let logger: jest.Mocked<Logger>;
   let artifactClient: ReturnType<typeof createEndpointArtifactClientMock>;
   /** An artifact that was created prior to 7.14 */
@@ -39,7 +44,7 @@ describe('When migrating artifacts to fleet', () => {
   };
 
   beforeEach(async () => {
-    soClient = savedObjectsClientMock.create();
+    soClient = savedObjectsClientMock.create() as unknown as jest.Mocked<SavedObjectsClient>;
     logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     artifactClient = createEndpointArtifactClientMock();
     // pre-v7.14 artifact, which is compressed
