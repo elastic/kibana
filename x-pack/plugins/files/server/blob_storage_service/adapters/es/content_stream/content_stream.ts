@@ -21,7 +21,7 @@ import type { FileChunkDocument } from '../mappings';
 //       Also opened the following issue: https://github.com/kriszyp/cbor-x/issues/36
 // TODO: use import once type declarations for the lib are fixed
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { encode } = require('cbor-x');
+const cborx = require('cbor-x');
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -92,10 +92,6 @@ export class ContentStream extends Duplex {
     });
   }
 
-  private decode(content: string) {
-    return Buffer.from(content, 'base64');
-  }
-
   private getMaxContentSize(): number {
     return ByteSizeValue.parse(this.parameters.maxChunkSize).getValueInBytes();
   }
@@ -110,7 +106,7 @@ export class ContentStream extends Duplex {
     return this.maxChunkSize;
   }
 
-  private async readChunk(): Promise<[data: null | string, last?: boolean]> {
+  private async readChunk(): Promise<[data: null | Buffer, last?: boolean]> {
     if (!this.id) {
       throw new Error('No document ID provided. Cannot read chunk.');
     }
@@ -119,13 +115,23 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     try {
-      const response = await this.client.get<FileChunkDocument>({
-        id,
-        index: this.index,
-        _source_includes: ['data', 'last'],
-      });
-      const source = response?._source;
-      return [source?.data ?? null, source?.last];
+      const stream = await this.client.get(
+        {
+          id,
+          index: this.index,
+        },
+        {
+          headers: { accept: 'application/cbor' },
+          asStream: true,
+        }
+      );
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream as unknown as Readable) {
+        chunks.push(chunk);
+      }
+      const source: undefined | FileChunkDocument = cborx.decode(Buffer.concat(chunks))?._source;
+      return [(source?.data as unknown as Buffer) ?? null, source?.last];
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
@@ -155,14 +161,12 @@ export class ContentStream extends Duplex {
 
   _read() {
     this.readChunk()
-      .then(([content, last]) => {
-        if (!content) {
+      .then(([buffer, last]) => {
+        if (!buffer) {
           this.logger.debug(`Chunk is empty.`);
           this.push(null);
           return;
         }
-
-        const buffer = this.decode(content);
 
         this.push(buffer);
         this.chunksRead++;
@@ -209,7 +213,7 @@ export class ContentStream extends Duplex {
       {
         id,
         index,
-        document: encode(
+        document: cborx.encode(
           last
             ? {
                 data,

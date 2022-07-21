@@ -36,7 +36,14 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  await file.uploadContent(stream as Readable);
+  try {
+    await file.uploadContent(stream as Readable);
+  } catch (e) {
+    if (e?.message.startsWith('Already uploaded file')) {
+      return res.badRequest({ body: 'File content already uploaded' });
+    }
+    throw e;
+  }
   const body: Response = { ok: true };
   return res.ok({ body });
 };
