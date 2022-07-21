@@ -549,7 +549,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   useEffect(() => {
     const fetchLogsDataView = async () => {
       let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
-      if (!dataView) {
+      if (!dataView && dataViews.getCanSaveSync()) {
         dataView = await dataViews.createAndSave({
           title: 'logs-osquery_manager.result*',
           timeFieldName: '@timestamp',
