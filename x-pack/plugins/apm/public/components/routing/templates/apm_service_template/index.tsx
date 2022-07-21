@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeaderProps,
@@ -267,14 +266,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: (
-        <EuiFlexGroup gutterSize="xs">
+        <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem>
             {i18n.translate('xpack.apm.home.infraTabLabel', {
               defaultMessage: 'Infrastructure',
             })}
           </EuiFlexItem>
           <EuiFlexItem>
-            <BetaBadge icon="beaker" />
+            <BetaBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -319,21 +318,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
             })}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-                {
-                  defaultMessage: 'Technical preview',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-            />
+            <TechnicalPreviewBadge icon="beaker" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
