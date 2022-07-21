@@ -285,6 +285,11 @@ describe('policy details: ', () => {
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
+                    attack_surface_reduction: {
+                      credential_hardening: {
+                        enabled: false,
+                      },
+                    },
                     popup: {
                       malware: {
                         enabled: true,

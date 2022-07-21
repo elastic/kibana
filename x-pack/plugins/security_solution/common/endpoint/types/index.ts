@@ -952,6 +952,11 @@ export interface PolicyConfig {
     antivirus_registration: {
       enabled: boolean;
     };
+    attack_surface_reduction: {
+      credential_hardening: {
+        enabled: boolean;
+      };
+    };
   };
   mac: {
     advanced?: {};
@@ -1029,6 +1034,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
+    | 'attack_surface_reduction'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI

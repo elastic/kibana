@@ -320,9 +320,9 @@ describe('Policy Form Layout', () => {
         expect(ransomware).toHaveLength(0);
       });
 
-      it('shows the locked card in place of 1 paid feature', () => {
+      it('shows the locked card in place of paid features', () => {
         const lockedCard = policyFormLayoutView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(3);
+        expect(lockedCard).toHaveLength(4);
       });
     });
   });
