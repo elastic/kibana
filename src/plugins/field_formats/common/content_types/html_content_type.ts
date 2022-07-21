@@ -7,7 +7,6 @@
  */
 
 import { escape, isFunction } from 'lodash';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
@@ -34,8 +33,7 @@ export const setup = (
   htmlContextTypeConvert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
-  const highlightColor = euiThemeVars.euiColorMediumShade;
-  const highlight = (text: string) => `<span style="color: ${highlightColor};">${text}</span>`;
+  const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
