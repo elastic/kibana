@@ -19,23 +19,31 @@ import { Status } from '../../../../../common/types/api';
 import { MappingsApiLogic } from '../../api/mapping/mapping_logic';
 import { SearchDocumentsApiLogic } from '../../api/search/search_documents_logic';
 
+import { IndexNameLogic } from './index_name_logic';
+
 interface DocumentsLogicActions {
   apiReset: typeof SearchDocumentsApiLogic.actions.apiReset;
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   makeRequest: typeof SearchDocumentsApiLogic.actions.makeRequest;
+  setSearchQuery(query: string): { query: string };
 }
 
 interface DocumentsLogicValues {
   data: typeof SearchDocumentsApiLogic.values.data;
+  indexName: typeof IndexNameLogic.values.indexName;
   isLoading: boolean;
   mappingData: IndicesGetMappingIndexMappingRecord;
   mappingStatus: Status;
+  query: string;
   results: SearchHit[];
   simplifiedMapping: Record<string, MappingProperty>;
   status: Status;
 }
 
 export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsLogicActions>>({
+  actions: {
+    setSearchQuery: (query) => ({ query }),
+  },
   connect: {
     actions: [
       SearchDocumentsApiLogic,
@@ -48,15 +56,28 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
       ['data', 'status'],
       MappingsApiLogic,
       ['data as mappingData', 'status as mappingStatus'],
+      IndexNameLogic,
+      ['indexName'],
     ],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
     openGenerateModal: () => {
       actions.apiReset();
     },
+    setSearchQuery: async (_, breakpoint) => {
+      await breakpoint(250);
+      actions.makeRequest({ indexName: values.indexName, query: values.query });
+    },
   }),
   path: ['enterprise_search', 'search_index', 'documents'],
-  reducers: () => ({}),
+  reducers: () => ({
+    query: [
+      '',
+      {
+        setSearchQuery: (_, { query }) => query,
+      },
+    ],
+  }),
   selectors: ({ selectors }) => ({
     isLoading: [
       () => [selectors.status, selectors.mappingStatus],
@@ -67,17 +88,14 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
       (data: SearchResponseBody, isLoading) => {
         if (isLoading) return [];
 
-        const a = data?.hits?.hits || [];
-        return a;
+        return data?.hits?.hits || [];
       },
     ],
     simplifiedMapping: [
       () => [selectors.mappingStatus, selectors.mappingData],
       (status: Status, mapping: IndicesGetMappingIndexMappingRecord) => {
         if (status !== Status.SUCCESS) return {};
-
-        const retVal = mapping?.mappings?.properties;
-        return retVal;
+        return mapping?.mappings?.properties;
       },
     ],
   }),

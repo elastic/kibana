@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -24,8 +24,6 @@ import { Result } from '../../../shared/result/result';
 
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
-
-const onChange = () => {};
 
 const iconMap: Record<string, string> = {
   boolean: 'tokenBoolen',
@@ -66,7 +64,7 @@ const defaultToken = 'questionInCircle';
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { simplifiedMapping, results } = useValues(DocumentsLogic);
-  const { makeRequest, makeMappingRequest } = useActions(DocumentsLogic);
+  const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
 
   useEffect(() => {
     makeRequest({ indexName, query: '' });
@@ -104,7 +102,9 @@ export const SearchIndexDocuments: React.FC = () => {
               <EuiFieldSearch
                 placeholder="Search documents in this index"
                 isClearable
-                onChange={onChange}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(event.target.value)
+                }
                 fullWidth
               />
             </EuiFlexItem>
