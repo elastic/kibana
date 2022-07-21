@@ -7,10 +7,10 @@
 
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
-import { PolicyDetailsState } from '../../../types';
-import {
+import type { PolicyDetailsState } from '../../../types';
+import type {
   Immutable,
   NewPolicyData,
   PolicyConfig,
@@ -25,7 +25,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
 } from '../../../../../common/constants';
-import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
+import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 import {
   isOnPolicyTrustedAppsView,
@@ -164,6 +164,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
+        attack_surface_reduction: windows.attack_surface_reduction,
       },
       mac: {
         advanced: mac.advanced,
@@ -187,6 +188,10 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
 
 export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
   return uiPolicyConfig.windows.antivirus_registration.enabled;
+});
+
+export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
 });
 
 /** Returns the total number of possible windows eventing configurations */

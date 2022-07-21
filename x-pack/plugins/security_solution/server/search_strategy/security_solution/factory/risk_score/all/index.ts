@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { SecuritySolutionFactory } from '../../types';
-import {
+import type { SecuritySolutionFactory } from '../../types';
+import type {
   RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
   RiskQueries,

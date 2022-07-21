@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
-import { FormattedEntry, ThreatMapEntries, Entry } from './types';
+import type { FormattedEntry, ThreatMapEntries, Entry } from './types';
 import { EntryItem } from './entry_item';
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 import { AndBadgeComponent } from './and_badge';

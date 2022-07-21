@@ -6,12 +6,11 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import { EndpointCommandDefinitionMeta } from './types';
+import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
-import { CommandExecutionComponentProps } from '../console/types';
+import type { CommandExecutionComponentProps } from '../console/types';
 import { ActionError } from './action_error';
 
 export const ReleaseActionResult = memo<
@@ -81,10 +80,6 @@ export const ReleaseActionResult = memo<
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Error. Release action failed.' }
-        )}
         dataTestSubj={'releaseErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -93,14 +88,6 @@ export const ReleaseActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Success. Host released.' }
-      )}
-      data-test-subj="releaseSuccessCallout"
-    />
-  );
+  return <ResultComponent data-test-subj="releaseSuccessCallout" />;
 });
 ReleaseActionResult.displayName = 'ReleaseActionResult';

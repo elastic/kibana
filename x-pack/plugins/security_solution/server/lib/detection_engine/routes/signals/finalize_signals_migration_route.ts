@@ -6,9 +6,9 @@
  */
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';

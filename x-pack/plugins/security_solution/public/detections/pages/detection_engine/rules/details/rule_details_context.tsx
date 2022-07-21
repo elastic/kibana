@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
-import {
+import type {
   AggregateRuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../../common/detection_engine/schemas/common';

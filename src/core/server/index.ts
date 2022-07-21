@@ -28,7 +28,6 @@
  * @packageDocumentation
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
@@ -42,19 +41,23 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
-import {
-  ElasticsearchServiceSetup,
-  configSchema as elasticsearchConfigSchema,
-  ElasticsearchServiceStart,
-  ElasticsearchServicePreboot,
-} from './elasticsearch';
 import type {
+  RequestHandlerContextBase,
+  IRouter,
+  RequestHandler,
+  KibanaResponseFactory,
+  RouteMethod,
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
-  IRouter,
-  RequestHandler,
-} from './http';
+} from '@kbn/core-http-server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
+import type {
+  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ElasticsearchServicePreboot,
+} from '@kbn/core-elasticsearch-server';
+import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -76,12 +79,8 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
-import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-import { KibanaResponseFactory, RouteMethod } from './http';
-
-export type { PrebootServicePreboot } from './preboot';
 
 export type {
   CoreUsageStats,
@@ -113,31 +112,28 @@ export type {
   EnvironmentMode,
   PackageInfo,
 } from '@kbn/config';
-export type {
-  IContextContainer,
-  IContextProvider,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './context';
+
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
+export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  NodesVersionCompatibility,
+  ElasticsearchConfigPreboot,
+  ElasticsearchRequestHandlerContext,
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchClientSslConfig,
   IScopedClusterClient,
-  ElasticsearchConfigPreboot,
-  PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
   UnauthorizedErrorHandlerRetryResult,
@@ -145,57 +141,29 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  ElasticsearchRequestHandlerContext,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server';
+
+export { CspConfig } from '@kbn/core-http-server-internal';
+export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
-  AuthStatus,
   AuthToolkit,
-  AuthRedirected,
+  AuthResultRedirected,
   AuthRedirectedParams,
   AuthResult,
   AuthResultType,
-  Authenticated,
-  AuthNotHandled,
-  BasePath,
-  IBasePath,
-  CustomHttpResponseOptions,
-  GetAuthHeaders,
-  GetAuthState,
-  Headers,
-  HttpAuth,
-  HttpResponseOptions,
-  HttpResponsePayload,
-  HttpServerInfo,
-  HttpServicePreboot,
-  HttpServiceStart,
-  ErrorHttpResponseOptions,
-  IKibanaSocket,
-  IsAuthenticated,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  IKibanaResponse,
-  LifecycleResponseFactory,
-  KnownHeaders,
-  OnPreAuthHandler,
-  OnPreAuthToolkit,
-  OnPreRoutingHandler,
-  OnPreRoutingToolkit,
-  OnPostAuthHandler,
-  OnPostAuthToolkit,
-  OnPreResponseHandler,
-  OnPreResponseToolkit,
-  OnPreResponseRender,
-  OnPreResponseExtensions,
-  OnPreResponseInfo,
-  RedirectResponseOptions,
-  RequestHandlerWrapper,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
+  AuthResultAuthenticated,
+  AuthResultNotHandled,
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
+  KibanaRequest,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -213,19 +181,51 @@ export type {
   RouteValidatorFullConfig,
   RouteValidationResultFactory,
   RouteValidationError,
+  RedirectResponseOptions,
+  RequestHandlerWrapper,
+  KibanaRequestEvents,
+  KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
+  LifecycleResponseFactory,
+  KnownHeaders,
+  ErrorHttpResponseOptions,
+  IKibanaSocket,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  Headers,
+  CustomHttpResponseOptions,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPreRoutingHandler,
+  OnPreRoutingToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseRender,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
+  ICspConfig,
+  IExternalUrlConfig,
+  IBasePath,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
-  DestructiveRouteMethod,
-  SafeRouteMethod,
-  KibanaRequest,
-  ICspConfig,
-  IExternalUrlConfig,
-  IExternalUrlPolicy,
-} from './http';
+  GetAuthState,
+  IsAuthenticated,
+  AuthStatus,
+  GetAuthHeaders,
+  IContextContainer,
+  HttpAuth,
+  HttpServerInfo,
+  HttpServicePreboot,
+  HttpServiceStart,
+} from '@kbn/core-http-server';
+export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest, CspConfig } from './http';
+export { validBodyOutput } from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -407,17 +407,13 @@ export { EventLoopDelaysMonitor } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
 export type {
-  BaseDeprecationDetails,
-  DeprecationsDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from './deprecations';
-
+export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
@@ -469,26 +465,6 @@ export type {
 } from '@kbn/core-analytics-server';
 
 export type { CoreRequestHandlerContext } from './core_route_handler_context';
-
-/**
- * Base, abstract type for request handler contexts.
- * @public
- **/
-export interface RequestHandlerContextBase {
-  /**
-   * Await all the specified context parts and return them.
-   *
-   * @example
-   * ```ts
-   * const resolved = await context.resolve(['core', 'pluginA']);
-   * const esClient = resolved.core.elasticsearch.client;
-   * const pluginAService = resolved.pluginA.someService;
-   * ```
-   */
-  resolve: <T extends keyof Omit<this, 'resolve'>>(
-    parts: T[]
-  ) => Promise<AwaitedProperties<Pick<this, T>>>;
-}
 
 /**
  * Base context passed to a route handler, containing the `core` context part.

@@ -10,13 +10,12 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { OpenTimelineResult } from '../../components/open_timeline/types';
+import type { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
 import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
-import {
-  TimelineType,
+import type {
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   PageInfoTimeline,
@@ -24,6 +23,7 @@ import {
   SortTimeline,
   GetAllTimelineVariables,
 } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {

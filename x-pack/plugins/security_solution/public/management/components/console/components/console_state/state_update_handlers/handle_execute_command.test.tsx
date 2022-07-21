@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
-import { ConsoleProps } from '../../../types';
+import type { ConsoleProps } from '../../../types';
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -33,7 +33,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
-        // `+2` to account for builtin commands
+        // `+2` to account for builtin generic args
         commands.length + 2
       );
     });
@@ -110,7 +110,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
-        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  or type help for assistance.'
+        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  Help or type help for assistance.'
       );
     });
   });

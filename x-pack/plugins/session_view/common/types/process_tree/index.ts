@@ -166,6 +166,7 @@ export interface ProcessEvent {
   };
   container?: ProcessEventContainer;
   orchestrator?: ProcessEventOrchestrator;
+  cloud?: ProcessEventCloud;
 }
 
 export interface ProcessEventsPage {
@@ -232,4 +233,18 @@ export interface ProcessEventOrchestrator {
   parent?: {
     type?: string;
   };
+}
+
+export interface ProcessEventCloud {
+  instance?: {
+    name?: string;
+  };
+  account?: {
+    id?: string;
+  };
+  project?: {
+    id?: string;
+  };
+  provider?: string;
+  region?: string;
 }
