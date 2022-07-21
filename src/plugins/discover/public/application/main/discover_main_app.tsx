@@ -7,8 +7,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import type { SavedObject } from '@kbn/data-plugin/public';
+import type { DataViewListItem} from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -24,7 +23,7 @@ export interface DiscoverMainProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<DataViewAttributes>>;
+  indexPatternList: DataViewListItem[];
   /**
    * Current instance of SavedSearch
    */
@@ -63,6 +62,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     history: usedHistory,
     savedSearch,
     setExpandedDoc,
+    dataViewList: indexPatternList,
   });
 
   /**

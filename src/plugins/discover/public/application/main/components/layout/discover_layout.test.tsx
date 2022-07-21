@@ -16,8 +16,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
@@ -61,7 +60,7 @@ function mountComponent(
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<DataViewAttributes>>;
+  }) as DataViewListItem[];
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

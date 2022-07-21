@@ -14,6 +14,7 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -40,11 +41,13 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
+  dataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  dataViewList: DataViewListItem[];
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -147,8 +150,8 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns);
+        savedSearch.searchSource.setField('index', nextIndexPattern.loaded || undefined);
 
         reset();
       }
@@ -265,8 +268,7 @@ export function useDiscoverState({
     async function fetchDataview() {
       if (state.query && isOfAggregateQueryType(state.query)) {
         const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const idsTitles = await indexPatterns.getIdsWithTitle();
-        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFROMQuery);
         if (dataViewObj) {
           const columns = fetchResults();
           if (columns.length) {

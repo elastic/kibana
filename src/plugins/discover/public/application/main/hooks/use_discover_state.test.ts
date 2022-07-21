@@ -38,6 +38,7 @@ describe('test useDiscoverState', () => {
         history,
         savedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
+        dataViewList: [],
       });
     });
     expect(result.current.state.index).toBe(indexPatternMock.id);

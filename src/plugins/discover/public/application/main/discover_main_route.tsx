@@ -7,12 +7,9 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { SavedObject } from '@kbn/data-plugin/public';
+import { DataViewListItem } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
-import {
-  DataViewAttributes,
-  DataViewSavedObjectConflictError,
-} from '@kbn/data-views-plugin/public';
+import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
@@ -59,9 +56,7 @@ export function DiscoverMainRoute(props: Props) {
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
-    []
-  );
+  const [indexPatternList, setIndexPatternList] = useState<DataViewListItem[]>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -98,14 +93,17 @@ export function DiscoverMainRoute(props: Props) {
 
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.dataViews, config);
+        const ip = await loadIndexPattern(index || '', data.dataViews);
+        if (!ip.loaded) {
+          // note that this should be caught in at the start of this function
+          throw new Error('No data views found');
+        }
 
-        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
-        await data.dataViews.refreshFields(indexPatternData);
-        setIndexPatternList(ipList);
+        const dataView = resolveIndexPattern(ip, searchSource, toastNotifications);
+        await data.dataViews.refreshFields(ip.loaded);
+        setIndexPatternList(ip.list);
 
-        return indexPatternData;
+        return dataView;
       } catch (e) {
         setError(e);
       }

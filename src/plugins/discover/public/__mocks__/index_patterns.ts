@@ -19,6 +19,13 @@ export const indexPatternsMock = {
     } else if (id === 'invalid-index-pattern-id') {
       return Promise.reject('Invald');
     }
+    return Promise.reject('Invald');
   },
   updateSavedObject: jest.fn(),
+  getIdsWithTitle: () => {
+    return [indexPatternMock];
+  },
+  getDefaultDataView: () => {
+    return indexPatternMock;
+  },
 } as unknown as jest.Mocked<DataViewsContract>;

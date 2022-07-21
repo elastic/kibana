@@ -61,6 +61,7 @@ describe('test useSavedSearch', () => {
         history,
         savedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
+        dataViewList: [],
       });
     });
 
@@ -104,6 +105,7 @@ describe('test useSavedSearch', () => {
         history,
         savedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
+        dataViewList: [],
       });
     });
 

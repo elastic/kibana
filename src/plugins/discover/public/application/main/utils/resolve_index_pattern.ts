@@ -7,20 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObject, ToastsStart } from '@kbn/core/public';
+import type { SavedObject, ToastsStart } from '@kbn/core/public';
 export type IndexPatternSavedObject = SavedObject & { title: string };
 
 interface IndexPatternData {
   /**
-   * List of existing index patterns
+   * List of existing data views
    */
-  list: IndexPatternSavedObject[];
+  list: DataViewListItem[];
   /**
    * Loaded index pattern (might be default index pattern if requested was not found)
    */
-  loaded: DataView;
+  loaded: DataView | null;
   /**
    * Id of the requested index pattern
    */
@@ -31,62 +31,27 @@ interface IndexPatternData {
   stateValFound: boolean;
 }
 
-export function findIndexPatternById(
-  indexPatterns: IndexPatternSavedObject[],
-  id: string
-): IndexPatternSavedObject | undefined {
-  if (!Array.isArray(indexPatterns) || !id) {
-    return;
-  }
-  return indexPatterns.find((o) => o.id === id);
-}
-
-/**
- * Checks if the given defaultIndex exists and returns
- * the first available index pattern id if not
- */
-export function getFallbackIndexPatternId(
-  indexPatterns: IndexPatternSavedObject[],
-  defaultIndex: string = ''
-): string {
-  if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
-    return defaultIndex;
-  }
-  return indexPatterns && indexPatterns[0]?.id ? indexPatterns[0].id : '';
-}
-
-/**
- * A given index pattern id is checked for existence and a fallback is provided if it doesn't exist
- * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
- * the first entry of the given list of Indexpatterns is used
- */
-export function getIndexPatternId(
-  id: string = '',
-  indexPatterns: IndexPatternSavedObject[] = [],
-  defaultIndex: string = ''
-): string {
-  if (!id || !findIndexPatternById(indexPatterns, id)) {
-    return getFallbackIndexPatternId(indexPatterns, defaultIndex);
-  }
-  return id;
-}
-
 /**
  * Function to load the given index pattern by id, providing a fallback if it doesn't exist
  */
 export async function loadIndexPattern(
   id: string,
-  indexPatterns: DataViewsContract,
-  config: IUiSettingsClient
+  dataViews: DataViewsContract
 ): Promise<IndexPatternData> {
-  const indexPatternList = (await indexPatterns.getCache()) as unknown as IndexPatternSavedObject[];
+  const dataViewList = await dataViews.getIdsWithTitle();
 
-  const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
+  let dataView: DataView | null;
+  try {
+    dataView = await dataViews.get(id);
+  } catch (e) {
+    dataView = await dataViews.getDefaultDataView();
+  }
+
   return {
-    list: indexPatternList || [],
-    loaded: await indexPatterns.get(actualId),
+    list: dataViewList,
+    loaded: dataView,
     stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateValFound: !!id && dataView?.id === id,
   };
 }
 
@@ -102,6 +67,9 @@ export function resolveIndexPattern(
   const { loaded: loadedIndexPattern, stateVal, stateValFound } = ip;
 
   const ownIndexPattern = searchSource.getOwnField('index');
+  if (!loadedIndexPattern) {
+    return;
+  }
 
   if (ownIndexPattern && !stateVal) {
     return ownIndexPattern;
@@ -142,6 +110,5 @@ export function resolveIndexPattern(
       }),
     });
   }
-
   return loadedIndexPattern;
 }
