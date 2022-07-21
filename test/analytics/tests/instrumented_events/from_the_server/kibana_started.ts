@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(event.properties.value3).to.be.a('number');
       expect(event.properties.key4).to.eql('setup_time');
       expect(event.properties.value4).to.be.a('number');
-      expect(event.properties.key5).to.eql('starttime');
+      expect(event.properties.key5).to.eql('start_time');
       expect(event.properties.value5).to.be.a('number');
     });
   });
