@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
+import './saved_search_grid.scss';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;

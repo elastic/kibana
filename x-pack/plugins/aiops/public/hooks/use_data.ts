@@ -16,9 +16,12 @@ import { TimeBuckets } from '../../common/time_buckets';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
 import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_wrapper';
 
 export const useData = (
   currentDataView: DataView,
+  aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useAiOpsKibana();
@@ -27,6 +30,42 @@ export const useData = (
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
   >();
+
+  /** Prepare required params to pass to search strategy **/
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = getEsQueryFromSavedSearch({
+      dataView: currentDataView,
+      uiSettings,
+      savedSearch: undefined,
+    });
+
+    if (searchData === undefined || aiopsListState.searchString !== '') {
+      if (aiopsListState.filters) {
+        services.data.query.filterManager.setFilters(aiopsListState.filters);
+      }
+      return {
+        searchQuery: aiopsListState.searchQuery,
+        searchString: aiopsListState.searchString,
+        searchQueryLanguage: aiopsListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentDataView.id,
+    aiopsListState.searchString,
+    aiopsListState.searchQueryLanguage,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify({
+      searchQuery: aiopsListState.searchQuery,
+    }),
+    lastRefresh,
+  ]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -56,6 +95,7 @@ export const useData = (
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
         index: currentDataView.title,
+        searchQuery,
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
       });
@@ -94,10 +134,21 @@ export const useData = (
     };
   });
 
+  // Ensure request is updated when search changes
+  useEffect(() => {
+    updateFieldStatsRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchString, JSON.stringify(searchQuery)]);
+
   return {
     docStats,
     timefilter,
+    /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,
+    /** End timestamp filter */
     latest: fieldStatsRequest?.latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
   };
 };

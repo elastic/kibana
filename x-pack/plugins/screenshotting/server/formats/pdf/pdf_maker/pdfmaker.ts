@@ -33,6 +33,7 @@ export class PdfMaker {
 
   private worker?: Worker;
   private pageCount: number = 0;
+  private transferList: ArrayBuffer[] = [];
 
   protected workerModulePath: string;
 
@@ -136,11 +137,15 @@ export class PdfMaker {
     this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
     const size = this.layout.getPdfImageSize();
     const img = {
-      image: `data:image/png;base64,${image.toString('base64')}`,
+      // The typings are incomplete for the image property.
+      // It's possible to pass a Buffer as the image data.
+      // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
+      image,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
-    };
+    } as unknown as ContentImage;
+    this.transferList.push(image.buffer);
 
     if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
@@ -232,7 +237,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
-        myPort.postMessage(generatePdfRequest);
+        myPort.postMessage(generatePdfRequest, this.transferList);
       });
     } finally {
       await this.cleanupWorker();
