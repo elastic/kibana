@@ -364,7 +364,7 @@ export function DiscoverLayout({
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
-                      onFieldEdited={onFieldEdited}
+                      onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized

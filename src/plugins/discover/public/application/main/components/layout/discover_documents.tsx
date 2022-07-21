@@ -62,7 +62,7 @@ function DiscoverDocumentsComponent({
   setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
-  onFieldEdited: () => void;
+  onFieldEdited?: () => void;
 }) {
   const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
