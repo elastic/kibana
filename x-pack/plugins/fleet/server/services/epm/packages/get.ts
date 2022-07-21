@@ -303,7 +303,7 @@ export async function getInstallationObject(options: {
   const { savedObjectsClient, pkgName, logger } = options;
   return savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch((e) => logger?.error(e));
+    .catch((e) => logger?.error(e) ?? undefined);
 }
 
 export async function getInstallation(options: {

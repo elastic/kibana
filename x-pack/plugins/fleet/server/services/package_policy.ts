@@ -1311,7 +1311,7 @@ export interface PackagePolicyServiceInterface {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger: Logger
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
