@@ -12,6 +12,10 @@ export type { SavedObjectsBulkResolveResponse } from './bulk_resolve';
 export type { SavedObjectsBulkUpdateObject, SavedObjectsBulkUpdateOptions } from './bulk_update';
 export type { SavedObjectsCreateOptions } from './create';
 export type { SavedObjectsDeleteOptions } from './delete';
-export type { SavedObjectsFindResponse, SavedObjectsFindOptions } from './find';
+export type {
+  SavedObjectsFindResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+} from './find';
 export type { ResolvedSimpleSavedObject } from './resolve';
 export type { SavedObjectsUpdateOptions } from './update';

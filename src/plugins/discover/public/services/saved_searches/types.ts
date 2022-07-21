@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';

@@ -13,6 +13,7 @@ export type {
   SavedObjectsDeleteOptions,
   SavedObjectsBatchResponse,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsUpdateOptions,
   ResolvedSimpleSavedObject,
   SavedObjectsBulkUpdateObject,

@@ -29,3 +29,11 @@ export interface SavedObjectsFindResponse<T = unknown, A = unknown>
   perPage: number;
   page: number;
 }
+
+/**
+ * @public
+ */
+export interface SavedObjectsFindOptionsReference {
+  type: string;
+  id: string;
+}
