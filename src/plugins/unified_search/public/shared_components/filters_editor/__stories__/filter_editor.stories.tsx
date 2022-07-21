@@ -66,6 +66,35 @@ const filters: Filter[] = [
           },
           {
             meta: {
+              params: {
+                conditionalType: 'and',
+                filters: [
+                  {
+                    meta: {
+                      index: '1234',
+                      type: 'phrase',
+                      key: 'category.keyword',
+                      params: {
+                        query: 'Filter 2-1',
+                      },
+                    },
+                  },
+                  {
+                    meta: {
+                      index: '1234',
+                      type: 'phrase',
+                      key: 'category.keyword',
+                      params: {
+                        query: 'Filter 2-2',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          {
+            meta: {
               index: '1234',
               type: 'phrase',
               key: 'category.keyword',
