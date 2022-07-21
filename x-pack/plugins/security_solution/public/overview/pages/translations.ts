@@ -25,8 +25,8 @@ export const RECENT_TIMELINES = i18n.translate(
   }
 );
 
-export const ALERT_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
-  defaultMessage: 'Detection alert trend',
+export const ALERT_TREND = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
+  defaultMessage: 'Alert trend',
 });
 
 export const TOP = (fieldName: string) =>
