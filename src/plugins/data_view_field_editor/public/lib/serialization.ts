@@ -14,11 +14,9 @@ export const deserializeField = (dataView: DataView, field?: DataViewField): Fie
     return undefined;
   }
 
-  const type = field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const);
-
   return {
     name: field.name,
-    type,
+    type: field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const),
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
