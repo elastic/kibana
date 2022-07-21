@@ -122,9 +122,7 @@ export interface FileJSON<Meta = unknown> {
   meta: FileSavedObjectAttributes<Meta>['Meta'];
   extension: FileSavedObjectAttributes['Extension'];
   alt: FileSavedObjectAttributes['Alt'];
-  chunkSize: FileSavedObjectAttributes['ChunkSize'];
   fileKind: FileSavedObjectAttributes['FileKind'];
-  compression: FileSavedObjectAttributes['Compression'];
   status: FileSavedObjectAttributes['Status'];
 }
 

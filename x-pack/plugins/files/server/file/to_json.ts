@@ -17,8 +17,6 @@ export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes
     FileKind,
     Status,
     Alt,
-    ChunkSize,
-    Compression,
     Extension,
     Meta,
   } = attrs;
@@ -31,8 +29,6 @@ export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes
     updated: Updated,
     fileKind: FileKind,
     alt: Alt,
-    chunkSize: ChunkSize,
-    compression: Compression,
     extension: Extension,
     status: Status,
     meta: Meta as M,
