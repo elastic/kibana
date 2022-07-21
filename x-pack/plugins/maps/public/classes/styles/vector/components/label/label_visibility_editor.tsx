@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { LabelVisibilityStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
@@ -25,6 +25,9 @@ export function LabelVisibilityEditor(props: Props) {
   const layerVisiblity = props.styleProperty.getLayerVisibility();
   const labelVisiblity = props.styleProperty.getLabelVisibility();
 
+  console.log('layerVisiblity', layerVisiblity);
+  console.log('labelVisiblity', labelVisiblity);
+
   const onSwitchChange = (event: EuiSwitchEvent) => {
     props.handlePropertyChange(props.styleProperty.getStyleName(), {
       options: {
@@ -38,7 +41,7 @@ export function LabelVisibilityEditor(props: Props) {
     props.handlePropertyChange(props.styleProperty.getStyleName(), {
       options: {
         ...props.styleProperty.getOptions(),
-        minZoom: Math.max(layerVisiblity.min, parseInt(value[0], 10)),
+        minZoom: Math.max(layerVisiblity.minZoom, parseInt(value[0], 10)),
         maxZoom: Math.min(layerVisiblity.maxZoom, parseInt(value[1], 10)),
       },
     });
@@ -47,11 +50,14 @@ export function LabelVisibilityEditor(props: Props) {
   const { useLayerVisibility } = props.styleProperty.getOptions();
   const slider = useLayerVisibility
     ? null
-    : <ValidatedDualRange
+    : <EuiFormRow
+        hasEmptyLabelSpace={true}
+      >
+        <ValidatedDualRange
           formRowDisplay="columnCompressed"
-          min={layerVisiblity.min}
-          max={layerVisiblity.max}
-          value={[labelVisiblity.min, labelVisiblity.max]}
+          min={layerVisiblity.minZoom}
+          max={layerVisiblity.maxZoom}
+          value={[labelVisiblity.minZoom, labelVisiblity.maxZoom]}
           showInput="inputWithPopover"
           showRange
           showLabels
@@ -59,15 +65,16 @@ export function LabelVisibilityEditor(props: Props) {
           allowEmptyRange={false}
           compressed
           prepend={i18n.translate('xpack.maps.styles.labelVisibility.visibleZoom', {
-            defaultMessage: 'Label zoom levels',
+            defaultMessage: 'Zoom levels',
           })}
-        />;
+        />
+      </EuiFormRow>;
 
   const form = (
-    <EuiFormRow
-      label={getVectorStyleLabel(props.styleProperty.getStyleName())}
-    >
-      <div>
+    <EuiForm>
+      <EuiFormRow
+        label={getVectorStyleLabel(props.styleProperty.getStyleName())}
+      >
         <EuiSwitch
           label={i18n.translate('xpack.maps.styles.labelVisibility.useLayerLabel', {
             defaultMessage: 'Use layer visibility',
@@ -76,9 +83,9 @@ export function LabelVisibilityEditor(props: Props) {
           onChange={onSwitchChange}
           compressed
         />
-        {slider}
-      </div>
-    </EuiFormRow>
+      </EuiFormRow>
+      {slider}
+    </EuiForm>
   );
 
   if (!props.disabled) {

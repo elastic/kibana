@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
 import { LabelVisibilityStylePropertyDescriptor } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
@@ -25,10 +26,15 @@ export class LabelVisibilityProperty extends AbstractStyleProperty<LabelVisibili
     this._layerMaxZoom = layerMaxZoom;
   }
 
+  syncLabelZoomRange(mbLayerId: string, mbMap: MbMap) {
+    const { maxZoom, minZoom } = this.getLabelVisibility();
+    mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
+  }
+
   getLayerVisibility() {
     return { 
-      max: this._layerMaxZoom,
-      min: this._layerMinZoom
+      maxZoom: this._layerMaxZoom,
+      minZoom: this._layerMinZoom
     };
   }
 
@@ -37,8 +43,8 @@ export class LabelVisibilityProperty extends AbstractStyleProperty<LabelVisibili
     return useLayerVisibility
       ? this.getLayerVisibility()
       : {
-          max: Math.min(this._layerMaxZoom, maxZoom),
-          min: Math.max(this._layerMinZoom, minZoom)
+          maxZoom: Math.min(this._layerMaxZoom, maxZoom),
+          minZoom: Math.max(this._layerMinZoom, minZoom)
         };
   }
 }

@@ -831,6 +831,7 @@ export class VectorStyle implements IVectorStyle {
     textLayerId: string;
   }) {
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
+    this._labelVisibilityProperty.syncLabelZoomRange(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
     this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);
