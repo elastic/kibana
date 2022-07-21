@@ -24,7 +24,7 @@ describe('syncEditedMonitor', () => {
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     kibanaVersion: null,
-    authSavedObjectsClient: { bulkUpdate: jest.fn() },
+    authSavedObjectsClient: { bulkUpdate: jest.fn(), get: jest.fn() },
     logger,
     config: {
       service: {
@@ -48,7 +48,12 @@ describe('syncEditedMonitor', () => {
       unit: 'm',
     },
     name: 'my mon',
-    locations: [],
+    locations: [
+      {
+        id: 'test_location',
+        isServiceManaged: true,
+      },
+    ],
     urls: 'http://google.com',
     max_redirects: '0',
     password: '',
