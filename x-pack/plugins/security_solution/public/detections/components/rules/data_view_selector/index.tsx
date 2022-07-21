@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
 interface DataViewSelectorProps {
-  kibanaDataViews: { [dataViewId: string]: DataViewListItem };
+  kibanaDataViews: Record<string, DataViewListItem>;
   field: FieldHook<DefineStepRule['dataViewId']>;
 }
 
