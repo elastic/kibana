@@ -25,7 +25,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
+import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
 
 import { getCommonTags } from '../utils';
 

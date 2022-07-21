@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PostBulkUpdateAgentTagsRequest, UpdateAgentRequest } from '../../../common';
+import type { PostBulkUpdateAgentTagsRequest, UpdateAgentRequest } from '../../../common/types';
 
 import { agentRouteService } from '../../services';
 

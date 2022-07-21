@@ -10,7 +10,7 @@ import Path from 'path';
 import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
-import type { PackagePolicySOAttributes } from '../../common';
+import type { PackagePolicySOAttributes } from '../../common/types';
 import type { AgentPolicySOAttributes } from '../types';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';

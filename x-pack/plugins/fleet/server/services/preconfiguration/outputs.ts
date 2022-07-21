@@ -9,8 +9,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import type { PreconfiguredOutput, Output } from '../../../common';
-import { normalizeHostsForAgents } from '../../../common';
+import type { PreconfiguredOutput, Output } from '../../../common/types';
+import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
