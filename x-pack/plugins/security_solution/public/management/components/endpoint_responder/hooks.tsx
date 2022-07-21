@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
-import type { ActionRequest, ActionRequestComponentProps } from './types';
+import type { ActionRequestState, ActionRequestComponentProps } from './types';
 import type { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import type { useSendReleaseEndpointRequest } from '../../hooks/endpoint/use_send_release_endpoint_request';
 
@@ -25,7 +25,7 @@ export const useUpdateActionState = ({
   actionRequestApi: ReturnType<
     typeof useSendIsolateEndpointRequest | typeof useSendReleaseEndpointRequest
   >;
-  actionRequest?: ActionRequest;
+  actionRequest?: ActionRequestState;
   endpointId?: string;
   isPending: boolean;
 }) => {
@@ -36,10 +36,10 @@ export const useUpdateActionState = ({
     refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
-  // Send Isolate request if not yet done
+  // Create action request
   useEffect(() => {
     if (!actionRequestSent && endpointId) {
-      const request: ActionRequest = {
+      const request: ActionRequestState = {
         requestSent: true,
         actionId: undefined,
       };
@@ -50,7 +50,7 @@ export const useUpdateActionState = ({
           comment: command.args.args?.comment?.[0],
         })
         .then((response) => {
-          request.actionId = response.action;
+          request.actionId = response.data.id;
 
           if (isMounted) {
             setStore((prevState) => {

@@ -17,7 +17,7 @@ export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionCo
   endpoint: HostMetadata;
 }>;
 
-export interface ActionRequest {
+export interface ActionRequestState {
   requestSent: boolean;
   actionId?: string;
 }
@@ -25,7 +25,7 @@ export interface ActionRequest {
 export type ActionRequestComponentProps = CommandExecutionComponentProps<
   { comment?: string },
   {
-    actionRequest?: ActionRequest;
+    actionRequest?: ActionRequestState;
     completedActionDetails?: ActionDetails;
   },
   EndpointCommandDefinitionMeta
