@@ -31,10 +31,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/mlSyncResponse'
               examples:
                 syncExample:
-                  $ref: '#/components/examples/syncExample'
+                  $ref: '#/components/examples/mlSyncExample'
   /api/ml/saved_objects/sync:
     get:
       summary: Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
@@ -52,10 +52,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/mlSyncResponse'
               examples:
                 syncExample:
-                  $ref: '#/components/examples/syncExample'
+                  $ref: '#/components/examples/mlSyncExample'
 components:
  parameters:
   spaceParam:
@@ -82,40 +82,40 @@ components:
     in: header
     name: ApiKey
  schemas:
-    syncSuccess:
+    mlSyncResponseSuccess:
       type: boolean
       description: The success or failure of the synchronization.
-    syncDatafeed:
+    mlSyncResponseDatafeeds:
       type: object
       description: The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.
       properties:
         success:
-          $ref: '#/components/schemas/syncSuccess'
-    syncJob:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponseJobs:
       type: object
       description: The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.
       properties:
         success:
-          $ref: '#/components/schemas/syncSuccess'
-    syncModel:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponseModels:
       type: object
       description: The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.
       properties:
         success:
-          $ref: '#/components/schemas/syncSuccess'
-    syncResponse:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponse:
       type: object
       properties:
         datafeedsAdded:
           type: object
           description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
           additionalProperties:
-           $ref: '#/components/schemas/syncDatafeed'
+           $ref: '#/components/schemas/mlSyncResponseDatafeeds'
         datafeedsRemoved:
           type: object
           description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
           additionalProperties:
-            $ref: '#/components/schemas/syncDatafeed'
+            $ref: '#/components/schemas/mlSyncResponseDatafeeds'
         savedObjectsCreated:
           type: object
           description: If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
@@ -123,15 +123,15 @@ components:
             anomaly-detector:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncJob'
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             data-frame-analytics:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncDatafeed'
+                $ref: '#/components/schemas/mlSyncResponseDatafeeds'
             trained-model:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncModel'
+                $ref: '#/components/schemas/mlSyncResponseModels'
         savedObjectsDeleted:
           type: object
           description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
@@ -139,17 +139,17 @@ components:
             anomaly-detector:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncJob'
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             data-frame-analytics:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncJob'
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             trained-model:
               type: object
               additionalProperties:
-                $ref: '#/components/schemas/syncModel'
+                $ref: '#/components/schemas/mlSyncResponseModels'
  examples:
-   syncExample:
+   mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
      value:
        {

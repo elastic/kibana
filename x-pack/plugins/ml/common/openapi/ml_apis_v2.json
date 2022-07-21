@@ -50,7 +50,7 @@
           "200" : {
             "description" : "Indicates a successful call.",
             "schema" : {
-              "$ref" : "#/definitions/SyncResponse"
+              "$ref" : "#/definitions/MLSyncResponse"
             }
           }
         },
@@ -77,7 +77,7 @@
           "200" : {
             "description" : "Indicates a successful call.",
             "schema" : {
-              "$ref" : "#/definitions/SyncResponse"
+              "$ref" : "#/definitions/MLSyncResponse"
             }
           }
         },
@@ -98,7 +98,17 @@
     }
   },
   "definitions": {
-    "SyncJob": {
+    "MLSyncResponse-Datafeeds": {
+      "type": "object",
+      "description": "The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.",
+      "properties" : {
+        "success": {
+          "type" : "boolean",
+          "description": "The success or failure of the synchronization."
+        }
+      }
+    },
+    "MLSyncResponse-Jobs": {
       "type": "object",
       "description": "The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.",
       "properties": {
@@ -108,7 +118,7 @@
         }
       }
     },
-    "SyncModel": {
+    "MLSyncResponse-Models": {
       "type": "object",
       "description": "The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.",
       "properties": {
@@ -118,7 +128,7 @@
         }
       }
     },
-    "SavedObjectsCreated": {
+    "MLSyncResponse-SavedObjectsCreated":{
       "type": "object",
       "description": "If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.",
       "properties": {
@@ -126,26 +136,26 @@
           "type": "object",
           "description": "This object is present if there are anomaly detection jobs affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncJob"
+            "$ref" : "#/definitions/MLSyncResponse-Jobs"
           }
         },
         "data-frame-analytics": {
           "type": "object",
           "description": "This object is present if there are data frame analytics jobs affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncJob"
+            "$ref" : "#/definitions/MLSyncResponse-Jobs"
           }
         },
         "trained-model": {
           "type": "object",
           "description": "This object is present if there are trained models affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncModel"
+            "$ref" : "#/definitions/MLSyncResponse-Models"
           }
         }
       }
     },
-    "SavedObjectsDeleted": {
+    "MLSyncResponse-SavedObjectsDeleted":{
       "type": "object",
       "description": "If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.",
       "properties": {
@@ -153,61 +163,47 @@
           "type": "object",
           "description": "This object is present if there are anomaly detection jobs affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncJob"
+            "$ref" : "#/definitions/MLSyncResponse-Jobs"
           }
         },
         "data-frame-analytics": {
           "type": "object",
           "description": "This object is present if there are data frame analytics jobs affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncJob"
+            "$ref" : "#/definitions/MLSyncResponse-Jobs"
           }
         },
         "trained-model": {
           "type": "object",
           "description": "This object is present if there are trained models affected by the synchronization.",
           "additionalProperties": {
-            "$ref": "#/definitions/SyncModel"
+            "$ref" : "#/definitions/MLSyncResponse-Models"
           }
         }
       }
     },
-    "SyncResponse": {
+    "MLSyncResponse": {
       "type": "object",
-      "description": "A list of machine learning saved objects that required synchronization.",
+      "description": "The sync machine learning saved objects API returns this list of machine learning saved objects that required synchronization.",
       "properties": {
         "savedObjectsCreated": {
-          "$ref": "#/definitions/SavedObjectsCreated"
-        },
+          "$ref" : "#/definitions/MLSyncResponse-SavedObjectsCreated"
+         },
         "savedObjectsDeleted": {
-          "$ref": "#/definitions/SavedObjectsDeleted"
+          "$ref" : "#/definitions/MLSyncResponse-SavedObjectsDeleted"
         },
         "datafeedsAdded": {
           "type": "object",
           "description": "If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.",
           "additionalProperties":{
-            "type": "object",
-            "description": "The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.",
-            "properties" : {
-              "success": {
-                "type" : "boolean",
-                "description": "The success or failure of the synchronization."
-              }
-            }
+             "$ref" : "#/definitions/MLSyncResponse-Datafeeds"
           }
         },
         "datafeedsRemoved": {
           "type": "object",
           "description": "If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.",
           "additionalProperties": {
-            "type": "object",
-            "description": "The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.",
-            "properties" : {
-              "success": {
-                "type" : "boolean",
-                "description": "The success or failure of the synchronization."
-              }
-            }
+            "$ref" : "#/definitions/MLSyncResponse-Datafeeds"
           }
         }
       }
