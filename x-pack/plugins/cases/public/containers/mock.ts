@@ -861,7 +861,6 @@ export const getExternalReferenceAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added a chart',
     timelineIcon: 'casesApp',
     ...viewObject,
@@ -892,7 +891,6 @@ export const getPersistableStateAttachment = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'update',
     event: 'added an embeddable',
     timelineIcon: 'casesApp',
     ...viewObject,

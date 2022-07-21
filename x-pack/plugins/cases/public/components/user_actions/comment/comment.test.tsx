@@ -190,9 +190,7 @@ describe('createCommentUserActionBuilder', () => {
 
     it('renders correctly an external reference', async () => {
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(
-        getExternalReferenceAttachment({ type: 'regular' })
-      );
+      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
       const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
@@ -242,7 +240,6 @@ describe('createCommentUserActionBuilder', () => {
       };
 
       const attachment = getExternalReferenceAttachment({
-        type: 'regular',
         actions: <ActionsView />,
       });
 
@@ -277,9 +274,7 @@ describe('createCommentUserActionBuilder', () => {
 
     it('renders correctly a persistable state attachment', async () => {
       const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      persistableStateAttachmentTypeRegistry.register(
-        getPersistableStateAttachment({ type: 'regular' })
-      );
+      persistableStateAttachmentTypeRegistry.register(getPersistableStateAttachment());
 
       const userAction = getPersistableStateUserAction();
       const builder = createCommentUserActionBuilder({
@@ -329,7 +324,6 @@ describe('createCommentUserActionBuilder', () => {
       };
 
       const attachment = getPersistableStateAttachment({
-        type: 'regular',
         actions: <ActionsView />,
       });
 
