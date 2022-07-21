@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
@@ -36,9 +36,14 @@ export const useUpdateActionState = ({
     refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
+  // keep a reference to track the console's mounted state
+  // in order to update the store and cause a re-render on action request API response
+  const latestIsMounted = useRef(false);
+  latestIsMounted.current = isMounted;
+
   // Create action request
   useEffect(() => {
-    if (!actionRequestSent && endpointId) {
+    if (!actionRequestSent && endpointId && isMounted) {
       const request: ActionRequestState = {
         requestSent: true,
         actionId: undefined,
@@ -52,16 +57,11 @@ export const useUpdateActionState = ({
         .then((response) => {
           request.actionId = response.data.id;
 
-          if (isMounted) {
+          if (latestIsMounted.current) {
             setStore((prevState) => {
-              return { ...prevState, actionRequest: request };
+              return { ...prevState, actionRequest: { ...request } };
             });
           }
-        })
-        .finally(() => {
-          setStore((prevState) => {
-            return { ...prevState, actionRequest: request };
-          });
         });
 
       setStore((prevState) => {
@@ -76,6 +76,15 @@ export const useUpdateActionState = ({
     isMounted,
     setStore,
   ]);
+
+  useEffect(() => {
+    // update the console's mounted state ref
+    latestIsMounted.current = isMounted;
+    // set to false when unmounted/console is hidden
+    return () => {
+      latestIsMounted.current = false;
+    };
+  }, [isMounted]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
