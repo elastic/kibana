@@ -95,8 +95,7 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
 
   public humanFriendlyMessage() {
     return i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
-      defaultMessage:
-        'Cannot generate PDF due to low memory. Consider making a smaller PDF before retrying this report.',
+      defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
     });
   }
 }
@@ -109,7 +108,7 @@ export class BrowserCouldNotLaunchError extends ReportingError {
 
   public humanFriendlyMessage() {
     return i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
-      defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
+      defaultMessage: `Can't generate screenshots because the browser did not launch. See the server logs for more information.`,
     });
   }
 }
@@ -147,8 +146,7 @@ export class VisualReportingSoftDisabledError extends ReportingError {
 
   humanFriendlyMessage() {
     return i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
-      defaultMessage:
-        'This report cannot be generated because Kibana does not have sufficient memory.',
+      defaultMessage: `Can't generate this report due to insufficient memory.`,
     });
   }
 }
