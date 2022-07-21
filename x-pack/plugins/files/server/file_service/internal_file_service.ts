@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import { nodeBuilder, escapeKuery, KueryNode } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';
 import { BlobStorageService } from '../blob_storage_service';
@@ -191,17 +192,16 @@ export class InternalFileService {
     page,
     perPage,
   }: FindFileArgs): Promise<FileJSON[]> {
-    const kueryExpressions: string[] = [];
+    const kueryExpressions: KueryNode[] = [];
 
     const addFilters = (fieldName: string, values: string[] = []): void => {
       if (values.length) {
         const orExpressions = values
           .filter(Boolean)
-          .map(
-            (value) => `${this.savedObjectType}.attributes.${fieldName}: ${JSON.stringify(value)}`
-          )
-          .join(' OR ');
-        kueryExpressions.push(`(${orExpressions})`);
+          .map((value) =>
+            nodeBuilder.is(`${this.savedObjectType}.attributes.${fieldName}`, escapeKuery(value))
+          );
+        kueryExpressions.push(nodeBuilder.or(orExpressions));
       }
     };
 
@@ -217,7 +217,7 @@ export class InternalFileService {
 
     const result = await this.soClient.find<FileSavedObjectAttributes>({
       type: this.savedObjectType,
-      filter: kueryExpressions ? kueryExpressions.join(' AND ') : undefined,
+      filter: kueryExpressions ? nodeBuilder.and(kueryExpressions) : undefined,
       page,
       perPage,
     });
