@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['test-plugin-lifecycle'] });
         // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
         expect(event.context).to.have.property('userAgent');
-        expect(event.context.user_agent).to.be.a('string');
+        expect(event.context.userAgent).to.be.a('string');
       });
 
       describe('Test helpers capabilities', () => {
