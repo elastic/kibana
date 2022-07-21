@@ -39,6 +39,7 @@ const getDefaultQuery = ({
   filters,
   pageIndex: 0,
   pageSize: 10,
+  sortDirection: 'desc',
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -75,6 +76,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    */
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery(urlQuery),
+    sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
   });
@@ -131,9 +133,16 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 pageIndex: urlQuery.pageIndex,
                 totalItemCount: findingsGroupByResource.data?.total || 0,
               })}
-              setTableOptions={({ page }) =>
-                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              setTableOptions={({ sort, page }) =>
+                setUrlQuery({
+                  sortDirection: sort?.direction,
+                  pageIndex: page.index,
+                  pageSize: page.size,
+                })
               }
+              sorting={{
+                sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              }}
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
                   pageIndex: 0,
