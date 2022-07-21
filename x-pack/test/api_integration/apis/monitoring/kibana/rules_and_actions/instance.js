@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import fixture from './fixtures/instance.json';
 import { getLifecycleMethods } from '../../data_stream';
+import { normalizeDataTypeDifferences } from '../../normalize_data_type_differences';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -36,6 +37,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
+      body.metrics = normalizeDataTypeDifferences(body.metrics, fixture);
       expect(body).to.eql(fixture);
     });
   });
