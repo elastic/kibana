@@ -90,6 +90,8 @@ export const generateAPIKey = async ({
               spaces: [ALL_SPACES_ID],
               feature: {
                 uptime: ['all'],
+                fleet: ['all'],
+                fleetv2: ['all'],
               },
             },
           ],

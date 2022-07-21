@@ -37,7 +37,8 @@ export class SyntheticsPrivateLocation {
 
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       this.server.authSavedObjectsClient,
-      'synthetics'
+      'synthetics',
+      this.server.logger
     );
 
     if (!newPolicy) {
