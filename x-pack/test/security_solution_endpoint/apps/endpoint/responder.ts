@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'header',
     'endpointPageUtils',
     'responder',
+    'timeline',
   ]);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -34,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.responder.closeResponder();
   };
 
-  describe('Response Actions Responder', function () {
+  describe.only('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -64,6 +65,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should show Responder from the endpoint details', async () => {
         await pageObjects.endpoint.showResponderFromEndpointDetails(indexedData.hosts[0].agent.id);
         await performResponderSanityChecks();
+      });
+    });
+
+    describe('from timeline', () => {
+      before(async () => {
+        await pageObjects.timeline.navigateToTimelineList();
+      });
+
+      it('should show Responder from alert in a timeline', async () => {
+        await new Promise((r) => setTimeout(r, 20_000));
       });
     });
   });
