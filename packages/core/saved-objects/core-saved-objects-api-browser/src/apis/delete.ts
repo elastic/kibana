@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsService } from './saved_objects_service';
-export type { SavedObjectsClient } from './saved_objects_client';
-export { SimpleSavedObject } from './simple_saved_object';
-export type { SavedObjectsStart } from './saved_objects_service';
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
+}

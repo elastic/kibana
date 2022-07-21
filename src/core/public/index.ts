@@ -130,25 +130,21 @@ export type {
 // TODO: check if can be exported as type.
 export { SimpleSavedObject } from './saved_objects';
 export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsClientContract,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  ISimpleSavedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsUpdateOptions,
   ResolvedSimpleSavedObject,
-} from './saved_objects';
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-browser';
 export type {
   SavedObject,
   SavedObjectTypeIdTuple,

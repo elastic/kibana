@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsService } from './saved_objects_service';
-export type { SavedObjectsClient } from './saved_objects_client';
-export { SimpleSavedObject } from './simple_saved_object';
-export type { SavedObjectsStart } from './saved_objects_service';
+import { ISimpleSavedObject } from '../simple_saved_object';
+
+/** @public */
+export interface SavedObjectsBatchResponse<T = unknown> {
+  savedObjects: Array<ISimpleSavedObject<T>>;
+}

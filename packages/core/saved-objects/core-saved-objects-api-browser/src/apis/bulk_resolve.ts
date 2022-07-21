@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsService } from './saved_objects_service';
-export type { SavedObjectsClient } from './saved_objects_client';
-export { SimpleSavedObject } from './simple_saved_object';
-export type { SavedObjectsStart } from './saved_objects_service';
+import type { ResolvedSimpleSavedObject } from './resolve';
+
+/** @public */
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
+}

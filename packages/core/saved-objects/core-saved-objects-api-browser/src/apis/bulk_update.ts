@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { SavedObjectsService } from './saved_objects_service';
-export type { SavedObjectsClient } from './saved_objects_client';
-export { SimpleSavedObject } from './simple_saved_object';
-export type { SavedObjectsStart } from './saved_objects_service';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+
+/** @public */
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
+  type: string;
+  id: string;
+  attributes: T;
+  version?: string;
+  references?: SavedObjectReference[];
+}
+
+/** @public */
+export interface SavedObjectsBulkUpdateOptions {
+  namespace?: string;
+}
