@@ -128,7 +128,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -146,7 +146,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -164,7 +164,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -182,7 +182,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -244,7 +244,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -262,7 +262,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -280,7 +280,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -357,7 +357,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -489,7 +489,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
     mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
@@ -623,7 +623,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -694,7 +694,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -873,7 +873,7 @@ describe('searchAfterAndBulkCreate', () => {
           statusCode: 500,
         },
       },
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
@@ -893,7 +893,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -911,7 +911,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -929,7 +929,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -980,7 +980,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -998,7 +998,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -1016,7 +1016,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
       errors: {},
-      truncatedAlertsArray: false,
+      alertsWereTruncated: false,
     });
 
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(

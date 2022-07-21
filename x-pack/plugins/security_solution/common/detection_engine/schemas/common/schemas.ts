@@ -348,14 +348,8 @@ export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalized
 export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
 export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
 
-export const newTermsFieldsOrUndefined = t.union([newTermsFields, t.undefined]);
-export type NewTermsFieldsOrUndefined = t.TypeOf<typeof newTermsFieldsOrUndefined>;
-
-export const historyWindowStart = t.string;
+export const historyWindowStart = NonEmptyString;
 export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
-
-export const historyWindowStartOrUndefined = t.union([historyWindowStart, t.undefined]);
-export type HistoryWindowStartOrUndefined = t.TypeOf<typeof historyWindowStartOrUndefined>;
 
 export const created_at = IsoDateString;
 

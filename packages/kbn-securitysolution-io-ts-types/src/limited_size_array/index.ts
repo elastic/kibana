@@ -30,7 +30,13 @@ export const LimitedSizeArray = <C extends t.Mixed>({
         Array.isArray(input) &&
         ((minSize && input.length < minSize) || (maxSize && input.length > maxSize))
       ) {
-        return t.failure(input, context);
+        return t.failure(
+          input,
+          context,
+          `Array size (${input.length}) is out of bounds: min: ${
+            minSize ?? 'not specified'
+          }, max: ${maxSize ?? 'not specified'}`
+        );
       } else {
         return arrType.validate(input, context);
       }

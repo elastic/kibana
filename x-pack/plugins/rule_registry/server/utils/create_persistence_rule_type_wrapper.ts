@@ -82,13 +82,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {}, truncatedAlertsArray: false };
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
                 }
 
-                let truncatedAlertsArray = false;
+                let alertsWereTruncated = false;
                 if (maxAlerts && filteredAlerts.length > maxAlerts) {
                   filteredAlerts.length = maxAlerts;
-                  truncatedAlertsArray = true;
+                  alertsWereTruncated = true;
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
@@ -111,7 +111,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (response == null) {
-                  return { createdAlerts: [], errors: {}, truncatedAlertsArray };
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated };
                 }
 
                 return {
@@ -126,11 +126,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     })
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
                   errors: errorAggregator(response.body, [409]),
-                  truncatedAlertsArray,
+                  alertsWereTruncated,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {}, truncatedAlertsArray: false };
+                return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
               }
             },
           },

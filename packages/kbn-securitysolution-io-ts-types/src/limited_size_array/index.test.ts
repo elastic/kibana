@@ -37,18 +37,18 @@ describe('limited size array', () => {
     expect(newTestSchema.name).toEqual('someName');
   });
 
-  test('it should NOT validate an empty array', () => {
+  test('it should not validate an array smaller than min size', () => {
     const payload: string[] = [];
     const decoded = limitedSizeArraySchema.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "[]" supplied to "TestSchemaArray"',
+      'Array size (0) is out of bounds: min: 1, max: 2',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('it should validate an array of testSchema', () => {
+  test('it should validate an array of testSchema that is within min and max size', () => {
     const payload: TestSchema[] = ['valid'];
     const decoded = limitedSizeArraySchema.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -57,7 +57,7 @@ describe('limited size array', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should validate an array of valid testSchema strings', () => {
+  test('it should validate an array of valid testSchema strings that is within min and max size', () => {
     const payload: TestSchema[] = ['valid', 'also_valid'];
     const decoded = limitedSizeArraySchema.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -66,13 +66,13 @@ describe('limited size array', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate an array of too many valid testSchema strings', () => {
+  test('it should not validate an array bigger than max size', () => {
     const payload: TestSchema[] = ['valid', 'also_valid', 'also_valid'];
     const decoded = limitedSizeArraySchema.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "["valid","also_valid","also_valid"]" supplied to "TestSchemaArray"',
+      'Array size (3) is out of bounds: min: 1, max: 2',
     ]);
     expect(message.schema).toEqual({});
   });

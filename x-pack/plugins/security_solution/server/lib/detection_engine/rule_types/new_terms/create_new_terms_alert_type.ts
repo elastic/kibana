@@ -41,7 +41,7 @@ interface BulkCreateResults {
   createdSignals: unknown[];
   success: boolean;
   errors: string[];
-  truncatedAlertsArray: boolean;
+  alertsWereTruncated: boolean;
 }
 
 interface SearchAfterResults {
@@ -59,7 +59,7 @@ const addBulkCreateResults = (
     createdSignals: [...results.createdSignals, ...newResults.createdItems],
     success: results.success && newResults.success,
     errors: [...results.errors, ...newResults.errors],
-    truncatedAlertsArray: results.truncatedAlertsArray || newResults.truncatedAlertsArray,
+    alertsWereTruncated: results.alertsWereTruncated || newResults.alertsWereTruncated,
   };
 };
 
@@ -141,7 +141,7 @@ export const createNewTermsAlertType = (
         createdSignals: [],
         success: true,
         errors: [],
-        truncatedAlertsArray: false,
+        alertsWereTruncated: false,
       };
 
       const searchAfterResults: SearchAfterResults = {
@@ -168,7 +168,7 @@ export const createNewTermsAlertType = (
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
       while (
-        !bulkCreateResults.truncatedAlertsArray &&
+        !bulkCreateResults.alertsWereTruncated &&
         bulkCreateResults.createdSignalsCount < params.maxSignals
       ) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from

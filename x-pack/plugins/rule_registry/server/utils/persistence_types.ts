@@ -31,7 +31,7 @@ export type PersistenceAlertService = <T>(
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
-  truncatedAlertsArray: boolean;
+  alertsWereTruncated: boolean;
 }
 
 export interface PersistenceServices {
