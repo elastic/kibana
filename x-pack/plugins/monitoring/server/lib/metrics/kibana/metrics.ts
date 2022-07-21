@@ -400,6 +400,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_cluster_action_overdue_count: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.count',

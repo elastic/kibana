@@ -202,6 +202,7 @@
           "description": "Number of queued alerting rules.",
           "units": "",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
@@ -265,6 +266,7 @@
           "description": "Average duration alerting rules are queued.",
           "units": "ms",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
@@ -326,6 +328,7 @@
           "description": "Longest duration an alerting rule was queued.",
           "units": "ms",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
@@ -388,6 +391,7 @@
           "description": "Number of actions queued.",
           "units": "",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
@@ -451,6 +455,7 @@
           "description": "Average duration actions are queued.",
           "units": "ms",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
@@ -512,6 +517,7 @@
           "description": "Longest duration an action was queued.",
           "units": "ms",
           "format": "0.[00]",
+          "technicalPreview": true,
           "hasCalculation": false,
           "isDerivative": false
         },
