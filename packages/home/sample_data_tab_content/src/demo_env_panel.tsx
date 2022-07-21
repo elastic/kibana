@@ -24,7 +24,7 @@ const title = i18n.translate('homePackages.demoEnvironmentPanel.welcomeTitle', {
 
 const message = i18n.translate('homePackages.demoEnvironmentPanel.welcomeMessage', {
   defaultMessage:
-    "Browse real-world data in a demo environment where you can explore search, observability, and security use cases like yours.",
+    'Browse real-world data in a demo environment where you can explore search, observability, and security use cases like yours.',
 });
 
 const alt = i18n.translate('homePackages.demoEnvironmentPanel.welcomeImageAlt', {
