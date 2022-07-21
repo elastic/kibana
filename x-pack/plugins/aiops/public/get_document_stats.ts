@@ -8,7 +8,8 @@
 import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { buildBaseFilterCriteria } from './query_utils';
+import { Query } from '@kbn/es-query';
+import { buildBaseFilterCriteria } from './application/utils/query_utils';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -23,6 +24,7 @@ export interface DocumentStatsSearchStrategyParams {
   latest?: number;
   intervalMs?: number;
   index: string;
+  searchQuery: Query['query'];
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
@@ -35,15 +37,13 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     earliest: earliestMs,
     latest: latestMs,
     runtimeFieldMap,
-    // searchQuery,
+    searchQuery,
     intervalMs,
     fieldsToFetch,
   } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, {
-    match_all: {},
-  });
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   // Don't use the sampler aggregation as this can lead to some potentially
   // confusing date histogram results depending on the date range of data amongst shards.
