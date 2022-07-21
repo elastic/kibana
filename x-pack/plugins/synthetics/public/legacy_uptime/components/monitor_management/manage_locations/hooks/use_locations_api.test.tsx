@@ -18,7 +18,8 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        loading: true,
+        fetchLoading: true,
+        deleteLoading: true,
         privateLocations: [],
       })
     );
@@ -44,7 +45,8 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        loading: true,
+        deleteLoading: true,
+        fetchLoading: true,
         privateLocations: [],
       })
     );
@@ -53,7 +55,8 @@ describe('useLocationsAPI', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        loading: false,
+        deleteLoading: false,
+        fetchLoading: false,
         privateLocations: [
           {
             id: 'Test',

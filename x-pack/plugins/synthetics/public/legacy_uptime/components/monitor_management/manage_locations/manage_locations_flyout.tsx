@@ -104,7 +104,7 @@ export const ManageLocationsFlyout = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isLoading={saveLoading || fetchLoading}
+                isLoading={saveLoading || fetchLoading || deleteLoading}
                 disabled={!hasFleetPermissions || !canSave}
                 onClick={() => setIsAddingNew(true)}
               >
