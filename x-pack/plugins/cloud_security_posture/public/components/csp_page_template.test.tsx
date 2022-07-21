@@ -5,14 +5,14 @@
  * 2.0.
  */
 import Chance from 'chance';
-import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
+import { createPageNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { getSideNavItems } from './csp_page_template';
 
 const chance = new Chance();
 
 describe('getSideNavItems', () => {
   it('maps navigation items to side navigation items', () => {
-    const navigationItem = createNavigationItemFixture();
+    const navigationItem = createPageNavigationItemFixture();
     const id = chance.word();
     const sideNavItems = getSideNavItems({ [id]: navigationItem });
 
@@ -25,7 +25,7 @@ describe('getSideNavItems', () => {
   });
 
   it('does not map disabled navigation items to side navigation items', () => {
-    const navigationItem = createNavigationItemFixture({ disabled: true });
+    const navigationItem = createPageNavigationItemFixture({ disabled: true });
     const id = chance.word();
     const sideNavItems = getSideNavItems({ [id]: navigationItem });
     expect(sideNavItems).toHaveLength(0);

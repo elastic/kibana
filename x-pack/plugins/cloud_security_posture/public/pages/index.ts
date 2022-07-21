@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Findings } from './findings';
+export { Findings, FindingsNoPageTemplate } from './findings';
 export * from './compliance_dashboard';
-export { Benchmarks } from './benchmarks';
-export { Rules } from './rules';
+export { Benchmarks, BenchmarksNoPageTemplate } from './benchmarks';
+export { Rules, RulesNoPageTemplate } from './rules';

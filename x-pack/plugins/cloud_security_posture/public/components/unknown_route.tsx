@@ -10,6 +10,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspPageTemplate } from './csp_page_template';
 
+// TODO: Remove when CSP is rendered exclusively under the security solution
 export const UnknownRoute = React.memo(() => (
   <CspPageTemplate template="centeredContent">
     <EuiEmptyPrompt

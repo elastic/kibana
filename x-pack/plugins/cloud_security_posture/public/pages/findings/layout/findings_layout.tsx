@@ -27,6 +27,7 @@ import {
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
 
+// TODO: Remove when CSP is rendered exclusively under the security solution
 export const PageWrapper: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   return (
