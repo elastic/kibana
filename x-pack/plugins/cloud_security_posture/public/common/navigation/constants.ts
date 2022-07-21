@@ -25,7 +25,7 @@ const NAV_ITEMS_NAMES = {
 };
 
 /** The base path for all cloud security posture pages. */
-export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture' as const;
+export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
 
 export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   dashboard: {

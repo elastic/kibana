@@ -65,13 +65,15 @@ const securitySolutionRoutes = getRoutesFromMapping(
   pageToComponentMappingNoPageTemplate
 );
 
+export interface CspRouterProps {
+  routes?: readonly CspRouteProps[];
+  securitySolutionContext?: CspSecuritySolutionContext;
+}
+
 export const CspRouter = ({
   routes = securitySolutionRoutes,
   securitySolutionContext,
-}: {
-  routes?: readonly CspRouteProps[];
-  securitySolutionContext?: CspSecuritySolutionContext;
-}) => {
+}: CspRouterProps) => {
   const SpyRoute = securitySolutionContext
     ? securitySolutionContext.getSpyRouteComponent()
     : undefined;

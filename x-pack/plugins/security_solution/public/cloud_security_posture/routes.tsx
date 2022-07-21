@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo } from 'react';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import {
   CLOUD_SECURITY_POSTURE_BASE_PATH,
@@ -24,7 +23,7 @@ const CloudPostureSpyRoute = ({ pageName }: { pageName?: CloudSecurityPosturePag
   <SpyRoute pageName={pageName as SecurityPageName | undefined} />
 );
 
-const CloudSecurityPosture = () => {
+const CloudSecurityPosture = memo(() => {
   const { cloudSecurityPosture } = useKibana().services;
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
   const securitySolutionContext: CspSecuritySolutionContext = {
@@ -36,13 +35,13 @@ const CloudSecurityPosture = () => {
     // TODO: Finer granularity of this needs to be implemented in the cloud security posture plugin
     <TrackApplicationView viewId="cloud_security_posture">
       <SecuritySolutionPageWrapper noPadding noTimeline>
-        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <CloudSecurityPostureRouter securitySolutionContext={securitySolutionContext} />
-        </Suspense>
+        <CloudSecurityPostureRouter securitySolutionContext={securitySolutionContext} />
       </SecuritySolutionPageWrapper>
     </TrackApplicationView>
   );
-};
+});
+
+CloudSecurityPosture.displayName = 'CloudSecurityPosture';
 
 export const routes: SecuritySubPluginRoutes = [
   {
