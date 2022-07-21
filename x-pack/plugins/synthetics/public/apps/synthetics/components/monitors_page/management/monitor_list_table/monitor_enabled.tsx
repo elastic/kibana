@@ -6,15 +6,13 @@
  */
 
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
-import { fetchUpsertMonitor } from '../../../../state';
-
 import * as labels from './labels';
+import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 
 interface Props {
   id: string;
@@ -26,15 +24,9 @@ interface Props {
 export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
+  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({ id, monitor });
 
   const { notifications } = useKibana();
-
-  const { status } = useFetcher(() => {
-    if (isEnabled !== null) {
-      return fetchUpsertMonitor({ id, monitor: { ...monitor, [ConfigKey.ENABLED]: isEnabled } });
-    }
-  }, [isEnabled]);
 
   useEffect(() => {
     if (status === FETCH_STATUS.FAILURE) {
