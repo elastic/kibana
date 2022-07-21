@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InnerLinkPanel } from './inner_link_panel';
@@ -35,13 +35,6 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   moreButtons,
   titleCopy,
 }) => {
-  const openDocLink = useCallback(
-    (e) => {
-      e.preventDefault();
-      window.open(docLink, '_self');
-    },
-    [docLink]
-  );
   return (
     <LinkPanelViewComponent
       listItems={listItems}
@@ -54,8 +47,8 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
                 <EuiFlexItem>
                   <LinkButton
                     color="warning"
-                    onClick={openDocLink}
                     href={docLink}
+                    target="_blank"
                     data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
                   >
                     {buttonCopy}

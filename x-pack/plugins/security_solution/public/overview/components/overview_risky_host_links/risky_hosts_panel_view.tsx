@@ -95,8 +95,7 @@ const RiskyHostsPanelViewComponent: React.FC<LinkPanelViewProps> = ({
   const onImportDashboardSuccessCallback = useCallback(
     (response: Array<SavedObject<SavedObjectAttributes>>) => {
       const targetDashboard = response.find(
-        (obj) =>
-          obj.type === 'dashboard' && obj?.attributes?.title === 'Current Risk Score for Hosts'
+        (obj) => obj.type === 'dashboard' && obj?.attributes?.title === RISKY_HOSTS_DASHBOARD_TITLE
       );
 
       const fetchDashboardUrl = (targetDashboardId: string | null | undefined) => {
