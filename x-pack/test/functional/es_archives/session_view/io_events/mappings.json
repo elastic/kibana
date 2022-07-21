@@ -13,9 +13,11 @@
             }
           }
         },
+        "process.io.text": {
+          "type": "wildcard"
+        },
         "process.entry_leader.entity_id": {
-          "type": "keyword",
-          "ignore_above": 256
+          "type": "keyword"
         }
       }
     }

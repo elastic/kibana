@@ -8,11 +8,10 @@ import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit';
 import { SearchAddon } from './search';
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { throttle } from 'lodash';
 import { useEuiTheme } from '../../hooks';
 import {
   IOLine,
@@ -78,8 +77,14 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
     return pages.reduce((previous, current) => {
       if (current.events) {
         current.events.forEach((event) => {
-          if (event?.process?.io?.data) {
-            const data: IOLine[] = event.process.io.data;
+          if (event?.process?.io?.text) {
+            const data: IOLine[] = event.process.io.text.split(/\n/).map((line) => {
+              return {
+                value: line,
+
+                //TODO: other process meta
+              }
+            });
 
             previous = previous.concat(data);
           }
@@ -96,12 +101,14 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
 export const useXtermPlayer = (
   ref: React.RefObject<HTMLElement>,
   isPlaying: boolean,
-  lines: IOLine[]
+  lines: IOLine[],
+  hasNextPage?: boolean,
+  fetchNextPage?: () => void
 ) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
-  const [lastLineWritten, setLastLineWritten] = useState(0);
+  const [userSeeked, setUserSeeked] = useState(false);
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
 
   const [terminal, fitAddon, searchAddon] = useMemo(() => {
@@ -131,34 +138,73 @@ export const useXtermPlayer = (
     }
   }, [fitAddon, terminal]);
 
-  const render = useCallback(throttle((curLine) => {
-    const linesToPrint = lines.slice(lastLineWritten, curLine);
+  const render = useCallback((lineNumber: number) => {
+    if (lines.length === 0) {
+      return;
+    }
 
-    if (lastLineWritten === 0) {
+    let linesToPrint;
+
+    if (userSeeked) {
+      linesToPrint = lines.slice(0, lineNumber);
       terminal.clear();
+      setUserSeeked(false);
+    } else {
+      linesToPrint = [lines[lineNumber]];
     }
 
     linesToPrint.forEach((line) => {
-      if (line.value !== undefined) {
+      if (line?.value !== undefined) {
         terminal.writeln(line.value);
       }
     });
-
-    setLastLineWritten(lastLineWritten + linesToPrint.length);
-  }, 100), [terminal, currentLine, lastLineWritten]);
+  }, [terminal, lines, userSeeked]);
 
   useEffect(() => {
     if (isPlaying) {
-      const frame = setInterval(render, playSpeed);
+      const timer = setTimeout(() => {
+        if (!isPlaying) {
+          return;
+        }
 
-      return () => clearInterval(frame);
+        if (currentLine < lines.length) {
+          setCurrentLine(currentLine + 1);
+        }
+      }, playSpeed);
+
+      return () => {
+        clearInterval(timer);
+      }
     }
-  }, [isPlaying, playSpeed]);
+  }, [lines, currentLine, isPlaying, playSpeed]);
+
+  useEffect(() => {
+    render(currentLine);
+
+    if (hasNextPage && fetchNextPage && currentLine === lines.length - 1) {
+      fetchNextPage();
+    }
+  }, [currentLine]);
+
+  const seekToLine = useCallback((line) => {
+    setUserSeeked(true);
+    setCurrentLine(line);
+  }, []);
+
+  const search = useCallback((query) => {
+    return searchAddon.findNext(query, { caseSensitive: false, lastLineOnly: true });
+  }, [searchAddon]);
+
+  const fit = useCallback(() => {
+    fitAddon.fit();
+  }, [fitAddon]);
 
   return {
     terminal,
     searchAddon,
     currentLine,
-    setCurrentLine,
+    seekToLine,
+    search,
+    fit,
   }
 };

@@ -13,19 +13,17 @@ import React, {
   ChangeEvent,
   MouseEvent,
 } from 'react';
+import { throttle } from 'lodash';
 import { EuiPanel, EuiRange, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
-import {
-  useFetchIOEvents,
-  useIOLines,
-  useXtermPlayer,
-} from './hooks';
+import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { IOLine } from '../../../common/types/process_tree';
 
 export interface TTYOutputDeps {
   sessionEntityId: string;
   onClose(): void;
+  isFullscreen: boolean;
 }
 
 interface SearchResult {
@@ -33,25 +31,21 @@ interface SearchResult {
   matches: string[];
 }
 
-export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
+export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputDeps) => {
   const styles = useStyles();
   const ref = useRef(null);
 
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-  } = useFetchIOEvents(sessionEntityId);
+  const { data, error, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
 
   const lines = useIOLines(data?.pages);
   const [isPlaying, setIsPlaying] = useState(false);
-  const {
-    searchAddon,
-    currentLine,
-    setCurrentLine,
-  } = useXtermPlayer(ref, isPlaying, lines);
+  const { search, fit, currentLine, seekToLine } = useXtermPlayer(
+    ref,
+    isPlaying,
+    lines,
+    hasNextPage,
+    fetchNextPage
+  );
 
   const [currentMatch, setCurrentMatch] = useState<{ match: SearchResult; index: number } | null>(
     null
@@ -60,12 +54,19 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
 
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
-      const value = parseInt((event?.target as HTMLInputElement).value || '0', 10);
+      const line = parseInt((event?.target as HTMLInputElement).value || '0', 10);
+      seekToLine(line);
       setCurrentMatch(null);
       setIsPlaying(false);
     },
     [lines, hasNextPage, fetchNextPage]
   );
+
+  useEffect(() => {
+    if (fit) {
+      fit();
+    }
+  }, [isFullscreen]);
 
   useEffect(() => {
     if (!isFetching && hasNextPage && currentLine === lines.length - 1) {
@@ -80,17 +81,17 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
   useEffect(() => {
     if (currentMatch) {
       const goToLine = lines.indexOf(currentMatch.match.line) + 1;
-      setCurrentLine(goToLine);
+      seekToLine(goToLine);
 
       const timeout = setTimeout(() => {
-        return searchAddon.findNext(searchQuery, { caseSensitive: false, lastLineOnly: true });
+        return search(searchQuery);
       }, 100);
 
       return () => {
         clearTimeout(timeout);
       };
     }
-  }, [currentMatch, currentLine]);
+  }, [currentMatch, currentLine, searchQuery]);
 
   const searchResults = useMemo(() => {
     if (searchQuery) {
@@ -152,7 +153,7 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
         }
       }
     },
-    [currentMatch, searchAddon, getMatchByIndex]
+    [currentMatch, getMatchByIndex]
   );
 
   const onPrevious = useCallback(
@@ -167,7 +168,7 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
         }
       }
     },
-    [currentMatch, searchAddon, getMatchByIndex]
+    [currentMatch, getMatchByIndex]
   );
 
   const alerts = useMemo(() => {
@@ -257,10 +258,10 @@ export const TTYOutput = ({ sessionEntityId, onClose }: TTYOutputDeps) => {
       </EuiPanel>
       <div ref={ref} css={styles.terminal} />
       <EuiPanel hasShadow={false} borderRadius="none">
-        <EuiFlexGroup alignItems="center" gutterSize="s" direction='row'>
+        <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType={isPlaying ? "pause" : "play"}
+              iconType={isPlaying ? 'pause' : 'play'}
               display="empty"
               size="m"
               aria-label="TTY Play Button"

@@ -62,8 +62,8 @@ export interface Teletype {
   };
 }
 
+// used by tty_output viewer component to split process.io.text into lines of IO
 export interface IOLine {
-  time?: number;
   value?: string;
 
   // the following is only set client side for caching purposes
@@ -73,7 +73,7 @@ export interface IOLine {
 }
 
 export interface IOFields {
-  data?: IOLine[];
+  text?: string;
 }
 
 export interface ProcessFields {

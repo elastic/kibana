@@ -393,7 +393,13 @@ export const SessionView = ({
           );
         }}
       </EuiResizableContainer>
-      {showTTY && <TTYOutput sessionEntityId={sessionEntityId} onClose={onToggleTTY} />}
+      {showTTY && (
+        <TTYOutput
+          sessionEntityId={sessionEntityId}
+          onClose={onToggleTTY}
+          isFullscreen={isFullScreen}
+        />
+      )}
     </div>
   );
 };
