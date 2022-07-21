@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 
 /**
  * Properties for the LegacyUrlConflict component.
