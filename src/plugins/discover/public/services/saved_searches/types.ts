@@ -27,6 +27,7 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  rowsPerPage?: number;
 }
 
 /** @internal **/
@@ -53,4 +54,5 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  rowsPerPage?: number;
 }

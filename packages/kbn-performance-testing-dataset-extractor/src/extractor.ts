@@ -12,7 +12,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { initClient, Document } from './es_client';
+import { initClient, Document, Headers } from './es_client';
 
 const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
 const STATIC_RESOURCES_PATTERN = /\.(css|ico|js|json|jpeg|jpg|gif|png|otf|ttf|woff|woff2)$/;
@@ -32,7 +32,7 @@ interface CLIParams {
   log: ToolingLog;
 }
 
-interface Stage {
+interface InjectionStep {
   action: string;
   minUsersCount?: number;
   maxUsersCount: number;
@@ -40,8 +40,8 @@ interface Stage {
 }
 
 export interface ScalabilitySetup {
-  warmup: { stages: Stage[] };
-  test: { stages: Stage[] };
+  warmup: InjectionStep[];
+  test: InjectionStep[];
   maxDuration: string;
 }
 
@@ -53,6 +53,13 @@ const parsePayload = (payload: string, traceId: string, log: ToolingLog): string
     log.error(`Failed to parse payload - trace_id: '${traceId}'`);
   }
   return body;
+};
+
+const combineHeaderFieldValues = (headers: Headers) => {
+  return Object.assign(
+    {},
+    ...Object.keys(headers).map((key) => ({ [key]: headers[key].join(', ') }))
+  );
 };
 
 const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
@@ -73,17 +80,18 @@ const getTraceItems = (
     .map((hit) => {
       const payload = hit.http.request?.body?.original;
       return {
-        processor: hit.processor,
         traceId: hit.trace.id,
-        timestamp: hit['@timestamp'],
+        parentId: hit?.parent?.id,
+        processor: hit.processor,
         environment: hit.environment,
         request: {
-          url: { path: hit.url.path },
-          headers: hit.http.request.headers,
+          timestamp: hit['@timestamp'],
           method: hit.http.request.method,
-          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
+          path: hit.url.path,
+          headers: combineHeaderFieldValues(hit.http.request.headers),
+          body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
+          statusCode: hit.http.response.status_code,
         },
-        response: { statusCode: hit.http.response.status_code },
         transaction: {
           id: hit.transaction.id,
           name: hit.transaction.name,
@@ -93,7 +101,7 @@ const getTraceItems = (
     });
 
   return withoutStaticResources
-    ? data.filter((item) => !STATIC_RESOURCES_PATTERN.test(item.request.url.path))
+    ? data.filter((item) => !STATIC_RESOURCES_PATTERN.test(item.request.path))
     : data;
 };
 
@@ -137,14 +145,14 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     journeyName,
     kibanaVersion,
     scalabilitySetup,
-    traceItems: getTraceItems(hits, withoutStaticResources, log),
+    requests: getTraceItems(hits, withoutStaticResources, log),
   };
 
   const outputDir = path.resolve('target/scalability_traces');
   const fileName = `${output.journeyName.replace(/ /g, '')}-${buildId}.json`;
   const filePath = path.resolve(outputDir, fileName);
 
-  log.info(`Found ${output.traceItems.length} transactions, output file: ${filePath}`);
+  log.info(`Found ${output.requests.length} transactions, output file: ${filePath}`);
   if (!existsSync(outputDir)) {
     await fs.mkdir(outputDir, { recursive: true });
   }
