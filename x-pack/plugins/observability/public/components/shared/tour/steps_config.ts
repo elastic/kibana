@@ -35,7 +35,7 @@ export const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
-      defaultMessage: 'Tail your infrastructure logs in real time',
+      defaultMessage: 'Tail your logs in real time',
     }),
     content: i18n.translate('xpack.observability.tour.streamStep.tourContent', {
       defaultMessage:

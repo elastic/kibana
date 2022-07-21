@@ -14,10 +14,12 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
+  isDataLoading?: boolean;
 }
 
 export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   hasData = true,
+  isDataLoading = false,
   'data-test-subj': _dataTestSubj,
   ...pageTemplateProps
 }) => {
@@ -58,7 +60,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
     <PageTemplate
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
-      isPageDataLoaded={hasData}
+      isPageDataLoaded={isDataLoading === false}
       {...pageTemplateProps}
     />
   );

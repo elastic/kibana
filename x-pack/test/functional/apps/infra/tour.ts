@@ -129,6 +129,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const overviewPageUrl = await browser.getCurrentUrl();
         expect(overviewPageUrl).to.contain('/app/observability/overview');
       });
+
+      it('ends the tour if the user clicks on the guided setup button', async () => {
+        // For brevity, starting the tour at step 5, "Alerts"
+        await setInitialTourState(5);
+
+        await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+        await pageObjects.infraHome.clickGuidedSetupButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
+      });
     });
   });
 };
