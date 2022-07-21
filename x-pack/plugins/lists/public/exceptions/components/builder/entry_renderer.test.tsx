@@ -10,6 +10,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   doesNotExistOperator,
+  doesNotMatchOperator,
   existsOperator,
   isInListOperator,
   isNotInListOperator,
@@ -383,6 +384,80 @@ describe('BuilderEntryItem', () => {
     ).toBeTruthy();
   });
 
+  test('it renders field values correctly when operator is "matchesOperator"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
+      'matches'
+    );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
+      '1234*'
+    );
+  });
+
+  test('it renders field values correctly when operator is "doesNotMatchOperator"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: doesNotMatchOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
+      'does not match'
+    );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
+      '1234*'
+    );
+  });
+
   test('it uses "correspondingKeywordField" if it exists', () => {
     const correspondingKeywordField: FieldSpec = {
       aggregatable: true,
@@ -652,6 +727,47 @@ describe('BuilderEntryItem', () => {
         operator: 'excluded',
         type: 'list',
       },
+      0
+    );
+  });
+
+  test('it invokes "onChange" when new value field is entered for wildcard operator', () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={mockOnChange}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    (
+      wrapper.find(EuiComboBox).at(2).props() as unknown as {
+        onCreateOption: (a: string) => void;
+      }
+    ).onCreateOption('5678*');
+
+    expect(mockOnChange).toHaveBeenCalledWith(
+      { field: 'ip', id: '123', operator: 'included', type: 'wildcard', value: '5678*' },
       0
     );
   });

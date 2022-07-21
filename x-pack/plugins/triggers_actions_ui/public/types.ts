@@ -284,6 +284,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
