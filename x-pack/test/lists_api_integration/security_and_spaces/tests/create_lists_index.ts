@@ -8,13 +8,10 @@
 import expect from '@kbn/expect';
 
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { getTemplateExists, getIndexTemplateExists } from '@kbn/securitysolution-es-utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-import {
-  createLegacyListsIndices,
-  deleteListsIndex,
-} from '../../utils';
-import { getTemplateExists, getIndexTemplateExists } from '@kbn/securitysolution-es-utils';
+import { createLegacyListsIndices, deleteListsIndex } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -39,18 +36,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(fetchedIndices).to.eql({
         message: 'index .lists-default and index .items-default does not exist',
-        status_code: 404
+        status_code: 404,
       });
 
-      await supertest
-        .post(LIST_INDEX)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 
-      const { body } = await supertest
-        .get(LIST_INDEX)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      const { body } = await supertest.get(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 
       expect(body).to.eql({ list_index: true, list_item_index: true });
     });
@@ -77,15 +68,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(listsIndex).to.eql({ list_index: true, list_item_index: true });
 
       // Expected 409 as index exists already, but now the templates should have been updated
-      await supertest
-        .post(LIST_INDEX)
-        .set('kbn-xsrf', 'true')
-        .expect(409);
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').expect(409);
 
-      const { body } = await supertest
-        .get(LIST_INDEX)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      const { body } = await supertest.get(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 
       const legacyListsTemplateExistsPostMigration = await getTemplateExists(es, '.lists-default');
       const legacyItemsTemplateExistsPostMigration = await getTemplateExists(es, '.items-default');
