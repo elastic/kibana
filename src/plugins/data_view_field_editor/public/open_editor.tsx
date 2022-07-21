@@ -24,20 +24,28 @@ import type {
 import { createKibanaReactContext, toMountPoint } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
-/*
+/**
  * Options for opening the field editor
  * @public
  */
 export interface OpenFieldEditorOptions {
-  /* context containing the data view the field belongs to */
+  /**
+   * context containing the data view the field belongs to
+   */
   ctx: {
     dataView: DataView;
   };
-  /* action to take after field is saved */
+  /**
+   * action to take after field is saved
+   */
   onSave?: (field: DataViewField) => void;
-  /* field to edit, for existing field */
+  /**
+   * field to edit, for existing field
+   */
   fieldName?: string;
-  /* pre-selectable options for new field creation */
+  /**
+   * pre-selectable options for new field creation
+   */
   fieldToCreate?: Field;
 }
 
