@@ -19,14 +19,14 @@ import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/sel
 import React, { Component, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
-import { FormattedMessage, InjectedIntl } from 'react-intl';
-import { i18n } from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n-react';
 
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
@@ -45,7 +45,6 @@ interface Props {
   readonly activeSpace: Space | null;
 }
 class SpacesMenuUI extends Component<Props> {
-
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
 
@@ -53,7 +52,7 @@ class SpacesMenuUI extends Component<Props> {
       <EuiText color="subdued" className="eui-textCenter">
         <FormattedMessage
           id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
-                    defaultMessage=" no spaces found "
+          defaultMessage=" no spaces found "
         />
       </EuiText>
     );
@@ -128,7 +127,7 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        checked: (this.props.activeSpace?.id === space.id) ? 'on' : undefined,
+        checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',
       };
@@ -139,7 +138,6 @@ class SpacesMenuUI extends Component<Props> {
     newOptions: EuiSelectableOption[],
     event: EuiSelectableOnChangeEvent
   ) => {
-
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
     if (!!selectedSpaceItem) {
