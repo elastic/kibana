@@ -5,14 +5,16 @@
  * 2.0.
  */
 import cuid from 'cuid';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
-import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
+
+import * as cborx from './cborx';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
@@ -25,6 +27,13 @@ type Callback = (error?: Error) => void;
 
 export type ContentStreamEncoding = 'base64' | 'raw';
 
+interface IndexRequestParams {
+  data: Buffer;
+  id: string;
+  index: string;
+  bid: string;
+}
+
 export interface ContentStreamParameters {
   /**
    * The maximum size allowed per chunk.
@@ -36,10 +45,6 @@ export interface ContentStreamParameters {
    * The file size in bytes. This can be used to optimize downloading.
    */
   size?: number;
-  /**
-   * Content encoding. By default, it is Base64.
-   */
-  encoding?: ContentStreamEncoding;
 }
 
 export class ContentStream extends Duplex {
@@ -48,14 +53,6 @@ export class ContentStream extends Duplex {
    */
   private static getMaxBase64EncodedSize(max: number) {
     return Math.floor(max / 4) * 3;
-  }
-
-  /**
-   * @note Raw data might be escaped during JSON serialization.
-   * In the worst-case, every character is escaped, so the max raw data length is twice less.
-   */
-  private static getMaxJsonEscapedSize(max: number) {
-    return Math.floor(max / 2);
   }
 
   private buffers: Buffer[] = [];
@@ -88,14 +85,6 @@ export class ContentStream extends Duplex {
     });
   }
 
-  private decode(content: string) {
-    return Buffer.from(content, this.parameters.encoding === 'base64' ? 'base64' : undefined);
-  }
-
-  private encode(buffer: Buffer) {
-    return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
-  }
-
   private getMaxContentSize(): number {
     return ByteSizeValue.parse(this.parameters.maxChunkSize).getValueInBytes();
   }
@@ -103,19 +92,14 @@ export class ContentStream extends Duplex {
   private getMaxChunkSize() {
     if (!this.maxChunkSize) {
       const maxContentSize = this.getMaxContentSize() - REQUEST_SPAN_SIZE_IN_BYTES;
-
-      this.maxChunkSize =
-        this.parameters.encoding === 'base64'
-          ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
-          : ContentStream.getMaxJsonEscapedSize(maxContentSize);
-
+      this.maxChunkSize = ContentStream.getMaxBase64EncodedSize(maxContentSize);
       this.logger.debug(`Chunk size is ${this.maxChunkSize} bytes.`);
     }
 
     return this.maxChunkSize;
   }
 
-  private async readChunk(): Promise<[data: null | string, last?: boolean]> {
+  private async readChunk(): Promise<[data: null | Buffer, last?: boolean]> {
     if (!this.id) {
       throw new Error('No document ID provided. Cannot read chunk.');
     }
@@ -124,13 +108,29 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     try {
-      const response = await this.client.get<FileChunkDocument>({
-        id,
-        index: this.index,
-        _source_includes: ['data', 'last'],
-      });
-      const source = response?._source;
-      return [source?.data ?? null, source?.last];
+      const stream = await this.client.get(
+        {
+          id,
+          index: this.index,
+          _source_includes: ['data', 'last'],
+        },
+        {
+          asStream: true, // This tells the ES client to not process the response body in any way.
+          headers: { accept: 'application/cbor' },
+        }
+      );
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream as unknown as Readable) {
+        chunks.push(chunk);
+      }
+      const buffer = Buffer.concat(chunks);
+      const source: undefined | FileChunkDocument = buffer.byteLength
+        ? cborx.decode<{ _source?: FileChunkDocument }>(Buffer.concat(chunks))?._source
+        : undefined;
+
+      const dataBuffer = source?.data as unknown as Buffer;
+      return [dataBuffer?.byteLength ? dataBuffer : null, source?.last];
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
@@ -160,14 +160,12 @@ export class ContentStream extends Duplex {
 
   _read() {
     this.readChunk()
-      .then(([content, last]) => {
-        if (!content) {
+      .then(([buffer, last]) => {
+        if (!buffer) {
           this.logger.debug(`Chunk is empty.`);
           this.push(null);
           return;
         }
-
-        const buffer = this.decode(content);
 
         this.push(buffer);
         this.chunksRead++;
@@ -209,33 +207,58 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${this.getId()}.${chunkNumber}`;
   }
 
+  private async indexChunk({ bid, data, id, index }: IndexRequestParams, last?: true) {
+    await this.client.index(
+      {
+        id,
+        index,
+        document: cborx.encode(
+          last
+            ? {
+                data,
+                bid,
+                last,
+              }
+            : { data, bid }
+        ),
+      },
+      {
+        headers: {
+          'content-type': 'application/cbor',
+          accept: 'application/json',
+        },
+      }
+    );
+  }
+
   /**
    * Holds a reference to the last written chunk without actually writing it to ES.
    *
    * This enables us to reliably determine what the real last chunk is at the cost
    * of holding, at most, 2 full chunks in memory.
    */
-  private indexRequestBuffer: undefined | IndexRequest<FileChunkDocument>;
-  private async writeChunk(data: string) {
+  private indexRequestBuffer: undefined | IndexRequestParams;
+  private async writeChunk(data: Buffer) {
     const chunkId = this.getChunkId(this.chunksWritten);
 
     if (!this.indexRequestBuffer) {
       this.indexRequestBuffer = {
         id: chunkId,
         index: this.index,
-        document: { data, bid: this.getId() },
+        data,
+        bid: this.getId(),
       };
       return;
     }
 
     this.logger.debug(`Writing chunk with ID "${this.indexRequestBuffer.id}".`);
-    await this.client.index<FileChunkDocument>(this.indexRequestBuffer);
-
-    // Hold a reference to the next buffer
+    await this.indexChunk(this.indexRequestBuffer);
+    // Hold a reference to the next buffer now that we indexed the previous one.
     this.indexRequestBuffer = {
       id: chunkId,
       index: this.index,
-      document: { data, bid: this.getId() },
+      data,
+      bid: this.getId(),
     };
   }
 
@@ -243,16 +266,8 @@ export class ContentStream extends Duplex {
     if (!this.indexRequestBuffer) {
       return;
     }
-
     this.logger.debug(`Writing last chunk with id "${this.indexRequestBuffer.id}".`);
-
-    await this.client.index<FileChunkDocument>({
-      ...this.indexRequestBuffer,
-      document: {
-        ...this.indexRequestBuffer.document!,
-        last: true,
-      },
-    });
+    await this.indexChunk(this.indexRequestBuffer, true);
     this.indexRequestBuffer = undefined;
   }
 
@@ -285,13 +300,12 @@ export class ContentStream extends Duplex {
 
     // We call Buffer.concat with the fewest number of buffers possible
     const chunk = Buffer.concat(buffersToFlush);
-    const content = this.encode(chunk);
 
     if (!this.chunksWritten) {
       await this.removeChunks();
     }
     if (chunk.byteLength) {
-      await this.writeChunk(content);
+      await this.writeChunk(chunk);
       this.chunksWritten++;
     }
 
