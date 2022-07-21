@@ -5314,13 +5314,7 @@
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
           " | undefined; }; client: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; logger: ",
           "Logger",
           "; }) => Promise<void>"

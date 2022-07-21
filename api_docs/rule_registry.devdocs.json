@@ -3411,13 +3411,7 @@
           "<Error> | ",
           "Right",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           ">"
         ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
