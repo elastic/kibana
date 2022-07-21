@@ -8,7 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { Filter, isPhraseFilter, isPhrasesFilter, isRangeFilter } from '@kbn/es-query';
+import { getPhraseDisplayValue } from './mappers/map_phrase';
+import { getPhrasesDisplayValue } from './mappers/map_phrases';
+import { getRangeDisplayValue } from './mappers/map_range';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataView, key?: string) {
@@ -38,13 +41,14 @@ export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: Da
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
   const { key, value } = filter.meta;
-  if (typeof value === 'function') {
-    const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-    const valueFormatter = getValueFormatter(indexPattern, key);
-    // TODO: distinguish between FilterMeta which is serializable to mapped FilterMeta
-    // Where value can be a function.
-    return (value as any)(valueFormatter);
-  } else {
-    return value || '';
-  }
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  const valueFormatter = getValueFormatter(indexPattern, key);
+
+  if (isPhraseFilter(filter)) {
+    return getPhraseDisplayValue(filter, valueFormatter);
+  } else if (isPhrasesFilter(filter)) {
+    return getPhrasesDisplayValue(filter, valueFormatter);
+  } else if (isRangeFilter(filter)) {
+    return getRangeDisplayValue(filter, valueFormatter);
+  } else return value ?? '';
 }

@@ -16,17 +16,14 @@ import {
   Filter,
   isPhraseFilter,
 } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
 
-const getFormattedValueFn = (value: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    return formatter ? formatter.convert(value) : value;
-  };
-};
+export function getPhraseDisplayValue(filter: PhraseFilter, formatter?: FieldFormat) {
+  return formatter?.convert(filter.meta.value) ?? filter.meta.value ?? '';
+}
 
 const getParams = (filter: PhraseFilter) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
@@ -39,7 +36,7 @@ const getParams = (filter: PhraseFilter) => {
     key,
     params,
     type: FILTERS.PHRASE,
-    value: getFormattedValueFn(query),
+    value: query,
   };
 };
 
