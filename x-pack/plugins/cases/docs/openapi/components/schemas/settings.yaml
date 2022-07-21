@@ -1,0 +1,7 @@
+type: object
+description: An object that contains the case settings.
+properties:
+  syncAlerts:
+    description: Turns alert syncing on or off.
+    type: boolean
+    example: true

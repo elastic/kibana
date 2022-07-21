@@ -2,12 +2,17 @@ type: object
 properties:
   alertId: 
     description: >
-      The alert identifier. It is required only when `type` is `alert`. This
-      functionality is in technical preview and may be changed or removed in a
-      future release. Elastic will apply best effort to fix any issues, but
-      features in technical preview are not subject to the support SLA of
-      official GA features.
-    type: string
+      The alert identifier. It is required only when `type` is `alert`. If it is
+      an array, `index` must also be an array. This functionality is in
+      technical preview and may be changed or removed in a future release.
+      Elastic will apply best effort to fix any issues, but features in
+      technical preview are not subject to the support SLA of official GA
+      features.
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
     x-technical-preview: true
     example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
   id:
@@ -18,12 +23,16 @@ properties:
     example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   index:
     description: >
-      The alert index. It is required only when `type` is `alert`. This
-      functionality is in technical preview and may be changed or removed in a
-      future release. Elastic will apply best effort to fix any issues, but
-      features in technical preview are not subject to the support SLA of
-      official GA features.
-    type: string
+      The alert index. It is required only when `type` is `alert`. If it is an
+      array, `alertId` must also be an array. This functionality is in technical
+      preview and may be changed or removed in a future release. Elastic will
+      apply best effort to fix any issues, but features in technical preview are
+      not subject to the support SLA of official GA features.
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
     x-technical-preview: true
   owner:
     $ref: 'owners.yaml'
@@ -37,16 +46,7 @@ properties:
     type: object
     x-technical-preview: true
     properties:
-      id:
-        description: The rule identifier.
-        type: string
-        x-technical-preview: true
-        example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-      name: 
-        description: The rule name.
-        type: string
-        x-technical-preview: true
-        example: security_rule
+      $ref: 'rule_properties.yaml'
   type: 
     description: The type of comment.
     type: string
