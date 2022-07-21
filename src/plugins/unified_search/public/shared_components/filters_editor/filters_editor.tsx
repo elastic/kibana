@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FiltersEditorContextType } from './filters_editor_context';
 import { ConditionTypes } from './filters_editor_condition_types';
-import { FilterGroup } from './filters_editor_filters_group';
+import { FilterGroup } from './filters_editor_filter_group';
 
 export interface FiltersEditorProps {
   filters: Filter[];

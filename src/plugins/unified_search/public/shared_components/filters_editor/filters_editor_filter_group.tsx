@@ -20,11 +20,13 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
   <h2>Delimiter {conditionType}</h2>
 );
 
-export function FilterGroup({ filters, conditionType }: FilterGroupProps) {
-  return filters.map((filter, index, acc) => (
-    <>
-      <FilterItem filter={filter} />
-      {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
-    </>
-  ));
-}
+export const FilterGroup = ({ filters, conditionType }: FilterGroupProps) => (
+  <>
+    {filters.map((filter, index, acc) => (
+      <>
+        <FilterItem filter={filter} />
+        {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
+      </>
+    ))}
+  </>
+);
