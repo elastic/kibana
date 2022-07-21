@@ -46,48 +46,6 @@ export type GeoContainmentExtractedParams = Omit<
   boundaryIndexRefName: string;
 };
 
-const actionVariableContextEntityIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
-  {
-    defaultMessage: 'The entity ID of the document that triggered the alert',
-  }
-);
-
-const actionVariableContextEntityDateTimeLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDateTimeLabel',
-  {
-    defaultMessage: `The date the entity was recorded in the boundary`,
-  }
-);
-
-const actionVariableContextEntityDocumentIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
-  {
-    defaultMessage: 'The id of the contained entity document',
-  }
-);
-
-const actionVariableContextDetectionDateTimeLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextDetectionDateTimeLabel',
-  {
-    defaultMessage: 'The alert interval end time this change was recorded',
-  }
-);
-
-const actionVariableContextEntityLocationLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityLocationLabel',
-  {
-    defaultMessage: 'The location of the entity',
-  }
-);
-
-const actionVariableContextContainingBoundaryIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
-  {
-    defaultMessage: 'The id of the boundary containing the entity',
-  }
-);
-
 const actionVariableContextContainingBoundaryNameLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryNameLabel',
   {
@@ -98,15 +56,68 @@ const actionVariableContextContainingBoundaryNameLabel = i18n.translate(
 const actionVariables = {
   context: [
     // Alert-specific data
-    { name: 'entityId', description: actionVariableContextEntityIdLabel },
-    { name: 'entityDateTime', description: actionVariableContextEntityDateTimeLabel },
-    { name: 'entityDocumentId', description: actionVariableContextEntityDocumentIdLabel },
-    { name: 'detectionDateTime', description: actionVariableContextDetectionDateTimeLabel },
-    { name: 'entityLocation', description: actionVariableContextEntityLocationLabel },
-    { name: 'containingBoundaryId', description: actionVariableContextContainingBoundaryIdLabel },
+    {
+      name: 'entityId',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
+        {
+          defaultMessage: 'The entity ID of the document that triggered the alert',
+        }
+      ),
+    },
+    {
+      name: 'entityDateTime',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDateTimeLabel',
+        {
+          defaultMessage: `The date the entity was recorded in the boundary`,
+        }
+      ),
+    },
+    {
+      name: 'entityDocumentId',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
+        {
+          defaultMessage: 'The id of the contained entity document',
+        }
+      ),
+    },
+    {
+      name: 'detectionDateTime',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextDetectionDateTimeLabel',
+        {
+          defaultMessage: 'The alert interval end time this change was recorded',
+        }
+      ),
+    },
+    {
+      name: 'entityLocation',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityLocationLabel',
+        {
+          defaultMessage: 'The location of the entity',
+        }
+      ),
+    },
+    {
+      name: 'containingBoundaryId',
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
+        {
+          defaultMessage: 'The id of the boundary containing the entity. Value not set for recovered alerts',
+        }
+      ),
+    },
     {
       name: 'containingBoundaryName',
-      description: actionVariableContextContainingBoundaryNameLabel,
+      description: i18n.translate(
+        'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryNameLabel',
+        {
+          defaultMessage: 'The name of the boundary containing the entity. Value not set for recovered alerts',
+        }
+      ),
     },
   ],
 };
