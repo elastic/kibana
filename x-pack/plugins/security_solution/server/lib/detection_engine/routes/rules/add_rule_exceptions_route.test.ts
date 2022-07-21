@@ -9,7 +9,7 @@ import { DETECTION_ENGINE_URL } from '../../../../../common/constants';
 
 import { getRuleMock, resolveRuleMock } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { createRuleExceptionListRoute } from './create_rule_exception_list_route';
+import { createRuleExceptionListRoute } from './add_rule_exceptions_route';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getDetectionsExceptionListSchemaMock,

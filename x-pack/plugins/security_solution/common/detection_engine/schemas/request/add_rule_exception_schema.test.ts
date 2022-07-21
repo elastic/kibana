@@ -8,44 +8,38 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import type { CreateRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
-import { createRuleDefaultExceptionListSchema } from './create_rule_default_exception_list';
+import type { addRuleExceptions, AddRuleExceptionSchema } from './add_rule_exception_schema';
 
-import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { getCreateExceptionListItemSchemaMock, getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 
-describe('createRuleDefaultExceptionListSchema', () => {
+describe('addRuleExceptions', () => {
   test('empty objects do not validate', () => {
-    const payload: CreateRuleDefaultExceptionListSchema =
-      {} as CreateRuleDefaultExceptionListSchema;
+    const payload: AddRuleExceptionSchema =
+      {} as AddRuleExceptionSchema;
 
-    const decoded = createRuleDefaultExceptionListSchema.decode(payload);
+    const decoded = addRuleExceptions.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual({});
   });
 
-  test('endpoint list types validate', () => {
-    const payload: CreateRuleDefaultExceptionListSchema = {
-      list_type: 'endpoint',
-      rule_so_id: 'so_id',
-    };
+  test('empty array of items does not validate', () => {
+    const payload: AddRuleExceptionSchema = [];
 
-    const decoded = createRuleDefaultExceptionListSchema.decode(payload);
+    const decoded = addRuleExceptions.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    expect(message.schema).toEqual({});
   });
 
   test('all values validate', () => {
-    const payload: CreateRuleDefaultExceptionListSchema = {
-      list: { ...getCreateExceptionListDetectionSchemaMock(), list_id: 'my_list' },
-      list_type: 'detection',
-      rule_so_id: 'so_id',
+    const payload: AddRuleExceptionSchema = {
+      items: [getCreateExceptionListItemSchemaMock(), getCreateExceptionListItemMinimalSchemaMockWithoutId()],
     };
 
-    const decoded = createRuleDefaultExceptionListSchema.decode(payload);
+    const decoded = addRuleExceptions.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -53,14 +47,12 @@ describe('createRuleDefaultExceptionListSchema', () => {
   });
 
   test('made up parameters do not validate', () => {
-    const payload: Partial<CreateRuleDefaultExceptionListSchema> & { madeUp: string } = {
-      list: getCreateExceptionListDetectionSchemaMock(),
-      rule_so_id: 'so_id',
-      list_type: 'detection',
+    const payload: Partial<AddRuleExceptionSchema> & { madeUp: string } = {
+      items: [getCreateExceptionListItemSchemaMock()],
       madeUp: 'invalid value',
     };
 
-    const decoded = createRuleDefaultExceptionListSchema.decode(payload);
+    const decoded = addRuleExceptions.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
