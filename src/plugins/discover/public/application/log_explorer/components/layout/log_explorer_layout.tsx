@@ -28,7 +28,7 @@ import { DiscoverNoResults } from '../../../main/components/no_results';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
 import { DiscoverLayoutProps } from '../../../main/components/layout/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';

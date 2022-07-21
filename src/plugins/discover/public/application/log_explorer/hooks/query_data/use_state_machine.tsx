@@ -6,275 +6,58 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
-import { createMachine } from 'xstate';
-import { useMachine, useActor, useInterpret } from '@xstate/react';
+import React, { useContext } from 'react';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { useInterpret, useActor } from '@xstate/react';
+import { ignoreElements, timer } from 'rxjs';
+import { assign } from 'xstate';
+import { dataAccessStateMachine } from '../../state_machines';
 
-const logExplorerStateMachine = createMachine({
-  id: 'Log Explorer Data',
-  initial: 'loading-around',
-  states: {
-    'loading-around': {
-      entry: ['cancel-requests', 'reset-chunks'],
-      invoke: {
-        src: 'load-around',
-        onDone: [
-          {
-            actions: ['updateTopChunk', 'updateBottomChunk'],
-            target: 'loaded',
-          },
-        ],
-        onError: [
-          {
-            target: 'failed-no-data',
-          },
-        ],
-      },
-      on: {
-        'position-changed': {
-          target: 'loading-around',
-          internal: false,
+export const useDataAccessStateMachine = ({ timefilter }: { timefilter: TimefilterContract }) => {
+  const dataAccessService = useInterpret(
+    () => {
+      const initialTimeRange = timefilter.getAbsoluteTime();
+
+      return dataAccessStateMachine.withContext({
+        timeRange: initialTimeRange,
+        position: {
+          timestamp: initialTimeRange.from,
+          tiebreaker: 0,
         },
-        'time-range-changed': {},
-        'columns-changed': {},
-      },
+        topChunk: {
+          status: 'uninitialized',
+        },
+        bottomChunk: {
+          status: 'uninitialized',
+        },
+      });
     },
-    loaded: {
-      type: 'parallel',
-      states: {
-        top: {
-          initial: 'start',
-          states: {
-            start: {
-              always: [
-                {
-                  cond: 'succeededTop',
-                  target: 'loaded',
-                },
-                {
-                  cond: '!succeededTop',
-                  target: 'failed',
-                },
-              ],
-            },
-            failed: {
-              on: {
-                'retry-top': {
-                  target: '#Log Explorer Data.extending-top',
-                },
-              },
-            },
-            loaded: {
-              on: {
-                'position-changed': {
-                  actions: 'rotateChunksUpwards',
-                  cond: 'isNearStart',
-                  target: '#Log Explorer Data.loading-top',
-                },
-              },
-            },
+    {
+      actions: {
+        resetChunks: assign((context) => ({
+          ...context,
+          topChunk: {
+            status: 'uninitialized' as const,
           },
-        },
-        bottom: {
-          initial: 'start',
-          states: {
-            start: {
-              always: [
-                {
-                  cond: 'succeededBottom',
-                  target: 'loaded',
-                },
-                {
-                  cond: '!succeededBottom',
-                  target: 'failed',
-                },
-              ],
-            },
-            failed: {
-              on: {
-                'retry-bottom': {
-                  target: '#Log Explorer Data.extending-bottom',
-                },
-              },
-            },
-            loaded: {
-              on: {
-                'position-changed': {
-                  actions: 'rotateChunkDownwards',
-                  cond: 'isNearEnd',
-                  target: '#Log Explorer Data.loading-bottom',
-                },
-              },
-            },
+          bottomChunk: {
+            status: 'uninitialized' as const,
           },
-        },
+        })),
       },
-      on: {
-        'position-changed': {
-          cond: '!isWithinLoadedChunks',
-          target: 'loading-around',
-        },
-        'time-range-changed': [
-          {
-            actions: 'extendTopChunk',
-            cond: 'startTimestampExtendsLoadedTop',
-            target: 'extending-top',
-          },
-          {
-            actions: 'reduceTopChunk',
-            cond: 'startTimestampReducesLoadedTop',
-          },
-          {
-            actions: 'extendBottomChunk',
-            cond: 'endTimestampExtendsLoadedBottom',
-            target: 'extending-bottom',
-          },
-          {
-            actions: 'reduceBottomChunk',
-            cond: 'endTimestampReducesLoadedBottom',
-          },
-          {
-            actions: 'reset-position',
-            target: 'loading-around',
-          },
-        ],
-        'columns-changed': {
-          target: 'reloading',
-        },
+      services: {
+        loadAround: createDummyService(),
       },
-    },
-    'failed-no-data': {
-      on: {
-        'position-changed': {
-          target: 'loading-around',
-        },
-        retry: {
-          target: 'loading-around',
-        },
-        'filters-changed': {
-          target: 'loading-around',
-        },
-        'time-range-changed': {
-          target: 'loading-around',
-        },
-      },
-    },
-    'loading-top': {
-      entry: 'cancel-requests',
-      invoke: {
-        src: 'load-before',
-        onDone: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.top.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.top.failed',
-          },
-        ],
-      },
-      on: {
-        'columns-changed': {
-          target: 'reloading',
-        },
-      },
-    },
-    'loading-bottom': {
-      entry: 'cancel-requests',
-      invoke: {
-        src: 'load-after',
-        onDone: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.bottom.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.failed',
-          },
-        ],
-      },
-      on: {
-        'columns-changed': {
-          target: 'reloading',
-        },
-      },
-    },
-    'extending-top': {
-      invoke: {
-        src: 'extend-top',
-        onDone: [
-          {
-            actions: 'prependToTopChunk',
-            target: '#Log Explorer Data.loaded.top.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.top.failed',
-          },
-        ],
-      },
-      on: {
-        'columns-changed': {
-          target: 'reloading',
-        },
-      },
-    },
-    'extending-bottom': {
-      invoke: {
-        src: 'extend-bottom',
-        onDone: [
-          {
-            actions: 'appendToBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.failed',
-          },
-        ],
-      },
-      on: {
-        'columns-changed': {
-          target: 'reloading',
-        },
-      },
-    },
-    reloading: {
-      invoke: {
-        src: 'reload',
-        onError: [
-          {
-            target: 'failed-no-data',
-          },
-        ],
-        onDone: [
-          {
-            actions: ['updateTopChunk', 'updateBottomChunk'],
-            target: 'loaded',
-          },
-        ],
-      },
-    },
-  },
-  on: {
-    'filters-changed': {
-      target: '.loading-around',
-    },
-    'data-view-changed': {
-      target: '.loading-around',
-    },
-  },
-});
+      devTools: true,
+    }
+  );
+
+  return dataAccessService;
+};
+
+const createDummyService =
+  (delay: number = 3000) =>
+  () =>
+    timer(delay).pipe(ignoreElements());
 
 export const StateMachineContext = createContext({});
 
