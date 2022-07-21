@@ -1,4 +1,4 @@
-[[definitions]]
+[[Machine_learning_APIs-definitions]]
 == Definitions
 
 * <<MLSyncResponse>>
