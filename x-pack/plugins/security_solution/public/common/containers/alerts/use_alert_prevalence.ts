@@ -16,7 +16,6 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 
 const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
-export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
 interface UseAlertPrevalenceOptions {
   field: string;

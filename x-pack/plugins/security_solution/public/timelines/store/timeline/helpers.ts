@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
 import uuid from 'uuid';
 
@@ -22,22 +22,15 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../components/timeline/data_providers/data_provider';
-import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   TimelineTypeLiteral,
   RowRendererId,
   SerializedFilterQuery,
-  ToggleDetailPanel,
   TimelinePersistInput,
 } from '../../../../common/types/timeline';
-import {
-  TimelineType,
-  TimelineStatus,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
@@ -1234,104 +1227,6 @@ export const removeTimelineProvider = ({
   };
 };
 
-interface SetDeletedTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isDeleted: boolean;
-  timelineById: TimelineById;
-}
-
-export const setDeletedTimelineEvents = ({
-  id,
-  eventIds,
-  isDeleted,
-  timelineById,
-}: SetDeletedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const deletedEventIds = isDeleted
-    ? union(timeline.deletedEventIds, eventIds)
-    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  const selectedEventIds = Object.fromEntries(
-    Object.entries(timeline.selectedEventIds).filter(
-      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
-    )
-  );
-
-  const isSelectAllChecked =
-    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      deletedEventIds,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
-interface SetLoadingTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isLoading: boolean;
-  timelineById: TimelineById;
-}
-
-export const setLoadingTimelineEvents = ({
-  id,
-  eventIds,
-  isLoading,
-  timelineById,
-}: SetLoadingTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const loadingEventIds = isLoading
-    ? union(timeline.loadingEventIds, eventIds)
-    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      loadingEventIds,
-    },
-  };
-};
-
-interface SetSelectedTimelineEventsParams {
-  id: string;
-  eventIds: Record<string, TimelineNonEcsData[]>;
-  isSelectAllChecked: boolean;
-  isSelected: boolean;
-  timelineById: TimelineById;
-}
-
-export const setSelectedTimelineEvents = ({
-  id,
-  eventIds,
-  isSelectAllChecked = false,
-  isSelected,
-  timelineById,
-}: SetSelectedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const selectedEventIds = isSelected
-    ? { ...timeline.selectedEventIds, ...eventIds }
-    : omit(Object.keys(eventIds), timeline.selectedEventIds);
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
 interface UnPinTimelineEventParams {
   id: string;
   eventId: string;
@@ -1349,28 +1244,6 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
-    },
-  };
-};
-
-interface UpdateHighlightedDropAndProviderIdParams {
-  id: string;
-  providerId: string;
-  timelineById: TimelineById;
-}
-
-export const updateHighlightedDropAndProvider = ({
-  id,
-  providerId,
-  timelineById,
-}: UpdateHighlightedDropAndProviderIdParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      highlightedDropAndProviderId: providerId,
     },
   };
 };
@@ -1435,22 +1308,4 @@ export const updateExcludedRowRenderersIds = ({
       excludedRowRendererIds,
     },
   };
-};
-
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
-  const { tabType } = action;
-
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
-  const expandedTabType = tabType ?? TimelineTabs.query;
-
-  return action.panelView && panelViewOptions.has(action.panelView)
-    ? {
-        [expandedTabType]: {
-          params: action.params ? { ...action.params } : {},
-          panelView: action.panelView,
-        },
-      }
-    : {
-        [expandedTabType]: {},
-      };
 };

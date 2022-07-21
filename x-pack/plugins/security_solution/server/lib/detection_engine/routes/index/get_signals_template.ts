@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import {
-  SPACE_IDS,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
 import { merge } from 'lodash';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
@@ -56,7 +50,6 @@ export const SIGNALS_FIELD_ALIASES_VERSION = 3;
   rules to write signals correctly. If the write index has a `version` less than this value, the EQL rule
   will throw an error on execution.
 */
-export const MIN_EQL_RULE_INDEX_VERSION = 2;
 export const ALIAS_VERSION_FIELD = 'aliases_version';
 
 export const getSignalsTemplate = (index: string, aadIndexAliasName: string) => {
@@ -171,28 +164,4 @@ export const createBackwardsCompatibilityMapping = (version: number) => {
   };
 
   return merge({ properties }, ...mappings, meta);
-};
-
-export const getRbacRequiredFields = (spaceId: string) => {
-  return {
-    [SPACE_IDS]: {
-      type: 'constant_keyword',
-      value: spaceId,
-    },
-    [ALERT_RULE_CONSUMER]: {
-      type: 'constant_keyword',
-      value: 'siem',
-    },
-    [ALERT_RULE_PRODUCER]: {
-      type: 'constant_keyword',
-      value: 'siem',
-    },
-    // TODO: discuss naming of this field and what the value will be for legacy signals.
-    // Can we leave it as 'siem.signals' or do we need a runtime field that will map signal.rule.type
-    // to the new ruleTypeId?
-    [ALERT_RULE_TYPE_ID]: {
-      type: 'constant_keyword',
-      value: 'siem.signals',
-    },
-  };
 };

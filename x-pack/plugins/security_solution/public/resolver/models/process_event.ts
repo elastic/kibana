@@ -17,15 +17,6 @@ import type {
 import type { ResolverProcessType } from '../types';
 
 /**
- * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
- * Resolver will only render 'graphable' process events.
- *
- */
-export function isGraphableProcess(passedEvent: SafeResolverEvent) {
-  return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
-}
-
-/**
  * Returns true if the process was terminated.
  */
 export function isTerminatedProcess(passedEvent: SafeResolverEvent): boolean {
@@ -89,34 +80,12 @@ export function eventType(passedEvent: SafeResolverEvent): ResolverProcessType {
 }
 
 /**
- * Returns the process event's PID
- */
-export function uniquePidForProcess(passedEvent: ResolverEvent): string {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    return String(passedEvent.endgame.unique_pid);
-  } else {
-    return passedEvent.process.entity_id;
-  }
-}
-
-/**
  * Returns the PID for the process on the host
  */
 export function processPID(event: SafeResolverEvent): number | undefined {
   return firstNonNullValue(
     eventModel.isLegacyEventSafeVersion(event) ? event.endgame.pid : event.process?.pid
   );
-}
-
-/**
- * Returns the process event's parent PID
- */
-export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    return String(passedEvent.endgame.unique_ppid);
-  } else {
-    return passedEvent.process.parent?.entity_id;
-  }
 }
 
 /**
@@ -137,20 +106,6 @@ export function userInfoForProcess(
   passedEvent: ResolverEvent
 ): { name?: string; domain?: string } | undefined {
   return passedEvent.user;
-}
-
-/**
- * Returns the command line path and arguments used to run the `passedEvent` if any
- *
- * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the arguments value for
- * @returns {string | undefined} The arguments (including the path) used to run the process
- */
-export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
-  if (eventModel.isLegacyEvent(passedEvent)) {
-    // There is not currently a key for this on Legacy event types
-    return undefined;
-  }
-  return passedEvent?.process?.args;
 }
 
 /**

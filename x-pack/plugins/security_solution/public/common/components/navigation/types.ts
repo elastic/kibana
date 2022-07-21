@@ -75,10 +75,6 @@ export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
   navTabs: GenericNavRecord;
 }
-export type GetUrlForApp = (
-  appId: string,
-  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
-) => string;
 
 export type NavigateToUrl = (url: string) => void;
 export interface NavLinkItem {

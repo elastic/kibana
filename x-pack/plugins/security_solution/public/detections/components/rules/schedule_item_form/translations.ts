@@ -27,10 +27,3 @@ export const HOURS = i18n.translate(
     defaultMessage: 'Hours',
   }
 );
-
-export const INVALID_TIME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.invalidTimeMessageDescription',
-  {
-    defaultMessage: 'A time is required.',
-  }
-);

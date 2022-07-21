@@ -39,8 +39,6 @@ export const getShowCallOutUnauthorizedMsg = () =>
     (showCallOutUnauthorizedMsg) => showCallOutUnauthorizedMsg
   );
 
-export const getTimelines = () => timelineByIdSelector;
-
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 
 export const getKqlFilterQuerySelector = () =>

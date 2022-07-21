@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type { DataViewBase } from '@kbn/es-query';
-
 import type { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
-import type {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
@@ -27,16 +21,3 @@ export interface OwnProps {
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
-
-export type NetworkComponentsQueryProps = OwnProps & {
-  flowTarget: FlowTarget;
-};
-
-export type TlsQueryTableComponentProps = OwnProps & {
-  flowTarget: FlowTargetSourceDest;
-};
-
-export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
-  flowTarget: FlowTargetSourceDest;
-  indexPattern: DataViewBase;
-};

@@ -71,10 +71,6 @@ import {
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  createdByOrNull,
-  updatedByOrNull,
-  created_at,
-  updated_at,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -248,7 +244,6 @@ export const allRuleTypes = t.union([
   t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
-export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
 
 export const internalRuleCreate = t.type({
   name,
@@ -278,15 +273,3 @@ export const internalRuleUpdate = t.type({
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-export const internalRuleResponse = t.intersection([
-  internalRuleCreate,
-  t.type({
-    id: t.string,
-    createdBy: createdByOrNull,
-    updatedBy: updatedByOrNull,
-    createdAt: created_at,
-    updatedAt: updated_at,
-  }),
-]);
-export type InternalRuleResponse = t.TypeOf<typeof internalRuleResponse>;

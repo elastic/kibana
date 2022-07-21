@@ -16,7 +16,6 @@ import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
 import { KpiPanel } from '../../../detections/components/alerts_kpis/common/components';
 import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
-import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { FieldSelection } from '../field_selection';
 import { HeaderSection } from '../header_section';
@@ -49,10 +48,6 @@ export interface Props {
   stackByWidth?: number;
   title: React.ReactNode;
 }
-
-export const getBucketsCount = (
-  data: AlertSearchResponse<unknown, AlertsTreeMapAggregation> | null
-): number => data?.aggregations?.stackByField0?.buckets?.length ?? 0;
 
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,

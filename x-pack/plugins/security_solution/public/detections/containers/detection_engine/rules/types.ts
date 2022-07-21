@@ -176,19 +176,6 @@ export const RulesSchema = t.array(RuleSchema);
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
-export interface RuleError {
-  id?: string;
-  rule_id?: string;
-  error: { status_code: number; message: string };
-}
-
-export type BulkRuleResponse = Array<Rule | RuleError>;
-
-export interface RuleResponseBuckets {
-  rules: Rule[];
-  errors: RuleError[];
-}
-
 export interface PaginationOptions {
   page: number;
   perPage: number;

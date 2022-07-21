@@ -60,14 +60,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
   }
 
-  generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
-  }
-
-  generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
-  }
-
   /** Generates an endpoint action response */
   generateResponse(
     overrides: DeepPartial<LogsEndpointActionResponse> = {}

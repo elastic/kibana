@@ -31,8 +31,6 @@ import {
 } from './rules_schema.mocks';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
-export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
-
 describe('rules_schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getRulesSchemaMock();

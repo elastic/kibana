@@ -211,6 +211,3 @@ export const useRuleDetailsContext = (): RuleDetailsContextType => {
   );
   return ruleDetailsContext;
 };
-
-export const useRuleDetailsContextOptional = (): RuleDetailsContextType | null =>
-  useContext(RuleDetailsContext);

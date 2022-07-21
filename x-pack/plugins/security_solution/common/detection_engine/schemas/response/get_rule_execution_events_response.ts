@@ -6,15 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { aggregateRuleExecutionEvent, ruleExecutionEvent } from '../common';
-
-export const GetRuleExecutionEventsResponse = t.exact(
-  t.type({
-    events: t.array(ruleExecutionEvent),
-  })
-);
-
-export type GetRuleExecutionEventsResponse = t.TypeOf<typeof GetRuleExecutionEventsResponse>;
+import { aggregateRuleExecutionEvent } from '../common';
 
 export const GetAggregateRuleExecutionEventsResponse = t.exact(
   t.type({

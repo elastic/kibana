@@ -21,18 +21,3 @@ export const RISK_LABEL = (riskScore: number) =>
     },
     defaultMessage: '(Risk {riskScore})',
   });
-
-export const SUBTITLE = (maxItems: number) =>
-  i18n.translate('xpack.securitySolution.components.alertsTreemap.subtitle', {
-    values: {
-      maxItems,
-    },
-    defaultMessage: 'Showing the top {maxItems} most frequently occurring alerts',
-  });
-
-export const SHOW_ALL = i18n.translate(
-  'xpack.securitySolution.components.alertsTreemap.showAllButton',
-  {
-    defaultMessage: 'Show all alerts',
-  }
-);

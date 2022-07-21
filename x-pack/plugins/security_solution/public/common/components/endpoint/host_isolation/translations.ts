@@ -36,20 +36,9 @@ export const GET_UNISOLATION_SUCCESS_MESSAGE = (hostName: string) =>
     values: { hostName },
   });
 
-export const ISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisolation.isolate', {
-  defaultMessage: 'isolate',
-});
-
 export const UNISOLATE = i18n.translate('xpack.securitySolution.endpoint.hostisolation.unisolate', {
   defaultMessage: 'release',
 });
-
-export const NOT_ISOLATED = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.notIsolated',
-  {
-    defaultMessage: 'not isolated',
-  }
-);
 
 export const ISOLATED = i18n.translate('xpack.securitySolution.endpoint.hostIsolation.isolated', {
   defaultMessage: 'isolated',

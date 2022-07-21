@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
-  {
-    defaultMessage: 'Back to detections',
-  }
-);
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
     defaultMessage: 'Tooltip for column: {columnName}',
@@ -99,20 +93,6 @@ export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle',
   {
     defaultMessage: 'Bulk actions',
-  }
-);
-
-export const ACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.activeRuleDescription',
-  {
-    defaultMessage: 'active',
-  }
-);
-
-export const INACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.inactiveRuleDescription',
-  {
-    defaultMessage: 'inactive',
   }
 );
 
@@ -477,13 +457,6 @@ export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
   }
 );
 
-export const DUPLICATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
-  {
-    defaultMessage: 'Duplicate',
-  }
-);
-
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -561,13 +534,6 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
-export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
-  {
-    defaultMessage: 'See all',
-  }
-);
-
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -628,13 +594,6 @@ export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
     defaultMessage: 'Rule Monitoring',
-  }
-);
-
-export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
-  {
-    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -817,27 +776,6 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
       defaultMessage: '{message}',
     }
   );
-
-export const REFRESH_PROMPT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
-  {
-    defaultMessage: 'Are you still there?',
-  }
-);
-
-export const REFRESH_PROMPT_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
-  {
-    defaultMessage: 'Continue',
-  }
-);
-
-export const REFRESH_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
-  {
-    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
-  }
-);
 
 export const DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',

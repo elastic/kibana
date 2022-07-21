@@ -102,8 +102,6 @@ export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]'
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
-export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
-
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';

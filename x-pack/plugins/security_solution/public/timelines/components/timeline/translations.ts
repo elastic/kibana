@@ -41,13 +41,6 @@ export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLitera
     defaultMessage: 'e.g. {timeline} name or description',
   });
 
-export const INSERT_TIMELINE = i18n.translate(
-  'xpack.securitySolution.insert.timeline.insertTimelineButton',
-  {
-    defaultMessage: 'Insert timeline link',
-  }
-);
-
 export const TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.timeline.flyoutTimelineTemplateLabel',
   {

@@ -23,7 +23,7 @@ import type {
   RowRenderer,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import type { inputsModel, State } from '../../../../common/store';
@@ -55,11 +55,6 @@ export interface Props {
   totalPages: number;
   onRuleChange?: () => void;
 }
-
-export const hasAdditionalActions = (id: TimelineId): boolean =>
-  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
-    id
-  );
 
 /**
  * The Body component is used everywhere timeline is used within the security application. It is the highest level component

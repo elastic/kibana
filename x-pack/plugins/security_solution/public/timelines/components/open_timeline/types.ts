@@ -97,9 +97,7 @@ export type OnOpenTimeline = ({
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
-export type SetActionTimeline = React.Dispatch<
-  React.SetStateAction<OpenTimelineResult | undefined>
->;
+
 export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
