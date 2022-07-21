@@ -20,7 +20,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsDeleteOptions,
 } from './apis';
-import type { ISimpleSavedObject } from './simple_saved_object';
+import type { SimpleSavedObject } from './simple_saved_object';
 
 /**
  * The client-side SavedObjectsClient is a thin convenience library around the SavedObjects
@@ -36,7 +36,7 @@ export interface SavedObjectsClientContract {
     type: string,
     attributes: T,
     options?: SavedObjectsCreateOptions
-  ): Promise<ISimpleSavedObject<T>>;
+  ): Promise<SimpleSavedObject<T>>;
 
   /**
    * Creates multiple documents at once
@@ -77,7 +77,7 @@ export interface SavedObjectsClientContract {
    * @param {string} id
    * @returns The saved object for the given type and id.
    */
-  get<T = unknown>(type: string, id: string): Promise<ISimpleSavedObject<T>>;
+  get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
 
   /**
    * Returns an array of objects by id
@@ -143,7 +143,7 @@ export interface SavedObjectsClientContract {
     id: string,
     attributes: T,
     options?: SavedObjectsUpdateOptions
-  ): Promise<ISimpleSavedObject<T>>;
+  ): Promise<SimpleSavedObject<T>>;
 
   /**
    * Update multiple documents at once

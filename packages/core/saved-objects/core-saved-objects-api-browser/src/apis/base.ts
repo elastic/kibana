@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ISimpleSavedObject } from '../simple_saved_object';
+import { SimpleSavedObject } from '../simple_saved_object';
 
 /** @public */
 export interface SavedObjectsBatchResponse<T = unknown> {
-  savedObjects: Array<ISimpleSavedObject<T>>;
+  savedObjects: Array<SimpleSavedObject<T>>;
 }

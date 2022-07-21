@@ -11,15 +11,15 @@ import { get, has } from 'lodash';
 import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
-  ISimpleSavedObject,
+  SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
 
 /**
- * Core internal implementation of {@link ISimpleSavedObject}
+ * Core internal implementation of {@link SimpleSavedObject}
  *
- * @public
+ * @internal Should use the {@link SimpleSavedObject} interface instead
  */
-export class SimpleSavedObject<T = unknown> implements ISimpleSavedObject<T> {
+export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;
   public _version?: SavedObjectType<T>['version'];
   public id: SavedObjectType<T>['id'];
@@ -72,7 +72,7 @@ export class SimpleSavedObject<T = unknown> implements ISimpleSavedObject<T> {
     return has(this.attributes, key);
   }
 
-  public save(): Promise<ISimpleSavedObject<T>> {
+  public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client
         .update(this.type, this.id, this.attributes, {

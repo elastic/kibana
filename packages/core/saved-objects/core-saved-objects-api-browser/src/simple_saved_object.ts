@@ -17,7 +17,7 @@ import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-com
  *
  * @public
  */
-export interface ISimpleSavedObject<T = unknown> {
+export interface SimpleSavedObject<T = unknown> {
   attributes: T;
   _version?: SavedObjectType<T>['version'];
   id: SavedObjectType<T>['id'];
@@ -39,7 +39,7 @@ export interface ISimpleSavedObject<T = unknown> {
 
   has(key: string): boolean;
 
-  save(): Promise<ISimpleSavedObject<T>>;
+  save(): Promise<SimpleSavedObject<T>>;
 
   delete(): Promise<{}>;
 }

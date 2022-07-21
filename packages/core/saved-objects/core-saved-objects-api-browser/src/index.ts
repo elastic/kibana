@@ -7,7 +7,7 @@
  */
 
 export type { SavedObjectsClientContract } from './saved_objects_client';
-export type { ISimpleSavedObject } from './simple_saved_object';
+export type { SimpleSavedObject } from './simple_saved_object';
 export type {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,

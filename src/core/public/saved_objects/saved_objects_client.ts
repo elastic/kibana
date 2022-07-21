@@ -27,9 +27,10 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsBulkCreateOptions,
   SavedObjectsBulkCreateObject,
+  SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
 
-import { SimpleSavedObject } from './simple_saved_object';
+import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -423,13 +424,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
-    return new SimpleSavedObject(this, options);
+    return new SimpleSavedObjectImpl(this, options);
   }
 
   private createResolvedSavedObject<T = unknown>(
     resolveResponse: SavedObjectsResolveResponse<T>
   ): ResolvedSimpleSavedObject<T> {
-    const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);
+    const simpleSavedObject = new SimpleSavedObjectImpl<T>(this, resolveResponse.saved_object);
     return {
       saved_object: simpleSavedObject,
       outcome: resolveResponse.outcome,

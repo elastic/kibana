@@ -127,11 +127,10 @@ export type {
   NavigateToUrlOptions,
 } from './application';
 
-// TODO: check if can be exported as type.
-export { SimpleSavedObject } from './saved_objects';
+export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
   SavedObjectsClientContract,
-  ISimpleSavedObject,
+  SimpleSavedObject,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsBatchResponse,

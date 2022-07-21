@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import { ISimpleSavedObject } from '../simple_saved_object';
+import { SimpleSavedObject } from '../simple_saved_object';
 
 /**
  * This interface is a very simple wrapper for SavedObjects resolved from the server
@@ -19,7 +19,7 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
   /**
    * The saved object that was found.
    */
-  saved_object: ISimpleSavedObject<T>;
+  saved_object: SimpleSavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
    *
