@@ -6,14 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, createContext } from 'react';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { useInterpret, useActor } from '@xstate/react';
 import { ignoreElements, timer } from 'rxjs';
 import { assign } from 'xstate';
 import { dataAccessStateMachine } from '../../state_machines';
 
-export const useDataAccessStateMachine = ({ timefilter }: { timefilter: TimefilterContract }) => {
+const createDummyService =
+  (delay: number = 3000) =>
+  () =>
+    timer(delay).pipe(ignoreElements());
+
+export const StateMachineContext = createContext({});
+
+export const StateMachineProvider = ({
+  timefilter,
+  children,
+}: {
+  timefilter: TimefilterContract;
+  children: React.ReactNode;
+}) => {
   const dataAccessService = useInterpret(
     () => {
       const initialTimeRange = timefilter.getAbsoluteTime();
@@ -51,27 +64,8 @@ export const useDataAccessStateMachine = ({ timefilter }: { timefilter: Timefilt
     }
   );
 
-  return dataAccessService;
-};
-
-const createDummyService =
-  (delay: number = 3000) =>
-  () =>
-    timer(delay).pipe(ignoreElements());
-
-export const StateMachineContext = createContext({});
-
-export const StateMachineProvider = (props) => {
-  const logExplorerService = useInterpret(() => {
-    const { timeFilter } = props;
-    const timeRange = timeFilter?.getAbsoluteTime();
-    return logExplorerStateMachine.withContext({
-      timeRange,
-    });
-  });
-
   return (
-    <StateMachineContext.Provider value={{ logExplorerService }}>
+    <StateMachineContext.Provider value={{ dataAccessService }}>
       {props.children}
     </StateMachineContext.Provider>
   );
@@ -79,6 +73,6 @@ export const StateMachineProvider = (props) => {
 
 export const useStateMachineState = () => {
   const services = useContext(StateMachineContext);
-  const [state] = useActor(services.logExplorerService);
+  const [state] = useActor(services.dataAccessService);
   return state;
 };

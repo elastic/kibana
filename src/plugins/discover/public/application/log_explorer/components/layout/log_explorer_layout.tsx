@@ -41,7 +41,7 @@ import { useDataState } from '../../../main/hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
-import { useStateMachineState } from '../../hooks/query_data/use_state_machine';
+import { useStateMachineState as useQueryDataMachineState } from '../../hooks/query_data/use_state_machine';
 
 /**
  * Local storage key for sidebar persistence state
@@ -80,8 +80,8 @@ export function LogExplorerLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const logExplorerState = useStateMachineState();
-  console.log(logExplorerState);
+  const queryDataState = useQueryDataMachineState();
+  console.log(queryDataState);
   const { main$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
