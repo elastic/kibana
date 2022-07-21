@@ -32,21 +32,19 @@ export type {
   SavedObjectsMigrationVersion,
 } from '@kbn/core-saved-objects-common';
 export type {
-  SavedObjectStatusMeta,
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
   SavedObjectsPitParams,
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
-} from './saved_objects/types';
-export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects/service';
+} from '@kbn/core-saved-objects-api-server';
 export type {
   DomainDeprecationDetails,
   DeprecationsGetResponse,
 } from '@kbn/core-deprecations-common';
-export * from './ui_settings/types';
 export type { ExternalUrlConfig } from '@kbn/core-http-server-internal';
+export * from './ui_settings/types';
+export type { SavedObjectStatusMeta } from './saved_objects/types';

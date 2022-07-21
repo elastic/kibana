@@ -6,31 +6,41 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
-  SavedObject,
-  SavedObjectError,
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
-} from '@kbn/core-saved-objects-common';
-import type {
+  SavedObjectsClientContract,
   ISavedObjectsRepository,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkResponse,
+  SavedObjectsUpdateResponse,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBulkUpdateObject,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsResolveResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from './lib';
-import {
-  SavedObjectsBaseOptions,
-  MutatingOperationRefreshSetting,
+  SavedObjectsUpdateOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
-} from '../types';
+} from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from './lib/errors';
-import { SavedObjectsUpdateObjectsSpacesResponse } from './lib';
-
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}

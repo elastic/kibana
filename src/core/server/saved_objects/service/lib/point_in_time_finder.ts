@@ -7,17 +7,19 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsFindResponse } from '..';
+import type {
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  ISavedObjectsPointInTimeFinder,
+} from '@kbn/core-saved-objects-api-server';
 
 type PointInTimeFinderClient = Pick<
   SavedObjectsClientContract,
   'find' | 'openPointInTimeForType' | 'closePointInTime'
 >;
-
-
-
-
 
 /**
  * @internal
@@ -33,7 +35,6 @@ export interface PointInTimeFinderDependencies
 export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
   findOptions: SavedObjectsCreatePointInTimeFinderOptions
 ) => ISavedObjectsPointInTimeFinder<T, A>;
-
 
 /**
  * @internal

@@ -8,9 +8,14 @@
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectReferenceWithContext,
+} from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObjectsBaseOptions } from '../../types';
 import { SavedObjectsErrorHelpers } from './errors';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
 import { getRootFields } from './included_fields';
@@ -37,8 +42,6 @@ const MAX_REFERENCE_GRAPH_DEPTH = 20;
  * @internal
  */
 export const ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE = 100;
-
-
 
 /**
  * Parameters for the collectMultiNamespaceReferences function.

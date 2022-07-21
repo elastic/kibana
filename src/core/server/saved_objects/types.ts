@@ -28,13 +28,7 @@ export interface SavedObjectStatusMeta {
   };
 }
 
-
-
-
-
-
-
-export type { SavedObjectsClientContract } from './service/saved_objects_client';
+export type { SavedObjectsClientContract } from '@kbn/core-saved-objects-common';
 
 /**
  * @public

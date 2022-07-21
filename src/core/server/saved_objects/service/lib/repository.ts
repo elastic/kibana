@@ -15,14 +15,47 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject, SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsBaseOptions,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsBulkResponse,
+  SavedObjectsUpdateResponse,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkUpdateResponse,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsFindResult,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsOpenPointInTimeResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
-  PointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
-} from './point_in_time_finder';
+  SavedObjectsResolveResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
+import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -35,37 +68,7 @@ import {
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
 } from '../../serialization';
-import {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
-  SavedObjectsBulkUpdateResponse,
-  SavedObjectsCheckConflictsObject,
-  SavedObjectsCheckConflictsResponse,
-  SavedObjectsCreateOptions,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsClosePointInTimeOptions,
-  SavedObjectsClosePointInTimeResponse,
-  SavedObjectsOpenPointInTimeOptions,
-  SavedObjectsOpenPointInTimeResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsResolveResponse,
-  SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
-} from '../saved_objects_client';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import {
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  MutatingOperationRefreshSetting,
-} from '../../types';
 import { SavedObjectsTypeValidator } from '../../validation';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
@@ -89,18 +92,8 @@ import {
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
-import {
-  collectMultiNamespaceReferences,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './collect_multi_namespace_references';
-import {
-  updateObjectsSpaces,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-  SavedObjectsUpdateObjectsSpacesResponse,
-} from './update_objects_spaces';
+import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+import { updateObjectsSpaces } from './update_objects_spaces';
 import { getIndexForType } from './get_index_for_type';
 import {
   preflightCheckForCreate,
@@ -122,14 +115,8 @@ export interface SavedObjectsRepositoryOptions {
   logger: Logger;
 }
 
-
-
-
-
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
 export const DEFAULT_RETRY_COUNT = 3;
-
-
 
 /**
  * @internal

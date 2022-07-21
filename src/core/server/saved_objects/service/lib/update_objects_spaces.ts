@@ -12,11 +12,15 @@ import intersection from 'lodash/intersection';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
+} from '@kbn/core-saved-objects-api-server';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from '../../types';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
@@ -32,8 +36,6 @@ import type { RepositoryEsClient } from './repository_es_client';
 import { ALL_NAMESPACES_STRING } from './utils';
 import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 import { deleteLegacyUrlAliases } from './legacy_url_aliases';
-
-
 
 /**
  * Parameters for the updateObjectsSpaces function.
