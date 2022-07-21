@@ -186,7 +186,7 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string) => {
+export const postDataView = (indexPattern: string | undefined) => {
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,

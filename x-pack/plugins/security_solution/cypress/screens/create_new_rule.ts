@@ -93,6 +93,11 @@ export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is req
 
 export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
+export const DATA_VIEW_COMBO_BOX =
+  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
+
+export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
+
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';

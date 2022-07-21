@@ -93,6 +93,8 @@ import {
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
+  DATA_VIEW_COMBO_BOX,
+  DATA_VIEW_OPTION,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -253,6 +255,10 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
+  if (rule.dataView) {
+    cy.get(DATA_VIEW_OPTION).click();
+    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataView}{enter}`);
+  }
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
@@ -277,7 +283,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
-  rule.index.forEach((index) => {
+  rule.index?.forEach((index) => {
     cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
   });
 

@@ -22,6 +22,8 @@ export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const DATA_VIEW_DETAILS = 'Data View';
+
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
 
@@ -38,8 +40,6 @@ export const EXCEPTIONS_TAB_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]'
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
-
-export const DATA_VIEW_DETAILS = 'Data View';
 
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 

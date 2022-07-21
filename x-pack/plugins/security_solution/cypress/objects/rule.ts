@@ -45,7 +45,8 @@ export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index: string[];
+  index?: string[];
+  dataView?: string;
   interval?: string;
   severity: string;
   riskScore: string;
@@ -179,6 +180,24 @@ const getLookBack = (): Interval => ({
   interval: '50000',
   timeType: 'Hours',
   type: 'h',
+});
+
+export const getDataViewRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  dataView: 'auditbeat-2022',
+  name: 'New Data View Rule',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
 });
 
 export const getNewRule = (): CustomRule => ({
