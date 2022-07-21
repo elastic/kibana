@@ -162,9 +162,6 @@ export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
   '[data-test-subj="risky-hosts-view-dashboard-button"]';
 export const OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON =
   '[data-test-subj="create-saved-object-button"]';
-
-export const OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON =
-  '[data-test-subj="disabled-create-saved-object-button-with-popover"]';
 export const OVERVIEW_RISKY_HOSTS_DOC_LINK =
   '[data-test-subj="risky-hosts-inner-panel-danger-learn-more"]';
 export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;

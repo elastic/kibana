@@ -11,7 +11,6 @@ import {
   OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT,
-  OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON,
   OVERVIEW_RISKY_HOSTS_DOC_LINK,
   OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON,
 } from '../../screens/overview';
@@ -36,7 +35,6 @@ describe('Risky Hosts Link Panel', () => {
     cy.get(`${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL}`).should(
       'exist'
     );
-    cy.get(`${OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON}`).should('exist');
     cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
     cy.get(`${OVERVIEW_RISKY_HOSTS_DOC_LINK}`)
@@ -62,7 +60,6 @@ describe('Risky Hosts Link Panel', () => {
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('exist');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON}`).should('exist');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     });
 
@@ -76,7 +73,6 @@ describe('Risky Hosts Link Panel', () => {
 
       changeSpace(testSpaceName);
       cy.visit(`/s/${testSpaceName}${OVERVIEW_URL}`);
-      cy.get(`${OVERVIEW_RISKY_HOSTS_DISABLED_IMPORT_DASHBOARD_BUTTON}`).should('exist');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
       cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
     });
