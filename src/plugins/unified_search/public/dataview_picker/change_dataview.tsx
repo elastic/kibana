@@ -299,6 +299,15 @@ export function ChangeDataView({
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
               setIsTextLangTransitionModalVisible(true);
+            } else if (isTextBasedLangSelected && isTextLangTransitionModalDismissed) {
+              setIsTextBasedLangSelected(false);
+              // clean up the Text based language query
+              onTextLangQuerySubmit?.({
+                language: 'kql',
+                query: '',
+              });
+              onChangeDataView(newId);
+              setTriggerLabel(trigger.label);
             } else {
               onChangeDataView(newId);
             }
