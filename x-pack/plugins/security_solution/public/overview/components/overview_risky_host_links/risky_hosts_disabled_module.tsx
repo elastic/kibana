@@ -19,8 +19,7 @@ import type { LinkPanelListItem } from '../link_panel';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
-const DETECTION_ENGINE_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/detection-engine-overview.html';
+
 const emptyList: LinkPanelListItem[] = [];
 
 export const RiskyHostsDisabledModuleComponent = () => {
@@ -45,7 +44,7 @@ export const RiskyHostsDisabledModuleComponent = () => {
           loadFromUrl={loadFromUrl}
           enableButton={!!signalIndexExists}
           title={ENABLE_VIA_DEV_TOOLS}
-          learnMoreUrl={DETECTION_ENGINE_DOC_LINK}
+          popoverContent={i18n.ENABLE_RISK_SCORE_POPOVER}
         />
       }
     />

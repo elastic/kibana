@@ -43,7 +43,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
 
   const closePopover = () => setIsPopoverOpen(false);
 
-  return loadFromUrl ? (
+  return (
     <EuiFlexItem>
       {enableButton ? (
         <EuiButton
@@ -62,10 +62,15 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
               <EuiText>
                 {popoverContent}{' '}
                 {learnMoreUrl && (
-                  <EuiLink href={learnMoreUrl} target="_blank" external={false}>
+                  <EuiLink
+                    href={learnMoreUrl}
+                    target="_blank"
+                    external={false}
+                    data-test-subj="open-in-console-learn-more"
+                  >
                     <FormattedMessage
                       defaultMessage="Learn More"
-                      id="xpack.securitySolution.openInDevConsole.tooltipTitle"
+                      id="xpack.securitySolution.openInDevConsole.learnMoreLinkTitle"
                     />
                   </EuiLink>
                 )}
@@ -93,7 +98,7 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
         </EuiButton>
       )}
     </EuiFlexItem>
-  ) : null;
+  );
 };
 
 export const OpenInDevConsoleButton = React.memo(OpenInDevConsoleButtonComponent);
