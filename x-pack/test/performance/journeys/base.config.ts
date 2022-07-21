@@ -36,7 +36,11 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.labels.testBuildId=${testBuildId}`,
+        `--telemetry.labels.testJobId=${testJobId}`,
+      ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.TEST_PERFORMANCE_PHASE ? 'true' : 'false',
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',

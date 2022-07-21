@@ -49,6 +49,14 @@ export default function () {
         // These are *very* important to have them pointing to staging
         '--telemetry.sendUsageTo=staging',
         `--server.maxPayload=1679958`,
+        // Telemetry Labels
+        `--telemetry.labels.branch=${process.env.BUILDKITE_BRANCH}`,
+        `--telemetry.labels.ciBuildId=${process.env.BUILDKITE_BUILD_ID}`,
+        `--telemetry.labels.ciBuildJobId=${process.env.BUILDKITE_JOB_ID}`,
+        `--telemetry.labels.ciBuildNumber=${process.env.BUILDKITE_BUILD_NUMBER}`,
+        `--telemetry.labels.git_rev=${process.env.BUILDKITE_COMMIT}`,
+        `--telemetry.labels.isPr=${process.env.CI}`,
+        `--telemetry.labels.prId=${process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH}`,
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
         // otel mock service
