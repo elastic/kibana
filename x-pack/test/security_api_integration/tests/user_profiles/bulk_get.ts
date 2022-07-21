@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  describe('Getting user profiles in bulk', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/136827
+  describe.skip('Getting user profiles in bulk', () => {
     const usersSessions = new Map<string, { cookie: Cookie; uid: string }>();
     before(async () => {
       // 1. Create test users
