@@ -32,7 +32,7 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
 import {
-  SimpleSavedObject,
+  ISimpleSavedObject,
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
@@ -43,10 +43,10 @@ import { LISTING_LIMIT_SETTING } from '../../common';
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
-  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
-  getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
-  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
-  getSavedObjectSubType?(savedObject: SimpleSavedObject<T>): string;
+  getIconForSavedObject(savedObject: ISimpleSavedObject<T>): IconType;
+  getTooltipForSavedObject?(savedObject: ISimpleSavedObject<T>): string;
+  showSavedObject?(savedObject: ISimpleSavedObject<T>): boolean;
+  getSavedObjectSubType?(savedObject: ISimpleSavedObject<T>): string;
   includeFields?: string[];
 }
 
@@ -60,9 +60,9 @@ interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
     name: string | null;
-    id: SimpleSavedObject['id'];
-    type: SimpleSavedObject['type'];
-    savedObject: SimpleSavedObject<FinderAttributes>;
+    id: ISimpleSavedObject['id'];
+    type: ISimpleSavedObject['type'];
+    savedObject: ISimpleSavedObject<FinderAttributes>;
   }>;
   query: string;
   isFetchingItems: boolean;
@@ -76,10 +76,10 @@ interface SavedObjectFinderState {
 
 interface BaseSavedObjectFinder {
   onChoose?: (
-    id: SimpleSavedObject['id'],
-    type: SimpleSavedObject['type'],
+    id: ISimpleSavedObject['id'],
+    type: ISimpleSavedObject['type'],
     name: string,
-    savedObject: SimpleSavedObject
+    savedObject: ISimpleSavedObject
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
