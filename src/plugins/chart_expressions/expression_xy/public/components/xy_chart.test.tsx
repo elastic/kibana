@@ -3208,7 +3208,7 @@ describe('XYChart component', () => {
       const smallMultiples = splitChart.dive().find(SmallMultiples);
 
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_ROW);
-      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_ROW);
     });
 
     it('should render split chart if splitColumnAccessor is specified', () => {
@@ -3234,7 +3234,7 @@ describe('XYChart component', () => {
       const smallMultiples = splitChart.dive().find(SmallMultiples);
 
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
-      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_COLUMN);
     });
 
     it('should render split chart if both, splitRowAccessor and splitColumnAccessor are specified', () => {
@@ -3266,8 +3266,8 @@ describe('XYChart component', () => {
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
       expect(groupBy.at(1).prop('id')).toEqual(SPLIT_ROW);
 
-      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
-      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_COLUMN);
     });
   });
 

@@ -135,9 +135,7 @@ export class VisualizeChartPageObject extends FtrService {
    * @param axis axis value, 'ValueAxis-1' by default
    */
   public async getLineChartData(selector: string, dataLabel = 'Count') {
-    // For now lines are rendered as areas to enable stacking
-    const areas = (await this.getEsChartDebugState(selector))?.areas ?? [];
-    const lines = areas.map(({ lines: { y1 }, name, color }) => ({ ...y1, name, color }));
+    const lines = (await this.getEsChartDebugState(selector))?.lines ?? [];
     const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
     return points.map(({ y }) => y);
   }
