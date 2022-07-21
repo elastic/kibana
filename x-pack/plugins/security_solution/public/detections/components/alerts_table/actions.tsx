@@ -521,7 +521,7 @@ const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const originalTimeValue = getField(normalizedEcsData, ALERT_ORIGINAL_TIME);
   const newTermsField = getField(normalizedEcsData, `${ALERT_RULE_PARAMETERS}.new_terms_fields`)[0];
-  const newTermsValue = getField(normalizedEcsData, `${ALERT_NEW_TERMS}`)[0];
+  const newTermsValue = getField(normalizedEcsData, ALERT_NEW_TERMS)[0];
   const newTermsFieldId = newTermsField.replace('.', '-');
   const dataProviderPartial = {
     id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${newTermsFieldId}-${newTermsValue}`,
@@ -633,16 +633,16 @@ const createNewTermsTimeline = async (
     const { toasts } = KibanaServices.get().notifications;
     toasts.addError(error, {
       toastMessage: i18n.translate(
-        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailure',
+        'xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailure',
         {
           defaultMessage: 'Failed to create timeline for document _id: {id}',
           values: { id: ecsData._id },
         }
       ),
       title: i18n.translate(
-        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle',
+        'xpack.securitySolution.detectionEngine.alerts.createNewTermsTimelineFailureTitle',
         {
-          defaultMessage: 'Failed to create theshold alert timeline',
+          defaultMessage: 'Failed to create new terms alert timeline',
         }
       ),
     });

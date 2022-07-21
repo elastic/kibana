@@ -40,6 +40,8 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  NEW_TERMS_HISTORY_WINDOW_DETAILS,
+  NEW_TERMS_FIELDS_DETAILS,
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
@@ -126,6 +128,8 @@ describe('New Terms rules', () => {
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'New Terms');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+        getDetails(NEW_TERMS_FIELDS_DETAILS).should('have.text', 'host.name');
+        getDetails(NEW_TERMS_HISTORY_WINDOW_DETAILS).should('have.text', '50000h');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
         getDetails(RUNS_EVERY_DETAILS).should(
