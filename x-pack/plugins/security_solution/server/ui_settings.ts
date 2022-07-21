@@ -146,7 +146,6 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.number(),
     },
-
     [ENABLE_GROUPED_NAVIGATION]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
         defaultMessage: 'New streamlined navigation',
@@ -164,7 +163,6 @@ export const initUiSettings = (
       requiresPageReload: false,
       schema: schema.boolean(),
     },
-
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',
