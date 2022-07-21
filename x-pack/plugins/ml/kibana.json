@@ -8,6 +8,7 @@
   ],
   "requiredPlugins": [
     "aiops",
+    "charts",
     "cloud",
     "data",
     "dataViews",
@@ -25,7 +26,6 @@
   ],
   "optionalPlugins": [
     "alerting",
-    "charts",
     "dashboard",
     "home",
     "lens",
