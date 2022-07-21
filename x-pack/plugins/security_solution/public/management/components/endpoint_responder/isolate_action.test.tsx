@@ -171,16 +171,5 @@ describe('When using isolate action from response actions console', () => {
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
     });
-
-    it('should show exit modal when action still pending', async () => {
-      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/1.2.3',
-      });
-      pendingDetailResponse.data.isCompleted = false;
-      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-      await render();
-      await consoleManagerMockAccess.openRunningConsole();
-      await consoleManagerMockAccess.hideOpenedConsole();
-    });
   });
 });

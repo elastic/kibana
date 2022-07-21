@@ -17,8 +17,7 @@ import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/136779
-describe.skip('When using the kill-process action from response actions console', () => {
+describe('When using the kill-process action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -267,17 +266,6 @@ describe.skip('When using the kill-process action from response actions console'
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
-    });
-
-    it('should show exit modal when action still pending', async () => {
-      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/1.2.3',
-      });
-      pendingDetailResponse.data.isCompleted = false;
-      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-      await render();
-      await consoleManagerMockAccess.openRunningConsole();
-      await consoleManagerMockAccess.hideOpenedConsole();
     });
   });
 });

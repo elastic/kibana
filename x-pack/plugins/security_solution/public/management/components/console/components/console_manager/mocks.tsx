@@ -75,12 +75,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
 
     hideOpenedConsole: async () => {
       userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
-      const exitModalConfirmButton = renderResult.queryByTestId('confirmModalConfirmButton');
-      if (exitModalConfirmButton) {
-        const exitModal = renderResult.getByTestId('consolePageOverlay-console-exit-modal');
-        expect(exitModal).toBeTruthy();
-        userEvent.click(exitModalConfirmButton);
-      }
+
       await waitFor(() => {
         expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
       });
