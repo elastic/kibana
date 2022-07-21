@@ -92,11 +92,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('downloading', async () => {
-        log.info(`sending download request...`);
-        await supertestUnauth
-          .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
-          .auth('test_user', 'changeme');
-        log.info(`download requests completed.`);
+        await Promise.all([
+          supertestUnauth
+            .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
+            .auth('test_user', 'changeme'),
+          supertestUnauth
+            .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
+            .auth('test_user', 'changeme'),
+          supertestUnauth
+            .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
+            .auth('test_user', 'changeme'),
+        ]);
 
         log.info(`waiting on internal stats aggregation...`);
         await waitOnAggregation();
@@ -105,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.info(`calling getUsageStats...`);
         expect(
           getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
-        ).to.be(1);
+        ).to.be(3);
       });
 
       it('deleting', async () => {
