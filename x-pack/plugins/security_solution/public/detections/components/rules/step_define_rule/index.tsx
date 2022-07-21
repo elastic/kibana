@@ -242,7 +242,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
-  const dataSourceType = formdataSourceType || initialState.dataSourceType;
+  const dataSourceType = formDataSourceType || initialState.dataSourceType;
 
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
