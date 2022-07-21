@@ -20,16 +20,16 @@ import { i18n } from '@kbn/i18n';
 import {
   PaletteRegistry,
   CustomizablePalette,
-  CUSTOM_PALETTE,
   FIXED_PROGRESSION,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
+import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams, RANGE_MIN } from './palette_config';
+import { defaultPaletteParams } from './palette_config';
 import { MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
@@ -42,7 +42,11 @@ export function MetricDimensionEditor(props: Props) {
 
   switch (accessor) {
     case state?.metricAccessor:
-      return <PrimaryMetricEditor {...props} />;
+      return (
+        <div data-test-subj="lnsMetricDimensionEditor_primary_metric">
+          <PrimaryMetricEditor {...props} />
+        </div>
+      );
     case state.secondaryMetricAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
@@ -105,6 +109,15 @@ function PrimaryMetricEditor(props: Props) {
     },
   };
 
+  const currentMinMax = getDataBoundsForPalette(
+    {
+      metric: state.metricAccessor!,
+      max: state.maxAccessor,
+      breakdownBy: state.breakdownByAccessor,
+    },
+    frame.activeData?.[state.layerId]
+  );
+
   const displayStops = applyPaletteParams(props.paletteService, activePalette, {
     min: activePalette.params?.rangeMin || DEFAULT_MIN_STOP,
     max: activePalette.params?.rangeMax || DEFAULT_MAX_STOP,
@@ -113,7 +126,7 @@ function PrimaryMetricEditor(props: Props) {
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
   return (
-    <div data-test-subj="lnsMetricDimensionEditor_primary_metric">
+    <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -127,7 +140,9 @@ function PrimaryMetricEditor(props: Props) {
         <EuiSwitch
           data-test-subj="lnsDynamicColoringMetricSwitch"
           compressed
-          label=""
+          label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+            defaultMessage: 'Color by value',
+          })}
           showLabel={false}
           checked={hasDynamicColoring}
           onChange={(e: EuiSwitchEvent) => {
@@ -156,7 +171,6 @@ function PrimaryMetricEditor(props: Props) {
       {hasDynamicColoring && (
         <>
           <EuiFormRow
-            className="lnsDynamicColoringRow"
             display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
@@ -197,18 +211,8 @@ function PrimaryMetricEditor(props: Props) {
                   <CustomizablePalette
                     palettes={props.paletteService}
                     activePalette={activePalette}
-                    dataBounds={{
-                      min: activePalette.params!.rangeMin!,
-                      max: activePalette.params!.rangeMax!,
-                    }}
+                    dataBounds={currentMinMax}
                     setPalette={(newPalette) => {
-                      if (
-                        newPalette.name !== CUSTOM_PALETTE &&
-                        newPalette.params &&
-                        newPalette.params.rangeMin !== RANGE_MIN
-                      ) {
-                        newPalette.params.rangeMin = RANGE_MIN;
-                      }
                       setState({
                         ...state,
                         palette: newPalette,
@@ -221,6 +225,6 @@ function PrimaryMetricEditor(props: Props) {
           </EuiFormRow>
         </>
       )}
-    </div>
+    </>
   );
 }

@@ -105,5 +105,21 @@ describe('dimension editor', () => {
     });
   });
 
-  // TODO - test palette picker
+  describe('primary metric dimension', () => {
+    const accessor = 'primary-metric-col-id';
+
+    it('renders when the accessor matches', () => {
+      const component = shallow(
+        <MetricDimensionEditor
+          {...props}
+          state={{ ...state, metricAccessor: accessor }}
+          accessor={accessor}
+        />
+      );
+
+      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeTruthy();
+      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
+      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+    });
+  });
 });

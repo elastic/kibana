@@ -41,6 +41,7 @@ import {
   getUiSettingsService,
 } from '../services';
 import { getCurrencyCode } from './currency_codes';
+import { getDataBoundsForPalette } from '../utils';
 
 const defaultColor = euiLightVars.euiColorDarkestShade;
 
@@ -155,26 +156,19 @@ const getColor = (
     return defaultColor;
   }
 
-  let dataMax = paletteParams.rangeMax;
-  let dataMin = paletteParams.rangeMin;
+  let minBound = paletteParams.rangeMin;
+  let maxBound = paletteParams.rangeMax;
 
   if (paletteParams.range === 'percent') {
-    dataMax = accessors.breakdownBy
-      ? accessors.max
-        ? data.rows[rowNumber][accessors.max]
-        : Math.max(...data.rows.map((row) => row[accessors.metric]))
-      : Math.max(...data.rows.map((row) => row[accessors.max!]));
-
-    dataMin =
-      accessors.breakdownBy && !accessors.max
-        ? Math.min(...data.rows.map((row) => row[accessors.metric]))
-        : 0;
+    const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
+    minBound = min;
+    maxBound = max;
   }
 
   return (
     getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-      min: dataMin,
-      max: dataMax,
+      min: minBound,
+      max: maxBound,
     }) || defaultColor
   );
 };
