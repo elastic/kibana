@@ -22,6 +22,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
+      await testSubjects.click('closeFlyoutButton');
     });
 
     it('uses preconfigured options for a new field', async () => {
