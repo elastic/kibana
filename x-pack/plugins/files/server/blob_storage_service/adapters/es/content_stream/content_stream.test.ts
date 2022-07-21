@@ -7,18 +7,27 @@
 
 import type { Logger } from '@kbn/core/server';
 import { set } from 'lodash';
+import { Readable } from 'stream';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 // TODO: use import once type declarations for the lib are fixed
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { encode } = require('cbor-x');
-
-const toBase64 = (str: string) => Buffer.from(str).toString('base64');
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: Logger;
   let stream: ContentStream;
+
+  const toReadable = (...args: unknown[]) => {
+    const chunks = [...args.map(encode), null];
+    return new Readable({
+      read() {
+        this.push(chunks.shift());
+      },
+    }) as unknown as GetResponse;
+  };
 
   const getContentStream = ({
     id = 'something',
@@ -34,7 +43,7 @@ describe('ContentStream', () => {
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
-    client.get.mockResponse(set<any>({}, '_source.data', 'some content'));
+    client.get.mockResponse(toReadable(set({}, '_source.data', Buffer.from('some content'))));
   });
 
   describe('read', () => {
@@ -54,12 +63,11 @@ describe('ContentStream', () => {
 
     it('should read the document contents', async () => {
       const data = await new Promise((resolve) => stream.once('data', resolve));
-
-      expect(data).toEqual(Buffer.from('some content', 'base64'));
+      expect(data).toEqual(Buffer.from('some content'));
     });
 
     it('should be an empty stream on empty response', async () => {
-      client.get.mockResponseOnce({} as any);
+      client.get.mockResponseOnce(toReadable());
       const onData = jest.fn();
 
       stream.on('data', onData);
@@ -79,7 +87,7 @@ describe('ContentStream', () => {
 
     it('should decode base64 encoded content', async () => {
       client.get.mockResponseOnce(
-        set<any>({}, '_source.data', Buffer.from('encoded content').toString('base64'))
+        toReadable(set({}, '_source.data', Buffer.from('encoded content')))
       );
       const data = await new Promise((resolve) => stream.once('data', resolve));
 
@@ -87,10 +95,10 @@ describe('ContentStream', () => {
     });
 
     it('should compound content from multiple chunks', async () => {
-      const [one, two, three] = ['12', '34', '56'].map(toBase64);
-      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', three));
+      const [one, two, three] = ['12', '34', '56'].map(Buffer.from);
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
 
       stream = getContentStream({
         params: { size: 6 },
@@ -115,10 +123,10 @@ describe('ContentStream', () => {
     });
 
     it('should stop reading on empty chunk', async () => {
-      const [one, two, three] = ['12', '34', ''].map(toBase64);
-      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', three));
+      const [one, two, three] = ['12', '34', ''].map(Buffer.from);
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
       stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {
@@ -129,11 +137,11 @@ describe('ContentStream', () => {
       expect(client.get).toHaveBeenCalledTimes(3);
     });
 
-    it('should read until chunks are present when there is no size', async () => {
-      const [one, two] = ['12', '34'].map(toBase64);
-      client.get.mockResponseOnce(set<any>({}, '_source.data', one));
-      client.get.mockResponseOnce(set<any>({}, '_source.data', two));
-      client.get.mockResponseOnce({} as any);
+    it('should read while chunks are present when there is no size', async () => {
+      const [one, two] = ['12', '34'].map(Buffer.from);
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable({}));
       stream = getContentStream({ params: { size: undefined } });
       let data = '';
       for await (const chunk of stream) {
@@ -145,16 +153,11 @@ describe('ContentStream', () => {
     });
 
     it('should decode every chunk separately', async () => {
-      client.get.mockResponseOnce(
-        set<any>({}, '_source.data', Buffer.from('12').toString('base64'))
-      );
-      client.get.mockResponseOnce(
-        set<any>({}, '_source.data', Buffer.from('34').toString('base64'))
-      );
-      client.get.mockResponseOnce(
-        set<any>({}, '_source.data', Buffer.from('56').toString('base64'))
-      );
-      client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
+      const [one, two, three, four] = ['12', '34', '56', ''].map(Buffer.from);
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
+      client.get.mockResponseOnce(toReadable(set({}, '_source.data', four)));
       stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {

@@ -130,8 +130,13 @@ export class ContentStream extends Duplex {
       for await (const chunk of stream as unknown as Readable) {
         chunks.push(chunk);
       }
-      const source: undefined | FileChunkDocument = cborx.decode(Buffer.concat(chunks))?._source;
-      return [(source?.data as unknown as Buffer) ?? null, source?.last];
+      const buffer = Buffer.concat(chunks);
+      const source: undefined | FileChunkDocument = buffer.byteLength
+        ? cborx.decode(Buffer.concat(chunks))?._source
+        : undefined;
+
+      const dataBuffer = source?.data as unknown as Buffer;
+      return [dataBuffer?.byteLength ? dataBuffer : null, source?.last];
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
