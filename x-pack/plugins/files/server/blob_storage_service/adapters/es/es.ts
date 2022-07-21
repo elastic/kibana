@@ -79,7 +79,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         index: this.index,
         logger: this.logger.get('content-stream-upload'),
         parameters: {
-          encoding: 'base64',
           maxChunkSize: this.chunkSize,
         },
       });
@@ -104,7 +103,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       index: this.index,
       logger: this.logger.get('content-stream-download'),
       parameters: {
-        encoding: 'base64',
         size,
       },
     });
@@ -121,9 +119,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         client: this.esClient,
         index: this.index,
         logger: this.logger.get('content-stream-delete'),
-        parameters: {
-          encoding: 'base64',
-        },
       });
       /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
       await promisify(dest.end.bind(dest, '', 'utf8'))();

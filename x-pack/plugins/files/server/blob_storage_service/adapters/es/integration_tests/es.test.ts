@@ -91,8 +91,11 @@ describe('Elasticsearch blob storage', () => {
         index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
         _source_includes: ['data', 'last'],
       },
+      {
+        headers: { accept: 'application/cbor' },
+        asStream: true,
+      },
     ]);
-    expect((await (esClient.get as sinon.SinonSpy).returnValues[0])._source.last).toBe(true);
   });
 
   it('uploads and downloads a file of many chunks', async () => {
