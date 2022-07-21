@@ -269,6 +269,10 @@
 /test/functional/services/remote @elastic/kibana-qa
 /test/visual_regression @elastic/kibana-qa
 /x-pack/test/visual_regression @elastic/kibana-qa
+/x-pack/test/stack_functional_integration @elastic/kibana-qa
+/x-pack/test/upgrade/config.ts @elastic/kibana-qa
+/test/functional/config.edge.js @elastic/kibana-qa
+/x-pack/test/functional/config.edge.js @elastic/kibana-qa
 
 # Core
 /examples/hello_world/ @elastic/kibana-core
@@ -305,6 +309,7 @@
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 #CC# /src/plugins/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
+/x-pack/test/banners_functional @elastic/kibana-core
 
 # Kibana Docs
 /packages/kbn-doc-links/ @elastic/kibana-docs
