@@ -2249,7 +2249,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"presentation\" | \"canvas\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"presentation\" | \"dashboard\" | \"canvas\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -2270,7 +2270,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"dashboard\" | \"presentation\" | \"canvas\")[] | undefined"
+                  "(\"presentation\" | \"dashboard\" | \"canvas\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -3367,7 +3367,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"dashboard\" | \"presentation\" | \"canvas\")[]"
+              "(\"presentation\" | \"dashboard\" | \"canvas\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false
@@ -3578,7 +3578,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"dashboard\" | \"presentation\" | \"canvas\""
+          "\"presentation\" | \"dashboard\" | \"canvas\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,

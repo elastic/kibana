@@ -7,7 +7,9 @@
 
 export {
   addChangePointsAction,
+  addChangePointsHistogramAction,
   errorAction,
+  resetAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';

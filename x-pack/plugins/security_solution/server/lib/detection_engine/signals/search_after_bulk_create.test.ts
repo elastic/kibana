@@ -24,8 +24,7 @@ import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from './types
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from '../rule_types/factories/bulk_create_factory';
 import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
@@ -217,6 +216,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
@@ -310,6 +310,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
@@ -385,6 +386,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -445,6 +447,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -514,6 +517,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -570,6 +574,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -639,6 +644,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
@@ -710,6 +716,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
@@ -758,6 +765,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -805,6 +813,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
@@ -930,6 +939,7 @@ describe('searchAfterAndBulkCreate', () => {
         bulkCreate,
         wrapHits,
         runtimeMappings: undefined,
+        primaryTimestamp: '@timestamp',
       });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
@@ -1015,6 +1025,7 @@ describe('searchAfterAndBulkCreate', () => {
       bulkCreate,
       wrapHits,
       runtimeMappings: undefined,
+      primaryTimestamp: '@timestamp',
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(

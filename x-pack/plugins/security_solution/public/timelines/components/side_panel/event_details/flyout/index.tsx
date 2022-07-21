@@ -26,9 +26,7 @@ export { FlyoutHeader } from './header';
 export { FlyoutFooter } from './footer';
 
 export const useToGetInternalFlyout = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const [alert, setAlert] = useState<{ id?: string; indexName?: string }>({
     id: undefined,
     indexName: undefined,
@@ -36,7 +34,6 @@ export const useToGetInternalFlyout = () => {
 
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
-      docValueFields,
       entityType: EntityType.EVENTS,
       indexName: alert.indexName ?? '',
       eventId: alert.id ?? '',

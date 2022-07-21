@@ -61,6 +61,7 @@ describe('eql_executor', () => {
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
       });
       expect(response.warningMessages.length).toEqual(1);
     });

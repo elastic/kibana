@@ -50,6 +50,7 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
@@ -65,6 +66,8 @@ import type {
   FieldBrowserProps,
   BrowserFieldItem,
 } from './application/sections/field_browser/types';
+import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -102,6 +105,7 @@ export type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   RulesListNotifyBadgeProps,
@@ -110,6 +114,7 @@ export type {
   CreateFieldComponent,
   GetFieldTableColumns,
   BrowserFieldItem,
+  RulesListVisibleColumns,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -279,6 +284,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -353,13 +359,14 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
 }
 export interface RuleDefinitionProps {
   rule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
+  filteredRuleTypes?: string[];
 }
 
 export enum Percentiles {
@@ -379,6 +386,7 @@ export interface TriggersActionsUiConfig {
 export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
+  uuid = 'kibana.alert.rule.uuid',
 }
 
 export interface FetchAlertData {
@@ -395,16 +403,9 @@ export interface FetchAlertData {
   sort: SortCombinations[];
 }
 
-export interface BulkActionsObjectProp {
-  alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: void;
-  onAlertStatusActionFailure?: void;
-}
-
 export interface AlertsTableProps {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   columns: EuiDataGridColumn[];
-  bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
@@ -412,7 +413,6 @@ export interface AlertsTableProps {
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  showCheckboxes: boolean;
   showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
@@ -432,6 +432,22 @@ export type AlertTableFlyoutComponent =
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
 
+export interface AlertsTableFlyoutBaseProps {
+  alert: EcsFieldsResponse;
+  isLoading: boolean;
+}
+
+export interface BulkActionsConfig {
+  label: string;
+  key: string;
+  'data-test-subj'?: string;
+  disableOnQuery: boolean;
+  disabledLabel?: string;
+  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+}
+
+export type UseBulkActionsRegistry = () => BulkActionsConfig[];
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -446,11 +462,29 @@ export interface AlertsTableConfigurationRegistry {
     renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
     width?: number;
   };
+  useBulkActions?: UseBulkActionsRegistry;
 }
 
-export interface AlertsTableFlyoutBaseProps {
-  alert: EcsFieldsResponse;
-  isLoading: boolean;
+export enum BulkActionsVerbs {
+  add = 'add',
+  delete = 'delete',
+  clear = 'clear',
+  selectCurrentPage = 'selectCurrentPage',
+  selectAll = 'selectAll',
+  rowCountUpdate = 'rowCountUpdate',
+}
+
+export interface BulkActionsReducerAction {
+  action: BulkActionsVerbs;
+  rowIndex?: number;
+  rowCount?: number;
+}
+
+export interface BulkActionsState {
+  rowSelection: Set<number>;
+  isAllSelected: boolean;
+  areAllVisibleRowsSelected: boolean;
+  rowCount: number;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

@@ -71,13 +71,10 @@ import {
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  createdByOrNull,
-  updatedByOrNull,
-  created_at,
-  updated_at,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  timestampOverrideFallbackDisabledOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
@@ -107,6 +104,7 @@ export const baseRuleParams = t.exact(
     severity,
     severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
+    timestampOverrideFallbackDisabled: timestampOverrideFallbackDisabledOrUndefined,
     threat: threats,
     to,
     references,
@@ -246,7 +244,6 @@ export const allRuleTypes = t.union([
   t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
-export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
 
 export const internalRuleCreate = t.type({
   name,
@@ -276,15 +273,3 @@ export const internalRuleUpdate = t.type({
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-export const internalRuleResponse = t.intersection([
-  internalRuleCreate,
-  t.type({
-    id: t.string,
-    createdBy: createdByOrNull,
-    updatedBy: updatedByOrNull,
-    createdAt: created_at,
-    updatedAt: updated_at,
-  }),
-]);
-export type InternalRuleResponse = t.TypeOf<typeof internalRuleResponse>;
