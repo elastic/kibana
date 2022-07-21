@@ -22,6 +22,7 @@ import { IndexPatternFieldEditorPlugin } from './plugin';
 
 export type {
   Field,
+  FieldFormatConfig,
   PluginSetup as IndexPatternFieldEditorSetup,
   PluginStart as IndexPatternFieldEditorStart,
 } from './types';
