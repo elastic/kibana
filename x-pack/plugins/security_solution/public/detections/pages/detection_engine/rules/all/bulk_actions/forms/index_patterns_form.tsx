@@ -161,19 +161,31 @@ const IndexPatternsFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-      <CommonUseField
-        path="overwriteDataViews"
-        componentProps={{
-          idAria: 'bulkEditRulesOverwriteRulesWithDataViews',
-          'data-test-subj': 'bulkEditRulesOverwriteRulesWithDataViews',
-        }}
-      />
+      {editAction === BulkActionEditType.add_index_patterns && (
+        <CommonUseField
+          path="overwriteDataViews"
+          componentProps={{
+            idAria: 'bulkEditRulesOverwriteRulesWithDataViews',
+            'data-test-subj': 'bulkEditRulesOverwriteRulesWithDataViews',
+          }}
+        />
+      )}
       {overwriteDataViews && (
         <EuiFormRow fullWidth>
           <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setDataViewsOverwriteWarningCallout"
               defaultMessage="If you have selected rules which depend on a data view this action will force those rules to read from the index pattern as defined after this update, not the dataview, and may result in broken rules."
+            />
+          </EuiCallOut>
+        </EuiFormRow>
+      )}
+      {editAction === BulkActionEditType.delete_index_patterns && (
+        <EuiFormRow fullWidth>
+          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesDataViewsWarning">
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPattnersDataViewsOverwriteWarningCallout"
+              defaultMessage="If you have selected rules which depend on a data view this action will not have any effect on those rules."
             />
           </EuiCallOut>
         </EuiFormRow>
