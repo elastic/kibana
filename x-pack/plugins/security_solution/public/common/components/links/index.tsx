@@ -226,8 +226,9 @@ const NetworkDetailsLinkComponent: React.FC<{
     [flowTarget, navigateToApp, search]
   );
   const getHref = useCallback(
-    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
-    [formatUrl]
+    (cIp: string) =>
+      formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search)),
+    [flowTarget, formatUrl, search]
   );
 
   const getLink = useCallback(

@@ -77,8 +77,20 @@ export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
             },
           },
           query: {
-            match_phrase: {
-              'source.ip': ipAddress,
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    'source.ip': ipAddress,
+                  },
+                },
+                {
+                  match_phrase: {
+                    'destination.ip': ipAddress,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
         },
