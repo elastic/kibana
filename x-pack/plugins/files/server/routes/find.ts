@@ -21,9 +21,9 @@ const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(s
 
 const bodySchema = schema.object({
   kind: schema.maybe(stringOrArrayOfStrings),
-  name: schema.maybe(nameStringOrArrayOfNameStrings),
-  mimeType: schema.maybe(stringOrArrayOfStrings),
   status: schema.maybe(stringOrArrayOfStrings),
+  mimeType: schema.maybe(stringOrArrayOfStrings),
+  name: schema.maybe(nameStringOrArrayOfNameStrings),
   meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
@@ -52,10 +52,10 @@ const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files }, req
   const body: Response = {
     files: await fileService.asCurrentUser().find({
       kind: kind && toArray(kind),
-      extension: extension && toArray(extension),
-      mimeType: mimeType && toArray(mimeType),
       name: name && toArray(name),
       status: status && toArray(status),
+      mimeType: mimeType && toArray(mimeType),
+      extension: extension && toArray(extension),
       meta,
       ...query,
     }),
