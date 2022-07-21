@@ -8,9 +8,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MonitorName } from './monitor_name';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
 import { getMonitorStatusAction, selectMonitorStatus } from '../../state';
+import { MonitorSelector } from './monitor_selector/monitor_selector';
 
 export const MonitorSummaryTitle = () => {
   const dispatch = useDispatch();
@@ -26,10 +26,10 @@ export const MonitorSummaryTitle = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}> {data?.monitor.name}</EuiFlexItem>
           <EuiFlexItem>
-            <MonitorName />
+            <MonitorSelector />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
