@@ -104,6 +104,7 @@ export interface IVectorStyle extends IStyle {
 
   getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
   getIconSvg(symbolId: string): string | undefined;
@@ -286,7 +287,7 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IField[],
     mapColors: string[]
   ) {
-    const originalProperties = this.getRawProperties();
+    const originalProperties = this.getPropertiesDescriptor();
     const invalidStyleNames: VECTOR_STYLES[] = (
       Object.keys(originalProperties) as VECTOR_STYLES[]
     ).filter((key) => {
@@ -446,7 +447,7 @@ export class VectorStyle implements IVectorStyle {
         )
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
-          this.getRawProperties(),
+          this.getPropertiesDescriptor(),
           false,
           styleFieldsHelper,
           mapColors
@@ -485,7 +486,7 @@ export class VectorStyle implements IVectorStyle {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ) {
-    const rawProperties = this.getRawProperties();
+    const rawProperties = this.getPropertiesDescriptor();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
       rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
@@ -537,7 +538,7 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getRawProperties(): VectorStylePropertiesDescriptor {
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor {
     return this._descriptor.properties || {};
   }
 
