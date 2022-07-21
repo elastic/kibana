@@ -53,6 +53,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('Content', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/content');
+      });
+
+      it('loads a setup guide', async function () {
+        await retry.waitFor(
+          'setup guide visible',
+          async () => await testSubjects.exists('setupGuide')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Elasticsearch', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/elasticsearch');
+      });
+
+      it('loads a setup guide', async function () {
+        await retry.waitFor(
+          'setup guide visible',
+          async () => await testSubjects.exists('elasticsearchGuide')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
     describe('App Search', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/app_search');
