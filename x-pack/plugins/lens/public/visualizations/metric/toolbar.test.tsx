@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Toolbar } from './toolbar';
 import { MetricVisualizationState } from './visualization';
 import { createMockFramePublicAPI } from '../../mocks';
 import { HTMLAttributes, ReactWrapper } from 'enzyme';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiFieldText } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { act } from 'react-dom/test-utils';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 describe('metric toolbar', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
@@ -53,8 +63,29 @@ describe('metric toolbar', () => {
       return this._wrapper.find(Toolbar);
     }
 
+    private get subtitleField() {
+      return this._wrapper.find(EuiFieldText);
+    }
+
+    private get progressDirectionControl() {
+      return this._wrapper.find(EuiButtonGroup);
+    }
+
     public get currentState() {
       return this.toolbarComponent.props().state;
+    }
+
+    public toggleOpenTextOptions() {
+      const toolbarButtons = this._wrapper.find(ToolbarButton);
+      toolbarButtons.at(0).simulate('click');
+    }
+
+    public setSubtitle(subtitle: string) {
+      act(() => {
+        this.subtitleField.props().onChange!({
+          target: { value: subtitle },
+        } as unknown as ChangeEvent<HTMLInputElement>);
+      });
     }
 
     public toggleOpenDisplayOptions() {
@@ -63,12 +94,12 @@ describe('metric toolbar', () => {
     }
 
     public setProgressDirection(direction: LayoutDirection) {
-      this._wrapper.find(EuiButtonGroup).props().onChange(direction);
+      this.progressDirectionControl.props().onChange(direction);
       this._wrapper.update();
     }
 
     public get progressDirectionDisabled() {
-      return this._wrapper.find(EuiButtonGroup).props().isDisabled;
+      return this.progressDirectionControl.find(EuiButtonGroup).props().isDisabled;
     }
 
     public setMaxCols(max: number) {
@@ -88,6 +119,24 @@ describe('metric toolbar', () => {
   });
 
   afterEach(() => mockSetState.mockClear());
+
+  describe('text options', () => {
+    it('sets a subtitle', () => {
+      harness.toggleOpenTextOptions();
+
+      const newSubtitle = 'new subtitle hey';
+      harness.setSubtitle(newSubtitle + ' 1');
+      harness.setSubtitle(newSubtitle + ' 2');
+      harness.setSubtitle(newSubtitle + ' 3');
+      expect(mockSetState.mock.calls.map(([state]) => state.subtitle)).toMatchInlineSnapshot(`
+        Array [
+          "new subtitle hey 1",
+          "new subtitle hey 2",
+          "new subtitle hey 3",
+        ]
+      `);
+    });
+  });
 
   describe('display options', () => {
     beforeEach(() => {

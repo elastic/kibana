@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -18,11 +18,25 @@ import {
 import { htmlIdGenerator } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import { VisualizationToolbarProps } from '../../types';
-import { ToolbarPopover } from '../../shared_components';
+import { ToolbarPopover, useDebouncedValue } from '../../shared_components';
 import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;
+
+  const setSubtitle = useCallback(
+    (prefix: string) => setState({ ...state, subtitle: prefix }),
+    [setState, state]
+  );
+
+  const { inputValue: subtitleInputVal, handleInputChange: handleSubtitleChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setSubtitle,
+        value: state.subtitle || '',
+      },
+      { allowFalsyValue: true }
+    );
 
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
   const idPrefix = htmlIdGenerator()();
@@ -59,13 +73,8 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
           >
             <EuiFieldText
               disabled={hasBreakdownBy}
-              value={state.subtitle}
-              onChange={(event) =>
-                setState({
-                  ...state,
-                  subtitle: event.target.value,
-                })
-              }
+              value={subtitleInputVal}
+              onChange={({ target: { value } }) => handleSubtitleChange(value)}
             />
           </EuiToolTip>
         </EuiFormRow>
