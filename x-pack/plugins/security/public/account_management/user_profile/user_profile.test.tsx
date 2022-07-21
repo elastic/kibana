@@ -186,7 +186,7 @@ describe('useUserProfileForm', () => {
 
   describe('User Avatar Form', () => {
     it('should display if the User is not a cloud user', () => {
-      const data: UserData = {};
+      const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
@@ -209,7 +209,7 @@ describe('useUserProfileForm', () => {
     });
 
     it('should not display if the User is a cloud user', () => {
-      const data: UserData = {};
+      const data: UserProfileData = {};
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
