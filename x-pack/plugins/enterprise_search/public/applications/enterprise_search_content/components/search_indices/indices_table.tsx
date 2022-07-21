@@ -159,7 +159,7 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
       }
       if (ingestionStatus === IngestionStatus.ERROR) {
         return getBadge(
-          'error',
+          'danger',
           i18n.translate(
             'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connectorError.label',
             { defaultMessage: 'Connector failure' }
@@ -168,7 +168,7 @@ const columns: Array<EuiBasicTableColumn<ViewSearchIndex>> = [
       }
       if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
         return getBadge(
-          'error',
+          'danger',
           i18n.translate(
             'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.syncError.label',
             { defaultMessage: 'Sync failure' }

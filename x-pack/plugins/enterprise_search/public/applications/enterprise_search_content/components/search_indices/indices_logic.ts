@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import moment from 'moment';
 
 import { Meta } from '../../../../../common/types';
 import { HttpError, Status } from '../../../../../common/types/api';
@@ -53,6 +54,12 @@ function getIngestionStatus(
     return IngestionStatus.CONNECTED;
   }
   if (ingestionMethod === IngestionMethod.CONNECTOR) {
+    if (
+      index.connector?.last_seen &&
+      moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
+    ) {
+      return IngestionStatus.ERROR;
+    }
     if (index.connector?.last_sync_status === SyncStatus.ERROR) {
       return IngestionStatus.SYNC_ERROR;
     }
