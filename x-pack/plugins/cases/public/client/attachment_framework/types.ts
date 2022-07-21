@@ -12,9 +12,10 @@ import {
   CommentRequestPersistableStateType,
 } from '../../../common/api';
 import { Case } from '../../containers/types';
+import { SupportedUserActionTypes } from '../../components/user_actions/types';
 
 export interface AttachmentViewObject<Props = {}> {
-  type?: EuiCommentProps['type'];
+  type?: SupportedUserActionTypes;
   timelineIcon?: EuiCommentProps['timelineIcon'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];

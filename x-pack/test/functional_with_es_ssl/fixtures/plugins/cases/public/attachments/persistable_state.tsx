@@ -59,7 +59,6 @@ export const getPersistableStateAttachmentRegular = (
   icon: 'casesApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
-    type: 'regular',
     event: 'added an embeddable',
     timelineIcon: 'casesApp',
     actions: <AttachmentActions />,
