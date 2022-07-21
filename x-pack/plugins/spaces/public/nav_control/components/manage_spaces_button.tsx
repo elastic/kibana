@@ -10,7 +10,7 @@ import type { CSSProperties } from 'react';
 import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from 'react-intl';
 
 interface Props {
   isDisabled?: boolean;

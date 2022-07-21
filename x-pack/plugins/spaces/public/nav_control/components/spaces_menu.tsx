@@ -19,14 +19,14 @@ import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/sel
 import React, { Component, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import type { InjectedIntl } from '@kbn/i18n-react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
+import { FormattedMessage, InjectedIntl } from 'react-intl';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n-react';
 
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
@@ -45,17 +45,15 @@ interface Props {
   readonly activeSpace: Space | null;
 }
 class SpacesMenuUI extends Component<Props> {
+
   public render() {
-    const spaceMenuOptions: EuiSelectableOption[] = this.getSpaceOptions();
-    const activeIndex: number | undefined = spaceMenuOptions.findIndex(
-      (f) => f.key === this.props.activeSpace?.id
-    );
+    const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
         <FormattedMessage
           id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
-          defaultMessage=" no spaces found "
+                    defaultMessage=" no spaces found "
         />
       </EuiText>
     );
@@ -91,15 +89,14 @@ class SpacesMenuUI extends Component<Props> {
               : undefined
           }
           noMatchesMessage={noSpacesMessage}
-          options={spaceMenuOptions}
+          options={spaceOptions}
           singleSelection={'always'}
           style={{ width: 300 }}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,
-            showIcons: false,
+            showIcons: true,
             onFocusBadge: false,
-            activeOptionIndex: activeIndex,
           }}
         >
           {(list, search) => (
@@ -131,7 +128,7 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        checked: undefined,
+        checked: (this.props.activeSpace?.id === space.id) ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',
       };
@@ -142,6 +139,7 @@ class SpacesMenuUI extends Component<Props> {
     newOptions: EuiSelectableOption[],
     event: EuiSelectableOnChangeEvent
   ) => {
+
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
     if (!!selectedSpaceItem) {
@@ -151,11 +149,6 @@ class SpacesMenuUI extends Component<Props> {
         ENTER_SPACE_PATH
       );
 
-      // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
-      // console.log(`**** Event Class: ${event.constructor.name}`);
-      // console.log(`**** Native Event: ${event.nativeEvent}`);
-      // console.log(`**** Event Type: ${event.type}`);
-      // console.log(`**** Event Default Prevented: ${event.defaultPrevented}`);
       let middleClick = false;
       if (event.type === 'click') {
         middleClick = (event as React.MouseEvent).button === 1;
@@ -163,16 +156,13 @@ class SpacesMenuUI extends Component<Props> {
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
-        // console.log(`**** SHIFT CLICK`);
         this.props.toggleSpaceSelector();
         window.open(urlToSelectedSpace);
       } else if (event.ctrlKey || event.metaKey || middleClick) {
         // Open in new tab - either a ctrl click or middle mouse button
-        // console.log(`**** CTRL/CMD CLICK`);
-        window.open(urlToSelectedSpace, '_blank'); // '_blank' causes new tab
+        window.open(urlToSelectedSpace, '_blank');
       } else {
         // Force full page reload (usually not a good idea, but we need to in order to change spaces)
-        // console.log(`**** NORMAL CLICK`);
         // If the selected space is already the active space, gracefully close the popover
         if (this.props.activeSpace?.id === selectedSpaceItem.key) this.props.toggleSpaceSelector();
         else this.props.navigateToUrl(urlToSelectedSpace);
