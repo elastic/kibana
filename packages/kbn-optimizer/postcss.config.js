@@ -15,7 +15,6 @@ module.exports = {
     autoprefixer(),
     cssnano({
       preset: preset({ discardComments: false }),
-      plugins: [autoprefixer],
     }),
   ],
 };
