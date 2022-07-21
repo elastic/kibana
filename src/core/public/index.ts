@@ -151,6 +151,7 @@ export type {
 } from './saved_objects';
 export type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

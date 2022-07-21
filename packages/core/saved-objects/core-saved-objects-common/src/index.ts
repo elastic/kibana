@@ -31,3 +31,5 @@ export type {
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportConflictError,
 } from './saved_objects_imports';
+
+export type { SavedObjectTypeIdTuple } from './types';

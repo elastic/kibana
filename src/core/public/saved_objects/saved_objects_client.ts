@@ -10,6 +10,7 @@ import { pick, throttle, cloneDeep } from 'lodash';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
 import type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
 } from '@kbn/core-saved-objects-common';
@@ -215,7 +216,7 @@ export interface SavedObjectsClientContract {
    * ])
    */
   bulkGet(
-    objects: Array<{ id: string; type: string }>
+    objects: SavedObjectTypeIdTuple[],
   ): Promise<SavedObjectsBatchResponse<unknown>>;
 
   /**
@@ -249,7 +250,7 @@ export interface SavedObjectsClientContract {
    * public client uses `bulkResolve` under the hood, so it behaves the same way.
    */
   bulkResolve<T = unknown>(
-    objects: Array<{ id: string; type: string }>
+    objects: SavedObjectTypeIdTuple[],
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
@@ -281,13 +282,8 @@ export interface SavedObjectsClientContract {
   ): Promise<SavedObjectsBatchResponse<T>>;
 }
 
-interface ObjectTypeAndId {
-  id: string;
-  type: string;
-}
-
-const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
-  const objects: ObjectTypeAndId[] = [];
+const getObjectsToFetch = (queue: BatchGetQueueEntry[]): SavedObjectTypeIdTuple[] => {
+  const objects: SavedObjectTypeIdTuple[] = [];
   const inserted = new Set<string>();
   queue.forEach(({ id, type }) => {
     if (!inserted.has(`${type}|${id}`)) {
@@ -300,7 +296,7 @@ const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
 
 const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
   const responseIndices: number[] = [];
-  const objectsToResolve: ObjectTypeAndId[] = [];
+  const objectsToResolve: SavedObjectTypeIdTuple[] = [];
   const inserted = new Map<string, number>();
   queue.forEach(({ id, type }) => {
     const key = `${type}|${id}`;
@@ -559,7 +555,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     });
   };
 
-  private async performBulkGet(objects: ObjectTypeAndId[]) {
+  private async performBulkGet(objects: SavedObjectTypeIdTuple[]) {
     const path = this.getPath(['_bulk_get']);
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -592,7 +588,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     };
   };
 
-  private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
+  private async performBulkResolve<T>(objects: SavedObjectTypeIdTuple[]) {
     const path = this.getPath(['_bulk_resolve']);
     const request: Promise<SavedObjectsBulkResolveResponseServer<T>> = this.savedObjectsFetch(
       path,
