@@ -16,9 +16,14 @@
 .unifiedTextLangEditor--expanded .monaco-editor .margin {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  background-color: rgb(233, 237, 243);
+  padding-top: 8px;
 }
 
-.unifiedTextLangEditor--expanded .monaco-editor .margin-view-overlays {
-  background-color: rgb(233, 237, 243);
-  padding-right: 6px;
+.unifiedTextLangEditor .monaco-editor .monaco-scrollable-element {
+  margin-top: 8px;
+}
+
+.unifiedTextLangEditor--expanded .monaco-editor .monaco-scrollable-element {
+  margin-left: 4px;
 }

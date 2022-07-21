@@ -139,7 +139,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const linesCount = editorModel.current?.getLineCount() || 1;
       if (linesCount === 1 || clickedOutside || initialRender) return;
       const editorElement = editor1.current.getDomNode();
-      const contentHeight = Math.min(MAX_COMPACT_VIEW_LENGTH, editor1.current.getContentHeight());
+      const contentHeight = Math.min(
+        MAX_COMPACT_VIEW_LENGTH,
+        editor1.current.getContentHeight() + 16
+      );
 
       if (editorElement) {
         editorElement.style.height = `${contentHeight}px`;
@@ -300,6 +303,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     accessibilitySupport: 'off',
     autoIndent: 'none',
     wrappingIndent: 'none',
+    lineNumbersMinChars: 3,
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
