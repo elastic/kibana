@@ -30,8 +30,8 @@ gpg --armor --export-secret-keys EA69DC1F612FABF267850741D2A182A7B0E00C14 > flee
 
 After generating the keys, you may want to delete them from your local keystore: 
 ```
-gpg --delete-secret-keys 80E7AFAFAD2D0DED9188C4E270210015224C4A3B
-gpg --delete-keys 80E7AFAFAD2D0DED9188C4E270210015224C4A3B
+gpg --delete-secret-keys EA69DC1F612FABF267850741D2A182A7B0E00C14
+gpg --delete-keys EA69DC1F612FABF267850741D2A182A7B0E00C14
 ```
 ## Packages folder
 
