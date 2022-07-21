@@ -276,20 +276,30 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     });
 };
 
-export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  let stepData: Omit<DefineStepRule, 'dataViewId' | 'index' | 'dataSourceType'> & {
-    index?: string[];
-    dataViewId?: string;
-  } = {
-    ...defineStepData,
-  };
-
+/**
+ * remove unused data source.
+ * Ex: rule is using a data view so we should not
+ * write an index property on the rule form.
+ * @param defineStepData
+ * @returns DefineStepRule
+ */
+export const getStepDataDataSource = (
+  defineStepData: DefineStepRule
+): Omit<DefineStepRule, 'dataViewId' | 'index' | 'dataSourceType'> & {
+  index?: string[];
+  dataViewId?: string;
+} => {
+  const copiedStepData = { ...defineStepData };
   if (defineStepData.dataSourceType === DataSourceType.DataView) {
-    stepData = omit(stepData, 'index');
+    return omit(copiedStepData, ['index', 'dataSourceType']);
   } else if (defineStepData.dataSourceType === DataSourceType.IndexPatterns) {
-    stepData = omit(stepData, 'dataViewId');
+    return omit(copiedStepData, ['dataViewId', 'dataSourceType']);
   }
-  stepData = omit(stepData, 'dataSourceType');
+  return copiedStepData;
+};
+
+export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
+  const stepData = getStepDataDataSource(defineStepData);
 
   const ruleFields = filterRuleFieldsForType(stepData, stepData.ruleType);
   const { ruleType, timeline } = ruleFields;

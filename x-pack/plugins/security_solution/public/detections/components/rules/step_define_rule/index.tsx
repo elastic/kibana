@@ -26,7 +26,6 @@ import usePrevious from 'react-use/lib/usePrevious';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import omit from 'lodash/omit';
 import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
@@ -39,7 +38,10 @@ import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_lice
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$, useKibana } from '../../../../common/lib/kibana';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
-import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
+import {
+  filterRuleFieldsForType,
+  getStepDataDataSource,
+} from '../../../pages/detection_engine/rules/create/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -652,12 +654,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
-  let dataForDescription: Partial<DefineStepRule> = { ...initialState };
+  const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
 
-  if (dataSourceType === DataSourceType.IndexPatterns) {
-    dataForDescription = omit(initialState, ['dataSourceType', 'dataViewId']);
-  } else if (dataSourceType === DataSourceType.DataView) {
-    dataForDescription = omit(initialState, ['dataSourceType', 'index']);
+  if (dataSourceType === DataSourceType.DataView) {
     dataForDescription.dataViewTitle = dataViewTitle;
   }
 
