@@ -12,8 +12,7 @@ import { getArtifactListPageRenderingSetup, getDeferred } from '../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-// FLAKY: https://github.com/elastic/kibana/issues/135794
-describe.skip('When displaying the Delete artfifact modal in the Artifact List Page', () => {
+describe('When displaying the Delete artfifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
@@ -86,7 +85,9 @@ describe.skip('When displaying the Delete artfifact modal in the Artifact List P
       expect(submitButton).toBeEnabled();
     });
 
-    deferred.resolve(); // cleanup
+    await act(async () => {
+      deferred.resolve(); // cleanup
+    });
   });
 
   it('should show success toast if deleted successfully', async () => {
