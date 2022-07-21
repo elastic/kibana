@@ -122,6 +122,10 @@ interface RuleAlertsAggs {
   error?: string;
   alertsChartData: AlertChartData[];
 }
+interface BucketAggsPerDay {
+  key_as_string: string;
+  doc_count: number;
+}
 
 export async function fetchRuleAlertsAggByTimeRange({
   http,
@@ -182,35 +186,27 @@ export async function fetchRuleAlertsAggByTimeRange({
     });
     const active = res?.aggregations?.filterAggs.buckets.alert_active?.doc_count ?? 0;
     const recovered = res?.aggregations?.filterAggs.buckets.alert_recovered?.doc_count ?? 0;
-
     const alertsChartData = [
       ...res?.aggregations?.filterAggs.buckets.alert_active.status_per_day.buckets.map(
-        (bucket) => ({
+        (bucket: BucketAggsPerDay) => ({
           date: bucket.key_as_string,
           status: 'active',
           count: bucket.doc_count,
         })
       ),
       ...res?.aggregations?.filterAggs.buckets.alert_recovered.status_per_day.buckets.map(
-        (bucket) => ({
+        (bucket: BucketAggsPerDay) => ({
           date: bucket.key_as_string,
           status: 'recovered',
           count: bucket.doc_count,
         })
       ),
     ];
-    const totalAlert =
-      [] ||
-      alertsChartData.map((entry) => ({
-        date: entry.date,
-        count: active + recovered,
-        status: 'total',
-      }));
 
     return {
       active,
       recovered,
-      alertsChartData: [...alertsChartData, ...totalAlert],
+      alertsChartData,
     };
   } catch (error) {
     return {

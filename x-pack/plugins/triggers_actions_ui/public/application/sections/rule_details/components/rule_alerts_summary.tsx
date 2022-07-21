@@ -13,6 +13,7 @@ import {
   PartialTheme,
   TooltipType,
   LIGHT_THEME,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -36,6 +37,17 @@ export interface RuleAlertsSummaryProps {
   rule: Rule;
   filteredRuleTypes: string[];
 }
+const getColorSeries = ({ seriesKeys }: XYChartSeriesIdentifier) => {
+  switch (seriesKeys[0]) {
+    case 'active':
+      return LIGHT_THEME.colors.vizColors[1];
+    case 'recovered':
+      return LIGHT_THEME.colors.vizColors[2];
+    default:
+      return null;
+  }
+};
+
 export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummaryProps) => {
   const [features, setFeatures] = useState<string>('');
   const { ruleTypes } = useLoadRuleTypes({
@@ -145,7 +157,6 @@ export { RuleAlertsSummary as default };
 interface AlertsChartProps {
   data: AlertChartData[];
 }
-const chartColor = [LIGHT_THEME.colors.vizColors[1], LIGHT_THEME.colors.vizColors[2]];
 const AlertsChart = ({ data }: AlertsChartProps) => {
   const theme: PartialTheme = {
     chartMargins: {
@@ -161,8 +172,9 @@ const AlertsChart = ({ data }: AlertsChartProps) => {
       right: 0,
     },
   };
+
   return (
-    <Chart size={['100%', '30%']}>
+    <Chart size={['100%', '35%']}>
       <Settings tooltip={TooltipType.None} theme={theme} />
       <BarSeries
         id="bars"
@@ -172,7 +184,7 @@ const AlertsChart = ({ data }: AlertsChartProps) => {
         yAccessors={['y']}
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        color={chartColor}
+        color={getColorSeries}
         data={data.map((alert) => ({
           x: alert.date,
           y: alert.count,
