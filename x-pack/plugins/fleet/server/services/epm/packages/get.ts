@@ -301,9 +301,10 @@ export async function getInstallationObject(options: {
   logger?: Logger;
 }) {
   const { savedObjectsClient, pkgName, logger } = options;
-  return savedObjectsClient
-    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-    .catch((e) => logger?.error(e) ?? undefined);
+  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
+    logger?.error(e);
+    return undefined;
+  });
 }
 
 export async function getInstallation(options: {
