@@ -54,7 +54,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
   );
 
   useEffect(() => {
-    if (!selectedDataViewNotFound && dataViewId != null && dataViewId !== '') {
+    if (!selectedDataViewNotFound && dataViewId) {
       setSelectedOption([
         { id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title },
       ]);
