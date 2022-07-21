@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
@@ -44,6 +45,7 @@ export enum AnomalyDetectionListColumns {
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
+  chartsService: ChartsPluginStart;
 }
 
 export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsService }) => {

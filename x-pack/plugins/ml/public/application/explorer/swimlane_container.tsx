@@ -34,7 +34,6 @@ import {
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
@@ -345,8 +344,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,
   });
-
-  const cursor = useObservable(chartsService.activeCursor.activeCursor$)?.cursor;
 
   const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
