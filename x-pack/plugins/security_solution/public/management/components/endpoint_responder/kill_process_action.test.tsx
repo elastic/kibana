@@ -17,7 +17,8 @@ import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
-describe('When using the kill-process action from response actions console', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/136779
+describe.skip('When using the kill-process action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -120,6 +121,24 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
+  it('should check the pid has a non-negative value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid -123');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
+  it('should check the pid is a number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid asd');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
   it('should check the entityId has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --entityId');
@@ -182,6 +201,21 @@ describe('When using the kill-process action from response actions console', () 
     });
   });
 
+  it('should show error if kill-process API fails', async () => {
+    apiMocks.responseProvider.killProcess.mockRejectedValueOnce({
+      status: 500,
+      message: 'this is an error',
+    } as never);
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessAPIErrorCallout').textContent).toMatch(
+        /this is an error/
+      );
+    });
+  });
+
   describe('and when console is closed (not terminated) and then reopened', () => {
     beforeEach(() => {
       const _render = render;
@@ -233,6 +267,17 @@ describe('When using the kill-process action from response actions console', () 
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+    });
+
+    it('should show exit modal when action still pending', async () => {
+      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+        path: '/api/endpoint/action/1.2.3',
+      });
+      pendingDetailResponse.data.isCompleted = false;
+      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+      await render();
+      await consoleManagerMockAccess.openRunningConsole();
+      await consoleManagerMockAccess.hideOpenedConsole();
     });
   });
 });
