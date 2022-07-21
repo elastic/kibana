@@ -7,7 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowEndpointResponder } from '../../../../hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -29,6 +31,13 @@ interface Options {
 }
 
 const responderCapabilitiesList = ['kill_process', 'suspend_process', 'running_processes'];
+
+const launchResponderMenuText = i18n.translate('xpack.securitySolution.endpoint.actions.console', {
+  defaultMessage: 'Launch responder',
+});
+
+// const launchResponderMenuText = <FormattedMessage id="xpack.securitySolution.endpoint.actions.console" defaultMessage="Launch responder" />
+
 /**
  * Returns a list (array) of actions for an individual endpoint
  * @param endpointMetadata
@@ -126,9 +135,7 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
-        ...(isResponseActionsConsoleEnabled &&
-        canAccessResponseConsole &&
-        isResponderCapabilitiesEnabled
+        ...(isResponseActionsConsoleEnabled && canAccessResponseConsole
           ? [
               {
                 'data-test-subj': 'console',
@@ -139,11 +146,20 @@ export const useEndpointActionItems = (
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
                 },
-                children: (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.actions.console"
-                    defaultMessage="Launch responder"
-                  />
+                children: isResponderCapabilitiesEnabled ? (
+                  launchResponderMenuText
+                ) : (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.securitySolution.endpoint.actions.disabledResponder.tooltip',
+                      {
+                        defaultMessage:
+                          'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
+                      }
+                    )}
+                  >
+                    <p>{launchResponderMenuText}</p>
+                  </EuiToolTip>
                 ),
                 toolTipContent: !isResponderCapabilitiesEnabled
                   ? UPGRADE_ENDPOINT_FOR_RESPONDER
