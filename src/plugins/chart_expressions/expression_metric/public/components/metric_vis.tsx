@@ -30,6 +30,7 @@ import {
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { VisParams } from '../../common';
@@ -72,7 +73,7 @@ const getBytesUnit = (value: number) => {
   return { value, unit };
 };
 
-const getFormatter = (
+const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
@@ -192,18 +193,23 @@ const MetricVisComponent = ({
   renderMode,
 }: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
-  const formatPrimaryMetric = getFormatter(config.dimensions.metric, data.columns);
+  const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
   let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getFormatter>;
+  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
   if (config.dimensions.secondaryMetric) {
     secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getFormatter(config.dimensions.secondaryMetric, data.columns);
+    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
   }
 
-  const breakdownByColumn = config.dimensions.breakdownBy
-    ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
-    : undefined;
+  let breakdownByColumn: DatatableColumn | undefined;
+  let formatBreakdownValue: FieldFormatConvertFunction;
+  if (config.dimensions.breakdownBy) {
+    breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
+    formatBreakdownValue = getFormatService()
+      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
+      .getConverterFor('text');
+  }
 
   let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
 
@@ -221,7 +227,9 @@ const MetricVisComponent = ({
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
     const value = row[primaryMetricColumn.id];
-    const title = breakdownByColumn ? row[breakdownByColumn.id] : primaryMetricColumn.name;
+    const title = breakdownByColumn
+      ? formatBreakdownValue(row[breakdownByColumn.id])
+      : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
     return {
       value,

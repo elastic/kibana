@@ -18,9 +18,13 @@ import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
 
-const mockDeserialize = jest.fn(() => ({
-  getConverterFor: jest.fn(() => () => 'formatted duration'),
-}));
+const mockDeserialize = jest.fn((params) => {
+  const converter =
+    params.id === 'terms'
+      ? (val: string) => (val === '__other__' ? 'Other' : val)
+      : () => 'formatted duration';
+  return { getConverterFor: jest.fn(() => converter) };
+});
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
 
@@ -189,7 +193,7 @@ const table: Datatable = {
       [minPriceColumnId]: 13.34375,
     },
     {
-      [dayOfWeekColumnId]: 'Monday',
+      [dayOfWeekColumnId]: '__other__',
       [basePriceColumnId]: 24.984375,
       [minPriceColumnId]: 13.242513020833334,
     },
@@ -197,6 +201,10 @@ const table: Datatable = {
 };
 
 describe('MetricVisComponent', function () {
+  afterEach(() => {
+    mockDeserialize.mockClear();
+  });
+
   describe('single metric', () => {
     const config: Props['config'] = {
       metric: {
@@ -585,7 +593,7 @@ describe('MetricVisComponent', function () {
               "color": "#343741",
               "extra": <span />,
               "subtitle": "Median products.base_price",
-              "title": "Monday",
+              "title": "Other",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
@@ -680,7 +688,7 @@ describe('MetricVisComponent', function () {
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Monday",
+              "title": "Other",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
