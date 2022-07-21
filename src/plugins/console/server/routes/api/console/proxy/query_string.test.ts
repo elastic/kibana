@@ -39,7 +39,7 @@ describe('Console Proxy Route', () => {
   describe('query string', () => {
     describe('path', () => {
       describe('contains full url', () => {
-        it('treats the url as a path', async () => {
+        it.skip('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
           expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;

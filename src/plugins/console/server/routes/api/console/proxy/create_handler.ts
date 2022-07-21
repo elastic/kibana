@@ -27,15 +27,16 @@ import {
 import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
+import { encodePath } from '../../../../lib/utils';
 
-function toURL(base: string, path: string) {
-  const [p, query = ''] = path.split('?');
+export function toURL(base: string, path: string) {
+  const [pathname, query = ''] = path.split('?');
 
   // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
   // node url encodes it as a whitespace which results in a faulty request
   // we need to replace '+' with '%2b' to encode it correctly
   if (/\+/g.test(query)) {
-    path = `${p}?${query.replace(/\+/g, '%2b')}`;
+    path = `${pathname}?${query.replace(/\+/g, '%2b')}`;
   }
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
@@ -44,6 +45,8 @@ function toURL(base: string, path: string) {
   if (!urlResult.searchParams.get('pretty')) {
     urlResult.searchParams.append('pretty', 'true');
   }
+
+  urlResult.pathname = encodePath(pathname);
   return urlResult;
 }
 
@@ -145,10 +148,6 @@ export const createHandler =
       const host = hosts[idx];
       try {
         const uri = toURL(host, path);
-        // Invalid URL characters included in uri pathname will be percent-encoded by Node URL method, and results in a faulty request in some cases.
-        // To fix this issue, we need to extract the original request path and supply it to proxyRequest function to encode it correctly with encodeURIComponent.
-        // We ignore the search params here, since we are extracting them from the uri constructed by Node URL method.
-        const [requestPath] = path.split('?');
 
         // Because this can technically be provided by a settings-defined proxy config, we need to
         // preserve these property names to maintain BWC.
@@ -178,7 +177,6 @@ export const createHandler =
           payload: body,
           rejectUnauthorized,
           agent,
-          requestPath,
         });
 
         break;
