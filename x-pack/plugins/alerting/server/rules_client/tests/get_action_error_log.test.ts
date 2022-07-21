@@ -358,7 +358,13 @@ const getActionErrorLogParams = (overwrites = {}) => {
     dateStart: new Date(Date.now() - 3600000).toISOString(),
     page: 1,
     perPage: 10,
-    sort: [{ sort_field: '@timestamp', sort_order: 'asc' }] as GetActionErrorLogByIdParams['sort'],
+    sort: [
+      {
+        '@timestamp': {
+          order: 'asc',
+        },
+      },
+    ] as GetActionErrorLogByIdParams['sort'],
     ...overwrites,
   };
 };

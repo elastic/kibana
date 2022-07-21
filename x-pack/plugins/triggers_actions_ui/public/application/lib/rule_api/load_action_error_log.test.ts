@@ -98,7 +98,13 @@ describe('loadActionErrorLog', () => {
       message: 'test',
       perPage: 10,
       page: 0,
-      sort: [{ sort_field: 'timestamp', sort_order: 'asc' }],
+      sort: [
+        {
+          timestamp: {
+            order: 'asc',
+          },
+        },
+      ],
       http,
     });
 
@@ -114,7 +120,7 @@ describe('loadActionErrorLog', () => {
             "filter": "kibana.alert.rule.execution.uuid: 123 and message: \\"test\\"",
             "page": 1,
             "per_page": 10,
-            "sort": "[{\\"sort_field\\":\\"@timestamp\\",\\"sort_order\\":\\"asc\\"}]",
+            "sort": "[{\\"@timestamp\\":{\\"order\\":\\"asc\\"}}]",
           },
         },
       ]
