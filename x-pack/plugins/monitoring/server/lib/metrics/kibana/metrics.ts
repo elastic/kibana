@@ -289,6 +289,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
     derivative: true,
@@ -307,6 +308,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_instance_action_failures: new KibanaInstanceActionMetric({
     derivative: true,
@@ -325,6 +327,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_instance_action_executions: new KibanaInstanceActionMetric({
     derivative: true,
@@ -343,6 +346,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
 
   kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
@@ -360,6 +364,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
     title: ruleQueueDurationTitle,
@@ -377,6 +382,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
     title: ruleQueueDurationTitle,
@@ -413,6 +419,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
     title: actionQueueDurationTitle,
@@ -430,6 +437,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
     title: actionQueueDurationTitle,
@@ -447,5 +455,6 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
+    technicalPreview: true,
   }),
 };
