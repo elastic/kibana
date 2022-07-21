@@ -51,9 +51,15 @@ export const SearchIndexOverview: React.FC = () => {
           }
         />
       )}
-      {isApi && <GenerateApiKeyPanel />}
+      {isApi && (
+        <>
+          <EuiSpacer />
+          <GenerateApiKeyPanel />
+        </>
+      )}
       {isCrawler && (
         <>
+          <EuiSpacer />
           <CrawlRequestsPanel />
           <CrawlDetailsFlyout />
         </>
