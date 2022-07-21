@@ -13,13 +13,14 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { File, FileSavedObjectAttributes } from '../../common';
+import type { File, FileJSON, FileSavedObjectAttributes } from '../../common';
 import { fileObjectType, fileShareObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import {
   CreateFileArgs,
   FindFileArgs,
+  GetByIdArgs,
   InternalFileService,
   ListFilesArgs,
   UpdateFileArgs,
@@ -70,8 +71,11 @@ export class FileServiceFactory {
       async delete(args) {
         return internalFileService.deleteFile(args);
       },
+      async getById<M>(args: GetByIdArgs) {
+        return internalFileService.getById(args) as Promise<File<M>>;
+      },
       async find<M>(args: FindFileArgs) {
-        return internalFileService.find(args) as Promise<File<M>>;
+        return internalFileService.findFilesJSON(args) as Promise<Array<FileJSON<M>>>;
       },
       async list<M>(args: ListFilesArgs) {
         return internalFileService.list(args) as Promise<Array<File<M>>>;

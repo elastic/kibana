@@ -38,6 +38,10 @@ export const FILE_KIND_API_ROUTES_CLIENT = {
   getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
 };
 
+export const FILES_API_ROUTES = {
+  find: `${FILES_API_BASE_PATH}/find`,
+};
+
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
   Q = unknown,
@@ -52,19 +56,19 @@ export interface HttpApiInterfaceEntryDefinition<
   output: R;
 }
 
-export type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type CreateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   unknown,
   {
     name: string;
     alt?: string;
     meta?: Record<string, unknown>;
-    mime?: string;
+    mimeType?: string;
   },
   { file: FileJSON }
 >;
 
-export type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DeleteFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -73,7 +77,7 @@ export type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { ok: true }
 >;
 
-export type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DownloadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
     fileName?: string;
@@ -84,7 +88,7 @@ export type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   any
 >;
 
-export type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type GetByIdFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -93,23 +97,60 @@ export type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-export type ListHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type ListFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   { page?: number; perPage?: number },
   unknown,
   { files: FileJSON[] }
 >;
 
-export type UpdateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   { name?: string; alt?: string; meta?: Record<string, unknown> },
   { file: FileJSON }
 >;
 
-export type UploadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   any,
   { ok: true }
+>;
+
+export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  { perPage?: number; page?: number },
+  {
+    /**
+     * Filter for set of file-kinds
+     */
+    kind?: string[];
+
+    /**
+     * Filter for match on names
+     */
+    name?: string[];
+
+    /**
+     * Filter for set of meta attributes matching this object
+     */
+    meta: {};
+
+    /**
+     * Filter for exact match on MIME types
+     */
+    mimeType?: string[];
+
+    /**
+     * Filter for match on extensions
+     */
+    extension?: string[];
+
+    /**
+     * Filter for match on extensions
+     */
+    status?: string[];
+  },
+  { files: FileJSON[] }
 >;

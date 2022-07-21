@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { File } from '../../common';
+import { File, FileJSON } from '../../common';
 import { FileShareServiceStart } from '../file_share_service/types';
 import {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
-  FindFileArgs,
+  GetByIdArgs,
   ListFilesArgs,
+  FindFileArgs,
 } from './internal_file_service';
 
 /**
@@ -37,9 +38,14 @@ export interface FileServiceStart {
   delete(args: DeleteFileArgs): Promise<void>;
 
   /**
-   * Find a file. Will throw if file cannot be found.
+   * Get a file by ID. Will throw if file cannot be found.
    */
-  find<M>(args: FindFileArgs): Promise<File<M>>;
+  getById<M>(args: GetByIdArgs): Promise<File<M>>;
+
+  /**
+   * Find files given a set of parameters.
+   */
+  find<M>(args: FindFileArgs): Promise<Array<FileJSON<M>>>;
 
   /**
    * List all files of specific file kind.
