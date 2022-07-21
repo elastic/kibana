@@ -40,6 +40,7 @@ import {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 const chance = new Chance();
 
@@ -74,15 +75,27 @@ describe('Cloud Security Posture Plugin', () => {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),
       taskManager: taskManagerMock.createStart(),
+      security: securityMock.createStart(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
     const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
     findMock.mockReturnValue(
       Promise.resolve({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
+        saved_objects: [
+          {
+            type: 'csp_rule',
+            attributes: {
+              enabled: false,
+              metadata: {
+                rego_rule_id: 'cis_1_1_1',
+                benchmark: { id: 'cis_k8s' },
+              },
+            },
+          },
+        ],
+        total: 1,
+        per_page: 10,
         page: 1,
       })
     );
@@ -293,6 +306,9 @@ describe('Cloud Security Posture Plugin', () => {
             {
               type: 'csp-rule-template',
               id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+              benchmark: {
+                id: 'cis_k8s',
+              },
             },
           ],
         })

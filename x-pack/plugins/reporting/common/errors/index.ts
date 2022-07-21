@@ -6,8 +6,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
 import { i18n } from '@kbn/i18n';
+
 export abstract class ReportingError extends Error {
   /**
    * A string that uniquely brands an error type. This is used to power telemetry
@@ -40,6 +40,16 @@ export class InvalidLayoutParametersError extends ReportingError {
   static code = 'invalid_layout_parameters_error' as const;
   public get code() {
     return InvalidLayoutParametersError.code;
+  }
+}
+
+/**
+ * While loading requests in the Kibana app, a URL was encountered that the network policy did not allow.
+ */
+export class DisallowedOutgoingUrl extends ReportingError {
+  static code = 'disallowed_outgoing_url_error' as const;
+  public get code() {
+    return DisallowedOutgoingUrl.code;
   }
 }
 

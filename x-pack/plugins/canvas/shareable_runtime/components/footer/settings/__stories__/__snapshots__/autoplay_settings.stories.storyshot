@@ -70,7 +70,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-l0kn38-euiHorizontalRule-full-m"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -239,7 +239,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-l0kn38-euiHorizontalRule-full-m"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -408,7 +408,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-l0kn38-euiHorizontalRule-full-m"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}

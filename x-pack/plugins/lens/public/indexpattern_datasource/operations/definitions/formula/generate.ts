@@ -55,6 +55,9 @@ export function generateFormula(
   } else {
     if (previousColumn && 'sourceField' in previousColumn && previousColumn.dataType === 'number') {
       previousFormula += `${previousColumn.operationType}(${getSafeFieldName(previousColumn)}`;
+    } else {
+      // couldn't find formula function to call, exit early because adding args is going to fail anyway
+      return '';
     }
   }
   const formulaNamedArgs = extractParamsForFormula(previousColumn, operationDefinitionMap);

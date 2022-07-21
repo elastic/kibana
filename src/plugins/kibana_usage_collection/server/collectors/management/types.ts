@@ -49,7 +49,6 @@ export interface UsageStats {
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
-  'timelion:legacyChartsLibrary': boolean;
   'timelion:target_buckets': number;
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
@@ -74,6 +73,7 @@ export interface UsageStats {
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:sampleRowsPerPage': number;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];

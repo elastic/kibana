@@ -53,7 +53,8 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const errors = await syntheticsService.triggerConfigs(request, [
       formatHeartbeatRequest({
-        monitor: normalizedMonitor.attributes,
+        // making it enabled, even if it's disabled in the UI
+        monitor: { ...normalizedMonitor.attributes, enabled: true },
         monitorId,
         customHeartbeatId: (normalizedMonitor.attributes as MonitorFields)[
           ConfigKey.CUSTOM_HEARTBEAT_ID

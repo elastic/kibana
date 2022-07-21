@@ -48,7 +48,11 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({ sourceData }) => {
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
+      <AddSourceHeader
+        name={name}
+        serviceType={baseServiceType ?? serviceType}
+        categories={categories}
+      />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup>
         <EuiFlexItem>

@@ -17,7 +17,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Inbox Forwarding Rule Created",
   "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and\nevent.category:web and event.action:\"New-InboxRule\" and\n    (\n        o365audit.Parameters.ForwardTo:* or\n        o365audit.Parameters.ForwardAsAttachmentTo:* or\n        o365audit.Parameters.RedirectTo:*\n    ) \n    and event.outcome:success\n",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and\nevent.category:web and event.action:\"New-InboxRule\" and\n    (\n        o365.audit.Parameters.ForwardTo:* or\n        o365.audit.Parameters.ForwardAsAttachmentTo:* or\n        o365.audit.Parameters.RedirectTo:*\n    ) \n    and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/responding-to-a-compromised-email-account?view=o365-worldwide",
     "https://docs.microsoft.com/en-us/powershell/module/exchange/new-inboxrule?view=exchange-ps",
@@ -61,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

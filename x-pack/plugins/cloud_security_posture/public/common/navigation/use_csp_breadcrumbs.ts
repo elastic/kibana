@@ -9,8 +9,11 @@ import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import { string } from 'io-ts';
+import { i18n } from '@kbn/i18n';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '../..';
 import type { CspNavigationItem } from './types';
-import { CLOUD_POSTURE } from './translations';
 
 const getClickableBreadcrumb = (
   routeMatch: RouteProps['path'],
@@ -27,7 +30,7 @@ const getClickableBreadcrumb = (
 export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   const {
     services: {
-      chrome: { setBreadcrumbs },
+      chrome: { setBreadcrumbs, docTitle },
       application: { getUrlForApp },
     },
   } = useKibana<CoreStart>();
@@ -49,15 +52,23 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
       };
     });
 
-    setBreadcrumbs([
+    const nextBreadcrumbs = [
       {
-        text: CLOUD_POSTURE,
-        onClick: (e) => {
+        text: i18n.translate('xpack.csp.navigation.cloudPostureBreadcrumbLabel', {
+          defaultMessage: 'Cloud Posture',
+        }),
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          history.push(`/`);
+          history.push(CLOUD_SECURITY_POSTURE_BASE_PATH);
         },
       },
       ...additionalBreadCrumbs,
-    ]);
-  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history]);
+    ];
+
+    setBreadcrumbs(nextBreadcrumbs);
+    docTitle.change(getTextBreadcrumbs(nextBreadcrumbs));
+  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history, docTitle]);
 };
+
+const getTextBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) =>
+  breadcrumbs.map((breadcrumb) => breadcrumb.text).filter(string.is);

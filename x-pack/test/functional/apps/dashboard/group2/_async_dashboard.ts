@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await appMenu.clickLink('Discover');
-      await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
+      await PageObjects.discover.selectIndexPattern('Kibana Sample Data Flights');
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
       await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);

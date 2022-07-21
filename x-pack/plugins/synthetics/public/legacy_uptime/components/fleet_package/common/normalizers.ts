@@ -6,6 +6,7 @@
  */
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { parseJsonIfString } from '../helpers/parsers';
 import { CommonFields, ConfigKey, DataStream } from '../types';
 import {
   DEFAULT_COMMON_FIELDS,
@@ -27,7 +28,8 @@ export type CommonNormalizerMap = Record<keyof CommonFields | ConfigKey.NAME, No
 export const cronToSecondsNormalizer = (value: string) =>
   value ? value.slice(0, value.length - 1) : null;
 
-export const jsonToJavascriptNormalizer = (value: string) => (value ? JSON.parse(value) : null);
+export const jsonToJavascriptNormalizer = (value: string) =>
+  value ? parseJsonIfString(value) : null;
 
 export function getNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
   return (fields: NewPackagePolicyInput['vars']) =>

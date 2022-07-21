@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { UsersQueryProps } from '../types';
-import { NavTab } from '../../../common/components/navigation/types';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { UsersQueryProps } from '../types';
+import type { NavTab } from '../../../common/components/navigation/types';
 
-import { DocValueFields } from '../../../common/containers/source';
-
-import { UsersTableType } from '../../store/model';
-import { usersModel } from '../../store';
+import type { UsersTableType } from '../../store/model';
+import type { usersModel } from '../../store';
 
 interface UsersDetailsComponentReduxProps {
   query: Query;
@@ -58,7 +56,6 @@ export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;

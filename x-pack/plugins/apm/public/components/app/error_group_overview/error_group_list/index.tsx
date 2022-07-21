@@ -55,13 +55,15 @@ const Culprit = euiStyled.div`
 type ErrorGroupItem =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
   mainStatistics: ErrorGroupItem[];
   serviceName: string;
   detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
+  initialSortField: string;
+  initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
 }
 
@@ -71,6 +73,8 @@ function ErrorGroupList({
   detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
+  initialSortField,
+  initialSortDirection,
 }: Props) {
   const { query } = useApmParams('/services/{serviceName}/errors');
   const { offset } = query;
@@ -251,8 +255,8 @@ function ErrorGroupList({
       })}
       items={mainStatistics}
       columns={columns}
-      initialSortField="occurrences"
-      initialSortDirection="desc"
+      initialSortField={initialSortField}
+      initialSortDirection={initialSortDirection}
       sortItems={false}
     />
   );

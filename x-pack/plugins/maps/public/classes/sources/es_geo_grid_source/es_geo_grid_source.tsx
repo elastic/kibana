@@ -13,6 +13,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -30,16 +31,18 @@ import {
 } from '../../../../common/constants';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
+import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
+  TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
@@ -521,6 +524,35 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return (await this._isGeoShape()) ? [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE] : [];
+  }
+
+  getFeatureActions({
+    addFilters,
+    featureId,
+    geoFieldNames,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    if (geoFieldNames.length === 0 || addFilters === null) {
+      return [];
+    }
+
+    return [
+      {
+        label: i18n.translate('xpack.maps.tooltip.action.filterByClusterLabel', {
+          defaultMessage: 'Filter by cluster',
+        }),
+        id: 'FILTER_BY_CLUSTER_ACTION',
+        onClick: () => {
+          const geoGridFilter = buildGeoGridFilter({
+            geoFieldNames,
+            gridId: featureId, // featureId is grid id for ES_GEO_GRID source
+            isHex: this._descriptor.requestType === RENDER_AS.HEX,
+          });
+          addFilters([geoGridFilter], ACTION_GLOBAL_APPLY_FILTER);
+          onClose();
+        },
+      },
+    ];
   }
 }
 

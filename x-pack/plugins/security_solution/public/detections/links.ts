@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ALERTS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import { ALERTS } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.alerts,
@@ -15,10 +15,10 @@ export const links: LinkItem = {
   path: ALERTS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalNavEnabled: true,
+  globalNavOrder: 2,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alerts', {
       defaultMessage: 'Alerts',
     }),
   ],
-  globalNavOrder: 9001,
 };

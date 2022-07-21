@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { TakeActionDropdown, TakeActionDropdownProps } from '.';
+import type { TakeActionDropdownProps } from '.';
+import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -24,15 +26,16 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../response_actions_console/response_actions_console_context_menu_item';
+} from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
 } from '../../../common/utils/endpoint_alert_check';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { allCasesPermissions } from '../../../cases_test_utils';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -41,7 +44,7 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue({ crud: true });
+(useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -59,7 +62,11 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
 }));
 
 jest.mock('../../../common/utils/endpoint_alert_check', () => {
+  const realEndpointAlertCheckUtils = jest.requireActual(
+    '../../../common/utils/endpoint_alert_check'
+  );
   return {
+    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
     isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
     isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
   };
@@ -426,6 +433,13 @@ describe('take action dropdown', () => {
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
         });
+        render();
+
+        expect(findLaunchResponderButton()).toHaveLength(0);
+      });
+
+      it('should not display the button for Events', async () => {
+        setAlertDetailsDataMockToEvent();
         render();
 
         expect(findLaunchResponderButton()).toHaveLength(0);

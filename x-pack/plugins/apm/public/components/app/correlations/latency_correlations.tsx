@@ -34,7 +34,7 @@ import { FieldStats } from '../../../../common/correlations/field_stats_types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -49,8 +49,9 @@ import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -347,11 +348,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <EuiSpacer size="s" />
 
-      <TransactionDistributionChart
+      <DurationDistributionChart
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
+        eventType={ProcessorEvent.transaction}
       />
 
       <EuiSpacer size="s" />

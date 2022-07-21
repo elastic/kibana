@@ -40,9 +40,9 @@ describe('ConnectInstance', () => {
     redirectFormCreated();
   });
 
-  const credentialsSourceData = staticSourceData[16]; // service_now
+  const credentialsSourceData = staticSourceData[15]; // service_now
   const oauthSourceData = staticSourceData[0]; // box
-  const subdomainSourceData = staticSourceData[22]; // zendesk
+  const subdomainSourceData = staticSourceData[20]; // zendesk
 
   const props = {
     ...credentialsSourceData,

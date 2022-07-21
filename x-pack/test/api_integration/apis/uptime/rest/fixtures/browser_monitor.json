@@ -43,5 +43,7 @@
   "locations": [],
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
-  "origin": "ui"
+  "origin": "ui",
+  "urls": null,
+  "url.port": null
 }

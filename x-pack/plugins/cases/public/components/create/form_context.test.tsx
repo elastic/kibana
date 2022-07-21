@@ -15,7 +15,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
@@ -42,6 +41,7 @@ import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
 import { CaseAttachments } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
 
 const sampleId = 'case-id';
 
@@ -130,7 +130,7 @@ const fillFormReactTestingLib = async (renderResult: RenderResult) => {
 };
 
 describe('Create case', () => {
-  const fetchTags = jest.fn();
+  const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
@@ -159,8 +159,8 @@ describe('Create case', () => {
     );
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
-      tags: sampleTags,
-      fetchTags,
+      data: sampleTags,
+      refetch,
     }));
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',

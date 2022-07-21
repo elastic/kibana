@@ -6,9 +6,9 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
-import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import type { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
+import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
 
@@ -158,6 +158,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
+  timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
 });
@@ -193,6 +194,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   anomalyThreshold: 50,
   machineLearningJobId: [],
   index: ['filebeat-'],
+  dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
   requiredFields: [],

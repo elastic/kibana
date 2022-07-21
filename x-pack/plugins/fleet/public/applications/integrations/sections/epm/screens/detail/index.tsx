@@ -10,7 +10,6 @@ import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'rea
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
@@ -45,11 +44,11 @@ import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
-import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
+
+import { HeaderReleaseBadge } from '../../components/release_badge';
 
 import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
-
 import {
   IntegrationAgentPolicyCount,
   UpdateIcon,
@@ -128,6 +127,13 @@ export function Detail() {
     }
     return getPackageInstallStatus(packageInfo.name).status;
   }, [packageInfo, getPackageInstallStatus]);
+
+  const isInstalled = useMemo(
+    () =>
+      packageInstallStatus === InstallStatus.installed ||
+      packageInstallStatus === InstallStatus.reinstalling,
+    [packageInstallStatus]
+  );
 
   const updateAvailable =
     packageInfo &&
@@ -234,16 +240,16 @@ export function Detail() {
                 />
               )}
             </FlexItemWithMaxHeight>
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <FlexItemWithMinWidth grow={true}>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText>
-                        {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                        <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                      </EuiText>
-                    </EuiFlexItem>
+            <FlexItemWithMinWidth grow={true}>
+              <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="default">
                         {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
@@ -251,18 +257,15 @@ export function Detail() {
                         })}
                       </EuiBadge>
                     </EuiFlexItem>
+                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      <EuiFlexItem grow={false}>
+                        <HeaderReleaseBadge release={packageInfo.release} />
+                      </EuiFlexItem>
+                    ) : null}
                   </EuiFlexGroup>
-                </FlexItemWithMinWidth>
-                {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={RELEASE_BADGE_LABEL[packageInfo.release]}
-                      tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
+            </FlexItemWithMinWidth>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -330,7 +333,7 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
-              ...(packageInstallStatus === 'installed'
+              ...(isInstalled
                 ? [
                     { isDivider: true },
                     {
@@ -380,15 +383,15 @@ export function Detail() {
     [
       packageInfo,
       updateAvailable,
-      packageInstallStatus,
+      isInstalled,
       userCanInstallPackages,
       getHref,
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      handleAddIntegrationPolicyClick,
       missingSecurityConfiguration,
       integrationInfo?.title,
+      handleAddIntegrationPolicyClick,
     ]
   );
 
@@ -416,7 +419,7 @@ export function Detail() {
       },
     ];
 
-    if (canReadIntegrationPolicies && packageInstallStatus === InstallStatus.installed) {
+    if (canReadIntegrationPolicies && isInstalled) {
       tabs.push({
         id: 'policies',
         name: (
@@ -434,7 +437,7 @@ export function Detail() {
       });
     }
 
-    if (packageInstallStatus === InstallStatus.installed && (packageInfo.assets || CustomAssets)) {
+    if (isInstalled && (packageInfo.assets || CustomAssets)) {
       tabs.push({
         id: 'assets',
         name: (
@@ -495,9 +498,9 @@ export function Detail() {
     getHref,
     integration,
     canReadIntegrationPolicies,
-    canReadPackageSettings,
-    packageInstallStatus,
+    isInstalled,
     CustomAssets,
+    canReadPackageSettings,
     showCustomTab,
   ]);
 

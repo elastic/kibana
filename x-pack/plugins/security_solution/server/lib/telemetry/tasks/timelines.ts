@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import { SafeEndpointEvent } from '../../../../common/endpoint/types';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
+import type { Logger } from '@kbn/core/server';
+import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type {
   ESClusterInfo,
@@ -101,6 +101,12 @@ export function createTelemetryTimelineTaskConfig() {
           nodeIds.push(nodeId);
         }
 
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_node_count',
+          incrementBy: nodeIds.length,
+        });
+
         // Fetch event lineage
 
         const timelineEvents = await receiver.fetchTimelineEvents(nodeIds);
@@ -114,6 +120,12 @@ export function createTelemetryTimelineTaskConfig() {
             if (entityId !== null && entityId !== undefined) eventsStore.set(entityId, doc);
           }
         }
+
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_event_count',
+          incrementBy: eventsStore.size,
+        });
 
         // Create telemetry record
 
@@ -130,19 +142,23 @@ export function createTelemetryTimelineTaskConfig() {
           telemetryTimeline.push(timelineTelemetryEvent);
         }
 
-        const record: TimelineTelemetryTemplate = {
-          '@timestamp': moment().toISOString(),
-          ...baseDocument,
-          alert_id: alertUUID,
-          event_id: eventId,
-          timeline: telemetryTimeline,
-        };
+        if (telemetryTimeline.length >= 1) {
+          const record: TimelineTelemetryTemplate = {
+            '@timestamp': moment().toISOString(),
+            ...baseDocument,
+            alert_id: alertUUID,
+            event_id: eventId,
+            timeline: telemetryTimeline,
+          };
 
-        sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
-        counter += 1;
+          sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
+          counter += 1;
+        } else {
+          logger.debug('no events in timeline');
+        }
       }
 
-      logger.debug(`sent ${counter} timelines. exiting telemetry task.`);
+      logger.debug(`sent ${counter} timelines. concluding timeline task.`);
       return counter;
     },
   };

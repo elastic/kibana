@@ -8,168 +8,141 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import JiraConnectorFields from './jira_connectors';
-import { JiraActionConnector } from './types';
+import { ConnectorFormTestProvider } from '../test_utils';
+import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
-  test('alerting Jira connector fields are rendered', () => {
+  test('Jira connector fields are rendered', () => {
     const actionConnector = {
+      actionTypeId: '.jira',
+      name: 'jira',
+      config: {
+        apiUrl: 'https://test.com',
+        projectKey: 'CK',
+      },
       secrets: {
         email: 'email',
         apiToken: 'token',
       },
-      id: 'test',
-      actionTypeId: '.jira',
-      isPreconfigured: false,
       isDeprecated: false,
-      name: 'jira',
-      config: {
-        apiUrl: 'https://test/',
-        projectKey: 'CK',
-      },
-    } as JiraActionConnector;
+    };
+
     const wrapper = mountWithIntl(
-      <JiraConnectorFields
-        action={actionConnector}
-        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <JiraConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-project-key-form-input"]').length > 0
-    ).toBeTruthy();
-
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-email-form-input"]').length > 0
-    ).toBeTruthy();
-
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-apiToken-form-input"]').length > 0
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="config.apiUrl-input"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="config.projectKey-input"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="secrets.email-input"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="secrets.apiToken-input"]').length > 0).toBeTruthy();
   });
 
-  test('case specific Jira connector fields is rendered', () => {
-    const actionConnector = {
-      secrets: {
-        email: 'email',
-        apiToken: 'token',
-      },
-      id: 'test',
-      actionTypeId: '.jira',
-      isPreconfigured: false,
-      isDeprecated: false,
-      name: 'jira',
-      config: {
-        apiUrl: 'https://test/',
-        projectKey: 'CK',
-      },
-    } as JiraActionConnector;
-    const wrapper = mountWithIntl(
-      <JiraConnectorFields
-        action={actionConnector}
-        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        consumer={'case'}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-project-key-form-input"]').length > 0
-    ).toBeTruthy();
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
 
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-email-form-input"]').length > 0
-    ).toBeTruthy();
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-    expect(
-      wrapper.find('[data-test-subj="connector-jira-apiToken-form-input"]').length > 0
-    ).toBeTruthy();
-  });
+    const tests: Array<[string, string]> = [
+      ['config.apiUrl-input', 'not-valid'],
+      ['config.projectKey-input', ''],
+      ['secrets.email-input', ''],
+      ['secrets.apiToken-input', ''],
+    ];
 
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      actionTypeId: '.jira',
-      isPreconfigured: false,
-      isDeprecated: false,
-      secrets: {},
-      config: {},
-    } as JiraActionConnector;
-    const wrapper = mountWithIntl(
-      <JiraConnectorFields
-        action={actionConnector}
-        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
+    it('connector validation succeeds when connector config is valid', async () => {
+      const actionConnector = {
+        actionTypeId: '.jira',
+        name: 'jira',
+        config: {
+          apiUrl: 'https://test.com',
+          projectKey: 'CK',
+        },
+        secrets: {
+          email: 'email',
+          apiToken: 'token',
+        },
+        isDeprecated: false,
+      };
 
-  test('should display a message when secrets is missing', () => {
-    const actionConnector = {
-      actionTypeId: '.jira',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isMissingSecrets: true,
-      secrets: {},
-      config: {},
-    } as JiraActionConnector;
-    const wrapper = mountWithIntl(
-      <JiraConnectorFields
-        action={actionConnector}
-        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
-  });
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <JiraConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
 
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        email: 'email',
-        apiToken: 'token',
-      },
-      id: 'test',
-      actionTypeId: '.jira',
-      isPreconfigured: false,
-      isDeprecated: false,
-      name: 'jira',
-      config: {
-        apiUrl: 'https://test/',
-        projectKey: 'CK',
-      },
-    } as JiraActionConnector;
-    const wrapper = mountWithIntl(
-      <JiraConnectorFields
-        action={actionConnector}
-        errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.jira',
+          name: 'jira',
+          config: {
+            apiUrl: 'https://test.com',
+            projectKey: 'CK',
+          },
+          secrets: {
+            email: 'email',
+            apiToken: 'token',
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it.each(tests)('validates correctly %p', async (field, value) => {
+      const actionConnector = {
+        actionTypeId: '.jira',
+        name: 'jira',
+        config: {
+          apiUrl: 'https://test.com',
+          projectKey: 'CK',
+        },
+        secrets: {
+          email: 'email',
+          apiToken: 'token',
+        },
+        isDeprecated: false,
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <JiraConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
   });
 });

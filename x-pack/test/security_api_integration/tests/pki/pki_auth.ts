@@ -155,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: { name: 'pki', type: 'pki' },
           authentication_type: 'token',
+          elastic_cloud_user: false,
         });
     });
 
@@ -192,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: { name: 'pki', type: 'pki' },
           authentication_type: 'realm',
+          elastic_cloud_user: false,
         });
 
       checkCookieIsSet(parseCookie(response.headers['set-cookie'][0])!);

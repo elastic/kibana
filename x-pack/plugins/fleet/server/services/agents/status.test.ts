@@ -7,6 +7,8 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { AGENT_POLLING_THRESHOLD_MS } from '../../../common/constants';
+
 import { getAgentStatusById } from './status';
 
 describe('Agent status service', () => {
@@ -79,5 +81,23 @@ describe('Agent status service', () => {
     );
     const status = await getAgentStatusById(mockElasticsearchClient, 'id');
     expect(status).toEqual('unenrolling');
+  });
+
+  it('should return offline when agent has not checked in for 10 intervals', async () => {
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockElasticsearchClient.get.mockResponse(
+      // @ts-expect-error not full interface
+      {
+        _id: 'id',
+        _source: {
+          active: true,
+          last_checkin: new Date(Date.now() - 10 * AGENT_POLLING_THRESHOLD_MS - 1000).toISOString(),
+          local_metadata: {},
+          user_provided_metadata: {},
+        },
+      }
+    );
+    const status = await getAgentStatusById(mockElasticsearchClient, 'id');
+    expect(status).toEqual('offline');
   });
 });

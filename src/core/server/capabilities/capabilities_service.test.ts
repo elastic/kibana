@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import {
   httpServiceMock,
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
-} from '../http/http_service.mock';
-import { mockRouter, RouterMock } from '../http/router/router.mock';
+} from '@kbn/core-http-server-mocks';
 import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
-import { mockCoreContext } from '../core_context.mock';
 
 describe('CapabilitiesService', () => {
   let http: InternalHttpServiceSetupMock;

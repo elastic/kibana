@@ -8,76 +8,102 @@
 /**
  * TODO:
  * - Need to add documentation URLs (search for `#`s)
- * - Need to implement the logic for the attaching search engines functionality
  */
 
 import React from 'react';
 
-import { useValues } from 'kea';
-
-import { EuiCodeBlock, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
-
-import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
-import { NewSearchIndexLogic } from './new_search_index_logic';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodApi: React.FC = () => {
-  const { name } = useValues(NewSearchIndexLogic);
-  const apiKey = 1212312313; // TODO change this
-
-  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
-
   return (
     <NewSearchIndexTemplate
-      description={
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.newIndex.methodApi.description"
-            defaultMessage="Your API endpoint can be used to add new documents to your index, update documents, retrieve documents by ID, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
-            values={{
-              clientLibrariesLink: (
-                <EuiLink href="#" target="_blank">
+      title={
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.newIndex.methodApi.title"
+          defaultMessage="Index using the API"
+        />
+      }
+      type="api"
+      onSubmit={() => null}
+    >
+      <EuiSteps
+        steps={[
+          {
+            children: (
+              <EuiText size="s">
+                <p>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.description.clientLibrariesLink',
+                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
                     {
-                      defaultMessage: 'client libraries',
+                      defaultMessage:
+                        'Provide a unique name for your index and select an optional index language.',
                     }
                   )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      }
-      docsUrl="#"
-      type="api"
-    >
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.enterpriseSearch.content.newIndex.methodApi.endpointTitle', {
-              defaultMessage: 'Enter a name to preview your new API endpoint',
-            })}
-          </h3>
-        </EuiTitle>
-        {name && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-              {`\
-curl -X POST '${searchIndexApiUrl}${name}/document' \\
-  -H 'Content-Type: application/json' \\
-  -H 'Authorization: Bearer ${apiKey}' \\
-  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
-`}
-            </EuiCodeBlock>
-          </>
-        )}
-      </EuiPanel>
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
+              {
+                defaultMessage: 'Create an Elasticsearch index',
+              }
+            ),
+
+            titleSize: 'xs',
+          },
+          {
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.methodApi.steps.configureIngestion.content',
+                    {
+                      defaultMessage:
+                        'Generate an API key and view the documentation for posting documents to the Elasticsearch API endpoint. Language clients are available for streamlined integration.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
+              {
+                defaultMessage: 'Configure ingestion settings',
+              }
+            ),
+            titleSize: 'xs',
+          },
+          {
+            children: (
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
+                    {
+                      defaultMessage:
+                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            ),
+            status: 'incomplete',
+            title: i18n.translate(
+              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
+              {
+                defaultMessage: 'Build a search experience',
+              }
+            ),
+            titleSize: 'xs',
+          },
+        ]}
+      />
     </NewSearchIndexTemplate>
   );
 };

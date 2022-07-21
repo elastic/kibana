@@ -21,7 +21,7 @@ import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Sha256 } from '@kbn/core/public/utils';
+import { Sha256 } from '@kbn/crypto-browser';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
@@ -212,10 +212,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
     // Security plugin is disabled
     if (!security) return true;
-    // Otherwise check roles. If user is not defined due to an unexpected error, then fail *open*.
+
+    // Otherwise check if user is a cloud user.
+    // If user is not defined due to an unexpected error, then fail *open*.
     // Cloud admin console will always perform the actual authorization checks.
     const user = await security.authc.getCurrentUser().catch(() => null);
-    return user?.roles.includes('superuser') ?? true;
+    return user?.elastic_cloud_user ?? true;
   }
 
   /**
@@ -262,11 +264,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         name: 'cloud_user_id',
         context$: from(security.authc.getCurrentUser()).pipe(
           map((user) => {
-            if (
-              getIsCloudEnabled(cloudId) &&
-              user.authentication_realm?.type === 'saml' &&
-              user.authentication_realm?.name === 'cloud-saml-kibana'
-            ) {
+            if (user.elastic_cloud_user) {
               // If the user is managed by ESS, use the plain username as the user ID:
               // The username is expected to be unique for these users,
               // and it matches how users are identified in the Cloud UI, so it allows us to correlate them.

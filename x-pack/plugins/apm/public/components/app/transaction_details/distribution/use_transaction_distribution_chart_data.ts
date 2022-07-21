@@ -37,14 +37,17 @@ export const useTransactionDistributionChartData = () => {
         params.start &&
         params.end
       ) {
-        return callApmApi('POST /internal/apm/latency/overall_distribution', {
-          params: {
-            body: {
-              ...params,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+        return callApmApi(
+          'POST /internal/apm/latency/overall_distribution/transactions',
+          {
+            params: {
+              body: {
+                ...params,
+                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [params]
@@ -83,20 +86,23 @@ export const useTransactionDistributionChartData = () => {
           params.start &&
           params.end
         ) {
-          return callApmApi('POST /internal/apm/latency/overall_distribution', {
-            params: {
-              body: {
-                ...params,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                termFilters: [
-                  {
-                    fieldName: EVENT_OUTCOME,
-                    fieldValue: EventOutcome.failure,
-                  },
-                ],
+          return callApmApi(
+            'POST /internal/apm/latency/overall_distribution/transactions',
+            {
+              params: {
+                body: {
+                  ...params,
+                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                  termFilters: [
+                    {
+                      fieldName: EVENT_OUTCOME,
+                      fieldValue: EventOutcome.failure,
+                    },
+                  ],
+                },
               },
-            },
-          });
+            }
+          );
         }
       },
       [params]

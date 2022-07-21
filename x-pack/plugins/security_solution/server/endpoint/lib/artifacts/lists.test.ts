@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-list-types';
 import { buildArtifact, getEndpointExceptionList, getFilteredEndpointExceptionList } from './lists';
-import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,

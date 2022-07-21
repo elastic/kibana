@@ -12,7 +12,7 @@ import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
-import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';

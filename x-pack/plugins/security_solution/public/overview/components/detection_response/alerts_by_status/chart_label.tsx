@@ -13,7 +13,7 @@ interface ChartLabelProps {
 }
 
 const PlaceHolder = styled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 const ChartLabelComponent: React.FC<ChartLabelProps> = ({ count }) => {

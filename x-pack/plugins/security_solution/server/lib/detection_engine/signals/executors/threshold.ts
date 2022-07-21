@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
@@ -38,12 +38,14 @@ import {
   createSearchAfterReturnTypeFromResponse,
   mergeReturns,
 } from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { BuildRuleMessage } from '../rule_messages';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 
 export const thresholdExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -57,7 +59,11 @@ export const thresholdExecutor = async ({
   bulkCreate,
   wrapHits,
   ruleDataReader,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
@@ -71,6 +77,8 @@ export const thresholdExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   ruleDataReader: IRuleDataReader;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -107,17 +115,10 @@ export const thresholdExecutor = async ({
       result.warning = true;
     }
 
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
-      timestampOverride: ruleParams.timestampOverride,
+      primaryTimestamp,
     });
 
     // Combine dupe filter with other filters
@@ -145,8 +146,10 @@ export const thresholdExecutor = async ({
       logger,
       filter: esFilter,
       threshold: ruleParams.threshold,
-      timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     // Build and index new alerts
@@ -170,7 +173,7 @@ export const thresholdExecutor = async ({
       result,
       createSearchAfterReturnTypeFromResponse({
         searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
+        primaryTimestamp,
       }),
       createSearchAfterReturnType({
         success,

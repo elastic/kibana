@@ -22,13 +22,13 @@ import {
 
 export const visualizationDefinitions = [
   { id: SeriesTypes.BAR, icon: BarIcon },
-  { id: SeriesTypes.BAR_STACKED, icon: BarStackedIcon },
-  { id: SeriesTypes.BAR_HORIZONTAL, icon: BarHorizontalIcon },
-  { id: SeriesTypes.BAR_PERCENTAGE_STACKED, icon: BarPercentageIcon },
-  { id: SeriesTypes.BAR_HORIZONTAL_STACKED, icon: BarHorizontalStackedIcon },
-  { id: SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED, icon: BarHorizontalPercentageIcon },
+  { id: `${SeriesTypes.BAR}_stacked`, icon: BarStackedIcon },
+  { id: `${SeriesTypes.BAR}_horizontal`, icon: BarHorizontalIcon },
+  { id: `${SeriesTypes.BAR}_percentage_stacked`, icon: BarPercentageIcon },
+  { id: `${SeriesTypes.BAR}_horizontal_stacked`, icon: BarHorizontalStackedIcon },
+  { id: `${SeriesTypes.BAR}_horizontal_percentage_stacked`, icon: BarHorizontalPercentageIcon },
   { id: SeriesTypes.LINE, icon: LineIcon },
   { id: SeriesTypes.AREA, icon: AreaIcon },
-  { id: SeriesTypes.AREA_STACKED, icon: AreaStackedIcon },
-  { id: SeriesTypes.AREA_PERCENTAGE_STACKED, icon: AreaPercentageIcon },
+  { id: `${SeriesTypes.AREA}_stacked`, icon: AreaStackedIcon },
+  { id: `${SeriesTypes.AREA}_percentage_stacked`, icon: AreaPercentageIcon },
 ];

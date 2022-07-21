@@ -15,8 +15,7 @@ import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '@kbn/core/server/http/router';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
@@ -175,7 +174,6 @@ export const createHandler =
           payload: body,
           rejectUnauthorized,
           agent,
-          originalPath: path,
         });
 
         break;

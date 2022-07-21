@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
-import { MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
+import { DEFAULT_WIDTH, MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
+import type { LegendItem } from './draggable_legend_item';
 
 jest.mock('../../lib/kibana');
 
@@ -72,6 +73,28 @@ describe('DraggableLegend', () => {
       expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
         'height',
         `${height}px`
+      );
+    });
+
+    it(`renders a container with the default 'min-width'`, () => {
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${DEFAULT_WIDTH}px`
+      );
+    });
+
+    it(`renders a container with the specified 'min-width'`, () => {
+      const width = 1234;
+
+      wrapper = mount(
+        <TestProviders>
+          <DraggableLegend height={height} legendItems={legendItems} minWidth={width} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${width}px`
       );
     });
 

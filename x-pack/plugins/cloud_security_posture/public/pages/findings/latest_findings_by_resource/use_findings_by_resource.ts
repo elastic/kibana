@@ -14,7 +14,14 @@ import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
-import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
+import type { FindingsBaseEsQuery } from '../types';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
+
+interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+  enabled: boolean;
+}
 
 // Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
@@ -34,32 +41,23 @@ type FindingsAggResponse = IKibanaSearchResponse<
   estypes.SearchResponse<{}, FindingsByResourceAggs>
 >;
 
-interface FindingsByResourcePage {
+export interface FindingsByResourcePage {
   failed_findings: {
     count: number;
     normalized: number;
     total_findings: number;
   };
   resource_id: string;
-  resource_name: string;
-  resource_subtype: string;
   cluster_id: string;
-  cis_sections: string[];
+  'resource.name': string;
+  'resource.sub_type': string;
+  'rule.section': string[];
 }
-
-interface UseFindingsByResourceData {
-  page: FindingsByResourcePage[];
-  total: number;
-}
-
-export type CspFindingsByResourceResult = FindingsQueryResult<
-  UseFindingsByResourceData | undefined,
-  unknown
->;
 
 interface FindingsByResourceAggs {
   resource_total: estypes.AggregationsCardinalityAggregate;
   resources: estypes.AggregationsMultiBucketAggregateBase<FindingsAggBucket>;
+  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
 interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
@@ -80,6 +78,7 @@ export const getFindingsByResourceAggQuery = ({
     query,
     size: 0,
     aggs: {
+      ...getFindingsCountAggQuery(),
       resource_total: { cardinality: { field: 'resource.id' } },
       resources: {
         terms: { field: 'resource.id', size: MAX_BUCKETS },
@@ -120,37 +119,45 @@ export const getFindingsByResourceAggQuery = ({
   ignore_unavailable: false,
 });
 
-export const useFindingsByResource = ({ query, from, size }: UseResourceFindingsOptions) => {
+export const useFindingsByResource = (options: UseFindingsByResourceOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
-  return useQuery<UseFindingsByResourceData & { newPitId: string }>(
-    ['csp_findings_resource', { query, size, from, pitId }],
-    () =>
-      lastValueFrom(
+  return useQuery(
+    ['csp_findings_resource', { params }],
+    async () => {
+      const {
+        rawResponse: { aggregations, pit_id: newPitId },
+      } = await lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ query, from, size, pitId }),
+          params: getFindingsByResourceAggQuery(params),
         })
-      ).then(({ rawResponse: { aggregations, pit_id: newPitId } }) => {
-        if (!aggregations) throw new Error('expected aggregations to be defined');
+      );
 
-        if (!Array.isArray(aggregations.resources.buckets))
-          throw new Error('expected resources buckets to be an array');
+      if (!aggregations) throw new Error('expected aggregations to be defined');
 
-        return {
-          page: aggregations.resources.buckets.map(createFindingsByResource),
-          total: aggregations.resource_total.value,
-          newPitId: newPitId!,
-        };
-      }),
+      if (
+        !Array.isArray(aggregations.resources.buckets) ||
+        !Array.isArray(aggregations.count.buckets)
+      )
+        throw new Error('expected buckets to be an array');
+
+      return {
+        page: aggregations.resources.buckets.map(createFindingsByResource),
+        total: aggregations.resource_total.value,
+        count: getAggregationCount(aggregations.count.buckets),
+        newPitId: newPitId!,
+      };
+    },
     {
+      enabled: options.enabled,
       keepPreviousData: true,
-      onError: (err) => showErrorToast(toasts, err),
+      onError: (err: Error) => showErrorToast(toasts, err),
       onSuccess: ({ newPitId }) => {
         setPitId(newPitId);
       },
@@ -176,10 +183,10 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
 
   return {
     resource_id: resource.key,
-    resource_name: resource.name.buckets[0].key,
-    resource_subtype: resource.subtype.buckets[0].key,
-    cluster_id: resource.cluster_id.buckets[0].key,
-    cis_sections: resource.cis_sections.buckets.map((v) => v.key),
+    ['resource.name']: resource.name.buckets[0]?.key,
+    ['resource.sub_type']: resource.subtype.buckets[0]?.key,
+    cluster_id: resource.cluster_id.buckets[0]?.key,
+    ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
     failed_findings: {
       count: resource.failed_findings.doc_count,
       normalized:

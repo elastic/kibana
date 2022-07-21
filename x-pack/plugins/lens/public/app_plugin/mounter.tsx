@@ -14,7 +14,11 @@ import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  Storage,
+  withNotifyOnErrors,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
@@ -24,6 +28,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
@@ -134,6 +139,17 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  if (!lensServices.application.capabilities.visualize.save) {
+    coreStart.chrome.setBadge({
+      text: i18n.translate('xpack.lens.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save visualizations to the library',
+      }),
+      iconType: 'glasses',
+    });
+  }
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
@@ -220,6 +236,21 @@ export async function mountApp(
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
       const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
+      useEffect(() => {
+        const kbnUrlStateStorage = createKbnUrlStateStorage({
+          history: props.history,
+          useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
+          ...withNotifyOnErrors(lensServices.notifications.toasts),
+        });
+        const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+          data.query,
+          kbnUrlStateStorage
+        );
+
+        return () => {
+          stopSyncingQueryServiceStateWithUrl();
+        };
+      }, [props.history]);
       const redirectCallback = useCallback(
         (id?: string) => {
           redirectTo(props.history, id);
@@ -243,8 +274,7 @@ export async function mountApp(
       useEffect(() => {
         (async () => {
           const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
-          if (!hasUserDataView || !hasEsData) {
+          if (!hasUserDataView) {
             setEditorState('no_data');
             return;
           }

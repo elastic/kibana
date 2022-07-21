@@ -27,7 +27,6 @@ export type {
   ControlColumnProps,
   DataProvidersAnd,
   DataProvider,
-  FieldBrowserOptions,
   GenericActionRowCellRenderProps,
   HeaderActionProps,
   HeaderCellRender,

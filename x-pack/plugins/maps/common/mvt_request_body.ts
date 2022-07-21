@@ -10,11 +10,15 @@ import rison from 'rison-node';
 import { RENDER_AS } from './constants';
 
 export function decodeMvtResponseBody(encodedRequestBody: string): object {
-  return rison.decode(decodeURIComponent(encodedRequestBody)) as object;
+  return rison.decode(decodeURIComponent(encodedRequestBody).replace('%25', '%')) as object;
 }
 
 export function encodeMvtResponseBody(unencodedRequestBody: object): string {
-  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue));
+  // URL encoding replaces unsafe ASCII characters with a '%' followed by two hexadecimal digits
+  // encodeURIComponent does not encode '%'
+  // This causes preexisting '%' to break decoding because they are not valid URL encoding
+  // To prevent this, properly url encode '%' before calling encodeURIComponent
+  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue).replace('%', '%25'));
 }
 
 export function getAggsTileRequest({
@@ -82,47 +86,11 @@ export function getHitsTileRequest({
       exact_bounds: true,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      fields: mergeFields(
-        [
-          requestBody.docvalue_fields as Field[] | undefined,
-          requestBody.stored_fields as Field[] | undefined,
-        ],
-        [geometryFieldName]
-      ),
+      fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
+      sort: requestBody.sort ? requestBody.sort : [],
       track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
       with_labels: hasLabels,
     },
   };
-}
-
-// can not use "import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey"
-// SearchRequest is incorrectly typed and does not support Field as object
-// https://github.com/elastic/elasticsearch-js/issues/1615
-type Field =
-  | string
-  | {
-      field: string;
-      format: string;
-    };
-
-function mergeFields(fieldsList: Array<Field[] | undefined>, excludeNames: string[]): Field[] {
-  const fieldNames: string[] = [];
-  const mergedFields: Field[] = [];
-
-  fieldsList.forEach((fields) => {
-    if (!fields) {
-      return;
-    }
-
-    fields.forEach((field) => {
-      const fieldName = typeof field === 'string' ? field : field.field;
-      if (!excludeNames.includes(fieldName) && !fieldNames.includes(fieldName)) {
-        fieldNames.push(fieldName);
-        mergedFields.push(field);
-      }
-    });
-  });
-
-  return mergedFields;
 }

@@ -10,19 +10,27 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
-import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noCreateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
@@ -34,7 +42,6 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('AllCases', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
@@ -43,7 +50,6 @@ describe('AllCases', () => {
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    dispatchUpdateCaseProperty,
     refetchCases,
     setFilters,
     setQueryParams,
@@ -64,7 +70,7 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],
@@ -78,14 +84,44 @@ describe('AllCases', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
   });
 
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
+
+  describe('empty table', () => {
+    beforeEach(() => {
+      useGetCasesMock.mockReturnValue({
+        ...defaultGetCases,
+        data: {
+          ...defaultGetCases.data,
+          cases: [],
+          total: 0,
+        },
+      });
+    });
+
+    it('should render the create new case link when the user has create privileges', async () => {
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.getByTestId('cases-table-add-case')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the create new case link when the user does not have create privileges', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noCreateCasesPermissions() });
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('should render the stats', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
     const wrapper = mount(

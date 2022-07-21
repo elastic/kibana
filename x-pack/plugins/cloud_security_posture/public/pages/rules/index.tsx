@@ -6,42 +6,35 @@
  */
 
 import React, { useMemo } from 'react';
-import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiEmptyPrompt, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import * as t from 'io-ts';
-import type { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
+import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { RulesContainer, type PageUrlParams } from './rules_container';
-import { allNavigationItems } from '../../common/navigation/constants';
+import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { CspNavigationItem } from '../../common/navigation/types';
-import { extractErrorMessage } from '../../../common/utils/helpers';
-import { useCspIntegration } from './use_csp_integration';
+import type { CspPageNavigationItem } from '../../common/navigation/types';
+import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 
-const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
-  [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
-    (breadcrumb): breadcrumb is CspNavigationItem => !!breadcrumb.name
+const getRulesBreadcrumbs = (name?: string): CspPageNavigationItem[] =>
+  [cloudPosturePages.benchmarks, { ...cloudPosturePages.rules, name }].filter(
+    (breadcrumb): breadcrumb is CspPageNavigationItem => !!breadcrumb.name
   );
 
-export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
+export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
-  const integrationInfo = useCspIntegration(params);
-  const breadcrumbs = useMemo(
-    // TODO: make benchmark breadcrumb navigable
-    () => getRulesBreadcrumbs(integrationInfo.data?.name),
-    [integrationInfo.data?.name]
-  );
+  const integrationInfo = useCspIntegrationInfo(params);
 
-  useCspBreadcrumbs(breadcrumbs);
+  const [packageInfo, agentInfo] = integrationInfo.data || [];
 
-  const pageProps: KibanaPageTemplateProps = useMemo(
-    () => ({
-      pageHeader: {
-        alignItems: 'bottom',
-        rightSideItems: [
+  return (
+    <CloudPosturePage query={integrationInfo}>
+      <EuiPageHeader
+        alignItems={'bottom'}
+        rightSideItems={[
           <EuiButtonEmpty
             iconType="gear"
             size="xs"
@@ -52,10 +45,10 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               defaultMessage="Manage Integration"
             />
           </EuiButtonEmpty>,
-        ],
-        pageTitle: (
+        ]}
+        pageTitle={
           <EuiFlexGroup direction="column" gutterSize="none">
-            <Link to={generatePath(allNavigationItems.benchmarks.path)}>
+            <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
               <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                 <FormattedMessage
                   id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
@@ -67,59 +60,51 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
               defaultMessage="Rules - {integrationName}"
               values={{
-                integrationName: integrationInfo.data?.name,
+                integrationName: packageInfo?.name,
               }}
             />
           </EuiFlexGroup>
-        ),
-        description: integrationInfo.data && integrationInfo.data.package && (
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
-              defaultMessage="{integrationType}, {agentPolicyName}"
-              values={{
-                integrationType: integrationInfo.data.package.title,
-                agentPolicyName: integrationInfo.data.name,
-              }}
-            />
-          </EuiTextColor>
-        ),
-      },
-    }),
-    [http.basePath, integrationInfo.data, params]
+        }
+        description={
+          packageInfo?.package &&
+          agentInfo?.name && (
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
+                defaultMessage="{integrationType}, {agentPolicyName}"
+                values={{
+                  integrationType: packageInfo.package.title,
+                  agentPolicyName: agentInfo.name,
+                }}
+              />
+            </EuiTextColor>
+          )
+        }
+        bottomBorder
+      />
+      <EuiSpacer />
+      <RulesContainer />
+    </CloudPosturePage>
   );
+};
+
+export const Rules = (props: RouteComponentProps<PageUrlParams>) => {
+  const { params } = props.match;
+  const integrationInfo = useCspIntegrationInfo(params);
+
+  const [packageInfo] = integrationInfo.data || [];
+
+  const breadcrumbs = useMemo(
+    // TODO: make benchmark breadcrumb navigable
+    () => getRulesBreadcrumbs(packageInfo?.name),
+    [packageInfo?.name]
+  );
+
+  useCspBreadcrumbs(breadcrumbs);
 
   return (
-    <>
-      <CspPageTemplate
-        {...pageProps}
-        query={integrationInfo}
-        errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
-      >
-        {integrationInfo.status === 'success' && <RulesContainer />}
-      </CspPageTemplate>
-    </>
+    <CspPageTemplate>
+      <RulesNoPageTemplate {...props} />
+    </CspPageTemplate>
   );
 };
-
-// react-query puts the response data on the 'error' object
-const bodyError = t.type({
-  body: t.type({
-    message: t.string,
-  }),
-});
-
-const extractErrorBodyMessage = (err: unknown) => {
-  if (bodyError.is(err)) return err.body.message;
-  return extractErrorMessage(err);
-};
-
-const RulesErrorPrompt = ({ error }: { error: string }) => (
-  <EuiEmptyPrompt
-    {...{
-      color: 'danger',
-      iconType: 'alert',
-      title: <h2>{error}</h2>,
-    }}
-  />
-);

@@ -35,7 +35,8 @@ export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
-        monitor,
+        // making it enabled, even if it's disabled in the UI
+        monitor: { ...monitor, enabled: true },
         monitorId,
         runOnce: true,
       }),
