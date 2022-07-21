@@ -152,7 +152,6 @@ export const ContainerNameWidget = ({
                 field: CONTAINER_IMAGE_NAME,
                 size: 'xs',
                 onClick: () => {},
-                onFilterAdded: () => {},
                 ownFocus: false,
                 showTooltip: true,
                 value: aggData.key as string,
