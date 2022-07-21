@@ -16,23 +16,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { consoleMappings } from '../console_mappings';
 import { ReadConsoleRequestSchema } from '../schema';
 
-const getReadables = (dataPath: string): Promise<string> =>
-  new Promise((resolved, reject) => {
-    let contents = '';
-    const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
-
-    readable.on('data', (stream) => {
-      contents += stream;
-    });
-
-    readable.on('end', () => {
-      resolved(contents);
-    });
-
-    readable.on('error', (err) => {
-      reject(err);
-    });
-  });
+const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { encoding: 'utf-8' });
 
 class ConsoleResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
