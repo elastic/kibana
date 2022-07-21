@@ -101,7 +101,7 @@ describe('dimension editor', () => {
       component.find(EuiFieldText).props().onChange!({
         target: { value: newVal },
       } as ChangeEvent<HTMLInputElement>);
-      expect(setState).toHaveBeenCalledWith({ ...localState, extraText: newVal });
+      expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
     });
   });
 
