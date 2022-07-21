@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useContext } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/css';
+import { FiltersEditorContextType } from './filters_editor_context';
 import { FilterGroup } from './filters_editor_filter_group';
 import { getConditionalOperationType } from './filters_editor_utils';
 import type { Path } from './filter_editors_types';
@@ -20,11 +21,13 @@ export interface FilterItemProps {
 }
 
 const filterItemCss = css`
+  // temporary
   border: 1px solid;
 `;
 
 export function FilterItem({ filter, path }: FilterItemProps) {
   const conditionalOperationType = getConditionalOperationType(filter);
+  const { dispatch } = useContext(FiltersEditorContextType);
 
   return (
     <EuiFlexItem className={filterItemCss}>
@@ -38,7 +41,16 @@ export function FilterItem({ filter, path }: FilterItemProps) {
         <>
           <EuiFlexGroup gutterSize="m" responsive={false}>
             <EuiFlexItem>
-              <p>{JSON.stringify(filter)}</p>
+              <code>
+                query: {filter.meta.params.query} path: {path}
+              </code>
+              <EuiButton
+                onClick={() => {
+                  dispatch({ type: 'removeFilter', payload: { path } });
+                }}
+              >
+                Test Action
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

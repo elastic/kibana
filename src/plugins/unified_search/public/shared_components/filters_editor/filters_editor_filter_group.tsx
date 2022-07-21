@@ -7,11 +7,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { css } from '@emotion/css';
+import type { Path } from './filter_editors_types';
 import { ConditionTypes } from './filters_editor_condition_types';
 import { FilterItem } from './filters_editor_filter_item';
-import type { Path } from './filter_editors_types';
 
 export interface FilterGroupProps {
   filters: Filter[];
@@ -19,17 +21,40 @@ export interface FilterGroupProps {
   path: Path;
 }
 
+const filterGroupCss = css`
+  // temporary
+  padding-left: 20px;
+`;
+
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
-  <code>Delimiter {conditionType}</code>
+  <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexItem>
+      <EuiHorizontalRule margin="s" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText color="subdued">
+        {conditionType === ConditionTypes.OR
+          ? i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
+              defaultMessage: 'or',
+            })
+          : i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
+              defaultMessage: 'and',
+            })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiHorizontalRule margin="s" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
 
 export const FilterGroup = ({ filters, conditionType, path }: FilterGroupProps) => (
-  <EuiFlexGroup direction="column" gutterSize="none">
+  <EuiFlexGroup className={filterGroupCss} direction="column" gutterSize="none">
     {filters.map((filter, index, acc) => (
-      <EuiFlexItem>
+      <>
         <FilterItem filter={filter} path={`${path ? path + '.' : ''}${index}`} />
         {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
-      </EuiFlexItem>
+      </>
     ))}
   </EuiFlexGroup>
 );

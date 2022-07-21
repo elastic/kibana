@@ -6,32 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FiltersEditorContextType } from './filters_editor_context';
 import { ConditionTypes } from './filters_editor_condition_types';
 import { FilterGroup } from './filters_editor_filter_group';
+import { filtersEditorReducer } from './filters_editor_reducer';
 
 export interface FiltersEditorProps {
   filters: Filter[];
   dataView: DataView;
-  onChange: (filters: []) => void;
+  onChange: (filters: Filter[]) => void;
 }
 
+const rootLevelConditionType = ConditionTypes.AND;
+
 export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProps) {
-  const [localFilters, setLocalFilters] = useState<Filter[]>(filters);
+  const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
 
   useEffect(() => {
-    if (filters !== localFilters) {
-      setLocalFilters(localFilters);
+    if (state.filters !== filters) {
+      onChange(state.filters);
     }
-  }, [filters, localFilters]);
+  }, [filters, onChange, state.filters]);
 
   return (
-    <FiltersEditorContextType.Provider value={{ dataView }}>
-      <FilterGroup filters={localFilters} conditionType={ConditionTypes.AND} path={''} />
+    <FiltersEditorContextType.Provider value={{ dataView, dispatch }}>
+      <FilterGroup filters={state.filters} conditionType={rootLevelConditionType} path={''} />
     </FiltersEditorContextType.Provider>
   );
 }

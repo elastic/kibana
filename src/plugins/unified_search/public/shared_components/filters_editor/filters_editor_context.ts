@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FiltersEditorActions } from './filters_editor_reducer';
 
 interface FiltersEditorContextType {
   dataView: DataView;
+  dispatch: Dispatch<FiltersEditorActions>;
 }
 
 export const FiltersEditorContextType = React.createContext<FiltersEditorContextType>(
