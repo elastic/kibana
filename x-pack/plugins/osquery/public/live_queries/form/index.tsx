@@ -524,6 +524,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   component={SuperSelectField}
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   euiFieldProps={{
+                    'data-test-subj': 'select-live-pack',
                     options: packOptions,
                     itemLayoutAlign: 'top',
                     hasDividers: true,
