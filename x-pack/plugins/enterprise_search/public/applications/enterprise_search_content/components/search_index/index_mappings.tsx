@@ -35,7 +35,9 @@ export const SearchIndexIndexMappings: React.FC = () => {
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
-          <EuiCodeBlock language="json">{JSON.stringify(mappingData, null, 2)}</EuiCodeBlock>
+          <EuiCodeBlock language="json" isCopyable>
+            {JSON.stringify(mappingData, null, 2)}
+          </EuiCodeBlock>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
