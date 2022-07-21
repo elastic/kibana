@@ -41,6 +41,10 @@ import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 
+interface LogsDataView extends DataView {
+  id: string;
+}
+
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
 // @ts-expect-error TS2769
@@ -76,9 +80,11 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
+  logsDataView?: LogsDataView;
 }
 
 function getLensAttributes(
+  logsDataView: LogsDataView,
   actionId?: string,
   agentIds?: string[]
 ): TypedLensByValueInput['attributes'] {
@@ -145,18 +151,18 @@ function getLensAttributes(
     title: `Action ${actionId} results`,
     references: [
       {
-        id: 'logs-*',
+        id: logsDataView.id,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'logs-*',
+        id: logsDataView.id,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
       {
         name: 'filter-index-pattern-0',
-        id: 'logs-*',
+        id: logsDataView.id,
         type: 'index-pattern',
       },
     ],
@@ -219,6 +225,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   endDate,
   startDate,
   mode,
+  logsDataView,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
@@ -227,24 +234,28 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     (event) => {
       event.preventDefault();
 
-      lensService?.navigateToPrefilledEditor(
-        {
-          id: '',
-          timeRange: {
-            from: startDate ?? 'now-1d',
-            to: endDate ?? 'now',
-            mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+      if (logsDataView) {
+        lensService?.navigateToPrefilledEditor(
+          {
+            id: '',
+            timeRange: {
+              from: startDate ?? 'now-1d',
+              to: endDate ?? 'now',
+              mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+            },
+            attributes: getLensAttributes(logsDataView, actionId, agentIds),
           },
-          attributes: getLensAttributes(actionId, agentIds),
-        },
-        {
-          openInNewTab: true,
-          skipAppLeave: true,
-        }
-      );
+          {
+            openInNewTab: true,
+            skipAppLeave: true,
+          }
+        );
+      }
     },
-    [actionId, agentIds, endDate, lensService, mode, startDate]
+    [actionId, agentIds, endDate, lensService, logsDataView, mode, startDate]
   );
+
+  const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
 
   if (!isLensAvailable) {
     return null;
@@ -252,7 +263,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} disabled={false}>
+      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} isDisabled={isDisabled}>
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -265,7 +276,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         disabled={false}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
-        isDisabled={!actionId}
+        isDisabled={isDisabled}
       />
     </EuiToolTip>
   );
@@ -279,6 +290,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  logsDataView,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
@@ -288,7 +300,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      if (!locator) return;
+      if (!locator || !logsDataView) return;
 
       const agentIdsQuery = agentIds?.length
         ? {
@@ -300,11 +312,11 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         : null;
 
       const newUrl = await locator.getUrl({
-        indexPatternId: 'logs-*',
+        indexPatternId: logsDataView.id,
         filters: [
           {
             meta: {
-              index: 'logs-*',
+              index: logsDataView.id,
               alias: null,
               negate: false,
               disabled: false,
@@ -322,7 +334,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
                   meta: {
                     alias: 'agent IDs',
                     disabled: false,
-                    index: 'logs-*',
+                    index: logsDataView.id,
                     key: 'query',
                     negate: false,
                     type: 'custom',
@@ -354,7 +366,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, locator]);
+  }, [actionId, agentIds, endDate, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
@@ -433,7 +445,7 @@ interface PackViewInActionProps {
     agents: string[];
   };
   actionId?: string;
-  logsDataView: DataView | undefined;
+  logsDataView?: LogsDataView;
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
@@ -462,6 +474,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      logsDataView={logsDataView}
     />
   );
 };
@@ -491,6 +504,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, 
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      logsDataView={logsDataView}
     />
   );
 };
@@ -530,13 +544,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const {
     data: { dataViews },
   } = useKibana().services;
-  const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
+  const [logsDataView, setLogsDataView] = useState<LogsDataView | undefined>(undefined);
 
   useEffect(() => {
     const fetchLogsDataView = async () => {
-      const dataView = await dataViews.find('logs-*');
+      let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
+      if (!dataView) {
+        dataView = await dataViews.createAndSave({
+          title: 'logs-osquery_manager.result*',
+          timeFieldName: '@timestamp',
+        });
+      }
 
-      setLogsDataView(dataView[0]);
+      setLogsDataView(dataView as LogsDataView);
     };
 
     fetchLogsDataView();
