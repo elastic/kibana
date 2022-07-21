@@ -11,7 +11,11 @@ import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+<<<<<<< HEAD
   const { common, dashboard, settings, visChart, discover } = getPageObjects([
+=======
+  const { common, dashboard, settings, timePicker, visChart, discover } = getPageObjects([
+>>>>>>> a65f3f0d6d0197412e59a2daa2f62824c9720dd0
     'common',
     'dashboard',
     'settings',
