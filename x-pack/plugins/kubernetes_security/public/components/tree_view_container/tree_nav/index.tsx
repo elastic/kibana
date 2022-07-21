@@ -59,18 +59,21 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const options: TreeViewOptionsGroup[] = [
-    {
-      id: logicalTreeViewPrefix,
-      label: TREE_VIEW_LOGICAL_VIEW,
-      value: LOGICAL,
-    },
-    {
-      id: `${treeNavTypePrefix}${INFRASTRUCTURE}`,
-      label: TREE_VIEW_INFRASTRUCTURE_VIEW,
-      value: INFRASTRUCTURE,
-    },
-  ];
+  const options: TreeViewOptionsGroup[] = useMemo(
+    () => [
+      {
+        id: logicalTreeViewPrefix,
+        label: TREE_VIEW_LOGICAL_VIEW,
+        value: LOGICAL,
+      },
+      {
+        id: `${treeNavTypePrefix}${INFRASTRUCTURE}`,
+        label: TREE_VIEW_INFRASTRUCTURE_VIEW,
+        value: INFRASTRUCTURE,
+      },
+    ],
+    [logicalTreeViewPrefix, treeNavTypePrefix]
+  );
 
   const selectedLabel = useMemo(() => {
     return options.find((opt) => opt.id === toggleIdSelected)!.label;
