@@ -180,10 +180,10 @@ describe('SecurityNavControl', () => {
     expect(wrapper.prop<boolean>('isOpen')).toEqual(false);
   });
 
-  it('should render additional user menu links registered by other plugins', async () => {
+  it('should render additional user menu links registered by other plugins and should render the default Edit Profile link as the first link when no custom profile link is provided', async () => {
     const wrapper = shallow(
       <SecurityNavControl
-        editProfileUrl=""
+        editProfileUrl="edit-profile-link"
         logoutUrl=""
         userMenuLinks$={
           new BehaviorSubject([
@@ -202,19 +202,15 @@ describe('SecurityNavControl', () => {
           "items": Array [
             Object {
               "data-test-subj": "profileLink",
-              "href": "",
+              "href": "edit-profile-link",
               "icon": <EuiIcon
                 size="m"
                 type="user"
               />,
               "name": <FormattedMessage
-                defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
+                defaultMessage="Edit profile"
                 id="xpack.security.navControlComponent.editProfileLinkText"
-                values={
-                  Object {
-                    "profileOverridden": false,
-                  }
-                }
+                values={Object {}}
               />,
               "onClick": [Function],
             },
@@ -265,10 +261,10 @@ describe('SecurityNavControl', () => {
     `);
   });
 
-  it('should render custom profile link registered by other plugins', async () => {
+  it('should render custom profile link registered by other plugins and not render default Edit Profile link', async () => {
     const wrapper = shallow(
       <SecurityNavControl
-        editProfileUrl=""
+        editProfileUrl="edit-profile-link"
         logoutUrl=""
         userMenuLinks$={
           new BehaviorSubject([
@@ -317,24 +313,6 @@ describe('SecurityNavControl', () => {
                 type="empty"
               />,
               "name": "link3",
-            },
-            Object {
-              "data-test-subj": "profileLink",
-              "href": "",
-              "icon": <EuiIcon
-                size="m"
-                type="controlsHorizontal"
-              />,
-              "name": <FormattedMessage
-                defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
-                id="xpack.security.navControlComponent.editProfileLinkText"
-                values={
-                  Object {
-                    "profileOverridden": true,
-                  }
-                }
-              />,
-              "onClick": [Function],
             },
             Object {
               "data-test-subj": "logoutLink",
