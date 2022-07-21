@@ -101,6 +101,7 @@ describe('ALL - Live Query', () => {
     cy.getBySel('select-live-pack').click();
     cy.contains('osquery-monitoring').click();
     cy.contains('This table contains 3 rows.');
+    cy.contains('osquery-monitoring (e137a1e0-08d1-11ed-9aa7-ef0d3cddc662)');
     cy.contains('schedule');
     cy.contains('events');
     cy.contains('osquery_info');
