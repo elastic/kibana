@@ -73,9 +73,10 @@ export const getDataFromFieldsHits = (
     // return simple field value (non-ecs object, non-array)
     if (
       !isObjectArray ||
-      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
+      (Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
         (ecsField) => ecsField === field
-      ) === undefined
+      ) === undefined &&
+        !isRuleParametersFieldOrSubfield(field, prependField))
     ) {
       return [
         ...accumulator,
