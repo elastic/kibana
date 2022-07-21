@@ -88,7 +88,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
     searchQueryLanguage,
     searchString,
     searchQuery,
-  } = useData(dataView, aiopsListState, setGlobalState);
+  } = useData(dataView, aiopsListState, setGlobalState, currentSelectedChangePoint);
 
   const totalCount = currentSelectedChangePoint
     ? overallDocStats.totalCount + selectedDocStats.totalCount
