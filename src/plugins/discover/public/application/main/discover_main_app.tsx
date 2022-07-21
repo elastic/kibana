@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { DataViewListItem} from '@kbn/data-views-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
