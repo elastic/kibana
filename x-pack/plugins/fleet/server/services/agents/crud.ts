@@ -121,7 +121,7 @@ export async function getAgentTags(esClient: ElasticsearchClient): Promise<strin
       size: 0,
       aggs: {
         tags: {
-          terms: { field: 'tags' },
+          terms: { field: 'tags', size: SO_SEARCH_LIMIT },
         },
       },
     });
