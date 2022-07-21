@@ -11,7 +11,7 @@ import * as sinon from 'sinon';
 import { proxyRequest } from './proxy_request';
 import { URL } from 'url';
 import { fail } from 'assert';
-import { toURL } from '../routes/api/console/proxy/create_handler';
+import { toURL } from './utils';
 
 describe(`Console's send request`, () => {
   let sandbox: sinon.SinonSandbox;

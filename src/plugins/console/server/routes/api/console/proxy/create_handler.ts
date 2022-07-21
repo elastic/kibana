@@ -7,8 +7,7 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import * as url from 'url';
-import { pick, trimStart, trimEnd } from 'lodash';
+import { pick } from 'lodash';
 import { SemVer } from 'semver';
 
 import { KibanaRequest, RequestHandler } from '@kbn/core/server';
@@ -27,28 +26,7 @@ import {
 import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
-import { encodePath } from '../../../../lib/utils';
-
-export function toURL(base: string, path: string) {
-  const [pathname, query = ''] = path.split('?');
-
-  // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
-  // node url encodes it as a whitespace which results in a faulty request
-  // we need to replace '+' with '%2b' to encode it correctly
-  if (/\+/g.test(query)) {
-    path = `${pathname}?${query.replace(/\+/g, '%2b')}`;
-  }
-  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
-  // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
-  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
-  // measurement precision)
-  if (!urlResult.searchParams.get('pretty')) {
-    urlResult.searchParams.append('pretty', 'true');
-  }
-
-  urlResult.pathname = encodePath(pathname);
-  return urlResult;
-}
+import { toURL } from '../../../../lib/utils';
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {
