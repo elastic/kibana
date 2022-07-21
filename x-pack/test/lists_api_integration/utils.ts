@@ -21,11 +21,7 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
-import {
-  setPolicy,
-  setTemplate,
-  createBootstrapIndex
-} from '@kbn/securitysolution-es-utils';
+import { setPolicy, setTemplate, createBootstrapIndex } from '@kbn/securitysolution-es-utils';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
@@ -425,91 +421,83 @@ export const waitForTextListItems = async (
 /**
  * Convenience function for creating legacy index templates to
  * test out logic updating to new index templates
- * @param es es client 
+ * @param es es client
  */
 export const createLegacyListsIndices = async (es: Client) => {
-  await setPolicy(
-    es,
-    '.lists-default',
-    {
-      "policy": {
-        "phases": {
-          "hot": {
-            "min_age": "0ms",
-            "actions": {
-              "rollover": {
-                "max_size": "50gb"
-              }
-            }
-          }
-        }
-      }
-    }
-  );
-  await setPolicy(
-    es,
-    '.items-default',
-    {
-      "policy": {
-        "phases": {
-          "hot": {
-            "min_age": "0ms",
-            "actions": {
-              "rollover": {
-                "max_size": "50gb"
-              }
-            }
-          }
-        }
-      }
-    }
-  );
+  await setPolicy(es, '.lists-default', {
+    policy: {
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_size: '50gb',
+            },
+          },
+        },
+      },
+    },
+  });
+  await setPolicy(es, '.items-default', {
+    policy: {
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_size: '50gb',
+            },
+          },
+        },
+      },
+    },
+  });
   await setTemplate(es, '.lists-default', {
     index_patterns: [`.lists-default-*`],
     mappings: {
-      "dynamic": "strict",
-      "properties": {
-        "name": {
-          "type": "keyword"
+      dynamic: 'strict',
+      properties: {
+        name: {
+          type: 'keyword',
         },
-        "deserializer": {
-          "type": "keyword"
+        deserializer: {
+          type: 'keyword',
         },
-        "serializer": {
-          "type": "keyword"
+        serializer: {
+          type: 'keyword',
         },
-        "description": {
-          "type": "keyword"
+        description: {
+          type: 'keyword',
         },
-        "type": {
-          "type": "keyword"
+        type: {
+          type: 'keyword',
         },
-        "tie_breaker_id": {
-          "type": "keyword"
+        tie_breaker_id: {
+          type: 'keyword',
         },
-        "meta": {
-          "enabled": "false",
-          "type": "object"
+        meta: {
+          enabled: 'false',
+          type: 'object',
         },
-        "created_at": {
-          "type": "date"
+        created_at: {
+          type: 'date',
         },
-        "updated_at": {
-          "type": "date"
+        updated_at: {
+          type: 'date',
         },
-        "created_by": {
-          "type": "keyword"
+        created_by: {
+          type: 'keyword',
         },
-        "updated_by": {
-          "type": "keyword"
+        updated_by: {
+          type: 'keyword',
         },
-        "version": {
-          "type": "keyword"
+        version: {
+          type: 'keyword',
         },
-        "immutable": {
-          "type": "boolean"
-        }
-      }
+        immutable: {
+          type: 'boolean',
+        },
+      },
     },
     settings: {
       index: {
@@ -519,44 +507,44 @@ export const createLegacyListsIndices = async (es: Client) => {
         },
       },
     },
-  })
+  });
   await setTemplate(es, '.items-default', {
     index_patterns: [`.items-default-*`],
     mappings: {
-      "dynamic": "strict",
-      "properties": {
-        "tie_breaker_id": {
-          "type": "keyword"
+      dynamic: 'strict',
+      properties: {
+        tie_breaker_id: {
+          type: 'keyword',
         },
-        "list_id": {
-          "type": "keyword"
+        list_id: {
+          type: 'keyword',
         },
-        "deserializer": {
-          "type": "keyword"
+        deserializer: {
+          type: 'keyword',
         },
-        "serializer": {
-          "type": "keyword"
+        serializer: {
+          type: 'keyword',
         },
-        "meta": {
-          "enabled": "false",
-          "type": "object"
+        meta: {
+          enabled: 'false',
+          type: 'object',
         },
-        "created_at": {
-          "type": "date"
+        created_at: {
+          type: 'date',
         },
-        "updated_at": {
-          "type": "date"
+        updated_at: {
+          type: 'date',
         },
-        "created_by": {
-          "type": "keyword"
+        created_by: {
+          type: 'keyword',
         },
-        "updated_by": {
-          "type": "keyword"
+        updated_by: {
+          type: 'keyword',
         },
-        "ip": {
-          "type": "ip"
+        ip: {
+          type: 'ip',
         },
-      }
+      },
     },
     settings: {
       index: {
@@ -569,4 +557,4 @@ export const createLegacyListsIndices = async (es: Client) => {
   });
   await createBootstrapIndex(es, '.lists-default');
   await createBootstrapIndex(es, '.items-default');
-}
+};
