@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -32,6 +33,9 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
 
 const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   try {
+    const INDEX_TEMPLATE_V830 = 'cloud_security_posture.scores';
+    await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
+
     // We always want to keep the index template updated
     await esClient.indices.putIndexTemplate({
       name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
@@ -67,6 +71,9 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
 
 const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   try {
+    const INDEX_TEMPLATE_V830 = 'cloud_security_posture.findings_latest';
+    await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
+
     // We want that our latest findings index template would be identical to the findings index template
     const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
       name: FINDINGS_INDEX_NAME,
@@ -100,6 +107,33 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
   }
 };
 
+const deleteIndexTemplateSafe = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  name: string
+) => {
+  try {
+    const resp = await esClient.indices.getIndexTemplate({
+      name,
+    });
+
+    if (resp.index_templates) {
+      await esClient.indices.deleteIndexTemplate({
+        name,
+      });
+
+      logger.info(`Deleted index template successfully [Name: ${name}]`);
+    }
+  } catch (e) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
+      logger.trace(`Index template no longer exists [Name: ${name}]`);
+    } else {
+      logger.error(`Failed to delete index template [Name: ${name}]`);
+      logger.error(e);
+    }
+  }
+};
+
 const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, index: string) => {
   try {
     const isLatestIndexExists = await esClient.indices.exists({
@@ -110,9 +144,13 @@ const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, in
       await esClient.indices.create({
         index,
       });
+
+      logger.info(`Created index successfully [Name: ${index}]`);
+    } else {
+      logger.trace(`Index already exists [Name: ${index}]`);
     }
   } catch (e) {
-    logger.error(`Failed to create index [Index: ${index}]`);
+    logger.error(`Failed to create index [Name: ${index}]`);
     logger.error(e);
   }
 };
