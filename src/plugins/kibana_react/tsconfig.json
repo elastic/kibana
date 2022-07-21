@@ -7,7 +7,5 @@
     "declarationMap": true
   },
   "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
-  "references": [
-    { "path": "../kibana_utils/tsconfig.json" },
-  ]
+  "references": [{ "path": "../kibana_utils/tsconfig.json" }]
 }

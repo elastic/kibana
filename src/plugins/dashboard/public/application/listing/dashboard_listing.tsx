@@ -297,12 +297,7 @@ export const DashboardListing = ({
       {!showNoDataPage && (
         <TableListViewKibanaProvider
           savedObjectTaggingApi={savedObjectsTagging!}
-          applicationStart={{
-            getUrlForApp: core.application.getUrlForApp,
-            capabilities: {
-              advancedSettings: core.application.capabilities.advancedSettings,
-            },
-          }}
+          applicationStart={core.application}
           kibanaReactToMountPoint={toMountPoint}
           themeServiceStart={core.theme}
           toastStart={core.notifications.toasts}

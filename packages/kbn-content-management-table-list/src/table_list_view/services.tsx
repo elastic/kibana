@@ -10,6 +10,7 @@ import React, { FC, useContext } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core-theme-browser';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '../types';
 
@@ -22,8 +23,13 @@ export interface Services {
       advancedSettings?: {
         save?: boolean;
       };
-    };
-    getUrlForApp: (app: string, params: { path: string }) => string;
+    } & RecursiveReadonly<{
+      [x: string]: Record<string, boolean | Record<string, boolean>>;
+    }>;
+    getUrlForApp: (
+      app: string,
+      options: { path?: string; absolute?: boolean; deepLinkId?: string }
+    ) => string;
   };
   toast: {
     addDanger: (params: { title: MountPoint<HTMLElement>; text: string }) => void;

@@ -25,7 +25,7 @@ export interface DashboardAttributes {
   timeRestore: boolean;
   timeTo?: string;
   timeFrom?: string;
-  title?: string;
+  title: string;
   description?: string;
   panelsJSON: string;
   optionsJSON?: string;
@@ -33,7 +33,6 @@ export interface DashboardAttributes {
   uiStateJSON?: string;
   lastSavedTitle: string;
   refreshInterval?: RefreshInterval;
-  searchSource: ISearchSource;
   outcome?: ResolvedSimpleSavedObject['outcome'];
   aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
@@ -42,7 +41,10 @@ export interface DashboardAttributes {
   [key: string]: any;
 }
 
-export interface DashboardSavedObject extends SavedObject<DashboardAttributes> {
+export interface DashboardSavedObject
+  extends DashboardAttributes,
+    SavedObject<DashboardAttributes> {
+  searchSource: ISearchSource;
   getQuery(): Query;
   getFilters(): Filter[];
   getFullEditPath: (editMode?: boolean) => string;
