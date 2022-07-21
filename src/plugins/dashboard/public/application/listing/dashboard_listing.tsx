@@ -61,7 +61,6 @@ const toTableListViewSavedObject = (
     attributes: {
       ...savedObject.attributes,
       title: savedObject.attributes.title ?? '',
-      description: savedObject.attributes.description ?? '',
     },
   };
 };

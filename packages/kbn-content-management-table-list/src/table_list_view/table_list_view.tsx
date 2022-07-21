@@ -91,7 +91,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
 
 export type UserContentCommonSchema = SimpleSavedObject<{
   title: string;
-  description: string;
+  description?: string;
 }>;
 
 function TableListView<T extends UserContentCommonSchema>({

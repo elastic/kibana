@@ -10,7 +10,6 @@ import React, { FC, useContext } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core-theme-browser';
-import { RecursiveReadonly } from '@kbn/utility-types';
 
 import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '../types';
 
@@ -20,12 +19,10 @@ import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '
 export interface Services {
   application: {
     capabilities: {
-      advancedSettings?: {
+      advancedSettings: {
         save?: boolean;
       };
-    } & RecursiveReadonly<{
-      [x: string]: Record<string, boolean | Record<string, boolean>>;
-    }>;
+    };
     getUrlForApp: (
       app: string,
       options: { path?: string; absolute?: boolean; deepLinkId?: string }

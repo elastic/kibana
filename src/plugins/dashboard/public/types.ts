@@ -227,7 +227,7 @@ export interface DashboardAppServices {
 /** Those are the **required** attributes for UserContent and that TableListView depend on */
 export interface DashboardAttributesUserContent extends DashboardAttributes {
   title: string;
-  description: string;
+  description?: string;
 }
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
