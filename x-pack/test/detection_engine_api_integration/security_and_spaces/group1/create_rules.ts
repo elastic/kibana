@@ -74,8 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(savedQueryRule)
             .expect(200);
 
-          const bodyToCompare = removeServerGeneratedProperties(body);
-          expect(bodyToCompare.data_view_id).to.eql('my-data-view');
+          expect(body.data_view_id).to.eql('my-data-view');
         });
       });
 
