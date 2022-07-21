@@ -80,17 +80,17 @@ const getTraceItems = (
     .map((hit) => {
       const payload = hit.http.request?.body?.original;
       return {
-        processor: hit.processor,
-        parentId: hit?.parent?.id,
         traceId: hit.trace.id,
+        parentId: hit?.parent?.id,
+        processor: hit.processor,
         environment: hit.environment,
         request: {
+          timestamp: hit['@timestamp'],
+          method: hit.http.request.method,
           path: hit.url.path,
           headers: combineHeaderFieldValues(hit.http.request.headers),
-          method: hit.http.request.method,
           body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
           statusCode: hit.http.response.status_code,
-          timestamp: hit['@timestamp'],
         },
         transaction: {
           id: hit.transaction.id,
