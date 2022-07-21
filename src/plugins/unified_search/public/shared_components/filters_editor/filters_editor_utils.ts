@@ -7,6 +7,17 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import { ConditionTypes } from './filters_editor_condition_types';
 
-/** Temporary: should be moved into @kbn/es-query **/
-export const isConditionalFilter = (filter: Filter) => filter.meta.params.conditional;
+export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
+  const { conditionalType } = filter.meta?.params || {};
+
+  if (conditionalType) {
+    switch (conditionalType) {
+      case 'or':
+        return ConditionTypes.OR;
+      case 'and':
+        return ConditionTypes.AND;
+    }
+  }
+};

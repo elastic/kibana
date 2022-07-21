@@ -42,22 +42,50 @@ const filters: Filter[] = [
   {
     meta: {
       index: '1234',
-      alias: null,
-      negate: false,
-      disabled: false,
       type: 'phrase',
       key: 'category.keyword',
       params: {
-        query: "Men's Accessories",
+        query: 'Filter 1',
       },
     },
-    query: {
-      match_phrase: {
-        'category.keyword': "Men's Accessories",
+  },
+  {
+    meta: {
+      params: {
+        conditionalType: 'or',
+        filters: [
+          {
+            meta: {
+              index: '1234',
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: 'Filter 2',
+              },
+            },
+          },
+          {
+            meta: {
+              index: '1234',
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: 'Filter 3',
+              },
+            },
+          },
+        ],
       },
     },
-    $state: {
-      store: 'appState',
+  },
+  {
+    meta: {
+      index: '1234',
+      type: 'phrase',
+      key: 'category.keyword',
+      params: {
+        query: 'Filter 4',
+      },
     },
   },
 ] as Filter[];

@@ -31,7 +31,7 @@ export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProp
 
   return (
     <FiltersEditorContextType.Provider value={{ dataView }}>
-      <FilterGroup filters={localFilters} conditionType={ConditionTypes.AND} />
+      <FilterGroup filters={localFilters} conditionType={ConditionTypes.AND} path={''} />
     </FiltersEditorContextType.Provider>
   );
 }
