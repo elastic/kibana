@@ -10,7 +10,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { EmbeddableInput } from '../lib';
 
 export const input = createSlice({
-  name: 'embeddable',
+  name: 'input',
   initialState: {} as EmbeddableInput,
   reducers: {
     setDisabledActions(state, action: PayloadAction<EmbeddableInput['disabledActions']>) {
@@ -52,7 +52,7 @@ export const input = createSlice({
     set(state, action: PayloadAction<EmbeddableInput>) {
       return action.payload;
     },
-    update(state, action: PayloadAction<EmbeddableInput>) {
+    update(state, action: PayloadAction<Partial<EmbeddableInput>>) {
       return { ...state, ...action.payload };
     },
   },

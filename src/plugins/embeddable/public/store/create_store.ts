@@ -6,19 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { debounce } from 'lodash';
 import { combineReducers, Reducer, Store } from 'redux';
 import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit';
-import { filter } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  last,
+  pluck,
+  takeUntil,
+  Observable,
+} from 'rxjs';
 import reduceReducers from 'reduce-reducers';
-import type { EmbeddableInput, IEmbeddable } from '../lib';
+import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
 import { input } from './input_slice';
+import { output } from './output_slice';
 
 export interface State {
   input: EmbeddableInput;
+  output: EmbeddableOutput;
 }
 
-const GENERIC_REDUCER = combineReducers({ input: input.reducer }) as Reducer<State>;
+const GENERIC_REDUCER = combineReducers({
+  input: input.reducer,
+  output: output.reducer,
+}) as Reducer<State>;
 
 function createReducer(reducer?: ConfigureStoreOptions<State>['reducer']) {
   if (!reducer) {
@@ -35,28 +47,55 @@ export function createStore(
   embeddable: IEmbeddable,
   { reducer, ...options }: Partial<ConfigureStoreOptions<State>> = {}
 ): Store<State> {
+  const store = configureStore({ ...options, reducer: createReducer(reducer) });
+  const state$ = new Observable<State>((subscriber) => {
+    subscriber.add(store.subscribe(() => subscriber.next(store.getState())));
+  });
+  const input$ = embeddable.getInput$();
+  const output$ = embeddable.getOutput$();
+
   let isUpstreamUpdate = false;
   let isDownstreamUpdate = false;
 
-  const store = configureStore({ ...options, reducer: createReducer(reducer) });
-  const onUpdate = debounce(() => {
-    isDownstreamUpdate = true;
-    embeddable.updateInput(store.getState().input);
-    isDownstreamUpdate = false;
-  });
-  const unsubscribe = store.subscribe(() => !isUpstreamUpdate && onUpdate());
-
-  embeddable
-    .getInput$()
-    .pipe(filter(() => !isDownstreamUpdate))
-    .subscribe({
-      next: () => {
-        isUpstreamUpdate = true;
-        store.dispatch(input.actions.set(embeddable.getInput()));
-        isUpstreamUpdate = false;
-      },
-      complete: unsubscribe,
+  state$
+    .pipe(
+      takeUntil(input$.pipe(last())),
+      filter(() => !isUpstreamUpdate),
+      pluck('input'),
+      distinctUntilChanged(),
+      debounceTime(0)
+    )
+    .subscribe((value) => {
+      isDownstreamUpdate = true;
+      embeddable.updateInput(value);
+      isDownstreamUpdate = false;
     });
+
+  state$
+    .pipe(
+      takeUntil(output$.pipe(last())),
+      filter(() => !isUpstreamUpdate),
+      pluck('output'),
+      distinctUntilChanged(),
+      debounceTime(0)
+    )
+    .subscribe((value) => {
+      isDownstreamUpdate = true;
+      embeddable.updateOutput(value);
+      isDownstreamUpdate = false;
+    });
+
+  input$.pipe(filter(() => !isDownstreamUpdate)).subscribe((value) => {
+    isUpstreamUpdate = true;
+    store.dispatch(input.actions.set(value));
+    isUpstreamUpdate = false;
+  });
+
+  output$.pipe(filter(() => !isDownstreamUpdate)).subscribe((value) => {
+    isUpstreamUpdate = true;
+    store.dispatch(output.actions.set(value));
+    isUpstreamUpdate = false;
+  });
 
   return store;
 }

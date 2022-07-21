@@ -101,10 +101,7 @@ const HelloWorldEmbeddablePanel = forwardRef<
       );
     }, [embeddable.store, title, viewMode]);
     useEffect(
-      () =>
-        embeddable.updateOutput({
-          loading,
-        }),
+      () => void embeddable.store.dispatch(actions.output.setLoading(loading)),
       [embeddable, loading]
     );
     useImperativeHandle(ref, () => ({ embeddable }));
@@ -232,7 +229,10 @@ interface DefaultWithErrorProps extends HelloWorldEmbeddablePanelProps {
 export function DefaultWithError({ message, ...props }: DefaultWithErrorProps) {
   const ref = useRef<React.ComponentRef<typeof HelloWorldEmbeddablePanel>>(null);
 
-  useEffect(() => ref.current?.embeddable.updateOutput({ error: new Error(message) }), [message]);
+  useEffect(
+    () => void ref.current?.embeddable.store.dispatch(actions.output.setError(new Error(message))),
+    [message]
+  );
 
   return <HelloWorldEmbeddablePanel ref={ref} {...props} />;
 }
@@ -258,7 +258,10 @@ export function DefaultWithCustomError({ message, ...props }: DefaultWithErrorPr
       }),
     []
   );
-  useEffect(() => ref.current?.embeddable.updateOutput({ error: new Error(message) }), [message]);
+  useEffect(
+    () => void ref.current?.embeddable.store.dispatch(actions.output.setError(new Error(message))),
+    [message]
+  );
 
   return <HelloWorldEmbeddablePanel ref={ref} {...props} />;
 }

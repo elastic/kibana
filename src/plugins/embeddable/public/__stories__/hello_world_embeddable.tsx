@@ -37,8 +37,4 @@ export class HelloWorldEmbeddable extends Embeddable {
   setErrorRenderer(renderer: IEmbeddable['renderError']) {
     this.renderError = renderer;
   }
-
-  updateOutput(...args: Parameters<Embeddable['updateOutput']>): void {
-    return super.updateOutput(...args);
-  }
 }

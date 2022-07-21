@@ -7,8 +7,10 @@
  */
 
 import { input } from './input_slice';
+import { output } from './output_slice';
 
 export { createStore, State } from './create_store';
 export const actions = {
   input: input.actions,
+  output: output.actions,
 };
