@@ -1465,7 +1465,6 @@
     "core.euiDataGrid.ariaLabel": "{label}; {page}/{pageCount}ページ。",
     "core.euiDataGrid.ariaLabelledBy": "{page}/{pageCount}ページ。",
     "core.euiDataGrid.screenReaderNotice": "セルにはインタラクティブコンテンツが含まれます。",
-    "core.euiDataGridCell.position": "行：{row}、列：{col}",
     "core.euiDataGridCellActions.expandButtonTitle": "クリックするか enter を押すと、セルのコンテンツとインタラクトできます。",
     "core.euiDataGridHeaderCell.headerActions": "ヘッダーアクション",
     "core.euiDataGridPagination.detailedPaginationLabel": "前のグリッドのページネーション：{label}",

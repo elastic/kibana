@@ -1463,7 +1463,6 @@
     "core.euiDataGrid.ariaLabel": "{label} ; page {page} sur {pageCount}.",
     "core.euiDataGrid.ariaLabelledBy": "Page {page} sur {pageCount}.",
     "core.euiDataGrid.screenReaderNotice": "Cette cellule contient du contenu interactif.",
-    "core.euiDataGridCell.position": "Ligne : {row} ; colonne : {col}",
     "core.euiDataGridCellActions.expandButtonTitle": "Cliquez ou appuyez sur Entrée pour interagir avec le contenu de la cellule.",
     "core.euiDataGridHeaderCell.headerActions": "Actions d'en-tête",
     "core.euiDataGridPagination.detailedPaginationLabel": "Pagination pour la grille précédente : {label}",
