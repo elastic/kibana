@@ -6,10 +6,12 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChangePoint } from '../../../common/types';
-import { ImpactBar } from './impact_bar';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+
+import { MiniHistogram } from '../mini_histogram';
+
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -29,25 +31,45 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
   const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
     {
-      field: 'score',
+      field: 'fieldName',
+      name: i18n.translate(
+        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
+        { defaultMessage: 'Field name' }
+      ),
+      sortable: true,
+    },
+    {
+      field: 'fieldValue',
+      name: i18n.translate(
+        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
+        { defaultMessage: 'Field value' }
+      ),
+      render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
+      sortable: true,
+    },
+    {
+      field: 'pValue',
       name: (
         <>
           {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel',
+            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel',
             {
-              defaultMessage: 'Score',
+              defaultMessage: 'Log rate',
             }
           )}
         </>
       ),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { score }) => {
-        return (
-          <>
-            <ImpactBar size="m" value={Number(score.toFixed(2))} label={score.toFixed(2)} />
-          </>
-        );
+      render: (_, { histogram, fieldName, fieldValue }) => {
+        return histogram ? (
+          <MiniHistogram chartData={histogram} label={`${fieldName}:${fieldValue}`} />
+        ) : null;
       },
+      sortable: false,
+    },
+    {
+      field: 'pValue',
+      name: 'p-value',
+      render: (pValue: number) => pValue.toPrecision(3),
       sortable: true,
     },
     {
@@ -68,29 +90,6 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
       },
       sortable: true,
     },
-    {
-      field: 'fieldName',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldNameLabel',
-        { defaultMessage: 'Field name' }
-      ),
-      sortable: true,
-    },
-    {
-      field: 'fieldValue',
-      name: i18n.translate(
-        'xpack.aiops.correlations.failedTransactions.correlationsTable.fieldValueLabel',
-        { defaultMessage: 'Field value' }
-      ),
-      render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
-      sortable: true,
-    },
-    {
-      field: 'pValue',
-      name: 'p-value',
-      render: (pValue: number) => pValue.toPrecision(3),
-      sortable: true,
-    },
   ];
 
   const onChange = useCallback((tableSettings) => {
@@ -105,7 +104,12 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
 
     const itemCount = changePointData?.length ?? 0;
     return {
-      pageOfItems: changePointData?.slice(pageStart, pageStart + pageSize),
+      pageOfItems: changePointData
+        // Temporary default sorting by ascending pValue until we add native table sorting
+        ?.sort((a, b) => {
+          return (a?.pValue ?? 1) - (b?.pValue ?? 0);
+        })
+        .slice(pageStart, pageStart + pageSize),
       pagination: {
         pageIndex,
         pageSize,
@@ -119,7 +123,7 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
     <EuiBasicTable
       compressed
       columns={columns}
-      items={pageOfItems ?? []}
+      items={pageOfItems}
       noItemsMessage={noDataText}
       onChange={onChange}
       pagination={pagination}
