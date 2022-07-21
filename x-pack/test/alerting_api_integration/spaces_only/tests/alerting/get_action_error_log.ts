@@ -151,9 +151,6 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
-            schedule: {
-              interval: '5s',
-            },
             actions: [
               {
                 id: createdConnector1.id,
@@ -171,7 +168,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 2 }]]));
+      await waitForEvents(createdRule.id, 'alerting', new Map([['execute', { gte: 1 }]]));
       await waitForEvents(createdRule.id, 'actions', new Map([['execute', { gte: 2 }]]));
 
       const response = await supertest.get(
