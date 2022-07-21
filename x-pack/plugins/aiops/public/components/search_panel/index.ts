@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const setDocTitle = (title) => (document.title = `${title} - Kibana`);
+export { SearchPanel } from './search_panel';
