@@ -124,7 +124,9 @@ export async function getFailedAndUnrecognizedTasksPerDay({
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
-      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${errorMessage}`,
+      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - ${JSON.stringify(
+        err
+      )}`,
       {
         tags: ['alerting', 'telemetry-failed'],
         error: { stack_trace: err.stack },

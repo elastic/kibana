@@ -180,7 +180,7 @@ export async function getExecutionsPerDayCount({
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
-      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${errorMessage}`,
+      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`,
       {
         tags: ['alerting', 'telemetry-failed'],
         error: { stack_trace: err.stack },
@@ -251,7 +251,9 @@ export async function getExecutionTimeoutsPerDayCount({
     const errorMessage = err && err.message ? err.message : err.toString();
 
     logger.warn(
-      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${errorMessage}`,
+      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
+        err
+      )}`,
       {
         tags: ['alerting', 'telemetry-failed'],
         error: { stack_trace: err.stack },

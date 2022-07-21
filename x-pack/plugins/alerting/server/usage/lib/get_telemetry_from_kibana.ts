@@ -221,7 +221,7 @@ export async function getTotalCountAggregations({
     const errorMessage = err && err.message ? err.message : err.toString();
 
     logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${errorMessage}`,
+      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
       {
         tags: ['alerting', 'telemetry-failed'],
         error: { stack_trace: err.stack },
@@ -310,10 +310,13 @@ export async function getTotalCountInUse({
     };
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(`Error executing alerting telemetry task: getTotalCountInUse - ${errorMessage}`, {
-      tags: ['alerting', 'telemetry-failed'],
-      error: { stack_trace: err.stack },
-    });
+    logger.warn(
+      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
+      {
+        tags: ['alerting', 'telemetry-failed'],
+        error: { stack_trace: err.stack },
+      }
+    );
     return {
       hasErrors: true,
       errorMessage,

@@ -1415,7 +1415,7 @@ describe('event log telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getExecutionsPerDayCount - oh no"`
+        `"Error executing alerting telemetry task: getExecutionsPerDayCount - {}"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
@@ -1515,7 +1515,7 @@ describe('event log telemetry', () => {
       const loggerCall = logger.warn.mock.calls[0][0];
       const loggerMeta = logger.warn.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(
-        `"Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - oh no"`
+        `"Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - {}"`
       );
       expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();

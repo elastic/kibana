@@ -125,7 +125,7 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getTotalCount - oh no`
+      `Error executing actions telemetry task: getTotalCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -312,7 +312,7 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getInUseTotalCount - oh no`
+      `Error executing actions telemetry task: getInUseTotalCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {
@@ -766,7 +766,7 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - oh no`
+      `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
 Object {

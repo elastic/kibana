@@ -204,7 +204,10 @@ export function createAlertingUsageCollector(
     },
     schema: {
       has_errors: { type: 'boolean' },
-      error_messages: { type: 'array', items: { type: 'keyword' } },
+      error_messages: {
+        type: 'array',
+        items: { type: 'keyword' },
+      },
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
       count_disabled_total: { type: 'long' },

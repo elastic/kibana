@@ -88,7 +88,7 @@ export async function getTotalCount(
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
 
-    logger.warn(`Error executing actions telemetry task: getTotalCount - ${errorMessage}`);
+    logger.warn(`Error executing actions telemetry task: getTotalCount - ${JSON.stringify(err)}`);
 
     return {
       hasErrors: true,
@@ -380,7 +380,9 @@ export async function getInUseTotalCount(
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
 
-    logger.warn(`Error executing actions telemetry task: getInUseTotalCount - ${errorMessage}`);
+    logger.warn(
+      `Error executing actions telemetry task: getInUseTotalCount - ${JSON.stringify(err)}`
+    );
     return {
       hasErrors: true,
       errorMessage,
@@ -588,7 +590,7 @@ export async function getExecutionsPerDayCount(
   } catch (err) {
     const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - ${errorMessage}`
+      `Error executing actions telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`
     );
     return {
       hasErrors: true,
