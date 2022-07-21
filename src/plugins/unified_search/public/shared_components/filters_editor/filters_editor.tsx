@@ -12,10 +12,10 @@ import type { Filter } from '@kbn/es-query';
 
 export interface FiltersEditorProps {
   filters: Filter[];
-  dataViews: DataView[];
+  dataView: DataView;
   onChange: (filters: []) => void;
 }
 
-export function FiltersEditor({ onChange, dataViews, filters }: FiltersEditorProps) {
+export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProps) {
   return <h2> Filter Editor</h2>;
 }
