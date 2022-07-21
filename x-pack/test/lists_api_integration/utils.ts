@@ -21,9 +21,18 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
+import {
+  setPolicy,
+  setTemplate,
+  createBootstrapIndex
+} from '@kbn/securitysolution-es-utils';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
+
 import { countDownTest } from '../detection_engine_api_integration/utils';
+import listMappings from './mock_list_mappings.json';
+import itemsMappings from './mock_items_mappings.json';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -414,3 +423,73 @@ export const waitForTextListItems = async (
 ): Promise<void> => {
   await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, log, item, fileName)));
 };
+
+/**
+ * Convenience function for creating legacy index templates to
+ * test out logic updating to new index templates
+ * @param es es client 
+ */
+export const createLegacyListsIndices = async (es: Client) => {
+  await setPolicy(
+    es,
+    '.lists-default',
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "min_age": "0ms",
+            "actions": {
+              "rollover": {
+                "max_size": "50gb"
+              }
+            }
+          }
+        }
+      }
+    }
+  );
+  await setPolicy(
+    es,
+    '.items-default',
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "min_age": "0ms",
+            "actions": {
+              "rollover": {
+                "max_size": "50gb"
+              }
+            }
+          }
+        }
+      }
+    }
+  );
+  await setTemplate(es, '.lists-default', {
+    index_patterns: [`.lists-default-*`],
+    mappings: listMappings,
+    settings: {
+      index: {
+        lifecycle: {
+          name: '.lists-default',
+          rollover_alias: '.lists-default',
+        },
+      },
+    },
+  })
+  await setTemplate(es, '.items-default', {
+    index_patterns: [`.items-default-*`],
+    mappings: itemsMappings,
+    settings: {
+      index: {
+        lifecycle: {
+          name: '.items-default',
+          rollover_alias: '.items-default',
+        },
+      },
+    },
+  });
+  await createBootstrapIndex(es, '.lists-default');
+  await createBootstrapIndex(es, '.items-default');
+}

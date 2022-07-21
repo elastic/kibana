@@ -8,7 +8,8 @@
 import { getListTemplate } from './get_list_template';
 
 jest.mock('./list_mappings.json', () => ({
-  listMappings: {},
+  dynamic: 'strict',
+  properties: {},
 }));
 
 describe('get_list_template', () => {
@@ -25,12 +26,10 @@ describe('get_list_template', () => {
     expect(template).toEqual({
       index_patterns: ['some_index-*'],
       template: {
-        mappings: { listMappings: {} },
-        settings: { index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } } },
-        mapping:  {
-          total_fields:  {
-            limit: 10000,
-          },
+        mappings: { dynamic: 'strict', properties: {} },
+        settings: {
+          index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } },
+          mapping: { total_fields: { limit: 10000 } },
         },
       },
     });

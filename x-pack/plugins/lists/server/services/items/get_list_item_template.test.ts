@@ -26,9 +26,9 @@ describe('get_list_item_template', () => {
       index_patterns: ['some_index-*'],
       template: {
         mappings: { listMappings: {} },
-        settings: { index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } } }, 
+        settings: { index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } } },
         mapping: {
-          total_fields:  {
+          total_fields: {
             limit: 10000,
           },
         },
