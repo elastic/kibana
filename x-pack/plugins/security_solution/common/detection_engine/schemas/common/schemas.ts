@@ -344,6 +344,16 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
+export const thresholdWithCardinality = t.intersection([
+  thresholdFieldNormalized,
+  t.exact(
+    t.type({
+      cardinality: t.array(thresholdCardinalityField),
+    })
+  ),
+]);
+export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
+
 // New terms rule type currently only supports a single term, but should support more in the future
 export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
 export type NewTermsFields = t.TypeOf<typeof newTermsFields>;

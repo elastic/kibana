@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export {
-  ObservabilityTour,
-  observTourActiveStorageKey,
-  observTourStepStorageKey,
-  useObservabilityTourContext,
-} from './tour';
+export { BulkActionsHeader } from './column_header';
+export { BulkActionsRowCell } from './row_cell';
