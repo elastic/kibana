@@ -3941,13 +3941,7 @@
           "description": [],
           "signature": [
             "(esClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.ElasticsearchClient",
-              "text": "ElasticsearchClient"
-            },
+            "ElasticsearchClient",
             ", spaceId: string, user: string) => ",
             {
               "pluginId": "lists",

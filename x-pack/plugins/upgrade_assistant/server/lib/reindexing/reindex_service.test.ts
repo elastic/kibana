@@ -10,8 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { TransportResult } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   ReindexOperation,
