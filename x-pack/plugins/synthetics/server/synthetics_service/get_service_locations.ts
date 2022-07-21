@@ -11,7 +11,6 @@ import {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
-  Location,
   ThrottlingOptions,
   BandwidthLimitKey,
   LocationStatus,

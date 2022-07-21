@@ -95,7 +95,10 @@ describe('useLocationsAPI', () => {
           {
             concurrentMonitors: 1,
             id: 'newPolicy',
-            latLon: '',
+            geo: {
+              lat: '',
+              lon: '',
+            },
             name: 'new',
             policyHostId: 'newPolicy',
           },
