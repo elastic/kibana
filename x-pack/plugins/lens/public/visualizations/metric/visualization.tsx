@@ -20,7 +20,7 @@ import { Visualization, OperationMetadata, DatasourceLayers } from '../../types'
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { MetricDimensionEditor } from './dimension_editor';
-import { MetricToolbar } from './toolbar';
+import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -368,7 +368,7 @@ export const getMetricVisualization = ({
   renderToolbar(domElement, props) {
     render(
       <I18nProvider>
-        <MetricToolbar {...props} />
+        <Toolbar {...props} />
       </I18nProvider>,
       domElement
     );
