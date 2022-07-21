@@ -265,18 +265,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.home.infraTabLabel', {
-              defaultMessage: 'Infrastructure',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <BetaBadge />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <BetaBadge />,
+      label: i18n.translate('xpack.apm.home.infraTabLabel', {
+        defaultMessage: 'Infrastructure',
+      }),
+
       hidden: !showInfraTab,
     },
     {
@@ -310,18 +303,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       hidden: !config.profilingEnabled,
-      label: (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-              defaultMessage: 'Profiling',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <TechnicalPreviewBadge icon="beaker" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+        defaultMessage: 'Profiling',
+      }),
     },
     {
       key: 'alerts',
@@ -329,27 +314,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: (
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.home.alertsTabLabel', {
-              defaultMessage: 'Alerts',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <TechnicalPreviewBadge icon="beaker" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
+        defaultMessage: 'Alerts',
+      }),
       hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, append }) => ({
       href,
       label,
+      append,
       isSelected: key === selectedTab,
     }));
 }
