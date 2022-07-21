@@ -70,13 +70,25 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Start handler clears possibly hovered or pinned
+  // change points on analysis refresh.
+  function startHandler() {
+    if (onPinnedChangePoint) {
+      onPinnedChangePoint(null);
+    }
+    if (onSelectedChangePoint) {
+      onSelectedChangePoint(null);
+    }
+    start();
+  }
+
   return (
     <>
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
-        onRefresh={start}
+        onRefresh={startHandler}
         onCancel={cancel}
       />
       {data?.changePoints ? (
