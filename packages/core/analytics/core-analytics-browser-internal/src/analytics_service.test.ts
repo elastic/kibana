@@ -195,6 +195,7 @@ describe('AnalyticsService', () => {
 
   test('setup should expose all the register APIs, reportEvent and opt-in', () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    injectedMetadata.getElasticsearchInfo.mockReturnValue({});
     expect(analyticsService.setup({ injectedMetadata })).toStrictEqual({
       registerShipper: expect.any(Function),
       registerContextProvider: expect.any(Function),
@@ -212,7 +213,13 @@ describe('AnalyticsService', () => {
     analyticsService.setup({ injectedMetadata });
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[3][0].context$)
-    ).resolves.toMatchInlineSnapshot(`undefined`);
+    ).resolves.toMatchInlineSnapshot(`
+            Object {
+              "clusterName": undefined,
+              "clusterUuid": undefined,
+              "clusterVersion": undefined,
+            }
+          `);
   });
 
   test('setup should register the elasticsearch info context provider (with info)', async () => {

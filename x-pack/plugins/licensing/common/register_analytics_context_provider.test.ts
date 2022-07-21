@@ -43,9 +43,9 @@ describe('registerAnalyticsContextProvider', () => {
     await expect(
       firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
     ).resolves.toEqual({
-      license_id: 'uid',
-      license_status: 'active',
-      license_type: 'basic',
+      licenseId: 'uid',
+      licenseStatus: 'active',
+      licenseType: 'basic',
     });
   });
 });
