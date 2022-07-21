@@ -87,7 +87,7 @@ export { Plugin } from './plugin';
 export { loadRules } from './application/lib/rule_api/rules';
 export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
 export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
-export { loadRuleTypes } from './application/lib/rule_api';
+export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';

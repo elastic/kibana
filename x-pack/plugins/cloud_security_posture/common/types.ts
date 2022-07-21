@@ -6,6 +6,7 @@
  */
 
 import type { PackagePolicy, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
@@ -95,3 +96,5 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
   rules: CspRulesStatus;
 }
+
+export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
