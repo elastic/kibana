@@ -117,9 +117,9 @@
           "Type",
           "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
           "NumericRollingStrategyConfig",
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { size: ",
+          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           "ByteSizeValue",
-          "; type: \"size-limit\"; }> | Readonly<{} & { interval: moment.Duration; type: \"time-interval\"; modulate: boolean; }>; fileName: string; }>>"
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; fileName: string; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
         "deprecated": false,
@@ -142,7 +142,7 @@
           "AppenderConfigType",
           ">>; loggers: ",
           "Type",
-          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -165,7 +165,7 @@
           "Type",
           "<string>; level: ",
           "Type",
-          "<\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\">; }>"
+          "<\"error\" | \"all\" | \"off\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
