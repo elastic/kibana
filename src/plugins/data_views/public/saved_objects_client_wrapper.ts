@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsUpdateOptions,
-  SimpleSavedObject,
+  ISimpleSavedObject,
 } from '@kbn/core/public';
 import { omit } from 'lodash';
 import { DataViewSavedObjectConflictError } from '../common/errors';
@@ -26,7 +26,7 @@ type SOClient = Pick<
   'find' | 'resolve' | 'update' | 'create' | 'delete'
 >;
 
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
+const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: ISimpleSavedObject): SavedObject<T> =>
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
