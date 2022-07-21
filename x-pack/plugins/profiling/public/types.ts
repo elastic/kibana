@@ -13,15 +13,18 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
