@@ -3,3 +3,4 @@ package_paths:
   #  TODO remove temp
   - /packages/snapshot
   - /packages/test-packages
+  - /packages/signed-test-packages
