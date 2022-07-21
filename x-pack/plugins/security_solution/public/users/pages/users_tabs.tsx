@@ -20,7 +20,7 @@ import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_
 import type { UpdateDateRange } from '../../common/components/charts/common';
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
-import { EventsQueryTabBody } from '../../common/components/events_tab/events_query_tab_body';
+import { EventsQueryTabBody } from '../../common/components/events_tab';
 import { TimelineId } from '../../../common/types';
 
 export const UsersTabs = memo<UsersTabsProps>(

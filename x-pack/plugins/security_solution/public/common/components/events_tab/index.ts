@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { EventsQueryTabBody } from './events_query_tab_body';
 export {
   alertsHistogramConfig,
   alertsStackByOptions,

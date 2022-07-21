@@ -6,7 +6,6 @@
  */
 
 import type { ActionCreator } from 'typescript-fsa';
-import { Optional } from 'utility-types';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 
@@ -47,10 +46,7 @@ export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
 
 type KeyUsersDetailsNavTab = `${UsersDetailsTableType}`;
 
-export type UsersDetailsNavTab = Optional<
-  Record<KeyUsersDetailsNavTab, NavTab>,
-  'anomalies' | 'userRisk'
->;
+export type UsersDetailsNavTab = Partial<Record<KeyUsersDetailsNavTab, NavTab>>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {

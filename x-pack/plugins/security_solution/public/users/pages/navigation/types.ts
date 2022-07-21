@@ -12,7 +12,7 @@ import type { NavTab } from '../../../common/components/navigation/types';
 
 type KeyUsersNavTab = `${UsersTableType}`;
 
-export type UsersNavTab = Optional<Record<KeyUsersNavTab, NavTab>, 'anomalies' | 'userRisk'>;
+export type UsersNavTab = Partial<Record<KeyUsersNavTab, NavTab>>;
 export interface QueryTabBodyProps {
   type: UsersType;
   startDate: GlobalTimeArgs['from'];
