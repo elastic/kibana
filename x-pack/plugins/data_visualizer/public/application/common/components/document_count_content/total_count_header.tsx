@@ -17,7 +17,7 @@ export const TotalCountHeader = ({
   loading,
 }: {
   totalCount: number;
-  loading: boolean;
+  loading?: boolean;
   approximate?: boolean;
 }) => {
   return (

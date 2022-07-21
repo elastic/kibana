@@ -36,6 +36,7 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -333,9 +334,18 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
-        defaultMessage: 'Alerts',
-      }),
+      label: (
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.apm.home.alertsTabLabel', {
+              defaultMessage: 'Alerts',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TechnicalPreviewBadge icon="beaker" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
