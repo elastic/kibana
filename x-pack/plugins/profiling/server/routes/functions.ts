@@ -13,15 +13,8 @@ import { createTopNFunctions } from '../../common/functions';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
+import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter, ProjectTimeQuery } from './query';
-import {
-  mgetExecutables,
-  mgetStackFrames,
-  mgetStackTraces,
-  searchEventsGroupByStackTrace,
-} from './stacktrace';
 
 async function queryTopNFunctions({
   logger,
@@ -41,48 +34,22 @@ async function queryTopNFunctions({
   sampleSize: number;
 }): Promise<any> {
   return withProfilingSpan('query_topn_functions', async () => {
-    const eventsIndex = await findDownsampledIndex({ logger, client, index, filter, sampleSize });
-
-    const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace({
-      logger,
+    getExecutablesAndStackTraces({
       client,
-      index: eventsIndex,
       filter,
-    });
-
-    // Manual downsampling if totalCount exceeds sampleSize by 10%.
-    if (totalCount > sampleSize * 1.1) {
-      let downsampledTotalCount = totalCount;
-      const p = sampleSize / totalCount;
-      logger.info('downsampling events with p=' + p);
-      await logExecutionLatency(logger, 'downsampling events', async () => {
-        downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
-      });
-      logger.info('downsampled total count: ' + downsampledTotalCount);
-      logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
-    }
-
-    const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
+      index,
       logger,
-      client,
-      events: stackTraceEvents,
+      sampleSize,
+    }).then(({ stackFrames, stackTraceEvents, stackTraces, executables }) => {
+      return createTopNFunctions(
+        stackTraceEvents,
+        stackTraces,
+        stackFrames,
+        executables,
+        startIndex,
+        endIndex
+      );
     });
-
-    return withProfilingSpan('mget_stack_frames_and_executables', () =>
-      Promise.all([
-        mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
-        mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
-      ]).then(([stackFrames, executables]) => {
-        return createTopNFunctions(
-          stackTraceEvents,
-          stackTraces,
-          stackFrames,
-          executables,
-          startIndex,
-          endIndex
-        );
-      })
-    );
   });
 }
 

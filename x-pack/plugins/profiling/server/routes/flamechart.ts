@@ -11,17 +11,10 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
-import { getClient } from './compat';
-import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
-import { createCommonFilter, ProjectTimeQuery } from './query';
-import {
-  mgetExecutables,
-  mgetStackFrames,
-  mgetStackTraces,
-  searchEventsGroupByStackTrace,
-} from './stacktrace';
 import { withProfilingSpan } from '../utils/with_profiling_span';
+import { getClient } from './compat';
+import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
+import { createCommonFilter, ProjectTimeQuery } from './query';
 
 async function queryFlameGraph({
   logger,
@@ -37,38 +30,21 @@ async function queryFlameGraph({
   sampleSize: number;
 }): Promise<FlameGraph> {
   return withProfilingSpan('get_flamegraph', async () => {
-    const eventsIndex = await findDownsampledIndex({ logger, client, index, filter, sampleSize });
-
-    const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace({
+    return getExecutablesAndStackTraces({
       logger,
       client,
-      index: eventsIndex,
+      index,
       filter,
-    });
-
-    // Manual downsampling if totalCount exceeds sampleSize by 10%.
-    let downsampledTotalCount = totalCount;
-    if (totalCount > sampleSize * 1.1) {
-      const p = sampleSize / totalCount;
-      logger.info('downsampling events with p=' + p);
-      await logExecutionLatency(logger, 'downsampling events', async () => {
-        downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
-      });
-      logger.info('downsampled total count: ' + downsampledTotalCount);
-      logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
-    }
-
-    const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
-      logger,
-      client,
-      events: stackTraceEvents,
-    });
-
-    return withProfilingSpan('mget_stack_frames_and_executables', () =>
-      Promise.all([
-        mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
-        mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
-      ]).then(([stackFrames, executables]) => {
+      sampleSize,
+    }).then(
+      ({
+        stackTraces,
+        executables,
+        stackFrames,
+        eventsIndex,
+        downsampledTotalCount,
+        stackTraceEvents,
+      }) => {
         return new FlameGraph(
           eventsIndex.sampleRate,
           downsampledTotalCount,
@@ -77,7 +53,7 @@ async function queryFlameGraph({
           stackFrames,
           executables
         );
-      })
+      }
     );
   });
 }
