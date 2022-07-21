@@ -6,6 +6,7 @@
  */
 
 export const elasticAgentStandaloneManifest = `---
+# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -280,6 +281,7 @@ metadata:
 `;
 
 export const elasticAgentManagedManifest = `---
+# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
