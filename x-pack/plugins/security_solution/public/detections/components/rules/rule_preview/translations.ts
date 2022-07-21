@@ -68,7 +68,7 @@ export const QUERY_GRAPH_COUNT = i18n.translate(
 export const THRESHOLD_QUERY_GRAPH_COUNT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryThresholdGraphCountLabel',
   {
-    defaultMessage: 'Cumulative Threshold Count',
+    defaultMessage: 'Cumulative Event Count',
   }
 );
 

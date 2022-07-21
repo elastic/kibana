@@ -91,7 +91,7 @@
                 "section": "def-common.RuleSnooze",
                 "text": "RuleSnooze"
               },
-              " | undefined; isSnoozedUntil?: Date | null | undefined; }"
+              " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
             "deprecated": false
@@ -2215,13 +2215,7 @@
             "label": "scopedClusterClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -2929,9 +2923,9 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>({ options: { fields, ...options }, excludeFromPublicApi, }?: { options?: ",
+          " = never>({ options: { fields, ...options }, excludeFromPublicApi, includeSnoozeData, }?: { options?: ",
           "FindOptions",
-          " | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          " | undefined; excludeFromPublicApi?: boolean | undefined; includeSnoozeData?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4915,6 +4909,19 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.activeSnoozes",
+            "type": "Array",
+            "tags": [],
+            "label": "activeSnoozes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.isSnoozedUntil",
             "type": "CompoundType",
             "tags": [],
@@ -6170,7 +6177,7 @@
             "section": "def-common.RuleSnooze",
             "text": "RuleSnooze"
           },
-          " | undefined; isSnoozedUntil?: Date | null | undefined; }"
+          " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
