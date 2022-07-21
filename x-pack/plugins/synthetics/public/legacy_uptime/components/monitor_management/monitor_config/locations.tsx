@@ -10,9 +10,11 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup, EuiFormRow, EuiText, EuiBadge, EuiIconTip } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useRouteMatch } from 'react-router-dom';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorServiceLocations, LocationStatus } from '../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../plugin';
+import { MONITOR_EDIT_ROUTE } from '../../../../../common/constants';
 
 interface Props {
   selectedLocations: MonitorServiceLocations;
@@ -34,6 +36,8 @@ export const ServiceLocations = ({
     {}
   );
   const { locations } = useSelector(monitorManagementListSelector);
+
+  const isEditMonitor = useRouteMatch(MONITOR_EDIT_ROUTE);
 
   const onLocationChange = (optionId: string) => {
     const isSelected = !checkboxIdToSelectedMap[optionId];
@@ -100,7 +104,7 @@ export const ServiceLocations = ({
           return {
             ...location,
             label,
-            disabled: isPrivateDisabled,
+            disabled: isPrivateDisabled && !isEditMonitor?.isExact,
             'data-test-subj': `syntheticsServiceLocation--${location.id}`,
           };
         })}

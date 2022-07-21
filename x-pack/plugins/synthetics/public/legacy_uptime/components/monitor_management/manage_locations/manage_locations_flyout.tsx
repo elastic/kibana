@@ -42,7 +42,10 @@ export const ManageLocationsFlyout = () => {
 
   const isOpen = useSelector(selectManageFlyoutOpen);
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({ isOpen });
+  const { onSubmit, saveLoading, fetchLoading, deleteLoading, privateLocations, onDelete } =
+    useLocationsAPI({
+      isOpen,
+    });
 
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
@@ -74,12 +77,12 @@ export const ManageLocationsFlyout = () => {
             <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
           </EuiCallOut>
         )}
-        {privateLocations.length === 0 && !loading && !isAddingNew ? (
+        {privateLocations.length === 0 && !(saveLoading || fetchLoading) && !isAddingNew ? (
           <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />
         ) : (
           <PrivateLocationsList
             privateLocations={privateLocations}
-            loading={loading}
+            loading={fetchLoading}
             onDelete={onDelete}
             onSubmit={onSubmit}
             hasFleetPermissions={hasFleetPermissions}
@@ -101,7 +104,7 @@ export const ManageLocationsFlyout = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isLoading={loading}
+                isLoading={saveLoading || fetchLoading}
                 disabled={!hasFleetPermissions || !canSave}
                 onClick={() => setIsAddingNew(true)}
               >

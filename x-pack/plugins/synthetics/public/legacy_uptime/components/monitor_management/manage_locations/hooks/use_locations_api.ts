@@ -25,7 +25,7 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
     return Promise.resolve(null);
   }, [formData, deleteId, isOpen]);
 
-  const { loading } = useFetcher(async () => {
+  const { loading: saveLoading } = useFetcher(async () => {
     if (currentPrivateLocations && formData) {
       const existingLocations = currentPrivateLocations.filter((loc) => loc.id !== formData.id);
 
@@ -58,9 +58,11 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   }, [deleteId, currentPrivateLocations]);
 
   return {
-    loading: Boolean(loading || deleteLoading || fetchLoading),
     onSubmit,
     onDelete,
+    fetchLoading: Boolean(fetchLoading || Boolean(formData)),
+    saveLoading: Boolean(saveLoading),
+    deleteLoading: Boolean(deleteLoading),
     privateLocations: currentPrivateLocations ?? [],
   };
 };

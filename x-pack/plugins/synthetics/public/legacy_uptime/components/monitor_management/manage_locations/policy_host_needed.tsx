@@ -13,7 +13,7 @@ import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_cont
 export const PolicyHostNeeded = () => {
   const { basePath } = useUptimeSettingsContext();
   return (
-    <EuiCallOut title="Fleet policy host needed!" color="warning" iconType="help">
+    <EuiCallOut title={AGENT_POLICY_NEEDED} color="warning" iconType="help">
       <p>
         {ADD_AGENT_POLICY_DESCRIPTION}
         <EuiLink href="#">{READ_THE_DOCS}</EuiLink>.
@@ -29,6 +29,9 @@ const CREATE_AGENT_POLICY = i18n.translate('xpack.synthetics.monitorManagement.c
   defaultMessage: 'Create agent policy',
 });
 
+const AGENT_POLICY_NEEDED = i18n.translate('xpack.synthetics.monitorManagement.agentPolicyNeeded', {
+  defaultMessage: 'No agent policy found. Please create one.',
+});
 const ADD_AGENT_POLICY_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.addAgentPolicyDesc',
   {
