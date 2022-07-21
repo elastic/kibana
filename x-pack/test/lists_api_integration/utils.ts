@@ -31,8 +31,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 
 import { countDownTest } from '../detection_engine_api_integration/utils';
-import listMappings from './mock_list_mappings.json';
-import itemsMappings from './mock_items_mappings.json';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -468,7 +466,51 @@ export const createLegacyListsIndices = async (es: Client) => {
   );
   await setTemplate(es, '.lists-default', {
     index_patterns: [`.lists-default-*`],
-    mappings: listMappings,
+    mappings: {
+      "dynamic": "strict",
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "deserializer": {
+          "type": "keyword"
+        },
+        "serializer": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "tie_breaker_id": {
+          "type": "keyword"
+        },
+        "meta": {
+          "enabled": "false",
+          "type": "object"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "updated_by": {
+          "type": "keyword"
+        },
+        "version": {
+          "type": "keyword"
+        },
+        "immutable": {
+          "type": "boolean"
+        }
+      }
+    },
     settings: {
       index: {
         lifecycle: {
@@ -480,7 +522,42 @@ export const createLegacyListsIndices = async (es: Client) => {
   })
   await setTemplate(es, '.items-default', {
     index_patterns: [`.items-default-*`],
-    mappings: itemsMappings,
+    mappings: {
+      "dynamic": "strict",
+      "properties": {
+        "tie_breaker_id": {
+          "type": "keyword"
+        },
+        "list_id": {
+          "type": "keyword"
+        },
+        "deserializer": {
+          "type": "keyword"
+        },
+        "serializer": {
+          "type": "keyword"
+        },
+        "meta": {
+          "enabled": "false",
+          "type": "object"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "updated_by": {
+          "type": "keyword"
+        },
+        "ip": {
+          "type": "ip"
+        },
+      }
+    },
     settings: {
       index: {
         lifecycle: {
