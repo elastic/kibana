@@ -57,7 +57,7 @@ describe('AddConnectorPackageLogic', () => {
         AddConnectorPackageApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
         await nextTick();
         expect(flashSuccessToast).toHaveBeenCalledWith('Index created successfully', {
-          text: 'You can use a connector build a search experience for your new Elasticsearch index.',
+          text: 'You can use a connector to build a search experience for your new Elasticsearch index.',
         });
         jest.advanceTimersByTime(1001);
         await nextTick();
