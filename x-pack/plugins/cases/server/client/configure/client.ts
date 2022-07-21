@@ -289,11 +289,13 @@ async function update(
           mappings = await casesClientInternal.configuration.updateMappings({
             connector,
             mappingId: resMappings[0].id,
+            refresh: false,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
             connector,
             owner: configuration.attributes.owner,
+            refresh: false,
           });
         }
       }
@@ -375,7 +377,11 @@ async function create(
 
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
-        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+        caseConfigureService.delete({
+          unsecuredSavedObjectsClient,
+          configurationId: c.id,
+          refresh: false,
+        });
 
       // Ensuring we don't too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
@@ -397,6 +403,7 @@ async function create(
       mappings = await casesClientInternal.configuration.createMappings({
         connector: configuration.connector,
         owner: configuration.owner,
+        refresh: false,
       });
     } catch (e) {
       error = e.isBoom

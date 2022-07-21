@@ -123,10 +123,14 @@ export enum SecurityPageName {
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
   noPage = '',
-  cloudSecurityPosture = 'cloud_security_posture',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
+   */
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -155,10 +159,6 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
-export const CLOUD_SECURITY_POSTURE_PATH = '/cloud_security_posture' as const;
-export const CLOUD_SECURITY_POSTURE_DASHBOARD_PATH = '/cloud_security_posture/dashboard' as const;
-export const CLOUD_SECURITY_POSTURE_FINDINGS_PATH = '/cloud_security_posture/findings' as const;
-export const CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH = '/cloud_security_posture/benchmarks' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -443,3 +443,12 @@ export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+/**
+ * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
+ */
+export enum BulkActionsDryRunErrCode {
+  IMMUTABLE = 'IMMUTABLE',
+  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
+  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
+}
