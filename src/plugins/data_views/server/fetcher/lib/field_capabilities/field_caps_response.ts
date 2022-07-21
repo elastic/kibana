@@ -171,7 +171,7 @@ export function readFieldCapsResponse(
         subType = { ...subType, multi: { parent: firstParent.name } };
       }
 
-      // We need to know if any parent field is nested
+      // We need to know if some parent field is nested
       const nestedParentCaps = parentFieldCapsAscending.find(
         (parentCaps) => parentCaps && parentCaps.type === 'nested'
       );
