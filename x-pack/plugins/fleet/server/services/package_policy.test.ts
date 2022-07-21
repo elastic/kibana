@@ -13,11 +13,12 @@ import {
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
+  KibanaRequest,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   PackageInfo,
@@ -620,7 +621,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
