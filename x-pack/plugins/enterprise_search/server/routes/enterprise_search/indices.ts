@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ErrorCode } from '../../../common/types/error_codes';
+
 import { fetchConnectors } from '../../lib/connectors/fetch_connectors';
 
 import { createApiIndex } from '../../lib/indices/create_index';
@@ -14,6 +16,8 @@ import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { RouteDependencies } from '../../plugin';
+import { createError } from '../../utils/create_error';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export function registerIndexRoutes({ router }: RouteDependencies) {
   router.get(
@@ -106,6 +110,42 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         const index = await fetchIndex(client, indexName);
         return response.ok({
           body: index,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+        return response.customError({
+          body: 'Error fetching data from Enterprise Search',
+          statusCode: 502,
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/exists',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { indexName } = request.params;
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const indexExists = await client.asCurrentUser.indices.exists({ index: indexName });
+        return response.ok({
+          body: {
+            exists: indexExists,
+          },
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {

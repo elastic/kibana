@@ -53,7 +53,7 @@ function getIngestionStatus(
     return IngestionStatus.CONNECTED;
   }
   if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    if (index.connector?.sync_status === SyncStatus.ERROR) {
+    if (index.connector?.last_sync_status === SyncStatus.ERROR) {
       return IngestionStatus.SYNC_ERROR;
     }
     if (index.connector?.status === ConnectorStatus.CONNECTED) {

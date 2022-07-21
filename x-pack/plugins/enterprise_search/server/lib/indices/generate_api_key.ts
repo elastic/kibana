@@ -27,7 +27,7 @@ export const generateApiKey = async (client: IScopedClusterClient, indexName: st
   });
   const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
     index: CONNECTORS_INDEX,
-    query: { term: { 'index_name.keyword': indexName } },
+    query: { term: { index_name: indexName } },
   });
   const connector = connectorResult.hits.hits[0];
   if (connector) {

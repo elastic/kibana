@@ -27,5 +27,15 @@ describe('addConnectorPackageApiLogic', () => {
       });
       await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
     });
+    it('adds delete param if specific', async () => {
+      const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
+      http.post.mockReturnValue(promise);
+      const result = addConnectorPackage({ deleteExistingConnector: true, indexName: 'indexName' });
+      await nextTick();
+      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
+        body: JSON.stringify({ index_name: 'indexName', delete_existing_connector: true }),
+      });
+      await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
+    });
   });
 });
