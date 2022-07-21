@@ -40,7 +40,7 @@ import { StaticOrientationProperty } from './properties/static_orientation_prope
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
-import { LabelVisibilityProperty } from './properties/label_visibility_property';
+import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
@@ -178,7 +178,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _iconSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _iconOrientationProperty: StaticOrientationProperty | DynamicOrientationProperty;
   private readonly _labelStyleProperty: StaticTextProperty | DynamicTextProperty;
-  private readonly _LabelVisibilityProperty: LabelVisibilityProperty;
+  private readonly _labelZoomRangeProperty: LabelZoomRangeProperty;
   private readonly _labelSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
   private readonly _labelColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
@@ -252,11 +252,11 @@ export class VectorStyle implements IVectorStyle {
     this._labelStyleProperty = this._makeLabelProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
     );
-    this._labelVisibilityProperty = new LabelVisibilityProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_VISIBILITY].options,
-      VECTOR_STYLES.LABEL_VISIBILITY,
+    this._labelZoomRangeProperty = new LabelZoomRangeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_ZOOM_RANGE].options,
+      VECTOR_STYLES.LABEL_ZOOM_RANGE,
       layer.getMinZoom(),
-      layer.getMaxZoom(),
+      layer.getMaxZoom()
     );
     this._labelSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
@@ -467,7 +467,7 @@ export class VectorStyle implements IVectorStyle {
       this._iconSizeStyleProperty,
       this._iconOrientationProperty,
       this._labelStyleProperty,
-      this._labelVisibilityProperty,
+      this._labelZoomRangeProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
       this._labelBorderColorStyleProperty,
@@ -831,7 +831,7 @@ export class VectorStyle implements IVectorStyle {
     textLayerId: string;
   }) {
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
-    this._labelVisibilityProperty.syncLabelZoomRange(textLayerId, mbMap);
+    this._labelZoomRangeProperty.syncLabelZoomRange(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
     this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
     this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);

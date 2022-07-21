@@ -118,9 +118,9 @@ export function getDefaultStaticProperties(
         size: DEFAULT_LABEL_SIZE,
       },
     },
-    [VECTOR_STYLES.LABEL_VISIBILITY]: {
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
       options: {
-        useLayerVisibility: true,
+        useLayerZoomRange: true,
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
       },
@@ -220,9 +220,9 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
         field: undefined,
       },
     },
-    [VECTOR_STYLES.LABEL_VISIBILITY]: {
+    [VECTOR_STYLES.LABEL_ZOOM_RANGE]: {
       options: {
-        useLayerVisibility: true,
+        useLayerZoomRange: true,
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
       },
