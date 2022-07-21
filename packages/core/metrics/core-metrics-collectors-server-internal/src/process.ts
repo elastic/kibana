@@ -8,7 +8,7 @@
 
 import v8 from 'v8';
 import type { OpsProcessMetrics, MetricsCollector } from '@kbn/core-metrics-server';
-import { EventLoopDelaysMonitor } from '../event_loop_delays';
+import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
   static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
