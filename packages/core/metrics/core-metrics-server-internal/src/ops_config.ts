@@ -6,17 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { Duration } from 'moment';
 
-export const opsConfig = {
-  path: 'ops',
-  schema: schema.object({
-    interval: schema.duration({ defaultValue: '5s' }),
-    cGroupOverrides: schema.object({
-      cpuPath: schema.maybe(schema.string()),
-      cpuAcctPath: schema.maybe(schema.string()),
-    }),
+/** @internal */
+export const OPS_CONFIG_PATH = 'ops' as const;
+
+/** @internal */
+const OPS_METRICS_INTERVAL = '5s';
+
+/** @internal */
+interface OpsConfigCGroupOverridesOps {
+  cpuPath?: string | undefined;
+  cpuAcctPath?: string | undefined;
+}
+
+/** @internal */
+export interface OpsConfigType {
+  interval: Duration;
+  cGroupOverrides: OpsConfigCGroupOverridesOps;
+}
+
+const configSchema = schema.object({
+  interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
+  cGroupOverrides: schema.object({
+    cpuPath: schema.maybe(schema.string()),
+    cpuAcctPath: schema.maybe(schema.string()),
   }),
-};
+});
 
-export type OpsConfigType = TypeOf<typeof opsConfig.schema>;
+export const opsConfig: ServiceConfigDescriptor<OpsConfigType> = {
+  path: OPS_CONFIG_PATH,
+  schema: configSchema,
+};

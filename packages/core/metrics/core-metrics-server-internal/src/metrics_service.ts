@@ -16,7 +16,7 @@ import type {
   MetricsServiceStart,
 } from '@kbn/core-metrics-server';
 import { OpsMetricsCollector } from './ops_metrics_collector';
-import { opsConfig, type OpsConfigType } from './ops_config';
+import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 
 export interface MetricsServiceSetupDeps {
@@ -47,7 +47,7 @@ export class MetricsService
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     const config = await firstValueFrom(
-      this.coreContext.configService.atPath<OpsConfigType>(opsConfig.path)
+      this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
 
     this.metricsCollector = new OpsMetricsCollector(http.server, {

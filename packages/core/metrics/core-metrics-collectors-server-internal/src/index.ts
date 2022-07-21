@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  type OpsMetricsCollectorOptions,
-  OsMetricsCollector,
-  ProcessMetricsCollector,
-  ServerMetricsCollector,
-} from './collectors';
-export { EventLoopDelaysMonitor } from './event_loop_delays';
+export { OsMetricsCollector } from './os';
+export type { OpsMetricsCollectorOptions } from './os';
+export { ProcessMetricsCollector } from './process';
+export { ServerMetricsCollector } from './server';
+export { EventLoopDelaysMonitor } from './event_loop_delays_monitor';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mocked } from '../../collectors/mocks_internal';
+import { mocked } from '../mocks_internal';
 
 export const monitorEventLoopDelay = jest.fn().mockImplementation(() => {
   const mockedHistogram = mocked.createHistogram();
