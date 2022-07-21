@@ -9,7 +9,8 @@
 import React, { FC } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FiltersEditor, FiltersEditorProps } from '../filters_editor';
 
 export default {
@@ -37,8 +38,32 @@ const mockedDataView = {
   ],
 } as DataView;
 
+const filters: Filter[] = [
+  {
+    meta: {
+      index: '1234',
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'category.keyword',
+      params: {
+        query: "Men's Accessories",
+      },
+    },
+    query: {
+      match_phrase: {
+        'category.keyword': "Men's Accessories",
+      },
+    },
+    $state: {
+      store: 'appState',
+    },
+  },
+] as Filter[];
+
 Default.args = {
-  filters: [],
+  filters,
   dataView: mockedDataView,
   onChange: (filters) => {},
 };

@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { FiltersEditorContextType } from './filters_editor_context';
+import { ConditionTypes } from './filters_editor_condition_types';
+import { FilterGroup } from './filters_editor_filters_group';
 
 export interface FiltersEditorProps {
   filters: Filter[];
@@ -17,5 +21,17 @@ export interface FiltersEditorProps {
 }
 
 export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProps) {
-  return <h2> Filter Editor</h2>;
+  const [localFilters, setLocalFilters] = useState<Filter[]>(filters);
+
+  useEffect(() => {
+    if (filters !== localFilters) {
+      setLocalFilters(localFilters);
+    }
+  }, [filters, localFilters]);
+
+  return (
+    <FiltersEditorContextType.Provider value={{ dataView }}>
+      <FilterGroup filters={localFilters} conditionType={ConditionTypes.AND} />
+    </FiltersEditorContextType.Provider>
+  );
 }
