@@ -12,7 +12,6 @@ import { CoreStart } from '@kbn/core/public';
 import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -106,7 +105,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     const savedSearch = embeddable.getSavedSearch();
     const query = savedSearch.searchSource.getField('query');
 
-    if (query && isOfAggregateQueryType(query)) {
+    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
+    if (query && Boolean(query && 'sql' in query)) {
       // hide exporting CSV for SQL
       return false;
     }
