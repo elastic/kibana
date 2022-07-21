@@ -521,8 +521,8 @@ describe('policy_config and licenses', () => {
           },
           cloud_lookup: false,
         },
+        another_advanced: true,
       };
-      policy.windows.advanced = { another_advanced: true };
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
