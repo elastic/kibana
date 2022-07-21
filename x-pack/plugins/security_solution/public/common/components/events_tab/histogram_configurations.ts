@@ -14,10 +14,11 @@ import * as i18n from './translations';
 
 const DEFAULT_EVENTS_STACK_BY = 'event.action';
 
-export const getSubtitle = (defaultNumberFormat: string) => (totalCount: number) =>
-  `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${i18n.ALERTS_UNIT(
-    totalCount
-  )}`;
+export const getSubtitleFunction =
+  (defaultNumberFormat: string, isAlert: boolean) => (totalCount: number) =>
+    `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${
+      isAlert ? i18n.ALERTS_UNIT(totalCount) : i18n.EVENTS_UNIT(totalCount)
+    }`;
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {

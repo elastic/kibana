@@ -32,6 +32,3 @@ export const eventsSelector = () => createSelector(selectHosts, (hosts) => hosts
 
 export const uncommonProcessesSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries.uncommonProcesses);
-
-export const alertsSelector = () =>
-  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.events]); // what should become of this

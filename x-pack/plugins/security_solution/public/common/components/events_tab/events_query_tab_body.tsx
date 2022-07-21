@@ -24,7 +24,7 @@ import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import {
   alertsHistogramConfig,
   eventsHistogramConfig,
-  getSubtitle,
+  getSubtitleFunction,
 } from './histogram_configurations';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -60,8 +60,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   endDate,
   filterQuery,
   indexNames,
-  externalAlertPageFilters,
-  pageFilters,
+  externalAlertPageFilters = [],
+  pageFilters: defaultPageFilters = [],
   setQuery,
   startDate,
   timelineId,
@@ -74,34 +74,9 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
-
-  const histogramExtraProps = useMemo(
-    () => ({
-      ...(showExternalAlerts
-        ? {
-            ...alertsHistogramConfig,
-            subtitle: getSubtitle(defaultNumberFormat),
-          }
-        : {
-            ...eventsHistogramConfig,
-            unit: i18n.EVENTS_UNIT,
-          }),
-    }),
+  const getSubtitle = useMemo(
+    () => getSubtitleFunction(defaultNumberFormat, showExternalAlerts),
     [defaultNumberFormat, showExternalAlerts]
-  );
-
-  const statefulEventsViewerExtraProps = useMemo(
-    () => ({
-      ...(showExternalAlerts
-        ? {
-            pageFilters: [defaultAlertsFilters, ...(externalAlertPageFilters || [])],
-          }
-        : {
-            pageFilters,
-            unit: i18n.EVENTS_UNIT,
-          }),
-    }),
-    [showExternalAlerts, externalAlertPageFilters, pageFilters]
   );
 
   useEffect(() => {
@@ -134,40 +109,45 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       {!globalFullScreen && (
         <MatrixHistogram
           id={ALERTS_EVENTS_HISTOGRAM_ID}
+          startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          setQuery={setQuery}
-          startDate={startDate}
           indexNames={indexNames}
-          {...histogramExtraProps}
+          setQuery={setQuery}
+          {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
+          subtitle={getSubtitle}
         />
       )}
       <StatefulEventsViewer
         additionalFilters={
           <EuiCheckbox
             id="showExternalAlertsCheckbox"
+            data-test-subj="showExternalAlertsCheckbox"
             aria-label={i18n.SHOW_EXTERNAL_ALERTS}
-            onChange={toggleExternalAlerts}
             checked={showExternalAlerts}
             color="text"
-            data-test-subj="showExternalAlertsCheckbox"
             label={i18n.SHOW_EXTERNAL_ALERTS}
+            onChange={toggleExternalAlerts}
           />
         }
         defaultCellActions={defaultCellActions}
+        start={startDate}
         end={endDate}
         entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
-        start={startDate}
         id={timelineId}
+        unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={{
           ...eventsDefaultModel,
           excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : [],
         }}
-        {...statefulEventsViewerExtraProps}
+        pageFilters={[
+          ...defaultPageFilters,
+          ...(showExternalAlerts ? [defaultAlertsFilters, ...externalAlertPageFilters] : []),
+        ]}
       />
     </>
   );
