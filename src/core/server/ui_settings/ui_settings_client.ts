@@ -192,8 +192,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
   }
 
   private isIgnorableError(error: Error) {
-    const { isForbiddenError, isEsUnavailableError } = this.savedObjectsClient.errors;
-
+    const { isForbiddenError, isEsUnavailableError } = SavedObjectsErrorHelpers;
     return isForbiddenError(error) || isEsUnavailableError(error);
   }
 }
