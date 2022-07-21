@@ -401,7 +401,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
         >
           <EuiComboBox
-            data-test-subj="agentUpgradeModal.MaintainanceCombobox"
+            data-test-subj="agentUpgradeModal.MaintenanceCombobox"
             fullWidth
             isClearable={false}
             singleSelection={{ asPlainText: true }}
