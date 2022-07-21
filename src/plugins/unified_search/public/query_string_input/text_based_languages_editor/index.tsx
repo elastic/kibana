@@ -299,6 +299,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
+    theme: 'vs',
     lineDecorationsWidth: 12,
     accessibilitySupport: 'off',
     autoIndent: 'none',
