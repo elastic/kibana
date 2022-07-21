@@ -74,7 +74,7 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
 
   const selectedLabel = useMemo(() => {
     return options.find((opt) => opt.id === toggleIdSelected)!.label;
-  }, [toggleIdSelected]);
+  }, [options, toggleIdSelected]);
 
   const handleTreeViewSwitch = (id: string, value: TreeViewKind) => {
     setToggleIdSelected(id);
