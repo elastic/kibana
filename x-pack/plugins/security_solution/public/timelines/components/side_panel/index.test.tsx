@@ -260,10 +260,23 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
+      mockUseSearchStrategy.mockReturnValue({
+        loading: true,
+        result: {
+          networkDetails: {},
+        },
+        search: jest.fn(),
+        refetch: jest.fn(),
+        inspect: {},
+      });
       const mockState = { ...state };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
       mockState.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    });
+
+    afterEach(() => {
+      mockUseSearchStrategy.mockReset();
     });
 
     test('it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set', () => {
