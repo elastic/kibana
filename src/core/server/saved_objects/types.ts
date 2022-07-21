@@ -9,7 +9,6 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObject, SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { SavedObjectsExportTransform } from './export';
@@ -146,69 +145,7 @@ export interface SavedObjectsBaseOptions {
  */
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
-/**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
- * use Elasticsearch for storing plugin state.
- *
- * ## SavedObjectsClient errors
- *
- * Since the SavedObjectsClient has its hands in everything we
- * are a little paranoid about the way we present errors back to
- * to application code. Ideally, all errors will be either:
- *
- *   1. Caused by bad implementation (ie. undefined is not a function) and
- *      as such unpredictable
- *   2. An error that has been classified and decorated appropriately
- *      by the decorators in {@link SavedObjectsErrorHelpers}
- *
- * Type 1 errors are inevitable, but since all expected/handle-able errors
- * should be Type 2 the `isXYZError()` helpers exposed at
- * `SavedObjectsErrorHelpers` should be used to understand and manage error
- * responses from the `SavedObjectsClient`.
- *
- * Type 2 errors are decorated versions of the source error, so if
- * the elasticsearch client threw an error it will be decorated based
- * on its type. That means that rather than looking for `error.body.error.type` or
- * doing substring checks on `error.body.error.reason`, just use the helpers to
- * understand the meaning of the error:
- *
- *   ```js
- *   if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
- *      // handle 404
- *   }
- *
- *   if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {
- *      // 401 handling should be automatic, but in case you wanted to know
- *   }
- *
- *   // always rethrow the error unless you handle it
- *   throw error;
- *   ```
- *
- * ### 404s from missing index
- *
- * From the perspective of application code and APIs the SavedObjectsClient is
- * a black box that persists objects. One of the internal details that users have
- * no control over is that we use an elasticsearch index for persistence and that
- * index might be missing.
- *
- * At the time of writing we are in the process of transitioning away from the
- * operating assumption that the SavedObjects index is always available. Part of
- * this transition is handling errors resulting from an index missing. These used
- * to trigger a 500 error in most cases, and in others cause 404s with different
- * error messages.
- *
- * From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The
- * object the request/call was targeting could not be found. This is why #14141
- * takes special care to ensure that 404 errors are generic and don't distinguish
- * between index missing or document missing.
- *
- * See {@link SavedObjectsClient}
- * See {@link SavedObjectsErrorHelpers}
- *
- * @public
- */
-export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+export type { SavedObjectsClientContract } from './service/saved_objects_client';
 
 /**
  * @public

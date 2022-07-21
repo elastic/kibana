@@ -29,6 +29,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import { SavedObjectsUpdateObjectsSpacesResponse } from './lib';
 
 /**
  *
@@ -434,20 +435,68 @@ export interface SavedObjectsClosePointInTimeResponse {
 }
 
 /**
+ * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * use Elasticsearch for storing plugin state.
+ *
+ * ## SavedObjectsClient errors
+ *
+ * Since the SavedObjectsClient has its hands in everything we
+ * are a little paranoid about the way we present errors back to
+ * to application code. Ideally, all errors will be either:
+ *
+ *   1. Caused by bad implementation (ie. undefined is not a function) and
+ *      as such unpredictable
+ *   2. An error that has been classified and decorated appropriately
+ *      by the decorators in {@link SavedObjectsErrorHelpers}
+ *
+ * Type 1 errors are inevitable, but since all expected/handle-able errors
+ * should be Type 2 the `isXYZError()` helpers exposed at
+ * `SavedObjectsErrorHelpers` should be used to understand and manage error
+ * responses from the `SavedObjectsClient`.
+ *
+ * Type 2 errors are decorated versions of the source error, so if
+ * the elasticsearch client threw an error it will be decorated based
+ * on its type. That means that rather than looking for `error.body.error.type` or
+ * doing substring checks on `error.body.error.reason`, just use the helpers to
+ * understand the meaning of the error:
+ *
+ *   ```js
+ *   if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+ *      // handle 404
+ *   }
+ *
+ *   if (SavedObjectsErrorHelpers.isNotAuthorizedError(error)) {
+ *      // 401 handling should be automatic, but in case you wanted to know
+ *   }
+ *
+ *   // always rethrow the error unless you handle it
+ *   throw error;
+ *   ```
+ *
+ * ### 404s from missing index
+ *
+ * From the perspective of application code and APIs the SavedObjectsClient is
+ * a black box that persists objects. One of the internal details that users have
+ * no control over is that we use an elasticsearch index for persistence and that
+ * index might be missing.
+ *
+ * At the time of writing we are in the process of transitioning away from the
+ * operating assumption that the SavedObjects index is always available. Part of
+ * this transition is handling errors resulting from an index missing. These used
+ * to trigger a 500 error in most cases, and in others cause 404s with different
+ * error messages.
+ *
+ * From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The
+ * object the request/call was targeting could not be found. This is why #14141
+ * takes special care to ensure that 404 errors are generic and don't distinguish
+ * between index missing or document missing.
+ *
+ * See {@link SavedObjectsClient}
+ * See {@link SavedObjectsErrorHelpers}
  *
  * @public
  */
-export class SavedObjectsClient {
-  public static errors = SavedObjectsErrorHelpers;
-  public errors = SavedObjectsErrorHelpers;
-
-  private _repository: ISavedObjectsRepository;
-
-  /** @internal */
-  constructor(repository: ISavedObjectsRepository) {
-    this._repository = repository;
-  }
-
+export interface SavedObjectsClientContract {
   /**
    * Persists a SavedObject
    *
@@ -455,9 +504,11 @@ export class SavedObjectsClient {
    * @param attributes
    * @param options
    */
-  async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
-    return await this._repository.create(type, attributes, options);
-  }
+  create<T = unknown>(
+    type: string,
+    attributes: T,
+    options?: SavedObjectsCreateOptions
+  ): Promise<SavedObject<T>>;
 
   /**
    * Persists multiple documents batched together as a single request
@@ -465,12 +516,10 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async bulkCreate<T = unknown>(
+  bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
-  ) {
-    return await this._repository.bulkCreate(objects, options);
-  }
+  ): Promise<SavedObjectsBulkResponse<T>>;
 
   /**
    * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
@@ -479,12 +528,10 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async checkConflicts(
-    objects: SavedObjectsCheckConflictsObject[] = [],
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObjectsCheckConflictsResponse> {
-    return await this._repository.checkConflicts(objects, options);
-  }
+  checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[],
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsCheckConflictsResponse>;
 
   /**
    * Deletes a SavedObject
@@ -493,20 +540,16 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
-    return await this._repository.delete(type, id, options);
-  }
+  delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
 
   /**
    * Find all SavedObjects matching the search query
    *
    * @param options
    */
-  async find<T = unknown, A = unknown>(
+  find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
-  ): Promise<SavedObjectsFindResponse<T, A>> {
-    return await this._repository.find(options);
-  }
+  ): Promise<SavedObjectsFindResponse<T, A>>;
 
   /**
    * Returns an array of objects by id
@@ -519,12 +562,10 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T = unknown>(
-    objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObjectsBulkResponse<T>> {
-    return await this._repository.bulkGet(objects, options);
-  }
+  bulkGet<T = unknown>(
+    objects: SavedObjectsBulkGetObject[],
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsBulkResponse<T>>;
 
   /**
    * Retrieves a single object
@@ -533,13 +574,11 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async get<T = unknown>(
+  get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObject<T>> {
-    return await this._repository.get(type, id, options);
-  }
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObject<T>>;
 
   /**
    * Resolves an array of objects by id, using any legacy URL aliases if they exist
@@ -556,12 +595,10 @@ export class SavedObjectsClient {
    * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to
    * `bulkResolve`; the regular `resolve` API will throw an error instead.
    */
-  async bulkResolve<T = unknown>(
+  bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
     options?: SavedObjectsBaseOptions
-  ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    return await this._repository.bulkResolve(objects, options);
-  }
+  ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
    * Resolves a single object, using any legacy URL alias if it exists
@@ -570,13 +607,11 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async resolve<T = unknown>(
+  resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObjectsResolveResponse<T>> {
-    return await this._repository.resolve(type, id, options);
-  }
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsResolveResponse<T>>;
 
   /**
    * Updates an SavedObject
@@ -585,37 +620,31 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async update<T = unknown>(
+  update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions<T> = {}
-  ): Promise<SavedObjectsUpdateResponse<T>> {
-    return await this._repository.update(type, id, attributes, options);
-  }
+    options?: SavedObjectsUpdateOptions<T>
+  ): Promise<SavedObjectsUpdateResponse<T>>;
 
   /**
    * Bulk Updates multiple SavedObject at once
    *
    * @param objects
    */
-  async bulkUpdate<T = unknown>(
+  bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBulkUpdateOptions
-  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
-    return await this._repository.bulkUpdate(objects, options);
-  }
+  ): Promise<SavedObjectsBulkUpdateResponse<T>>;
 
   /**
    * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
    */
-  async removeReferencesTo(
+  removeReferencesTo(
     type: string,
     id: string,
     options?: SavedObjectsRemoveReferencesToOptions
-  ) {
-    return await this._repository.removeReferencesTo(type, id, options);
-  }
+  ): Promise<SavedObjectsRemoveReferencesToResponse>;
 
   /**
    * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
@@ -625,12 +654,10 @@ export class SavedObjectsClient {
    * Only use this API if you have an advanced use case that's not solved by the
    * {@link SavedObjectsClient.createPointInTimeFinder} method.
    */
-  async openPointInTimeForType(
+  openPointInTimeForType(
     type: string | string[],
-    options: SavedObjectsOpenPointInTimeOptions = {}
-  ) {
-    return await this._repository.openPointInTimeForType(type, options);
-  }
+    options?: SavedObjectsOpenPointInTimeOptions
+  ): Promise<SavedObjectsOpenPointInTimeResponse>;
 
   /**
    * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the
@@ -640,9 +667,10 @@ export class SavedObjectsClient {
    * Only use this API if you have an advanced use case that's not solved by the
    * {@link SavedObjectsClient.createPointInTimeFinder} method.
    */
-  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
-    return await this._repository.closePointInTime(id, options);
-  }
+  closePointInTime(
+    id: string,
+    options?: SavedObjectsClosePointInTimeOptions
+  ): Promise<SavedObjectsClosePointInTimeResponse>;
 
   /**
    * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
@@ -692,13 +720,7 @@ export class SavedObjectsClient {
   createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder<T, A> {
-    return this._repository.createPointInTimeFinder(findOptions, {
-      client: this,
-      // Include dependencies last so that SO client wrappers have their settings applied.
-      ...dependencies,
-    });
-  }
+  ): ISavedObjectsPointInTimeFinder<T, A>;
 
   /**
    * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
@@ -706,12 +728,10 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async collectMultiNamespaceReferences(
+  collectMultiNamespaceReferences(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
     options?: SavedObjectsCollectMultiNamespaceReferencesOptions
-  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    return await this._repository.collectMultiNamespaceReferences(objects, options);
-  }
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
 
   /**
    * Updates one or more objects to add and/or remove them from specified spaces.
@@ -721,6 +741,157 @@ export class SavedObjectsClient {
    * @param spacesToRemove
    * @param options
    */
+  updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ): Promise<SavedObjectsUpdateObjectsSpacesResponse>;
+}
+
+/**
+ * Core internal implementation of {@link SavedObjectsClientContract}
+ * @internal
+ */
+export class SavedObjectsClient implements SavedObjectsClientContract {
+  public static errors = SavedObjectsErrorHelpers;
+  public errors = SavedObjectsErrorHelpers;
+
+  private _repository: ISavedObjectsRepository;
+
+  /** @internal */
+  constructor(repository: ISavedObjectsRepository) {
+    this._repository = repository;
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.create} */
+  async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
+    return await this._repository.create(type, attributes, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.bulkCreate} */
+  async bulkCreate<T = unknown>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options?: SavedObjectsCreateOptions
+  ) {
+    return await this._repository.bulkCreate(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.checkConflicts} */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.delete} */
+  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}) {
+    return await this._repository.delete(type, id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.find} */
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
+    return await this._repository.find(options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
+  async bulkGet<T = unknown>(
+    objects: SavedObjectsBulkGetObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsBulkResponse<T>> {
+    return await this._repository.bulkGet(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.get} */
+  async get<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObject<T>> {
+    return await this._repository.get(type, id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.bulkResolve} */
+  async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options?: SavedObjectsBaseOptions
+  ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    return await this._repository.bulkResolve(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.resolve} */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    return await this._repository.resolve(type, id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.update} */
+  async update<T = unknown>(
+    type: string,
+    id: string,
+    attributes: Partial<T>,
+    options: SavedObjectsUpdateOptions<T> = {}
+  ): Promise<SavedObjectsUpdateResponse<T>> {
+    return await this._repository.update(type, id, attributes, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.bulkUpdate} */
+  async bulkUpdate<T = unknown>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
+    options?: SavedObjectsBulkUpdateOptions
+  ): Promise<SavedObjectsBulkUpdateResponse<T>> {
+    return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.removeReferencesTo} */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.openPointInTimeForType} */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this._repository.openPointInTimeForType(type, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.closePointInTime} */
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this._repository.closePointInTime(id, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.createPointInTimeFinder} */
+  createPointInTimeFinder<T = unknown, A = unknown>(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder<T, A> {
+    return this._repository.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that SO client wrappers have their settings applied.
+      ...dependencies,
+    });
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.collectMultiNamespaceReferences} */
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this._repository.collectMultiNamespaceReferences(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.updateObjectsSpaces} */
   async updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
