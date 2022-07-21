@@ -15,6 +15,15 @@ import { shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiFieldText } from '@elastic/eui';
 
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const SELECTORS = {
   PRIMARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_primary_metric"]',
   SECONDARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_secondary_metric"]',

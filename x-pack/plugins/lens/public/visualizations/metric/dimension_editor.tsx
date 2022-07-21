@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiFieldText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   PaletteRegistry,
@@ -27,7 +27,11 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
-import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
+import {
+  applyPaletteParams,
+  PalettePanelContainer,
+  useDebouncedValue,
+} from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
 import { MetricVisualizationState } from './visualization';
@@ -39,6 +43,20 @@ type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
 
 export function MetricDimensionEditor(props: Props) {
   const { state, setState, accessor } = props;
+
+  const setPrefix = useCallback(
+    (prefix: string) => setState({ ...state, secondaryPrefix: prefix }),
+    [setState, state]
+  );
+
+  const { inputValue: prefixInputVal, handleInputChange: handlePrefixChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setPrefix,
+        value: state.secondaryPrefix || '',
+      },
+      { allowFalsyValue: true }
+    );
 
   switch (accessor) {
     case state?.metricAccessor:
@@ -59,8 +77,8 @@ export function MetricDimensionEditor(props: Props) {
           >
             <EuiFieldText
               compressed
-              value={state.secondaryPrefix}
-              onChange={({ target: { value } }) => setState({ ...state, secondaryPrefix: value })}
+              value={prefixInputVal}
+              onChange={({ target: { value } }) => handlePrefixChange(value)}
             />
           </EuiFormRow>
         </div>

@@ -26,7 +26,6 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
 
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
   const idPrefix = htmlIdGenerator()();
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
