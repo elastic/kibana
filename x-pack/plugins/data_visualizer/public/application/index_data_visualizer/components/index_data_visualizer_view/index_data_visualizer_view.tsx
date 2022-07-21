@@ -135,7 +135,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
       setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
     }
-  }, [dataVisualizerProps?.currentSavedSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataVisualizerProps?.currentSavedSearch?.id]);
 
   useEffect(() => {
     if (!currentDataView.isTimeBased()) {
@@ -254,7 +255,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       // When navigating away from the index pattern
       // Reset all previously set filters
       // to make sure new page doesn't have unrelated filters
-      data.query.filterManager.removeAll();
+      // We want to clear all filters have not been pinned globally
+      data.query.filterManager
+        .getFilters()
+        .filter((f) => f.$state?.store === 'appState')
+        .forEach((f) => data.query.filterManager.removeFilter(f));
     };
   }, [currentDataView.id, data.query.filterManager]);
 
