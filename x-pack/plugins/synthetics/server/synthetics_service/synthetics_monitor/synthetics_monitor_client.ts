@@ -29,7 +29,6 @@ export class SyntheticsMonitorClient {
       monitorId: id,
       customHeartbeatId: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID],
     });
-    await this.syntheticsService.addConfig(config);
 
     const { privateLocations, publicLocations } = this.parseLocations(config);
 
