@@ -14,7 +14,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
   const maps = getPageObject('maps');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const renderable = getService('renderable');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
@@ -79,7 +79,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await renderable.waitForRender();
       await maps.openLegend();
 
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-data-visualizer-choropleth',
         screenshotDirectories
       );
@@ -102,7 +102,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobWizardMultiMetric.scrollSplitFieldIntoView();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-multimetric-wizard-vector',
         screenshotDirectories
       );
@@ -122,7 +122,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.anomalyExplorer.scrollMapContainerIntoView();
       await renderable.waitForRender();
       await maps.openLegend();
-      await mlScreenshots.takeScreenshot('weblogs-anomaly-explorer-vectors', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'weblogs-anomaly-explorer-vectors',
+        screenshotDirectories
+      );
     });
   });
 }
