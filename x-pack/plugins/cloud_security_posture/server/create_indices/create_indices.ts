@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import {
-  FINDINGS_INDEX_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSP_INGEST_TIMESTAMP_PIPELINE,
-  LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-  LATEST_FINDINGS_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  CSP_INGEST_TIMESTAMP_PIPELINE,
+  FINDINGS_INDEX_NAME,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
 import { createPipelineIfNotExists } from './create_processor';
+import { benchmarkScoreMapping } from './benchmark_score_mapping';
 
 // TODO: Add integration tests
 
@@ -28,43 +26,26 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
-    createIndexIfNotExists({
-      esClient,
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      indexTemplateName: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
-      indexPattern: BENCHMARK_SCORE_INDEX_PATTERN,
-      mappings: benchmarkScoreMapping,
-      settings: { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE },
-      logger,
-    }),
+    createBenchmarkScoreIndex(esClient, logger),
   ]);
 };
 
-interface CreateIndexIfNotExistsParams {
-  esClient: ElasticsearchClient;
-  index: string;
-  indexTemplateName: string;
-  indexPattern: string;
-  mappings: MappingTypeMapping;
-  settings: IndicesIndexSettings;
-  logger: Logger;
-}
-
-export const createIndexIfNotExists = async ({
-  esClient,
-  index,
-  indexTemplateName,
-  indexPattern,
-  mappings,
-  settings,
-  logger,
-}: CreateIndexIfNotExistsParams) => {
+const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
   try {
     // We always want to keep the index template updated
     await esClient.indices.putIndexTemplate({
-      name: indexTemplateName,
-      index_patterns: indexPattern,
-      template: { mappings },
+      name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+      index_patterns: BENCHMARK_SCORE_INDEX_PATTERN,
+      template: {
+        mappings: benchmarkScoreMapping,
+        settings: {
+          default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE,
+          lifecycle: {
+            // This is the default lifecycle name, it is named on the data-stream type (e.g, logs/ metrics)
+            name: 'logs',
+          },
+        },
+      },
       _meta: {
         package: {
           name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -75,62 +56,63 @@ export const createIndexIfNotExists = async ({
       priority: 500,
     });
 
-    const isLatestIndexExists = await esClient.indices.exists({
-      index,
-    });
-    if (!isLatestIndexExists) {
-      await esClient.indices.create({
-        index,
-        mappings,
-        settings,
-      });
-    }
-  } catch (err) {
-    const error = transformError(err);
-    logger.error(`Failed to create the index template: ${indexTemplateName}`);
-    logger.error(error.message);
+    await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+  } catch (e) {
+    logger.error(
+      `Failed to upsert index template [Template: ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}]`
+    );
+    logger.error(e);
   }
 };
 
 const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
-  // We want that our latest findings index template would be identical to the findings index template
-  const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
-    name: FINDINGS_INDEX_NAME,
-  });
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { template, composed_of, _meta } =
-    findingsIndexTemplateResponse.index_templates[0].index_template;
-
-  if (template?.settings) {
-    template.settings.lifecycle = {
-      name: '',
-    };
-  }
-
-  // We always want to keep the index template updated
-  await esClient.indices.putIndexTemplate({
-    name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-    index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
-    priority: 500,
-    _meta,
-    composed_of,
-    template,
-  });
-
   try {
-    const isLatestIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    // We want that our latest findings index template would be identical to the findings index template
+    const findingsIndexTemplateResponse = await esClient.indices.getIndexTemplate({
+      name: FINDINGS_INDEX_NAME,
     });
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { template, composed_of, _meta } =
+      findingsIndexTemplateResponse.index_templates[0].index_template;
 
-    if (isLatestIndexExists) {
-      return;
+    if (template?.settings) {
+      template.settings.lifecycle = {
+        name: '',
+      };
     }
 
-    await esClient.indices.create({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    // We always want to keep the index template updated
+    await esClient.indices.putIndexTemplate({
+      name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+      index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
+      priority: 500,
+      _meta,
+      composed_of,
+      template,
     });
+
+    await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);
   } catch (e) {
-    logger.warn('Failed to create latest findings index');
-    logger.warn(e);
+    logger.error(
+      `Failed to upsert index template [Template: ${LATEST_FINDINGS_INDEX_TEMPLATE_NAME}]`
+    );
+    logger.error(e);
+  }
+};
+
+const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, index: string) => {
+  try {
+    const isLatestIndexExists = await esClient.indices.exists({
+      index,
+    });
+
+    if (!isLatestIndexExists) {
+      await esClient.indices.create({
+        index,
+      });
+    }
+  } catch (e) {
+    logger.error(`Failed to create index [Index: ${index}]`);
+    logger.error(e);
   }
 };
