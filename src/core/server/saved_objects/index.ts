@@ -54,13 +54,6 @@ export type {
 } from './saved_objects_service';
 
 export type {
-  ISavedObjectsRepository,
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsIncrementCounterField,
-  SavedObjectsDeleteByNamespaceOptions,
-} from './service/lib/repository';
-
-export type {
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinition,
