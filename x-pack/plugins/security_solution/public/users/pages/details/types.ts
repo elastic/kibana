@@ -6,12 +6,15 @@
  */
 
 import type { ActionCreator } from 'typescript-fsa';
+import { Optional } from 'utility-types';
+
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../common/components/navigation/types';
 
-import type { UsersTableType } from '../../store/model';
+import type { UsersDetailsTableType } from '../../store/model';
 import type { usersModel } from '../../store';
 
 interface UsersDetailsComponentReduxProps {
@@ -42,16 +45,12 @@ export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
   UsersDetailsComponentDispatchProps &
   UsersQueryProps;
 
-export type KeyUsersDetailsNavTabWithoutMlPermission = UsersTableType.events;
+type KeyUsersDetailsNavTab = `${UsersDetailsTableType}`;
 
-type KeyUsersDetailsNavTabWithMlPermission = KeyUsersDetailsNavTabWithoutMlPermission &
-  UsersTableType.anomalies;
-
-type KeyUsersDetailsNavTab =
-  | KeyUsersDetailsNavTabWithoutMlPermission
-  | KeyUsersDetailsNavTabWithMlPermission;
-
-export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
+export type UsersDetailsNavTab = Optional<
+  Record<KeyUsersDetailsNavTab, NavTab>,
+  'anomalies' | 'userRisk'
+>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {

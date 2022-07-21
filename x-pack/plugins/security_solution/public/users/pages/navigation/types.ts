@@ -10,15 +10,9 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 import type { ESTermQuery } from '../../../../common/typed_json';
 import type { NavTab } from '../../../common/components/navigation/types';
 
-type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers &
-  UsersTableType.risk &
-  UsersTableType.events;
+type KeyUsersNavTab = `${UsersTableType}`;
 
-type KeyUsersNavTabWithMlPermission = KeyUsersNavTabWithoutMlPermission & UsersTableType.anomalies;
-
-type KeyUsersNavTab = KeyUsersNavTabWithoutMlPermission | KeyUsersNavTabWithMlPermission;
-
-export type UsersNavTab = Record<KeyUsersNavTab, NavTab>;
+export type UsersNavTab = Optional<Record<KeyUsersNavTab, NavTab>, 'anomalies' | 'userRisk'>;
 export interface QueryTabBodyProps {
   type: UsersType;
   startDate: GlobalTimeArgs['from'];

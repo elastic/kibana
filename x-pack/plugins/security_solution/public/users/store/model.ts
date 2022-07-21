@@ -21,6 +21,13 @@ export enum UsersTableType {
   events = 'events',
 }
 
+export enum UsersDetailsTableType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  risk = 'userRisk',
+  events = 'events',
+}
+
 export type AllUsersTables = UsersTableType;
 
 export interface BasicQueryPaginated {
