@@ -172,94 +172,6 @@
     "interfaces": [
       {
         "parentPluginId": "dataViewFieldEditor",
-        "id": "def-public.Field",
-        "type": "Interface",
-        "tags": [],
-        "label": "Field",
-        "description": [
-          "\nThe data model for the field editor"
-        ],
-        "path": "src/plugins/data_view_field_editor/public/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.script",
-            "type": "Object",
-            "tags": [],
-            "label": "script",
-            "description": [],
-            "signature": [
-              "{ source: string; } | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.customLabel",
-            "type": "string",
-            "tags": [],
-            "label": "customLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.popularity",
-            "type": "number",
-            "tags": [],
-            "label": "popularity",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.Field.format",
-            "type": "Object",
-            "tags": [],
-            "label": "format",
-            "description": [],
-            "signature": [
-              "FieldFormatConfig",
-              " | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.FormatEditorProps",
         "type": "Interface",
         "tags": [],
@@ -547,26 +459,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViewFieldEditor",
-            "id": "def-public.OpenFieldEditorOptions.fieldToCreate",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldToCreate",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViewFieldEditor",
-                "scope": "public",
-                "docId": "kibDataViewFieldEditorPluginApi",
-                "section": "def-public.Field",
-                "text": "Field"
-              },
-              " | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false
