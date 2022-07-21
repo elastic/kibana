@@ -943,7 +943,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
       {
-        defaultMessage: 'Experimental',
+        defaultMessage:
+          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
       }
     ),
     license: 'platinum',
