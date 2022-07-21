@@ -186,6 +186,29 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       );
 
       expect(filteredResponse.body.totalErrors).to.eql(1);
+
+      // Fetch rule execution, try to filter on that
+      const execResponse = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+          createdRule.id
+        }/_execution_log?date_start=${dateStart}`
+      );
+
+      const runId = execResponse.body.data[0].id;
+
+      const filteredByIdResponse = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+          createdRule.id
+        }/_action_error_log?filter=kibana.alert.rule.execution.uuid:${runId}&date_start=${dateStart}`
+      );
+      expect(filteredByIdResponse.body.totalErrors).to.eql(2);
+
+      const filteredByInvalidResponse = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+          createdRule.id
+        }/_action_error_log?filter=kibana.alert.rule.execution.uuid:doesnt_exist&date_start=${dateStart}`
+      );
+      expect(filteredByInvalidResponse.body.totalErrors).to.eql(0);
     });
   });
 

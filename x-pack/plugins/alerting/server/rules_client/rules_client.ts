@@ -35,7 +35,6 @@ import {
   IEventLogClient,
   IEventLogger,
   SAVED_OBJECT_REL_PRIMARY,
-  FindOptionsType,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import {
@@ -66,6 +65,7 @@ import {
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
+  convertEsSortToEventLogSort,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -363,7 +363,7 @@ export interface GetActionErrorLogByIdParams {
   filter?: string;
   page: number;
   perPage: number;
-  sort: FindOptionsType['sort'];
+  sort: estypes.Sort;
 }
 
 interface ScheduleRuleOptions {
@@ -922,7 +922,7 @@ export class RulesClient {
           page,
           per_page: perPage,
           filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
-          sort,
+          sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
       );
