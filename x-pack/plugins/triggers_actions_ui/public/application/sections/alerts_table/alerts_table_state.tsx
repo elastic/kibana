@@ -230,7 +230,6 @@ const AlertsTableState = ({
       useFetchAlertsData,
       visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
-      query,
     }),
     [
       alertsTableConfiguration,
@@ -239,7 +238,6 @@ const AlertsTableState = ({
       pagination.pageSize,
       showExpandToDetails,
       useFetchAlertsData,
-      query,
     ]
   );
 

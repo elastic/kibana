@@ -386,6 +386,7 @@ export interface TriggersActionsUiConfig {
 export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
+  uuid = 'kibana.alert.rule.uuid',
 }
 
 export interface FetchAlertData {

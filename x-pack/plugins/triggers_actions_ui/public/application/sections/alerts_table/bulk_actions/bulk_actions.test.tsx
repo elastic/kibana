@@ -36,12 +36,14 @@ describe('AlertsTable.BulkActions', () => {
     {
       [AlertsField.name]: ['one'],
       [AlertsField.reason]: ['two'],
+      [AlertsField.uuid]: ['uuidone'],
       _id: 'alert0',
       _index: 'idx0',
     },
     {
       [AlertsField.name]: ['three'],
       [AlertsField.reason]: ['four'],
+      [AlertsField.uuid]: ['uuidtwo'],
       _id: 'alert1',
       _index: 'idx1',
     },
@@ -332,7 +334,29 @@ describe('AlertsTable.BulkActions', () => {
           userEvent.click(getByTestId('selectedShowBulkActionsButton'));
 
           userEvent.click(getByText('Fake Bulk Action'));
-          expect(mockedFn.mock.calls[0]).toEqual([[{ id: 'alert1', index: 'idx1' }], false]);
+          expect(mockedFn.mock.calls[0]).toEqual([
+            [
+              {
+                _id: 'alert1',
+                _index: 'idx1',
+                data: [
+                  {
+                    field: 'kibana.alert.rule.name',
+                    value: ['three'],
+                  },
+                  {
+                    field: 'kibana.alert.rule.uuid',
+                    value: ['uuidtwo'],
+                  },
+                ],
+                ecs: {
+                  _id: 'alert1',
+                  _index: 'idx1',
+                },
+              },
+            ],
+            false,
+          ]);
         });
       });
 
@@ -417,8 +441,42 @@ describe('AlertsTable.BulkActions', () => {
             userEvent.click(getByText('Fake Bulk Action'));
             expect(mockedFn.mock.calls[0]).toEqual([
               [
-                { id: 'alert0', index: 'idx0' },
-                { id: 'alert1', index: 'idx1' },
+                {
+                  _id: 'alert0',
+                  _index: 'idx0',
+                  data: [
+                    {
+                      field: 'kibana.alert.rule.name',
+                      value: ['one'],
+                    },
+                    {
+                      field: 'kibana.alert.rule.uuid',
+                      value: ['uuidone'],
+                    },
+                  ],
+                  ecs: {
+                    _id: 'alert0',
+                    _index: 'idx0',
+                  },
+                },
+                {
+                  _id: 'alert1',
+                  _index: 'idx1',
+                  data: [
+                    {
+                      field: 'kibana.alert.rule.name',
+                      value: ['three'],
+                    },
+                    {
+                      field: 'kibana.alert.rule.uuid',
+                      value: ['uuidtwo'],
+                    },
+                  ],
+                  ecs: {
+                    _id: 'alert1',
+                    _index: 'idx1',
+                  },
+                },
               ],
               true,
             ]);
