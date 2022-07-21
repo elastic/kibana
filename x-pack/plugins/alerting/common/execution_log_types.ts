@@ -22,10 +22,8 @@ export const actionErrorLogSortableColumns = [
   '@timestamp',
   'event.start',
   'event.end',
-  'event.provider',
   'event.duration',
   'event.action',
-  'message',
 ];
 
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
