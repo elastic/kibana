@@ -19,15 +19,14 @@ import {
 } from './alert_type';
 
 import { GEO_CONTAINMENT_ID } from './alert_type';
-
-export type LatestEntityLocation = GeoContainmentInstanceState;
+import { getAlertId, getContainedAlertContext, getRecoveredAlertContext } from './get_context';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
   results: estypes.SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
-): Map<string, LatestEntityLocation[]> {
+): Map<string, GeoContainmentInstanceState[]> {
   if (!results) {
     return new Map();
   }
@@ -67,8 +66,8 @@ export function transformResults(
     // Get unique
     .reduce(
       (
-        accu: Map<string, LatestEntityLocation[]>,
-        el: LatestEntityLocation & { entityName: string }
+        accu: Map<string, GeoContainmentInstanceState[]>,
+        el: GeoContainmentInstanceState & { entityName: string }
       ) => {
         const { entityName, ...locationData } = el;
         if (entityName) {
@@ -84,61 +83,65 @@ export function transformResults(
   return orderedResults;
 }
 
-export function getActiveEntriesAndGenerateAlerts(
-  prevLocationMap: Map<string, LatestEntityLocation[]>,
-  currLocationMap: Map<string, LatestEntityLocation[]>,
+export function getEntitiesAndGenerateAlerts(
+  prevLocationMap: Map<string, GeoContainmentInstanceState[]>,
+  currLocationMap: Map<string, GeoContainmentInstanceState[]>,
   alertFactory: RuleExecutorServices<
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,
     typeof ActionGroupId
   >['alertFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
-  currIntervalEndTime: Date
-) {
-  const allActiveEntriesMap: Map<string, LatestEntityLocation[]> = new Map([
+  windowEnd: Date
+): {
+  activeEntities: Map<string, GeoContainmentInstanceState[]>;
+  inactiveEntities: Map<string, GeoContainmentInstanceState[]>;
+} {
+  const activeEntities: Map<string, GeoContainmentInstanceState[]> = new Map([
     ...prevLocationMap,
     ...currLocationMap,
   ]);
-  allActiveEntriesMap.forEach((locationsArr, entityName) => {
+  const inactiveEntities: Map<string, GeoContainmentInstanceState[]> = new Map();
+  activeEntities.forEach((containments, entityName) => {
     // Generate alerts
-    locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
-      const context = {
-        entityId: entityName,
-        entityDateTime: dateInShape || null,
-        entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityLocation: `POINT (${location[0]} ${location[1]})`,
-        containingBoundaryId: shapeLocationId,
-        containingBoundaryName: shapesIdsNamesMap[shapeLocationId] || shapeLocationId,
-      };
-      const alertInstanceId = `${entityName}-${context.containingBoundaryName}`;
-      if (shapeLocationId !== OTHER_CATEGORY) {
-        alertFactory.create(alertInstanceId).scheduleActions(ActionGroupId, context);
+    containments.forEach((containment) => {
+      if (containment.shapeLocationId !== OTHER_CATEGORY) {
+        const context = getContainedAlertContext({
+          entityName,
+          containment,
+          shapesIdsNamesMap,
+          windowEnd,
+        });
+        alertFactory
+          .create(getAlertId(entityName, context.containingBoundaryName))
+          .scheduleActions(ActionGroupId, context);
       }
     });
 
-    if (locationsArr[0].shapeLocationId === OTHER_CATEGORY) {
-      allActiveEntriesMap.delete(entityName);
+    // Entity in "other" filter bucket is no longer contained by any boundary and switches from "active" to "inactive"
+    if (containments[0].shapeLocationId === OTHER_CATEGORY) {
+      inactiveEntities.set(entityName, containments);
+      activeEntities.delete(entityName);
       return;
     }
 
-    const otherCatIndex = locationsArr.findIndex(
+    const otherCatIndex = containments.findIndex(
       ({ shapeLocationId }) => shapeLocationId === OTHER_CATEGORY
     );
     if (otherCatIndex >= 0) {
-      const afterOtherLocationsArr = locationsArr.slice(0, otherCatIndex);
-      allActiveEntriesMap.set(entityName, afterOtherLocationsArr);
+      const afterOtherLocationsArr = containments.slice(0, otherCatIndex);
+      activeEntities.set(entityName, afterOtherLocationsArr);
     } else {
-      allActiveEntriesMap.set(entityName, locationsArr);
+      activeEntities.set(entityName, containments);
     }
   });
-  return allActiveEntriesMap;
+  return { activeEntities, inactiveEntities };
 }
 
 export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
   async function ({
-    previousStartedAt: currIntervalStartTime,
-    startedAt: currIntervalEndTime,
+    previousStartedAt: windowStart,
+    startedAt: windowEnd,
     services,
     params,
     alertId,
@@ -166,37 +169,57 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
 
     // Start collecting data only on the first cycle
     let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
-    if (!currIntervalStartTime) {
+    if (!windowStart) {
       log.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
       const START_TIME_WINDOW = 1;
-      const tempPreviousEndTime = new Date(currIntervalEndTime);
+      const tempPreviousEndTime = new Date(windowEnd);
       tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - START_TIME_WINDOW);
-      currentIntervalResults = await executeEsQuery(tempPreviousEndTime, currIntervalEndTime);
+      currentIntervalResults = await executeEsQuery(tempPreviousEndTime, windowEnd);
     } else {
-      currentIntervalResults = await executeEsQuery(currIntervalStartTime, currIntervalEndTime);
+      currentIntervalResults = await executeEsQuery(windowStart, windowEnd);
     }
 
-    const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
+    const currLocationMap: Map<string, GeoContainmentInstanceState[]> = transformResults(
       currentIntervalResults,
       params.dateField,
       params.geoField
     );
 
-    const prevLocationMap: Map<string, LatestEntityLocation[]> = new Map([
-      ...Object.entries((state.prevLocationMap as Record<string, LatestEntityLocation[]>) || {}),
+    const prevLocationMap: Map<string, GeoContainmentInstanceState[]> = new Map([
+      ...Object.entries(
+        (state.prevLocationMap as Record<string, GeoContainmentInstanceState[]>) || {}
+      ),
     ]);
-    const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+    const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMap,
       currLocationMap,
       services.alertFactory,
       shapesIdsNamesMap,
-      currIntervalEndTime
+      windowEnd
     );
+
+    const { getRecoveredAlerts } = services.alertFactory.done();
+    for (const recoveredAlert of getRecoveredAlerts()) {
+      const recoveredAlertId = recoveredAlert.getId();
+      try {
+        const context = getRecoveredAlertContext({
+          alertId: recoveredAlertId,
+          activeEntities,
+          inactiveEntities,
+          windowEnd,
+        });
+        if (context) {
+          recoveredAlert.setContext(context);
+        }
+      } catch (e) {
+        log.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);
+      }
+    }
 
     return {
       shapesFilters,
       shapesIdsNamesMap,
-      prevLocationMap: Object.fromEntries(allActiveEntriesMap),
+      prevLocationMap: Object.fromEntries(activeEntities),
     };
   };
