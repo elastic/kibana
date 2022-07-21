@@ -17,6 +17,7 @@ import {
   ExpressionFunctionKibanaContext,
   QueryState,
   aggregateQueryToAst,
+  filtersToAst,
   timerangeToAst,
 } from '..';
 
@@ -34,6 +35,7 @@ export async function queryStateToExpressionAst({ filters, query, time, dataView
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
     timeRange: time && timerangeToAst(time),
+    filters: filters && filtersToAst(filters),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
 

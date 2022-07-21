@@ -218,7 +218,8 @@ export class SavedSearchEmbeddable
           this.savedSearch.searchSource.getField('query')!,
           this.services.indexPatterns,
           this.services.data,
-          this.services.expressions
+          this.services.expressions,
+          this.input.filters
         );
         this.updateOutput({
           ...this.getOutput(),

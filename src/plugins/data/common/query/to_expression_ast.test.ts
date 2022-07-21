@@ -31,6 +31,7 @@ describe('queryStateToExpressionAst', () => {
           },
           Object {
             "arguments": Object {
+              "filters": Array [],
               "timeRange": Array [
                 Object {
                   "chain": Array [
@@ -98,6 +99,7 @@ describe('queryStateToExpressionAst', () => {
           },
           Object {
             "arguments": Object {
+              "filters": Array [],
               "timeRange": Array [
                 Object {
                   "chain": Array [
