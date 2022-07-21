@@ -30,7 +30,7 @@ import {
   validateSecrets,
   ActionExecutorContract,
   validateConnector,
-  trimActionStrings,
+  trimStrings,
 } from './lib';
 import {
   ActionResult,
@@ -181,10 +181,10 @@ export class ActionsClient {
       throw error;
     }
 
-    name = trimActionStrings(name);
+    name = trimStrings(name);
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, trimActionStrings(config));
-    const validatedActionTypeSecrets = validateSecrets(actionType, trimActionStrings(secrets));
+    const validatedActionTypeConfig = validateConfig(actionType, trimStrings(config));
+    const validatedActionTypeSecrets = validateSecrets(actionType, trimStrings(secrets));
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }

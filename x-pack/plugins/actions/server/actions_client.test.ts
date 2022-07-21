@@ -354,6 +354,39 @@ describe('create()', () => {
     `);
   });
 
+  test('trims strings before validation', async () => {
+    const emptyStringValidator = (s: string) => {
+      if (s === '') {
+        return 'expected a non empty string';
+      }
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        config: schema.object({
+          param1: schema.string({ validate: emptyStringValidator }),
+        }),
+      },
+      executor,
+    });
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {
+            param1: ' ',
+          },
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [param1]: expected a non empty string"`
+    );
+  });
+
   test('validates config', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',

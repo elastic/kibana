@@ -8,17 +8,17 @@
 import { isObject, keys, get, set, isString } from 'lodash';
 
 // Used to trim strings in an action object before validation
-export function trimActionStrings(value: unknown) {
+export function trimStrings(value: unknown) {
   if (isString(value)) {
     return value.trim();
   } else if (Array.isArray(value)) {
     return value.reduce((acc, item) => {
-      acc.push(trimActionStrings(item));
+      acc.push(trimStrings(item));
       return acc;
     }, []);
   } else if (isObject(value)) {
     return keys(value).reduce((acc, key) => {
-      set(acc, key, trimActionStrings(get(value, key)));
+      set(acc, key, trimStrings(get(value, key)));
       return acc;
     }, {});
   } else {
