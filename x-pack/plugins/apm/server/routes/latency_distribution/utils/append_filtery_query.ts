@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export function appendFilterQuery(
-  query: estypes.QueryDslQueryContainer,
-  newFilter: estypes.QueryDslQueryContainer
-): estypes.QueryDslQueryContainer {
+  query: QueryDslQueryContainer,
+  newFilter: QueryDslQueryContainer | QueryDslQueryContainer[]
+): QueryDslQueryContainer {
   const filter = [query?.bool?.filter ?? [], newFilter].flat().filter(Boolean);
   return {
     ...query,

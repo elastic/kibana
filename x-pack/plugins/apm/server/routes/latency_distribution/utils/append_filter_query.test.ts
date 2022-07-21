@@ -27,12 +27,12 @@ describe('#appendFilterQuery', () => {
   });
 
   it('creates new filtered query when the given query is blank', () => {
-    const query = appendFilterQuery(null, mockFilterQuery);
+    const query = appendFilterQuery({}, mockFilterQuery);
     expect(query).toMatchSnapshot();
   });
 
   it('does not change query when given a blank filter query', () => {
-    const query = appendFilterQuery(mockQuery, null);
+    const query = appendFilterQuery(mockQuery, []);
     expect(query).toMatchSnapshot();
   });
 });
