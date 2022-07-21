@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { createContext, useContext } from 'react';
 import { createMachine } from 'xstate';
-import { useMachine } from '@xstate/react';
+import { useMachine, useActor, useInterpret } from '@xstate/react';
 
 const logExplorerStateMachine = createMachine({
   id: 'Log Explorer Data',
@@ -34,8 +35,8 @@ const logExplorerStateMachine = createMachine({
           target: 'loading-around',
           internal: false,
         },
-        'filters-changed': {},
         'time-range-changed': {},
+        'columns-changed': {},
       },
     },
     loaded: {
@@ -137,8 +138,8 @@ const logExplorerStateMachine = createMachine({
             target: 'loading-around',
           },
         ],
-        'filters-changed': {
-          target: 'loading-around',
+        'columns-changed': {
+          target: 'reloading',
         },
       },
     },
@@ -168,6 +169,17 @@ const logExplorerStateMachine = createMachine({
             target: '#Log Explorer Data.loaded.top.loaded',
           },
         ],
+        onError: [
+          {
+            actions: 'updateTopChunk',
+            target: '#Log Explorer Data.loaded.top.failed',
+          },
+        ],
+      },
+      on: {
+        'columns-changed': {
+          target: 'reloading',
+        },
       },
     },
     'loading-bottom': {
@@ -180,36 +192,110 @@ const logExplorerStateMachine = createMachine({
             target: '#Log Explorer Data.loaded.bottom.loaded',
           },
         ],
+        onError: [
+          {
+            actions: 'updateBottomChunk',
+            target: '#Log Explorer Data.loaded.bottom.failed',
+          },
+        ],
       },
       on: {
-        'loading-after-succeeded': {
-          actions: 'updateBottomChunk',
-          target: 'loaded',
+        'columns-changed': {
+          target: 'reloading',
         },
       },
     },
     'extending-top': {
-      entry: 'cancel-requests',
+      invoke: {
+        src: 'extend-top',
+        onDone: [
+          {
+            actions: 'prependToTopChunk',
+            target: '#Log Explorer Data.loaded.top.loaded',
+          },
+        ],
+        onError: [
+          {
+            actions: 'updateBottomChunk',
+            target: '#Log Explorer Data.loaded.top.failed',
+          },
+        ],
+      },
       on: {
-        'extending-top-succeeded': {
-          actions: 'prependToTopChunk',
-          target: 'loaded',
+        'columns-changed': {
+          target: 'reloading',
         },
       },
     },
     'extending-bottom': {
-      entry: 'cancel-requests',
+      invoke: {
+        src: 'extend-bottom',
+        onDone: [
+          {
+            actions: 'appendToBottomChunk',
+            target: '#Log Explorer Data.loaded.bottom.loaded',
+          },
+        ],
+        onError: [
+          {
+            actions: 'updateBottomChunk',
+            target: '#Log Explorer Data.loaded.bottom.failed',
+          },
+        ],
+      },
       on: {
-        'extending-bottom-succeeded': {
-          actions: 'appendToBottomChunk',
-          target: 'loaded',
+        'columns-changed': {
+          target: 'reloading',
         },
       },
+    },
+    reloading: {
+      invoke: {
+        src: 'reload',
+        onError: [
+          {
+            target: 'failed-no-data',
+          },
+        ],
+        onDone: [
+          {
+            actions: ['updateTopChunk', 'updateBottomChunk'],
+            target: 'loaded',
+          },
+        ],
+      },
+    },
+  },
+  on: {
+    'filters-changed': {
+      target: '.loading-around',
+    },
+    'data-view-changed': {
+      target: '.loading-around',
     },
   },
 });
 
-export const useStateMachine = () => {
-  const [state, send] = useMachine(logExplorerStateMachine);
-  return [state, send];
+export const StateMachineContext = createContext({});
+
+export const StateMachineProvider = (props) => {
+  const logExplorerService = useInterpret(() => {
+    const { timeFilter } = props;
+    const timeRange = timeFilter?.getAbsoluteTime();
+    return logExplorerStateMachine.withContext({
+      timeRange,
+    });
+  });
+
+  return (
+    <StateMachineContext.Provider value={{ logExplorerService }}>
+      {props.children}
+    </StateMachineContext.Provider>
+  );
+};
+
+export const useStateMachineState = () => {
+  const services = useContext(StateMachineContext);
+  const [state] = useActor(services.logExplorerService);
+  return state;
 };

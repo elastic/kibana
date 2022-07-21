@@ -39,9 +39,9 @@ import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../../main/hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
+import { useStateMachineState } from '../../hooks/query_data/use_state_machine';
 
 /**
  * Local storage key for sidebar persistence state
@@ -80,13 +80,10 @@ export function LogExplorerLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
+  const logExplorerState = useStateMachineState();
+  console.log(logExplorerState);
   const { main$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-
-  const viewMode = useMemo(() => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }, [uiSettings, state.viewMode]);
 
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
@@ -242,7 +239,6 @@ export function LogExplorerLayout({
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
             />

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
@@ -18,6 +18,7 @@ import { SavedSearch, useSavedSearchAliasMatchRedirect } from '../../services/sa
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useQueryData } from './hooks/query_data/use_query_data';
+import { StateMachineProvider } from './hooks/query_data/use_state_machine';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -44,6 +45,12 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
     },
     [usedHistory]
   );
+
+  const stateMachineProps = useMemo(() => {
+    return {
+      timeFilter: data.query.timefilter.timefilter,
+    };
+  }, [data]);
 
   // TODO: We will want to rewrite the bulk of the query fetching logic in useDiscoverState > useSavedSearch (which returns data$)
   /**
@@ -99,22 +106,24 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <LogExplorerLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeIndexPattern={onChangeIndexPattern}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      state={state}
-      stateContainer={stateContainer}
-    />
+    <StateMachineProvider {...stateMachineProps}>
+      <LogExplorerLayoutMemoized
+        indexPattern={indexPattern}
+        indexPatternList={indexPatternList}
+        inspectorAdapters={inspectorAdapters}
+        expandedDoc={expandedDoc}
+        onChangeIndexPattern={onChangeIndexPattern}
+        onUpdateQuery={onUpdateQuery}
+        resetSavedSearch={resetCurrentSavedSearch}
+        setExpandedDoc={setExpandedDoc}
+        navigateTo={navigateTo}
+        savedSearch={savedSearch}
+        savedSearchData$={data$}
+        savedSearchRefetch$={refetch$}
+        searchSource={searchSource}
+        state={state}
+        stateContainer={stateContainer}
+      />
+    </StateMachineProvider>
   );
 }
