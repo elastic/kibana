@@ -448,7 +448,10 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    renderCustomActionsRow: (
+      alert: EcsFieldsResponse,
+      setFlyoutAlert: (data: unknown) => void
+    ) => JSX.Element;
     width?: number;
   };
 }
