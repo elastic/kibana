@@ -205,11 +205,11 @@ export class InternalFileService {
       }
     };
 
-    addFilters('FileKind', kind);
     addFilters('name', name);
-    addFilters('Extension', extension);
-    addFilters('mime_type', mimeType);
+    addFilters('FileKind', kind);
     addFilters('Status', status);
+    addFilters('mime_type', mimeType);
+    addFilters('extension', extension);
 
     Object.entries(meta ? getFlattenedObject(meta) : {}).forEach(([fieldName, value]) => {
       addFilters(`Meta.${fieldName}`, Array.isArray(value) ? value : [value]);

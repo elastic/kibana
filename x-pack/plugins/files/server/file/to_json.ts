@@ -17,7 +17,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes
     FileKind,
     Status,
     Alt,
-    Extension,
+    extension,
     Meta,
   } = attrs;
   return {
@@ -26,11 +26,11 @@ export function toJSON<M = unknown>(id: string, attrs: FileSavedObjectAttributes
     mimeType,
     size,
     created,
-    updated: Updated,
-    fileKind: FileKind,
+    extension,
     alt: Alt,
-    extension: Extension,
     status: Status,
     meta: Meta as M,
+    updated: Updated,
+    fileKind: FileKind,
   };
 }

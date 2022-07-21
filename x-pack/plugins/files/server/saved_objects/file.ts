@@ -30,7 +30,7 @@ const properties: Properties = {
   mime_type: {
     type: 'keyword',
   },
-  Extension: {
+  extension: {
     type: 'keyword',
   },
   size: {

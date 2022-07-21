@@ -13,14 +13,17 @@ import type { FilesRequestHandler } from './types';
 
 export const method = 'post' as const;
 
-const stringOrArrayOfStrings = schema.oneOf([schema.string(), schema.arrayOf(schema.string())]);
+const string64 = schema.string({ maxLength: 64 });
+const string256 = schema.string({ maxLength: 256 });
+
+const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
+const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
 
 const bodySchema = schema.object({
   kind: schema.maybe(stringOrArrayOfStrings),
-  name: schema.maybe(stringOrArrayOfStrings),
+  name: schema.maybe(nameStringOrArrayOfNameStrings),
   mimeType: schema.maybe(stringOrArrayOfStrings),
   status: schema.maybe(stringOrArrayOfStrings),
-  kuery: schema.maybe(stringOrArrayOfStrings),
   meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 

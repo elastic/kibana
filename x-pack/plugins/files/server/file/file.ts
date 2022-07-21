@@ -223,7 +223,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public get extension(): undefined | string {
-    return this.attributes.Extension;
+    return this.attributes.extension;
   }
 
   /**
@@ -247,7 +247,7 @@ export class File<M = unknown> implements IFile {
       Alt: alt,
       Meta: meta,
       FileKind: fileKind.id,
-      Extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);
