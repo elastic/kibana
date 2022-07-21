@@ -470,6 +470,36 @@ describe('Authenticator', () => {
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
+    it('does not activate profiles for the Elastic Cloud users even if profile grant is provided', async () => {
+      const user = mockAuthenticatedUser({ elastic_cloud_user: true });
+      const request = httpServerMock.createKibanaRequest();
+      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'some-user',
+        password: 'some-password',
+      };
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      await expect(
+        authenticator.login(request, { provider: { type: 'basic' }, value: {} })
+      ).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+      );
+
+      expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+        username: user.username,
+        provider: mockSessVal.provider,
+        state: { authorization },
+      });
+      expectAuditEvents({ action: 'user_login', outcome: 'success' });
+      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+    });
+
     it('returns `notHandled` if login attempt is targeted to not configured provider.', async () => {
       const request = httpServerMock.createKibanaRequest();
       await expect(

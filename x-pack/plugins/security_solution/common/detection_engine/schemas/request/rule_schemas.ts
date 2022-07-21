@@ -420,11 +420,7 @@ export const previewRulesSchema = t.intersection([
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
-export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
-export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
 export type QueryUpdateSchema = UpdateSchema<t.TypeOf<typeof queryCreateParams>>;
-export type SavedQueryUpdateSchema = UpdateSchema<t.TypeOf<typeof savedQueryCreateParams>>;
-export type ThresholdUpdateSchema = UpdateSchema<t.TypeOf<typeof thresholdCreateParams>>;
 export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
@@ -448,7 +444,6 @@ export {
   machineLearningPatchParams,
   newTermsPatchParams,
 };
-export type PatchTypeSpecific = t.TypeOf<typeof patchTypeSpecific>;
 
 export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
 export type ThreatMatchPatchParams = t.TypeOf<typeof threatMatchPatchParams>;

@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const CHANGE_ALERT_STATUS = i18n.translate(
-  'xpack.securitySolution.endpoint.takeAction.changeAlertStatus',
-  {
-    defaultMessage: 'Change alert status',
-  }
-);
+export { useTourContext, TourContextProvider } from './tour';

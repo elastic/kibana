@@ -97,8 +97,6 @@ export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
 
-export const DEFINE_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
-
 export const DEFINE_INDEX_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="input"]';
 
@@ -159,9 +157,6 @@ export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
 export const DEFAULT_RISK_SCORE_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
-
-export const DEFAULT_RISK_SCORE_SLIDER =
-  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 
