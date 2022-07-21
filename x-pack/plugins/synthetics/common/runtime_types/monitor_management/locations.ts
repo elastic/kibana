@@ -57,12 +57,12 @@ export const ServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
     label: t.string,
-    geo: LocationGeoCodec,
-    url: t.string,
     isServiceManaged: t.boolean,
-    status: LocationStatusCodec,
   }),
   t.partial({
+    url: t.string,
+    geo: LocationGeoCodec,
+    status: LocationStatusCodec,
     isInvalid: t.boolean,
   }),
 ]);
