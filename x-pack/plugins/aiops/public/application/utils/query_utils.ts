@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate query utils in
+// `x-pack/plugins/data_visualizer/common/utils/query_utils.ts`
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
