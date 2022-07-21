@@ -212,7 +212,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatMapping: formThreatMapping,
       machineLearningJobId: formMachineLearningJobId,
       anomalyThreshold: formAnomalyThreshold,
-      dataSourceType: formdataSourceType,
+      dataSourceType: formDataSourceType,
     },
   ] = useFormData<DefineStepRule>({
     form,
