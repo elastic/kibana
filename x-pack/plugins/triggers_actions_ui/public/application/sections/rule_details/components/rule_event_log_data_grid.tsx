@@ -52,7 +52,7 @@ export interface RuleEventLogDataGrid {
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFilterChange: (filter: string[]) => void;
-  onModalOpen: (runLog: IExecutionLog) => void;
+  onFlyoutOpen: (runLog: IExecutionLog) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
 }
@@ -70,7 +70,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     onChangeItemsPerPage,
     onChangePage,
     onFilterChange,
-    onModalOpen,
+    onFlyoutOpen,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -104,6 +104,12 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }
         ),
         isSortable: getIsColumnSortable('timestamp'),
+        isResizable: false,
+        actions: {
+          showHide: false,
+          showMoveLeft: false,
+          showMoveRight: false,
+        },
         initialWidth: 250,
       },
       {
@@ -115,6 +121,12 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }
         ),
         isSortable: getIsColumnSortable('execution_duration'),
+        isResizable: false,
+        actions: {
+          showHide: false,
+          showMoveLeft: false,
+          showMoveRight: false,
+        },
         initialWidth: 100,
       },
       {
@@ -126,8 +138,11 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }
         ),
         actions: {
+          showHide: false,
           showSortAsc: false,
           showSortDesc: false,
+          showMoveLeft: false,
+          showMoveRight: false,
           additional: [
             {
               iconType: 'annotation',
@@ -154,7 +169,8 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           ],
         },
         isSortable: getIsColumnSortable('status'),
-        initialWidth: 100,
+        isResizable: false,
+        initialWidth: 150,
       },
       {
         id: 'message',
@@ -172,7 +188,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             const actionErrors = runLog?.num_errored_actions as number;
             if (actionErrors) {
               return (
-                <Component onClick={() => onModalOpen(runLog)} iconType="alert">
+                <Component onClick={() => onFlyoutOpen(runLog)} iconType="alert">
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.viewActionErrors"
                     defaultMessage="View action errors"
@@ -295,7 +311,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isSortable: getIsColumnSortable('timed_out'),
       },
     ],
-    [getPaginatedRowIndex, onModalOpen, onFilterChange, logs]
+    [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, logs]
   );
 
   const columnVisibilityProps = useMemo(
@@ -389,7 +405,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             borderRadius: euiTheme.border.radius.medium,
           }}
           color="hollow"
-          onClick={() => onModalOpen(runLog)}
+          onClick={() => onFlyoutOpen(runLog)}
           onClickAriaLabel="Open action errors modal"
         >
           {value}

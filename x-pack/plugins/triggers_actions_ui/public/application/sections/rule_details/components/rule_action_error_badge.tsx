@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiText } from '@elastic/eui';
 
 export interface RuleActionErrorBadge {
   totalErrors: number;
@@ -15,28 +15,10 @@ export interface RuleActionErrorBadge {
 
 export const RuleActionErrorBadge = (props: RuleActionErrorBadge) => {
   const { totalErrors, showIcon = false } = props;
-  const { euiTheme } = useEuiTheme();
-
-  const badgeStyle = useMemo(
-    () => ({
-      color: 'white',
-      borderRadius: '24px',
-    }),
-    []
-  );
-
-  const textStyle = useMemo(
-    () => ({
-      fontWeight: euiTheme.font.weight.semiBold,
-    }),
-    [euiTheme]
-  );
 
   return (
-    <EuiBadge style={badgeStyle} iconType={showIcon ? 'alert' : undefined} color="accent">
-      <EuiText color="white" size="s" style={textStyle}>
-        {totalErrors}
-      </EuiText>
+    <EuiBadge iconType={showIcon ? 'alert' : undefined} color="danger">
+      <EuiText size="s">{totalErrors}</EuiText>
     </EuiBadge>
   );
 };

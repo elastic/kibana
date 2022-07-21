@@ -46,7 +46,7 @@ const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; messa
   const filter: string[] = [];
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
+    filter.push(`event.provider: alerting AND event.outcome: ${outcomeFilter.join(' or ')}`);
   }
 
   if (message) {

@@ -21,11 +21,11 @@ import {
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
+import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, LOCKED_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { RuleActionErrorLogModal } from './rule_action_error_log_modal';
+import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -58,6 +58,11 @@ const SEARCH_PLACEHOLDER = i18n.translate(
 
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 
+const getDefaultColumns = (columns: string[]) => {
+  const columnsWithoutLockedColumn = columns.filter((column) => !LOCKED_COLUMNS.includes(column));
+  return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
+};
+
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
@@ -85,15 +90,15 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | null>(null);
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
-    return (
+    return getDefaultColumns(
       JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
-      RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
+        RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
     );
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -213,13 +218,13 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination, setFilter]
   );
 
-  const onModalOpen = useCallback((runLog: IExecutionLog) => {
-    setIsModalOpen(true);
+  const onFlyoutOpen = useCallback((runLog: IExecutionLog) => {
+    setIsFlyoutOpen(true);
     setSelectedRunLog(runLog);
   }, []);
 
-  const onModalClose = useCallback(() => {
-    setIsModalOpen(false);
+  const onFlyoutClose = useCallback(() => {
+    setIsFlyoutOpen(false);
     setSelectedRunLog(null);
   }, []);
 
@@ -259,7 +264,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           dateFormat={dateFormat}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
-          onModalOpen={onModalOpen}
+          onFlyoutOpen={onFlyoutOpen}
           onFilterChange={setFilter}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
@@ -334,12 +339,12 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           backToTopAnchor="rule_event_log_list"
         />
       )}
-      {isModalOpen && selectedRunLog && (
-        <RuleActionErrorLogModal
+      {isFlyoutOpen && selectedRunLog && (
+        <RuleActionErrorLogFlyout
           rule={rule}
           runLog={selectedRunLog}
           refreshToken={refreshToken}
-          onClose={onModalClose}
+          onClose={onFlyoutClose}
         />
       )}
     </div>

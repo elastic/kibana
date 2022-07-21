@@ -72,9 +72,6 @@ export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [
   'num_recovered_alerts',
 ];
 
-export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
-  'timestamp',
-  'execution_duration',
-  'status',
-  'message',
-];
+export const LOCKED_COLUMNS = ['timestamp', 'execution_duration', 'status'];
+
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS, 'message,'];
