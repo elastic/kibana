@@ -13,7 +13,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCreateCaseNavigation } from '../../../common/navigation';
 
 const NoCasesComponent = () => {
-  const { userCanCrud } = useCasesContext();
+  const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
 
   const navigateToCreateCaseClick = useCallback(
@@ -24,7 +24,7 @@ const NoCasesComponent = () => {
     [navigateToCreateCase]
   );
 
-  return userCanCrud ? (
+  return permissions.all ? (
     <>
       <span>{i18n.NO_CASES}</span>
       <LinkAnchor

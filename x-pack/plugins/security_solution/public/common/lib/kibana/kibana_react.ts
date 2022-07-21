@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
-  KibanaReactContextValue,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
 } from '@kbn/kibana-react-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {

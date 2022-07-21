@@ -8,6 +8,7 @@
 import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { ElasticFlameGraph } from '../common/flamegraph';
+import { TopNFunctions } from '../common/functions';
 import { TopNSamples } from '../common/topn';
 
 export interface Services {
@@ -20,6 +21,15 @@ export interface Services {
     n: number;
     kuery: string;
   }) => Promise<TopNSamples>;
+  fetchTopNFunctions: (params: {
+    index: string;
+    projectID: number;
+    timeFrom: number;
+    timeTo: number;
+    startIndex: number;
+    endIndex: number;
+    kuery: string;
+  }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
     index: string;
     projectID: number;
@@ -45,6 +55,39 @@ export function getServices(core: CoreStart): Services {
           kuery,
         };
         return await core.http.get(`${paths.TopN}/${type}`, { query });
+      } catch (e) {
+        return e;
+      }
+    },
+
+    fetchTopNFunctions: async ({
+      index,
+      projectID,
+      timeFrom,
+      timeTo,
+      startIndex,
+      endIndex,
+      kuery,
+    }: {
+      index: string;
+      projectID: number;
+      timeFrom: number;
+      timeTo: number;
+      startIndex: number;
+      endIndex: number;
+      kuery: string;
+    }) => {
+      try {
+        const query: HttpFetchQuery = {
+          index,
+          projectID,
+          timeFrom,
+          timeTo,
+          startIndex,
+          endIndex,
+          kuery,
+        };
+        return await core.http.get(paths.TopNFunctions, { query });
       } catch (e) {
         return e;
       }

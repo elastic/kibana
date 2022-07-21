@@ -6,7 +6,6 @@
  */
 
 import {
-  CriteriaWithPagination,
   EuiAvatar,
   EuiBadge,
   EuiBasicTable,
@@ -23,16 +22,15 @@ import {
   EuiCodeBlock,
   EuiToolTip,
   RIGHT_ALIGNMENT,
-  EuiFlexGrid,
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
-import type { HorizontalAlignment } from '@elastic/eui';
+import type { HorizontalAlignment, CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -58,17 +56,24 @@ const StyledFacetButton = euiStyled(EuiFacetButton)`
 `;
 
 const customDescriptionListCss = css`
-  dt,
-  dd {
-    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS} !important;
-  }
-  dt {
-    font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+  &.euiDescriptionList {
+    > .euiDescriptionList__title {
+      color: ${(props) => props.theme.eui.euiColorDarkShade};
+      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
+
+    > .euiDescriptionList__description {
+      font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+      margin-top: ${(props) => props.theme.eui.euiSizeS};
+    }
   }
 `;
 
-const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
+const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+  type: 'column',
+})`
   ${customDescriptionListCss}
 `;
 
@@ -158,39 +163,46 @@ export const ResponseActionsList = memo<
           parameters,
         } = item;
 
+        const parametersList = parameters
+          ? Object.entries(parameters).map(([key, value]) => {
+              return `${key}:${value}`;
+            })
+          : undefined;
+
         const command = getCommand(_command);
-        const descriptionListLeft = [
+        const dataList = [
           {
             title: OUTPUT_MESSAGES.expandSection.placedAt,
             description: `${startedAt}`,
           },
           {
-            title: OUTPUT_MESSAGES.expandSection.input,
-            description: `${command}`,
-          },
-        ];
-
-        const descriptionListCenter = [
-          {
             title: OUTPUT_MESSAGES.expandSection.startedAt,
             description: `${startedAt}`,
           },
           {
-            title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: parameters ? parameters : emptyValue,
-          },
-        ];
-
-        const descriptionListRight = [
-          {
             title: OUTPUT_MESSAGES.expandSection.completedAt,
             description: `${completedAt ?? emptyValue}`,
           },
-        ];
+          {
+            title: OUTPUT_MESSAGES.expandSection.input,
+            description: `${command}`,
+          },
+          {
+            title: OUTPUT_MESSAGES.expandSection.parameters,
+            description: parametersList ? parametersList : emptyValue,
+          },
+        ].map(({ title, description }) => {
+          return {
+            title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+            description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+          };
+        });
 
         const outputList = [
           {
-            title: OUTPUT_MESSAGES.expandSection.output,
+            title: (
+              <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>
+            ),
             description: (
               // codeblock for output
               <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
@@ -213,32 +225,10 @@ export const ResponseActionsList = memo<
               direction="column"
               style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
+              gutterSize="s"
             >
               <EuiFlexItem grow={false}>
-                <EuiFlexGrid columns={3}>
-                  {[descriptionListLeft, descriptionListCenter, descriptionListRight].map(
-                    (_list, i) => {
-                      const list = _list.map((l) => {
-                        const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
-                        return {
-                          title: l.title,
-                          description: isParameters ? (
-                            // codeblock for parameters
-                            <StyledEuiCodeBlock>{l.description}</StyledEuiCodeBlock>
-                          ) : (
-                            l.description
-                          ),
-                        };
-                      });
-
-                      return (
-                        <EuiFlexItem key={i}>
-                          <StyledDescriptionList listItems={list} />
-                        </EuiFlexItem>
-                      );
-                    }
-                  )}
-                </EuiFlexGrid>
+                <StyledDescriptionList listItems={dataList} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <StyledDescriptionListOutput listItems={outputList} />
@@ -501,6 +491,7 @@ export const ResponseActionsList = memo<
       <ActionListDateRangePicker
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
+        onClick={reFetchEndpointActionList}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}

@@ -11,14 +11,18 @@ import type { CasesProps } from '../../components/app';
 import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 
 type GetCasesPropsInternal = CasesProps & CasesContextProps;
-export type GetCasesProps = Omit<GetCasesPropsInternal, 'externalReferenceAttachmentTypeRegistry'>;
+export type GetCasesProps = Omit<
+  GetCasesPropsInternal,
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
+>;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
 
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   basePath,
   onComponentInitialized,
   actionsNavigation,
@@ -33,8 +37,9 @@ export const getCasesLazy = ({
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
       owner,
-      userCanCrud,
+      permissions,
       basePath,
       features,
       releasePhase,

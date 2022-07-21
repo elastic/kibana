@@ -11,6 +11,7 @@ import { fireEvent } from '@testing-library/dom';
 import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
+import * as useGetUserCasesPermissionsModule from '../../../../hooks/use_get_user_cases_permissions';
 import moment from 'moment';
 
 describe('AddToCaseAction', function () {
@@ -81,6 +82,10 @@ describe('AddToCaseAction', function () {
   });
 
   it('should be able to click add to case button', async function () {
+    const mockUseGetUserCasesPermissions = jest
+      .spyOn(useGetUserCasesPermissionsModule, 'useGetUserCasesPermissions')
+      .mockImplementation(() => ({ crud: false, read: false }));
+
     const initSeries = {
       data: [
         {
@@ -106,8 +111,13 @@ describe('AddToCaseAction', function () {
     expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
-        userCanCrud: true,
+        permissions: {
+          all: false,
+          read: false,
+        },
       })
     );
+
+    mockUseGetUserCasesPermissions.mockRestore();
   });
 });

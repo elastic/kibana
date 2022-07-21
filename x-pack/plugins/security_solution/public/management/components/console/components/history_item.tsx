@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { css } from '@kbn/kibana-react-plugin/common';

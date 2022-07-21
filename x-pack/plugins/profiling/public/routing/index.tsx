@@ -12,6 +12,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import { FlameGraphsView } from '../components/flame_graphs_view';
+import { FunctionsView } from '../components/functions_view';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
 
@@ -100,6 +101,49 @@ const routes = {
               },
               '/flamegraphs': {
                 element: <Redirect to="/flamegraphs/flamegraph" />,
+              },
+            },
+          },
+          '/functions': {
+            element: (
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.functions', {
+                  defaultMessage: 'Functions',
+                })}
+                href="/functions/topn"
+              >
+                <FunctionsView>
+                  <Outlet />
+                </FunctionsView>
+              </RouteBreadcrumb>
+            ),
+            children: {
+              '/functions/topn': {
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.topnFunctions', {
+                      defaultMessage: 'Top N',
+                    })}
+                    href="/functions/topn"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
+              },
+              '/functions/differential': {
+                element: (
+                  <RouteBreadcrumb
+                    title={i18n.translate('xpack.profiling.breadcrumb.differentialFunctions', {
+                      defaultMessage: 'Differential Top N',
+                    })}
+                    href="/functions/differential"
+                  >
+                    <Outlet />
+                  </RouteBreadcrumb>
+                ),
+              },
+              '/functions': {
+                element: <Redirect to="/functions/topn" />,
               },
             },
           },

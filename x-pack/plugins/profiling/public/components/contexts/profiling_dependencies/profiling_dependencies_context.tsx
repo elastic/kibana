@@ -15,6 +15,10 @@ import {
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import { createContext } from 'react';
+import {
+  ChartsPluginSetup,
+  ChartsPluginStart,
+} from '../../../../../../../src/plugins/charts/public';
 import { Services } from '../../../services';
 
 export interface ProfilingDependencies {
@@ -23,12 +27,14 @@ export interface ProfilingDependencies {
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
     observability: ObservabilityPublicStart;
+    charts: ChartsPluginStart;
   };
   setup: {
     core: CoreSetup;
     data: DataPublicPluginSetup;
     dataViews: DataViewsPublicPluginSetup;
     observability: ObservabilityPublicSetup;
+    charts: ChartsPluginSetup;
   };
   services: Services;
 }

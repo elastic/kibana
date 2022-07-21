@@ -9,8 +9,8 @@ import React, { useCallback, useState, useContext } from 'react';
 import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EnrichedFieldInfo } from '../types';
-import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import type { EnrichedFieldInfo } from '../types';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;

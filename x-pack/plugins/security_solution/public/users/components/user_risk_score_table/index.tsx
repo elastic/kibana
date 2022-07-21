@@ -9,33 +9,34 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import {
-  Columns,
-  Criteria,
-  ItemsPerRow,
-  PaginatedTable,
-} from '../../../common/components/paginated_table';
+import styled from 'styled-components';
+import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getUserRiskScoreColumns } from './columns';
 
 import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
 import { usersModel, usersSelectors, usersActions } from '../../store';
-import {
+import type {
   UserRiskScoreFields,
   UserRiskScoreItem,
 } from '../../../../common/search_strategy/security_solution/users/common';
-import { SeverityCount } from '../../../common/components/severity/types';
+import type { SeverityCount } from '../../../common/components/severity/types';
 import { SeverityBadges } from '../../../common/components/severity/severity_badges';
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
 import { SeverityFilterGroup } from '../../../common/components/severity/severity_filter_group';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { State } from '../../../common/store';
-import {
+import type { State } from '../../../common/store';
+import type {
   RiskScoreSortField,
   RiskSeverity,
   UsersRiskScore,
 } from '../../../../common/search_strategy';
+
+const IconWrapper = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -154,9 +155,9 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   const headerTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{i18nUsers.NAVIGATION_RISK_TITLE}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <>
+      {i18nUsers.NAVIGATION_RISK_TITLE}
+      <IconWrapper>
         <EuiIconTip
           color="subdued"
           content={i18n.USER_RISK_TABLE_TOOLTIP}
@@ -164,8 +165,8 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
           size="l"
           type="iInCircle"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </IconWrapper>
+    </>
   );
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
