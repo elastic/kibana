@@ -8,7 +8,8 @@
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { SavedObjectsClient, type SavedObjectsClientContract } from './saved_objects_client';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
+import { SavedObjectsClient } from './saved_objects_client';
 
 /**
  * @public
@@ -20,8 +21,10 @@ export interface SavedObjectsStart {
 
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
   public async setup() {}
+
   public async start({ http }: { http: HttpStart }): Promise<SavedObjectsStart> {
     return { client: new SavedObjectsClient(http) };
   }
+
   public async stop() {}
 }
