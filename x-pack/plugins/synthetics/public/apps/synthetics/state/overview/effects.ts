@@ -7,7 +7,7 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchMonitorOverviewAction } from './actions';
+import { fetchMonitorOverviewAction, quietFetchOverviewAction } from './actions';
 import { fetchMonitorOverview } from './api';
 
 export function* fetchMonitorOverviewEffect() {
@@ -17,6 +17,17 @@ export function* fetchMonitorOverviewEffect() {
       fetchMonitorOverview,
       fetchMonitorOverviewAction.success,
       fetchMonitorOverviewAction.fail
+    )
+  );
+}
+
+export function* quietFetchOverviewEffect() {
+  yield takeLeading(
+    quietFetchOverviewAction.get,
+    fetchEffectFactory(
+      fetchMonitorOverview,
+      quietFetchOverviewAction.success,
+      quietFetchOverviewAction.fail
     )
   );
 }
