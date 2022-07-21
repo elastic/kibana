@@ -7,16 +7,10 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
-import type { OwnProps as SaveTimelineComponentProps } from './save_timeline_button';
+import type { SaveTimelineComponentProps } from './save_timeline_button';
 import { SaveTimelineButton } from './save_timeline_button';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-} from '../../../../common/mock';
-import { createStore } from '../../../../common/store';
+import { TestProviders } from '../../../../common/mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -25,33 +19,19 @@ jest.mock('react-redux', () => {
     useDispatch: jest.fn(),
   };
 });
+
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/components/user_privileges');
 
-const props: SaveTimelineComponentProps = {
+const props = {
   initialFocus: 'title' as const,
   timelineId: 'timeline-1',
   toolTip: 'tooltip message',
 };
 
-const getStore = (state = mockGlobalState) =>
-  createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    kibanaObservable,
-    createSecuritySolutionStorageMock().storage
-  );
-
-const defaultStore = getStore();
-
-const storeWithReadOnlyTimeLineAccess = getStore({
-  ...mockGlobalState,
-  timeline: { ...mockGlobalState.timeline, showCallOutUnauthorizedMsg: true },
-});
-
-const TestSaveTimelineButton: React.FC<SaveTimelineComponentProps> = (_props) => (
-  <TestProviders store={defaultStore}>
+const TestSaveTimelineButton = (_props: SaveTimelineComponentProps) => (
+  <TestProviders>
     <SaveTimelineButton {..._props} />
   </TestProviders>
 );
@@ -60,6 +40,7 @@ describe('SaveTimelineButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   // skipping this test because popover is not getting visible by RTL gestures.
   //
   // Raised a bug with eui team: https://github.com/elastic/eui/issues/6065
@@ -69,12 +50,10 @@ describe('SaveTimelineButton', () => {
       '[data-test-subj="save-timeline-button-icon"]'
     )[0];
 
-    const mouseenter = new MouseEvent('mouseover', {
-      bubbles: true,
-      cancelable: false,
-    });
+    fireEvent.mouseOver(saveTimelineIcon);
 
-    fireEvent.mouseOver(saveTimelineIcon, mouseenter);
+    jest.runAllTimers();
+
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toBeVisible();
     });
@@ -104,8 +83,11 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should have edit timeline btn disabled with tooltip if user does not have write access', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false },
+    });
     const { container } = render(
-      <TestProviders store={storeWithReadOnlyTimeLineAccess}>
+      <TestProviders>
         <SaveTimelineButton {...props} />
       </TestProviders>
     );
@@ -115,9 +97,12 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should show a modal when showOverlay equals true', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
     const { container, baseElement } = render(<TestSaveTimelineButton {...props} />);
     expect(
-      container.querySelector('[data-test-subj="save-timeline-modal-comp"]')
+      container.querySelector('[data-test-subj="save-timeline-modal"]')
     ).not.toBeInTheDocument();
 
     const saveTimelineIcon = container.querySelectorAll(

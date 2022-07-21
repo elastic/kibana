@@ -53,6 +53,7 @@ export const epicPersistPinnedEvent = (
       const savedTimeline = recentTimeline[action.payload.id];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
       if (allTimelineQuery.refetch != null) {
         (allTimelineQuery.refetch as inputsModel.Refetch)();
       }
