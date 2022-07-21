@@ -170,6 +170,7 @@ export const getMetricVisualization = ({
     const newState = { ...state };
     delete newState.metricAccessor;
     delete newState.secondaryMetricAccessor;
+    delete newState.secondaryPrefix;
     delete newState.breakdownByAccessor;
     delete newState.collapseFn;
     delete newState.maxAccessor;
@@ -349,6 +350,7 @@ export const getMetricVisualization = ({
     }
     if (prevState.secondaryMetricAccessor === columnId) {
       delete updated.secondaryMetricAccessor;
+      delete updated.secondaryPrefix;
     }
     if (prevState.maxAccessor === columnId) {
       delete updated.maxAccessor;

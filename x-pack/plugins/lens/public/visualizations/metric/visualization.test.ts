@@ -431,7 +431,6 @@ describe('metric visualization', () => {
         "layerType": "data",
         "maxCols": 5,
         "progressDirection": "vertical",
-        "secondaryPrefix": "extra-text",
         "subtitle": "subtitle",
       }
     `);
@@ -552,6 +551,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
+      expect(removed).not.toHaveProperty('secondaryPrefix');
     });
     it('removes max dimension', () => {
       const removed = visualization.removeDimension({
