@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
@@ -41,6 +42,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { navTabsNetworkDetails } from './nav_tabs';
@@ -91,11 +93,15 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
+
+  const networkDetailsPageFilters: Filter[] = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
+  const getFilters = () => [...networkDetailsPageFilters, ...filters];
+
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
-    filters,
+    filters: getFilters(),
   });
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
@@ -149,7 +155,6 @@ const NetworkDetailsComponent: React.FC = () => {
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
-
             <NetworkDetailsManage
               id={id}
               inspect={inspect}
@@ -168,17 +173,12 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
             />
-
             <EuiHorizontalRule />
-
             <EuiSpacer />
-
             <SecuritySolutionTabNavigation
-              navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities))}
+              navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />
-
             <EuiSpacer />
-
             <NetworkDetailsTabs
               ip={ip}
               endDate={to}

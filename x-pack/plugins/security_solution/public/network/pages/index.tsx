@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -18,6 +18,7 @@ import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { NETWORK_PATH } from '../../../common/constants';
+import { FlowTarget } from '../../../common/search_strategy';
 import { networkDetailsPagePath, networkDetailsTabPath } from './constants';
 
 const NetworkContainerComponent = () => {
@@ -30,6 +31,12 @@ const NetworkContainerComponent = () => {
   const networkRoutePath = useMemo(
     () => getNetworkRoutePath(capabilitiesFetched, userHasMlUserPermissions),
     [capabilitiesFetched, userHasMlUserPermissions]
+  );
+
+  const getPathWithFlowType = useCallback(
+    (detailName: string) =>
+      `${NETWORK_PATH}/${detailName}/${NetworkRouteType.flows}/${FlowTarget.source}`,
+    []
   );
 
   return (
@@ -55,6 +62,23 @@ const NetworkContainerComponent = () => {
         <NetworkDetails />
       </Route>
       <Route
+        // For now we are allowing the old route to exist but redirect to the new structure
+        path={`${NETWORK_PATH}/ip/:detailName`}
+        render={({
+          match: {
+            params: { detailName },
+          },
+          location: { search = '' },
+        }) => (
+          <Redirect
+            to={{
+              pathname: getPathWithFlowType(detailName),
+              search,
+            }}
+          />
+        )}
+      />
+      <Route
         path={networkDetailsPagePath}
         render={({
           match: {
@@ -64,7 +88,7 @@ const NetworkContainerComponent = () => {
         }) => (
           <Redirect
             to={{
-              pathname: `${NETWORK_PATH}/${detailName}/${NetworkRouteType.flows}`,
+              pathname: getPathWithFlowType(detailName),
               search,
             }}
           />

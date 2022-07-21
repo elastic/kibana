@@ -13,4 +13,4 @@ export const networkTabPath = `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows
 
 export const networkDetailsPagePath = `${NETWORK_PATH}/:detailName`;
 
-export const networkDetailsTabPath = `${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})`;
+export const networkDetailsTabPath = `${networkDetailsPagePath}/:tabName(${NetworkDetailsRouteType.flows}|${NetworkDetailsRouteType.http}|${NetworkDetailsRouteType.tls}|${NetworkDetailsRouteType.anomalies}|${NetworkDetailsRouteType.events}|${NetworkDetailsRouteType.users})/:flowTarget`;
