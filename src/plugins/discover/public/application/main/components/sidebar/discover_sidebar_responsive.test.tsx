@@ -107,7 +107,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     selectedIndexPattern: indexPattern,
     state: {},
     trackUiMetric: jest.fn(),
-    onEditRuntimeField: jest.fn(),
+    onFieldEdited: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
     useNewFieldsApi: true,

@@ -31,13 +31,6 @@ export type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
   IScopedClusterClient,
-  // responses
-  SearchResponse,
-  CountResponse,
-  ShardsInfo,
-  ShardsResponse,
-  GetResponse,
-  DeleteDocumentResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -54,3 +47,5 @@ export {
   isNotFoundFromUnsupportedServer,
   PRODUCT_RESPONSE_HEADER,
 } from './supported_server_response_check';
+export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
+export type { ElasticsearchRequestHandlerContext } from './elasticsearch_route_handler_context';

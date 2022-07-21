@@ -124,7 +124,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testResources = MachineLearningTestResourcesProvider(context, api);
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
-  const trainedModels = TrainedModelsProvider(context, api, commonUI);
+  const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
 

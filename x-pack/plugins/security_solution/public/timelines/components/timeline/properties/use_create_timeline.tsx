@@ -12,11 +12,8 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';

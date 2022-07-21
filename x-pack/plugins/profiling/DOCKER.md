@@ -21,16 +21,23 @@ You will first need to build the Docker image for the Kibana environment:
 make build
 ```
 
-This will create a Docker image with the tag `kibana-dev:8.1.x`.
+This will create a Docker image with the tag `kibana-dev:latest`.
 
 If you wish to change the image version, you can run this instead:
 
 ```
-make build KIBANA_VERSION=8.2
+make build KIBANA_VERSION=8.4
+```
+
+If you need to do a full refresh of the Docker image, you can rebuild from
+scratch using this:
+
+```
+make build-nocache
 ```
 
 Next, you can start the container using this (assumes Docker image is
-`kibana-dev:8.1.x` and Elasticsearch is running on the `apm-integration-testing`
+`kibana-dev:latest` and Elasticsearch is running on the `apm-integration-testing`
 Docker network):
 
 ```

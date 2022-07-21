@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -18,9 +18,9 @@ import {
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
-import { TaskExecutionPeriod } from '../task';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   return {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
 
-import { Filter } from '@kbn/es-query';
-import { hostsModel } from '../store';
-import { GlobalTimeArgs } from '../../common/containers/use_global_time';
-import { InputsModelId } from '../../common/store/inputs/constants';
+import type { Filter } from '@kbn/es-query';
+import type { hostsModel } from '../store';
+import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
+import type { InputsModelId } from '../../common/store/inputs/constants';
 import { HOSTS_PATH } from '../../../common/constants';
 
 export const hostDetailsPagePath = `${HOSTS_PATH}/:detailName`;

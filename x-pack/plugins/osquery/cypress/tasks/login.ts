@@ -6,8 +6,9 @@
  */
 
 import * as yaml from 'js-yaml';
-import Url, { UrlObject } from 'url';
-import { ROLES } from '../test';
+import type { UrlObject } from 'url';
+import Url from 'url';
+import type { ROLES } from '../test';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate

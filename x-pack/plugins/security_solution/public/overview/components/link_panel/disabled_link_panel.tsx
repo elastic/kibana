@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { InnerLinkPanel } from './inner_link_panel';
-import { LinkPanelListItem, LinkPanelViewProps } from './types';
+import type { LinkPanelListItem, LinkPanelViewProps } from './types';
 
 interface DisabledLinkPanelProps {
   bodyCopy: string;

@@ -37,6 +37,13 @@ export class ProfilingPlugin implements Plugin {
         }),
         path: '/flamegraphs',
       },
+      {
+        id: 'functions',
+        title: i18n.translate('xpack.profiling.navigation.functionsLinkLabel', {
+          defaultMessage: 'Functions',
+        }),
+        path: '/functions',
+      },
     ];
 
     const section$ = from(coreSetup.getStartServices()).pipe(

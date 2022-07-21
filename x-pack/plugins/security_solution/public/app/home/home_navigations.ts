@@ -6,11 +6,8 @@
  */
 
 import * as i18n from '../translations';
-import {
-  SecurityNav,
-  SecurityNavGroup,
-  SecurityNavGroupKey,
-} from '../../common/components/navigation/types';
+import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
+import { SecurityNavGroupKey } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_DETECTION_RESPONSE_PATH,

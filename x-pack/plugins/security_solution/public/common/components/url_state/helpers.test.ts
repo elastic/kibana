@@ -8,7 +8,7 @@
 import { navTabs } from '../../../app/home/home_navigations';
 import { getTitle, isQueryStateEmpty } from './helpers';
 import { CONSTANTS } from './constants';
-import { ValueUrlState } from './types';
+import type { ValueUrlState } from './types';
 
 describe('Helpers Url_State', () => {
   describe('getTitle', () => {
@@ -35,42 +35,6 @@ describe('Helpers Url_State', () => {
   });
 
   describe('isQueryStateEmpty', () => {
-    test('returns true if queryState is undefined', () => {
-      const result = isQueryStateEmpty(undefined, CONSTANTS.savedQuery);
-      expect(result).toBeTruthy();
-    });
-
-    test('returns true if queryState is null', () => {
-      const result = isQueryStateEmpty(null, CONSTANTS.savedQuery);
-      expect(result).toBeTruthy();
-    });
-
-    test('returns true if url key is "query" and queryState is empty string', () => {
-      const result = isQueryStateEmpty('', CONSTANTS.appQuery);
-      expect(result).toBeTruthy();
-    });
-
-    test('returns false if url key is "query" and queryState is not empty', () => {
-      const result = isQueryStateEmpty(
-        { query: { query: '*:*' }, language: 'kuery' },
-        CONSTANTS.appQuery
-      );
-      expect(result).toBeFalsy();
-    });
-
-    test('returns true if url key is "filters" and queryState is empty', () => {
-      const result = isQueryStateEmpty([], CONSTANTS.filters);
-      expect(result).toBeTruthy();
-    });
-
-    test('returns false if url key is "filters" and queryState is not empty', () => {
-      const result = isQueryStateEmpty(
-        [{ query: { query: '*:*' }, meta: { key: '123' } }],
-        CONSTANTS.filters
-      );
-      expect(result).toBeFalsy();
-    });
-
     // TODO: Is this a bug, or intended?
     test('returns false if url key is "timeline" and queryState is empty', () => {
       const result = isQueryStateEmpty({} as ValueUrlState, CONSTANTS.timeline);

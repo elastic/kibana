@@ -7,12 +7,13 @@
 
 import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
 import {
-  StackTraceID,
-  StackFrameID,
-  FileID,
-  StackTrace,
-  StackFrame,
+  describeFrameType,
   Executable,
+  FileID,
+  StackFrame,
+  StackFrameID,
+  StackTrace,
+  StackTraceID,
 } from './profiling';
 
 interface ColumnarCallerCallee {
@@ -96,28 +97,7 @@ function getExeFileName(node: CallerCalleeNode) {
   if (node.ExeFileName !== '') {
     return node.ExeFileName;
   }
-  switch (node.FrameType) {
-    case 0:
-      return '<unsymbolized frame>';
-    case 1:
-      return 'Python';
-    case 2:
-      return 'PHP';
-    case 3:
-      return 'Native';
-    case 4:
-      return 'Kernel';
-    case 5:
-      return 'JVM/Hotspot';
-    case 6:
-      return 'Ruby';
-    case 7:
-      return 'Perl';
-    case 8:
-      return 'JavaScript';
-    default:
-      return '';
-  }
+  return describeFrameType(node.FrameType);
 }
 
 function getLabel(node: CallerCalleeNode) {

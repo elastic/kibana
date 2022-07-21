@@ -12,10 +12,10 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
   CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-import type { CspRuleType } from '../../../common/schemas';
+import type { CspRule } from '../../../common/schemas';
 import { useKibana } from '../../common/hooks/use_kibana';
 
-export type RuleSavedObject = Omit<SimpleSavedObject<CspRuleType>, FunctionKeys<SimpleSavedObject>>;
+export type RuleSavedObject = Omit<SimpleSavedObject<CspRule>, FunctionKeys<SimpleSavedObject>>;
 
 export type RulesQuery = Required<
   Pick<SavedObjectsFindOptions, 'search' | 'page' | 'perPage' | 'filter'>
@@ -26,7 +26,7 @@ export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) =
   const { savedObjects } = useKibana().services;
 
   return useQuery([CSP_RULE_SAVED_OBJECT_TYPE, { search, page, perPage }], () =>
-    savedObjects.client.find<CspRuleType>({
+    savedObjects.client.find<CspRule>({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
       search: search ? `"${search}"*` : '',
       searchFields: ['metadata.name.text'],
@@ -52,7 +52,7 @@ export const useBulkUpdateCspRules = () => {
       packagePolicyId,
     }: {
       savedObjectRules: RuleSavedObject[];
-      packagePolicyId: CspRuleType['package_policy_id'];
+      packagePolicyId: CspRule['package_policy_id'];
     }) => {
       await savedObjects.client.bulkUpdate<RuleSavedObject>(
         savedObjectRules.map((savedObjectRule) => ({

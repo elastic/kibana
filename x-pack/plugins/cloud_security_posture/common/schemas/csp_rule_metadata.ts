@@ -8,7 +8,11 @@ import { schema as rt, TypeOf } from '@kbn/config-schema';
 
 export const cspRuleMetadataSchema = rt.object({
   audit: rt.string(),
-  benchmark: rt.object({ name: rt.string(), version: rt.string() }),
+  benchmark: rt.object({
+    name: rt.string(),
+    id: rt.oneOf([rt.literal('cis_k8s'), rt.literal('cis_eks')]),
+    version: rt.string(),
+  }),
   default_value: rt.maybe(rt.string()),
   description: rt.string(),
   id: rt.string(),
@@ -24,4 +28,4 @@ export const cspRuleMetadataSchema = rt.object({
   version: rt.string(),
 });
 
-export type CspRuleMetadataType = TypeOf<typeof cspRuleMetadataSchema>;
+export type CspRuleMetadata = TypeOf<typeof cspRuleMetadataSchema>;

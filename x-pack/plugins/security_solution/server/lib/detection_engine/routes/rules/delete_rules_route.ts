@@ -7,10 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
-import {
-  queryRulesSchema,
-  QueryRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import type { QueryRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import { queryRulesSchema } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';

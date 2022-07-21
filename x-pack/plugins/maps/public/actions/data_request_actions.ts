@@ -35,7 +35,6 @@ import {
   getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -307,12 +306,6 @@ function endDataLoad(
       });
     }
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer, features));
-      }
-    }
-
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -352,13 +345,6 @@ function onDataLoadError(
       });
     }
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      const layer = getLayerById(layerId, getState());
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer));
-      }
-    }
-
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -381,13 +367,6 @@ export function updateSourceDataRequest(layerId: string, newData: object) {
       layerId,
       newData,
     });
-
-    if ('features' in newData) {
-      const layer = getLayerById(layerId, getState());
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer, (newData as FeatureCollection).features));
-      }
-    }
 
     dispatch(updateStyleMeta(layerId));
   };
