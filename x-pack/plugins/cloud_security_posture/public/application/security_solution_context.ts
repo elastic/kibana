@@ -4,5 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import type { CspSecuritySolutionContext } from '../types';
 
-export { Benchmarks, BenchmarksNoPageTemplate } from './benchmarks';
+export const SecuritySolutionContext = React.createContext<CspSecuritySolutionContext | undefined>(
+  undefined
+);
