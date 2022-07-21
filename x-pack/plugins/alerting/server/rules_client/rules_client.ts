@@ -903,7 +903,7 @@ export class RulesClient {
     );
 
     const defaultFilter =
-      '(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)';
+      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();

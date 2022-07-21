@@ -495,7 +495,8 @@ describe('getActionErrorLog()', () => {
       {
         page: 1,
         per_page: 10,
-        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
+        filter:
+          'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))',
         sort: [{ sort_field: '@timestamp', sort_order: 'asc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -525,7 +526,7 @@ describe('getActionErrorLog()', () => {
         page: 3,
         per_page: 20,
         filter:
-          '((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)) AND (message: "test" AND runId: 123)',
+          '(event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))) AND (message: "test" AND runId: 123)',
         sort: [{ sort_field: '@timestamp', sort_order: 'asc' }],
         end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
