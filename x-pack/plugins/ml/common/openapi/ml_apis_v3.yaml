@@ -14,10 +14,14 @@ servers:
 paths:
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
       description: >
         Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      operationId: ml-sync
+      tags:
+        - ml
       parameters:
         - $ref: '#/components/parameters/spaceParam'
         - $ref: '#/components/parameters/simulateParam'
@@ -27,16 +31,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/mlSyncResponse'
               examples:
                 syncExample:
-                  $ref: '#/components/examples/syncExample'
+                  $ref: '#/components/examples/mlSyncExample'
   /api/ml/saved_objects/sync:
     get:
+      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
       description: >
-        Synchronizes Kibana saved objects for machine learning jobs and trained models.
         You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
+      operationId: ml-sync-default
+      tags:
+        - ml
       parameters:
         - $ref: '#/components/parameters/simulateParam'
       responses:
@@ -45,10 +52,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/mlSyncResponse'
               examples:
                 syncExample:
-                  $ref: '#/components/examples/syncExample'
+                  $ref: '#/components/examples/mlSyncExample'
 components:
  parameters:
   spaceParam:
@@ -70,84 +77,79 @@ components:
   basicAuth:
     type: http
     scheme: basic
+  apiKeyAuth:
+    type: apiKey
+    in: header
+    name: ApiKey
  schemas:
-    syncResponse:
+    mlSyncResponseSuccess:
+      type: boolean
+      description: The success or failure of the synchronization.
+    mlSyncResponseDatafeeds:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are datafeeds affected by the synchronization. There is an object for each relevant datafeed, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponseJobs:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are machine learning jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponseModels:
+      type: object
+      description: The sync machine learning saved objects API response contains this object when there are trained models affected by the synchronization. There is an object for each relevant trained model, which contains the synchronization status.
+      properties:
+        success:
+          $ref: '#/components/schemas/mlSyncResponseSuccess'
+    mlSyncResponse:
       type: object
       properties:
         datafeedsAdded:
           type: object
-          description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+          description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added when you run the sync machine learning saved objects API.
           additionalProperties:
-            type: object
-            properties:
-             success:
-               type: boolean
+           $ref: '#/components/schemas/mlSyncResponseDatafeeds'
         datafeedsRemoved:
           type: object
-          description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+          description: If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted when you run the sync machine learning saved objects API.
           additionalProperties:
-            type: object
-            properties:
-             success:
-               type: boolean
+            $ref: '#/components/schemas/mlSyncResponseDatafeeds'
         savedObjectsCreated:
           type: object
-          description: If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+          description: If saved objects are missing for machine learning jobs or trained models, they are created when you run the sync machine learning saved objects API.
           properties:
             anomaly-detector:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             data-frame-analytics:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseDatafeeds'
             trained-model:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseModels'
         savedObjectsDeleted:
           type: object
-          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
+          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted when you run the sync machine learning saved objects API.
           properties:
             anomaly-detector:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             data-frame-analytics:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseJobs'
             trained-model:
               type: object
               additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                $ref: '#/components/schemas/mlSyncResponseModels'
  examples:
-   syncExample:
+   mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
      value:
        {
@@ -162,4 +164,5 @@ components:
           "datafeedsRemoved":{}
         }
 security:
-  - basicAuth: []
+  - basicAuth: [ ]
+  - ApiKeyAuth: [ ]
