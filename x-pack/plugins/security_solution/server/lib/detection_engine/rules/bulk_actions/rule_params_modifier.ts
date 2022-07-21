@@ -11,6 +11,7 @@ import type { BulkActionEditForRuleParams } from '../../../../../common/detectio
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import { invariant } from '../../../../../common/utils/invariant';
+import { isMachineLearningParams } from '../../signals/utils';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -34,6 +35,10 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
+
+      if (!isMachineLearningParams(ruleParams) && action.overwriteDataViews) {
+        ruleParams.dataViewId = undefined;
+      }
 
       ruleParams.index = addItemsToArray(ruleParams.index ?? [], action.value);
       break;
