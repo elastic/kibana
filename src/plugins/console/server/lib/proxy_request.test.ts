@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import http, { ClientRequest, OutgoingHttpHeaders } from 'http';
+import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
 import { proxyRequest } from './proxy_request';
 import { URL } from 'url';
@@ -29,28 +29,6 @@ describe(`Console's send request`, () => {
     fakeRequest = null as any;
   });
 
-  const sendProxyRequest = async ({
-    headers = {},
-    uri = new URL('http://noone.nowhere.none'),
-    timeout = 3000,
-    requestPath = '',
-  }: {
-    headers?: OutgoingHttpHeaders;
-    uri?: URL;
-    timeout?: number;
-    requestPath?: string;
-  }) => {
-    return await proxyRequest({
-      agent: null as any,
-      headers,
-      method: 'get',
-      payload: null as any,
-      uri,
-      timeout,
-      requestPath,
-    });
-  };
-
   it('correctly implements timeout and abort mechanism', async () => {
     fakeRequest = {
       destroy: sinon.stub(),
@@ -58,7 +36,14 @@ describe(`Console's send request`, () => {
       once() {},
     } as any;
     try {
-      await sendProxyRequest({ timeout: 0 }); // immediately timeout
+      await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 0, // immediately timeout
+        uri: new URL('http://noone.nowhere.none'),
+      });
       fail('Should not reach here!');
     } catch (e) {
       expect(e.message).toEqual('Client request timeout');
@@ -78,9 +63,16 @@ describe(`Console's send request`, () => {
     } as any;
 
     // Don't set a host header this time
-    const defaultResult = await sendProxyRequest({});
+    const result1 = await proxyRequest({
+      agent: null as any,
+      headers: {},
+      method: 'get',
+      payload: null as any,
+      timeout: 30000,
+      uri: new URL('http://noone.nowhere.none'),
+    });
 
-    expect(defaultResult).toEqual('done');
+    expect(result1).toEqual('done');
 
     const [httpRequestOptions1] = stub.firstCall.args;
 
@@ -91,9 +83,16 @@ describe(`Console's send request`, () => {
     });
 
     // Set a host header
-    const resultWithHostHeader = await sendProxyRequest({ headers: { Host: 'myhost' } });
+    const result2 = await proxyRequest({
+      agent: null as any,
+      headers: { Host: 'myhost' },
+      method: 'get',
+      payload: null as any,
+      timeout: 30000,
+      uri: new URL('http://noone.nowhere.none'),
+    });
 
-    expect(resultWithHostHeader).toEqual('done');
+    expect(result2).toEqual('done');
 
     const [httpRequestOptions2] = stub.secondCall.args;
     expect((httpRequestOptions2 as any).headers).toEqual({
@@ -103,7 +102,7 @@ describe(`Console's send request`, () => {
     });
   });
 
-  describe('with request path', () => {
+  describe('with percent-encoded uri pathname', () => {
     beforeEach(() => {
       fakeRequest = {
         abort: sinon.stub(),
@@ -116,45 +115,39 @@ describe(`Console's send request`, () => {
       } as any;
     });
 
-    const verifyRequestPath = async ({
-      initialPath,
-      expectedPath,
-      uri,
-    }: {
-      initialPath: string;
-      expectedPath: string;
-      uri?: URL;
-    }) => {
-      const result = await sendProxyRequest({
-        requestPath: initialPath,
+    it('should decode percent-encoded uri pathname and encode it correctly', async () => {
+      const uri = new URL(
+        `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
+      );
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
         uri,
       });
+
       expect(result).toEqual('done');
       const [httpRequestOptions] = stub.firstCall.args;
-      expect((httpRequestOptions as any).path).toEqual(expectedPath);
-    };
-
-    it('should correctly encode invalid URL characters included in path', async () => {
-      await verifyRequestPath({
-        initialPath: '%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23',
-        expectedPath:
-          '%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23',
-      });
+      expect((httpRequestOptions as any).path).toEqual(
+        '/%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23'
+      );
     });
 
-    it('should not encode the path if it is encoded', async () => {
-      await verifyRequestPath({
-        initialPath: '%3Cmy-index-%7Bnow%2Fd%7D%3E',
-        expectedPath: '%3Cmy-index-%7Bnow%2Fd%7D%3E',
+    it('should issue request with date-math format', async () => {
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
+        uri: new URL(`http://noone.nowhere.none/%3Cmy-index-%7Bnow%2Fd%7D%3E`),
       });
-    });
 
-    it('should correctly encode path with query params', async () => {
-      await verifyRequestPath({
-        initialPath: '_index/.test',
-        uri: new URL('http://noone.nowhere.none/_index/.test?q=something&v=something'),
-        expectedPath: '_index/.test?q=something&v=something',
-      });
+      expect(result).toEqual('done');
+      const [httpRequestOptions] = stub.firstCall.args;
+      expect((httpRequestOptions as any).path).toEqual('/%3Cmy-index-%7Bnow%2Fd%7D%3E');
     });
   });
 });
