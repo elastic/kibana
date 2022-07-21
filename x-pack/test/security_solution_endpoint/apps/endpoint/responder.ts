@@ -6,6 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -19,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
+  const timelineTestService = getService('timeline');
   const log = getService('log');
 
   const performResponderSanityChecks = async () => {
@@ -47,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       if (indexedData) {
-        log.info('Cleaning up loaded data');
+        log.info('Cleaning up loaded endpoint data');
         await endpointTestResources.unloadEndpointData(indexedData);
       }
     });
@@ -69,12 +71,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('from timeline', () => {
+      let timeline: TimelineResponse;
+
       before(async () => {
+        timeline = await timelineTestService.createTimeline('endpoint responder test');
+
+        // FIXME:PT Need to add alert to timeline
+
         await pageObjects.timeline.navigateToTimelineList();
       });
 
+      after(async () => {
+        if (timeline) {
+          log.info(
+            `Cleaning up created timeline [${timeline.data.persistTimeline.timeline.title} - ${timeline.data.persistTimeline.timeline.savedObjectId}]`
+          );
+          await timelineTestService.deleteTimeline(
+            timeline.data.persistTimeline.timeline.savedObjectId
+          );
+        }
+      });
+
       it('should show Responder from alert in a timeline', async () => {
+        await pageObjects.timeline.openTimelineById(
+          timeline.data.persistTimeline.timeline.savedObjectId
+        );
+
+        // FIXME:PT need to click on alert, then then show responder from the actions button.
+
         await new Promise((r) => setTimeout(r, 20_000));
+
+        await pageObjects.timeline.closeTimeline();
       });
     });
   });

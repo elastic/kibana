@@ -42,8 +42,10 @@ export class TimelinePageObject extends FtrService {
   async openTimelineById(id: string): Promise<void> {
     await this.showOpenTimelinePopupFromBottomBar();
     await this.testSubjects.click('open-timeline-button');
-    await this.testSubjects.existOrFail('open-timeline-modal');
-    await this.testSubjects.click(`title-${id}`);
+
+    const timelineSelectModel = await this.testSubjects.find('open-timeline-modal');
+
+    await (await this.testSubjects.findDescendant(`title-${id}`, timelineSelectModel)).click();
     await this.testSubjects.existOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
   }
 
