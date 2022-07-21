@@ -180,6 +180,8 @@ export async function fetchRuleAlertsAggByTimeRange({
         },
       }),
     });
+    const active = res?.aggregations?.filterAggs.buckets.alert_active?.doc_count ?? 0;
+    const recovered = res?.aggregations?.filterAggs.buckets.alert_recovered?.doc_count ?? 0;
 
     const alertsChartData = [
       ...res?.aggregations?.filterAggs.buckets.alert_active.status_per_day.buckets.map(
@@ -192,16 +194,23 @@ export async function fetchRuleAlertsAggByTimeRange({
       ...res?.aggregations?.filterAggs.buckets.alert_recovered.status_per_day.buckets.map(
         (bucket) => ({
           date: bucket.key_as_string,
-          status: 'active',
+          status: 'recovered',
           count: bucket.doc_count,
         })
       ),
     ];
+    const totalAlert =
+      [] ||
+      alertsChartData.map((entry) => ({
+        date: entry.date,
+        count: active + recovered,
+        status: 'total',
+      }));
 
     return {
-      active: res?.aggregations?.filterAggs.buckets.alert_active?.doc_count ?? 0,
-      recovered: res?.aggregations?.filterAggs.buckets.alert_recovered?.doc_count ?? 0,
-      alertsChartData,
+      active,
+      recovered,
+      alertsChartData: [...alertsChartData, ...totalAlert],
     };
   } catch (error) {
     return {
