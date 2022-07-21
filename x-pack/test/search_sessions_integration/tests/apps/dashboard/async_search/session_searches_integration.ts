@@ -94,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('When session is deleted, searches are also deleted', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
@@ -121,42 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
       expect(searchSessionItem.searchesCount).to.be(1);
       await searchSessionItem.delete();
-
-      const searchNotFoundError = await searchSessions
-        .getAsyncSearchStatus(asyncSearchId)
-        .catch((e) => e);
-      expect(searchNotFoundError.name).to.be('ResponseError');
-      expect(searchNotFoundError.meta.body.error.type).to.be('resource_not_found_exception');
-    });
-
-    it('When session is extended, searches are also', async () => {
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      await PageObjects.dashboard.waitForRenderComplete();
-      await searchSessions.expectState('completed');
-
-      const searchResponse = await dashboardPanelActions.getSearchResponseByTitle(
-        'Sum of Bytes by Extension'
-      );
-
-      const asyncSearchId = searchResponse.id;
-      expect(typeof asyncSearchId).to.be('string');
-
-      await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
-
-      const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
-      );
-
-      // check that search saved into the session
-
-      await searchSessions.openPopover();
-      await searchSessions.viewSearchSessions();
-
-      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-      expect(searchSessionItem.searchesCount).to.be(1);
-      await searchSessionItem.extend();
 
       const searchNotFoundError = await searchSessions
         .getAsyncSearchStatus(asyncSearchId)
