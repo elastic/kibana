@@ -8,7 +8,7 @@
 
 import {
   SavedObjectsClientContract,
-  ISimpleSavedObject,
+  SimpleSavedObject,
   SavedObjectAttributes,
 } from '@kbn/core/public';
 
@@ -18,13 +18,13 @@ import {
  * @param savedObjectsClient {SavedObjectsClientContract}
  * @param type {string}
  * @param title {string}
- * @returns {Promise<ISimpleSavedObject|undefined>}
+ * @returns {Promise<SimpleSavedObject|undefined>}
  */
 export async function findObjectByTitle<T extends SavedObjectAttributes>(
   savedObjectsClient: SavedObjectsClientContract,
   type: string,
   title: string
-): Promise<ISimpleSavedObject<T> | void> {
+): Promise<SimpleSavedObject<T> | void> {
   if (!title) {
     return;
   }
