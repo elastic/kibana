@@ -42,6 +42,23 @@ function isStaticRequire(node) {
   );
 }
 
+const winPathSeparatorRegExp = /\\/g;
+/**
+ * Converts win32 paths to posix format.
+ * @param {string} filePath
+ *
+ * @example
+ * toPosixPath('a\\b\\c') // 'a/b/c'
+ */
+function toPosixPath(filePath) {
+  return filePath.replace(winPathSeparatorRegExp, '/');
+}
+
+/**
+ * Traverses to the top folder that matches provided pattern.
+ * @param {string} filePath
+ * @param {string} pattern glob format restricted zone pattern
+ */
 function traverseToTopFolder(src, pattern) {
   while (mm([src], pattern).length > 0) {
     const srcIdx = src.lastIndexOf(path.sep);
@@ -50,10 +67,25 @@ function traverseToTopFolder(src, pattern) {
   return src;
 }
 
+/**
+ * Check whether the imported path that matches zone pattern, is a part of the same folder or sub-folder.
+ * We shouldn't ban imports within the restricted zone, but limit imports from outside.
+
+ * @param {string} src - source path
+ * @param {string} imported - import path
+ * @param {string} pattern - glob format restricted zone pattern
+ *
+ * @example
+ * isSameFolderOrDescendent('src/service/a.ts', 'src/core/service/deep/b.ts', 'src/\*\*\/\*') // true
+ * isSameFolderOrDescendent('src\\service\\a.ts', 'src/core/service/deep/b.ts', 'src/\*\*\/\*') // true
+ */
 function isSameFolderOrDescendent(src, imported, pattern) {
+  // normalize win32 paths to posix format, micromatch also converts them internally.
+  const normalizedSrc = toPosixPath(src);
+  const normalizedImported = toPosixPath(imported);
   // to allow to exclude file by name in pattern (e.g., !**/index*) we start with file dirname and then traverse
-  const srcFileFolderRoot = traverseToTopFolder(path.dirname(src), pattern);
-  const importedFileFolderRoot = traverseToTopFolder(path.dirname(imported), pattern);
+  const srcFileFolderRoot = traverseToTopFolder(path.dirname(normalizedSrc), pattern);
+  const importedFileFolderRoot = traverseToTopFolder(path.dirname(normalizedImported), pattern);
 
   return srcFileFolderRoot === importedFileFolderRoot;
 }
