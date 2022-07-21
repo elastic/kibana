@@ -30,7 +30,8 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
-  if (!uiSettings) return null;
+
+  // if (!uiSettings) return null;
 
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
 

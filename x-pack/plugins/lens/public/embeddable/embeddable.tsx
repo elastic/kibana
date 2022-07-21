@@ -17,6 +17,7 @@ import {
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
+  mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
@@ -32,7 +33,6 @@ import {
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -42,6 +42,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -875,9 +876,11 @@ export class Embeddable
   public getFilters() {
     console.log('lens get filters');
     if (!this.savedVis) {
-      throw new Error('savedVis is required for getMergedSearchContext');
+      throw new Error('savedVis is required for getFilters');
     }
-    return this.savedVis.state.filters;
+    return mapAndFlattenFilters(
+      this.deps.injectFilterReferences(this.savedVis.state.filters, this.savedVis.references)
+    );
   }
 
   public getSavedVis(): Readonly<Document | undefined> {

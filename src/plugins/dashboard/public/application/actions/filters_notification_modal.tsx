@@ -15,7 +15,9 @@ import {
   EuiOutsideClickDetector,
   EuiText,
 } from '@elastic/eui';
+import { isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FiltersNotificationActionContext } from './filters_notification_badge';
+
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
   displayName: string;

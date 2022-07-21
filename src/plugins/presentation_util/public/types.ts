@@ -7,7 +7,6 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs';
 
@@ -24,12 +23,4 @@ export interface PresentationUtilPluginSetupDeps {}
 
 export interface PresentationUtilPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
-}
-
-export interface FilterableEmbeddable {
-  getFilters: () => Filter[];
-}
-
-export function isFilterableEmbeddable(incoming: unknown): incoming is FilterableEmbeddable {
-  return !!(incoming as FilterableEmbeddable).getFilters;
 }

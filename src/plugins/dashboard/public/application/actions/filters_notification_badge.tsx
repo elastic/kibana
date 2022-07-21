@@ -9,10 +9,9 @@
 import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { isFilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 
@@ -21,8 +20,6 @@ import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 
 import { FiltersNotificationModal } from './filters_notification_modal';
 import { DashboardContainer } from '../embeddable';
-// import { EuiBadge } from '@elastic/eui';
-// // import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -33,18 +30,13 @@ export interface FiltersNotificationActionContext {
 export class FiltersNotificationBadge implements Action<FiltersNotificationActionContext> {
   public readonly id = BADGE_FILTERS_NOTIFICATION;
   public readonly type = BADGE_FILTERS_NOTIFICATION;
-  public readonly order = 3;
+  public readonly order = 1;
 
   // private displayName = dashboardLibraryNotification.getDisplayName();
   private displayName = 'Custom filters';
-
   private icon = 'filter';
 
-  constructor(
-    private theme: CoreStart['theme'],
-    private overlays: OverlayStart,
-    private data: DataPublicPluginStart
-  ) {}
+  constructor(private theme: CoreStart['theme'], private overlays: OverlayStart) {}
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -65,45 +57,25 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&
       isFilterableEmbeddable(embeddable) &&
-      embeddable.getFilters().length > 0
+      embeddable.getFilters().length > 0 // THIS IS CAUSING UNSAVED CHANGES BUG????
     );
   };
 
-  public getDisplayNameTooltip(context: FiltersNotificationActionContext) {
-    console.log('here in tooltip');
-    return 'this is a tooltip';
-  }
-
   // public execute = async () => {};
   public execute = async (context: FiltersNotificationActionContext) => {
-    // console.log('EXECUTE');
     const { embeddable } = context;
     const isCompatible = await this.isCompatible({ embeddable });
-    if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
+    if (!isCompatible) {
       throw new IncompatibleActionError();
     }
     const filters = embeddable.getFilters() ?? [];
     const dataViewList: DataView[] =
       (embeddable.parent as DashboardContainer)?.getAllDataViews() ?? [];
-    const filterPills = <FilterItems filters={filters} indexPatterns={dataViewList} />;
-    // console.log('filterpills', filterPills);
-    // const filterPills = filters.map((filter: Filter) => {
-    //   console.log('filter:', filter);
-    //   return (
-    //     <FilterItem
-    //       id={embeddable.id}
-    //       filter={filter}
-    //       indexPatterns={dataViewList}
-    //       onUpdate={() => {}}
-    //       onRemove={() => {}}
-    //     />
-    //   );
-
-    //   // const valueLabel = getDisplayValueFromFilter(filter, dataViewList);
-    //   // const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViewList);
-    //   // console.log('value label:', valueLabel);
-    //   // console.log('fiELD label:', fieldLabel);
-    // });
+    // console.log('Dashboard dataviews:', dataViewList);
+    // console.log('Embeddable filters:', filters);
+    const filterPills = (
+      <FilterItems filters={filters} indexPatterns={dataViewList} readOnly={true} />
+    );
 
     const session = this.overlays.openModal(
       toMountPoint(
@@ -122,36 +94,5 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
         'data-test-subj': 'copyToDashboardPanel',
       }
     );
-
-    // const session = this.overlays.openModal(
-    //   toMountPoint(
-    //     <FiltersNotificationModal
-    //       displayName={this.displayName}
-    //       context={context}
-    //       icon={this.getIconType({ embeddable })}
-    //       id={this.id}
-    //       closeModal={() => session.close()}
-    //       dataViews={this.data.dataViews}
-    //     />,
-    //     { theme$: this.theme.theme$ }
-    //   ),
-    //   {
-    //     maxWidth: 400,
-    //     'data-test-subj': 'copyToDashboardPanel',
-    //   }
-    // );
-
-    // Only here for typescript
-    // const { embeddable } = context;
-    // return (
-    //   <KibanaThemeProvider theme$={this.theme.theme$}>
-    //     <FiltersNotificationPopover
-    //       displayName={this.displayName}
-    //       context={context}
-    //       icon={this.getIconType({ embeddable })}
-    //       id={this.id}
-    //     />
-    //   </KibanaThemeProvider>
-    // );
   };
 }

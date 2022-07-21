@@ -23,11 +23,12 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { APPLY_FILTER_TRIGGER, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -257,7 +258,12 @@ export class MapEmbeddable
     } catch (e) {
       throw new Error('Unable to parse attribute mapStateJSON');
     }
-    return mapState.filters ?? [];
+    const filters = mapState.filters
+      ? mapState.filters.filter((filter) => {
+          return filter.$state?.store === FilterStateStore.APP_STATE;
+        })
+      : [];
+    return mapAndFlattenFilters(filters);
   }
 
   public supportedTriggers(): string[] {

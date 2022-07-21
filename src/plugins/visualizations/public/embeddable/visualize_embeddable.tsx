@@ -24,6 +24,7 @@ import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  FilterableEmbeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
@@ -37,6 +38,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -193,7 +195,8 @@ export class VisualizeEmbeddable
 
   public getFilters() {
     console.log('vis get filters');
-    return this.vis.data.searchSource?.getFields().filter ?? [];
+    const filters = this.getInput().savedVis?.data.searchSource?.filter ?? [];
+    return mapAndFlattenFilters(filters);
   }
 
   public getInspectorAdapters = () => {

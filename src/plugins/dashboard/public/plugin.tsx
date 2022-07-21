@@ -26,9 +26,10 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -96,6 +97,7 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
@@ -114,6 +116,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {
@@ -368,6 +371,9 @@ export class DashboardPlugin
     const { notifications, overlays, application, theme } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
+    // console.log(dataViews);
+    // console.log(data.dataViews.get());
+
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;
 
@@ -389,18 +395,6 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
-
-    // const dateFormat = core.uiSettings.get('dateFormat') as string;
-    // const commonlyUsedRanges = core.uiSettings.get(
-    //   UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-    // ) as CommonlyUsedRange[];
-    // const { openModal } = createReactOverlays(core);
-    // const timeRangeBadge = new CustomTimeRangeBadge({
-    //   openModal,
-    //   dateFormat,
-    //   commonlyUsedRanges,
-    // });
-    // uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     if (share) {
       const ExportCSVPlugin = new ExportCSVAction({ core, data });
