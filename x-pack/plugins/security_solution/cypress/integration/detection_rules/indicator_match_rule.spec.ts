@@ -463,7 +463,7 @@ describe('indicator match', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            getNewThreatIndicatorRule().index.join('')
+            getNewThreatIndicatorRule().index?.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');

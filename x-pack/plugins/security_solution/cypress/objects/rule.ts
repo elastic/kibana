@@ -176,6 +176,12 @@ const getRunsEvery = (): Interval => ({
   type: 's',
 });
 
+const getRunsEveryFiveMinutes = (): Interval => ({
+  interval: '5',
+  timeType: 'Minutes',
+  type: 'm',
+});
+
 const getLookBack = (): Interval => ({
   interval: '50000',
   timeType: 'Hours',
@@ -194,7 +200,7 @@ export const getDataViewRule = (): CustomRule => ({
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery: getRunsEvery(),
+  runsEvery: getRunsEveryFiveMinutes(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,

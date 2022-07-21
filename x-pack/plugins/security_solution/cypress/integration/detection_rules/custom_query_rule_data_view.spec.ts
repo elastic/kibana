@@ -46,7 +46,7 @@ import {
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { deleteAlertsAndRules, postDataView } from '../../tasks/common';
+import { postDataView } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -64,7 +64,6 @@ import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Custom query rules', () => {
   before(() => {
-    esArchiverResetKibana();
     login();
   });
 
@@ -76,7 +75,7 @@ describe('Custom query rules', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      deleteAlertsAndRules();
+      esArchiverResetKibana();
       createTimeline(getDataViewRule().timeline).then((response) => {
         cy.wrap({
           ...getDataViewRule(),

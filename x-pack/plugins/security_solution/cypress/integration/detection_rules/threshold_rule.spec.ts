@@ -158,7 +158,8 @@ describe('Detection rules, threshold', () => {
   });
 
   it.skip('Preview results of keyword using "host.name"', () => {
-    rule.index = [...rule.index, '.siem-signals*'];
+    const ruleIndex = rule.index ? rule.index : '';
+    rule.index = [...ruleIndex, '.siem-signals*'];
 
     createCustomRuleEnabled(getNewRule());
     goToManageAlertsDetectionRules();
@@ -177,7 +178,8 @@ describe('Detection rules, threshold', () => {
       thresholdField: 'source.ip',
       threshold: '1',
     };
-    previewRule.index = [...previewRule.index, '.siem-signals*'];
+    const ruleIndex = rule.index ? rule.index : '';
+    previewRule.index = [...ruleIndex, '.siem-signals*'];
 
     createCustomRuleEnabled(getNewRule());
     goToManageAlertsDetectionRules();
