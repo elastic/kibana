@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-export const ALERTS = '[data-test-subj="groupedNavItemLink-alerts"]';
+// main links
+export const DASHBOARDS = '[data-test-subj="groupedNavItemLink-dashboards"]';
 
-export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
+export const ALERTS = '[data-test-subj="groupedNavItemLink-alerts"]';
 
 export const CASES = '[data-test-subj="groupedNavItemLink-cases"]';
 
-export const HOSTS = '[data-test-subj="groupedNavPanelLink-hosts"]';
+export const TIMELINES = '[data-test-subj="groupedNavItemLink-timelines"]';
 
-export const KQL_INPUT = '[data-test-subj="queryInput"]';
+export const EXPLORE = '[data-test-subj="groupedNavItemLink-explore"]';
+
+export const MANAGE = '[data-test-subj="groupedNavItemLink-administration"]';
+
+// nested links
+export const OVERVIEW = '[data-test-subj="groupedNavPanelLink-overview"]';
+
+export const DETECTION_RESPONSE = '[data-test-subj="groupedNavPanelLink-detection_response"]';
+
+export const HOSTS = '[data-test-subj="groupedNavPanelLink-hosts"]';
 
 export const ENDPOINTS = '[data-test-subj="groupedNavPanelLink-endpoints"]';
 
@@ -29,28 +39,28 @@ export const RULES = '[data-test-subj="groupedNavPanelLink-rules"]';
 
 export const EXCEPTIONS = '[data-test-subj="groupedNavPanelLink-exceptions"]';
 
-export const OVERVIEW = '[data-test-subj="groupedNavPanelLink-overview"]';
+// other
+export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
-export const DETECTION_RESPONSE = '[data-test-subj="groupedNavPanelLink-detection_response"]';
+export const KQL_INPUT = '[data-test-subj="queryInput"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
 
-export const TIMELINES = '[data-test-subj="groupedNavItemLink-timelines"]';
-
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 
-export const openNavigationPanel = (page: string) => {
+// opens the navigation panel for a given nested link
+export const openNavigationPanelFor = (page: string) => {
   let panel;
   switch (page) {
     case OVERVIEW:
     case DETECTION_RESPONSE: {
-      panel = 'dashboards';
+      panel = DASHBOARDS;
       break;
     }
     case HOSTS:
     case NETWORK:
     case USERS: {
-      panel = 'explore';
+      panel = EXPLORE;
       break;
     }
     case ENDPOINTS:
@@ -58,11 +68,16 @@ export const openNavigationPanel = (page: string) => {
     case EVENT_FILTERS:
     case RULES:
     case EXCEPTIONS: {
-      panel = 'administration';
+      panel = MANAGE;
       break;
     }
   }
   if (panel) {
-    cy.get(`[data-test-subj="groupedNavItemLink-${panel}"] button`).click({ force: true });
+    openNavigationPanel(panel);
   }
+};
+
+// opens the navigation panel of a main link
+export const openNavigationPanel = (page: string) => {
+  cy.get(`${page} button.solutionGroupedNavItemButton`).click({ force: true });
 };
