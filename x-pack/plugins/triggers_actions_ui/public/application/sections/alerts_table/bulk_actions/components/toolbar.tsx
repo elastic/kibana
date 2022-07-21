@@ -36,6 +36,7 @@ export interface TimelineNonEcsData {
 }
 
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+const containerStyles = { display: 'inline-block', position: 'relative' } as const;
 
 const selectedIdsToTimelineItemMapper = (
   alerts: EcsFieldsResponse[],
@@ -156,7 +157,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, a
 
   return (
     <div
-      style={{ display: 'inline-block', position: 'relative' }}
+      style={containerStyles}
       onClick={closeIfPopoverIsOpen}
       data-test-subj="bulk-actions-button-container"
       aria-hidden

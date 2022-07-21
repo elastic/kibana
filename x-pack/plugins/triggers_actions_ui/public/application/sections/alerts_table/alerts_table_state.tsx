@@ -24,7 +24,12 @@ import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
-import { AlertsTableConfigurationRegistry } from '../../../types';
+import {
+  AlertsTableConfigurationRegistry,
+  AlertsTableProps,
+  BulkActionsReducerAction,
+  BulkActionsState,
+} from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
@@ -80,6 +85,17 @@ const EmptyConfiguration = {
   },
   getRenderCellValue: () => () => null,
 };
+
+const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
+  tableProps: AlertsTableProps;
+  initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
+}> = ({ tableProps, initialBulkActionsState }) => (
+  <BulkActionsContext.Provider value={initialBulkActionsState}>
+    <AlertsTable {...tableProps} />
+  </BulkActionsContext.Provider>
+);
+
+const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
 const AlertsTableState = ({
   alertsTableConfigurationRegistry,
@@ -255,15 +271,17 @@ const AlertsTableState = ({
           permissions={cases.permissions}
           features={{ alerts: { sync: false } }}
         >
-          <BulkActionsContext.Provider value={initialBulkActionsState}>
-            <AlertsTable {...tableProps} />
-          </BulkActionsContext.Provider>
+          <AlertsTableWithBulkActionsContext
+            tableProps={tableProps}
+            initialBulkActionsState={initialBulkActionsState}
+          />
         </CasesContext>
       )}
       {alertsCount !== 0 && (!CasesContext || !cases) && (
-        <BulkActionsContext.Provider value={initialBulkActionsState}>
-          <AlertsTable {...tableProps} />
-        </BulkActionsContext.Provider>
+        <AlertsTableWithBulkActionsContext
+          tableProps={tableProps}
+          initialBulkActionsState={initialBulkActionsState}
+        />
       )}
     </>
   ) : (

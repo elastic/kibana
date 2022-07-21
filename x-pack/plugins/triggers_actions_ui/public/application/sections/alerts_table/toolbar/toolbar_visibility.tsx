@@ -25,7 +25,10 @@ export const getToolbarVisibility = ({
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
-    return {};
+    return {
+      showColumnSelector: true,
+      showSortSelector: true,
+    };
 
   const options = {
     showColumnSelector: false,
