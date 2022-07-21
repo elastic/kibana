@@ -98,8 +98,6 @@ export function FieldInputs({
     <>
       <div
         style={{
-          backgroundColor: euiTheme.colors.lightestShade,
-          borderRadius: euiTheme.size.xs,
           padding: euiTheme.size.s,
         }}
       >

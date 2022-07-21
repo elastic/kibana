@@ -18,6 +18,8 @@ import {
   EuiText,
   EuiIcon,
   useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
@@ -342,16 +344,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       } else if (isActive) {
         label = (
-          <EuiText color={euiTheme.colors.primary} size="s">
+          <EuiText color={euiTheme.colors.primary} size="s" style={{ fontWeight: 'inherit' }}>
             {operationDisplay[operationType].displayName}
           </EuiText>
         );
       } else if (!compatibleWithCurrentField) {
         label = (
-          <>
-            {label}
-            <EuiIcon type="dot" color="warning" />
-          </>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.lens.indexPattern.helpIncompatibleFieldDotLabel', {
+                  defaultMessage: 'This function is not compatible with the current selected field',
+                })}
+                display="block"
+                position="left"
+              >
+                <EuiIcon type="dot" color="warning" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       }
 
@@ -552,7 +564,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const quickFunctions = (
     <>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Functions',
@@ -572,7 +584,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       </div>
 
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
         {shouldDisplayReferenceEditor ? (
           <>
             {selectedColumn.references.map((referenceId, index) => {
@@ -875,7 +887,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {ButtonGroupContent}
 
       {shouldDisplayAdvancedOptions && (
-        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--paddedLeftRight">
           <AdvancedOptions
             options={[
               {

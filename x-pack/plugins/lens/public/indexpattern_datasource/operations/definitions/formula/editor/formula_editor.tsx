@@ -675,6 +675,7 @@ export function FormulaEditor({
         className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded"
         css={css`
           border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
+          border-radius: 6px;
         `}
       >
         <div className="lnsFormula">
