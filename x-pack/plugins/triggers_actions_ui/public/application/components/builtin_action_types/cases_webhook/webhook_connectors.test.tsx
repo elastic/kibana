@@ -334,8 +334,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ['getIncidentResponseExternalTitleKeyText', ''],
       ['getIncidentResponseCreatedDateKeyText', ''],
       ['getIncidentResponseUpdatedDateKeyText', ''],
-      ['updateIncidentUrlInput', 'https://missingexternalid.com'],
-      ['createCommentUrlInput', 'https://missingexternalid.com'],
+      ['updateIncidentUrlInput', 'badurl.com'],
+      ['createCommentUrlInput', 'badurl.com'],
     ];
 
     const mustacheTests: Array<[string, string, string[]]> = [
@@ -344,14 +344,12 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ['updateIncidentJson', invalidJsonTitle, ['{{{case.title}}}']],
       ['updateIncidentJson', invalidJsonBoth, ['{{{case.title}}}', '{{{case.description}}}']],
       ['createCommentJson', invalidJsonBoth, ['{{{case.comment}}}']],
-      ['updateIncidentUrl', 'https://missingexternalid.com', ['{{{external.system.id}}}']],
       [
         'incidentViewUrl',
         'https://missingexternalid.com',
         ['{{{external.system.id}}}', '{{{external.system.title}}}'],
       ],
       ['getIncidentUrl', 'https://missingexternalid.com', ['{{{external.system.id}}}']],
-      ['createCommentUrl', 'https://missingexternalid.com', ['{{{external.system.id}}}']],
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {

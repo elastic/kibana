@@ -10,13 +10,7 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import {
-  containsCommentsOrEmpty,
-  containsExternalId,
-  containsIdOrEmpty,
-  containsTitleAndDesc,
-  isUrlButCanBeEmpty,
-} from '../validator';
+import { containsCommentsOrEmpty, containsTitleAndDesc, isUrlButCanBeEmpty } from '../validator';
 import { MustacheTextFieldWrapper } from '../../../mustache_text_field_wrapper';
 import { casesVars, commentVars, urlVars } from '../action_variables';
 import { JsonFieldWrapper } from '../../../json_field_wrapper';
@@ -64,7 +58,6 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               {
                 validator: urlField(i18n.UPDATE_URL_REQUIRED),
               },
-              { validator: containsExternalId() },
             ],
             helpText: i18n.UPDATE_INCIDENT_URL_HELP,
           }}
@@ -106,7 +99,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookUpdateIncidentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
-            messageVariables: casesVars,
+            messageVariables: [...casesVars, ...urlVars],
             paramsProperty: 'updateIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
             showButtonTitle: true,
@@ -147,7 +140,6 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               {
                 validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
               },
-              { validator: containsIdOrEmpty(i18n.CREATE_COMMENT_URL_REQUIRED) },
             ],
             helpText: i18n.CREATE_COMMENT_URL_HELP,
           }}
@@ -186,7 +178,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
               'data-test-subj': 'webhookCreateCommentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
-            messageVariables: commentVars,
+            messageVariables: [...commentVars, ...urlVars],
             paramsProperty: 'createCommentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
             showButtonTitle: true,

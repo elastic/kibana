@@ -77,23 +77,6 @@ export const containsExternalIdOrTitle =
     return error;
   };
 
-export const containsIdOrEmpty =
-  (message: string) =>
-  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value }] = args;
-    if (typeof value !== 'string') {
-      return {
-        code: 'ERR_FIELD_FORMAT',
-        formatType: 'STRING',
-        message,
-      };
-    }
-    if (value.length === 0) {
-      return undefined;
-    }
-    return containsExternalId()(...args);
-  };
-
 export const containsCommentsOrEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {

@@ -182,14 +182,18 @@ export const createExternalService = (
           },
         }),
         logger,
-        data: renderMustacheStringNoEscape(
-          updateIncidentJson,
-          stringifyObjValues({
+        data: renderMustacheStringNoEscape(updateIncidentJson, {
+          ...stringifyObjValues({
             ...(title ? { title } : {}),
             ...(description ? { description } : {}),
             ...(tags ? { tags } : {}),
-          })
-        ),
+          }),
+          external: {
+            system: {
+              id: incidentId,
+            },
+          },
+        }),
         configurationUtilities,
       });
 
@@ -233,10 +237,14 @@ export const createExternalService = (
           },
         }),
         logger,
-        data: renderMustacheStringNoEscape(
-          createCommentJson,
-          stringifyObjValues({ comment: comment.comment })
-        ),
+        data: renderMustacheStringNoEscape(createCommentJson, {
+          ...stringifyObjValues({ comment: comment.comment }),
+          external: {
+            system: {
+              id: incidentId,
+            },
+          },
+        }),
         configurationUtilities,
       });
 
