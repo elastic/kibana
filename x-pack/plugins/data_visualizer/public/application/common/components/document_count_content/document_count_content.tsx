@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiRange,
   EuiSelect,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortedIndex } from 'lodash';
@@ -63,6 +64,34 @@ export const DocumentCountContent: FC<Props> = ({
     setShowSamplingOptionsPopover(false);
   }, [setShowSamplingOptionsPopover]);
 
+  const calloutInfoMessage = useMemo(() => {
+    switch (randomSamplerPreference) {
+      case RANDOM_SAMPLER_OPTION.OFF:
+        return i18n.translate(
+          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCalloutMessage',
+          {
+            defaultMessage:
+              'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
+          }
+        );
+      case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+        return i18n.translate(
+          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCalloutMessage',
+          {
+            defaultMessage:
+              'Random sampling is being used for the total document count and the chart. The probability used in the aggregation will be automatically set to balance accuracy and speed.',
+          }
+        );
+
+      case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+      default:
+        return i18n.translate('xpack.dataVisualizer.randomSamplerSettingsPopUp.offCalloutMessage', {
+          defaultMessage:
+            'Random sampling is being used for the total document count and the chart. A lower percentage probability will increase performance, but some accuracy will be lost.',
+        });
+    }
+  }, [randomSamplerPreference]);
+
   if (documentCountStats === undefined) {
     return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
@@ -81,12 +110,17 @@ export const DocumentCountContent: FC<Props> = ({
 
   const ProbabilityUsed =
     randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
-      <FormattedMessage
-        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
-        defaultMessage="Probability used: {samplingProbability}%"
-        values={{ samplingProbability: samplingProbability * 100 }}
-      />
+      <>
+        <EuiSpacer size="m" />
+
+        <FormattedMessage
+          id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
+          defaultMessage="Probability used: {samplingProbability}%"
+          values={{ samplingProbability: samplingProbability * 100 }}
+        />
+      </>
     ) : null;
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -118,59 +152,68 @@ export const DocumentCountContent: FC<Props> = ({
           >
             <EuiPanel style={{ maxWidth: 400 }}>
               <EuiFlexItem grow={true}>
-                <EuiCallOut
-                  size="s"
-                  color={'primary'}
-                  title={i18n.translate(
-                    'xpack.dataVisualizer.randomSamplerSettingsPopUp.infoCalloutMessage',
-                    {
-                      defaultMessage:
-                        'Random sampler is being used for the total document count and the chart. Pick a higher percentage for better accuracy, or "Off" for no sampling.',
-                    }
-                  )}
-                />
+                <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
               </EuiFlexItem>
               <EuiSpacer size="m" />
 
-              <EuiSelect
-                options={RANDOM_SAMPLER_SELECT_OPTIONS}
-                value={randomSamplerPreference}
-                onChange={(e) => setRandomSamplerPreference(e.target.value as RandomSamplerOption)}
-              />
-              <EuiSpacer size="m" />
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+                  {
+                    defaultMessage: 'Random sampling',
+                  }
+                )}
+              >
+                <EuiSelect
+                  options={RANDOM_SAMPLER_SELECT_OPTIONS}
+                  value={randomSamplerPreference}
+                  onChange={(e) =>
+                    setRandomSamplerPreference(e.target.value as RandomSamplerOption)
+                  }
+                />
+              </EuiFormRow>
 
               {randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL ? (
                 <EuiFlexItem grow={true}>
                   <EuiSpacer size="m" />
-                  <EuiRange
-                    fullWidth
-                    showValue
-                    showTicks
-                    showRange={false}
-                    min={RANDOM_SAMPLER_STEP}
-                    max={0.5 * 100}
-                    value={(samplingProbability ?? 1) * 100}
-                    ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
-                      value: d,
-                      label: d === 0.001 || d >= 5 ? `${d}%` : '',
-                    }))}
-                    onChange={(e) => {
-                      const newProbability = Number(e.currentTarget.value);
-                      const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
-                      const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
-                      const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
-                      const closestProbability =
-                        Math.abs(closestPrev - newProbability) <
-                        Math.abs(closestNext - newProbability)
-                          ? closestPrev
-                          : closestNext;
-
-                      if (setSamplingProbability) {
-                        setSamplingProbability(closestProbability / 100);
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowLabel',
+                      {
+                        defaultMessage: 'Sampling percentage',
                       }
-                    }}
-                    step={RANDOM_SAMPLER_STEP}
-                  />
+                    )}
+                  >
+                    <EuiRange
+                      fullWidth
+                      showValue
+                      showTicks
+                      showRange={false}
+                      min={RANDOM_SAMPLER_STEP}
+                      max={0.5 * 100}
+                      value={(samplingProbability ?? 1) * 100}
+                      ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
+                        value: d,
+                        label: d === 0.001 || d >= 5 ? `${d}%` : '',
+                      }))}
+                      onChange={(e) => {
+                        const newProbability = Number(e.currentTarget.value);
+                        const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
+                        const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
+                        const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
+                        const closestProbability =
+                          Math.abs(closestPrev - newProbability) <
+                          Math.abs(closestNext - newProbability)
+                            ? closestPrev
+                            : closestNext;
+
+                        if (setSamplingProbability) {
+                          setSamplingProbability(closestProbability / 100);
+                        }
+                      }}
+                      step={RANDOM_SAMPLER_STEP}
+                    />
+                  </EuiFormRow>
                 </EuiFlexItem>
               ) : (
                 ProbabilityUsed

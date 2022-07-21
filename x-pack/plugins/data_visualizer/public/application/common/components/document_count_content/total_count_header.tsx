@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
@@ -46,6 +47,16 @@ export const TotalCountHeader = ({
           }}
         />
       </EuiText>
+      {approximate ? (
+        <EuiIconTip
+          content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
+            defaultMessage:
+              'Random sampler is being used for the total document count and the chart. Values shown are estimated.',
+          })}
+          position="right"
+          type="iInCircle"
+        />
+      ) : null}
     </EuiFlexItem>
   );
 };

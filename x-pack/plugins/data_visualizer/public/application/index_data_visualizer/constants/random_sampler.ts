@@ -28,13 +28,13 @@ export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{ value: RandomSamplerOption; 
   {
     value: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
     text: i18n.translate('xpack.dataVisualizer.randomSamplerPreference.onAutomaticLabel', {
-      defaultMessage: 'On (automatic use best %)',
+      defaultMessage: 'On - automatic',
     }),
   },
   {
     value: RANDOM_SAMPLER_OPTION.ON_MANUAL,
     text: i18n.translate('xpack.dataVisualizer.randomSamplerPreference.onManualLabel', {
-      defaultMessage: 'On (manual set %)',
+      defaultMessage: 'On - manual',
     }),
   },
   {
