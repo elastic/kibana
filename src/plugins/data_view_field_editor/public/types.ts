@@ -21,15 +21,22 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
+/*
+ * Public setup contract of data view field editor
+ * @public
+ */
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
 }
 
-/* Public contract of data view field editor
+/*
+ * Public start contract of data view field editor
  * @public
  */
 export interface PluginStart {
-  /* method to open the data view field editor fly-out */
+  /*
+   * method to open the data view field editor fly-out
+   */
   openEditor(options: OpenFieldEditorOptions): () => void;
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
@@ -56,17 +63,29 @@ export type InternalFieldType = 'concrete' | 'runtime';
  * @public
  */
 export interface Field {
-  /* name / path used for the field */
+  /*
+   * name / path used for the field
+   */
   name: string;
-  /* ES type */
+  /*
+   * ES type
+   */
   type: RuntimeField['type'] | string;
-  /* source of the runtime field script */
+  /*
+   * source of the runtime field script
+   */
   script?: RuntimeField['script'];
-  /* custom label for display */
+  /*
+   * custom label for display
+   */
   customLabel?: string;
-  /* custom popularity */
+  /*
+   * custom popularity
+   */
   popularity?: number;
-  /* configuration of the field format */
+  /*
+   * configuration of the field format
+   */
   format?: FieldFormatConfig;
 }
 
@@ -75,9 +94,13 @@ export interface Field {
  * @public
  */
 export interface FieldFormatConfig {
-  /* id to reference field format */
+  /*
+   * id to reference field format
+   */
   id: string;
-  /* parameters for customizing the format */
+  /*
+   * parameters for customizing the format
+   */
   params?: SerializableRecord;
 }
 
