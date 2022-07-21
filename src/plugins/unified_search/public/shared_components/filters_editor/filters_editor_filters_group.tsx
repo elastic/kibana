@@ -7,29 +7,24 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ConditionTypes } from './filters_editor_condition_types';
+import { FilterItem } from './filters_editor_filter_item';
 
 export interface FilterGroupProps {
   filters: Filter[];
   conditionType: ConditionTypes;
 }
 
+const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
+  <h2>Delimiter {conditionType}</h2>
+);
+
 export function FilterGroup({ filters, conditionType }: FilterGroupProps) {
-  return (
+  return filters.map((filter, index, acc) => (
     <>
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" className="kbnQueryBar__filterModalORText" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <FilterItem filter={filter} />
+      {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
     </>
-  );
+  ));
 }
