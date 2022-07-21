@@ -15,8 +15,6 @@ import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
 import { SavedObjectsValidationMap } from './validation';
 
-type KueryNode = any;
-
 /**
  * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
  *
@@ -30,120 +28,11 @@ export interface SavedObjectStatusMeta {
   };
 }
 
-/**
- * @public
- */
-export interface SavedObjectsFindOptionsReference {
-  type: string;
-  id: string;
-}
 
-/**
- * @public
- */
-export interface SavedObjectsPitParams {
-  id: string;
-  keepAlive?: string;
-}
 
-/**
- *
- * @public
- */
-export interface SavedObjectsFindOptions {
-  type: string | string[];
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: estypes.SortOrder;
-  /**
-   * An array of fields to include in the results
-   * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
-   */
-  fields?: string[];
-  /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
-  search?: string;
-  /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
-  searchFields?: string[];
-  /**
-   * Use the sort values from the previous page to retrieve the next page of results.
-   */
-  searchAfter?: estypes.Id[];
-  /**
-   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
-   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
-   */
-  rootSearchFields?: string[];
 
-  /**
-   * Search for documents having a reference to the specified objects.
-   * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
-   */
-  hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
-  /**
-   * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
-   */
-  hasReferenceOperator?: 'AND' | 'OR';
 
-  /**
-   * The search operator to use with the provided filter. Defaults to `OR`
-   */
-  defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string | KueryNode;
-  /**
-   * A record of aggregations to perform.
-   * The API currently only supports a limited set of metrics and bucket aggregation types.
-   * Additional aggregation types can be contributed to Core.
-   *
-   * @example
-   * Aggregating on SO attribute field
-   * ```ts
-   * const aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
-   * return client.find({ type: 'dashboard', aggs })
-   * ```
-   *
-   * @example
-   * Aggregating on SO root field
-   * ```ts
-   * const aggs = { latest_update: { max: { field: 'dashboard.updated_at' } } };
-   * return client.find({ type: 'dashboard', aggs })
-   * ```
-   *
-   * @alpha
-   */
-  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
-  namespaces?: string[];
-  /**
-   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
-   * object client wrapper.
-   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
-   * Any types that are not included in this map will be excluded entirely.
-   * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
-   */
-  typeToNamespacesMap?: Map<string, string[] | undefined>;
-  /** An optional ES preference value to be used for the query **/
-  preference?: string;
-  /**
-   * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
-   */
-  pit?: SavedObjectsPitParams;
-}
 
-/**
- *
- * @public
- */
-export interface SavedObjectsBaseOptions {
-  /** Specify the namespace for this operation */
-  namespace?: string;
-}
-
-/**
- * Elasticsearch Refresh setting for mutating operation
- * @public
- */
-export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 export type { SavedObjectsClientContract } from './service/saved_objects_client';
 

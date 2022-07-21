@@ -3351,6 +3351,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common":
   version "0.0.0"
   uid ""
@@ -7111,6 +7115,10 @@
   uid ""
 
 "@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server/npm_module_types":
   version "0.0.0"
   uid ""
 
