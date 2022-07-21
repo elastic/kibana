@@ -48,6 +48,7 @@ export interface Document {
   character: string;
   quote: string;
   service: { version: string };
+  parent?: { id: string };
   processor: string;
   trace: { id: string };
   '@timestamp': string;

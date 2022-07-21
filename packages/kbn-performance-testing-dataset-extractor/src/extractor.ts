@@ -81,8 +81,8 @@ const getTraceItems = (
       const payload = hit.http.request?.body?.original;
       return {
         processor: hit.processor,
+        parentId: hit?.parent?.id,
         traceId: hit.trace.id,
-        date: hit['@timestamp'],
         environment: hit.environment,
         request: {
           path: hit.url.path,
@@ -90,7 +90,7 @@ const getTraceItems = (
           method: hit.http.request.method,
           body: payload ? JSON.stringify(parsePayload(payload, hit.trace.id, log)) : undefined,
           statusCode: hit.http.response.status_code,
-          timestamp: new Date(hit['@timestamp']).getTime(),
+          timestamp: hit['@timestamp'],
         },
         transaction: {
           id: hit.transaction.id,
