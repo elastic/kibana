@@ -938,10 +938,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.rollback',
+    key: 'windows.advanced.alerts.rollback.remediation.enabled',
     first_supported_version: '8.4',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
       {
         defaultMessage: 'Experimental',
       }
