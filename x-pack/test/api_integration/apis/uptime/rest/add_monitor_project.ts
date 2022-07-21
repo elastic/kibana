@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       agentId = apiResponse.body.item.id;
