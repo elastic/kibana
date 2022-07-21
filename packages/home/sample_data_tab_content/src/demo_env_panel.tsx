@@ -24,7 +24,7 @@ const title = i18n.translate('homePackages.demoEnvironmentPanel.welcomeTitle', {
 
 const message = i18n.translate('homePackages.demoEnvironmentPanel.welcomeMessage', {
   defaultMessage:
-    "Browse our demo environment and explore the many ways you can gain insights into your own data using Elastic. With its real-world data for search, observability, and security, it's just a few clicks before you find something that you can leverage for your own use cases.",
+    "Browse real-world data in a demo environment where you can explore search, observability, and security use cases like yours.",
 });
 
 const alt = i18n.translate('homePackages.demoEnvironmentPanel.welcomeImageAlt', {
