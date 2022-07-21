@@ -11,19 +11,20 @@ export interface ActionProps {
   color?: IconColor;
   iconType?: IconType | string;
   label: string;
-  onClick?: any;
+  onClick?: Function;
 }
 
 export interface MetaDataProps {
-  clickCount: number;
-  engineId: string;
+  clickCount?: number;
+  engineId?: string;
   id: string;
-  lastUpdated: string;
+  lastUpdated?: string;
+  onDocumentDelete?: Function;
 }
 
 export interface ResultFieldProps {
   fieldName: string;
-  fieldType?: any;
+  fieldType?: string;
   fieldValue: string;
   iconType: IconType;
   isExpanded?: boolean;

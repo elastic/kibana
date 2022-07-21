@@ -117,20 +117,9 @@ export const SearchIndexDocuments: React.FC = () => {
               return (
                 <>
                   <Result
-                    actions={[
-                      {
-                        color: 'danger',
-                        iconType: 'arrowDown',
-                        label: 'action 1',
-                        onClick: () => {},
-                      },
-                    ]}
                     fields={resultToField(result)}
                     metaData={{
-                      clickCount: 0,
-                      engineId: '123',
                       id: result._id,
-                      lastUpdated: 'TODAY',
                     }}
                   />
                   <EuiSpacer size="s" />

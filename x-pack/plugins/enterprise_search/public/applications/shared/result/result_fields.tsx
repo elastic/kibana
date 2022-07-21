@@ -6,6 +6,8 @@
  */
 import React from 'react';
 
+import { EuiTable, EuiTableBody } from '@elastic/eui';
+
 import { ResultField } from './result_field';
 import { ResultFieldProps } from './types';
 
@@ -16,16 +18,18 @@ interface Props {
 
 export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
   return (
-    <div className="resultFieldList">
-      {fields.map((field) => (
-        <ResultField
-          isExpanded={isExpanded}
-          iconType={field.iconType}
-          fieldName={field.fieldName}
-          fieldValue={field.fieldValue}
-          fieldType={field.fieldType}
-        />
-      ))}
-    </div>
+    <EuiTable>
+      <EuiTableBody>
+        {fields.map((field) => (
+          <ResultField
+            isExpanded={isExpanded}
+            iconType={field.iconType}
+            fieldName={field.fieldName}
+            fieldValue={field.fieldValue}
+            fieldType={field.fieldType}
+          />
+        ))}
+      </EuiTableBody>
+    </EuiTable>
   );
 };

@@ -25,7 +25,7 @@ import { ResultHeader } from './result_header';
 import { ActionProps, MetaDataProps, ResultFieldProps } from './types';
 
 interface ResultProps {
-  actions: ActionProps[];
+  actions?: ActionProps[];
   fields: ResultFieldProps[];
   isCheckable?: boolean;
   isDraggable?: boolean;
@@ -33,7 +33,7 @@ interface ResultProps {
 }
 
 export const Result: React.FC<ResultProps> = ({
-  actions,
+  actions = [],
   metaData,
   fields,
   isCheckable,
@@ -67,11 +67,7 @@ export const Result: React.FC<ResultProps> = ({
                 <div className="resultCheckDragColumn__emptySpace" />
               )}
               {isDraggable ? (
-                <EuiButtonIcon
-                  iconType="grab"
-                  color="text"
-                  onClick={() => console.log('Drag it')}
-                />
+                <EuiButtonIcon iconType="grab" color="text" onClick={() => {}} />
               ) : (
                 <div className="resultCheckDragColumn__emptySpace" />
               )}
@@ -81,7 +77,11 @@ export const Result: React.FC<ResultProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <ResultHeader title={metaData.id} actions={actions} metaData={metaData} />
+              <ResultHeader
+                title={`Document ID: ${metaData.id}`}
+                actions={actions}
+                metaData={metaData}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <ResultFields

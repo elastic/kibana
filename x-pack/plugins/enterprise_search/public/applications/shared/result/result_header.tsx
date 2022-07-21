@@ -47,10 +47,14 @@ const Definition: React.FC<TermDef> = ({ label }) => (
     <EuiTextColor color="subdued">{label}</EuiTextColor>
   </EuiFlexItem>
 );
-
-export const ResultHeader: React.FC<Props> = ({ title, actions, metaData }) => {
+const MetadataPopover: React.FC<MetaDataProps> = ({
+  id,
+  lastUpdated,
+  engineId,
+  clickCount,
+  onDocumentDelete,
+}) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
-
   const closePopover = () => setPopoverIsOpen(false);
 
   const metaDataIcon = (
@@ -63,42 +67,53 @@ export const ResultHeader: React.FC<Props> = ({ title, actions, metaData }) => {
     />
   );
 
-  const popover = (
+  return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>Document metadata</EuiPopoverTitle>
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <Term label="ID" />
-            <Definition label={metaData.id} />
+            <Definition label={id} />
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <Term label="Last updated" />
-            <Definition label={metaData.lastUpdated} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <Term label="Engine" />
-            <Definition label={metaData.engineId} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <Term label="Clicks (7 days)" />
-            <Definition label={metaData.clickCount} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {lastUpdated && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <Term label="Last updated" />
+              <Definition label={lastUpdated} />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {engineId && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <Term label="Engine" />
+              <Definition label={engineId} />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {clickCount && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <Term label="Clicks (7 days)" />
+              <Definition label={clickCount} />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      <EuiPopoverFooter>
-        <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
-          Delete document
-        </EuiButton>
-      </EuiPopoverFooter>
+      {onDocumentDelete && (
+        <EuiPopoverFooter>
+          <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
+            Delete document
+          </EuiButton>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
+};
+
+export const ResultHeader: React.FC<Props> = ({ title, actions, metaData }) => {
   return (
     <div className="resultHeader">
       <EuiText size="s">
@@ -113,7 +128,11 @@ export const ResultHeader: React.FC<Props> = ({ title, actions, metaData }) => {
               <ResultActions actions={actions} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>{popover}</EuiFlexItem>
+          {!!metaData && (
+            <EuiFlexItem grow={false}>
+              <MetadataPopover {...metaData} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiText>
     </div>

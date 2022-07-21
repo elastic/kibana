@@ -13,15 +13,6 @@
   padding: $euiSizeXS $euiSizeS;
 }
 
-.resultFieldTextParent {
-  min-width: 0;
-}
-.resultFieldText {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
 .resultCheckDragColumn {
   border-right: $euiBorderThin;
   display: flex;
@@ -50,7 +41,7 @@
   padding: $euiSizeS;
 }
 
-.resultActionButton .euiButtonContent > * + *{
+.resultActionButton .euiButtonContent > * + * {
   margin-inline-start: $euiSizeXS;
 }
 
@@ -64,5 +55,5 @@
 
 .euiPanel.euiPanel--hasBorder.result__selected {
   border: 1px solid $euiColorPrimary;
-  box-shadow:0 0 0 1px #07c, 0 6px 12px 1px rgba(0,0,0,.1), 0 4px 4px 1px rgba(0,0,0,.05), 0 2px 2px 0 rgba(0,0,0,.1); /* EUI Bottom Shadow with an added blue 1px spread inset */
+  box-shadow:0 0 0 1px #07C, 0 6px 12px 1px rgba(0,0,0,.1), 0 4px 4px 1px rgba(0,0,0,.05), 0 2px 2px 0 rgba(0,0,0,.1); /* EUI Bottom Shadow with an added blue 1px spread inset */
 }

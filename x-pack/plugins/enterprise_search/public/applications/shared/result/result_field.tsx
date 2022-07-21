@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiIcon,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiText,
+  EuiToken,
+} from '@elastic/eui';
 
 import { ResultFieldProps } from './types';
 import './result.scss';
@@ -20,28 +27,35 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   isExpanded,
 }) => {
   return (
-    <EuiFlexItem className="resultField">
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
+    <EuiTableRow className="resultField">
+      <EuiTableRowCell width="5%" valign="middle">
+        <span>
           <EuiToken iconType={iconType} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">{fieldName}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="sortRight" color="subdued" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={4}>
-          {(fieldType === 'object' || fieldType === 'array' || fieldType === 'nested') &&
-          isExpanded ? (
-            <EuiCodeBlock language="json">{fieldValue}</EuiCodeBlock>
-          ) : (
-            <EuiText className="resultFieldText" size="xs" grow={false}>
-              {fieldValue}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+        </span>
+      </EuiTableRowCell>
+      <EuiTableRowCell width="25%" valign="middle">
+        <EuiText size="xs" grow={false}>
+          {fieldName}
+        </EuiText>
+      </EuiTableRowCell>
+      <EuiTableRowCell width="5%" valign="middle">
+        <EuiIcon type="sortRight" color="subdued" />
+      </EuiTableRowCell>
+      <EuiTableRowCell truncateText valign="middle">
+        {(fieldType === 'object' ||
+          fieldType === 'array' ||
+          fieldType === 'nested' ||
+          Array.isArray(fieldValue)) &&
+        isExpanded ? (
+          <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
+            {fieldValue}
+          </EuiCodeBlock>
+        ) : (
+          <EuiText size="xs" grow={false}>
+            {fieldValue}
+          </EuiText>
+        )}
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
