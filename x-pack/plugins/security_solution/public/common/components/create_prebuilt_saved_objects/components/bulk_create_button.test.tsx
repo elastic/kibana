@@ -140,9 +140,10 @@ describe('ImportSavedObjectsButton', () => {
     });
 
     await waitFor(() => {
-      expect(appToastsMock.addSuccess).toHaveBeenCalledWith(
-        'Following saved object has been imported successfully: 1. ) my saved object title 1'
-      );
+      expect(appToastsMock.addSuccess).toHaveBeenCalledWith({
+        text: 'my saved object title 1',
+        title: '1 saved object imported successfully',
+      });
     });
   });
 
