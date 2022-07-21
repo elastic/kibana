@@ -101,5 +101,5 @@ export interface IInterpreterRenderHandlers {
    */
   uiState?: unknown;
 
-  getExecutionContext: () => KibanaExecutionContext | undefined;
+  getExecutionContext(): KibanaExecutionContext | undefined;
 }
