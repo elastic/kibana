@@ -69,7 +69,7 @@ export const SearchIndexDocuments: React.FC = () => {
   useEffect(() => {
     makeRequest({ indexName, query: '' });
     makeMappingRequest({ indexName });
-  }, []);
+  }, [indexName]);
 
   const resultToField = (result: SearchHit) => {
     if (result._source && !Array.isArray(result._source)) {
