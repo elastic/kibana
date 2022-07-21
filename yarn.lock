@@ -7692,10 +7692,10 @@
     "@types/node" "*"
     form-data "^2.3.3"
 
-"@types/node-forge@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.0.2.tgz#454299d3eaa846a38f8d88872a895b40a02e86dd"
-  integrity sha512-J1OkeZGaW0y9Y7xD49Ja8O82B9l5nZDeoYuGWqIOYPAf9LR+xF23k9ILdzv8dH+2H033fx3D5oiA0GlmicI+sg==
+"@types/node-forge@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.0.4.tgz#82df44938848e111463080286876e4cbe2b297a0"
+  integrity sha512-UpX8LTRrarEZPQvQqF5/6KQAqZolOVckH7txWdlsWIJrhBFFtwEUTcqeDouhrJl6t0F7Wg5cyUOAqqF8a6hheg==
   dependencies:
     "@types/node" "*"
 
@@ -30493,10 +30493,10 @@ xhr@^2.0.1:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-xml-crypto@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.1.3.tgz#6a7272b610ea3e4ea7f13e9e4876f1b20cbc32c8"
-  integrity sha512-MpXZwnn9JK0mNPZ5mnFIbNnQa+8lMGK4NtnX2FlJMfMWR60sJdFO9X72yO6ji068pxixzk53O7x0/iSKh6IhyQ==
+xml-crypto@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.1.4.tgz#85b3c62fa0debc4956ee72cb2dfee65651e865b5"
+  integrity sha512-ModFeGOy67L/XXHcuepnYGF7DASEDw7fhvy+qIs1ORoH55G1IIr+fN0kaMtttwvmNFFMskD9AHro8wx352/mUg==
   dependencies:
     "@xmldom/xmldom" "^0.7.0"
     xpath "0.0.32"
