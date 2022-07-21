@@ -145,7 +145,6 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         return response.ok({
           body: {
             exists: indexExists,
-            index_name: indexName,
           },
           headers: { 'content-type': 'application/json' },
         });

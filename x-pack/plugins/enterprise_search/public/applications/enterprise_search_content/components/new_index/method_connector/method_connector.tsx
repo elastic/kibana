@@ -41,7 +41,7 @@ const errorToMessage = (error?: HttpError): string | undefined => {
   }
   if (error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.indexAlreadyExists',
+      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
       {
         defaultMessage: 'A connector for this index already exists',
       }

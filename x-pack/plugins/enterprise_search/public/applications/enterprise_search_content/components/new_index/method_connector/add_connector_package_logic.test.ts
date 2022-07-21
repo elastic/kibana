@@ -25,7 +25,7 @@ const DEFAULT_VALUES: AddConnectorValues = {
 
 describe('AddConnectorPackageLogic', () => {
   const { mount } = new LogicMounter(AddConnectorPackageLogic);
-  const { flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   it('has expected default values', () => {
     mount();
@@ -52,8 +52,14 @@ describe('AddConnectorPackageLogic', () => {
     });
 
     describe('apiSuccess', () => {
-      it('navigates to correct spot', async () => {
+      it('navigates to correct spot and flashes success toast', async () => {
+        jest.useFakeTimers();
         AddConnectorPackageApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
+        await nextTick();
+        expect(flashSuccessToast).toHaveBeenCalledWith('Index created successfully', {
+          text: 'You can use a connector build a search experience for your new Elasticsearch index.',
+        });
+        jest.advanceTimersByTime(1001);
         await nextTick();
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(
           '/search_indices/success/configuration'

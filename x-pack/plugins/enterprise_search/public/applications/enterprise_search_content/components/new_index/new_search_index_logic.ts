@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Status } from '../../../../../common/types/api';
+
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import {
@@ -26,9 +28,11 @@ export interface NewSearchIndexValues {
   fullIndexName: string;
   fullIndexNameExists: boolean;
   fullIndexNameIsValid: boolean;
+  isLoading: boolean;
   language: LanguageForOptimization;
   languageSelectValue: string;
   rawName: string;
+  status: Status;
 }
 
 export type NewSearchIndexActions = Pick<
@@ -46,7 +50,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   },
   connect: {
     actions: [IndexExistsApiLogic, ['makeRequest']],
-    values: [IndexExistsApiLogic, ['data']],
+    values: [IndexExistsApiLogic, ['data', 'status']],
   },
   listeners: ({ actions, values }) => ({
     setRawName: async (_, breakpoint) => {
@@ -74,12 +78,13 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     fullIndexNameExists: [
       () => [selectors.data, selectors.fullIndexName],
       (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>
-        data?.exists === true && data.index_name === fullIndexName,
+        data?.exists === true && data.indexName === fullIndexName,
     ],
     fullIndexNameIsValid: [
       () => [selectors.fullIndexName],
       (fullIndexName) => isValidIndexName(fullIndexName),
     ],
+    isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
     language: [
       () => [selectors.languageSelectValue],
       (languageSelectValue) => getLanguageForOptimization(languageSelectValue),

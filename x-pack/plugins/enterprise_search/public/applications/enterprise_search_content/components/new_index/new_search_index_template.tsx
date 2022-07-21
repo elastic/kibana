@@ -57,6 +57,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
+    isLoading,
     language,
     rawName,
     languageSelectValue,
@@ -75,6 +76,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   };
 
   const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
+
   const formError = () => {
     if (fullIndexNameExists) {
       return i18n.translate(
@@ -87,7 +89,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
         }
       );
     }
-    if (fullIndexNameIsValid) {
+    if (!fullIndexNameIsValid) {
       return i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.isInvalid.error',
         {
@@ -195,8 +197,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!rawName || buttonLoading || formInvalid}
-              isLoading={buttonLoading}
+              isDisabled={!rawName || buttonLoading || isLoading || formInvalid}
+              isLoading={buttonLoading || isLoading}
               type="submit"
             >
               {i18n.translate(

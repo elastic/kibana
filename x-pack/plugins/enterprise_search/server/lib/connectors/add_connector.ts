@@ -23,12 +23,9 @@ const createConnector = async (
   deleteExisting: boolean
 ): Promise<{ id: string; index_name: string }> => {
   const index = document.index_name;
-  // Retrieve as array so this function doesn't throw an error if it doesn't exist
   const indexExists = await client.asCurrentUser.indices.exists({ index });
   if (indexExists) {
-    if (deleteExisting) {
-      await client.asCurrentUser.indices.delete({ index });
-    } else {
+    {
       throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
     }
   }
@@ -60,13 +57,13 @@ export const addConnector = async (
     configuration: {},
     index_name: input.index_name,
     last_seen: null,
+    last_sync_error: null,
+    last_sync_status: null,
     last_synced: null,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: null,
     status: ConnectorStatus.CREATED,
-    sync_error: null,
     sync_now: false,
-    sync_status: null,
   };
   try {
     return await createConnector(document, client, !!input.delete_existing_connector);

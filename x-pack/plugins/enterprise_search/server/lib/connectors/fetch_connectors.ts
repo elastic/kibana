@@ -73,7 +73,7 @@ export const fetchConnectors = async (
     let connectors = connectorResult.hits.hits;
     let length = connectors.length;
     const query: QueryDslQueryContainer = indexNames
-      ? { terms: { 'index_name.keyword': indexNames } }
+      ? { terms: { index_name: indexNames } }
       : { match_all: {} };
     while (length >= 1000) {
       const newConnectorResult = await client.asCurrentUser.search<ConnectorDocument>({
