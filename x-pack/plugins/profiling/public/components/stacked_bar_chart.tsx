@@ -10,6 +10,7 @@ import {
   BrushAxis,
   Chart,
   HistogramBarSeries,
+  ScaleType,
   Settings,
   StackMode,
   timeFormatter,
@@ -19,7 +20,8 @@ import {
 import { EuiPanel } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { TopNSample, TopNSubchart } from '../../common/topn';
-import { chartTheme } from '../utils/chart_styles';
+import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
+import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { TopNContext } from './contexts/topn';
 import { SubChart } from './subchart';
@@ -61,6 +63,10 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 }) => {
   const ctx = useContext(TopNContext);
 
+  const timeZone = useKibanaTimeZoneSetting();
+
+  const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
+
   return (
     <Chart size={{ height }}>
       <Settings
@@ -77,7 +83,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
 
           onBrushEnd({ rangeFrom, rangeTo });
         }}
-        theme={chartTheme}
+        baseTheme={chartsBaseTheme}
+        theme={chartsTheme}
         onElementClick={(events) => {
           const [value] = events[0] as XYChartElementEvent;
           onSampleClick(value.datum as TopNSample);
@@ -99,6 +106,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
           xAccessor={'Timestamp'}
           yAccessors={['Count']}
           stackMode={asPercentages ? StackMode.Percentage : undefined}
+          xScaleType={ScaleType.Time}
+          timeZone={timeZone}
         />
       ))}
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />

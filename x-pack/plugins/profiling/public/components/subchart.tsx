@@ -18,9 +18,10 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } fr
 import React from 'react';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { CountPerTime } from '../../common/topn';
+import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
+import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { useProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { chartTheme } from '../utils/chart_styles';
 import { asPercentage } from '../utils/formatters/as_percentage';
 
 export interface SubChartProps {
@@ -58,6 +59,10 @@ export const SubChart: React.FC<SubChartProps> = ({
     },
   });
 
+  const timeZone = useKibanaTimeZoneSetting();
+
+  const { chartsTheme, chartsBaseTheme } = useProfilingChartsTheme();
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -81,7 +86,12 @@ export const SubChart: React.FC<SubChartProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <Chart size={{ height, width }}>
-          <Settings showLegend={false} tooltip={{ showNullValues: false }} theme={chartTheme} />
+          <Settings
+            showLegend={false}
+            tooltip={{ showNullValues: false }}
+            baseTheme={chartsBaseTheme}
+            theme={chartsTheme}
+          />
           <AreaSeries
             id={category}
             name={category}
@@ -89,6 +99,7 @@ export const SubChart: React.FC<SubChartProps> = ({
             xAccessor={'Timestamp'}
             yAccessors={['Count']}
             xScaleType={ScaleType.Time}
+            timeZone={timeZone}
             yScaleType={ScaleType.Linear}
             curve={CurveType.CURVE_STEP_AFTER}
             color={color}

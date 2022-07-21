@@ -18,7 +18,8 @@
     "features",
     "kibanaReact",
     "unifiedSearch",
-    "dataViews"
+    "dataViews",
+    "charts"
   ],
   "optionalPlugins": []
 }

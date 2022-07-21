@@ -10,7 +10,6 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
