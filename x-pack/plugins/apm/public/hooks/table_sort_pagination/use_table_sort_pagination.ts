@@ -109,10 +109,8 @@ export function useTableSortAndPagination<T extends any[]>(
         query: {
           page: newTableOptions.page.index.toString(),
           pageSize: newTableOptions.page.size.toString(),
-          sortField: newTableOptions.sort?.field
-            ? newTableOptions.sort.field.toString()
-            : '',
-          sortDirection: newTableOptions.sort?.direction || DESC,
+          sortField: newTableOptions.sort?.field.toString() || '',
+          sortDirection: newTableOptions.sort?.direction || '',
         },
       });
     }
