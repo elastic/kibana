@@ -11,10 +11,13 @@ import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import {
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  BENCHMARK_SCORE_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  BENCHMARK_SCORE_INDEX_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
-  LATEST_FINDINGS_INDEX_NAME,
+  LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+  LATEST_FINDINGS_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
 } from '../../common/constants';
 import { createPipelineIfNotExists } from './create_processor';
 
@@ -25,38 +28,59 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
-    createIndexIfNotExists(
+    createIndexIfNotExists({
       esClient,
-      BENCHMARK_SCORE_INDEX_NAME,
-      BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      benchmarkScoreMapping,
-      { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE },
-      logger
-    ),
+      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+      indexTemplateName: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+      indexPattern: BENCHMARK_SCORE_INDEX_PATTERN,
+      mappings: benchmarkScoreMapping,
+      settings: { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE },
+      logger,
+    }),
   ]);
 };
-export const createIndexIfNotExists = async (
-  esClient: ElasticsearchClient,
-  indexTemplateName: string,
-  indexPattern: string,
-  mappings: MappingTypeMapping,
-  settings: IndicesIndexSettings,
-  logger: Logger
-) => {
+
+interface CreateIndexIfNotExistsParams {
+  esClient: ElasticsearchClient;
+  index: string;
+  indexTemplateName: string;
+  indexPattern: string;
+  mappings: MappingTypeMapping;
+  settings: IndicesIndexSettings;
+  logger: Logger;
+}
+
+export const createIndexIfNotExists = async ({
+  esClient,
+  index,
+  indexTemplateName,
+  indexPattern,
+  mappings,
+  settings,
+  logger,
+}: CreateIndexIfNotExistsParams) => {
   try {
-    const isLatestIndexExists = await esClient.indices.exists({
-      index: indexPattern,
+    // We always want to keep the index template updated
+    await esClient.indices.putIndexTemplate({
+      name: indexTemplateName,
+      index_patterns: indexPattern,
+      template: { mappings },
+      _meta: {
+        package: {
+          name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+        },
+        managed_by: 'cloud_security_posture',
+        managed: true,
+      },
+      priority: 500,
     });
 
+    const isLatestIndexExists = await esClient.indices.exists({
+      index,
+    });
     if (!isLatestIndexExists) {
-      await esClient.indices.putIndexTemplate({
-        name: indexTemplateName,
-        index_patterns: indexPattern,
-        template: { mappings },
-        priority: 500,
-      });
       await esClient.indices.create({
-        index: indexPattern,
+        index,
         mappings,
         settings,
       });
@@ -83,9 +107,10 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
     };
   }
 
+  // We always want to keep the index template updated
   await esClient.indices.putIndexTemplate({
-    name: LATEST_FINDINGS_INDEX_NAME,
-    index_patterns: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+    index_patterns: LATEST_FINDINGS_INDEX_PATTERN,
     priority: 500,
     _meta,
     composed_of,
