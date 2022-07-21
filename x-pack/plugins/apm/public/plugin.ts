@@ -123,6 +123,13 @@ const dependenciesTitle = i18n.translate(
   }
 );
 
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -299,6 +306,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
