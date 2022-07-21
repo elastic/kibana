@@ -62,7 +62,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj={`${productId}ProductCard`}>
+    <EuiPanel
+      hasBorder
+      paddingSize="l"
+      data-test-subj={`${productId}ProductCard`}
+      className="productCard"
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={false} data-test-subj="productCard-icon">
           <EuiIcon size="xl" type={icon} />
@@ -108,7 +113,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-features">
-          <EuiListGroup flush style={{ paddingTop: '1.5rem' }}>
+          <EuiListGroup flush className="productCard-features">
             {features.map((item: string, index: number) => (
               <EuiListGroupItem
                 key={index}

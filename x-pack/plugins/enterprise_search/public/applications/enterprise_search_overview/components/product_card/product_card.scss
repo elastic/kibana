@@ -6,30 +6,7 @@
  */
 
 .productCard {
-  &__imageContainer {
-    @include euiBreakpoint('xs') {
-      max-height: 115px;
-      overflow: hidden;
-    }
-  }
-}
-
-.entSearchSolutions__item {
-  @include euiBreakpoint('l', 'xl') {
-    max-width: calc(33.33% - #{$euiSizeM * 2});
-  }
-}
-
-.entSearchSolutionPanelImage {
-  &--elasticsearch {
-    fill: $euiColorWarning;
-  }
-
-  &--appSearch {
-    fill: $euiColorAccent;
-  }
-
-  &--workplaceSearch {
-    fill: $euiColorSuccess;
+  & &-features {
+    padding-top: 1.5rem;
   }
 }
