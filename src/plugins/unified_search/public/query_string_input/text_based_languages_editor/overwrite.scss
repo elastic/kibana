@@ -1,3 +1,23 @@
+.unifiedTextLangEditor .monaco-editor {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.unifiedTextLangEditor .monaco-editor .margin {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.unifiedTextLangEditor--expanded .monaco-editor {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.unifiedTextLangEditor--expanded .monaco-editor .margin {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 .unifiedTextLangEditor--expanded .monaco-editor .margin-view-overlays {
   background-color: rgb(233, 237, 243);
   padding-right: 6px;

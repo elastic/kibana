@@ -31,6 +31,7 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderTopLeftRadius: isCodeEditorExpanded ? 0 : '6px',
       borderBottom: isCodeEditorExpanded
         ? 'none'
         : isCompactFocused
@@ -42,6 +43,8 @@ export const textBasedLanguagedEditorStyles = (
       width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
+      borderTopLeftRadius: '6px',
+      borderBottomLeftRadius: '6px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
     linesBadge: {
@@ -72,10 +75,14 @@ export const textBasedLanguagedEditorStyles = (
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: '1px',
-      marginLeft: 0,
+      marginLeft: '-1px',
+      borderBottomLeftRadius: '6px',
+      borderBottomRightRadius: '6px',
     },
     topContainer: {
       border: euiTheme.border.thin,
+      borderTopLeftRadius: '6px',
+      borderTopRightRadius: '6px',
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.s,
       paddingRight: euiTheme.size.s,
