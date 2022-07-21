@@ -35,11 +35,15 @@ jest.mock('../../kibana_services', () => {
   };
 });
 describe('getting started', () => {
+  let storageItemValue: string | null;
   beforeAll(() => {
+    storageItemValue = localStorage.getItem(KEY_ENABLE_WELCOME);
     localStorage.removeItem(KEY_ENABLE_WELCOME);
   });
   afterAll(() => {
-    localStorage.removeItem(KEY_ENABLE_WELCOME);
+    if (storageItemValue) {
+      localStorage.setItem(KEY_ENABLE_WELCOME, storageItemValue);
+    }
   });
   test('should render getting started component', async () => {
     const component = await shallow(<GettingStarted />);
