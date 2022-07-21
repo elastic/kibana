@@ -66,7 +66,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
-  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration) ? true : false;
+  const useReduce = hasFleetServer || (!isManaged && !hasK8sIntegration);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
