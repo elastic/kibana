@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with duplicate query utils in
+// `x-pack/plugins/data_visualizer/common/utils/query_utils.ts`
+
 import { cloneDeep } from 'lodash';
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';

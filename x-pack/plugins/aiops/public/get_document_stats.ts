@@ -11,8 +11,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
+import { Query } from '@kbn/es-query';
 
-import { buildBaseFilterCriteria } from './query_utils';
+import { buildBaseFilterCriteria } from './application/utils/query_utils';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -27,6 +28,7 @@ export interface DocumentStatsSearchStrategyParams {
   latest?: number;
   intervalMs?: number;
   index: string;
+  searchQuery: Query['query'];
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
@@ -41,7 +43,7 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     earliest: earliestMs,
     latest: latestMs,
     runtimeFieldMap,
-    // searchQuery,
+    searchQuery,
     intervalMs,
     fieldsToFetch,
     selectedChangePoint,
@@ -53,9 +55,7 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     timeFieldName,
     earliestMs,
     latestMs,
-    {
-      match_all: {},
-    },
+    searchQuery,
     selectedChangePoint,
     includeSelectedChangePoint
   );
