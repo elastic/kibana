@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ReduxEmbeddablePackage } from './types';
+
 export {
   useReduxContainerContext,
   useReduxEmbeddableContext,
 } from './use_redux_embeddable_context';
 
-export { createReduxEmbeddableTools } from './create_redux_embeddable_tools';
+export type { ReduxEmbeddableState, ReduxEmbeddableTools, ReduxEmbeddablePackage } from './types';
 
-export type { ReduxEmbeddableState, ReduxEmbeddableTools } from './types';
+export const lazyLoadReduxEmbeddablePackage = async (): Promise<ReduxEmbeddablePackage> => {
+  const { createReduxEmbeddableTools } = await import('./create_redux_embeddable_tools');
+  return {
+    createTools: createReduxEmbeddableTools,
+  };
+};

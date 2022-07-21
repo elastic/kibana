@@ -21,10 +21,7 @@ import {
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
-import {
-  createReduxEmbeddableTools,
-  ReduxEmbeddableTools,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -87,7 +84,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     typeof optionsListReducers
   >;
 
-  constructor(input: OptionsListEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: OptionsListEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
     super(input, output, parent);
 
     // Destructure controls services
@@ -97,7 +99,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.typeaheadSubject = new Subject<string>();
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = createReduxEmbeddableTools<
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       OptionsListReduxState,
       typeof optionsListReducers
     >({

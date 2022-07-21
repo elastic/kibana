@@ -23,10 +23,7 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription, lastValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
-import {
-  ReduxEmbeddableTools,
-  createReduxEmbeddableTools,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -84,13 +81,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     typeof rangeSliderReducers
   >;
 
-  constructor(input: RangeSliderEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: RangeSliderEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
     super(input, output, parent); // get filters for initial output...
 
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
-    this.reduxEmbeddableTools = createReduxEmbeddableTools<
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       RangeSliderReduxState,
       typeof rangeSliderReducers
     >({

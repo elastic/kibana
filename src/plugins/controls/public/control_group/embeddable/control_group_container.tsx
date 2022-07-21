@@ -22,8 +22,8 @@ import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
+  ReduxEmbeddablePackage,
   ReduxEmbeddableTools,
-  createReduxEmbeddableTools,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
@@ -160,7 +160,11 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  constructor(initialInput: ControlGroupInput, parent?: Container) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    initialInput: ControlGroupInput,
+    parent?: Container
+  ) {
     super(
       initialInput,
       { dataViewIds: [], loading: false, embeddableLoaded: {}, filters: [] },
@@ -172,7 +176,7 @@ export class ControlGroupContainer extends Container<
     this.recalculateFilters$ = new Subject();
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = createReduxEmbeddableTools<
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       ControlGroupReduxState,
       typeof controlGroupReducers
     >({

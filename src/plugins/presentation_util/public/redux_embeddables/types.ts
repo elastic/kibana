@@ -33,6 +33,13 @@ export interface ReduxEmbeddableSyncSettings<
 }
 
 /**
+ * The package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools.
+ */
+export interface ReduxEmbeddablePackage {
+  createTools: typeof import('./create_redux_embeddable_tools')['createReduxEmbeddableTools'];
+}
+
+/**
  * The return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,
  * but also returns the context object to allow the embeddable class to interact with the redux store.
  */

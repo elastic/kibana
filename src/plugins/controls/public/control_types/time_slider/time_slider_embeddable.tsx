@@ -15,10 +15,7 @@ import { merge, Subscription, BehaviorSubject, Observable } from 'rxjs';
 import { map, distinctUntilChanged, skip, take, mergeMap } from 'rxjs/operators';
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import {
-  ReduxEmbeddableTools,
-  createReduxEmbeddableTools,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
@@ -78,7 +75,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     typeof timeSliderReducers
   >;
 
-  constructor(input: TimeSliderControlEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: TimeSliderControlEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
     super(input, output, parent); // get filters for initial output...
 
     const {
@@ -96,7 +98,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.internalOutput = {};
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = createReduxEmbeddableTools<
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
     >({

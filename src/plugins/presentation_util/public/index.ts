@@ -48,9 +48,10 @@ export {
 export {
   useReduxContainerContext,
   useReduxEmbeddableContext,
-  createReduxEmbeddableTools,
+  lazyLoadReduxEmbeddablePackage,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
+  type ReduxEmbeddablePackage,
 } from './redux_embeddables';
 
 export * from './components/types';
