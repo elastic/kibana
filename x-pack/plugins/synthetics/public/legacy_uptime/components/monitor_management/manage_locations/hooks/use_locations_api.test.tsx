@@ -79,7 +79,10 @@ describe('useLocationsAPI', () => {
       policyHostId: 'newPolicy',
       name: 'new',
       concurrentMonitors: 1,
-      latLon: '',
+      geo: {
+        lat: '',
+        lon: '',
+      },
     });
 
     await waitForNextUpdate();

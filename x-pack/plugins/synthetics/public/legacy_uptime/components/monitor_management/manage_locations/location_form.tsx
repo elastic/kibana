@@ -51,7 +51,10 @@ export const LocationForm = ({
       name: '',
       policyHostId: '',
       id: '',
-      latLon: '',
+      geo: {
+        lat: '',
+        lon: '',
+      },
       concurrentMonitors: 1,
     },
   });
