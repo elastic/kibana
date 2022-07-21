@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { BarSeries, Chart, ScaleType, Settings, PartialTheme, TooltipType } from '@elastic/charts';
+import {
+  BarSeries,
+  Chart,
+  ScaleType,
+  Settings,
+  PartialTheme,
+  TooltipType,
+  LIGHT_THEME,
+} from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -137,6 +145,7 @@ export { RuleAlertsSummary as default };
 interface AlertsChartProps {
   data: AlertChartData[];
 }
+const chartColor = [LIGHT_THEME.colors.vizColors[1], LIGHT_THEME.colors.vizColors[2]];
 const AlertsChart = ({ data }: AlertsChartProps) => {
   const theme: PartialTheme = {
     chartMargins: {
@@ -163,7 +172,12 @@ const AlertsChart = ({ data }: AlertsChartProps) => {
         yAccessors={['y']}
         stackAccessors={['x']}
         splitSeriesAccessors={['g']}
-        data={data.map((alert) => ({ x: alert.date, y: alert.count, g: alert.status }))}
+        color={chartColor}
+        data={data.map((alert) => ({
+          x: alert.date,
+          y: alert.count,
+          g: alert.status,
+        }))}
       />
     </Chart>
   );
