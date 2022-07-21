@@ -16,6 +16,9 @@ import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
 
 import { AgentListPage } from '.';
 
+jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
+  useConfirmForceInstall: () => <>confirmForceInstall</>,
+}));
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   sendGetAgents: jest.fn(),

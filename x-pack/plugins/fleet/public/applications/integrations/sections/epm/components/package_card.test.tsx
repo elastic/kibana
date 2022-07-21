@@ -18,6 +18,7 @@ import { PackageCard } from './package_card';
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
+    useConfirmForceInstall: jest.fn(),
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
