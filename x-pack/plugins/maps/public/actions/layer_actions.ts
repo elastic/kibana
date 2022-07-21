@@ -24,7 +24,7 @@ import {
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { setDrawMode, updateFlyout } from './ui_actions';
+import { hideTOCDetails, setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -75,7 +75,7 @@ import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
 import { showTOCDetails } from './ui_actions';
-import { getDrawMode } from '../selectors/ui_selectors';
+import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -618,6 +618,10 @@ function removeLayerFromLayerList(layerId: string) {
     const editState = getEditState(getState());
     if (layerId === editState?.layerId) {
       dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
+    const openTOCDetails = getOpenTOCDetails(getState());
+    if (openTOCDetails.includes(layerId)) {
+      dispatch(hideTOCDetails(layerId));
     }
   };
 }
