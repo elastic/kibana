@@ -19,7 +19,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover } from '../../shared_components';
-import { MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
 
 export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;
@@ -128,7 +128,7 @@ export function MetricToolbar(props: VisualizationToolbarProps<MetricVisualizati
           display="columnCompressed"
         >
           <EuiFieldNumber
-            value={state.maxCols ?? 5}
+            value={state.maxCols ?? DEFAULT_MAX_COLUMNS}
             onChange={(event) => setState({ ...state, maxCols: parseInt(event.target.value, 10) })}
           />
         </EuiFormRow>

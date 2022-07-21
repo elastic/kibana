@@ -23,6 +23,8 @@ import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
+export const DEFAULT_MAX_COLUMNS = 3;
+
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
@@ -129,7 +131,7 @@ const toExpression = (
                   .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
               ]
             : [],
-          maxCols: state.maxCols ? [state.maxCols] : [],
+          maxCols: [state.maxCols ?? DEFAULT_MAX_COLUMNS],
           minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
         },
       },
