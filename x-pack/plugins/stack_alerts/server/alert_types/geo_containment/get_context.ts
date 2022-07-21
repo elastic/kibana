@@ -39,7 +39,7 @@ function getAlertContext({
 }: {
   entityName: string;
   containment: GeoContainmentInstanceState;
-  shapesIdsNamesMap: Record<string, unknown>;
+  shapesIdsNamesMap?: Record<string, unknown>;
   windowEnd: Date;
   isRecovered: boolean;
 }): GeoContainmentInstanceContext {
@@ -53,7 +53,8 @@ function getAlertContext({
   if (!isRecovered) {
     context.containingBoundaryId = containment.shapeLocationId;
     context.containingBoundaryName =
-      shapesIdsNamesMap[containment.shapeLocationId] || containment.shapeLocationId;
+      (shapesIdsNamesMap && shapesIdsNamesMap[containment.shapeLocationId]) ||
+      containment.shapeLocationId;
   }
   return context;
 }
@@ -71,13 +72,11 @@ export function getRecoveredAlertContext({
   alertId,
   activeEntities,
   inactiveEntities,
-  shapesIdsNamesMap,
   windowEnd,
 }: {
   alertId: string;
   activeEntities: Map<string, GeoContainmentInstanceState[]>;
   inactiveEntities: Map<string, GeoContainmentInstanceState[]>;
-  shapesIdsNamesMap: Record<string, unknown>;
   windowEnd: Date;
 }): GeoContainmentInstanceContext | null {
   const { entityName } = splitAlertId(alertId);
@@ -96,7 +95,6 @@ export function getRecoveredAlertContext({
     ? getAlertContext({
         entityName,
         containment,
-        shapesIdsNamesMap,
         windowEnd,
         isRecovered: true,
       })

@@ -46,13 +46,6 @@ export type GeoContainmentExtractedParams = Omit<
   boundaryIndexRefName: string;
 };
 
-const actionVariableContextContainingBoundaryNameLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryNameLabel',
-  {
-    defaultMessage: 'The boundary the entity is currently located within',
-  }
-);
-
 const actionVariables = {
   context: [
     // Alert-specific data
@@ -106,7 +99,8 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
         {
-          defaultMessage: 'The id of the boundary containing the entity. Value not set for recovered alerts',
+          defaultMessage:
+            'The id of the boundary containing the entity. Value not set for recovered alerts',
         }
       ),
     },
@@ -115,7 +109,8 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryNameLabel',
         {
-          defaultMessage: 'The name of the boundary containing the entity. Value not set for recovered alerts',
+          defaultMessage:
+            'The name of the boundary containing the entity. Value not set for recovered alerts',
         }
       ),
     },

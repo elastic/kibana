@@ -207,7 +207,6 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
           alertId: recoveredAlertId,
           activeEntities,
           inactiveEntities,
-          shapesIdsNamesMap,
           windowEnd,
         });
         if (context) {
