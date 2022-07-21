@@ -34,9 +34,6 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExpressionsStartDependencies {}
-
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
   private static logger = {
     ...console,
