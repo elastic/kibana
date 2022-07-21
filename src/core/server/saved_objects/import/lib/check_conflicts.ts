@@ -13,7 +13,7 @@ import type {
   SavedObjectError,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ImportStateMap } from './types';
 
 interface CheckConflictsParams {

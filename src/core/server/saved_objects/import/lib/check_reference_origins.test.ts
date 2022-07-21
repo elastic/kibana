@@ -8,7 +8,7 @@
 
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
-import type { SavedObjectsFindResult } from '../../service';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClientContract } from '../../types';
 import { checkReferenceOrigins, CheckReferenceOriginsParams } from './check_reference_origins';
 import { savedObjectsClientMock } from '../../../mocks';
