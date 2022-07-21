@@ -314,8 +314,8 @@ export const waitForPage = (url: string) => {
 
 export const visit = (
   url: string,
-  role?: ROLES,
-  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
+  role?: ROLES
 ) => {
   cy.visit(
     `${

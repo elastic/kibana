@@ -86,7 +86,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', () => {
       before(() => {
         login(ROLES.reader);
-        visit(OVERVIEW_URL, ROLES.reader);
+        visit(OVERVIEW_URL, undefined, ROLES.reader);
       });
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
