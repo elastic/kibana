@@ -26,6 +26,7 @@ interface Options {
   isEndpointList: boolean;
 }
 
+const responderCapabilitiesList = ['kill_process', 'suspend_process', 'running_processes'];
 /**
  * Returns a list (array) of actions for an individual endpoint
  * @param endpointMetadata
@@ -46,6 +47,9 @@ export const useEndpointActionItems = (
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
+      const isResponderCapabilitiesEnabled = responderCapabilitiesList.every((capability) =>
+        endpointMetadata.Endpoint.capabilities?.includes(capability)
+      );
       const isIsolated = isEndpointHostIsolated(endpointMetadata);
       const endpointId = endpointMetadata.agent.id;
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
@@ -119,7 +123,9 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
-        ...(isResponseActionsConsoleEnabled && canAccessResponseConsole
+        ...(isResponseActionsConsoleEnabled &&
+        canAccessResponseConsole &&
+        isResponderCapabilitiesEnabled
           ? [
               {
                 'data-test-subj': 'console',
