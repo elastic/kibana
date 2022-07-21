@@ -279,6 +279,58 @@ export default ({ getService }: FtrProviderContext): void => {
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query the invalid searchField ${field}`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      describe('search and searchField', () => {
+        beforeEach(async () => {
+          await createCase(supertest, postCaseReq);
+        });
+
+        it('should successfully find a case when using valid searchFields', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should successfully find a case when not passing the searchFields parameter', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should not find any cases when it does not use a wildcard and the string does not match', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss' },
+          });
+
+          expect(cases.total).to.be(0);
+        });
+
+        it('should find a case when it uses a wildcard', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss*' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+      });
     });
 
     describe('alerts', () => {
@@ -662,45 +714,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
-
-      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
-        await Promise.all([
-          // super user creates a case with owner securitySolutionFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-          // super user creates a case with owner observabilityFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        const res = await findCases({
-          supertest: supertestWithoutAuth,
-          query: {
-            search: 'securitySolutionFixture observabilityFixture',
-            searchFields: 'owner',
-          },
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
-      });
 
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
       // the authorizationFilter produced by the cases authorization class

@@ -26,6 +26,7 @@ import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
+import { ConstructQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -51,7 +52,7 @@ export const find = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs = {
+    const queryArgs: ConstructQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
@@ -111,14 +112,14 @@ const validateSearchFields = (searchFields?: string | string[]) => {
   if (invalidSearchFields.length > 0) {
     throw Boom.badRequest(
       `received invalid search fields: [${invalidSearchFields.join(',')}], must be one of [${[
-        ...searchableFields,
+        ...SEARCHABLE_FIELDS,
       ].join(',')}]`
     );
   }
 };
 
 const getUnsearchableFields = (fields: string[]) => {
-  return fields.filter((field) => !searchableFields.has(field));
+  return fields.filter((field) => !SEARCHABLE_FIELDS.has(field));
 };
 
-const searchableFields = new Set<string>(['description', 'connector.name', 'title']);
+const SEARCHABLE_FIELDS = new Set<string>(['description', 'connector.name', 'title']);
