@@ -424,6 +424,11 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   },
 });
 
+export const sampleEmptyAggsSearchResults = (): SignalSearchResponse => ({
+  ...sampleEmptyDocSearchResults(),
+  aggregations: {},
+});
+
 export const sampleSignalHit = (): SignalHit => ({
   '@timestamp': '2020-04-20T21:27:45+0000',
   event: {
@@ -475,70 +480,6 @@ export const sampleSignalHit = (): SignalHit => ({
       references: ['test 1', 'test 2'],
       severity: 'high',
       severity_mapping: [],
-      updated_by: 'elastic_kibana',
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      to: 'now',
-      type: 'query',
-      threat: [],
-      version: 1,
-      output_index: '.siem-signals-default',
-      max_signals: 100,
-      risk_score: 55,
-      risk_score_mapping: [],
-      language: 'kuery',
-      rule_id: 'query-rule-id',
-      interval: '5m',
-      exceptions_list: getListArrayMock(),
-      related_integrations: [],
-      required_fields: [],
-      setup: '',
-    },
-    depth: 1,
-  },
-});
-
-export const sampleThresholdSignalHit = (): SignalHit => ({
-  '@timestamp': '2020-04-20T21:27:45+0000',
-  event: {
-    kind: 'signal',
-  },
-  signal: {
-    parents: [],
-    ancestors: [],
-    original_time: '2021-02-16T17:37:34.275Z',
-    status: 'open',
-    threshold_result: {
-      count: 72,
-      terms: [{ field: 'host.name', value: 'a hostname' }],
-      cardinality: [{ field: 'process.name', value: 6 }],
-      from: '2021-02-16T17:31:34.275Z',
-    },
-    rule: {
-      author: [],
-      id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
-      created_at: '2020-04-20T21:27:45+0000',
-      updated_at: '2020-04-20T21:27:45+0000',
-      created_by: 'elastic',
-      description: 'some description',
-      enabled: true,
-      false_positives: ['false positive 1', 'false positive 2'],
-      from: 'now-6m',
-      immutable: false,
-      name: 'Query with a rule id',
-      query: 'user.name: root or user.name: admin',
-      references: ['test 1', 'test 2'],
-      severity: 'high',
-      severity_mapping: [],
-      threshold: {
-        field: ['host.name'],
-        value: 5,
-        cardinality: [
-          {
-            field: 'process.name',
-            value: 2,
-          },
-        ],
-      },
       updated_by: 'elastic_kibana',
       tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',

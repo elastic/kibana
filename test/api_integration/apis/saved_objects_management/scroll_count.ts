@@ -15,19 +15,22 @@ const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
   describe('scroll_count', () => {
     describe('with less than 10k objects', () => {
       before(async () => {
-        await esArchiver.load(
-          'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
       });
       after(async () => {
-        await esArchiver.unload(
-          'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('returns the count for each included types', async () => {
