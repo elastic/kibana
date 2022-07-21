@@ -10,7 +10,8 @@ import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('docCount query', () => {
+  // FAILING FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/136412
+  describe.skip('docCount query', () => {
     const supertest = getService('supertest');
 
     it(`will fetch the index's count`, async () => {
