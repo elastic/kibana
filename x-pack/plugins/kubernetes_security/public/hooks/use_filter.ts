@@ -12,13 +12,15 @@ import type { StartPlugins } from '../types';
 
 export const useSetFilter = () => {
   const { data, timelines } = useKibana<CoreStart & StartPlugins>().services;
-  const { getFilterForValueButton, getFilterOutValueButton } = timelines.getHoverActions();
+  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton } =
+    timelines.getHoverActions();
 
   const filterManager = useMemo(() => data.query.filterManager, [data.query.filterManager]);
 
   return {
     getFilterForValueButton,
     getFilterOutValueButton,
+    getCopyButton,
     filterManager,
   };
 };

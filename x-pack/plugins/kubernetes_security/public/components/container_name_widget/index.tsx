@@ -51,6 +51,10 @@ interface FilterButtons {
   filterOutButtons: ReactNode[];
 }
 
+interface CopyButtons {
+  copyButtons: ReactNode[];
+}
+
 export const ContainerNameWidget = ({
   widgetKey,
   indexPattern,
@@ -95,7 +99,8 @@ export const ContainerNameWidget = ({
     enableAllColumns: true,
   };
 
-  const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
+  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton, filterManager } =
+    useSetFilter();
   const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:
@@ -137,6 +142,28 @@ export const ContainerNameWidget = ({
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 
+  const copyToClipboardButtons = useMemo((): CopyButtons => {
+    const result: CopyButtons = {
+      copyButtons:
+        data?.pages
+          ?.map((aggsData) => {
+            return aggsData?.buckets.map((aggData) => {
+              return getCopyButton({
+                field: CONTAINER_IMAGE_NAME,
+                size: 'xs',
+                onClick: () => {},
+                onFilterAdded: () => {},
+                ownFocus: false,
+                showTooltip: true,
+                value: aggData.key as string,
+              });
+            });
+          })
+          .flat() || [],
+    };
+    return result;
+  }, [data, getCopyButton]);
+
   const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data
       ? data?.pages
@@ -167,6 +194,7 @@ export const ContainerNameWidget = ({
               name={name}
               filterButtonIn={filterButtons.filterForButtons[indexHelper]}
               filterButtonOut={filterButtons.filterOutButtons[indexHelper]}
+              copyToClipboardButton={copyToClipboardButtons.copyButtons[indexHelper]}
             />
           );
         },
@@ -186,7 +214,13 @@ export const ContainerNameWidget = ({
         align: 'right',
       },
     ];
-  }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray, styles]);
+  }, [
+    filterButtons.filterForButtons,
+    filterButtons.filterOutButtons,
+    copyToClipboardButtons.copyButtons,
+    containerNameArray,
+    styles,
+  ]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useScroll({
