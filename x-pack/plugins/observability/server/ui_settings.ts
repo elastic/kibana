@@ -97,6 +97,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
+    sensitive: true,
     name: i18n.translate('xpack.observability.defaultApmServiceEnvironment', {
       defaultMessage: 'Default service environment',
     }),
