@@ -28,6 +28,7 @@ import {
   FileJSON,
   FilesMetrics,
   ES_FIXED_SIZE_INDEX_BLOB_STORE,
+  FileStatus,
 } from '../../common';
 import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
@@ -232,12 +233,14 @@ export class InternalFileService {
     let pit: undefined | SavedObjectsOpenPointInTimeResponse;
     try {
       pit = await this.soClient.openPointInTimeForType(this.savedObjectType);
+      const deleted: FileStatus = 'DELETED';
       const { aggregations } = await this.soClient.find<
         FileSavedObjectAttributes,
         { size: AggregationsSumAggregate }
       >({
         type: this.savedObjectType,
         pit,
+        filter: `NOT ${this.savedObjectType}.attributes.Status: ${deleted}`,
         aggs: {
           size: {
             sum: {
