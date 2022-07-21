@@ -34,7 +34,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { AuthenticatedUser, UserAvatarData } from '../../../common';
+import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
 import {
   canUserChangeDetails,
   canUserChangePassword,
@@ -58,7 +58,7 @@ import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR }
 export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: {
-    avatar?: UserAvatarData;
+    avatar?: UserProfileAvatarData;
   };
 }
 

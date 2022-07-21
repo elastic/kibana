@@ -21,7 +21,7 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { UserAvatarData } from '../../common';
+import type { UserProfileAvatarData } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, UserAvatar, useUserProfile } from '../components';
 
@@ -47,7 +47,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserAvatarData }>('avatar');
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';

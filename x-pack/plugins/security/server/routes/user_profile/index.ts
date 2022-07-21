@@ -6,10 +6,12 @@
  */
 
 import type { RouteDefinitionParams } from '..';
+import { defineBulkGetUserProfilesRoute } from './bulk_get';
 import { defineGetUserProfileRoute } from './get';
 import { defineUpdateUserProfileDataRoute } from './update';
 
 export function defineUserProfileRoutes(params: RouteDefinitionParams) {
   defineUpdateUserProfileDataRoute(params);
   defineGetUserProfileRoute(params);
+  defineBulkGetUserProfilesRoute(params);
 }

@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesFactory } from './check_privileges';
 import type { HasPrivilegesResponse } from './types';
 
 const application = 'kibana-our_application';
@@ -32,7 +32,7 @@ const createMockClusterClient = (response: any) => {
   return { mockClusterClient, mockScopedClusterClient };
 };
 
-describe('#atSpace', () => {
+describe('#checkPrivilegesWithRequest.atSpace', () => {
   const checkPrivilegesAtSpaceTest = async (options: {
     spaceId: string;
     kibanaPrivileges?: string | string[];
@@ -45,7 +45,7 @@ describe('#atSpace', () => {
     const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
       options.esHasPrivilegesResponse
     );
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -890,7 +890,7 @@ describe('#atSpace', () => {
         },
       },
     });
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -914,7 +914,7 @@ describe('#atSpace', () => {
   });
 });
 
-describe('#atSpaces', () => {
+describe('#checkPrivilegesWithRequest.atSpaces', () => {
   const checkPrivilegesAtSpacesTest = async (options: {
     spaceIds: string[];
     kibanaPrivileges?: string | string[];
@@ -927,7 +927,7 @@ describe('#atSpaces', () => {
     const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
       options.esHasPrivilegesResponse
     );
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -2131,7 +2131,7 @@ describe('#atSpaces', () => {
         },
       },
     });
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -2155,7 +2155,7 @@ describe('#atSpaces', () => {
   });
 });
 
-describe('#globally', () => {
+describe('#checkPrivilegesWithRequest.globally', () => {
   const checkPrivilegesGloballyTest = async (options: {
     kibanaPrivileges?: string | string[];
     elasticsearchPrivileges?: {
@@ -2167,7 +2167,7 @@ describe('#globally', () => {
     const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
       options.esHasPrivilegesResponse
     );
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -3021,7 +3021,7 @@ describe('#globally', () => {
         },
       },
     });
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
       application
@@ -3042,5 +3042,99 @@ describe('#globally', () => {
         ],
       },
     });
+  });
+});
+
+describe('#checkUserProfilesPrivileges.atSpace', () => {
+  const checkPrivilegesAtSpaceTest = async (options: {
+    spaceId: string;
+    uids: string[];
+    kibanaPrivileges: string[];
+    esHasPrivilegesResponse: Promise<{ has_privilege_uids: string[]; error_uids?: string[] }>;
+  }) => {
+    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient.asInternalUser.transport.request.mockImplementation(
+      () => options.esHasPrivilegesResponse
+    );
+
+    const { checkUserProfilesPrivileges } = checkPrivilegesFactory(
+      mockActions,
+      () => Promise.resolve(mockClusterClient),
+      application
+    );
+    const checkPrivileges = checkUserProfilesPrivileges(new Set(options.uids));
+
+    let actualResult;
+    let errorThrown = null;
+    try {
+      actualResult = await checkPrivileges.atSpace(options.spaceId, {
+        kibana: options.kibanaPrivileges,
+      });
+    } catch (err) {
+      errorThrown = err;
+    }
+
+    expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+    expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '_security/profile/_has_privileges',
+      body: {
+        uids: options.uids,
+        privileges: {
+          application: [
+            {
+              application,
+              resources: [`space:${options.spaceId}`],
+              privileges: options.kibanaPrivileges
+                ? uniq([mockActions.version, mockActions.login, ...options.kibanaPrivileges])
+                : [mockActions.version, mockActions.login],
+            },
+          ],
+        },
+      },
+    });
+
+    if (errorThrown) {
+      throw errorThrown;
+    }
+    return actualResult;
+  };
+
+  it('successfully returns results of the privilege check', async () => {
+    await expect(
+      checkPrivilegesAtSpaceTest({
+        spaceId: 'space_1',
+        uids: ['uid-1', 'uid-2', 'uid-3'],
+        kibanaPrivileges: [
+          `saved_object:${savedObjectTypes[0]}/get`,
+          `saved_object:${savedObjectTypes[1]}/get`,
+        ],
+        esHasPrivilegesResponse: Promise.resolve({
+          has_privilege_uids: ['uid-1', 'uid-2'],
+          error_uids: ['uid-3'],
+        }),
+      })
+    ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "errorUids": Array [
+            "uid-3",
+          ],
+          "hasPrivilegeUids": Array [
+            "uid-1",
+            "uid-2",
+          ],
+        }
+    `);
+  });
+
+  it(`throws if check privileges call fails`, async () => {
+    await expect(
+      checkPrivilegesAtSpaceTest({
+        spaceId: 'space_1',
+        uids: ['uid-1', 'uid-2', 'uid-3'],
+        kibanaPrivileges: [mockActions.login],
+        esHasPrivilegesResponse: Promise.reject(new Error('Oh no!')),
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Oh no!]`);
   });
 });
