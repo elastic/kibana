@@ -11,11 +11,11 @@ import { IScopedClusterClient } from '@kbn/core/server';
 export const fetchSearchResults = async (
   client: IScopedClusterClient,
   indexName: string,
-  query: string
+  query?: string
 ): Promise<SearchResponseBody> => {
   const results = await client.asCurrentUser.search({
     index: indexName,
-    q: query,
+    ...(!!query ? { q: query } : {}),
   });
   return results;
 };

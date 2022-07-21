@@ -52,7 +52,7 @@ export const Result: React.FC<ResultProps> = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="none" className={`${isChecked && 'result__selected'}`}>
+    <EuiPanel hasBorder paddingSize="s" className={`${isChecked && 'result__selected'}`}>
       <EuiFlexGroup gutterSize="none">
         {showLeftColumn && (
           <EuiFlexItem grow={false}>
@@ -81,14 +81,13 @@ export const Result: React.FC<ResultProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <ResultHeader
-                title="A very well-written title"
-                actions={actions}
-                metaData={metaData}
-              />
+              <ResultHeader title={metaData.id} actions={actions} metaData={metaData} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <ResultFields fields={isExpanded ? fields : fields.slice(0, 3)} />
+              <ResultFields
+                isExpanded={isExpanded}
+                fields={isExpanded ? fields : fields.slice(0, 3)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -96,7 +95,6 @@ export const Result: React.FC<ResultProps> = ({
           <div className="resultExpandColumn">
             <EuiToolTip position="left" content={toolTipContent}>
               <EuiButtonIcon
-                disabled={fields.length <= 3}
                 iconType={isExpanded ? 'fold' : 'unfold'}
                 color="text"
                 onClick={() => setIsExpanded(!isExpanded)}

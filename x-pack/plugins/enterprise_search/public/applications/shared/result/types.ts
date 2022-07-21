@@ -1,21 +1,30 @@
-import { IconType } from "@elastic/eui";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { IconType, IconColor } from '@elastic/eui';
 
 export interface ActionProps {
+  color?: IconColor;
   iconType?: IconType | string;
   label: string;
   onClick?: any;
-  color?: any;
 }
 
 export interface MetaDataProps {
+  clickCount: number;
+  engineId: string;
   id: string;
   lastUpdated: string;
-  engineId: string;
-  clickCount: number;
 }
 
 export interface ResultFieldProps {
-  iconType: IconType;
   fieldName: string;
+  fieldType?: any;
   fieldValue: string;
+  iconType: IconType;
+  isExpanded?: boolean;
 }

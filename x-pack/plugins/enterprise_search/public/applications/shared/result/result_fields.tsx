@@ -11,16 +11,19 @@ import { ResultFieldProps } from './types';
 
 interface Props {
   fields: ResultFieldProps[];
+  isExpanded: boolean;
 }
 
-export const ResultFields: React.FC<Props> = ({ fields }) => {
+export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
   return (
     <div className="resultFieldList">
       {fields.map((field) => (
         <ResultField
+          isExpanded={isExpanded}
           iconType={field.iconType}
           fieldName={field.fieldName}
           fieldValue={field.fieldValue}
+          fieldType={field.fieldType}
         />
       ))}
     </div>

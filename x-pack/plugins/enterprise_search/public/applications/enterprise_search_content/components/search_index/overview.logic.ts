@@ -82,7 +82,7 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     apiKey: [
       () => [selectors.apiKeyStatus, selectors.apiKeyData],
       (apiKeyStatus, apiKeyData) =>
-        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.api_key : '',
+        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.encoded : '',
     ],
     indexData: [() => [selectors.data], (data) => data],
     isLoading: [() => [selectors.status], (status) => status === Status.LOADING],
