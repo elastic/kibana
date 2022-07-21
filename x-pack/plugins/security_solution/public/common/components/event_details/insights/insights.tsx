@@ -97,7 +97,7 @@ export const Insights = React.memo<Props>(
           )}
 
           {processSessionField && processSessionField.values && (
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="related-alerts-by-session">
               <RelatedAlertsBySession
                 browserFields={browserFields}
                 data={processSessionField}
