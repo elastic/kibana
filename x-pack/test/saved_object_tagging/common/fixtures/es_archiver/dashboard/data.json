@@ -1,357 +1,248 @@
 {
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+  "id": "tag-1",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-1",
+    "description": "My first tag!",
+    "color": "#FF00FF"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "tag-2",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-2",
+    "description": "Another awesome tag",
+    "color": "#123456"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "tag-3",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-3",
+    "description": "Last but not least",
+    "color": "#000000"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 4 with real data (tag-1)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
     },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-1",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-1",
-        "description": "My first tag!",
-        "color": "#FF00FF"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"version\":\"7.3.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"gridData\":{\"w\":24,\"h\":15,\"x\":24,\"y\":0,\"i\":\"2\"},\"version\":\"7.3.0\",\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"}]",
+    "refreshInterval": {
+      "display": "Off",
+      "pause": false,
+      "value": 0
     },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-2",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-2",
-        "description": "Another awesome tag",
-        "color": "#11FF22"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
     },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "tag:tag-3",
-    "index": ".kibana",
-    "source": {
-      "tag": {
-        "name": "tag-3",
-        "description": "Last but not least",
-        "color": "#AA0077"
-      },
-      "type": "tag",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+    {
+      "id": "50643b60-3dd3-11e8-b2b9-5d5dc1715159",
+      "name": "panel_0",
+      "type": "visualization"
     },
-    "type": "doc"
-  }
+    {
+      "id": "a16d1990-3dca-11e8-8660-4d65aa086b3c",
+      "name": "panel_1",
+      "type": "search"
+    },
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
+    }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "config:6.3.0",
-    "index": ".kibana",
-    "source": {
-      "config": {
-        "buildNum": 8467,
-        "defaultIndex": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c"
-      },
-      "references": [
-      ],
-      "type": "config",
-      "updated_at": "2018-04-11T20:43:55.434Z"
+  "id": "ref-to-tag-2",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 1 (tag-2)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
     }
-  }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "dashboard:61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 4 with real data (tag-1)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[{\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"version\":\"7.3.0\",\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"gridData\":{\"w\":24,\"h\":15,\"x\":24,\"y\":0,\"i\":\"2\"},\"version\":\"7.3.0\",\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"}]",
-        "refreshInterval": {
-          "display": "Off",
-          "pause": false,
-          "value": 0
-        },
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-          "type": "index-pattern"
-        },
-        {
-          "id": "50643b60-3dd3-11e8-b2b9-5d5dc1715159",
-          "name": "panel_0",
-          "type": "visualization"
-        },
-        {
-          "id": "a16d1990-3dca-11e8-8660-4d65aa086b3c",
-          "name": "panel_1",
-          "type": "search"
-        },
-        {
-          "id": "tag-1",
-          "name": "tag-1-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
+  "id": "ref-to-tag-3",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 2 (tag-3)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
     }
-  }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "dashboard:ref-to-tag-2",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 1 (tag-2)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "tag-2",
-          "name": "tag-2-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
+  "id": "ref-to-tag-1-and-tag-3",
+  "type": "dashboard",
+  "attributes": {
+    "title": "dashboard 3 (tag-1 and tag-3)",
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
+    },
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
     }
-  }
+  ],
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "dashboard:ref-to-tag-3",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 2 (tag-3)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "tag-3",
-          "name": "tag-3-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
-    }
-  }
+  "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
+  "type": "index-pattern",
+  "attributes": {
+    "fieldFormatMap": "{\"weightLbs\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.0\"}},\"is_dog\":{\"id\":\"boolean\"},\"isDog\":{\"id\":\"boolean\"}}",
+    "fields": "[{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"animal\",\"type\":\"string\",\"count\":3,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"animal.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"name\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"name.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"sound\",\"type\":\"string\",\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"sound.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"weightLbs\",\"type\":\"number\",\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"isDog\",\"type\":\"boolean\",\"count\":0,\"scripted\":true,\"script\":\"return doc['animal.keyword'].value == 'dog'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+    "timeFieldName": "@timestamp",
+    "title": "animals-*"
+  },
+  "references": [],
+  "migrationVersion": {
+    "index-pattern": "7.6.0"
+  },
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "dashboard:ref-to-tag-1-and-tag-3",
-    "index": ".kibana",
-    "source": {
-      "dashboard": {
-        "title": "dashboard 3 (tag-1 and tag-3)",
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-        },
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[]",
-        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-        "timeRestore": true,
-        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-        "version": 1
-      },
-      "migrationVersion": {
-        "dashboard": "7.3.0"
-      },
-      "references": [
-        {
-          "id": "tag-1",
-          "name": "tag-1-ref",
-          "type": "tag"
-        },
-        {
-          "id": "tag-3",
-          "name": "tag-3-ref",
-          "type": "tag"
-        }
-      ],
-      "type": "dashboard",
-      "updated_at": "2018-04-11T21:57:52.253Z"
+  "id": "50643b60-3dd3-11e8-b2b9-5d5dc1715159",
+  "type": "visualization",
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Rendering Test: animal sounds pie",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Rendering Test: animal sounds pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"sound.keyword\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}]}"
+  },
+  "references": [
+    {
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
     }
-  }
+  ],
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }
 
 {
-  "type": "doc",
-  "value": {
-    "id": "index-pattern:a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fieldFormatMap": "{\"weightLbs\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.0\"}},\"is_dog\":{\"id\":\"boolean\"},\"isDog\":{\"id\":\"boolean\"}}",
-        "fields": "[{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"animal\",\"type\":\"string\",\"count\":3,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"animal.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"name\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"name.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"sound\",\"type\":\"string\",\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"sound.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"weightLbs\",\"type\":\"number\",\"count\":2,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"isDog\",\"type\":\"boolean\",\"count\":0,\"scripted\":true,\"script\":\"return doc['animal.keyword'].value == 'dog'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
-        "timeFieldName": "@timestamp",
-        "title": "animals-*"
-      },
-      "migrationVersion": {
-        "index-pattern": "7.6.0"
-      },
-      "references": [
-      ],
-      "type": "index-pattern",
-      "updated_at": "2018-05-09T20:55:44.314Z"
+  "id": "a16d1990-3dca-11e8-8660-4d65aa086b3c",
+  "type": "search",
+  "attributes": {
+    "columns": [
+      "animal",
+      "isDog",
+      "name",
+      "sound",
+      "weightLbs"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"weightLbs:>40\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "weightLbs",
+        "desc"
+      ]
+    ],
+    "title": "animal weights",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
     }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "visualization:50643b60-3dd3-11e8-b2b9-5d5dc1715159",
-    "index": ".kibana",
-    "source": {
-      "migrationVersion": {
-        "visualization": "7.8.0"
-      },
-      "references": [
-        {
-          "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2018-04-17T15:06:34.195Z",
-      "visualization": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "title": "Rendering Test: animal sounds pie",
-        "uiStateJSON": "{}",
-        "version": 1,
-        "visState": "{\"title\":\"Rendering Test: animal sounds pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"sound.keyword\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}]}"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "search:a16d1990-3dca-11e8-8660-4d65aa086b3c",
-    "index": ".kibana",
-    "source": {
-      "migrationVersion": {
-        "search": "7.4.0"
-      },
-      "references": [
-        {
-          "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c",
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern"
-        }
-      ],
-      "search": {
-        "columns": [
-          "animal",
-          "isDog",
-          "name",
-          "sound",
-          "weightLbs"
-        ],
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"weightLbs:>40\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "sort": [
-          [
-            "weightLbs",
-            "desc"
-          ]
-        ],
-        "title": "animal weights",
-        "version": 1
-      },
-      "type": "search",
-      "updated_at": "2018-04-11T20:55:26.317Z"
-    }
-  }
+  ],
+  "migrationVersion": {
+    "search": "7.4.0"
+  },
+  "updated_at": "2021-06-17T18:57:58.076Z"
 }

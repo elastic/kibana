@@ -53,6 +53,7 @@ import {
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -144,28 +145,22 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const pkgInfoPromise = getPackageInfo({
+      if (!options?.skipEnsureInstalled) {
+        await ensureInstalledPackage({
+          esClient,
+          spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          force: options?.force,
+        });
+      }
+
+      const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-
-      let pkgInfo: PackageInfo;
-
-      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
-      else {
-        const [, packageInfo] = await Promise.all([
-          ensureInstalledPackage({
-            esClient,
-            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-          }),
-          pkgInfoPromise,
-        ]);
-        pkgInfo = packageInfo;
-      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
@@ -380,6 +375,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
+    if (packagePolicyUpdate.is_managed && !options?.force) {
+      throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+    }
+
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
@@ -481,6 +480,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
+        }
+
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
@@ -605,7 +609,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
@@ -620,6 +624,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           packagePolicy,
           pkgVersion
         ));
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+        }
 
         await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
       } catch (error) {
@@ -839,6 +847,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      skipArchive: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '', '');

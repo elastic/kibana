@@ -6,9 +6,9 @@
  */
 
 import { has, get } from 'lodash/fp';
-import { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from './default_headers';
 

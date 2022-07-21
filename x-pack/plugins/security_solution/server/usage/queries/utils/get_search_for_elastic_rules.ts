@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsAggregationContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';

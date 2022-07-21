@@ -11,6 +11,7 @@ import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import * as Either from 'fp-ts/lib/Either';
 import type { State } from '../state';
 import type { IndexMapping } from '../../mappings';
 import type { FetchIndexResponse } from '../actions';
@@ -152,12 +153,25 @@ export function indexVersion(indexName?: string): string | undefined {
 /**
  * Creates a record of alias -> index name pairs
  */
-export function getAliases(indices: FetchIndexResponse) {
-  return Object.keys(indices).reduce((acc, index) => {
-    Object.keys(indices[index].aliases || {}).forEach((alias) => {
-      // TODO throw if multiple .kibana aliases point to the same index?
-      acc[alias] = index;
-    });
-    return acc;
-  }, {} as Record<string, string>);
+export function getAliases(
+  indices: FetchIndexResponse
+): Either.Either<
+  { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
+  Record<string, string>
+> {
+  const aliases = {} as Record<string, string>;
+  for (const index of Object.getOwnPropertyNames(indices)) {
+    for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
+      if (aliases[alias] != null) {
+        return Either.left({
+          type: 'multiple_indices_per_alias',
+          alias,
+          indices: [aliases[alias], index],
+        });
+      }
+      aliases[alias] = index;
+    }
+  }
+
+  return Either.right(aliases);
 }

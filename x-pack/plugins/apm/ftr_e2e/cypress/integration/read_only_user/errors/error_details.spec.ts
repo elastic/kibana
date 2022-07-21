@@ -71,6 +71,15 @@ describe('Error details', () => {
         cy.get('[data-test-subj="errorDistribution"]').contains('Occurrences');
       });
 
+      it('shows top erroneous transactions table', () => {
+        cy.visit(errorDetailsPageHref);
+        cy.contains('Top 5 affected transactions');
+        cy.get('[data-test-subj="topErroneousTransactionsTable"]')
+          .contains('a', 'GET /apple 🍎')
+          .click();
+        cy.url().should('include', 'opbeans-java/transactions/view');
+      });
+
       it('shows a Stacktrace and Metadata tabs', () => {
         cy.visit(errorDetailsPageHref);
         cy.contains('button', 'Exception stack trace');
@@ -87,7 +96,7 @@ describe('Error details', () => {
       });
 
       describe('when clicking on View x occurences in discover', () => {
-        it('should redirects the user to discover', () => {
+        it.skip('should redirects the user to discover', () => {
           cy.visit(errorDetailsPageHref);
           cy.contains('View 1 occurrence in Discover').click();
           cy.url().should('include', 'app/discover');

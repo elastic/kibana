@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

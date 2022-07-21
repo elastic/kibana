@@ -7,19 +7,6 @@
 
 import { RuleStatus } from '../../../types';
 
-const getEnablementFilter = (ruleStatusFilter: RuleStatus[] = []) => {
-  const enablementFilters = ruleStatusFilter.reduce<string[]>((result, filter) => {
-    if (filter === 'enabled') {
-      return [...result, 'true'];
-    }
-    if (filter === 'disabled') {
-      return [...result, 'false'];
-    }
-    return result;
-  }, []);
-  return `alert.attributes.enabled:(${enablementFilters.join(' or ')})`;
-};
-
 export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
@@ -56,20 +43,27 @@ export const mapFiltersToKql = ({
   }
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
-    const enablementFilter = getEnablementFilter(ruleStatusesFilter);
     const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)`;
-    const hasEnablement =
-      ruleStatusesFilter.includes('enabled') || ruleStatusesFilter.includes('disabled');
-    const hasSnoozed = ruleStatusesFilter.includes('snoozed');
+    const enabledFilter = `(alert.attributes.enabled: true AND NOT ${snoozedFilter})`;
+    const disabledFilter = `alert.attributes.enabled: false`;
 
-    if (hasEnablement && !hasSnoozed) {
-      filters.push(`${enablementFilter} and not ${snoozedFilter}`);
-    } else if (!hasEnablement && hasSnoozed) {
-      filters.push(snoozedFilter);
-    } else {
-      filters.push(`${enablementFilter} or ${snoozedFilter}`);
+    const result = [];
+
+    if (ruleStatusesFilter.includes('enabled')) {
+      result.push(enabledFilter);
     }
+
+    if (ruleStatusesFilter.includes('disabled')) {
+      result.push(disabledFilter);
+    }
+
+    if (ruleStatusesFilter.includes('snoozed')) {
+      result.push(`(${snoozedFilter} AND NOT ${disabledFilter})`);
+    }
+
+    filters.push(result.join(' or '));
   }
+
   if (tagsFilter && tagsFilter.length) {
     filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
   }

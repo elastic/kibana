@@ -9,22 +9,24 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { ConsoleManager } from '../../management/components/console';
-import { createStore, State } from '../store';
+import type { State } from '../store';
+import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
-import { FieldHook } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
