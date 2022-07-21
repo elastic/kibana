@@ -82,7 +82,11 @@ export type Query = {
   language: string;
 };
 
-export type AggregateQuery = { sql: string } | { esql: string };
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type AggregateQuery = {
+  sql?: string;
+  esql?: string;
+};
 
 /**
  * An interface for a latitude-longitude pair
