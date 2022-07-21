@@ -32,7 +32,7 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useAiOpsKibana();
-  const { uiSettings } = services;
+  const { uiSettings, data } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -44,6 +44,7 @@ export const useData = (
       dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {

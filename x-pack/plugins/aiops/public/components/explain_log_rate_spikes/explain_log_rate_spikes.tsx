@@ -50,6 +50,14 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView, 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
 
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+
+  useEffect(() => {
+    if (savedSearch) {
+      setCurrentSavedSearch(savedSearch);
+    }
+  }, [savedSearch]);
+
   const setSearchParams = useCallback(
     (searchParams: {
       searchQuery: Query['query'];
@@ -57,6 +65,12 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView, 
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
+
       setAiopsListState({
         ...aiopsListState,
         searchQuery: searchParams.searchQuery,
@@ -65,15 +79,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView, 
         filters: searchParams.filters,
       });
     },
-    [aiopsListState, setAiopsListState]
+    [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const { docStats, timefilter, earliest, latest, searchQueryLanguage, searchString, searchQuery } =
-    useData(
-      { currentDataView: dataView, currentSavedSearch: savedSearch },
-      aiopsListState,
-      setGlobalState
-    );
+    useData({ currentDataView: dataView, currentSavedSearch }, aiopsListState, setGlobalState);
 
   useEffect(() => {
     return () => {
