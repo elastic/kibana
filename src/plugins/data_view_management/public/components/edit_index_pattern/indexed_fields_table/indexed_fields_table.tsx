@@ -43,14 +43,23 @@ export class IndexedFieldsTable extends Component<
     super(props);
 
     this.state = {
-      fields: [...this.mapCompositeRuntimeFields(), ...this.mapFields(this.props.fields)],
+      fields: [
+        ...this.mapCompositeRuntimeFields(this.props.compositeRuntimeFields),
+        ...this.mapFields(this.props.fields),
+      ],
     };
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: IndexedFieldsTableProps) {
-    if (nextProps.fields !== this.props.fields) {
+    if (
+      nextProps.fields !== this.props.fields ||
+      nextProps.compositeRuntimeFields !== this.props.compositeRuntimeFields
+    ) {
       this.setState({
-        fields: [...this.mapCompositeRuntimeFields(), ...this.mapFields(nextProps.fields)],
+        fields: [
+          ...this.mapCompositeRuntimeFields(nextProps.compositeRuntimeFields),
+          ...this.mapFields(nextProps.fields),
+        ],
       });
     }
   }
@@ -58,7 +67,8 @@ export class IndexedFieldsTable extends Component<
   mapFields(fields: DataViewField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters && indexPattern.sourceFilters.map((f) => f.value);
+      indexPattern.sourceFilters &&
+      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (
@@ -81,31 +91,31 @@ export class IndexedFieldsTable extends Component<
     );
   }
 
-  mapCompositeRuntimeFields(): IndexedFieldItem[] {
+  mapCompositeRuntimeFields(
+    compositeRuntimeFields: Record<string, RuntimeField>
+  ): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, userEditPermission } = this.props;
     const sourceFilters =
       indexPattern.sourceFilters &&
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
-    // return Object.entries(indexPattern.getAllRuntimeFields()).map(([name, fld]) => {
-    return Object.entries(this.props.compositeRuntimeFields).map(([name, fld]) => {
+    return Object.entries(compositeRuntimeFields).map(([name, fld]) => {
       return {
         spec: {
           searchable: false,
           aggregatable: false,
           name,
-          type: '',
+          type: 'composite',
           runtimeField: {
             type: 'composite',
             script: fld.script,
           },
         },
         name,
-        type: '',
+        type: 'composite',
         kbnType: '',
         displayName: name,
-        // format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
         excluded: fieldWildcardMatch ? fieldWildcardMatch(name) : false,
         info: [],
         isMapped: false,
@@ -174,7 +184,6 @@ export class IndexedFieldsTable extends Component<
   render() {
     const { indexPattern } = this.props;
     const fields = this.getFilteredFields(this.state, this.props);
-
     return (
       <div>
         <Table

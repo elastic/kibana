@@ -35,7 +35,7 @@ import { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
   (!field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite') ||
-  (field.runtimeField?.type === 'composite' && !field.type);
+  (field.runtimeField?.type === 'composite' && field.type === 'composite');
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(

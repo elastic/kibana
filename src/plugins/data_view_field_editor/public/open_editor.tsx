@@ -105,6 +105,7 @@ export const getFieldEditorOpener =
       };
 
       // todo this is sloppy
+      // todo types
       const dataViewField = fieldName
         ? dataView.getFieldByName(fieldName) || getRuntimeField(fieldName)
         : undefined;
@@ -137,6 +138,7 @@ export const getFieldEditorOpener =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
       let field: Field | undefined;
+      console.log('HERE HERE');
       if (dataViewField) {
         if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
           // We are editing a composite runtime **subField**.
@@ -160,6 +162,8 @@ export const getFieldEditorOpener =
             customLabel: dataViewField.customLabel,
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldName!)?.toJSON(),
+            parentName: dataViewField.spec.parentName,
+            // parent: dataViewField.runtimeField?.parent,
           };
         }
       }

@@ -178,11 +178,12 @@ export const FieldEditorFlyoutContentContainer = ({
       setIsSaving(true);
 
       try {
+        const editedFields: DataViewField[] =
+          fieldTypeToProcess === 'runtime'
+            ? updateRuntimeField(updatedField)
+            : updateConcreteField(updatedField as Field);
+
         const afterSave = () => {
-          const editedFields: DataViewField[] =
-            fieldTypeToProcess === 'runtime'
-              ? updateRuntimeField(updatedField)
-              : updateConcreteField(updatedField as Field);
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },

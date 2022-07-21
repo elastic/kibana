@@ -413,6 +413,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Is this field in the mapping? False if a scripted or runtime field defined on the data view.
    */
   isMapped?: boolean;
+  /**
+   * Name of parent field for composite runtime field subfields.
+   */
+  parentName?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

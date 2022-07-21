@@ -9,13 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
   Form,
@@ -39,6 +33,7 @@ import { getNameFieldConfig } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
+import { TypeSelection } from './types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -46,8 +41,6 @@ export interface FieldEditorFormState {
   isSubmitting: boolean;
   submit: FormHook<Field>['submit'];
 }
-
-type TypeSelection = Array<EuiComboBoxOptionOption<RuntimeType>>;
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
   fields?: Array<{ name: string; type: TypeSelection }>;
@@ -86,13 +79,15 @@ const formDeserializer = (field: Field): FieldFormInternal => {
   const fieldType = fieldTypeToComboBoxOption(field.type);
 
   const format = field.format === null ? undefined : field.format;
-  // console.log('DESERIALIZER', field.fields);
+
+  console.log('DESERIALIZER', fieldType);
+  console.log('DESERIALIZER', field.fields);
   return {
     ...field,
     type: fieldType,
     format,
     fields: field.fields
-      ? Object.entries(field.fields).reduce<Array<{ name: string; type: RuntimePrimitiveTypes }>>(
+      ? Object.entries(field.fields).reduce<Array<{ name: string; type: TypeSelection }>>(
           (col, [key, val]) => {
             col.push({ name: key, type: fieldTypeToComboBoxOption(val.type) });
             return col;
@@ -111,6 +106,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
 const formSerializer = (field: FieldFormInternal): Field => {
   const { __meta__, type, format, fields, ...rest } = field;
+  console.log('SERIALIZER', field);
 
   return {
     type: type && type[0].value!,
@@ -118,10 +114,13 @@ const formSerializer = (field: FieldFormInternal): Field => {
     // format if there is one defined for the field.
     format: format === undefined ? null : format,
     fields: fields
-      ? fields.reduce<Record<string, RuntimeFieldSubField>>((acc, { name, type: subfieldType }) => {
-          acc[name] = { type: subfieldType[0].value as RuntimePrimitiveTypes };
-          return acc;
-        }, {})
+      ? fields.reduce<Record<string, RuntimeFieldSubField>>(
+          (acc, { name, type: subfieldType = [{}] }) => {
+            acc[name] = { type: (subfieldType[0].value || 'keyword') as RuntimePrimitiveTypes };
+            return acc;
+          },
+          {}
+        )
       : undefined,
     ...rest,
   };
@@ -133,6 +132,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
+    fields,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -162,10 +162,15 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     format: updatedFormat,
   } = formData;
   const { name: nameField, type: typeField } = getFields();
+  // todo how to do this for composite fields?
   const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
+  // const isRuntimeSubfield = field?.script.
+  // form.setFieldValue('fields', [{ name: 'a', value: [{ label: 'keyword', type: 'keyword' }] }]);
+  // form.setFieldValue('fields', { a: { type: 'keyword' } });
+  // console.log('RENDER FORM', form.getFields());
 
   useEffect(() => {
     if (onChange) {
@@ -189,7 +194,10 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     if (onFormModifiedChange) {
       onFormModifiedChange(isFormModified);
     }
-  }, [isFormModified, onFormModifiedChange]);
+  }, [isFormModified, onFormModifiedChange, form]);
+
+  const formDataBest = form.getFormData();
+  console.log(formDataBest);
 
   return (
     <Form
@@ -227,7 +235,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       {(nameHasChanged || typeHasChanged) && (
         <>
           <EuiSpacer size="xs" />
@@ -240,9 +247,19 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           />
         </>
       )}
-
       <EuiSpacer size="xl" />
-
+      {field?.parentName && (
+        <>
+          <EuiCallOut
+            iconType="iInCircle"
+            title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
+              defaultMessage: "Field value is defined by '{parentName}'",
+              values: { parentName: field?.parentName },
+            })}
+          />
+          <EuiSpacer size="xl" />
+        </>
+      )}
       {updatedType && updatedType[0].value !== 'composite' ? <FieldDetail /> : <CompositeEditor />}
     </Form>
   );

@@ -49,6 +49,7 @@ export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field extends RuntimeField {
   name: string;
+  parentName?: string;
 }
 
 export interface FieldFormatConfig {

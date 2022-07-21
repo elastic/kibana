@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
-import { pickBy } from 'lodash';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFilterButton,
@@ -30,6 +29,7 @@ import {
   DataViewField,
   DataViewsPublicPluginStart,
   META_FIELDS,
+  RuntimeField,
 } from '@kbn/data-views-plugin/public';
 import {
   SavedObjectRelation,
@@ -58,6 +58,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   refreshFields: () => void;
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  compositeRuntimeFields: Record<string, RuntimeField>;
 }
 
 interface FilterItems {
@@ -145,6 +146,7 @@ export function Tabs({
   refreshFields,
   relationships,
   allowedTypes,
+  compositeRuntimeFields,
 }: TabsProps) {
   const {
     uiSettings,
@@ -184,11 +186,6 @@ export function Tabs({
   ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
-
-  const compositeRuntimeFields = useMemo(
-    () => pickBy(indexPattern.getAllRuntimeFields(), (fld) => fld.type === 'composite'),
-    [indexPattern]
-  );
 
   const updateFilterItem = (
     items: FilterItems[],

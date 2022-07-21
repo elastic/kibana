@@ -27,6 +27,7 @@ export {
 export type {
   FieldFormatMap,
   RuntimeType,
+  RuntimePrimitiveTypes,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,

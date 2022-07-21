@@ -19,9 +19,15 @@ interface Props {
   isDisabled?: boolean;
   includeComposite?: boolean;
   path: string;
+  defaultValue?: TypeSelection;
 }
 
-export const TypeField = ({ isDisabled = false, includeComposite, path }: Props) => {
+export const TypeField = ({
+  isDisabled = false,
+  includeComposite,
+  path,
+  defaultValue = { label: 'Keyword', value: 'keyword' },
+}: Props) => {
   return (
     <UseField<TypeSelection> path={path}>
       {({ label, value, setValue }) => {
@@ -40,7 +46,7 @@ export const TypeField = ({ isDisabled = false, includeComposite, path }: Props)
                 )}
                 singleSelection={{ asPlainText: true }}
                 options={includeComposite ? RUNTIME_FIELD_OPTIONS : RUNTIME_FIELD_OPTIONS_PRIMITIVE}
-                selectedOptions={value}
+                selectedOptions={value || [defaultValue]}
                 onChange={(newValue) => {
                   if (newValue.length === 0) {
                     // Don't allow clearing the type. One must always be selected
