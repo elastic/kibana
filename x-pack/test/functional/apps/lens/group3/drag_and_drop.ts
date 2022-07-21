@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const xyChartContainer = 'xyVisChart';
 
-  describe('lens drag and drop tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/136797
+  describe.skip('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
       it('should construct the basic split xy chart', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
