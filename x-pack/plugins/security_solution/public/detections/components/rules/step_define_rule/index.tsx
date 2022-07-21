@@ -183,6 +183,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
+  const [dataViewTitle, setDataViewTitle] = useState<string>();
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -272,6 +273,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       const fetchDataView = async () => {
         if (dataView != null) {
           const dv = await data.dataViews.get(dataView);
+          setDataViewTitle(dv.title);
           setIndexPattern(dv);
         }
       };
@@ -650,12 +652,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
-  let dataForDescription: Partial<DefineStepRule> = initialState;
+  let dataForDescription: Partial<DefineStepRule> = { ...initialState };
 
   if (dataSourceType === DataSourceType.IndexPatterns) {
     dataForDescription = omit(initialState, ['dataSourceType', 'dataViewId']);
   } else if (dataSourceType === DataSourceType.DataView) {
     dataForDescription = omit(initialState, ['dataSourceType', 'index']);
+    dataForDescription.dataViewTitle = dataViewTitle;
   }
 
   return isReadOnlyView ? (
