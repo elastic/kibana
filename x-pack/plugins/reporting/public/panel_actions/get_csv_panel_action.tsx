@@ -99,13 +99,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     const { embeddable } = context;
 
+    if (embeddable.type !== 'search') {
+      return false;
+    }
+
     const savedSearch = embeddable.getSavedSearch();
     const query = savedSearch.searchSource.getField('query');
 
     if (query && isOfAggregateQueryType(query)) {
+      // hide exporting CSV for SQL
       return false;
     }
-    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
+    return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 
   public execute = async (context: ActionContext) => {
