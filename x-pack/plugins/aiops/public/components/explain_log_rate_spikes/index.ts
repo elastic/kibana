@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export type { ExplainLogRateSpikesWrapperProps } from './explain_log_rate_spikes_wrapper';
-import { ExplainLogRateSpikesWrapper } from './explain_log_rate_spikes_wrapper';
+export type { ExplainLogRateSpikesAppStateProps } from './explain_log_rate_spikes_app_state';
+import { ExplainLogRateSpikesAppState } from './explain_log_rate_spikes_app_state';
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default ExplainLogRateSpikesWrapper;
+export default ExplainLogRateSpikesAppState;

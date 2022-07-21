@@ -18,37 +18,33 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, Query } from '@kbn/es-query';
 
 import { useAiOpsKibana } from '../../kibana_context';
-import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { ApiExplainLogRateSpikes } from '../../../common/api';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
-import { SpikeAnalysisTable } from '../spike_analysis_table';
-import { restorableDefaults } from './explain_log_rate_spikes_wrapper';
+import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
 
+import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+
 /**
  * ExplainLogRateSpikes props require a data view.
  */
-interface ExplainLogRateSpikesProps {
+interface ExplainLogRateSpikesPageProps {
   /** The data view to analyze. */
   dataView: DataView;
 }
 
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
+export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ dataView }) => {
   const { services } = useAiOpsKibana();
-  const { http, data: dataService } = services;
-  const basePath = http?.basePath.get() ?? '';
+  const { data: dataService } = services;
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -134,31 +130,6 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const { cancel, start, data, isRunning, error } = useFetchStream<
-    ApiExplainLogRateSpikes,
-    typeof basePath
-  >(
-    `${basePath}/internal/aiops/explain_log_rate_spikes`,
-    {
-      // @ts-ignore unexpected type
-      start: earliest,
-      // @ts-ignore unexpected type
-      end: latest,
-      // TODO Consider an optional Kuery.
-      kuery: '',
-      // TODO Handle data view without time fields.
-      timeFieldName: dataView.timeFieldName ?? '',
-      index: dataView.title,
-      ...windowParameters,
-    },
-    { reducer: streamReducer, initialState }
-  );
-
-  useEffect(() => {
-    start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
       <EuiFlexGroup gutterSize="m">
@@ -223,23 +194,15 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
           <EuiSpacer size="m" />
           {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
             <EuiFlexItem>
-              <ProgressControls
-                progress={data.loaded}
-                progressMessage={data.loadingState ?? ''}
-                isRunning={isRunning}
-                onRefresh={start}
-                onCancel={cancel}
+              <ExplainLogRateSpikesAnalysis
+                dataView={dataView}
+                earliest={earliest}
+                latest={latest}
+                windowParameters={windowParameters}
+                setPinnedChangePoint={setPinnedChangePoint}
+                setSelectedChangePoint={setSelectedChangePoint}
+                selectedChangePoint={currentSelectedChangePoint}
               />
-              {data?.changePoints ? (
-                <SpikeAnalysisTable
-                  changePoints={data.changePoints}
-                  loading={isRunning}
-                  error={error}
-                  setPinnedChangePoint={setPinnedChangePoint}
-                  setSelectedChangePoint={setSelectedChangePoint}
-                  selectedChangePoint={selectedChangePoint}
-                />
-              ) : null}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
