@@ -60,6 +60,14 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         esTypes: field.esTypes,
         scripted: field.scripted,
         runtime: Boolean(field.runtimeField),
+        softRestrictions: field.esTypes?.includes('aggregate_metric_double')
+          ? {
+              percentile: true,
+              percentile_rank: true,
+              median: true,
+              last_value: true,
+            }
+          : undefined,
       };
 
       // Simplifies tests by hiding optional properties instead of undefined
@@ -85,7 +93,10 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         }
       });
       if (Object.keys(restrictionsObj).length) {
-        newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
+        newFields[index] = {
+          ...field,
+          aggregationRestrictions: { ...(field.aggregationRestrictions || {}), ...restrictionsObj },
+        };
       }
     });
   }

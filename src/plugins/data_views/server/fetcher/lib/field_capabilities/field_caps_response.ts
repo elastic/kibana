@@ -80,6 +80,7 @@ export function readFieldCapsResponse(
     (agg, fieldName) => {
       const capsByType = capsByNameThenType[fieldName];
       const types = Object.keys(capsByType);
+      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
 
       // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
       const isSearchable = types.some((type) => {
@@ -124,11 +125,19 @@ export function readFieldCapsResponse(
         return agg;
       }
 
+      const esTypes = [...types];
+      if (timeSeriesMetricProp.includes('gauge')) {
+        esTypes.push('gauge');
+      }
+      if (timeSeriesMetricProp.includes('counter')) {
+        esTypes.push('counter');
+      }
+
       const esType = types[0];
       const field = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
-        esTypes: types,
+        esTypes,
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

@@ -80,7 +80,11 @@ export const percentileOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
+    if (
+      supportedFieldTypes.includes(fieldType) &&
+      aggregatable &&
+      (!aggregationRestrictions || aggregationRestrictions.percentiles)
+    ) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -95,7 +99,7 @@ export const percentileOperation: OperationDefinition<
       newField &&
         supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
-        !newField.aggregationRestrictions
+        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
