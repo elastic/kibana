@@ -72,11 +72,6 @@ interface Props {
   isReadOnly?: boolean;
 }
 
-export const Indent = styled.div`
-  padding: 0 8px;
-  word-break: break-word;
-`;
-
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   display: flex;
   flex: 1;
