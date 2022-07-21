@@ -1,6 +1,7 @@
 # Assert that our modified test(s) actually ran in CI
 
-It'd be nice if ci told us if our tests actually ran
+As a feature developer it'd be nice if ci told me if 
+my own tests actually ran...the tests I modified in my pr.
 
 First we need to run this check on a completed ci run.
 Probably means running this within `.buildkite/scripts/lifecycle/post_build.sh`
