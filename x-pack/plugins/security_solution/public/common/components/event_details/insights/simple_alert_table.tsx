@@ -34,6 +34,7 @@ const columns: Array<EuiBasicTableColumn<Record<string, string[]>>> = [
   },
 ];
 
+/** 10 alert rows in this table has been deemed a balanced amount for the flyout */
 const alertLimit = 10;
 
 /**

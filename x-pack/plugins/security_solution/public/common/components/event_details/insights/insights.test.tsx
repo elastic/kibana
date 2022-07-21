@@ -59,7 +59,12 @@ describe('Insights', () => {
   });
 
   it('renders when there is at least one insight element to show', () => {
+    // One of the insights modules is the module showing related cases.
+    // It will show for all users that are able to read case data.
+    // Enabling that permission, will show the case insight module which
+    // is necessary to pass this test.
     mockUseGetUserCasesPermissions.mockReturnValue(readCasesPermissions());
+
     render(
       <TestProviders>
         <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />

@@ -63,7 +63,7 @@ describe('Alert Flyout', () => {
       });
   });
 
-  it('Opens a new timeline investigation (from an insighrs module)', () => {
+  it('Opens a new timeline investigation (from an insights module)', () => {
     openOverview();
 
     cy.get(INSIGHTS_RELATED_ALERTS_BY_SESSION)
