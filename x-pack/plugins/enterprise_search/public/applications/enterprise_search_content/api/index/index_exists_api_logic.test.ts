@@ -9,21 +9,21 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { fetchIndex } from './fetch_index_api_logic';
+import { fetchIndexExists } from './index_exists_api_logic';
 
-describe('generateConnectorApiKeyApiLogic', () => {
+describe('IndexExistsApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('generateApiKey', () => {
+  describe('indexExists', () => {
     it('calls correct api', async () => {
-      const promise = Promise.resolve('result');
+      const promise = Promise.resolve({ exists: true });
       http.get.mockReturnValue(promise);
-      const result = fetchIndex({ indexName: 'indexName' });
+      const result = fetchIndexExists({ indexName: 'indexName' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName');
-      await expect(result).resolves.toEqual('result');
+      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName/exists');
+      await expect(result).resolves.toEqual({ exists: true, indexName: 'indexName' });
     });
   });
 });
