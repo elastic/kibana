@@ -116,7 +116,7 @@ const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
 );
 
 const API_KEY_DISCLAIMER = i18n.translate(
-  'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
+  'xpack.synthetics.monitorManagement.getAPIKeyLabel.disclaimer',
   {
     defaultMessage:
       'Please note: In order to use push monitors using private testing locations, you must generate this API key with a user who has Fleet and Integrations write permissions.',
