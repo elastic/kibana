@@ -301,7 +301,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     lineNumbers: showLineNumbers ? 'on' : 'off',
     theme: 'vs',
     lineDecorationsWidth: 12,
-    accessibilitySupport: 'off',
+    accessibilitySupport: 'on',
     autoIndent: 'none',
     wrappingIndent: 'none',
     lineNumbersMinChars: 3,

@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { AggregateQuery } from '../../query';
 import { EssqlExpressionFunctionDefinition } from './essql';
 
-export const aggregateQueryToAst = (query: AggregateQuery, timeField?: string) => {
+export const aggregateQueryToAst = (
+  query: AggregateQuery,
+  timeField?: string
+): undefined | ExpressionAstFunction => {
   if (query.sql) {
     return buildExpressionFunction<EssqlExpressionFunctionDefinition>('essql', {
       query: query.sql,
