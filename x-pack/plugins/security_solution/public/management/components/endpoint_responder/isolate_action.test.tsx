@@ -13,7 +13,7 @@ import {
 } from '../console/components/console_manager/mocks';
 import React from 'react';
 import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { responseActionsHttpMocks, getDeferred } from '../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 
@@ -116,6 +116,27 @@ describe('When using isolate action from response actions console', () => {
       expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
         /error one \| error two/
       );
+    });
+  });
+
+  it('should continue to check status when console is closed too soon on a slow network', async () => {
+    const deferrable = getDeferred();
+    apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
+    await render();
+
+    // enter command
+    enterConsoleCommand(renderResult, 'isolate');
+    // hide console
+    await consoleManagerMockAccess.hideOpenedConsole();
+    // should have created action request
+    expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    deferrable.resolve();
+
+    // open console
+    await consoleManagerMockAccess.openRunningConsole();
+    // status should be updating
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
     });
   });
 
