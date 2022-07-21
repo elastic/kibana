@@ -199,8 +199,8 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
                 earliest={earliest}
                 latest={latest}
                 windowParameters={windowParameters}
-                setPinnedChangePoint={setPinnedChangePoint}
-                setSelectedChangePoint={setSelectedChangePoint}
+                onPinnedChangePoint={setPinnedChangePoint}
+                onSelectedChangePoint={setSelectedChangePoint}
                 selectedChangePoint={currentSelectedChangePoint}
               />
             </EuiFlexItem>

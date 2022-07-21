@@ -30,8 +30,8 @@ interface ExplainLogRateSpikesAnalysisProps {
   latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
-  setPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  setSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
 }
 
@@ -40,8 +40,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   earliest,
   latest,
   windowParameters,
-  setPinnedChangePoint,
-  setSelectedChangePoint,
+  onPinnedChangePoint,
+  onSelectedChangePoint,
   selectedChangePoint,
 }) => {
   const { services } = useAiOpsKibana();
@@ -84,8 +84,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           changePoints={data.changePoints}
           loading={isRunning}
           error={error}
-          setPinnedChangePoint={setPinnedChangePoint}
-          setSelectedChangePoint={setSelectedChangePoint}
+          onPinnedChangePoint={onPinnedChangePoint}
+          onSelectedChangePoint={onSelectedChangePoint}
           selectedChangePoint={selectedChangePoint}
         />
       ) : null}

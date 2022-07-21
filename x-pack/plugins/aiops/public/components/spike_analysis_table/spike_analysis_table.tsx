@@ -23,8 +23,8 @@ interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
   error?: string;
   loading: boolean;
-  setPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
-  setSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
   selectedChangePoint?: ChangePoint;
 }
 
@@ -32,8 +32,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
   error,
   loading,
-  setPinnedChangePoint,
-  setSelectedChangePoint,
+  onPinnedChangePoint,
+  onSelectedChangePoint,
   selectedChangePoint,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -143,18 +143,18 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       rowProps={(changePoint) => {
         return {
           onClick: () => {
-            if (setPinnedChangePoint) {
-              setPinnedChangePoint(changePoint);
+            if (onPinnedChangePoint) {
+              onPinnedChangePoint(changePoint);
             }
           },
           onMouseEnter: () => {
-            if (setSelectedChangePoint) {
-              setSelectedChangePoint(changePoint);
+            if (onSelectedChangePoint) {
+              onSelectedChangePoint(changePoint);
             }
           },
           onMouseLeave: () => {
-            if (setSelectedChangePoint) {
-              setSelectedChangePoint(null);
+            if (onSelectedChangePoint) {
+              onSelectedChangePoint(null);
             }
           },
           style:
