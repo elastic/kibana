@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { ListClient } from '@kbn/lists-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { mergeWith, isArray } from 'lodash';
 
 import { createThreatEnrichments } from './threat_indicators';
 import type { SignalSourceHit } from '../types';
-import { BuildRuleMessage } from '../rule_messages';
+import type { BuildRuleMessage } from '../rule_messages';
 
 export const enrichEvents = async ({
   services,
