@@ -119,10 +119,11 @@ export class ContentStream extends Duplex {
         {
           id,
           index: this.index,
+          _source_includes: ['data', 'last'],
         },
         {
+          asStream: true, // This tells the ES client to not process the response body in any way.
           headers: { accept: 'application/cbor' },
-          asStream: true,
         }
       );
 
