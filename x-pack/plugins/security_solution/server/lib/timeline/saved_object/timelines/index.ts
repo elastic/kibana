@@ -717,7 +717,7 @@ export const getSelectedTimelines = async (
 
   const savedObjects = await Promise.resolve(
     savedObjectsClient.bulkGet<TimelineWithoutExternalRefs>(
-      exportedIds?.reduce(
+      (exportedIds ?? []).reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
       )
