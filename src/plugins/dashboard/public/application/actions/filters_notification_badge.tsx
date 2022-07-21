@@ -10,13 +10,19 @@ import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isFilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { KibanaThemeProvider, reactToUiComponent, toMountPoint } from '../../services/kibana_react';
+
+import { toMountPoint } from '../../services/kibana_react';
 import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 
 import { FiltersNotificationModal } from './filters_notification_modal';
-import { EuiBadge } from '@elastic/eui';
-// import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { DashboardContainer } from '../embeddable';
+// import { EuiBadge } from '@elastic/eui';
+// // import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -34,7 +40,11 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   private icon = 'filter';
 
-  constructor(private theme: CoreStart['theme'], private overlays: OverlayStart) {}
+  constructor(
+    private theme: CoreStart['theme'],
+    private overlays: OverlayStart,
+    private data: DataPublicPluginStart
+  ) {}
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -66,12 +76,34 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   // public execute = async () => {};
   public execute = async (context: FiltersNotificationActionContext) => {
+    // console.log('EXECUTE');
     const { embeddable } = context;
     const isCompatible = await this.isCompatible({ embeddable });
-    if (!isCompatible) {
+    if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
-    console.log('here in execute');
+    const filters = embeddable.getFilters() ?? [];
+    const dataViewList: DataView[] =
+      (embeddable.parent as DashboardContainer)?.getAllDataViews() ?? [];
+    const filterPills = <FilterItems filters={filters} indexPatterns={dataViewList} />;
+    // console.log('filterpills', filterPills);
+    // const filterPills = filters.map((filter: Filter) => {
+    //   console.log('filter:', filter);
+    //   return (
+    //     <FilterItem
+    //       id={embeddable.id}
+    //       filter={filter}
+    //       indexPatterns={dataViewList}
+    //       onUpdate={() => {}}
+    //       onRemove={() => {}}
+    //     />
+    //   );
+
+    //   // const valueLabel = getDisplayValueFromFilter(filter, dataViewList);
+    //   // const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViewList);
+    //   // console.log('value label:', valueLabel);
+    //   // console.log('fiELD label:', fieldLabel);
+    // });
 
     const session = this.overlays.openModal(
       toMountPoint(
@@ -81,6 +113,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
           icon={this.getIconType({ embeddable })}
           id={this.id}
           closeModal={() => session.close()}
+          contents={filterPills}
         />,
         { theme$: this.theme.theme$ }
       ),
@@ -89,6 +122,24 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
         'data-test-subj': 'copyToDashboardPanel',
       }
     );
+
+    // const session = this.overlays.openModal(
+    //   toMountPoint(
+    //     <FiltersNotificationModal
+    //       displayName={this.displayName}
+    //       context={context}
+    //       icon={this.getIconType({ embeddable })}
+    //       id={this.id}
+    //       closeModal={() => session.close()}
+    //       dataViews={this.data.dataViews}
+    //     />,
+    //     { theme$: this.theme.theme$ }
+    //   ),
+    //   {
+    //     maxWidth: 400,
+    //     'data-test-subj': 'copyToDashboardPanel',
+    //   }
+    // );
 
     // Only here for typescript
     // const { embeddable } = context;

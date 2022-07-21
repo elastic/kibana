@@ -8,29 +8,21 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFocusTrap,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOutsideClickDetector,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { FiltersNotificationActionContext, UnlinkFromLibraryAction } from '.';
-import { dashboardLibraryNotification } from '../../dashboard_strings';
-
+import { FiltersNotificationActionContext } from './filters_notification_badge';
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
   displayName: string;
   icon: string;
   id: string;
   closeModal: () => void;
+  contents: JSX.Element;
 }
 
 export function FiltersNotificationModal({
@@ -39,12 +31,21 @@ export function FiltersNotificationModal({
   icon,
   id,
   closeModal,
+  contents,
 }: FiltersNotificationProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { embeddable } = context;
 
+  // const getLabel = (filter: Filter) => {
+  //   const valueLabel = getDisplayValueFromFilter(filter, [await dataViews.getDefaultDataView()]);
+  //   const fieldLabel = getFieldDisplayValueFromFilter(filter, this.props.indexPatterns);
+  //   return <FilterLabel filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+  // };
+
   const panelFilters = useMemo(() => {
-    return JSON.stringify(embeddable.getFilters());
+    if (!isFilterableEmbeddable(embeddable)) return;
+    const filters = embeddable.getFilters() ?? [];
+    return JSON.stringify(filters);
   }, [embeddable]);
 
   return (
@@ -60,7 +61,7 @@ export function FiltersNotificationModal({
           <EuiModalBody>
             <>
               <EuiText>
-                <p id={'panelIdd'}>{panelFilters}</p>
+                <p id={'panelIdd'}>{contents}</p>
               </EuiText>
             </>
           </EuiModalBody>

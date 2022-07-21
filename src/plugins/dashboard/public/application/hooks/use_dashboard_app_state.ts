@@ -259,6 +259,7 @@ export const useDashboardAppState = ({
           if (newDataViews.length > 0 && newDataViews[0].id) {
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
           }
+          dashboardContainer.setAllDataViews(newDataViews);
           setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
         },
       });

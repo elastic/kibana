@@ -14,7 +14,8 @@ import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
+
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, Query } from '../../services/data';
 import {
@@ -104,6 +105,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
+
+  private allDataViews: DataView[] = [];
+
+  public getAllDataViews = () => {
+    return this.allDataViews;
+  };
+
+  public setAllDataViews = (newDataViews: DataView[]) => {
+    this.allDataViews = newDataViews;
+  };
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
