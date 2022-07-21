@@ -142,7 +142,9 @@ describe('Custom query rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS).should('have.text', '1 alert');
+      cy.get(NUMBER_OF_ALERTS)
+        .invoke('text')
+        .should('match', /^[1-9].+$/);
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
     });
   });
