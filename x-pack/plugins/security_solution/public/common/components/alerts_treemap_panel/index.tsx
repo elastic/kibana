@@ -149,10 +149,11 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   return (
     <InspectButtonContainer>
       <KpiPanel
+        className="eui-yScroll"
         data-test-subj="treemapPanel"
         hasBorder
         height={isPanelExpanded ? height : COLLAPSED_HEIGHT}
-        $overflowY="auto"
+        $overflowY={isPanelExpanded ? 'auto' : 'hidden'}
         $toggleStatus
       >
         <HeaderSection
