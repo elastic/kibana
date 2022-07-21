@@ -249,7 +249,7 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
-  const fetchResults = useCallback(() => {
+  const getResultColumns = useCallback(() => {
     if (documentState.result?.length) {
       const firstRow = documentState.result[0];
       const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
@@ -263,12 +263,12 @@ export function useDiscoverState({
 
   useEffect(() => {
     async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query)) {
-        const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
+      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
         const idsTitles = await indexPatterns.getIdsWithTitle();
-        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
+        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
         if (dataViewObj) {
-          const columns = fetchResults();
+          const columns = getResultColumns();
           if (columns.length) {
             setDocumentStateCols(columns);
           }

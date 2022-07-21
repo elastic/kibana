@@ -15,8 +15,10 @@ export function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
 // Checks if the query is of type AggregateQuery
 // currently only supports the sql query type
 // should be enhanced to support other query types
-export function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
+export function isOfAggregateQueryType(
+  query: AggregateQuery | Query | { [key: string]: any }
+): query is AggregateQuery {
+  return Boolean(query && ('sql' in query || 'esql' in query));
 }
 
 // returns the language of the aggregate Query, sql, esql etc

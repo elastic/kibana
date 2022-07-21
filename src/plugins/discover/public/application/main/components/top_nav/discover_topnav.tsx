@@ -176,9 +176,9 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-  const SQLModeIsEnabled = uiSettings.get(ENABLE_SQL);
+  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
   const supportedTextBasedLanguages = [];
-  if (SQLModeIsEnabled) {
+  if (isSQLModeEnabled) {
     supportedTextBasedLanguages.push('SQL');
   }
   const dataViewPickerProps = {

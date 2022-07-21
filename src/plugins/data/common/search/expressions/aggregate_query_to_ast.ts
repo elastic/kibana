@@ -14,7 +14,7 @@ export const aggregateQueryToAst = (
   query: AggregateQuery,
   timeField?: string
 ): undefined | ExpressionAstFunction => {
-  if (query.sql) {
+  if ('sql' in query) {
     return buildExpressionFunction<EssqlExpressionFunctionDefinition>('essql', {
       query: query.sql,
       timeField,
