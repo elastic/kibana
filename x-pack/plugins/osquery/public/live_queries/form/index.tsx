@@ -532,7 +532,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               </EuiFlexItem>
               {submitButtonContent}
               <EuiSpacer />
-              {(liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries) && (
+              {(liveQueryDetails?.queries?.length ||
+                selectedPackData?.attributes?.queries?.length) && (
                 <>
                   <EuiFlexItem>
                     <PackQueriesStatusTable
