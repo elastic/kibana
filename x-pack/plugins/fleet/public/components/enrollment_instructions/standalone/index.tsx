@@ -5,42 +5,31 @@
  * 2.0.
  */
 import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
-import type { K8sMode } from '../../agent_enrollment_flyout/types';
 
-export const StandaloneInstructions = (
-  kibanaVersion: string,
-  isK8s?: K8sMode
-): CommandsByPlatform => {
-  const KUBERNETES_RUN_INSTRUCTIONS = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
-
-  const STANDALONE_RUN_INSTRUCTIONS_LINUX = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-cd elastic-agent-${kibanaVersion}-linux-x86_64
-sudo ./elastic-agent install`;
-
-  const STANDALONE_RUN_INSTRUCTIONS_MAC = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-cd elastic-agent-${kibanaVersion}-darwin-x86_64
-sudo ./elastic-agent install`;
-
-  const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = `$ProgressPreference = 'SilentlyContinue'
-Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
-cd elastic-agent-${kibanaVersion}-windows-x86_64
-.\\elastic-agent.exe install`;
-
+export const StandaloneInstructions = (kibanaVersion: string): CommandsByPlatform => {
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
 sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
   const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
 sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
-  const linuxCommand =
-    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_LINUX;
-  const macCommand =
-    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_MAC;
-  const windowsCommand =
-    isK8s === 'IS_KUBERNETES' ? KUBERNETES_RUN_INSTRUCTIONS : STANDALONE_RUN_INSTRUCTIONS_WINDOWS;
+  const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-linux-x86_64
+sudo ./elastic-agent install`;
+
+  const macCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-darwin-x86_64
+sudo ./elastic-agent install`;
+
+  const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
+cd elastic-agent-${kibanaVersion}-windows-x86_64
+.\\elastic-agent.exe install`;
+
+  const k8sCommand = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
 
   return {
     linux: linuxCommand,
@@ -48,5 +37,6 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm \nsudo systemctl enable e
     windows: windowsCommand,
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
+    kubernetes: k8sCommand,
   };
 };

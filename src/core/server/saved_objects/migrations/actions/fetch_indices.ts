@@ -7,12 +7,13 @@
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexMapping } from '../../mappings';
-import { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+
 export type FetchIndexResponse = Record<
   string,
   { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
@@ -41,7 +42,7 @@ export const fetchIndices =
           index: indices,
           ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
         },
-        { ignore: [404], maxRetries: 0 }
+        { maxRetries: 0 }
       )
       .then((body) => {
         return Either.right(body);

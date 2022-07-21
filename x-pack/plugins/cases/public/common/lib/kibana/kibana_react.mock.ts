@@ -53,7 +53,13 @@ export const createStartServicesMock = (): StartServices => {
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCases: { crud_cases: true, read_cases: true },
+    generalCases: {
+      create_cases: true,
+      read_cases: true,
+      update_cases: true,
+      delete_cases: true,
+      push_cases: true,
+    },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },
   };

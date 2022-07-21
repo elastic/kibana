@@ -1507,7 +1507,7 @@ describe('Authenticator', () => {
         password: 'some-password',
       };
       mockOptions.userProfileService.activate.mockResolvedValue({
-        ...userProfileMock.create(),
+        ...userProfileMock.createWithSecurity(),
         uid: 'new-profile-uid',
       });
 

@@ -193,4 +193,25 @@ describe('AlertsTableState', () => {
       );
     });
   });
+
+  describe('empty state', () => {
+    beforeEach(() => {
+      hookUseFetchAlerts.mockClear();
+      hookUseFetchAlerts.mockImplementation(() => [
+        false,
+        {
+          alerts: [],
+          isInitializing: false,
+          getInspectQuery: jest.fn(),
+          refetch: jest.fn(),
+          totalAlerts: 0,
+        },
+      ]);
+    });
+
+    it('should render an empty screen if there are no alerts', async () => {
+      const result = render(<AlertsTableState {...tableProps} />);
+      expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
+    });
+  });
 });

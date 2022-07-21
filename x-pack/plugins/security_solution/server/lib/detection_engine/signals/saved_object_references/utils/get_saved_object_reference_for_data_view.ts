@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from '@kbn/core/server';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import { getSavedObjectReference } from './get_saved_object_reference';
 
 /**

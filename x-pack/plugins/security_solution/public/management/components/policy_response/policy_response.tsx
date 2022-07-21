@@ -8,17 +8,16 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  HostPolicyResponseActionStatus,
+import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
@@ -47,6 +46,7 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 `;
 
 interface PolicyResponseProps {
+  hostOs: string;
   policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
   policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   policyResponseAttentionCount: Map<string, number>;
@@ -57,6 +57,7 @@ interface PolicyResponseProps {
  */
 export const PolicyResponse = memo(
   ({
+    hostOs,
     policyResponseConfig,
     policyResponseActions,
     policyResponseAttentionCount,
@@ -93,9 +94,8 @@ export const PolicyResponse = memo(
 
           const policyResponseActionFormatter = new PolicyResponseActionFormatter(
             action || {},
-            docLinks.links.securitySolution.policyResponseTroubleshooting[
-              action.name as keyof DocLinksStart['links']['securitySolution']['policyResponseTroubleshooting']
-            ]
+            docLinks.links.securitySolution.policyResponseTroubleshooting,
+            hostOs
           );
           return {
             label: (
@@ -144,6 +144,7 @@ export const PolicyResponse = memo(
         docLinks.links.securitySolution.policyResponseTroubleshooting,
         getEntryIcon,
         policyResponseActions,
+        hostOs,
       ]
     );
 

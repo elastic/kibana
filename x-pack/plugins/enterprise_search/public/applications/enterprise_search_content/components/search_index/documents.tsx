@@ -7,16 +7,6 @@
 
 import React from 'react';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-
 export const SearchIndexDocuments: React.FC = () => {
-  return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[]}
-      pageViewTelemetry="Documents"
-      isLoading={false}
-    >
-      <>Documents</>
-    </EnterpriseSearchContentPageTemplate>
-  );
+  return <>Documents</>;
 };

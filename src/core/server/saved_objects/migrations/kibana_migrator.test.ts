@@ -10,7 +10,7 @@ import { take } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
@@ -99,9 +99,7 @@ describe('KibanaMigrator', () => {
     it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();
 
-      options.client.cat.templates.mockResponse([], { statusCode: 404 });
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       const migrator = new KibanaMigrator(options);
 
@@ -112,8 +110,7 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       options.client.cluster.getSettings.mockResponse(
         {

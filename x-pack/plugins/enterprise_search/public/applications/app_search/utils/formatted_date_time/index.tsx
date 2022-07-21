@@ -5,23 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
-
-interface Props {
-  date: Date;
-  hideTime?: boolean;
-}
-
-export const FormattedDateTime: React.FC<Props> = ({ date, hideTime = false }) => (
-  <>
-    <FormattedDate value={date} year="numeric" month="short" day="numeric" />
-    {!hideTime && (
-      <>
-        {' '}
-        <FormattedTime value={date} />
-      </>
-    )}
-  </>
-);
+export { FormattedDateTime } from '../../../shared/formatted_date_time';

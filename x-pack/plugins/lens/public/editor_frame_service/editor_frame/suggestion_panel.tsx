@@ -113,6 +113,7 @@ const PreviewRenderer = ({
         <ExpressionRendererComponent
           className="lnsSuggestionPanel__expressionRenderer"
           padding="s"
+          renderMode="preview"
           expression={expression}
           debounce={2000}
           renderError={() => {
@@ -146,7 +147,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
-          hasBorder
+          hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             'lnsSuggestionPanel__button-isSelected': selected,

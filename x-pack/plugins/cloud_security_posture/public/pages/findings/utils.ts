@@ -9,6 +9,7 @@ import { buildEsQuery, type Filter, buildFilter, FILTERS, FilterStateStore } fro
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Serializable } from '@kbn/utility-types';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -106,6 +107,29 @@ export const useBaseEsQuery = ({
   return baseEsQuery;
 };
 
+export const getFindingsPageSizeInfo = ({
+  currentPageSize,
+  pageIndex,
+  pageSize,
+}: Record<'pageIndex' | 'pageSize' | 'currentPageSize', number>) => ({
+  pageStart: pageIndex * pageSize + 1,
+  pageEnd: pageIndex * pageSize + currentPageSize,
+});
+
+export const getFindingsCountAggQuery = () => ({
+  count: { terms: { field: 'result.evaluation.keyword' } },
+});
+
+export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
+  const passed = buckets.find((bucket) => bucket.key === 'passed');
+  const failed = buckets.find((bucket) => bucket.key === 'failed');
+
+  return {
+    passed: passed?.doc_count || 0,
+    failed: failed?.doc_count || 0,
+  };
+};
+
 export const addFilter = ({
   filters,
   dataView,
@@ -137,3 +161,15 @@ export const addFilter = ({
 
   return [...filters, filter].filter(isNonNullable);
 };
+
+const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
+  '@timestamp',
+  'resource.sub_type',
+  'resource.name',
+  'resource.id',
+  'rule.name',
+]);
+
+// NOTE: .keyword comes from the mapping we defined for the Findings index
+export const getSortKey = (key: string): string =>
+  FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;

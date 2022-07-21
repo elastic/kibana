@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -61,6 +62,11 @@ export const policyFactory = (): PolicyConfig => {
       },
       antivirus_registration: {
         enabled: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
       },
     },
     mac: {
@@ -167,6 +173,11 @@ export const policyFactoryWithoutPaidFeatures = (
       behavior_protection: {
         mode: ProtectionModes.off,
         supported: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,

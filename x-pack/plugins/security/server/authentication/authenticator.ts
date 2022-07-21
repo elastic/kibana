@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IBasePath, IClusterClient, LoggerFactory } from '@kbn/core/server';
-import { KibanaRequest } from '@kbn/core/server';
+import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -25,7 +25,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session, SessionValue } from '../session_management';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,7 +80,7 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
-  userProfileService: UserProfileServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
   basePath: IBasePath;
@@ -131,7 +131,7 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 
 function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof KibanaRequest)) {
+  if (!(request instanceof CoreKibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }

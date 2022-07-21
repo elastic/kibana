@@ -10,7 +10,7 @@ import { waitFor, render, act } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
@@ -569,13 +569,7 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      [
-        'Threshold Count',
-        'host.name [threshold]',
-        'host.id [threshold]',
-        'Threshold Cardinality',
-        'count(host.name) >= 9001',
-      ].forEach((fieldId) => {
+      ['Event Count', 'Event Cardinality', 'host.name', 'host.id'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
@@ -637,14 +631,14 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      ['Threshold Count'].forEach((fieldId) => {
+      ['Event Count'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
 
       [
         'host.name [threshold]',
         'host.id [threshold]',
-        'Threshold Cardinality',
+        'Event Cardinality',
         'count(host.name) >= 9001',
       ].forEach((fieldText) => {
         expect(() => getByText(fieldText)).toThrow();

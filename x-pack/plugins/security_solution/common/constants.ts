@@ -123,6 +123,14 @@ export enum SecurityPageName {
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
   noPage = '',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
+   */
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -382,6 +390,11 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPING,
 ]);
 
+export const STARTED_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.INDEXING,
+  TRANSFORM_STATES.STARTED,
+]);
+
 /**
  * How many rules to update at a time is set to 50 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
@@ -430,3 +443,12 @@ export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+/**
+ * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
+ */
+export enum BulkActionsDryRunErrCode {
+  IMMUTABLE = 'IMMUTABLE',
+  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
+  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
+}
