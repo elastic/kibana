@@ -46,7 +46,7 @@ export const WARNING_BODY = i18n.translate(
 export const DANGER_TITLE = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardDangerPanelTitle',
   {
-    defaultMessage: 'No threat intel data available to display',
+    defaultMessage: 'No threat intelligence data',
   }
 );
 

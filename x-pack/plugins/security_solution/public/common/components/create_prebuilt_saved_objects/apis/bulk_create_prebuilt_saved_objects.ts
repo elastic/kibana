@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { bulkCreateSavedObjects } from '../../../../../common/constants';
 
 interface Options {
@@ -13,9 +13,7 @@ interface Options {
 }
 
 export const bulkCreatePrebuiltSavedObjects = async (http: HttpStart, options: Options) => {
-  const res = await http.post<SavedObjectsImportResponse>(
-    bulkCreateSavedObjects(options.templateName)
-  );
+  const res = await http.post(bulkCreateSavedObjects(options.templateName));
 
   return res;
 };

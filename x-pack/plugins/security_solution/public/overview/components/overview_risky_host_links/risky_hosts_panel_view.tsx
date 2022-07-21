@@ -67,7 +67,7 @@ const warningPanel = (
   />
 );
 
-export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
+const RiskyHostsPanelViewComponent: React.FC<LinkPanelViewProps> = ({
   isInspectEnabled,
   listItems,
   splitPanel,
@@ -82,7 +82,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
         : undefined
       : splitPanel;
 
-  const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
+  const [dashboardUrl, setDashboardUrl] = useState<string>();
   const { buttonHref } = useDashboardButtonHref({
     to,
     from,
@@ -99,7 +99,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
           obj.type === 'dashboard' && obj?.attributes?.title === 'Current Risk Score for Hosts'
       );
 
-      const fetchDashboardUrl = async (targetDashboardId: string | null | undefined) => {
+      const fetchDashboardUrl = (targetDashboardId: string | null | undefined) => {
         if (to && from && targetDashboardId) {
           const targetUrl = dashboard?.locator?.getRedirectUrl({
             dashboardId: targetDashboardId,
@@ -109,7 +109,7 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
             },
           });
 
-          setDashboardUrl(targetUrl ?? null);
+          setDashboardUrl(targetUrl);
         }
       };
 
@@ -123,12 +123,12 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
       {...{
         button: (
           <ImportSavedObjectsButton
-            href={buttonHref || dashboardUrl}
-            ishostRiskScoreDataAvailable={listItems.length > 0}
+            hide={listItems == null || listItems.length === 0}
             onSuccessCallback={onImportDashboardSuccessCallback}
+            successLink={buttonHref || dashboardUrl}
             successTitle={VIEW_DASHBOARD}
+            templateName="hostRiskScoreDashboards"
             title={i18n.IMPORT_DASHBOARD}
-            tooltip={i18n.IMPORT_DASHBOARD_TOOLTIP}
           />
         ),
         columns,
@@ -154,3 +154,5 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
     />
   );
 };
+
+export const RiskyHostsPanelView = React.memo(RiskyHostsPanelViewComponent);

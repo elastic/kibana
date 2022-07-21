@@ -5,138 +5,99 @@
  * 2.0.
  */
 
-import { EuiButton, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useState } from 'react';
 import type { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
-import { useKibana, useToasts } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { bulkCreatePrebuiltSavedObjects } from '../apis/bulk_create_prebuilt_saved_objects';
 import { IMPORT_SAVED_OBJECTS_FAILURE, IMPORT_SAVED_OBJECTS_SUCCESS } from '../translations';
-
-const Popover = styled(EuiPanel)`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: '340px';
-`;
-
-const PopoverWrapper = styled.div`
-  position: relative;
-`;
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 
 interface ImportSavedObjectsButtonProps {
-  href?: string | null | undefined;
-  ishostRiskScoreDataAvailable: boolean;
+  hide: boolean;
   onSuccessCallback?: (result: Array<SavedObject<SavedObjectAttributes>>) => void;
+  successLink?: string | undefined;
   successTitle: string;
+  templateName: string;
   title: string;
-  tooltip?: string;
 }
 
 const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps> = ({
-  href,
-  ishostRiskScoreDataAvailable,
+  hide,
   onSuccessCallback,
+  successLink,
   successTitle,
+  templateName,
   title,
-  tooltip,
 }) => {
   const {
     services: { http },
   } = useKibana();
-  const [response, setResponse] = useState<Array<SavedObject<SavedObjectAttributes>>>();
-  const [error, setError] = useState<Error>();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const toasts = useToasts();
+  const { addSuccess, addError } = useAppToasts();
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>();
 
-  const onMouseEnter = () => {
-    setIsPopoverOpen(true);
-  };
-
-  const closePopover = () => setIsPopoverOpen(false);
   const importPrebuiltSavedObjects = useCallback(async () => {
     setStatus('loading');
 
     try {
       const res = await bulkCreatePrebuiltSavedObjects(http, {
-        templateName: 'hostRiskScoreDashboards',
+        templateName,
       });
-      const savedObjects = getOr([], ['saved_objects'], res);
-      setResponse(savedObjects);
+      const savedObjects: Array<SavedObject<SavedObjectAttributes>> = getOr(
+        [],
+        ['saved_objects'],
+        res
+      );
       setStatus('success');
+
+      addSuccess({
+        title: IMPORT_SAVED_OBJECTS_SUCCESS(savedObjects.length),
+        text: savedObjects.map((o) => o?.attributes?.title ?? o?.attributes?.name).join(', '),
+      });
+
+      if (onSuccessCallback) {
+        onSuccessCallback(savedObjects);
+      }
     } catch (e) {
       setStatus('error');
-      setError(e);
+      addError(e, { title: IMPORT_SAVED_OBJECTS_FAILURE, toastMessage: e.message });
     }
-  }, [http]);
+  }, [addError, addSuccess, http, onSuccessCallback, templateName]);
 
-  useEffect(() => {
-    if (status === 'success' && response != null) {
-      toasts.addSuccess(
-        `${IMPORT_SAVED_OBJECTS_SUCCESS(response.length)}: ${response
-          .map((o, idx) => `${idx + 1}. ) ${o?.attributes?.title ?? o?.attributes?.name}`)
-          .join(' ,')}`
-      );
-    }
-
-    if (onSuccessCallback && response != null) {
-      onSuccessCallback(response);
-    }
-
-    if (status === 'error' && error != null) {
-      toasts.addError(error, { title: IMPORT_SAVED_OBJECTS_FAILURE, toastMessage: error.message });
-    }
-  }, [error, onSuccessCallback, response, status, toasts]);
-
-  return href || status === 'success' ? (
-    <EuiButton
-      href={href ?? undefined}
-      isDisabled={!href}
-      data-test-subj="view-dashboard-button"
-      target="_blank"
-    >
-      {successTitle}
-    </EuiButton>
-  ) : ishostRiskScoreDataAvailable ? (
-    <EuiButton
-      onClick={importPrebuiltSavedObjects}
-      color="warning"
-      target="_blank"
-      isDisabled={status === 'loading'}
-      data-test-subj="create-saved-object-button"
-    >
-      {status === 'loading' && <EuiLoadingSpinner size="m" />} {title}
-    </EuiButton>
-  ) : tooltip ? (
-    <PopoverWrapper onMouseEnter={onMouseEnter} onMouseLeave={closePopover}>
-      {isPopoverOpen && (
-        <Popover>
-          <EuiText>{tooltip} </EuiText>
-        </Popover>
-      )}
+  if (successLink || status === 'success') {
+    return (
       <EuiButton
+        href={successLink}
+        isDisabled={!successLink}
+        data-test-subj="create-saved-object-success-button"
+        target="_blank"
+      >
+        {successTitle}
+      </EuiButton>
+    );
+  }
+
+  if (!hide) {
+    return (
+      <EuiButton
+        onClick={importPrebuiltSavedObjects}
         color="warning"
         target="_blank"
-        isDisabled={true}
-        data-test-subj="disabled-create-saved-object-button-with-popover"
+        isDisabled={status === 'loading'}
+        data-test-subj="create-saved-object-button"
       >
+        {status === 'loading' && (
+          <EuiLoadingSpinner data-test-subj="creating-saved-objects" size="m" />
+        )}{' '}
         {title}
       </EuiButton>
-    </PopoverWrapper>
-  ) : (
-    <EuiButton
-      color="warning"
-      target="_blank"
-      isDisabled={true}
-      data-test-subj="disabled-create-saved-object-button"
-    >
-      {title}
-    </EuiButton>
-  );
+    );
+  } else {
+    return null;
+  }
 };
 
 export const ImportSavedObjectsButton = React.memo(ImportSavedObjectsButtonComponent);
