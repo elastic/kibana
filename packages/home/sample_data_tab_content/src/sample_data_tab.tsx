@@ -22,7 +22,14 @@ export const SampleDataTabContent = () => {
     <>
       <DemoEnvironmentPanel demoUrl="#" />
       <EuiSpacer />
-      <EuiAccordion id="sampleDataTab" buttonContent={sampleDataLabel}>
+      <EuiAccordion
+        id="sampleDataTab"
+        buttonContent={sampleDataLabel}
+        data-test-subj="sampleDataAccordion"
+        buttonProps={{
+          'data-test-subj': 'sampleDataAccordionButton',
+        }}
+      >
         <EuiSpacer />
         <EuiPanel color="subdued" paddingSize="xl">
           <SampleDataCards />
