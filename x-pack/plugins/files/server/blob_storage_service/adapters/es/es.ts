@@ -60,6 +60,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
+        return;
       }
       throw e;
     }

@@ -23,7 +23,7 @@ export async function getById(
 ): Promise<ResultOrHttpError> {
   let result: undefined | File;
   try {
-    result = await fileService.find({ id, fileKind });
+    result = await fileService.getById({ id, fileKind });
   } catch (e) {
     let error: undefined | IKibanaResponse;
     if (e instanceof errors.FileNotFoundError) {

@@ -30,6 +30,7 @@ import { InternalFileService } from '../file_service/internal_file_service';
 import { InternalFileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
+import { toJSON } from './to_json';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
@@ -166,21 +167,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public toJSON(): FileJSON<M> {
-    return {
-      id: this.id,
-      alt: this.alt,
-      chunkSize: this.attributes.ChunkSize,
-      extension: this.extension,
-      meta: this.meta,
-      mimeType: this.mimeType,
-      size: this.size,
-      compression: this.compression,
-      created: this.created,
-      updated: this.updated,
-      fileKind: this.fileKind,
-      name: this.name,
-      status: this.status,
-    };
+    return toJSON<M>(this.id, this.attributes);
   }
 
   private get attributes(): FileSavedObjectAttributes {
@@ -236,7 +223,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public get extension(): undefined | string {
-    return this.attributes.Extension;
+    return this.attributes.extension;
   }
 
   /**
@@ -260,7 +247,7 @@ export class File<M = unknown> implements IFile {
       Alt: alt,
       Meta: meta,
       FileKind: fileKind.id,
-      Extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
     });
 
     const file = internalFileService.toFile(fileSO, fileKind);

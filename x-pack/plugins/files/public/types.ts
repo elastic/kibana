@@ -7,13 +7,13 @@
 
 import type {
   HttpApiInterfaceEntryDefinition,
-  CreateHttpEndpoint,
-  DeleteHttpEndpoint,
-  DownloadHttpEndpoint,
-  GetByIdHttpEndpoint,
-  ListHttpEndpoint,
-  UpdateHttpEndpoint,
-  UploadHttpEndpoint,
+  CreateFileKindHttpEndpoint,
+  DeleteFileKindHttpEndpoint,
+  DownloadFileKindHttpEndpoint,
+  GetByIdFileKindHttpEndpoint,
+  ListFileKindHttpEndpoint,
+  UpdateFileKindHttpEndpoint,
+  UploadFileKindHttpEndpoint,
 } from '../common/api_routes';
 
 type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
@@ -21,13 +21,13 @@ type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
 ) => Promise<E['output']>;
 
 export interface FilesClient {
-  create: ClientMethodFrom<CreateHttpEndpoint>;
-  delete: ClientMethodFrom<DeleteHttpEndpoint>;
-  download: ClientMethodFrom<DownloadHttpEndpoint>;
-  getById: ClientMethodFrom<GetByIdHttpEndpoint>;
-  list: ClientMethodFrom<ListHttpEndpoint>;
-  update: ClientMethodFrom<UpdateHttpEndpoint>;
-  upload: ClientMethodFrom<UploadHttpEndpoint>;
+  create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
+  delete: ClientMethodFrom<DeleteFileKindHttpEndpoint>;
+  download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint>;
+  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
+  update: ClientMethodFrom<UpdateFileKindHttpEndpoint>;
+  upload: ClientMethodFrom<UploadFileKindHttpEndpoint>;
 }
 
 export interface FilesClientFactory {

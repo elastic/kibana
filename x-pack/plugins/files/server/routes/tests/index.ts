@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { FilesRouter } from './types';
-import { registerFileKindRoutes } from './file_kind';
-import * as find from './find';
-
-export function registerRoutes(router: FilesRouter) {
-  registerFileKindRoutes(router);
-
-  find.register(router);
-}
+export { setupIntegrationEnvironment } from './setup_integration_environment';
+export type { TestEnvironmentUtils } from './setup_integration_environment';

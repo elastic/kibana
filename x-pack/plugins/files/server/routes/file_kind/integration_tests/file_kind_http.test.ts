@@ -5,101 +5,28 @@
  * 2.0.
  */
 
-import { defaults } from 'lodash';
-import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import pRetry from 'p-retry';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  TestElasticsearchUtils,
-  request,
-} from '@kbn/core/test_helpers/kbn_server';
-
-import type { FileJSON, UpdatableFileAttributes } from '../../../../common/types';
-import { fileKindsRegistry } from '../../../file_kinds_registry';
+import type { UpdatableFileAttributes } from '../../../../common/types';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../tests';
 
 describe('File kind HTTP API', () => {
-  const fileKind: string = 'test-file-kind';
-  const testIndex = '.kibana-test-files';
-  const testConfig = {
-    xpack: {
-      reporting: { enabled: false },
-    },
-  };
-
-  let manageES: TestElasticsearchUtils;
-  let root: ReturnType<typeof createRootWithCorePlugins>;
-  let esClient: ElasticsearchClient;
-  let coreStart: CoreStart;
+  let fileKind: string;
+  let createFile: TestEnvironmentUtils['createFile'];
+  let root: TestEnvironmentUtils['root'];
+  let request: TestEnvironmentUtils['request'];
+  let testHarness: TestEnvironmentUtils;
 
   beforeAll(async () => {
-    fileKindsRegistry.register({
-      id: fileKind,
-      blobStoreSettings: {
-        esFixedSizeIndex: { index: testIndex },
-      },
-      http: {
-        create: { tags: ['access:myapp'] },
-        delete: { tags: ['access:myapp'] },
-        update: { tags: ['access:myapp'] },
-        download: { tags: ['access:myapp'] },
-        getById: { tags: ['access:myapp'] },
-        list: { tags: ['access:myapp'] },
-      },
-    });
-
-    const { startES } = createTestServers({
-      adjustTimeout: jest.setTimeout,
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    manageES = await startES();
-    root = createRootWithCorePlugins(testConfig, { oss: false });
-    await root.preboot();
-    await root.setup();
-    coreStart = await root.start();
-    esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    await pRetry(() => request.get(root, '/api/licensing/info').expect(200), { retries: 5 });
+    testHarness = await setupIntegrationEnvironment();
+    ({ createFile, root, request, fileKind } = testHarness);
   });
 
   afterAll(async () => {
-    await root.shutdown();
-    await manageES.stop();
+    await testHarness.cleanupAfterAll();
   });
 
-  let disposables: Array<() => Promise<void>> = [];
   afterEach(async () => {
-    await Promise.all(disposables.map((dispose) => dispose()));
-    disposables = [];
-    await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
+    await testHarness.cleanupAfterEach();
   });
-
-  const createFile = async (
-    fileAttrs: Partial<{ name: string; alt: string; meta: Record<string, any>; mime: string }> = {}
-  ): Promise<FileJSON> => {
-    const result = await request
-      .post(root, `/api/files/files/${fileKind}`)
-      .send(
-        defaults(fileAttrs, {
-          name: 'myFile',
-          alt: 'a picture of my dog',
-          meta: {},
-          mime: 'image/png',
-        })
-      )
-      .expect(200);
-    disposables.push(async () => {
-      await request
-        .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
-        .send()
-        .expect(200);
-    });
-    return result.body.file;
-  };
 
   test('create', async () => {
     expect(await createFile()).toEqual({

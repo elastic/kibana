@@ -48,7 +48,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
             body: {
               output: 'stream',
               parse: false,
-              accepts: 'application/octet-stream',
+              accepts: fileKind.allowedMimeTypes ?? 'application/octet-stream',
             },
           },
         },

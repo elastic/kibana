@@ -12,7 +12,9 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import { nodeBuilder, escapeKuery, KueryNode } from '@kbn/es-query';
 
+import { getFlattenedObject } from '@kbn/std';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import {
@@ -21,8 +23,9 @@ import {
   FileSavedObject,
   UpdatableFileAttributes,
   FileKind,
+  FileJSON,
 } from '../../common';
-import { File } from '../file';
+import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
 import { FileNotFoundError } from './errors';
 
@@ -51,9 +54,20 @@ export interface ListFilesArgs {
   perPage?: number;
 }
 
-export interface FindFileArgs {
+export interface GetByIdArgs {
   id: string;
   fileKind: string;
+}
+
+export interface FindFileArgs {
+  kind?: string[];
+  name?: string[];
+  extension?: string[];
+  status?: string[];
+  meta?: Record<string, string>;
+  mimeType?: string[];
+  page?: number;
+  perPage?: number;
 }
 
 /**
@@ -88,16 +102,16 @@ export class InternalFileService {
   }
 
   public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<IFile> {
-    const file = await this.find({ fileKind, id });
+    const file = await this.getById({ fileKind, id });
     return await file.update(attributes);
   }
 
   public async deleteFile({ id, fileKind }: DeleteFileArgs): Promise<void> {
-    const file = await this.find({ id, fileKind });
+    const file = await this.getById({ id, fileKind });
     await file.delete();
   }
 
-  public async find({ fileKind, id }: FindFileArgs): Promise<IFile> {
+  public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
     try {
       const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
       const { FileKind: actualFileKind, Status } = result.attributes;
@@ -166,5 +180,47 @@ export class InternalFileService {
   ): Promise<FileSavedObject> {
     const updateResponse = await this.soClient.update(this.savedObjectType, id, attributes);
     return updateResponse as FileSavedObject;
+  }
+
+  public async findFilesJSON({
+    kind,
+    name,
+    extension,
+    mimeType,
+    meta,
+    status,
+    page,
+    perPage,
+  }: FindFileArgs): Promise<FileJSON[]> {
+    const kueryExpressions: KueryNode[] = [];
+
+    const addFilters = (fieldName: string, values: string[] = []): void => {
+      if (values.length) {
+        const orExpressions = values
+          .filter(Boolean)
+          .map((value) =>
+            nodeBuilder.is(`${this.savedObjectType}.attributes.${fieldName}`, escapeKuery(value))
+          );
+        kueryExpressions.push(nodeBuilder.or(orExpressions));
+      }
+    };
+
+    addFilters('name', name);
+    addFilters('FileKind', kind);
+    addFilters('Status', status);
+    addFilters('mime_type', mimeType);
+    addFilters('extension', extension);
+
+    Object.entries(meta ? getFlattenedObject(meta) : {}).forEach(([fieldName, value]) => {
+      addFilters(`Meta.${fieldName}`, Array.isArray(value) ? value : [value]);
+    });
+
+    const result = await this.soClient.find<FileSavedObjectAttributes>({
+      type: this.savedObjectType,
+      filter: kueryExpressions ? nodeBuilder.and(kueryExpressions) : undefined,
+      page,
+      perPage,
+    });
+    return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
   }
 }

@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
-import type { UploadHttpEndpoint } from '../../../common/api_routes';
+import type { UploadFileKindHttpEndpoint } from '../../../common/api_routes';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
@@ -20,9 +20,9 @@ type Body = TypeOf<typeof bodySchema>;
 export const paramsSchema = schema.object({
   id: schema.string(),
 });
-type Params = Ensure<UploadHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
+type Params = Ensure<UploadFileKindHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
-type Response = UploadHttpEndpoint['output'];
+type Response = UploadFileKindHttpEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files, fileKind },

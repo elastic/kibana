@@ -30,14 +30,14 @@ const properties: Properties = {
   mime_type: {
     type: 'keyword',
   },
-  Extension: {
+  extension: {
     type: 'keyword',
   },
   size: {
     type: 'long',
   },
   Meta: {
-    type: 'object',
+    type: 'flattened',
   },
   FileKind: {
     type: 'keyword',
@@ -49,7 +49,7 @@ const properties: Properties = {
     type: 'keyword',
   },
   hash: {
-    type: 'object',
+    type: 'flattened',
   },
 };
 

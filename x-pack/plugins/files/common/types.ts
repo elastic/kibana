@@ -61,15 +61,15 @@ export type FileMetadata = {
   };
 
   /**
+   * The file extension, for example "jpg", "png", "svg" and so forth
+   */
+  extension?: string;
+
+  /**
    * Alternate text that can be used used to describe the contents of the file
    * in human-friendly language
    */
   Alt?: string;
-
-  /**
-   * The file extension, for example "jpg", "png", "svg" and so forth
-   */
-  Extension?: string;
 
   /**
    * ISO string representing when the file was last updated
@@ -118,13 +118,11 @@ export interface FileJSON<Meta = unknown> {
   name: FileSavedObjectAttributes['name'];
   mimeType: FileSavedObjectAttributes['mime_type'];
   size: FileSavedObjectAttributes['size'];
+  extension: FileSavedObjectAttributes['extension'];
 
   meta: FileSavedObjectAttributes<Meta>['Meta'];
-  extension: FileSavedObjectAttributes['Extension'];
   alt: FileSavedObjectAttributes['Alt'];
-  chunkSize: FileSavedObjectAttributes['ChunkSize'];
   fileKind: FileSavedObjectAttributes['FileKind'];
-  compression: FileSavedObjectAttributes['Compression'];
   status: FileSavedObjectAttributes['Status'];
 }
 
