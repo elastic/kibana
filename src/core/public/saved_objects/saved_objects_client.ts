@@ -18,7 +18,7 @@ import type {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsResolveResponse,
-} from '../../server';
+} from '@kbn/core-saved-objects-api-server';
 
 import { SimpleSavedObject } from './simple_saved_object';
 import type { ResolvedSimpleSavedObject } from './types';
