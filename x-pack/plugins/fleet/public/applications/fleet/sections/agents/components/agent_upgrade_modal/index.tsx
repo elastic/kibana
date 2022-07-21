@@ -330,7 +330,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           customOptionText="Input the desired version"
         />
       </EuiFormRow>
-      {Array.isArray(agents) &&
+      {!isSingleAgent &&
+      Array.isArray(agents) &&
       agents.some((agent) =>
         isVersionUnsupported(agent.local_metadata?.elastic?.agent?.version)
       ) ? (
