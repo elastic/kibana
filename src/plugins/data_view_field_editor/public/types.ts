@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { FunctionComponent } from 'react';
 import { DeleteFieldProviderProps } from './components';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
@@ -66,11 +66,11 @@ export interface Field {
   /**
    * name / path used for the field
    */
-  name: string;
+  name: FieldSpec['name'];
   /**
    * ES type
    */
-  type: RuntimeField['type'] | string;
+  type: RuntimeType;
   /**
    * source of the runtime field script
    */
@@ -78,7 +78,7 @@ export interface Field {
   /**
    * custom label for display
    */
-  customLabel?: string;
+  customLabel?: FieldSpec['customLabel'];
   /**
    * custom popularity
    */
@@ -86,22 +86,7 @@ export interface Field {
   /**
    * configuration of the field format
    */
-  format?: FieldFormatConfig;
-}
-
-/**
- * The configuration of a field formatter, as viewed in the editor
- * @public
- */
-export interface FieldFormatConfig {
-  /**
-   * id to reference field format
-   */
-  id: string;
-  /**
-   * parameters for customizing the format
-   */
-  params?: SerializableRecord;
+  format?: FieldSpec['format'];
 }
 
 export interface EsRuntimeField {
