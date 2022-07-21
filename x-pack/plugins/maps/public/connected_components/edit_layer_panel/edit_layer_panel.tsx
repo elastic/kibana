@@ -29,7 +29,7 @@ import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
-import { VectorLayerDescriptor } from '../../../common/descriptor_types';
+import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
@@ -41,6 +41,7 @@ const localStorage = new Storage(window.localStorage);
 export interface Props {
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
+  updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
 }
 
 interface State {
@@ -276,6 +277,8 @@ export class EditLayerPanel extends Component<Props, State> {
                 currentLayerType: this.props.selectedLayer.getType(),
                 numberOfJoins,
                 onChange: this._onSourceChange,
+                onStyleDescriptorChange: this.props.updateStyleDescriptor,
+                style: this.props.selectedLayer.getStyleForEditing(),
               })}
 
               {this._renderFilterSection()}
