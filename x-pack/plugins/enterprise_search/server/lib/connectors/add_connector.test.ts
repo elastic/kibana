@@ -13,15 +13,12 @@ import { ErrorCode } from '../../../common/types/error_codes';
 
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
-import { createApiIndex } from '../indices/create_index';
-
 import { addConnector } from './add_connector';
 import { fetchConnectorByIndexName } from './fetch_connectors';
 
 jest.mock('../../index_management/setup_indices', () => ({
   setupConnectorsIndices: jest.fn(),
 }));
-jest.mock('../indices/create_index', () => ({ createApiIndex: jest.fn() }));
 
 jest.mock('./fetch_connectors', () => ({ fetchConnectorByIndexName: jest.fn() }));
 
@@ -71,7 +68,7 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(createApiIndex).toHaveBeenCalledWith(mockClient, 'index_name', 'en');
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
   });
 
   it('should reject if index already exists', async () => {
@@ -85,7 +82,7 @@ describe('addConnector lib function', () => {
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
-    expect(createApiIndex).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
 
   it('should reject if connector already exists', async () => {
@@ -99,7 +96,7 @@ describe('addConnector lib function', () => {
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
-    expect(createApiIndex).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
 
   it('should reject with index already exists if connector and index already exist', async () => {
@@ -113,7 +110,7 @@ describe('addConnector lib function', () => {
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
-    expect(createApiIndex).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
 
   it('should replace connector if deleteExistingConnector flag is true', async () => {
@@ -149,7 +146,7 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(createApiIndex).toHaveBeenCalledWith(mockClient, 'index_name', null);
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
   });
 
   it('should create index if no connectors index exists', async () => {
@@ -185,7 +182,7 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(createApiIndex).toHaveBeenCalledTimes(1);
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
   });
   it('should not create index if status code is not 404', async () => {
     mockClient.asCurrentUser.index.mockImplementationOnce(() => {

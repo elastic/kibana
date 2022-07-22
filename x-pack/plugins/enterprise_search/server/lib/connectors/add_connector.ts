@@ -12,7 +12,6 @@ import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connec
 import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-import { createApiIndex } from '../indices/create_index';
 
 import { deleteConnectorById } from './delete_connector';
 
@@ -44,7 +43,7 @@ const createConnector = async (
     document,
     index: CONNECTORS_INDEX,
   });
-  await createApiIndex(client, index, language);
+  await client.asCurrentUser.indices.create({ index });
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
