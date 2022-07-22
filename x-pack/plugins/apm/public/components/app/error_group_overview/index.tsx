@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -13,35 +14,27 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import uuid from 'uuid';
-import { orderBy } from 'lodash';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import React, { useMemo } from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ErrorDistribution } from '../error_group_details/distribution';
-import { ErrorGroupList } from './error_group_list';
-import { INITIAL_PAGE_SIZE } from '../../shared/managed_table';
+import { getColumns } from './get_columns';
+import { useTableSortAndPagination } from '../../../hooks/use_table_sort_pagination';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
-const INITIAL_STATE_MAIN_STATISTICS: {
-  errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
-  requestId?: string;
-  currentPageGroupIds: ErrorGroupMainStatistics['errorGroups'];
-} = {
-  errorGroupMainStatistics: [],
-  requestId: undefined,
-  currentPageGroupIds: [],
+const INITIAL_STATE_MAIN_STATISTICS: ErrorGroupMainStatistics = {
+  errorGroups: [],
 };
 
 const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
@@ -49,23 +42,25 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   previousPeriod: {},
 };
 
+const PAGE_SIZE = 25;
+const SORT_FIELD = 'occurrences';
+
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
+  const { query } = useApmParams('/services/{serviceName}/errors');
   const {
-    query: {
-      environment,
-      kuery,
-      sortField = 'occurrences',
-      sortDirection = 'desc',
-      rangeFrom,
-      rangeTo,
-      offset,
-      comparisonEnabled,
-      page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
-    },
-  } = useApmParams('/services/{serviceName}/errors');
+    environment,
+    kuery,
+    sortField,
+    sortDirection,
+    rangeFrom,
+    rangeTo,
+    offset,
+    comparisonEnabled,
+    page,
+    pageSize,
+  } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
@@ -99,47 +94,43 @@ export function ErrorGroupOverview() {
                 },
               },
             }
-          ).then((response) => {
-            const currentPageGroupIds = orderBy(
-              response.errorGroups,
-              sortField,
-              sortDirection
-            )
-              .slice(page * pageSize, (page + 1) * pageSize)
-              .map(({ groupId }) => groupId)
-              .sort();
-
-            return {
-              // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-              requestId: uuid(),
-              errorGroupMainStatistics: response.errorGroups,
-              currentPageGroupIds,
-            };
-          });
+          );
         }
       },
-      [
-        environment,
-        kuery,
-        serviceName,
-        start,
-        end,
-        sortField,
-        sortDirection,
-        page,
-        pageSize,
-      ]
+      [environment, kuery, serviceName, start, end, sortField, sortDirection]
     );
 
-  const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
-    errorGroupListData;
+  const { errorGroups } = errorGroupListData;
+
+  const { tableItems, tablePagination, tableSort, onTableChange, requestId } =
+    useTableSortAndPagination(
+      {
+        items: errorGroups,
+        pagination: {
+          pageIndex: page,
+          pageSize: pageSize || PAGE_SIZE,
+          showPerPageOptions: true,
+        },
+        sorting: {
+          sort: {
+            field:
+              (sortField as
+                | keyof ErrorGroupMainStatistics['errorGroups'][0]
+                | undefined) || SORT_FIELD,
+            direction: sortDirection,
+          },
+        },
+        urlState: true,
+      },
+      [offset, comparisonEnabled]
+    );
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
     status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (requestId && currentPageGroupIds.length && start && end) {
+      if (requestId && tableItems.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -157,7 +148,9 @@ export function ErrorGroupOverview() {
                     : undefined,
               },
               body: {
-                groupIds: JSON.stringify(currentPageGroupIds),
+                groupIds: JSON.stringify(
+                  tableItems.map(({ groupId }) => groupId)
+                ),
               },
             },
           }
@@ -168,6 +161,26 @@ export function ErrorGroupOverview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
+  );
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        serviceName,
+        detailedStatisticsLoading:
+          errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+          errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
+        detailedStatistics: errorGroupDetailedStatistics,
+        comparisonEnabled,
+        query,
+      }),
+    [
+      serviceName,
+      errorGroupDetailedStatisticsStatus,
+      errorGroupDetailedStatistics,
+      comparisonEnabled,
+      query,
+    ]
   );
 
   if (!errorDistributionData || !errorGroupListData) {
@@ -210,17 +223,31 @@ export function ErrorGroupOverview() {
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ErrorGroupList
-            mainStatistics={errorGroupMainStatistics}
-            serviceName={serviceName}
-            detailedStatisticsLoading={
-              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-              errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
+          <EuiBasicTable
+            error={
+              status === FETCH_STATUS.FAILURE
+                ? i18n.translate('xpack.apm.errorsTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
+                : ''
             }
-            detailedStatistics={errorGroupDetailedStatistics}
-            comparisonEnabled={comparisonEnabled}
-            initialSortField={sortField}
-            initialSortDirection={sortDirection}
+            noItemsMessage={
+              status === FETCH_STATUS.LOADING
+                ? i18n.translate(
+                    'xpack.apm.errorsTable.noErrorsLabel.loading',
+                    { defaultMessage: 'Loading...' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.errorsTable.noErrorsLabel.noResults',
+                    { defaultMessage: 'No errors found' }
+                  )
+            }
+            columns={columns}
+            items={tableItems}
+            pagination={tablePagination}
+            loading={status === FETCH_STATUS.LOADING}
+            onChange={onTableChange}
+            sorting={tableSort}
           />
         </EuiPanel>
       </EuiFlexItem>
