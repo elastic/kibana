@@ -6,7 +6,7 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import type { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../../containers/detection_engine/rules';
 import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
@@ -161,6 +161,8 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
 });
 
 // TODO: update types mapping
@@ -214,6 +216,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     },
   },
   eqlOptions: {},
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({
@@ -221,13 +225,3 @@ export const mockScheduleStepRule = (): ScheduleStepRule => ({
   from: '6m',
   to: 'now',
 });
-
-export const mockRuleError = (id: string): RuleError => ({
-  rule_id: id,
-  error: { status_code: 404, message: `id: "${id}" not found` },
-});
-
-export const mockRules: Rule[] = [
-  mockRule('abe6c564-050d-45a5-aaf0-386c37dd1f61'),
-  mockRule('63f06f34-c181-4b2d-af35-f2ace572a1ee'),
-];
