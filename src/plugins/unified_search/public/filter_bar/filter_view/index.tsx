@@ -15,6 +15,7 @@ import type { FilterLabelStatus } from '../filter_item/filter_item';
 
 interface Props {
   filter: Filter;
+  readOnly: boolean;
   valueLabel: string;
   fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
@@ -25,6 +26,7 @@ interface Props {
 
 export const FilterView: FC<Props> = ({
   filter,
+  readOnly,
   iconOnClick,
   onClick,
   valueLabel,
@@ -54,29 +56,35 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  const badgeProps: EuiBadgeProps = {
-    title,
-    color: 'hollow',
-    iconType: 'cross',
-    iconSide: 'right',
-    closeButtonProps: {
-      // Removing tab focus on close button because the same option can be obtained through the context menu
-      // Also, we may want to add a `DEL` keyboard press functionality
-      tabIndex: -1,
-    },
-    iconOnClick,
-    iconOnClickAriaLabel: i18n.translate(
-      'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
-      {
-        defaultMessage: 'Delete {filter}',
-        values: { filter: innerText },
-      }
-    ),
-    onClick,
-    onClickAriaLabel: i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
-      defaultMessage: 'Filter actions',
-    }),
-  };
+  const readOnlyProps = { title, color: 'hollow' };
+
+  const badgeProps: EuiBadgeProps = readOnly
+    ? readOnlyProps
+    : {
+        ...readOnlyProps,
+        iconType: 'cross',
+        iconSide: 'right',
+        closeButtonProps: {
+          // Removing tab focus on close button because the same option can be obtained through the context menu
+          // Also, we may want to add a `DEL` keyboard press functionality
+          tabIndex: -1,
+        },
+        iconOnClick,
+        iconOnClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
+          {
+            defaultMessage: 'Delete {filter}',
+            values: { filter: innerText },
+          }
+        ),
+        onClick,
+        onClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel',
+          {
+            defaultMessage: 'Filter actions',
+          }
+        ),
+      };
 
   return (
     <EuiBadge {...badgeProps} {...rest}>

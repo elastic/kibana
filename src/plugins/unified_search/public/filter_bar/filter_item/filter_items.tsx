@@ -19,6 +19,7 @@ import { FilterItem, FilterItemProps } from './filter_item';
 
 export interface Props {
   filters: Filter[];
+  readOnly?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;
   indexPatterns: DataView[];
   intl: InjectedIntl;
@@ -30,6 +31,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
+  const { readOnly = false } = props;
 
   // if (!uiSettings) return null;
 
@@ -60,6 +62,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
           uiSettings={uiSettings!}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          readOnly={readOnly}
         />
       </EuiFlexItem>
     ));
