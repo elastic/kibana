@@ -47,6 +47,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
     services: {
       uiSettings,
       mlServices: { mlApiServices },
+      charts: chartsService,
     },
   } = useMlKibana();
 
@@ -167,7 +168,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
-        <AnomalyDetectionTable items={groups} statsBarData={statsBarData!} />
+        <AnomalyDetectionTable
+          items={groups}
+          statsBarData={statsBarData!}
+          chartsService={chartsService}
+        />
       ) : null}
     </EuiPanel>
   );

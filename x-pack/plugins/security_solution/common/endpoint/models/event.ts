@@ -206,34 +206,6 @@ export function winlogRecordID(event: WinlogEvent): undefined | string {
 }
 
 /**
- * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
- */
-type EventSequenceFields = Partial<
-  | {
-      endgame: Partial<{
-        serial_event_id: ECSField<number>;
-      }>;
-    }
-  | {
-      event: Partial<{
-        sequence: ECSField<number>;
-      }>;
-    }
->;
-
-/**
- * Extract the first non null event sequence value from a document. Returns undefined if the field doesn't exist in the document.
- *
- * @param event a document from ES
- */
-export function eventSequence(event: EventSequenceFields): number | undefined {
-  if (isLegacyEventSafeVersion(event)) {
-    return firstNonNullValue(event.endgame?.serial_event_id);
-  }
-  return firstNonNullValue(event.event?.sequence);
-}
-
-/**
  * The event.id ECS field.
  */
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
@@ -282,16 +254,6 @@ export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   } else {
     return firstNonNullValue(event.process?.entity_id);
   }
-}
-
-/**
- * The process.parent.entity_id ECS field.
- */
-export function parentEntityId(event: ResolverEvent): string | undefined {
-  if (isLegacyEvent(event)) {
-    return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
-  }
-  return event.process.parent?.entity_id;
 }
 
 /**

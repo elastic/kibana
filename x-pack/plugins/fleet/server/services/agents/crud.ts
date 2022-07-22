@@ -114,6 +114,27 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
   }
 }
 
+export async function getAgentTags(esClient: ElasticsearchClient): Promise<string[]> {
+  try {
+    const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
+      index: AGENTS_INDEX,
+      size: 0,
+      aggs: {
+        tags: {
+          terms: { field: 'tags', size: SO_SEARCH_LIMIT },
+        },
+      },
+    });
+    const buckets = result.aggregations?.tags.buckets;
+    return buckets?.map((bucket) => bucket.key) ?? [];
+  } catch (err) {
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      return [];
+    }
+    throw err;
+  }
+}
+
 export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
