@@ -13,7 +13,6 @@ import {
   MonitorFields,
   PrivateLocation,
   HeartbeatConfig,
-  SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
@@ -54,10 +53,10 @@ export class SyntheticsPrivateLocation {
 
       const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
         ...(config as Partial<MonitorFields>),
-        config_id: config.fields.config_id,
+        config_id: config.fields?.config_id,
         location_name: privateLocation.name,
-        'monitor.project.id': config.fields['monitor.project.name'],
-        'monitor.project.name': config.fields['monitor.project.name'],
+        'monitor.project.id': config.fields?.['monitor.project.name'],
+        'monitor.project.name': config.fields?.['monitor.project.name'],
       });
 
       return formattedPolicy;
@@ -109,6 +108,10 @@ export class SyntheticsPrivateLocation {
 
       if (hasLocation) {
         const newPolicy = await this.generateNewPolicy(config, privateLocation);
+
+        if (!newPolicy) {
+          return null;
+        }
 
         if (hasPolicy) {
           await this.updatePolicy(newPolicy, currId);
@@ -171,7 +174,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async findMonitor(config: SyntheticsMonitorWithId) {
+  async findMonitor(config: HeartbeatConfig) {
     const soClient = this.server.authSavedObjectsClient;
     try {
       const list = await this.server.fleet.packagePolicyService.list(soClient!, {
@@ -195,7 +198,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async deleteMonitor(config: SyntheticsMonitorWithId) {
+  async deleteMonitor(config: HeartbeatConfig) {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {

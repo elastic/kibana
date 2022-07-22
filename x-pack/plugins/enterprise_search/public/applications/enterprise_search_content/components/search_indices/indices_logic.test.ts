@@ -9,6 +9,8 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 
 import { indices } from '../../__mocks__/search_indices.mock';
 
+import moment from 'moment';
+
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
@@ -286,6 +288,57 @@ describe('IndicesLogic', () => {
           },
           hasNoIndices: false,
           indices: viewSearchIndices,
+          isLoading: false,
+          meta: DEFAULT_META,
+          status: Status.SUCCESS,
+        });
+      });
+      it('updates ingestionStatus for connector to error when last_seen is more than half an hour ago', () => {
+        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
+        const date = moment();
+        const lastSeen = date.subtract(31, 'minutes').format();
+        IndicesLogic.actions.apiSuccess({
+          indices: [
+            {
+              ...indices[1],
+              connector: {
+                ...indices[1].connector!,
+                last_seen: lastSeen,
+                status: ConnectorStatus.CONNECTED,
+              },
+            },
+          ],
+          isInitialRequest: true,
+          meta: DEFAULT_META,
+        });
+
+        expect(IndicesLogic.values).toEqual({
+          data: {
+            indices: [
+              {
+                ...indices[1],
+                connector: {
+                  ...indices[1].connector!,
+                  last_seen: lastSeen,
+                  status: ConnectorStatus.CONNECTED,
+                },
+              },
+            ],
+            isInitialRequest: true,
+            meta: DEFAULT_META,
+          },
+          hasNoIndices: false,
+          indices: [
+            {
+              ...connectorIndex,
+              connector: {
+                ...connectorIndex.connector,
+                last_seen: lastSeen,
+                status: ConnectorStatus.CONNECTED,
+              },
+              ingestionStatus: IngestionStatus.ERROR,
+            },
+          ],
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,

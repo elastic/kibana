@@ -23,6 +23,7 @@ export const formatSyntheticsPolicy = (
   const configKeys = Object.keys(config) as ConfigKey[];
 
   const formattedPolicy = { ...newPolicy };
+
   const currentInput = formattedPolicy.inputs.find(
     (input) => input.type === `synthetics/${monitorType}`
   );

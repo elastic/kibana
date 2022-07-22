@@ -317,7 +317,7 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
 
 export const HeartbeatConfigCodec = t.intersection([
   SyntheticsMonitorWithIdCodec,
-  t.interface({
+  t.partial({
     fields_under_root: t.boolean,
     fields: t.intersection([
       t.interface({
