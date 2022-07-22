@@ -308,14 +308,27 @@ export class UserProfileService {
           },
         });
 
-      return (
-        body.profiles
-          // "uids" is just a hint that allows to put user profiles with the requested uids on the top of the
-          // returned list, but if Elasticsearch cannot find user profiles for all requested uids it might include
-          // other "matched" user profiles as well.
-          .filter((rawProfile) => uids.has(rawProfile.uid))
-          .map((rawProfile) => parseUserProfile<D>(rawProfile))
+      // Using `_suggest` API to simulate `_bulk_get` API has two important shortcomings:
+      // 1. "uids" parameter is just a hint that asks Elasticsearch to put user profiles with the requested uids on the
+      // top of the returned list, but if Elasticsearch cannot find user profiles for all requested uids it might
+      // include other "matched" user profiles as well. We should filter those non-requested profiles out.
+      // 2. The `_suggest` API is supposed to sort results by relevance i.e. first by the search score (if `name`
+      // parameter is specified which isn't the case here) and then by the activation time. The `_bulk_get` API, on the
+      // contrary, should always return results in the order the consumer specified UIDs in (in our case, the insertion
+      // order for the `Set` we use as the UIDs parameter). That's why we're manually sorting profiles here.
+      const rawUserProfiles = new Map(
+        body.profiles.map((rawUserProfile) => [rawUserProfile.uid, rawUserProfile])
       );
+
+      const parsedUserProfiles = [];
+      for (const uid of uids) {
+        const rawUserProfile = rawUserProfiles.get(uid);
+        if (rawUserProfile) {
+          parsedUserProfiles.push(parseUserProfile<D>(rawUserProfile));
+        }
+      }
+
+      return parsedUserProfiles;
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;
