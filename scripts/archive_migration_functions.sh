@@ -4,6 +4,8 @@ standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-
 
 orig_archive="x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces"
 new_archive="x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_spaces"
+newArchives=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space")
+newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_timezone_space")
 test_config="x-pack/test/reporting_api_integration/reporting_and_security.config.ts"
 
 arrayify_csv() {
@@ -91,7 +93,6 @@ _find_config() {
 
   local current
   local parent
-  local grandParent
   local greatGrand
   current=$(dirname "$test_file")
   parent=$(dirname "$current")
@@ -277,6 +278,16 @@ load_kbn() {
   set +x
 }
 
+load_kbns() {
+  local space=${1:-default}
+
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" load "$x" --space "$space"
+    set +x
+  done
+}
+
 load_created_kbn_archive() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" load "$new_archive"
@@ -287,6 +298,16 @@ unload_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" unload "$new_archive"
   set +x
+}
+
+unload_kbns() {
+  local space=${1:-default}
+
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" unload "$x"
+    set +x
+  done
 }
 
 ping_server() {
