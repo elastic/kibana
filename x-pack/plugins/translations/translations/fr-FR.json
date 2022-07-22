@@ -9948,8 +9948,6 @@
     "xpack.cases.configureCases.incidentManagementSystemDesc": "Connectez vos cas à un système de gestion des incidents externes. Vous pouvez ensuite transmettre les données de cas en tant qu'incident dans un système tiers.",
     "xpack.cases.configureCases.incidentManagementSystemLabel": "Système de gestion des incidents",
     "xpack.cases.configureCases.incidentManagementSystemTitle": "Système de gestion des incidents externes",
-    "xpack.cases.configureCases.requiredMappings": "Au moins un champ de cas doit être mappé aux champs { connectorName } requis suivants : { fields }",
-    "xpack.cases.configureCases.saveAndCloseButton": "Enregistrer et fermer",
     "xpack.cases.configureCases.saveButton": "Enregistrer",
     "xpack.cases.configureCases.updateSelectedConnector": "Mettre à jour { connectorName }",
     "xpack.cases.configureCases.warningMessage": "Le connecteur utilisé pour envoyer des mises à jour au service externe a été supprimé ou vous ne disposez pas de la {appropriateLicense} pour l'utiliser. Pour mettre à jour des cas dans des systèmes externes, sélectionnez un autre connecteur ou créez-en un nouveau.",
