@@ -55,8 +55,6 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
             ActionComponents: [ActionLogButton],
-            // hide the console Done/close button
-            showCloseButton: false,
           })
           .show();
       }

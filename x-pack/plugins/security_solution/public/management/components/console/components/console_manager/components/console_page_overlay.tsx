@@ -30,7 +30,7 @@ export interface ConsolePageOverlayProps {
 }
 
 export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
-  ({ console, onHide, isHidden, body, actions, pageTitle = '', showCloseButton }) => {
+  ({ console, onHide, isHidden, body, actions, pageTitle = '', showCloseButton = false }) => {
     const getTestId = useTestIdGenerator('consolePageOverlay');
     const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
       (ev) => {
