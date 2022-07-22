@@ -13,13 +13,13 @@ import { ConvertTsvbToLensVisualization } from './types';
 const getConvertFnByType = async (
   type: PANEL_TYPES
 ): Promise<ConvertTsvbToLensVisualization | undefined> => {
-  const convertionFns: Record<PANEL_TYPES | string, () => Promise<ConvertTsvbToLensVisualization>> =
-    {
-      [PANEL_TYPES.TIMESERIES]: async (): Promise<ConvertTsvbToLensVisualization> => {
-        const { convertToLens } = await import('./timeseries');
-        return convertToLens;
-      },
-    };
+  const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
+    [PANEL_TYPES.TIMESERIES]: async () => {
+      const { convertToLens } = await import('./timeseries');
+      return convertToLens;
+    },
+  };
+
   return await convertionFns[type]?.();
 };
 
