@@ -74,14 +74,7 @@ describe('AlertSummaryView', () => {
         </TestProviders>
       );
 
-      [
-        'host.name',
-        'user.name',
-        i18n.RULE_TYPE,
-        'query',
-        i18n.SOURCE_EVENT_ID,
-        i18n.SESSION_ID,
-      ].forEach((fieldId) => {
+      ['host.name', 'user.name', i18n.RULE_TYPE, 'query'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
