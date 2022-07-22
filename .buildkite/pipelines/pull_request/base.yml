@@ -7,25 +7,43 @@ steps:
 
   - wait
 
-  - command: PARALLEL_LINT=8 .buildkite/scripts/steps/lint.sh
+  - command: PARALLEL_LINT=2 .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 90
+
+  - command: PARALLEL_LINT=2 .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 90
+
+  - command: PARALLEL_LINT=4 .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 90
+
+  - command: PARALLEL_LINT=4 .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
       queue: n2-8-spot
     timeout_in_minutes: 90
 
-  - command: PARALLEL_LINT=10 .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      queue: n2-8-spot
-    timeout_in_minutes: 90
-
-  - command: PARALLEL_LINT=12 .buildkite/scripts/steps/lint.sh
+  - command: PARALLEL_LINT=5 .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
       queue: n2-8-spot
     timeout_in_minutes: 90
 
   - command: PARALLEL_LINT=6 .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      queue: n2-8-spot
+    timeout_in_minutes: 90
+
+  - command: PARALLEL_LINT=7 .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
       queue: n2-8-spot
