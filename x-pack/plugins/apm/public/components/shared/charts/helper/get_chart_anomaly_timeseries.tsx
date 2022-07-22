@@ -14,7 +14,7 @@ import {
   ANOMALY_SEVERITY,
   ANOMALY_THRESHOLD,
 } from '../../../../../common/ml_constants';
-import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
+import { APMAnomalyTimeseries } from '../../../../../common/anomaly_detection/apm_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 
 export const expectedBoundsTitle = i18n.translate(
@@ -27,10 +27,12 @@ export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
   anomalyTimeseriesColor,
+  anomalyThreshold,
 }: {
-  anomalyTimeseries?: ServiceAnomalyTimeseries;
+  anomalyTimeseries?: APMAnomalyTimeseries;
   theme: EuiTheme;
   anomalyTimeseriesColor?: string;
+  anomalyThreshold: number;
 }):
   | {
       boundaries: APMChartSpec[];
@@ -61,12 +63,18 @@ export function getChartAnomalyTimeseries({
   ];
 
   const severities = [
+    { severity: ANOMALY_SEVERITY.LOW, threshold: ANOMALY_THRESHOLD.LOW },
+    {
+      severity: ANOMALY_SEVERITY.WARNING,
+      threshold: ANOMALY_THRESHOLD.WARNING,
+    },
+    { severity: ANOMALY_SEVERITY.MINOR, threshold: ANOMALY_THRESHOLD.MINOR },
     { severity: ANOMALY_SEVERITY.MAJOR, threshold: ANOMALY_THRESHOLD.MAJOR },
     {
       severity: ANOMALY_SEVERITY.CRITICAL,
       threshold: ANOMALY_THRESHOLD.CRITICAL,
     },
-  ];
+  ].filter((severity) => severity.threshold >= anomalyThreshold);
 
   const scores: APMChartSpec[] = severities.map(({ severity, threshold }) => {
     const color = getSeverityColor(threshold);
@@ -96,7 +104,7 @@ export function getChartAnomalyTimeseries({
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, minor {Minor} major {Major} critical {Critical}} anomaly',
+          '{severity, select, low {Low} warning {Warning} minor {Minor} major {Major} critical {Critical}} anomaly',
         values: {
           severity,
         },

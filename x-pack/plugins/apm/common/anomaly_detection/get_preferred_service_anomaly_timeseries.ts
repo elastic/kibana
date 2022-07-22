@@ -7,7 +7,7 @@
 
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
+import { APMAnomalyTimeseries } from './apm_anomaly_timeseries';
 
 export function getPreferredServiceAnomalyTimeseries({
   preferredEnvironment,
@@ -17,7 +17,7 @@ export function getPreferredServiceAnomalyTimeseries({
 }: {
   preferredEnvironment: Environment;
   detectorType: ApmMlDetectorType;
-  allAnomalyTimeseries: ServiceAnomalyTimeseries[];
+  allAnomalyTimeseries: APMAnomalyTimeseries[];
   fallbackToTransactions: boolean;
 }) {
   const seriesForType = allAnomalyTimeseries.filter(

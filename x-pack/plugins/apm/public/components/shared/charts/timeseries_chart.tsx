@@ -25,12 +25,11 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ANOMALY_THRESHOLD } from '@kbn/ml-plugin/common';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-plugin/public';
-import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import { APMAnomalyTimeseries } from '../../../../common/anomaly_detection/apm_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
@@ -39,6 +38,7 @@ import { useChartPointerEventContext } from '../../../context/chart_pointer_even
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
+import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 import { ChartContainer } from './chart_container';
 import {
   expectedBoundsTitle,
@@ -47,7 +47,7 @@ import {
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
-interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
+interface AnomalyTimeseries extends APMAnomalyTimeseries {
   color?: string;
 }
 interface Props {
@@ -69,6 +69,9 @@ interface Props {
   anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
+  anomalyThreshold?: number;
+  comparisonEnabled: boolean;
+  offset?: string;
 }
 export function TimeseriesChart({
   id,
@@ -82,6 +85,9 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  anomalyThreshold = ANOMALY_THRESHOLD.MAJOR,
+  comparisonEnabled,
+  offset,
 }: Props) {
   const history = useHistory();
   const { core } = useApmPluginContext();
@@ -89,18 +95,12 @@ export function TimeseriesChart({
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const {
-    query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services',
-    '/dependencies/*',
-    '/services/{serviceName}'
-  );
 
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
     anomalyTimeseriesColor: anomalyTimeseries?.color,
+    anomalyThreshold,
   });
 
   const isEmpty = isTimeseriesEmpty(timeseries);

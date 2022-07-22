@@ -54,6 +54,8 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { apmMlTransactionAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_transaction_anomaly_query';
+import { APMAnomalyTimeseries } from '../../../common/anomaly_detection/apm_anomaly_timeseries';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -1148,9 +1150,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    allAnomalyTimeseries: Array<
-      import('./../../../common/anomaly_detection/service_anomaly_timeseries').ServiceAnomalyTimeseries
-    >;
+    allAnomalyTimeseries: APMAnomalyTimeseries[];
   }> => {
     const setup = await setupRequest(resources);
 
@@ -1165,8 +1165,10 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     try {
       const allAnomalyTimeseries = await getAnomalyTimeseries({
-        serviceName,
-        transactionType,
+        query: apmMlTransactionAnomalyQuery({
+          serviceName,
+          transactionType,
+        }),
         start,
         end,
         mlSetup: setup.ml,

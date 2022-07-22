@@ -13,13 +13,13 @@ import {
 } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export function apmMlAnomalyQuery({
-  serviceName,
-  transactionType,
+  partitionField,
+  byField,
   detectorTypes,
 }: {
-  serviceName?: string;
+  partitionField?: string;
+  byField?: string;
   detectorTypes?: ApmMlDetectorType[];
-  transactionType?: string;
 }) {
   return [
     {
@@ -49,8 +49,8 @@ export function apmMlAnomalyQuery({
             'detector_index',
             ...(detectorTypes?.map((type) => getApmMlDetectorIndex(type)) ?? [])
           ),
-          ...termQuery('partition_field_value', serviceName),
-          ...termQuery('by_field_value', transactionType),
+          ...termQuery('partition_field_value', partitionField),
+          ...termQuery('by_field_value', byField),
         ],
       },
     },

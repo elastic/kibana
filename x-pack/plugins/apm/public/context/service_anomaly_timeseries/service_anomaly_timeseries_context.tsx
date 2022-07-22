@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useEnvironmentsContext } from '../environments_context/use_environments_context';
-import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
+import { APMAnomalyTimeseries } from '../../../common/anomaly_detection/apm_anomaly_timeseries';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
@@ -18,7 +18,7 @@ import { useLicenseContext } from '../license/use_license_context';
 
 export const ServiceAnomalyTimeseriesContext = React.createContext<{
   status: FETCH_STATUS;
-  allAnomalyTimeseries: ServiceAnomalyTimeseries[];
+  allAnomalyTimeseries: APMAnomalyTimeseries[];
 }>({
   status: FETCH_STATUS.NOT_INITIATED,
   allAnomalyTimeseries: [],

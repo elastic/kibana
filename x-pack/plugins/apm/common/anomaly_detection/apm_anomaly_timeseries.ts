@@ -8,13 +8,13 @@
 import { Coordinate } from '../../typings/timeseries';
 import { ApmMlDetectorType } from './apm_ml_detectors';
 
-export interface ServiceAnomalyTimeseries {
+export interface APMAnomalyTimeseries {
   jobId: string;
   type: ApmMlDetectorType;
   environment: string;
-  serviceName: string;
+  partitionFieldValue: string;
   version: number;
-  transactionType: string;
+  byFieldValue: string;
   anomalies: Array<Coordinate & { actual: number | null }>;
   bounds: Array<{ x: number; y0: number | null; y1: number | null }>;
 }

@@ -6,7 +6,11 @@
  */
 
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
+import {
+  ApmMlJob,
+  ApmMlJobType,
+} from '../../../common/anomaly_detection/apm_ml_job';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
@@ -50,13 +54,23 @@ export function getMlJobsWithAPMGroup(
           (stats) => stats.datafeed_id === job.datafeed_config?.datafeed_id
         );
 
+        const type = job.job_id.includes(ApmMlJobType.SpanMetrics)
+          ? ApmMlJobType.SpanMetrics
+          : ApmMlJobType.TransactionMetrics;
+
+        const version =
+          job.job_id === 'apm_span_metrics'
+            ? 3
+            : Number(job.custom_settings?.job_tags?.apm_ml_version ?? 1);
+
         return {
+          type,
           environment: String(
-            job.custom_settings?.job_tags?.environment
+            job.custom_settings?.job_tags?.environment ?? ENVIRONMENT_ALL.value
           ) as Environment,
           jobId: job.job_id,
           jobState: jobStats?.state as ApmMlJob['jobState'],
-          version: Number(job.custom_settings?.job_tags?.apm_ml_version ?? 1),
+          version,
           datafeedId: datafeedStats?.datafeed_id,
           datafeedState: datafeedStats?.state as ApmMlJob['datafeedState'],
           bucketSpan: job.analysis_config?.bucket_span,

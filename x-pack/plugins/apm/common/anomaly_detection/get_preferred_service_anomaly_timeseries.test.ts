@@ -9,7 +9,7 @@ import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
+import { APMAnomalyTimeseries } from './apm_anomaly_timeseries';
 
 const PROD = 'production' as Environment;
 const DEV = 'development' as Environment;
@@ -22,15 +22,15 @@ function createMockAnomalyTimeseries({
   type: ApmMlDetectorType;
   environment?: Environment;
   version?: number;
-}): ServiceAnomalyTimeseries {
+}): APMAnomalyTimeseries {
   return {
     anomalies: [],
     bounds: [],
     environment,
     jobId: uuid(),
     type,
-    serviceName: 'opbeans-java',
-    transactionType: 'request',
+    partitionFieldValue: 'opbeans-java',
+    byFieldValue: 'request',
     version,
   };
 }

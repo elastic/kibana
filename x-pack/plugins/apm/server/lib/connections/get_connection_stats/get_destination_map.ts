@@ -43,6 +43,8 @@ type Destination = {
     }
 );
 
+export type DestinationMap = Map<string, Node>;
+
 // This operation tries to find a service for a dependency, by:
 // - getting a span for each value of span.destination.service.resource (which indicates an outgoing call)
 // - for each span, find the transaction it creates
@@ -59,7 +61,7 @@ export const getDestinationMap = ({
   end: number;
   filter: QueryDslQueryContainer[];
   offset?: string;
-}) => {
+}): Promise<DestinationMap> => {
   return withApmSpan('get_destination_map', async () => {
     const { apmEventClient } = setup;
 

@@ -8,6 +8,7 @@ import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { Environment } from '../environment_rt';
 
 export interface ApmMlJob {
+  type: ApmMlJobType;
   environment: Environment;
   version: number;
   jobId: string;
@@ -15,4 +16,9 @@ export interface ApmMlJob {
   datafeedId?: string;
   datafeedState?: DATAFEED_STATE;
   bucketSpan?: string;
+}
+
+export enum ApmMlJobType {
+  SpanMetrics = 'apm_span_metrics',
+  TransactionMetrics = 'apm_tx_metrics',
 }

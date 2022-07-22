@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import { compact, keyBy } from 'lodash';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { parseInterval } from '@kbn/data-plugin/common';
-import { Environment } from '../../../common/environment_rt';
-import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
+import type { Logger } from '@kbn/logging';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { compact, keyBy } from 'lodash';
 import {
   ApmMlDetectorType,
   getApmMlDetectorType,
 } from '../../../common/anomaly_detection/apm_ml_detectors';
-import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
-import { apmMlJobsQuery } from './apm_ml_jobs_query';
+import type { APMAnomalyTimeseries } from '../../../common/anomaly_detection/apm_anomaly_timeseries';
+import { Environment } from '../../../common/environment_rt';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { maybe } from '../../../common/utils/maybe';
 import type { Setup } from '../helpers/setup_request';
 import { anomalySearch } from './anomaly_search';
+import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
+import { apmMlJobsQuery } from './apm_ml_jobs_query';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
@@ -46,22 +46,20 @@ function getBoundedX(value: number | null, start: number, end: number) {
 }
 
 export async function getAnomalyTimeseries({
-  serviceName,
-  transactionType,
+  query,
   start,
   end,
   logger,
   mlSetup,
   environment: preferredEnvironment,
 }: {
-  serviceName: string;
-  transactionType: string;
+  query: ReturnType<typeof apmMlAnomalyQuery>;
   start: number;
   end: number;
   environment: Environment;
   logger: Logger;
   mlSetup: Required<Setup>['ml'];
-}): Promise<ServiceAnomalyTimeseries[]> {
+}): Promise<APMAnomalyTimeseries[]> {
   if (!mlSetup) {
     return [];
   }
@@ -105,10 +103,7 @@ export async function getAnomalyTimeseries({
         query: {
           bool: {
             filter: [
-              ...apmMlAnomalyQuery({
-                serviceName,
-                transactionType,
-              }),
+              ...query,
               ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
               ...apmMlJobsQuery(mlJobs),
             ],
@@ -134,14 +129,14 @@ export async function getAnomalyTimeseries({
                   },
                 },
                 {
-                  serviceName: {
+                  partitionFieldValue: {
                     terms: {
                       field: 'partition_field_value',
                     },
                   },
                 },
                 {
-                  transactionType: {
+                  byFieldValue: {
                     terms: {
                       field: 'by_field_value',
                     },
@@ -193,7 +188,7 @@ export async function getAnomalyTimeseries({
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
 
-  const series: Array<ServiceAnomalyTimeseries | undefined> =
+  const series: Array<APMAnomalyTimeseries | undefined> =
     anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
       const jobId = bucket.key.jobId as string;
       const job = maybe(jobsById[jobId]);
@@ -203,17 +198,24 @@ export async function getAnomalyTimeseries({
         return undefined;
       }
 
-      const type = getApmMlDetectorType(Number(bucket.key.detectorIndex));
+      const type = getApmMlDetectorType({
+        jobId,
+        detectorIndex: Number(bucket.key.detectorIndex),
+      });
 
       // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
-      const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
+      const divider =
+        type === ApmMlDetectorType.txFailureRate ||
+        type === ApmMlDetectorType.spanFailureRate
+          ? 100
+          : 1;
 
       return {
         jobId,
         type,
-        serviceName: bucket.key.serviceName as string,
+        partitionFieldValue: bucket.key.partitionFieldValue as string,
         environment: job.environment,
-        transactionType: bucket.key.transactionType as string,
+        byFieldValue: bucket.key.byFieldValue as string,
         version: job.version,
         anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,
