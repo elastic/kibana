@@ -270,7 +270,7 @@ export class ProjectMonitorFormatter {
       );
 
     if (hasMonitorBeenEdited) {
-      syncEditedMonitor({
+      await syncEditedMonitor({
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
