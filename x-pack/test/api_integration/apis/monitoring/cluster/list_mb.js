@@ -14,6 +14,9 @@ export default function ({ getService }) {
   const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('list mb', () => {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     describe('with trial license clusters', () => {
       const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster_mb';
       const timeRange = {
