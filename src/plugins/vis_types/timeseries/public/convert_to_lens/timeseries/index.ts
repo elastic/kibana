@@ -9,26 +9,33 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo, getFieldType } from '../lib/datasource';
+import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
 import { SUPPORTED_FORMATTERS } from '../lib/formatters';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { getYExtents } from '../lib/xy';
+import {
+  convertChartType,
+  convertFilter,
+  convertMetrics,
+  convertSplitFilters,
+  getYExtents,
+  isSplitWithDateHistogram,
+} from '../lib/xy';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
-  // get the active series number
-  let seriesNum = 0;
-  model.series.forEach((series) => {
-    if (!series.hidden) seriesNum++;
-  });
 
+  // get the active series number
+  const seriesNum = model.series.filter((series) => !series.hidden).length;
   const dataViews = getDataViewsStart();
+
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
-    if (layer.hidden) continue;
+    if (layer.hidden) {
+      continue;
+    }
 
     const { indexPatternId, timeField } = await getDataSourceInfo(
       model.index_pattern,
@@ -38,79 +45,34 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       dataViews
     );
 
-    const timeShift = layer.offset_time;
-    // translate to Lens seriesType
-    const layerChartType =
-      layer.chart_type === 'line' && Number(layer.fill) > 0 ? 'area' : layer.chart_type;
-    let chartType = layerChartType;
-
-    if (layer.stacked !== 'none' && layer.stacked !== 'percent') {
-      chartType = layerChartType !== 'line' ? `${layerChartType}_stacked` : 'line';
-    }
-    if (layer.stacked === 'percent') {
-      chartType = layerChartType !== 'line' ? `${layerChartType}_percentage_stacked` : 'line';
-    }
-
     // handle multiple metrics
     const series = getSeries(layer.metrics, seriesNum);
     if (!series) {
       return null;
     }
     const { metrics: metricsArray, seriesAgg } = series;
-    let filter: {
-      kql?: string | { [key: string]: any } | undefined;
-      lucene?: string | { [key: string]: any } | undefined;
-    };
-    if (layer.filter) {
-      if (layer.filter.language === 'kuery') {
-        filter = { kql: layer.filter.query };
-      } else if (layer.filter.language === 'lucene') {
-        filter = { lucene: layer.filter.query };
-      }
-    }
-
-    const metricsWithParams = metricsArray.map((metric) => {
-      return {
-        ...metric,
-        color: metric.color ?? layer.color,
-        params: {
-          ...metric.params,
-          ...(timeShift && { shift: timeShift }),
-          ...(filter && filter),
-        },
-      };
-    });
-    const splitFilters: VisualizeEditorLayersContext['splitFilters'] = [];
-    if (layer.split_mode === 'filter' && layer.filter) {
-      splitFilters.push({ filter: layer.filter });
-    }
-    if (layer.split_filters) {
-      splitFilters.push(...layer.split_filters);
-    }
-
+    const filter = convertFilter(layer);
+    const metrics = convertMetrics(layer, metricsArray, filter);
+    const splitFilters = convertSplitFilters(layer);
     const palette = layer.palette as PaletteOutput;
     const splitFields = getFieldsForTerms(layer.terms_field);
 
     // in case of terms in a date field, we want to apply the date_histogram
-    let splitWithDateHistogram = false;
-    if (layer.terms_field && layer.split_mode === 'terms' && splitFields) {
-      for (const f of splitFields) {
-        const fieldType = await getFieldType(indexPatternId, f, dataViews);
+    const splitWithDateHistogram = await isSplitWithDateHistogram(
+      layer,
+      splitFields,
+      indexPatternId,
+      dataViews
+    );
 
-        if (fieldType === 'date') {
-          if (splitFields.length === 1) {
-            splitWithDateHistogram = true;
-          } else {
-            return null;
-          }
-        }
-      }
+    if (splitWithDateHistogram === null) {
+      return null;
     }
 
     const layerConfiguration: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
-      chartType,
+      chartType: convertChartType(layer),
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
       ...(layer.terms_field && { splitFields }),
       splitWithDateHistogram,
@@ -135,7 +97,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
         },
       }),
       collapseFn: seriesAgg,
-      metrics: [...metricsWithParams],
+      metrics,
       timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),

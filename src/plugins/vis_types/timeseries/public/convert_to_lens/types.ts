@@ -12,3 +12,8 @@ import type { Panel } from '../../common/types';
 export type ConvertTsvbToLensVisualization = (
   model: Panel
 ) => Promise<NavigateToLensContext | null>;
+
+export interface Filter {
+  kql?: string | { [key: string]: any } | undefined;
+  lucene?: string | { [key: string]: any } | undefined;
+}

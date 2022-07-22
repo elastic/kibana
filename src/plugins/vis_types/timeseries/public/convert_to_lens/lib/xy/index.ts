@@ -7,3 +7,7 @@
  */
 
 export * from './extents';
+export * from './chart_type';
+export * from './filters';
+export * from './metrics';
+export * from './date_histogram';
