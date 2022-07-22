@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
 export CI_STATS_BUILD_ID
 
