@@ -24,7 +24,7 @@ import {
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { setDrawMode, updateFlyout } from './ui_actions';
+import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -57,17 +57,24 @@ import {
   StyleDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
+  VectorStyleDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SCALING_TYPES } from '../../common/constants';
+import {
+  DRAW_MODE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SCALING_TYPES,
+  STYLE_TYPE,
+} from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
-import { getDrawMode } from '../selectors/ui_selectors';
+import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -196,6 +203,15 @@ export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {
 
     layerDescriptors.forEach((layerDescriptor) => {
       dispatch(addLayer({ ...layerDescriptor, __isPreviewLayer: true }));
+
+      // Auto open layer legend to increase legend discoverability
+      if (
+        layerDescriptor.style &&
+        (hasByValueStyling(layerDescriptor.style) ||
+          layerDescriptor.style.type === LAYER_STYLE_TYPE.HEATMAP)
+      ) {
+        dispatch(showTOCDetails(layerDescriptor.id));
+      }
     });
   };
 }
@@ -602,6 +618,10 @@ function removeLayerFromLayerList(layerId: string) {
     if (layerId === editState?.layerId) {
       dispatch(setDrawMode(DRAW_MODE.NONE));
     }
+    const openTOCDetails = getOpenTOCDetails(getState());
+    if (openTOCDetails.includes(layerId)) {
+      dispatch(hideTOCDetails(layerId));
+    }
   };
 }
 
@@ -643,6 +663,11 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
         ...styleDescriptor,
       },
     });
+
+    // Auto open layer legend to increase legend discoverability
+    if (hasByValueStyling(styleDescriptor)) {
+      dispatch(showTOCDetails(layerId));
+    }
 
     // Ensure updateStyleMeta is triggered
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
@@ -741,4 +766,13 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });
   }
+}
+
+function hasByValueStyling(styleDescriptor: StyleDescriptor) {
+  return (
+    styleDescriptor.type === LAYER_STYLE_TYPE.VECTOR &&
+    Object.values((styleDescriptor as VectorStyleDescriptor).properties).some((styleProperty) => {
+      return (styleProperty as { type?: STYLE_TYPE })?.type === STYLE_TYPE.DYNAMIC;
+    })
+  );
 }
