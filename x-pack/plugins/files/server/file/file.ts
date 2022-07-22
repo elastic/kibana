@@ -31,6 +31,12 @@ import { InternalFileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { toJSON } from './to_json';
+import {
+  AlreadyDeletedError,
+  ContentAlreadyUploadedError,
+  NoDownloadAvailableError,
+  UploadInProgressError,
+} from './errors';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
@@ -63,7 +69,7 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  private canUpload(): boolean {
+  private contentUploaded(): boolean {
     return (
       this.fileSO.attributes.Status === 'AWAITING_UPLOAD' ||
       this.fileSO.attributes.Status === 'UPLOAD_ERROR'
@@ -79,8 +85,10 @@ export class File<M = unknown> implements IFile {
   }
 
   public async uploadContent(content: Readable): Promise<void> {
-    if (!this.canUpload()) {
-      throw new Error(`Already uploaded file [id = ${this.id}][name = ${this.name}].`);
+    if (!this.contentUploaded()) {
+      throw new ContentAlreadyUploadedError(
+        `Already uploaded file [id = ${this.id}][name = ${this.name}].`
+      );
     }
     this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
     await this.updateFileState({
@@ -106,7 +114,7 @@ export class File<M = unknown> implements IFile {
   public downloadContent(): Promise<Readable> {
     const { size } = this.attributes;
     if (this.status !== 'READY') {
-      throw new Error('This file is not ready for download.');
+      throw new NoDownloadAvailableError('This file is not ready for download.');
     }
     // We pass through this file ID to retrieve blob content.
     return this.blobStorage.download({ id: this.id, size });
@@ -115,7 +123,10 @@ export class File<M = unknown> implements IFile {
   public async delete(): Promise<void> {
     const { attributes } = this.fileSO;
     if (attributes.Status === 'UPLOADING') {
-      throw new Error('Cannot delete file while upload in progress');
+      throw new UploadInProgressError('Cannot delete file while upload in progress');
+    }
+    if (attributes.Status === 'DELETED') {
+      throw new AlreadyDeletedError('File has already been deleted');
     }
     await this.updateFileState({
       action: 'delete',
