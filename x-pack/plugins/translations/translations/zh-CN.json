@@ -7938,8 +7938,6 @@
     "xpack.apm.serviceDetails.metricsTabLabel": "指标",
     "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "概览",
-    "xpack.apm.serviceDetails.profilingTabExperimentalDescription": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.apm.serviceDetails.profilingTabExperimentalLabel": "技术预览",
     "xpack.apm.serviceDetails.profilingTabLabel": "分析",
     "xpack.apm.serviceDetails.transactionsTabLabel": "事务",
     "xpack.apm.serviceGroup.allServices.title": "所有服务",
