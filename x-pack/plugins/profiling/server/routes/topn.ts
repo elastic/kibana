@@ -17,6 +17,7 @@ import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace'
 import { getClient, getAggs } from './compat';
 import { ProfilingRequestHandlerContext } from '../types';
 import { RouteRegisterParameters } from '.';
+import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 
 export async function topNElasticSearchQuery({
   client,
@@ -181,7 +182,12 @@ export function registerTraceEventsTopNContainersSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNContainers, 'ContainerName');
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNContainers,
+    getFieldNameForTopNType(TopNType.Containers)
+  );
 }
 
 export function registerTraceEventsTopNDeploymentsSearchRoute({
@@ -189,7 +195,12 @@ export function registerTraceEventsTopNDeploymentsSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNDeployments, 'PodName');
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNDeployments,
+    getFieldNameForTopNType(TopNType.Deployments)
+  );
 }
 
 export function registerTraceEventsTopNHostsSearchRoute({
@@ -197,7 +208,7 @@ export function registerTraceEventsTopNHostsSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNHosts, 'HostID');
+  return queryTopNCommon(router, logger, paths.TopNHosts, getFieldNameForTopNType(TopNType.Hosts));
 }
 
 export function registerTraceEventsTopNStackTracesSearchRoute({
@@ -205,7 +216,12 @@ export function registerTraceEventsTopNStackTracesSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNTraces, 'StackTraceID');
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNTraces,
+    getFieldNameForTopNType(TopNType.Traces)
+  );
 }
 
 export function registerTraceEventsTopNThreadsSearchRoute({
@@ -213,5 +229,10 @@ export function registerTraceEventsTopNThreadsSearchRoute({
   logger,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  return queryTopNCommon(router, logger, paths.TopNThreads, 'ThreadName');
+  return queryTopNCommon(
+    router,
+    logger,
+    paths.TopNThreads,
+    getFieldNameForTopNType(TopNType.Threads)
+  );
 }

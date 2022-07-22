@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { createContext } from 'react';
-import type { TopNSubchart } from '../../../common/topn';
-
-export const TopNContext = createContext<{ charts: TopNSubchart[] }>({
-  charts: [],
-});
+export function asPercentage(value: number, precision: number = 0) {
+  return `${Number(value * 100).toFixed(precision)}%`;
+}

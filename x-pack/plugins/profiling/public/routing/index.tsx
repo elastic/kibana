@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import * as t from 'io-ts';
-import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import { toNumberRt } from '@kbn/io-ts-utils';
-import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { toNumberRt } from '@kbn/io-ts-utils';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
+import { Redirect } from 'react-router-dom';
+import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
@@ -30,84 +31,35 @@ const routes = {
     children: {
       '/': {
         children: {
-          '/stacktraces': {
-            element: (
-              <RouteBreadcrumb
-                title={i18n.translate('xpack.profiling.breadcrumb.stackTraces', {
-                  defaultMessage: 'Stacktraces',
-                })}
-                href="/stacktraces"
-              >
-                <StackTracesView>
-                  <Outlet />
-                </StackTracesView>
-              </RouteBreadcrumb>
-            ),
-            children: {
-              '/stacktraces/containers': {
-                element: (
-                  <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.containers', {
-                      defaultMessage: 'Containers',
-                    })}
-                    href="/stacktraces/containers"
-                  >
-                    <Outlet />
-                  </RouteBreadcrumb>
-                ),
-              },
-              '/stacktraces/deployments': {
-                element: (
-                  <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.deployments', {
-                      defaultMessage: 'Deployments',
-                    })}
-                    href="/stacktraces/deployments"
-                  >
-                    <Outlet />
-                  </RouteBreadcrumb>
-                ),
-              },
-              '/stacktraces/threads': {
-                element: (
-                  <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.threads', {
-                      defaultMessage: 'Threads',
-                    })}
-                    href="/stacktraces/threads"
-                  >
-                    <Outlet />
-                  </RouteBreadcrumb>
-                ),
-              },
-              '/stacktraces/hosts': {
-                element: (
-                  <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.hosts', {
-                      defaultMessage: 'Hosts',
-                    })}
-                    href="/stacktraces/hosts"
-                  >
-                    <Outlet />
-                  </RouteBreadcrumb>
-                ),
-              },
-              '/stacktraces/traces': {
-                element: (
-                  <RouteBreadcrumb
-                    title={i18n.translate('xpack.profiling.breadcrumb.traces', {
-                      defaultMessage: 'Traces',
-                    })}
-                    href="/stacktraces/traces"
-                  >
-                    <Outlet />
-                  </RouteBreadcrumb>
-                ),
-              },
-              '/stacktraces': {
-                element: <Redirect to="/stacktraces/containers" />,
+          '/stacktraces/{topNType}': {
+            element: <StackTracesView />,
+            params: t.type({
+              path: t.type({
+                topNType: t.union([
+                  t.literal(TopNType.Containers),
+                  t.literal(TopNType.Deployments),
+                  t.literal(TopNType.Hosts),
+                  t.literal(TopNType.Threads),
+                  t.literal(TopNType.Traces),
+                ]),
+              }),
+              query: t.type({
+                displayAs: t.union([
+                  t.literal(StackTracesDisplayOption.StackTraces),
+                  t.literal(StackTracesDisplayOption.Percentage),
+                ]),
+                limit: toNumberRt,
+              }),
+            }),
+            defaults: {
+              query: {
+                displayAs: StackTracesDisplayOption.StackTraces,
+                limit: '10',
               },
             },
+          },
+          '/stacktraces': {
+            element: <Redirect to="/stacktraces/containers" />,
           },
           '/flamegraphs': {
             element: (
