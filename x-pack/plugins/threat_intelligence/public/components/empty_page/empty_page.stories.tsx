@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { EmptyPage } from '.';
 
 export default {
@@ -14,5 +16,18 @@ export default {
 };
 
 export function BasicEmptyPage() {
-  return <EmptyPage integrationsPageLink="https://google.com" />;
+  const KibanaReactContext = createKibanaReactContext({
+    docLinks: {
+      links: {
+        securitySolution: {
+          threatIntelInt: 'https://google.com',
+        },
+      },
+    },
+  } as unknown as Partial<CoreStart>);
+  return (
+    <KibanaReactContext.Provider>
+      <EmptyPage integrationsPageLink="https://google.com" />
+    </KibanaReactContext.Provider>
+  );
 }

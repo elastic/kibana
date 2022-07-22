@@ -10,7 +10,7 @@ import React, { VFC } from 'react';
 import { EuiEmptyPrompt, EuiImage, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { useKibana } from '../../hooks/use_kibana';
 import illustration from './integrations_light.svg';
 
 export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
@@ -22,8 +22,7 @@ interface EmptyPageProps {
 }
 
 export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
-  const docsLink =
-    'https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html';
+  const { docLinks } = useKibana().services;
 
   return (
     <EuiEmptyPrompt
@@ -71,7 +70,11 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
             information, view the {docsLink}."
               values={{
                 docsLink: (
-                  <EuiLink href={docsLink} target="_blank" data-test-subj={DOCS_LINK_TEST_ID}>
+                  <EuiLink
+                    href={docLinks.links.securitySolution.threatIntelInt}
+                    target="_blank"
+                    data-test-subj={DOCS_LINK_TEST_ID}
+                  >
                     <FormattedMessage
                       id="xpack.threatIntelligence.common.emptyPage.docsLinkText"
                       defaultMessage="Security app documentation"
