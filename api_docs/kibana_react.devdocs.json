@@ -1155,6 +1155,18 @@
           {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/home.tsx"
           }
         ],
         "children": [
@@ -2067,6 +2079,26 @@
           {
             "plugin": "home",
             "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
+          },
+          {
+            "plugin": "home",
+            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
           }
         ],
         "children": [
