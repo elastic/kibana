@@ -12,12 +12,17 @@ import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { EuiPageBody } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../application/utils/search_utils';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  SearchQueryLanguage,
+  SavedSearchSavedObject,
+} from '../../application/utils/search_utils';
 import { useAiOpsKibana } from '../../kibana_context';
 import {
   Accessor,
@@ -32,6 +37,8 @@ import {
 export interface ExplainLogRateSpikesWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
+  savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 
 const defaultSearchQuery = {
@@ -57,7 +64,10 @@ export const getDefaultAiOpsListState = (
 
 export const restorableDefaults = getDefaultAiOpsListState();
 
-export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
+export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({
+  dataView,
+  savedSearch,
+}) => {
   const { services } = useAiOpsKibana();
   const { notifications } = services;
   const { toasts } = notifications;
@@ -149,7 +159,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
-        <ExplainLogRateSpikes dataView={dataView} />
+        <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />
       </EuiPageBody>
     </UrlStateContextProvider>
   );

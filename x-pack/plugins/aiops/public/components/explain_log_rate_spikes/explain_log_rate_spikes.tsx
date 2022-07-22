@@ -18,23 +18,20 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { Filter, Query } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
-import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { ApiExplainLogRateSpikes } from '../../../common/api';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
+import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
-import { SpikeAnalysisTable } from '../spike_analysis_table';
 import { restorableDefaults } from './explain_log_rate_spikes_wrapper';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
+import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -42,15 +39,24 @@ import { SearchPanel } from '../search_panel';
 interface ExplainLogRateSpikesProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
+  savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView, savedSearch }) => {
   const { services } = useAiOpsKibana();
-  const { http, data: dataService } = services;
-  const basePath = http?.basePath.get() ?? '';
+  const { data: dataService } = services;
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
+
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+
+  useEffect(() => {
+    if (savedSearch) {
+      setCurrentSavedSearch(savedSearch);
+    }
+  }, [savedSearch]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -59,6 +65,12 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
+
       setAiopsListState({
         ...aiopsListState,
         searchQuery: searchParams.searchQuery,
@@ -67,11 +79,11 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
         filters: searchParams.filters,
       });
     },
-    [aiopsListState, setAiopsListState]
+    [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const { docStats, timefilter, earliest, latest, searchQueryLanguage, searchString, searchQuery } =
-    useData(dataView, aiopsListState, setGlobalState);
+    useData({ currentDataView: dataView, currentSavedSearch }, aiopsListState, setGlobalState);
 
   useEffect(() => {
     return () => {
@@ -104,35 +116,10 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
   useEffect(() => {
     // Update data query manager if input string is updated
     dataService?.query.queryString.setQuery({
-      query: searchString,
+      query: searchString ?? '',
       language: searchQueryLanguage,
     });
   }, [dataService, searchQueryLanguage, searchString]);
-
-  const { cancel, start, data, isRunning, error } = useFetchStream<
-    ApiExplainLogRateSpikes,
-    typeof basePath
-  >(
-    `${basePath}/internal/aiops/explain_log_rate_spikes`,
-    {
-      // @ts-ignore unexpected type
-      start: earliest,
-      // @ts-ignore unexpected type
-      end: latest,
-      // TODO Consider an optional Kuery.
-      kuery: '',
-      // TODO Handle data view without time fields.
-      timeFieldName: dataView.timeFieldName ?? '',
-      index: dataView.title,
-      ...windowParameters,
-    },
-    { reducer: streamReducer, initialState }
-  );
-
-  useEffect(() => {
-    start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <>
@@ -176,7 +163,7 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
           <EuiFlexItem>
             <SearchPanel
               dataView={dataView}
-              searchString={searchString}
+              searchString={searchString ?? ''}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
@@ -194,20 +181,12 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }
           <EuiSpacer size="m" />
           {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
             <EuiFlexItem>
-              <ProgressControls
-                progress={data.loaded}
-                progressMessage={data.loadingState ?? ''}
-                isRunning={isRunning}
-                onRefresh={start}
-                onCancel={cancel}
+              <ExplainLogRateSpikesAnalysis
+                dataView={dataView}
+                earliest={earliest}
+                latest={latest}
+                windowParameters={windowParameters}
               />
-              {data?.changePoints ? (
-                <SpikeAnalysisTable
-                  changePointData={data.changePoints}
-                  loading={isRunning}
-                  error={error}
-                />
-              ) : null}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
