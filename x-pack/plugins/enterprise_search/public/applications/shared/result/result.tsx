@@ -25,23 +25,21 @@ interface ResultProps {
 export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const toolTipContent = (
-    <>
-      {fields.length <= 3
-        ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.allVisible', {
-            defaultMessage: 'All fields are visible',
-          })
-        : isExpanded
-        ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showLess', {
-            defaultMessage: 'Show {amount} less fields',
-            values: { amount: fields.length - 3 },
-          })
-        : i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showMore', {
-            defaultMessage: 'Show {amount} more fields',
-            values: { amount: fields.length - 3 },
-          })}
-    </>
-  );
+  const tooltipText =
+    fields.length <= 3
+      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.allVisible', {
+          defaultMessage: 'All fields are visible',
+        })
+      : isExpanded
+      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showLess', {
+          defaultMessage: 'Show {amount} less fields',
+          values: { amount: fields.length - 3 },
+        })
+      : i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showMore', {
+          defaultMessage: 'Show {amount} more fields',
+          values: { amount: fields.length - 3 },
+        });
+  const toolTipContent = <>{tooltipText}</>;
 
   return (
     <EuiPanel hasBorder paddingSize="s">
@@ -72,6 +70,7 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
                 iconType={isExpanded ? 'fold' : 'unfold'}
                 color="text"
                 onClick={() => setIsExpanded(!isExpanded)}
+                aria-label={tooltipText}
               />
             </EuiToolTip>
           </div>

@@ -59,6 +59,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       iconType="iInCircle"
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.shared.result.header.metadata.icon.ariaLabel',
+        { defaultMessage: 'Metadata for document: {id}', values: { id } }
+      )}
     />
   );
 
