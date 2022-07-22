@@ -10,10 +10,19 @@ import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export const search = async ({ indexName, query }: { indexName: string; query: string }) => {
-  const route = `/internal/enterprise_search/${indexName}/search/${query}`;
+export const searchDocuments = async ({
+  indexName,
+  query,
+}: {
+  indexName: string;
+  query: string;
+}) => {
+  const route = `/internal/enterprise_search/search/${indexName}/${query}`;
 
   return await HttpLogic.values.http.get<SearchResponseBody>(route);
 };
 
-export const SearchDocumentsApiLogic = createApiLogic(['search_documents_api_logic'], search);
+export const SearchDocumentsApiLogic = createApiLogic(
+  ['search_documents_api_logic'],
+  searchDocuments
+);

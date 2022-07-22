@@ -16,8 +16,8 @@ import {
 
 import { Status } from '../../../../../common/types/api';
 
-import { MappingsApiLogic } from '../../api/mapping/mapping_logic';
-import { SearchDocumentsApiLogic } from '../../api/search/search_documents_logic';
+import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
+import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
 
 import { IndexNameLogic } from './index_name_logic';
 

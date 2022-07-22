@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { IconType, IconColor } from '@elastic/eui';
-
-export interface ActionProps {
-  color?: IconColor;
-  iconType?: IconType | string;
-  label: string;
-  onClick?: Function;
-}
+import { IconType } from '@elastic/eui';
 
 export interface MetaDataProps {
-  clickCount?: number;
-  engineId?: string;
   id: string;
-  lastUpdated?: string;
   onDocumentDelete?: Function;
 }
 
@@ -26,6 +16,6 @@ export interface ResultFieldProps {
   fieldName: string;
   fieldType?: string;
   fieldValue: string;
-  iconType: IconType;
+  iconType?: IconType;
   isExpanded?: boolean;
 }

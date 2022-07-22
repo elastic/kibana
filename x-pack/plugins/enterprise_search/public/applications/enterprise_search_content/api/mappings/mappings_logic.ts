@@ -11,7 +11,7 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export const getMappings = async ({ indexName }: { indexName: string }) => {
-  const route = `/internal/enterprise_search/${indexName}/mapping/`;
+  const route = `/internal/enterprise_search/mappings/${indexName}/`;
 
   return await HttpLogic.values.http.get<IndicesGetMappingIndexMappingRecord>(route);
 };

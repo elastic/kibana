@@ -7,79 +7,53 @@
 
 import React, { useState } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 
-// @ts-ignore
-import { htmlIdGenerator } from '@elastic/eui/lib/services';
+import { i18n } from '@kbn/i18n';
 
 import { ResultFields } from './result_fields';
 import { ResultHeader } from './result_header';
 
-import { ActionProps, MetaDataProps, ResultFieldProps } from './types';
+import { MetaDataProps, ResultFieldProps } from './types';
+import './result.scss';
 
 interface ResultProps {
-  actions?: ActionProps[];
   fields: ResultFieldProps[];
-  isCheckable?: boolean;
-  isDraggable?: boolean;
   metaData: MetaDataProps;
 }
 
-export const Result: React.FC<ResultProps> = ({
-  actions = [],
-  metaData,
-  fields,
-  isCheckable,
-  isDraggable,
-}) => {
+export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
-  const [showLeftColumn] = useState(isCheckable || isDraggable);
 
   const toolTipContent = (
     <>
       {fields.length <= 3
-        ? 'All fields are visible'
-        : `Show ${fields.length - 3} ${isExpanded ? 'fewer' : 'more'} fields`}
+        ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.allVisible', {
+            defaultMessage: 'All fields are visible',
+          })
+        : isExpanded
+        ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showLess', {
+            defaultMessage: 'Show {amount} less fields',
+            values: { amount: fields.length - 3 },
+          })
+        : i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showMore', {
+            defaultMessage: 'Show {amount} more fields',
+            values: { amount: fields.length - 3 },
+          })}
     </>
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="s" className={`${isChecked && 'result__selected'}`}>
+    <EuiPanel hasBorder paddingSize="s">
       <EuiFlexGroup gutterSize="none">
-        {showLeftColumn && (
-          <EuiFlexItem grow={false}>
-            <div className="resultCheckDragColumn">
-              {isCheckable ? (
-                <EuiCheckbox
-                  id={htmlIdGenerator()()}
-                  checked={isChecked}
-                  onChange={() => setIsChecked(!isChecked)}
-                />
-              ) : (
-                <div className="resultCheckDragColumn__emptySpace" />
-              )}
-              {isDraggable ? (
-                <EuiButtonIcon iconType="grab" color="text" onClick={() => {}} />
-              ) : (
-                <div className="resultCheckDragColumn__emptySpace" />
-              )}
-            </div>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <ResultHeader
-                title={`Document ID: ${metaData.id}`}
-                actions={actions}
+                title={i18n.translate('xpack.enterpriseSearch.shared.result.title.id', {
+                  defaultMessage: 'Document id: {id}',
+                  values: { id: metaData.id },
+                })}
                 metaData={metaData}
               />
             </EuiFlexItem>

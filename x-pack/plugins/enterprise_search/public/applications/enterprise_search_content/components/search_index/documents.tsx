@@ -20,46 +20,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { Result } from '../../../shared/result/result';
 
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
-
-const iconMap: Record<string, string> = {
-  boolean: 'tokenBoolen',
-  date: 'tokenDate',
-  date_range: 'tokenDate',
-  double: 'tokenNumber',
-  double_range: 'tokenDate',
-  flattened: 'tokenObject',
-  float: 'tokenNumber',
-  float_range: 'tokenNumber',
-  geo_point: 'tokenGeo',
-  geo_shape: 'tokenGeo',
-  half_float: 'tokenNumber',
-  histogram: 'tokenHistogram',
-  integer: 'tokenNumber',
-  integer_range: 'tokenNumber',
-  ip: 'tokenIp',
-  ip_range: 'tokenIp',
-  join: 'tokenJoin',
-  keyword: 'tokenKeyword',
-  long: 'tokenNumber',
-  long_range: 'tokenNumber',
-  nested: 'tokenObject',
-  object: 'tokenObject',
-  percolator: 'tokenPercolator',
-  rank_feature: 'tokenRankFeature',
-  rank_features: 'tokenRankFeatures',
-  scaled_float: 'tokenNumber',
-  search_as_you_type: 'tokenSearchType',
-  shape: 'tokenShape',
-  short: 'tokenNumber',
-  text: 'tokenString',
-  token_count: 'tokenTokenCount',
-  unsigned_long: 'tokenNumber',
-};
-const defaultToken = 'questionInCircle';
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
@@ -79,7 +45,6 @@ export const SearchIndexDocuments: React.FC = () => {
             fieldName: key,
             fieldType: simplifiedMapping[key]?.type ?? 'object',
             fieldValue: JSON.stringify(value, null, 2),
-            iconType: iconMap[simplifiedMapping[key]?.type ?? 'object'] || defaultToken,
           };
         });
       }
@@ -95,12 +60,21 @@ export const SearchIndexDocuments: React.FC = () => {
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>Browse documents</h2>
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.title', {
+                    defaultMessage: 'Browse documents',
+                  })}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldSearch
-                placeholder="Search documents in this index"
+                placeholder={i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.searchField.placeholder',
+                  {
+                    defaultMessage: 'Search documents in this index',
+                  }
+                )}
                 isClearable
                 onChange={(event: ChangeEvent<HTMLInputElement>) =>
                   setSearchQuery(event.target.value)
@@ -111,7 +85,11 @@ export const SearchIndexDocuments: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          {!simplifiedMapping && 'No mappings found for index'}
+          {!simplifiedMapping &&
+            i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
+              defaultMessage: 'No mappings found for index',
+            })}
+
           {simplifiedMapping &&
             results.map((result) => {
               return (

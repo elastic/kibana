@@ -19,8 +19,44 @@ import {
 import { ResultFieldProps } from './types';
 import './result.scss';
 
+const iconMap: Record<string, string> = {
+  boolean: 'tokenBoolen',
+  date: 'tokenDate',
+  date_range: 'tokenDate',
+  double: 'tokenNumber',
+  double_range: 'tokenDate',
+  flattened: 'tokenObject',
+  float: 'tokenNumber',
+  float_range: 'tokenNumber',
+  geo_point: 'tokenGeo',
+  geo_shape: 'tokenGeo',
+  half_float: 'tokenNumber',
+  histogram: 'tokenHistogram',
+  integer: 'tokenNumber',
+  integer_range: 'tokenNumber',
+  ip: 'tokenIp',
+  ip_range: 'tokenIp',
+  join: 'tokenJoin',
+  keyword: 'tokenKeyword',
+  long: 'tokenNumber',
+  long_range: 'tokenNumber',
+  nested: 'tokenObject',
+  object: 'tokenObject',
+  percolator: 'tokenPercolator',
+  rank_feature: 'tokenRankFeature',
+  rank_features: 'tokenRankFeatures',
+  scaled_float: 'tokenNumber',
+  search_as_you_type: 'tokenSearchType',
+  shape: 'tokenShape',
+  short: 'tokenNumber',
+  text: 'tokenString',
+  token_count: 'tokenTokenCount',
+  unsigned_long: 'tokenNumber',
+};
+const defaultToken = 'questionInCircle';
+
 export const ResultField: React.FC<ResultFieldProps> = ({
-  iconType = 'tokenString',
+  iconType,
   fieldName,
   fieldValue,
   fieldType,
@@ -30,7 +66,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
     <EuiTableRow className="resultField">
       <EuiTableRowCell width="5%" valign="middle">
         <span>
-          <EuiToken iconType={iconType} />
+          <EuiToken iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)} />
         </span>
       </EuiTableRowCell>
       <EuiTableRowCell width="25%" valign="middle">

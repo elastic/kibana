@@ -19,9 +19,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
+// TODO doclinks
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { makeMappingRequest } = useActions(DocumentsLogic);
@@ -42,15 +45,25 @@ export const SearchIndexIndexMappings: React.FC = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiTitle>
-              <h3>About index mappings</h3>
+              <h3>
+                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.title', {
+                  defaultMessage: 'About index mappings',
+                })}
+              </h3>
             </EuiTitle>
             <EuiText>
               <p>
-                Index mappings tell all the bits of bacon where arrange themselves in the omlet.
-                Perfect bacon arrangement leads to the perfect omlet.
+                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.description', {
+                  defaultMessage:
+                    'Index mappings tell all the bits of bacon where arrange themselves in the omlet. Perfect bacon arrangement leads to the perfect omlet.',
+                })}
               </p>
             </EuiText>
-            <EuiLink>Learn more</EuiLink>
+            <EuiLink href="#" external>
+              {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
