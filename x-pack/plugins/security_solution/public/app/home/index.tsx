@@ -55,16 +55,19 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
       <ConsoleManager>
-        <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
-        <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          <TourContextProvider>
-            <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-              {children}
-            </SecuritySolutionTemplateWrapper>
-          </TourContextProvider>
-        </DragDropContextWrapper>
-        <HelpMenu />
+        <TourContextProvider>
+          <>
+            <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+            <DragDropContextWrapper browserFields={browserFields}>
+              <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+
+              <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+                {children}
+              </SecuritySolutionTemplateWrapper>
+            </DragDropContextWrapper>
+            <HelpMenu />
+          </>
+        </TourContextProvider>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
