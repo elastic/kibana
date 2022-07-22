@@ -102,7 +102,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const {
     notifications: { toasts },
+    uiSettings,
   } = useKibana().services;
+
+  const timeFormat = useMemo(
+    () =>
+      uiSettings.get('dateFormat:scaled').find(([key]: string[]) => key === 'PT1M')[1] ?? 'HH:mm',
+    [uiSettings]
+  );
 
   const isSnoozed = useMemo(() => {
     return isRuleSnoozed(rule);
@@ -116,12 +123,20 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const formattedSnoozeText = useMemo(() => {
     if (!isSnoozedUntil) {
-      if (nextScheduledSnooze)
-        return i18nAbbrMonthDayDate(moment(nextScheduledSnooze.rRule.dtstart));
+      if (nextScheduledSnooze) {
+        const snoozeStart = nextScheduledSnooze.rRule.dtstart;
+        if (moment(snoozeStart).format('MMM D') === moment().format('MMM D')) {
+          return moment(snoozeStart).format(timeFormat);
+        }
+        return i18nAbbrMonthDayDate(moment(snoozeStart));
+      }
       return '';
     }
+    if (moment(isSnoozedUntil).format('MMM D') === moment().format('MMM D')) {
+      return moment(isSnoozedUntil).format(timeFormat);
+    }
     return i18nAbbrMonthDayDate(moment(isSnoozedUntil));
-  }, [isSnoozedUntil, nextScheduledSnooze]);
+  }, [isSnoozedUntil, nextScheduledSnooze, timeFormat]);
 
   const snoozeTooltipText = useMemo(() => {
     if (isSnoozedIndefinitely) {
@@ -136,7 +151,9 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         {
           defaultMessage: 'Notifications scheduled to snooze starting {schedStart}',
           values: {
-            schedStart: i18nMonthDayDate(moment(nextScheduledSnooze!.rRule.dtstart)),
+            schedStart: `${i18nMonthDayDate(
+              moment(nextScheduledSnooze!.rRule.dtstart)
+            )} at ${moment(nextScheduledSnooze!.rRule.dtstart).format(timeFormat)}`,
           },
         }
       );
@@ -168,6 +185,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     isSnoozedUntil,
     nextScheduledSnooze,
     showTooltipInline,
+    timeFormat,
   ]);
 
   const snoozedButton = useMemo(() => {
@@ -189,7 +207,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [formattedSnoozeText, isLoading, isEditable, onClick]);
 
   const scheduledSnoozeButton = useMemo(() => {
-    // TODO: Implement scheduled snooze button
     return (
       <EuiButton
         size="s"
