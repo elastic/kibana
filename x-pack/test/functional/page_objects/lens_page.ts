@@ -1288,7 +1288,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async dragFieldToExtraDropType(
       field: string,
       to: string,
-      type: 'duplicate' | 'swap' | 'combine'
+      type: 'duplicate' | 'swap' | 'combine',
+      visDataTestSubj?: string | undefined
     ) {
       const from = `lnsFieldListPanelField-${field}`;
       await this.dragEnterDrop(
@@ -1296,7 +1297,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization(visDataTestSubj);
     },
 
     /**
