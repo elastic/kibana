@@ -25,12 +25,6 @@ jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
     } as Awaited<ReturnType<typeof getApmIndices>>),
 }));
 
-jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
-  getDynamicDataView: async () => {
-    return;
-  },
-}));
-
 function getMockResources() {
   const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
   // @ts-expect-error incomplete definition

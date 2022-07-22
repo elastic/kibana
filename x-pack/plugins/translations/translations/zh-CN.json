@@ -8571,7 +8571,6 @@
     "xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel": "APM 仪表板",
     "xpack.apm.tutorial.specProvider.longDescription": "应用程序性能监测 (APM) 从您的应用程序内收集深入全面的性能指标和错误。其允许您实时监测数以千计的应用程序的性能。[了解详情]({learnMoreLink})。",
     "xpack.apm.tutorial.specProvider.name": "APM",
-    "xpack.apm.tutorial.specProvider.savedObjectsInstallMsg": "APM UI 中的某些功能需要 APM 数据视图。",
     "xpack.apm.tutorial.startServer.textPre": "服务器在 Elasticsearch 中处理并存储应用程序性能指标。",
     "xpack.apm.tutorial.startServer.title": "启动 APM Server",
     "xpack.apm.tutorial.windowsServerInstructions.textPost": "注意：如果您的系统禁用了脚本执行，则需要为当前会话设置执行策略，以允许脚本运行。示例：{command}。",

@@ -18,10 +18,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
-jest.mock('../services/rest/data_view', () => ({
-  createStaticDataView: () => Promise.resolve(undefined),
-}));
-
 describe('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
   beforeAll(() => {

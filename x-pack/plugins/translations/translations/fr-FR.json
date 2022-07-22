@@ -8565,7 +8565,6 @@
     "xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel": "Tableau de bord APM",
     "xpack.apm.tutorial.specProvider.longDescription": "Le monitoring des performances applicatives (APM) collecte les indicateurs et les erreurs de performance approfondies depuis votre application. Cela vous permet de monitorer les performances de milliers d'applications en temps réel. [Learn more]({learnMoreLink}).",
     "xpack.apm.tutorial.specProvider.name": "APM",
-    "xpack.apm.tutorial.specProvider.savedObjectsInstallMsg": "Une vue de données APM est requise pour certaines fonctionnalités de l'interface utilisateur APM.",
     "xpack.apm.tutorial.startServer.textPre": "Le serveur traite et conserve les indicateurs de performances de l'application dans Elasticsearch.",
     "xpack.apm.tutorial.startServer.title": "Lancer le serveur APM",
     "xpack.apm.tutorial.windowsServerInstructions.textPost": "Remarque : si l'exécution du script est désactivée dans votre système, vous devez définir la politique d'exécution de la session en cours de sorte que l'exécution du script soit autorisée. Par exemple : {command}.",

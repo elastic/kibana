@@ -8557,7 +8557,6 @@
     "xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel": "APM ダッシュボード",
     "xpack.apm.tutorial.specProvider.longDescription": "アプリケーションパフォーマンスモニタリング（APM）は、アプリケーション内から詳細なパフォーマンスメトリックやエラーを収集します。何千ものアプリケーションのパフォーマンスをリアルタイムで監視できます。[詳細]（{learnMoreLink}）。",
     "xpack.apm.tutorial.specProvider.name": "APM",
-    "xpack.apm.tutorial.specProvider.savedObjectsInstallMsg": "APM UIの機能にはAPMデータビューが必要なものがあります。",
     "xpack.apm.tutorial.startServer.textPre": "サーバーは、Elasticsearch アプリケーションのパフォーマンスメトリックを処理し保存します。",
     "xpack.apm.tutorial.startServer.title": "APM Server の起動",
     "xpack.apm.tutorial.windowsServerInstructions.textPost": "注：システムでスクリプトの実行が無効な場合、スクリプトを実行するために現在のセッションの実行ポリシーの設定が必要となります。例：{command}。",
