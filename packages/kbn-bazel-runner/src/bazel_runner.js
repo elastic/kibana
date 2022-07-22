@@ -58,7 +58,7 @@ function once(emitter, event) {
  * @param {import('./types').BazelRunOptions | undefined} options
  */
 async function runBazelRunner(runner, args, options = undefined) {
-  const proc = ChildProcess.spawn(runner, args, {
+  const proc = ChildProcess.spawn(runner, options?.quiet ? [...args, '--color=no'] : args, {
     env: {
       ...process.env,
       ...options?.env,
@@ -106,7 +106,7 @@ async function runBazelRunner(runner, args, options = undefined) {
     // on CI it's useful to reduce the logging output, but we still want to see basic info from Bazel so continue to log the INFO: lines from bazel
     for (const line of buffer) {
       if (line.startsWith('INFO:')) {
-        console.log(`${options?.logPrefix ? options.logPrefix : ''}${line}`);
+        console.log(options?.logPrefix ? `${options.logPrefix} ${line}` : line);
       }
     }
   }
