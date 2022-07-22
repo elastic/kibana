@@ -460,7 +460,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
     const agentVersion = this.randomVersion();
-    const minCapabilitiesVersion = '7.15.0';
     const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
     const agentId = this.seededUUIDv4();
 
