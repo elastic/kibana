@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { ConfigKey, EncryptedSyntheticsMonitor } from '../components/monitors_page/overview/types';
+import { ConfigKey, MonitorOverviewItem } from '../components/monitors_page/overview/types';
 import { fetchUpsertMonitor } from '../state';
 
 export interface EnableStateMonitorLabels {
@@ -24,7 +24,7 @@ export function useMonitorEnableHandler({
   labels,
 }: {
   id: string;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: MonitorOverviewItem;
   reloadPage: () => void;
   labels?: EnableStateMonitorLabels;
 }) {
