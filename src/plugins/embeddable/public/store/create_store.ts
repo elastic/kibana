@@ -28,28 +28,36 @@ export interface State<E extends IEmbeddable = IEmbeddable> {
   output: E extends IEmbeddable<infer I, infer O> ? O : never;
 }
 
-type CustomReducer<T extends State> = Reducer<T> | ReducersMapObject<Optional<T, keyof State>>;
-
-interface CreateStoreOptions<S extends State> extends Omit<ConfigureStoreOptions<S>, 'reducer'> {
-  reducer?: CustomReducer<S>;
+export interface CreateStoreOptions<S extends State>
+  extends Omit<ConfigureStoreOptions<S>, 'reducer'> {
+  reducer?: Reducer<S> | Optional<ReducersMapObject<S>, keyof State>;
 }
 
-function createReducer<S extends State>(reducer?: CustomReducer<S>): Reducer<S> {
-  const generic = combineReducers<Pick<S, keyof State>>({
-    input: input.reducer,
-    output: output.reducer,
-  }) as Reducer<S>;
+function createReducer<S extends State>(
+  reducer?: CreateStoreOptions<S>['reducer']
+): Reducer<S> | ReducersMapObject<S> {
+  if (reducer instanceof Function) {
+    const generic = combineReducers<Pick<S, keyof State>>({
+      input: input.reducer,
+      output: output.reducer,
+    }) as Reducer<S>;
 
-  if (!reducer) {
-    return generic;
+    return reduceReducers(generic, reducer) as Reducer<S>;
   }
 
-  const custom =
-    reducer instanceof Function ? reducer : (combineReducers(reducer) as unknown as Reducer<S>);
-
-  return reduceReducers(generic, custom) as Reducer<S>;
+  return {
+    ...(reducer ?? {}),
+    input: reducer?.input ? reduceReducers(input.reducer, reducer.input) : input.reducer,
+    output: reducer?.output ? reduceReducers(output.reducer, reducer.output) : output.reducer,
+  } as ReducersMapObject<S>;
 }
 
+/**
+ * Creates a Redux store for the given embeddable.
+ * @param embeddable The embeddable instance.
+ * @param options The custom options to pass to the `configureStore` call.
+ * @returns The Redux store.
+ */
 export function createStore<E extends IEmbeddable = IEmbeddable, S extends State<E> = State<E>>(
   embeddable: E,
   { reducer, ...options }: CreateStoreOptions<S> = {}
