@@ -19,7 +19,8 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe('actions telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/136152
+  describe.skip('actions telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
 
     before(async () => {
