@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY } from '../../common/constants';
+import { DEFAULT_FILTER, DEFAULT_FILTER_QUERY } from '../../common/constants';
 
 /**
- * Add startDate and endDate filter for '@timestamp' field into query.
+ * Add DEFAULT_FILTER and startDate and endDate filter for '@timestamp' field into query.
  *
  * Used by frontend components
  *
@@ -20,13 +20,13 @@ import { DEFAULT_QUERY } from '../../common/constants';
  *                  in the right format, return a default query.
  */
 
-export const addTimerangeToQuery = (
+export const addTimerangeAndDefaultFilterToQuery = (
   query: string | undefined,
   startDate: string,
   endDate: string
 ) => {
   if (!(query && !isNaN(Date.parse(startDate)) && !isNaN(Date.parse(endDate)))) {
-    return DEFAULT_QUERY;
+    return DEFAULT_FILTER_QUERY;
   }
 
   try {
@@ -44,13 +44,13 @@ export const addTimerangeToQuery = (
       },
     };
     if (parsedQuery.bool.filter) {
-      parsedQuery.bool.filter = [...parsedQuery.bool.filter, range];
+      parsedQuery.bool.filter = [DEFAULT_FILTER, ...parsedQuery.bool.filter, range];
     } else {
       parsedQuery.bool.filter = [range];
     }
 
     return JSON.stringify(parsedQuery);
   } catch {
-    return DEFAULT_QUERY;
+    return DEFAULT_FILTER_QUERY;
   }
 };
