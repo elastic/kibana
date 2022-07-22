@@ -6,7 +6,6 @@
  */
 
 import { isValidHex } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 export const DEFAULT_CUSTOM_COLOR = '#FF0000';
@@ -77,11 +76,5 @@ export function isOrdinalStopsInvalid(colorStops) {
     }
 
     return isColorInvalid(colorStop.color) || isOrdinalStopInvalid(colorStop.stop) || isDescending;
-  });
-}
-
-export function getOtherCategoryLabel() {
-  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
-    defaultMessage: 'Other',
   });
 }

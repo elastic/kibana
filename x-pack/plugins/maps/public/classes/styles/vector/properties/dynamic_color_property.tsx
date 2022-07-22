@@ -7,7 +7,6 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
@@ -23,11 +22,12 @@ import {
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
+// @ts-expect-error
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 import {
-  isCategoricalStopsInvalid,
-  getOtherCategoryLabel,
-  // @ts-expect-error
-} from '../components/color/color_stops_utils';
+  OTHER_CATEGORY_LABEL,
+  OTHER_CATEGORY_DEFAULT_COLOR,
+} from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
@@ -247,7 +247,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._chartsPaletteServiceGetColor('__other__');
     }
 
-    return this._options.otherCategoryColor ? this._options.otherCategoryColor : euiThemeVars.euiColorLightShade;
+    return this._options.otherCategoryColor ? this._options.otherCategoryColor : OTHER_CATEGORY_DEFAULT_COLOR;
   }
 
   _getColorPaletteStops() {
@@ -433,7 +433,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           svg,
           symbolId,
           label: isOtherCategory 
-            ? <EuiTextColor color="subdued">{getOtherCategoryLabel()}</EuiTextColor> 
+            ? <EuiTextColor color="subdued">{OTHER_CATEGORY_LABEL}</EuiTextColor> 
             : this.formatField(stop),
         });
       }

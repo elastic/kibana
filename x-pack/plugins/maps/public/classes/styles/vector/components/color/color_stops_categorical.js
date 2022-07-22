@@ -17,7 +17,7 @@ import {
 } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
-import { getOtherCategoryLabel } from '../../style_util';
+import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import { StopInput } from '../stop_input';
 
 export const ColorStopsCategorical = ({
@@ -50,8 +50,8 @@ export const ColorStopsCategorical = ({
     if (index === 0) {
       return (
         <EuiFieldText
-          aria-label={getOtherCategoryLabel()}
-          placeholder={getOtherCategoryLabel()}
+          aria-label={OTHER_CATEGORY_LABEL}
+          placeholder={OTHER_CATEGORY_LABEL}
           disabled
           compressed
         />
