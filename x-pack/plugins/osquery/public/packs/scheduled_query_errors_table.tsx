@@ -93,13 +93,17 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
   const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
 
   const renderLogsErrorsAction = useCallback(
-    (item) => (
-      <ViewErrorsInLogsAction
-        actionId={actionId}
-        agentId={item?.fields['elastic_agent.id'][0]}
-        timestamp={item?.fields['event.ingested'][0]}
-      />
-    ),
+    (item) => {
+      console.log({ item });
+
+      return (
+        <ViewErrorsInLogsAction
+          actionId={actionId}
+          agentId={item?.fields['elastic_agent.id'][0]}
+          timestamp={item?.fields['event.ingested'][0]}
+        />
+      );
+    },
     [actionId]
   );
 
