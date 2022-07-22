@@ -148,7 +148,7 @@ export const TagsAddRemove: React.FC<Props> = ({
           searchProps={{
             'data-test-subj': 'addRemoveTags',
             placeholder: i18n.translate('xpack.fleet.tagsAddRemove.findOrCreatePlaceholder', {
-              defaultMessage: 'Find or create label...',
+              defaultMessage: 'Find or create tag...',
             }),
             onChange: (value: string) => {
               setSearchValue(sanitizeTag(value));
