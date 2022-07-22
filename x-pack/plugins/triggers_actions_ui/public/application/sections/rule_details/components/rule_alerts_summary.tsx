@@ -81,7 +81,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
               <EuiTitle size="xxs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.alertsTitle"
+                    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
                     defaultMessage="Alerts"
                   />
                 </h5>
