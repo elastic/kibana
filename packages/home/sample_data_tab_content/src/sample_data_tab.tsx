@@ -13,6 +13,9 @@ import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
 
+// TODO: clintandrewhall - pull from config.
+import { DEMO_ENV_URL } from './constants';
+
 const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sampleDataLabel', {
   defaultMessage: 'Other sample data sets',
 });
@@ -20,7 +23,7 @@ const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sample
 export const SampleDataTabContent = () => {
   return (
     <>
-      <DemoEnvironmentPanel demoUrl="#" />
+      <DemoEnvironmentPanel demoUrl={DEMO_ENV_URL} />
       <EuiSpacer />
       <EuiAccordion
         id="sampleDataTab"

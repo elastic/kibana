@@ -74,8 +74,8 @@ export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiText size="s" grow={false}>
+        <EuiFlexItem grow={1}>
+          <EuiText size="s">
             <h2>{title}</h2>
             <p>{message}</p>
             <EuiButton
@@ -90,7 +90,9 @@ export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
             </EuiButton>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{image}</EuiFlexItem>
+        <EuiFlexItem grow={1} style={{ textAlign: 'center' }}>
+          {image}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
