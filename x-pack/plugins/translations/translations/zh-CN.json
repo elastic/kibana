@@ -24212,7 +24212,6 @@
     "xpack.securitySolution.alerts.severityMapping.sourceFieldTitle": "源字段",
     "xpack.securitySolution.alerts.severityMapping.sourceValueTitle": "源值",
     "xpack.securitySolution.alertsView.osqueryAlertTitle": "运行 Osquery",
-    "xpack.securitySolution.alertsView.osqueryBackToAlertDetails": "告警详情",
     "xpack.securitySolution.allHost.errorSearchDescription": "搜索所有主机时发生错误",
     "xpack.securitySolution.allHost.failSearchDescription": "无法对所有主机执行搜索",
     "xpack.securitySolution.andOrBadge.and": "AND",
