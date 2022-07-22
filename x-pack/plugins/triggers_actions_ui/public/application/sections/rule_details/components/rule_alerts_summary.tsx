@@ -140,7 +140,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
           <EuiTitle size="xxs">
             <h5>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recentAlertHistoryTitle"
+                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.recentAlertHistoryTitle"
                 defaultMessage="Recent alert history"
               />
             </h5>
