@@ -123,13 +123,13 @@ export const PageLayout = memo<PageLayoutProps>(
           {!hideHeader && (
             <EuiFlexItem grow={false} data-test-subj={getTestId('headerContainer')}>
               <EuiPageHeader
-                alignItems="bottom"
                 pageTitle={headerTitleContainer}
                 description={pageDescription}
                 bottomBorder={headerHasBottomBorder}
                 rightSideItems={headerRightSideItems}
                 rightSideGroupProps={headerRightSideGroupProps}
                 restrictWidth={restrictWidth}
+                alignItems="bottom"
                 data-test-subj={getTestId('header')}
               />
               <EuiSpacer size="l" />
