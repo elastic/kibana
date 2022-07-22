@@ -25,16 +25,16 @@ export const command = {
     changes build artifacts will be downloaded from the remote cache.
   `,
   flagsHelp: `
-    --force-install      Use this flag to force bootstrap to install yarn dependencies. By default the',
-                          command will attempt to only run yarn installs when necessary, but if you manually',
-                          delete the node modules directory or have an issue in your node_modules directory',
-                          you might need to force the install manually.',
-    --offline            Run the installation process without consulting online resources. This is useful and',
-                          sometimes necessary for using bootstrap on an airplane for instance. The local caches',
-                          will be used exclusively, including a yarn-registry local mirror which is created and',
-                          maintained by successful online bootstrap executions.',
-    --no-validate        By default bootstrap validates the yarn.lock file to check for a handfull of',
-                          conditions. If you run into issues with this process locally you can disable it by',
+    --force-install      Use this flag to force bootstrap to install yarn dependencies. By default the
+                          command will attempt to only run yarn installs when necessary, but if you manually
+                          delete the node modules directory or have an issue in your node_modules directory
+                          you might need to force the install manually.
+    --offline            Run the installation process without consulting online resources. This is useful and
+                          sometimes necessary for using bootstrap on an airplane for instance. The local caches
+                          will be used exclusively, including a yarn-registry local mirror which is created and
+                          maintained by successful online bootstrap executions.
+    --no-validate        By default bootstrap validates the yarn.lock file to check for a handfull of
+                          conditions. If you run into issues with this process locally you can disable it by
                           passing this flag.
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
