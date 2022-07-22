@@ -6,6 +6,8 @@
  */
 
 import { left, right } from 'fp-ts/lib/Either';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { Dataset, RuleDataWriterInitializationError } from '..';
@@ -15,7 +17,7 @@ import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-const mockLogger = loggingSystemMock.create().get();
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
 const mockResourceInstaller = resourceInstallerMock.create();
 
@@ -52,7 +54,7 @@ function getRuleDataClientOptions({
       waitUntilReadyForReading ?? Promise.resolve(right(scopedClusterClient) as WaitResult),
     waitUntilReadyForWriting:
       waitUntilReadyForWriting ?? Promise.resolve(right(scopedClusterClient) as WaitResult),
-    logger: mockLogger,
+    logger,
   };
 }
 
@@ -71,13 +73,10 @@ describe('RuleDataClient', () => {
   });
 
   describe('getReader()', () => {
-    beforeAll(() => {
+    beforeEach(() => {
+      jest.resetAllMocks();
       getFieldsForWildcardMock.mockResolvedValue(['foo']);
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
-    });
-
-    beforeEach(() => {
-      getFieldsForWildcardMock.mockClear();
     });
 
     afterAll(() => {
@@ -116,6 +115,10 @@ describe('RuleDataClient', () => {
           body: query,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error performing search in RuleDataClient - something went wrong!`
+      );
     });
 
     test('waits until cluster client is ready before getDynamicIndexPattern', async () => {
@@ -143,6 +146,10 @@ describe('RuleDataClient', () => {
       await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"something went wrong!"`
       );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error fetching index patterns in RuleDataClient - something went wrong!`
+      );
     });
 
     test('correct handles no_matching_indices errors from getFieldsForWildcard', async () => {
@@ -155,6 +162,8 @@ describe('RuleDataClient', () => {
         timeFieldName: '@timestamp',
         title: '.alerts-observability.apm.alerts*',
       });
+
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('handles errors getting cluster client', async () => {
@@ -193,7 +202,7 @@ describe('RuleDataClient', () => {
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false and \\"observability.apm\\" is not disabled in \\"xpack.ruleRegistry.write.disabledRegistrationContexts\\" within \\"kibana.yml\\"."`
       );
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
       );
     });
@@ -210,7 +219,7 @@ describe('RuleDataClient', () => {
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client"`
       );
-      expect(mockLogger.error).toHaveBeenNthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         1,
         new RuleDataWriterInitializationError(
           'index',
@@ -218,7 +227,7 @@ describe('RuleDataClient', () => {
           new Error('could not get cluster client')
         )
       );
-      expect(mockLogger.error).toHaveBeenNthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         2,
         `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
       );
@@ -228,7 +237,7 @@ describe('RuleDataClient', () => {
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
       );
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
       );
     });
@@ -242,7 +251,7 @@ describe('RuleDataClient', () => {
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation"`
       );
-      expect(mockLogger.error).toHaveBeenNthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         1,
         new RuleDataWriterInitializationError(
           'namespace',
@@ -250,7 +259,7 @@ describe('RuleDataClient', () => {
           new Error('bad resource installation')
         )
       );
-      expect(mockLogger.error).toHaveBeenNthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         2,
         `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
       );
@@ -260,7 +269,7 @@ describe('RuleDataClient', () => {
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
       );
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
       );
     });
@@ -297,7 +306,7 @@ describe('RuleDataClient', () => {
       await delay();
 
       expect(await writer.bulk({})).toEqual(undefined);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
       );
     });
@@ -317,11 +326,16 @@ describe('RuleDataClient', () => {
       await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
         `"something went wrong!"`
       );
-      expect(mockLogger.error).toHaveBeenNthCalledWith(1, error);
+      expect(logger.error).toHaveBeenNthCalledWith(1, error);
       expect(ruleDataClient.isWriteEnabled()).toBe(true);
     });
 
     test('waits until cluster client is ready before calling bulk', async () => {
+      scopedClusterClient.bulk.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          {}
+        ) as unknown as estypes.BulkResponse
+      );
       const ruleDataClient = new RuleDataClient(
         getRuleDataClientOptions({
           waitUntilReadyForWriting: new Promise((resolve) =>
