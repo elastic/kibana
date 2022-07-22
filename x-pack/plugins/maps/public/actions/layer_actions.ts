@@ -24,7 +24,7 @@ import {
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { hideTOCDetails, setDrawMode, updateFlyout } from './ui_actions';
+import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -74,7 +74,6 @@ import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 import type { IESSource } from '../classes/sources/es_source';
-import { showTOCDetails } from './ui_actions';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
