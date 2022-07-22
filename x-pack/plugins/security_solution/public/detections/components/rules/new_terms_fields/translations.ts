@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { callApmApi } from './create_call_apm_api';
+import { i18n } from '@kbn/i18n';
 
-export const createStaticDataView = async () => {
-  return await callApmApi('POST /internal/apm/data_view/static', {
-    signal: null,
-  });
-};
+export const NEW_TERMS_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsField.placeholderText',
+  {
+    defaultMessage: 'Select a field',
+  }
+);
