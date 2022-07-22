@@ -20,12 +20,8 @@ import { CountBadge } from '../../../common/components/page';
 export type UpdateNote = (note: Note) => void;
 /** Performs IO to associate a note with something (e.g. a timeline, an event, etc). (The "something" is opaque to the caller) */
 export type AssociateNote = (noteId: string) => void;
-/** Performs IO to get a new note ID */
-export type GetNewNoteId = () => string;
 /** Updates the local state containing a new note being edited by the user */
 export type UpdateInternalNewNote = (newNote: string) => void;
-/** Closes the notes popover */
-export type OnClosePopover = () => void;
 
 /**
  * Defines the behavior of the search input that appears above the table of data
