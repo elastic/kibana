@@ -80,3 +80,29 @@ export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;
 
 export const stringArrayOrUndefined = t.union([t.array(t.string), t.undefined]);
 export type StringArrayOrUndefined = t.TypeOf<typeof stringArrayOrUndefined>;
+
+export const arrayQueries = t.array(
+  t.type({
+    id,
+    query,
+    ecsMapping,
+    version,
+    platform,
+  })
+);
+export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
+export const objectQueries = t.record(
+  t.string,
+  t.type({
+    query,
+    ecsMapping: ecsMappingOrUndefined,
+    version: versionOrUndefined,
+    platform: platformOrUndefined,
+    saved_query_id: savedQueryIdOrUndefined,
+  })
+);
+export type ObjectQueries = t.TypeOf<typeof objectQueries>;
+export const queries = t.union([arrayQueries, objectQueries]);
+export type Queries = t.TypeOf<typeof queries>;
+export const queriesOrUndefined = t.union([queries, t.undefined]);
+export type QueriesOrUndefined = t.TypeOf<typeof queriesOrUndefined>;

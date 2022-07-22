@@ -69,7 +69,7 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
-  logsDataView?: LogsDataView;
+  logsDataView: LogsDataView | undefined;
 }
 
 function getLensAttributes(
@@ -581,7 +581,7 @@ interface PackViewInActionProps {
     id: string;
     interval: number;
   };
-  logsDataView: DataView | undefined;
+  logsDataView: LogsDataView | undefined;
   packName: string;
   agentIds?: string[];
 }
@@ -615,6 +615,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      logsDataView={logsDataView}
     />
   );
 };
@@ -673,7 +674,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   >({});
 
   const dataViews = useKibana().services.data.dataViews;
-  const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
+  const [logsDataView, setLogsDataView] = useState<LogsDataView | undefined>(undefined);
 
   useEffect(() => {
     const fetchLogsDataView = async () => {
@@ -685,7 +686,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         });
       }
 
-      setLogsDataView(dataView);
+      setLogsDataView(dataView as LogsDataView);
     };
 
     fetchLogsDataView();

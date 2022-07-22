@@ -12,6 +12,7 @@ import {
   savedQueryIdOrUndefined,
   packIdOrUndefined,
   queryOrUndefined,
+  queriesOrUndefined,
   stringArrayOrUndefined,
 } from '../../common/schemas';
 
@@ -21,6 +22,7 @@ export const createLiveQueryRequestBodySchema = t.type({
   agent_platforms: stringArrayOrUndefined,
   agent_policy_ids: stringArrayOrUndefined,
   query: queryOrUndefined,
+  queries: queriesOrUndefined,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,

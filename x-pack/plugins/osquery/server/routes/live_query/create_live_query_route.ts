@@ -113,7 +113,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           pack_id: request.body.pack_id,
           pack_name: packSO?.attributes?.name,
           pack_prebuilt: request.body.pack_id
-            ? !!(packSO ? some(packSO?.references, ['type', 'osquery-pack-asset']) : undefined)
+            ? !!some(packSO?.references, ['type', 'osquery-pack-asset'])
             : undefined,
           queries: packSO
             ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>

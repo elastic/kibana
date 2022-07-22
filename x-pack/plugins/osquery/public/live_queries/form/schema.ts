@@ -44,8 +44,11 @@ export const liveQueryFormSchema = {
     ],
   },
   packId: {
-    label: 'Pack',
-    type: FIELD_TYPES.SUPER_SELECT,
+    label: i18n.translate('xpack.osquery.packs.dropdown.searchFieldLabel', {
+      defaultMessage: `Pack`,
+    }),
+    type: FIELD_TYPES.COMBO_BOX,
+    defaultValue: [],
   },
   ecs_mapping: {
     defaultValue: [],

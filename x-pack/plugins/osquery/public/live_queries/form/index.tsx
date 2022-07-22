@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiAccordionProps, EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButton,
@@ -15,16 +15,16 @@ import {
   EuiFlexItem,
   EuiAccordion,
   EuiCard,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { pickBy, isEmpty, map, find } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import type { FormData } from '../../shared_imports';
-import { UseField, Form, useForm, useFormData, SuperSelectField } from '../../shared_imports';
+import { UseField, Form, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -37,6 +37,7 @@ import { usePacks } from '../../packs/use_packs';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import { PacksComboBoxField } from './packs_combobox_field';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -70,6 +71,10 @@ const StyledEuiCard = styled(EuiCard)`
         display: none;
       }
     }
+  }
+
+  button[aria-checked='false'] > span > svg {
+    display: none;
   }
 `;
 
@@ -149,7 +154,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       pickBy(
         {
           ...formData,
-          pack_id: packId,
+          pack_id: packId?.length ? packId[0] : undefined,
           saved_query_id: savedQueryId,
           ecs_mapping: convertECSMappingToObject(ecs_mapping),
         },
@@ -423,25 +428,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const { data: packsData } = usePacks({});
 
-  const packOptions = useMemo<Array<EuiSuperSelectOption<string>>>(
-    () =>
-      packsData?.data?.map((packSO) => ({
-        value: packSO.id,
-        inputDisplay: <>{`${packSO.attributes.name} (${packSO.id})`}</>,
-        dropdownDisplay: (
-          <>
-            <strong>{packSO.attributes.name}</strong>
-            <EuiText size="s" color="subdued">
-              <p>{packSO.attributes.description}</p>
-            </EuiText>
-          </>
-        ),
-      })) ?? [],
-    [packsData]
-  );
-
   const selectedPackData = useMemo(
-    () => find(packsData?.data, { id: packId }),
+    () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
     [packId, packsData]
   );
 
@@ -463,17 +451,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [queryType]
   );
 
+  const canRunPacks = useMemo(
+    () => !!(permissions.runSavedQueries && permissions.readPacks),
+    [permissions]
+  );
+
   useLayoutEffect(() => {
     if (defaultValue?.packId) {
       setQueryType('pack');
-      const selectedPackOption = find(packOptions, ['value', defaultValue.packId]);
+      const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
       if (selectedPackOption) {
         updateFieldValues({
-          packId: defaultValue.packId,
+          packId: [defaultValue.packId],
         });
       }
     }
-  }, [defaultValue, packOptions, updateFieldValues]);
+  }, [defaultValue, packsData, updateFieldValues]);
 
   useLayoutEffect(() => {
     setIsLive(() => !(liveQueryDetails?.status === 'completed'));
@@ -483,32 +476,55 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     <>
       <Form form={form}>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <EuiFormRow label="Query type" fullWidth>
-              <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem>
-                  <StyledEuiCard
-                    layout="horizontal"
-                    title="Single query"
-                    titleSize="xs"
-                    hasBorder
-                    description="Run a saved query or new one."
-                    selectable={queryCardSelectable}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <StyledEuiCard
-                    layout="horizontal"
-                    title="Pack"
-                    titleSize="xs"
-                    hasBorder
-                    description="Run a set of queries in a pack."
-                    selectable={packCardSelectable}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </EuiFlexItem>
+          {queryField && (
+            <EuiFlexItem>
+              <EuiFormRow label="Query type" fullWidth>
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <StyledEuiCard
+                      layout="horizontal"
+                      title={i18n.translate(
+                        'xpack.osquery.liveQuery.queryForm.singleQueryTypeLabel',
+                        {
+                          defaultMessage: 'Single query',
+                        }
+                      )}
+                      titleSize="xs"
+                      hasBorder
+                      description={i18n.translate(
+                        'xpack.osquery.liveQuery.queryForm.singleQueryTypeDescription',
+                        {
+                          defaultMessage: 'Run a saved query or new one.',
+                        }
+                      )}
+                      selectable={queryCardSelectable}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <StyledEuiCard
+                      layout="horizontal"
+                      title={i18n.translate(
+                        'xpack.osquery.liveQuery.queryForm.packQueryTypeLabel',
+                        {
+                          defaultMessage: 'Pack',
+                        }
+                      )}
+                      titleSize="xs"
+                      hasBorder
+                      description={i18n.translate(
+                        'xpack.osquery.liveQuery.queryForm.packQueryTypeDescription',
+                        {
+                          defaultMessage: 'Run a set of queries in a pack.',
+                        }
+                      )}
+                      selectable={packCardSelectable}
+                      isDisabled={!canRunPacks}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
           {!hideAgentsField ? (
             <EuiFlexItem>
               <UseField path="agentSelection" component={AgentsTableField} />
@@ -521,14 +537,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <EuiFlexItem>
                 <UseField
                   path="packId"
-                  component={SuperSelectField}
+                  component={PacksComboBoxField}
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  euiFieldProps={{
-                    'data-test-subj': 'select-live-pack',
-                    options: packOptions,
-                    itemLayoutAlign: 'top',
-                    hasDividers: true,
-                  }}
+                  euiFieldProps={{ packsData: packsData?.data }}
                 />
               </EuiFlexItem>
               {submitButtonContent}
