@@ -8,8 +8,13 @@
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-import { formatHeartbeatRequest, SyntheticsConfig } from '../formatters/format_configs';
-import { ConfigKey, MonitorFields, SyntheticsMonitorWithId } from '../../../common/runtime_types';
+import { formatHeartbeatRequest } from '../formatters/format_configs';
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitorWithId,
+  HeartbeatConfig,
+} from '../../../common/runtime_types';
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
@@ -62,7 +67,7 @@ export class SyntheticsMonitorClient {
     return await this.syntheticsService.deleteConfigs([monitor]);
   }
 
-  parseLocations(config: SyntheticsConfig) {
+  parseLocations(config: HeartbeatConfig) {
     const { locations } = config;
 
     const privateLocations = locations.filter((loc) => !loc.isServiceManaged);

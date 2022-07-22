@@ -6,18 +6,18 @@
  */
 
 import { NewPackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { SyntheticsConfig } from '../formatters/format_configs';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
   ConfigKey,
   MonitorFields,
   PrivateLocation,
+  HeartbeatConfig,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
-const getPolicyId = (config: SyntheticsMonitorWithId, privateLocation: PrivateLocation) =>
+const getPolicyId = (config: HeartbeatConfig, privateLocation: PrivateLocation) =>
   config.id + '-' + privateLocation.id;
 
 export class SyntheticsPrivateLocation {
@@ -28,7 +28,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async generateNewPolicy(
-    config: SyntheticsMonitorWithId & { fields: Record<string, string> },
+    config: HeartbeatConfig,
     privateLocation: PrivateLocation
   ): Promise<NewPackagePolicy | null> {
     if (!this.server.authSavedObjectsClient) {
@@ -67,7 +67,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async createMonitor(config: SyntheticsMonitorWithId) {
+  async createMonitor(config: HeartbeatConfig) {
     try {
       const { locations } = config;
 
@@ -93,7 +93,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async editMonitor(config: SyntheticsConfig) {
+  async editMonitor(config: HeartbeatConfig) {
     const { locations } = config;
 
     const allPrivateLocations = await getSyntheticsPrivateLocations(
