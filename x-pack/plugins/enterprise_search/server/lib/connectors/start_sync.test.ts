@@ -8,8 +8,9 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
+import { ErrorCode } from '../../../common/types/error_codes';
 
-import { updateConnectorScheduling } from './update_connector_scheduling';
+import { startConnectorSync } from './start_sync';
 
 describe('addConnector lib function', () => {
   const mockClient = {
@@ -27,7 +28,7 @@ describe('addConnector lib function', () => {
     jest.clearAllMocks();
   });
 
-  it('should update connector scheduling', async () => {
+  it('should start a sync', async () => {
     mockClient.asCurrentUser.get.mockImplementationOnce(() => {
       return Promise.resolve({
         _source: {
@@ -39,7 +40,7 @@ describe('addConnector lib function', () => {
           last_sync_error: null,
           last_sync_status: null,
           last_synced: null,
-          scheduling: { enabled: false, interval: '* * * * *' },
+          scheduling: { enabled: true, interval: '1 2 3 4 5' },
           service_type: null,
           status: 'not connected',
           sync_now: false,
@@ -50,10 +51,7 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      updateConnectorScheduling(mockClient as unknown as IScopedClusterClient, 'connectorId', {
-        enabled: true,
-        interval: '1 2 3 4 5',
-      })
+      startConnectorSync(mockClient as unknown as IScopedClusterClient, 'connectorId')
     ).resolves.toEqual({ _id: 'fakeId' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
@@ -68,7 +66,7 @@ describe('addConnector lib function', () => {
         scheduling: { enabled: true, interval: '1 2 3 4 5' },
         service_type: null,
         status: 'not connected',
-        sync_now: false,
+        sync_now: true,
       },
       id: 'connectorId',
       index: CONNECTORS_INDEX,
@@ -78,16 +76,13 @@ describe('addConnector lib function', () => {
     });
   });
 
-  it('should not index document if there is no connector', async () => {
+  it('should not create index if there is no connector', async () => {
     mockClient.asCurrentUser.get.mockImplementationOnce(() => {
       return Promise.resolve({});
     });
     await expect(
-      updateConnectorScheduling(mockClient as unknown as IScopedClusterClient, 'connectorId', {
-        enabled: true,
-        interval: '1 2 3 4 5',
-      })
-    ).rejects.toEqual(new Error('Could not find document'));
+      startConnectorSync(mockClient as unknown as IScopedClusterClient, 'connectorId')
+    ).rejects.toEqual(new Error(ErrorCode.RESOURCE_NOT_FOUND));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
   });
 });
