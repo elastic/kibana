@@ -143,7 +143,7 @@ export const createConnectedSearchSessionIndicator = ({
       startTime,
       completedTime,
       canceledTime,
-    } = useObservable(sessionService.sessionMeta$, { state });
+    } = useObservable(sessionService.sessionMeta$, { state, isContinued: false });
     const saveSearchSessionNameFn = useCallback(async (newName: string) => {
       await sessionService.renameCurrentSession(newName);
     }, []);
