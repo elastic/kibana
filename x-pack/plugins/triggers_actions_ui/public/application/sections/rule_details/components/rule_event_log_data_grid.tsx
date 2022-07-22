@@ -21,6 +21,8 @@ import {
   EuiBadge,
   EuiDataGridCellPopoverElementProps,
   useEuiTheme,
+  EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -30,17 +32,23 @@ import {
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
+import './rule_event_log_list.scss';
 
 const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
 };
 
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
-
-const gridStyles: EuiDataGridStyle = {
-  border: 'horizontal',
-  header: 'underline',
+const getErroredActionsTranslation = (errors: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.erroredActionsTooltip',
+    {
+      defaultMessage: '{value, plural, one {# errored action} other {# errored actions}}',
+      values: { value: errors },
+    }
+  );
 };
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export interface RuleEventLogDataGrid {
   logs: IExecutionLog[];
@@ -49,6 +57,7 @@ export interface RuleEventLogDataGrid {
   visibleColumns: string[];
   dateFormat: string;
   pageSizeOptions?: number[];
+  selectedRunLog?: IExecutionLog;
   onChangeItemsPerPage: (pageSize: number) => void;
   onChangePage: (pageIndex: number) => void;
   onFilterChange: (filter: string[]) => void;
@@ -65,6 +74,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     pagination,
     dateFormat,
     visibleColumns,
+    selectedRunLog,
     setVisibleColumns,
     setSortingColumns,
     onChangeItemsPerPage,
@@ -107,8 +117,6 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isResizable: false,
         actions: {
           showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
         },
         initialWidth: 250,
       },
@@ -124,8 +132,6 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         isResizable: false,
         actions: {
           showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
         },
         initialWidth: 100,
       },
@@ -141,8 +147,6 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           showHide: false,
           showSortAsc: false,
           showSortDesc: false,
-          showMoveLeft: false,
-          showMoveRight: false,
           additional: [
             {
               iconType: 'annotation',
@@ -208,6 +212,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Active alerts',
           }
         ),
+        initialWidth: 140,
         isSortable: getIsColumnSortable('num_active_alerts'),
       },
       {
@@ -218,6 +223,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'New alerts',
           }
         ),
+        initialWidth: 140,
         isSortable: getIsColumnSortable('num_new_alerts'),
       },
       {
@@ -340,17 +346,44 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     [pagination, pageSizeOptions, onChangeItemsPerPage, onChangePage]
   );
 
-  const renderMessageWithActionError = (columnId: string, errors: number) => {
+  const rowClasses = useMemo(() => {
+    if (!selectedRunLog) {
+      return {};
+    }
+    const index = logs.findIndex((log) => log.id === selectedRunLog.id);
+    return {
+      [index]: 'ruleEventLogDataGrid--rowClassSelected',
+    };
+  }, [selectedRunLog, logs]);
+
+  const gridStyles: EuiDataGridStyle = useMemo(() => {
+    return {
+      border: 'horizontal',
+      header: 'underline',
+      rowClasses,
+    };
+  }, [rowClasses]);
+
+  const renderMessageWithActionError = (
+    columnId: string,
+    errors: number,
+    showTooltip: boolean = false
+  ) => {
     if (columnId !== 'message') {
       return null;
     }
     if (!errors) {
       return null;
     }
-
     return (
       <EuiFlexItem grow={false}>
-        <RuleActionErrorBadge totalErrors={errors} showIcon />
+        {showTooltip ? (
+          <EuiToolTip content={getErroredActionsTranslation(errors)}>
+            <RuleActionErrorBadge totalErrors={errors} showIcon />
+          </EuiToolTip>
+        ) : (
+          <RuleActionErrorBadge totalErrors={errors} showIcon />
+        )}
       </EuiFlexItem>
     );
   };
@@ -376,14 +409,32 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     return (
       <div style={{ width: '100%' }}>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {renderMessageWithActionError(columnId, actionErrors)}
-          </EuiFlexItem>
-          <EuiFlexItem>{value}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        {cellActions}
+        <div>
+          <EuiText size="m">{value}</EuiText>
+        </div>
+        <EuiSpacer size="s" />
+        {actionErrors > 0 && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {renderMessageWithActionError(columnId, actionErrors)}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                &nbsp;
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.erroredActionsTooltip"
+                  defaultMessage="{value, plural, one {errored action} other {errored actions}}"
+                  values={{
+                    value: actionErrors,
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            {cellActions}
+          </>
+        )}
       </div>
     );
   };
@@ -406,15 +457,20 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }}
           color="hollow"
           onClick={() => onFlyoutOpen(runLog)}
-          onClickAriaLabel="Open action errors modal"
+          onClickAriaLabel={i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.openActionErrorsFlyout',
+            {
+              defaultMessage: 'Open action errors flyout',
+            }
+          )}
         >
           {value}
         </EuiBadge>
       );
     }
     return (
-      <EuiFlexGroup gutterSize="s">
-        {renderMessageWithActionError(columnId, actionErrors)}
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        {renderMessageWithActionError(columnId, actionErrors, true)}
         <EuiFlexItem>
           <RuleEventLogListCellRenderer
             columnId={columnId as ColumnId}

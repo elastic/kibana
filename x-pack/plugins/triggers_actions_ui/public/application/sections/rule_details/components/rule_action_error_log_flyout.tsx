@@ -16,6 +16,9 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
+  EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { Rule } from '../../../../types';
@@ -32,10 +35,18 @@ export interface RuleActionErrorLogFlyoutProps {
 export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) => {
   const { rule, runLog, refreshToken, onClose } = props;
 
+  const { euiTheme } = useEuiTheme();
+
   const { id, message, num_errored_actions: totalErrors } = runLog;
 
+  const isFlyoutPush = useIsWithinBreakpoints(['xl']);
+
   return (
-    <EuiFlyout type="push" onClose={onClose}>
+    <EuiFlyout
+      type={isFlyoutPush ? 'push' : 'overlay'}
+      onClose={onClose}
+      size={isFlyoutPush ? 'm' : 'l'}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -47,15 +58,28 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSpacer />
-        <EuiText>{message}</EuiText>
-        <EuiSpacer />
+        <EuiText
+          size="xs"
+          style={{
+            fontWeight: euiTheme.font.weight.bold,
+          }}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.message"
+            defaultMessage="Message"
+          />
+        </EuiText>
+        <EuiSpacer size="xs" />.<EuiText>{message}</EuiText>
+        <EuiHorizontalRule size="full" />
         <div>
           <RuleActionErrorBadge totalErrors={totalErrors} />
           &nbsp;
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrors"
-            defaultMessage="Errored Action(s)"
+            id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.actionErrorsPlural"
+            defaultMessage="{value, plural, one {errored action} other {errored actions}}"
+            values={{
+              value: totalErrors,
+            }}
           />
         </div>
         <RuleErrorLogWithApi rule={rule} runId={id} refreshToken={refreshToken} />

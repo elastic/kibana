@@ -64,7 +64,7 @@ const getFilter = ({ runId, message }: { runId?: string; message?: string }) => 
   return filter;
 };
 
-export const loadActionErrorLog = async ({
+export const loadActionErrorLog = ({
   id,
   http,
   dateStart,

@@ -91,7 +91,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | null>(null);
+  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -225,7 +225,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 
   const onFlyoutClose = useCallback(() => {
     setIsFlyoutOpen(false);
-    setSelectedRunLog(null);
+    setSelectedRunLog(undefined);
   }, []);
 
   const onSearchChange = useCallback(
@@ -262,6 +262,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
           sortingColumns={sortingColumns}
           visibleColumns={visibleColumns}
           dateFormat={dateFormat}
+          selectedRunLog={selectedRunLog}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
           onFlyoutOpen={onFlyoutOpen}
