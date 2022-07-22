@@ -93,7 +93,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                   <EuiFlexItem>
                     <EuiText size="s" color="subdued">
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.allAlertsTitle"
+                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
                         defaultMessage="All alerts"
                       />
                     </EuiText>
