@@ -456,6 +456,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         searchSessionId: dataFilters.searchSessionId,
         inspectorAdapters,
       });
+      console.log('styleMeta', styleMeta);
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
