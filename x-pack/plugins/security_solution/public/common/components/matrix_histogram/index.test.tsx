@@ -46,7 +46,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
     {
       detailName: 'mockHost',
       pageName: 'hosts',
-      tabName: 'externalAlerts',
+      tabName: 'events',
     },
   ]),
 }));
@@ -181,7 +181,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: 'mockHost',
           pageName: 'hosts',
-          tabName: 'externalAlerts',
+          tabName: 'events',
         },
       ]);
 
@@ -240,7 +240,7 @@ describe('Matrix Histogram Component', () => {
         {
           detailName: 'mockHost',
           pageName: 'hosts',
-          tabName: 'externalAlerts',
+          tabName: 'events',
         },
       ]);
 

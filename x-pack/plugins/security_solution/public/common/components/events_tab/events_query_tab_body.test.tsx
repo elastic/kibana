@@ -11,7 +11,7 @@ import { TimelineId } from '../../../../common/types';
 import { HostsType } from '../../../hosts/store/model';
 import { TestProviders } from '../../mock';
 import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
-import { EventsQueryTabBody } from './events_query_tab_body';
+import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 
@@ -73,7 +73,7 @@ describe('EventsQueryTabBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('eventsHistogramQueryPanel')).toBeInTheDocument();
+    expect(queryByTestId(`${ALERTS_EVENTS_HISTOGRAM_ID}Panel`)).toBeInTheDocument();
   });
 
   it("doesn't render the matrix histogram when globalFullScreen is true", () => {
@@ -87,7 +87,7 @@ describe('EventsQueryTabBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('eventsHistogramQueryPanel')).not.toBeInTheDocument();
+    expect(queryByTestId(`${ALERTS_EVENTS_HISTOGRAM_ID}Panel`)).not.toBeInTheDocument();
   });
 
   it('deletes query when unmouting', () => {

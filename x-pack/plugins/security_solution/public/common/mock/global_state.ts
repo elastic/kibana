@@ -81,7 +81,6 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: {
           activePage: 0,
           limit: 10,
@@ -103,7 +102,6 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
-        externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: {
           activePage: 0,
           limit: 10,
@@ -223,14 +221,12 @@ export const mockGlobalState: State = {
           severitySelection: [],
         },
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
-        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
     details: {
       queries: {
         [usersModel.UsersTableType.anomalies]: null,
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
-        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
   },

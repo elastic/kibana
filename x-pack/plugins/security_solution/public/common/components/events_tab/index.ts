@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const EXTERNAL_ALERTS_TAB = '[data-test-subj="navigation-externalAlerts"]';
-export const EXTERNAL_ALERTS_TAB_CONTENT = '[data-test-subj="events-viewer-panel"]';
+export { EventsQueryTabBody } from './events_query_tab_body';
+export {
+  alertsHistogramConfig,
+  alertsStackByOptions,
+  eventsHistogramConfig,
+  eventsStackByOptions,
+} from './histogram_configurations';
