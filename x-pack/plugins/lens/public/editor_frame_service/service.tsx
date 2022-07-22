@@ -42,11 +42,11 @@ export interface EditorFrameSetupPlugins {
 }
 
 export interface EditorFrameStartPlugins {
+  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions: UiActionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
 }

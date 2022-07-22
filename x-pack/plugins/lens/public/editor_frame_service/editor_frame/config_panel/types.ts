@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
+
 import {
   Visualization,
   FramePublicAPI,
@@ -20,6 +22,7 @@ export interface ConfigPanelWrapperProps {
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
   indexPatternService: IndexPatternServiceAPI;
+  uiActions: UiActionsStart;
 }
 
 export interface LayerPanelProps {

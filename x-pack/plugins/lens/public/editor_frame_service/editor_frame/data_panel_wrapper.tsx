@@ -13,6 +13,7 @@ import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } fr
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import { StateSetter, DatasourceDataPanelProps, DatasourceMap, FramePublicAPI } from '../../types';
@@ -122,6 +123,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   return (
     <>
+      <Easteregg query={externalContext?.query} />
       {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"

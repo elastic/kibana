@@ -8,7 +8,15 @@
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import {
+  UPDATE_FILTER_REFERENCES_ACTION,
+  UPDATE_FILTER_REFERENCES_TRIGGER,
+} from '@kbn/unified-search-plugin/public';
+import {
+  ActionExecutionContext,
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import type { DatasourceDataPanelProps, VisualizeEditorContext } from '../types';
 import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
@@ -215,6 +223,7 @@ export async function changeLayerIndexPattern({
   storage,
   indexPatterns,
   indexPatternService,
+  uiActions,
 }: {
   indexPatternId: string;
   layerId: string;
@@ -224,11 +233,25 @@ export async function changeLayerIndexPattern({
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
   indexPatternService: IndexPatternServiceAPI;
+  uiActions: UiActionsStart;
 }) {
   const newIndexPatterns = await indexPatternService.addIndexPattern({
     id: indexPatternId,
     cache: indexPatterns,
   });
+  const fromDataView = state.layers[layerId].indexPatternId;
+  const toDataView = indexPatternId;
+
+  const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+  const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+
+  action?.execute({
+    trigger,
+    fromDataView,
+    toDataView,
+    defaultDataView: toDataView,
+    usedDataViews: Object.values(Object.values(state.layers).map((layer) => layer.indexPatternId)),
+  } as ActionExecutionContext);
   if (newIndexPatterns) {
     setState((s) => ({
       ...s,

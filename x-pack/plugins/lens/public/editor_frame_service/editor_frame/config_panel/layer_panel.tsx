@@ -631,6 +631,7 @@ export function LayerPanel(
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   indexPatterns: dataViews.indexPatterns,
                   existingFields: dataViews.existingFields,
+                  activeData: layerVisualizationConfigProps.activeData,
                 }}
               />
             )}

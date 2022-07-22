@@ -6,9 +6,16 @@
  */
 
 import { keyBy } from 'lodash';
-import type { IndexPatternField } from '../editor_frame_service/types';
+import { IndexPatternField } from '../types';
+import { documentField } from './document_field';
 
-export function getFieldByNameFactory(newFields: IndexPatternField[]) {
+export function getFieldByNameFactory(
+  newFields: IndexPatternField[],
+  addRecordsField: boolean = true
+) {
   const fieldsLookup = keyBy(newFields, 'name');
+  if (addRecordsField) {
+    fieldsLookup[documentField.name] = documentField;
+  }
   return (name: string) => fieldsLookup[name];
 }

@@ -1735,10 +1735,6 @@
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
             {
-              "plugin": "cloudSecurityPosture",
-              "path": "x-pack/plugins/cloud_security_posture/server/routes/configuration/update_rules_configuration.ts"
-            },
-            {
               "plugin": "logstash",
               "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
             },
@@ -2401,13 +2397,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               "[] | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",

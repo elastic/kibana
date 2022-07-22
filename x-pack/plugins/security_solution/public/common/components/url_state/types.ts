@@ -7,7 +7,6 @@
 
 import type { DataViewBase } from '@kbn/es-query';
 import type { FilterManager, SavedQueryService } from '@kbn/data-plugin/public';
-import type { UrlInputsModel } from '../../store/inputs/model';
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import type { RouteSpyState } from '../../utils/route/types';
 import type { SecurityNav } from '../navigation/types';
@@ -15,7 +14,7 @@ import type { SecurityNav } from '../navigation/types';
 import type { UrlStateType } from './constants';
 import { CONSTANTS } from './constants';
 
-export const ALL_URL_STATE_KEYS: KeyUrlState[] = [CONSTANTS.timerange, CONSTANTS.timeline];
+export const ALL_URL_STATE_KEYS: KeyUrlState[] = [CONSTANTS.timeline];
 
 export const isAdministration = (urlKey: UrlStateType): boolean => 'administration' === urlKey;
 
@@ -33,7 +32,6 @@ export type LocationTypes =
   | CONSTANTS.unknown;
 
 export interface UrlState {
-  [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }
 export type KeyUrlState = keyof UrlState;
@@ -52,11 +50,6 @@ export type UrlStateContainerPropTypes = RouteSpyState & UrlStateStateToPropsTyp
 
 export interface UrlStateStateToPropsType {
   urlState: UrlState;
-}
-
-export interface UpdateTimelineIsLoading {
-  id: string;
-  isLoading: boolean;
 }
 
 export interface PreviousLocationUrlState {

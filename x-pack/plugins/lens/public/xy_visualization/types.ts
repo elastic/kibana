@@ -92,7 +92,7 @@ export interface XYDataLayerConfig {
   layerType: 'data';
   seriesType: SeriesType;
   xAccessor?: string;
-  hide?: boolean;
+  simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
@@ -115,6 +115,7 @@ export interface XYAnnotationLayerConfig {
   annotations: EventAnnotationConfig[];
   hide?: boolean;
   indexPatternId: string;
+  simpleView?: boolean;
 }
 
 export type XYLayerConfig =

@@ -83,10 +83,10 @@ export const toExpression = (
 };
 
 const simplifiedLayerExpression = {
-  [layerTypes.DATA]: (layer: XYDataLayerConfig) => ({ ...layer, hide: true }),
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => ({ ...layer, simpleView: true }),
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
-    hide: true,
+    simpleView: true,
     yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
@@ -96,7 +96,7 @@ const simplifiedLayerExpression = {
   }),
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
-    hide: true,
+    simpleView: true,
   }),
 };
 
@@ -411,7 +411,7 @@ const annotationLayerToExpression = (
         type: 'function',
         function: 'extendedAnnotationLayer',
         arguments: {
-          hide: [Boolean(layer.hide)],
+          simpleView: [Boolean(layer.simpleView)],
           layerId: [layer.layerId],
           annotations: eventAnnotationService.toExpression(layer.annotations || []),
         },
@@ -453,7 +453,7 @@ const dataLayerToExpression = (
         function: 'extendedDataLayer',
         arguments: {
           layerId: [layer.layerId],
-          hide: [Boolean(layer.hide)],
+          simpleView: [Boolean(layer.simpleView)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],

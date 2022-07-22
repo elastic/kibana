@@ -32,8 +32,9 @@ default space is used.
 === {api-request-body-title}
 
 `alertId`::
-(Required*, string) The identifier for the alert. It is required only when
-`type` is `alert`. preview:[]
+(Required*, string or array of strings) The identifier for the alert. It is
+required only when `type` is `alert`. If it is an array, `index` must also be an
+array.preview:[]
 
 `comment`::
 (Required*, string) The updated comment. It is required only when `type` is
@@ -44,7 +45,8 @@ default space is used.
 <<cases-api-get-comments>>.
 
 `index`::
-(Required*, string) The alert index. It is required only when `type` is `alert`.
+(Required*, string or array of strings) The alert index. It is required only
+when `type` is `alert`. If it is an array, `alertId` must also be an array.
 preview:[]
 
 `owner`::
