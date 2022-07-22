@@ -56,7 +56,7 @@ describe('helpers', function () {
       const errors = [error];
       expect(parseErrors(errors, `SELECT * FROM "kibana_sample_data_ecommerce1"`)).toEqual([
         {
-          endColumn: 44,
+          endColumn: 46,
           endLineNumber: 1,
           message: 'No data view found for index pattern kibana_sample_data_ecommerce1',
           severity: 8,
@@ -77,7 +77,7 @@ describe('helpers', function () {
         )
       ).toEqual([
         {
-          endColumn: 39,
+          endColumn: 41,
           endLineNumber: 2,
           message: 'No data view found for index pattern kibana_sample_data_ecommerce1',
           severity: 8,
