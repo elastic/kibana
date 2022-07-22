@@ -73,7 +73,7 @@ EOF
   fi
 }
 
-.buildkite/scripts/lifecycle/setup_ci_stats.sh
+source .buildkite/scripts/lifecycle/setup_ci_stats.sh
 
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
