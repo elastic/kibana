@@ -6,6 +6,27 @@ orig_archive="x-pack/test/functional/es_archives/spaces/copy_saved_objects"
 new_archive="x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_objects"
 test_config="x-pack/test/functional/apps/spaces/config.ts"
 
+create_space() {
+  local id=${1:-sales}
+  local upperCased=$(echo ${id:0:1} | tr '[a-z]' '[A-Z]')${id:1}
+  local name=${2:-$upperCased}
+
+  # Use jq to create the i and n variables, then inject them.
+  local payloadWithJqInjectedVars=$(jq -n --arg i "$id" --arg n "$name" '{ "id": $i, "name": $n, "disabledFeatures": [] }')
+
+  curl -H "Content-Type: application/json" -H "kbn-xsrf: archive-migration-functions" \
+    -X POST -d "$payloadWithJqInjectedVars" \
+    --user elastic:changeme http://localhost:5620/api/spaces/space
+}
+
+delete_space() {
+  local id=${1:?Need a space id.}
+
+  curl -H "kbn-xsrf: archive-migration-functions" \
+    -X DELETE -d "$payloadWithJqInjectedVars" \
+    --user elastic:changeme http://localhost:5620/api/spaces/space/"$id"
+}
+
 arrayify_csv() {
   local xs=${1}
   echo "$xs" | tr ',' '\n' | uniq | sort
