@@ -24,7 +24,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await browser.refresh();
   };
 
-  describe('Onboarding Observability tour', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/136876
+  describe.skip('Onboarding Observability tour', function () {
     this.tags('includeFirefox');
 
     before(async () => {
