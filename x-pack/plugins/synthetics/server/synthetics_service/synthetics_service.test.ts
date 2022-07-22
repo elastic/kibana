@@ -17,8 +17,6 @@ import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
-const taskManagerSetup = taskManagerMock.createSetup();
-
 describe('SyntheticsService', () => {
   const mockEsClient = {
     search: jest.fn(),
