@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
@@ -93,53 +93,6 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     ],
   };
 };
-
-export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
-  name: i18n.translate('xpack.securitySolution.featureRegistry.manageAlertsName', {
-    defaultMessage: 'Alerts',
-  }),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          id: 'alerts_all',
-          name: i18n.translate('xpack.securitySolution.featureRegistry.subfeature.alertsAllName', {
-            defaultMessage: 'All',
-          }),
-          includeIn: 'all' as 'all',
-          alerting: {
-            alert: {
-              all: ruleTypes,
-            },
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['crud_alerts', 'read_alerts'],
-        },
-        {
-          id: 'alerts_read',
-          name: i18n.translate('xpack.securitySolution.featureRegistry.subfeature.alertsReadName', {
-            defaultMessage: 'Read',
-          }),
-          includeIn: 'read' as 'read',
-          alerting: {
-            alert: {
-              read: ruleTypes,
-            },
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['read_alerts'],
-        },
-      ],
-    },
-  ],
-});
 
 // Same as the plugin id defined by Cloud Security Posture
 const CLOUD_POSTURE_APP_ID = 'csp';

@@ -9,7 +9,6 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { escapeKuery } from '@kbn/es-query';
 import {
   IExecutionLog,
   ExecutionLogSortFields,
@@ -50,7 +49,7 @@ const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; messa
   }
 
   if (message) {
-    filter.push(`message: "${escapeKuery(message)}"`);
+    filter.push(`message: "${message}"`);
   }
 
   return filter;

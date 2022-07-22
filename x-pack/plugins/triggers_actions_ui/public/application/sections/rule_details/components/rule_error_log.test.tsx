@@ -159,7 +159,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -199,7 +199,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -217,7 +217,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'asc' }],
+        sort: [{ timestamp: { order: 'asc' } }],
       })
     );
 
@@ -248,7 +248,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -269,7 +269,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 1,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -295,7 +295,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -319,7 +319,7 @@ describe('rule_error_log', () => {
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 10,
-        sort: [{ sort_field: 'timestamp', sort_order: 'desc' }],
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 

@@ -7,14 +7,15 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { escapeKuery } from '@kbn/es-query';
 import { IExecutionErrorsResult, ActionErrorLogSortFields } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export interface SortField {
-  sort_field: ActionErrorLogSortFields;
-  sort_order: SortOrder;
-}
+export type SortField = Record<
+  ActionErrorLogSortFields,
+  {
+    order: SortOrder;
+  }
+>;
 
 export interface LoadActionErrorLogProps {
   id: string;
@@ -37,10 +38,15 @@ const getRenamedSort = (sort?: SortField[]) => {
   if (!sort) {
     return [];
   }
-  return sort.map(({ sort_field: sortField, sort_order: sortOrder }) => ({
-    sort_field: SORT_MAP[sortField] || sortField,
-    sort_order: sortOrder,
-  }));
+  return sort.map((o) => {
+    const sortField = Object.keys(o)[0];
+    const sortOrder = o[Object.keys(o)[0]];
+    return {
+      [SORT_MAP[sortField] || sortField]: {
+        ...sortOrder,
+      },
+    };
+  });
 };
 
 // TODO (Jiawei): Use node builder instead of strings
@@ -52,7 +58,7 @@ const getFilter = ({ runId, message }: { runId?: string; message?: string }) => 
   }
 
   if (message) {
-    filter.push(`message: "${escapeKuery(message)}"`);
+    filter.push(`message: "${message}"`);
   }
 
   return filter;

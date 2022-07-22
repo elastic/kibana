@@ -16,9 +16,15 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const sortSchema = schema.object({
-  sort_field: schema.oneOf([schema.literal('@timestamp')]),
-  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
+
+const sortFieldSchema = schema.oneOf([
+  schema.object({ '@timestamp': schema.object({ order: sortOrderSchema }) }),
+  schema.object({ 'event.duration': schema.object({ order: sortOrderSchema }) }),
+]);
+
+const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
+  defaultValue: [{ '@timestamp': { order: 'desc' } }],
 });
 
 const querySchema = schema.object({
@@ -27,9 +33,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
   per_page: schema.number({ defaultValue: 10, min: 1 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
-  sort: schema.arrayOf(sortSchema, {
-    defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
-  }),
+  sort: sortFieldsSchema,
 });
 
 const rewriteReq: RewriteRequestCase<GetActionErrorLogByIdParams> = ({

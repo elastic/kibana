@@ -23,8 +23,6 @@ export type {
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
 
-export type { FindOptionsType } from './event_log_client';
-
 export { ClusterClientAdapter } from './es/cluster_client_adapter';
 
 export { createReadySignal } from './lib/ready_signal';

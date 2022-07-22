@@ -120,8 +120,9 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     const { field, direction } = sort;
     return [
       {
-        sort_field: field,
-        sort_order: direction,
+        [field]: {
+          order: direction,
+        },
       },
     ];
   }, [sort]);

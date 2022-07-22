@@ -293,7 +293,13 @@ describe('with_bulk_rule_api_operations', () => {
       filter: ['message: "test"'],
       perPage: 10,
       page: 0,
-      sort: [{ sort_field: 'timestamp', sort_order: 'desc' as const }],
+      sort: [
+        {
+          timestamp: {
+            order: 'asc' as const,
+          },
+        },
+      ],
     };
 
     const ComponentToExtend = ({ loadActionErrorLog }: ComponentOpts) => {
