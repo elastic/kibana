@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('list mb', () => {
+  describe('list mb', function () {
     // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
     this.tags(['skipCloud']);
 

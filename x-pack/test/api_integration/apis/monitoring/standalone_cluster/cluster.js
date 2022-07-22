@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('cluster', () => {
+  describe('cluster', function () {
     // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
     this.tags(['skipCloud']);
 
