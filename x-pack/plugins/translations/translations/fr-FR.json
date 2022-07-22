@@ -29034,8 +29034,6 @@
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error": "Script obligatoire",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText": "Exécute des scripts de tests synthétiques définis en ligne.",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label": "Script en ligne",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText": "Objet JSON qui définit toute variable dont vos tests ont besoin.",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label": "Paramètres",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.closeButtonLabel": "Fermer le menu volant du script",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName": "test_script.js",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label": "Type de source",
