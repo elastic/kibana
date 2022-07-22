@@ -585,10 +585,10 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   });
 
   const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    ? moment(lastResultsData?.['@timestamp']?.[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
   const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    ? moment(lastResultsData?.['@timestamp']?.[0]).toISOString()
     : 'now';
 
   return (
@@ -598,7 +598,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.['@timestamp']?.[0] ? 'absolute' : 'relative'}
     />
   );
 };
@@ -620,10 +620,10 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   });
 
   const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    ? moment(lastResultsData?.['@timestamp']?.[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
   const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    ? moment(lastResultsData?.['@timestamp']?.[0]).toISOString()
     : 'now';
 
   return (
@@ -633,7 +633,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.['@timestamp']?.[0] ? 'absolute' : 'relative'}
     />
   );
 };
