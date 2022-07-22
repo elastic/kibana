@@ -21,18 +21,18 @@ export const fetchDurationPercentiles = async ({
   kuery,
   query,
   percents,
-  searchAggregatedTransactions,
+  searchMetrics,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   setup: Setup;
   percents?: number[];
-  searchAggregatedTransactions?: boolean;
+  searchMetrics?: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;
 }> => {
   const params = {
-    apm: { events: [getEventType(chartType, searchAggregatedTransactions)] },
+    apm: { events: [getEventType(chartType, searchMetrics)] },
     body: {
       track_total_hits: true,
       query: getCommonCorrelationsQuery({
@@ -49,7 +49,7 @@ export const fetchDurationPercentiles = async ({
             hdr: {
               number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
             },
-            field: getDurationField(chartType, searchAggregatedTransactions),
+            field: getDurationField(chartType, searchMetrics),
             ...(Array.isArray(percents) ? { percents } : {}),
           },
         },

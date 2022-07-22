@@ -30,7 +30,7 @@ export async function getOverallLatencyDistribution({
   kuery,
   query,
   percentileThreshold,
-  searchAggregatedTransactions,
+  searchMetrics,
 }: {
   chartType: LatencyDistributionChartType;
   setup: Setup;
@@ -40,13 +40,13 @@ export async function getOverallLatencyDistribution({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   percentileThreshold: number;
-  searchAggregatedTransactions?: boolean;
+  searchMetrics?: boolean;
 }) {
   // when using metrics data, ensure we filter by docs with the appropriate duration field
-  const filteredQuery = searchAggregatedTransactions
+  const filteredQuery = searchMetrics
     ? appendFilterQuery(query, {
         exists: {
-          field: getDurationField(chartType, searchAggregatedTransactions),
+          field: getDurationField(chartType, searchMetrics),
         },
       })
     : query;
@@ -65,7 +65,7 @@ export async function getOverallLatencyDistribution({
         kuery,
         query: filteredQuery,
         percentileThreshold,
-        searchAggregatedTransactions,
+        searchMetrics,
       });
 
     // finish early if we weren't able to identify the percentileThresholdValue.
@@ -82,7 +82,7 @@ export async function getOverallLatencyDistribution({
       environment,
       kuery,
       query: filteredQuery,
-      searchAggregatedTransactions,
+      searchMetrics,
     });
 
     if (!rangeSteps) {
@@ -100,7 +100,7 @@ export async function getOverallLatencyDistribution({
       kuery,
       query: filteredQuery,
       rangeSteps,
-      searchAggregatedTransactions,
+      searchMetrics,
     });
 
     overallLatencyDistribution.overallHistogram = durationRanges;

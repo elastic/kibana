@@ -17,11 +17,11 @@ const {
 
 export function getEventType(
   chartType: LatencyDistributionChartType,
-  searchAggregatedTransactions = false
+  searchMetrics = false
 ): ProcessorEvent {
   switch (chartType) {
     case transactionLatency:
-      if (searchAggregatedTransactions) {
+      if (searchMetrics) {
         return ProcessorEvent.metric;
       }
       return ProcessorEvent.transaction;

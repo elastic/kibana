@@ -21,11 +21,11 @@ const {
 
 export function getDurationField(
   chartType: LatencyDistributionChartType,
-  searchAggregatedTransactions = false
+  searchMetrics = false
 ) {
   switch (chartType) {
     case transactionLatency:
-      if (searchAggregatedTransactions) {
+      if (searchMetrics) {
         return TRANSACTION_DURATION_HISTOGRAM;
       }
       return TRANSACTION_DURATION;

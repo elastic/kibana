@@ -21,7 +21,7 @@ export const fetchDurationRanges = async ({
   kuery,
   query,
   chartType,
-  searchAggregatedTransactions,
+  searchMetrics,
 }: {
   rangeSteps: number[];
   setup: Setup;
@@ -31,7 +31,7 @@ export const fetchDurationRanges = async ({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
-  searchAggregatedTransactions?: boolean;
+  searchMetrics?: boolean;
 }): Promise<Array<{ key: number; doc_count: number }>> => {
   const { apmEventClient } = setup;
 
@@ -49,7 +49,7 @@ export const fetchDurationRanges = async ({
 
   const resp = await apmEventClient.search('get_duration_ranges', {
     apm: {
-      events: [getEventType(chartType, searchAggregatedTransactions)],
+      events: [getEventType(chartType, searchMetrics)],
     },
     body: {
       size: 0,
@@ -63,7 +63,7 @@ export const fetchDurationRanges = async ({
       aggs: {
         logspace_ranges: {
           range: {
-            field: getDurationField(chartType, searchAggregatedTransactions),
+            field: getDurationField(chartType, searchMetrics),
             ranges,
           },
         },

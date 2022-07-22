@@ -31,11 +31,11 @@ export const fetchDurationHistogramRangeSteps = async ({
   environment,
   kuery,
   query,
-  searchAggregatedTransactions,
+  searchMetrics,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   setup: Setup;
-  searchAggregatedTransactions?: boolean;
+  searchMetrics?: boolean;
 }): Promise<number[]> => {
   const { apmEventClient } = setup;
 
@@ -43,14 +43,14 @@ export const fetchDurationHistogramRangeSteps = async ({
 
   const durationField = getDurationField(
     chartType,
-    searchAggregatedTransactions
+    searchMetrics
   );
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
     {
       apm: {
-        events: [getEventType(chartType, searchAggregatedTransactions)],
+        events: [getEventType(chartType, searchMetrics)],
       },
       body: {
         size: 0,

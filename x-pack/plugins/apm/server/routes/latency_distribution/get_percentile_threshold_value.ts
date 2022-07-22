@@ -19,12 +19,12 @@ export async function getPercentileThresholdValue({
   kuery,
   query,
   percentileThreshold,
-  searchAggregatedTransactions,
+  searchMetrics,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
   chartType: LatencyDistributionChartType;
   percentileThreshold: number;
-  searchAggregatedTransactions?: boolean;
+  searchMetrics?: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
     setup,
@@ -34,7 +34,7 @@ export async function getPercentileThresholdValue({
     environment,
     kuery,
     query,
-    searchAggregatedTransactions,
+    searchMetrics,
   });
 
   return durationPercentiles.percentiles[`${percentileThreshold}.0`];

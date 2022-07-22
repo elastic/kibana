@@ -99,7 +99,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         },
       },
       percentileThreshold,
-      searchAggregatedTransactions,
+      searchMetrics: searchAggregatedTransactions,
     });
   },
 });
