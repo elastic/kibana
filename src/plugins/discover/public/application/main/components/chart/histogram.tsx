@@ -8,17 +8,14 @@
 import './histogram.scss';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
 import { XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../utils/use_saved_search';
+import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
@@ -28,6 +25,7 @@ export interface DiscoverHistogramProps {
   savedSearchDataTotalHits$: DataTotalHits$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
+  dataView: DataView;
 }
 
 export function DiscoverHistogram({
@@ -37,7 +35,7 @@ export function DiscoverHistogram({
   stateContainer,
   dataView,
 }: DiscoverHistogramProps) {
-  const { data, uiSettings, fieldFormats, lens } = useDiscoverServices();
+  const { data, uiSettings, lens } = useDiscoverServices();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
@@ -53,7 +51,6 @@ export function DiscoverHistogram({
     },
     [timefilterUpdateHandler]
   );
-
 
   const { timefilter } = data.query.timefilter;
 
@@ -92,6 +89,7 @@ export function DiscoverHistogram({
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, toMoment, bucketInterval, stateContainer]);
+
   const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
   });
@@ -144,11 +142,11 @@ export function DiscoverHistogram({
           style={{ height: '100%' }}
           onBrushEnd={onBrushEnd}
           timeRange={{ from, to }}
-          onLoad={(_, activeData) => {
+          onLoad={(_, activeData: TableInspectorAdapter) => {
             if (!activeData) return;
             savedSearchDataTotalHits$.next({
-               fetchStatus: FetchStatus.COMPLETE,
-               result: activeData?.layer1?.meta?.statistics?.totalCount
+              fetchStatus: FetchStatus.COMPLETE,
+              result: activeData?.layer1?.meta?.statistics?.totalCount,
             });
           }}
           attributes={{
