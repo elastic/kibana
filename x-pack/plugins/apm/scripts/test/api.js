@@ -34,9 +34,13 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .option('grep', {
     alias: 'spec',
-    default: false,
     type: 'string',
-    description: 'Specify the spec files to run',
+    description: 'Specify the specs to run',
+  })
+  .option('grep-files', {
+    alias: 'files',
+    type: 'string',
+    description: 'Specify the files to run',
   })
   .option('inspect', {
     default: false,
@@ -62,7 +66,16 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { basic, trial, server, runner, grep, inspect, updateSnapshots } = argv;
+const {
+  basic,
+  trial,
+  server,
+  runner,
+  grep,
+  grepFiles,
+  inspect,
+  updateSnapshots,
+} = argv;
 
 if (trial === false && basic === false) {
   throw new Error('Please specify either --trial or --basic');
@@ -84,6 +97,7 @@ const cmd = [
   ...(inspect ? ['--inspect-brk'] : []),
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
+  ...(grepFiles ? [`--grep-files "${grepFiles}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   `--config ../../../../test/apm_api_integration/${license}/config.ts`,
 ].join(' ');

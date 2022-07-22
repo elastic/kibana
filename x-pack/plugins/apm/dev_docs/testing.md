@@ -24,7 +24,8 @@ open target/coverage/jest/index.html
 | --trial   | Run tests with trial license                    |
 | --server  | Only start ES and Kibana                        |
 | --runner  | Only run tests                                  |
-| --grep    | Specify the spec files to run                   |
+| --grep    | Specify the specs to run                        |
+| --files   | Specify the files to run                        |
 | --inspect | Add --inspect-brk flag to the ftr for debugging |
 | --times   | Repeat the test n number of times               |
 
@@ -47,7 +48,7 @@ Once the tests finish, the instances will be terminated.
 node scripts/test/api --server --basic
 
 # run tests
-node scripts/test/api --runner --basic
+node scripts/test/api --runner --basic --files=error_group_list
 ```
 
 ### Update snapshots (from Kibana root)

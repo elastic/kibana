@@ -140,6 +140,7 @@ export function runFtrCli() {
         string: [
           'config',
           'grep',
+          'grep-files',
           'include',
           'exclude',
           'include-tag',
