@@ -346,6 +346,10 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                         // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
                         color: isActive ? '#a8376a' : euiTheme.colors.subduedText,
                         backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
+                        minHeight: '40px',
+                        height: 'auto',
+                        whiteSpace: 'normal',
+                        maxWidth: '417px',
                       }}
                       className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
                       onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
