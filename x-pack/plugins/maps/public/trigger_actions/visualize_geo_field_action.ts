@@ -8,6 +8,7 @@
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
@@ -49,8 +50,8 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     const usageCollection = getUsageCollection();
     usageCollection?.reportUiCounter(
       APP_ID,
-      'visualize_geo_field',
-      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
+      METRIC_TYPE.CLICK,
+      `create_maps_vis_${context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'}`
     );
 
     getCore().application.navigateToApp(app, {
