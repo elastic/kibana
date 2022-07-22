@@ -7,7 +7,7 @@
 
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
@@ -26,6 +26,7 @@ import {
   TermsIndexPatternColumn,
 } from './definitions';
 import type {
+  DataViewDragDropOperation,
   IndexPattern,
   IndexPatternField,
   IndexPatternLayer,
@@ -68,96 +69,84 @@ interface ColumnChange {
 }
 
 interface ColumnCopy {
-  layer: IndexPatternLayer;
-  targetId: string;
-  sourceColumn: GenericIndexPatternColumn;
-  sourceColumnId: string;
-  indexPattern: IndexPattern;
+  layers: Record<string, IndexPatternLayer>;
+  target: DataViewDragDropOperation;
+  source: DataViewDragDropOperation;
   shouldDeleteSource?: boolean;
 }
 
+export const deleteColumnInLayers = ({
+  layers,
+  source,
+}: {
+  layers: Record<string, IndexPatternLayer>;
+  source: DataViewDragDropOperation;
+}) => ({
+  ...layers,
+  [source.layerId]: deleteColumn({
+    layer: layers[source.layerId],
+    columnId: source.columnId,
+    indexPattern: source.dataView,
+  }),
+});
+
 export function copyColumn({
-  layer,
-  targetId,
-  sourceColumn,
+  layers,
+  source,
+  target,
   shouldDeleteSource,
-  indexPattern,
-  sourceColumnId,
-}: ColumnCopy): IndexPatternLayer {
-  let modifiedLayer = copyReferencesRecursively(
-    layer,
-    sourceColumn,
-    sourceColumnId,
-    targetId,
-    indexPattern
-  );
-
-  if (shouldDeleteSource) {
-    modifiedLayer = deleteColumn({
-      layer: modifiedLayer,
-      columnId: sourceColumnId,
-      indexPattern,
-    });
-  }
-
-  return modifiedLayer;
+}: ColumnCopy): Record<string, IndexPatternLayer> {
+  const outputLayers = createCopiedColumn(layers, target, source);
+  return shouldDeleteSource
+    ? deleteColumnInLayers({
+        layers: outputLayers,
+        source,
+      })
+    : outputLayers;
 }
 
-function copyReferencesRecursively(
-  layer: IndexPatternLayer,
-  sourceColumn: GenericIndexPatternColumn,
-  sourceId: string,
-  targetId: string,
-  indexPattern: IndexPattern
-): IndexPatternLayer {
-  let columns = { ...layer.columns };
+function createCopiedColumn(
+  layers: Record<string, IndexPatternLayer>,
+  target: DataViewDragDropOperation,
+  source: DataViewDragDropOperation
+): Record<string, IndexPatternLayer> {
+  const sourceLayer = layers[source.layerId];
+  const sourceColumn = sourceLayer.columns[source.columnId];
+  const targetLayer = layers[target.layerId];
+  let columns = { ...targetLayer.columns };
   if ('references' in sourceColumn) {
-    if (columns[targetId]) {
-      return layer;
-    }
-
     const def = operationDefinitionMap[sourceColumn.operationType];
     if ('createCopy' in def) {
-      // Allow managed references to recursively insert new columns
-      return def.createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap);
+      return def.createCopy(layers, source, target, operationDefinitionMap); // Allow managed references to recursively insert new columns
     }
+    const referenceColumns = sourceColumn.references.reduce((refs, sourceRef) => {
+      const newRefId = generateId();
+      return { ...refs, [newRefId]: { ...sourceLayer.columns[sourceRef] } };
+    }, {});
 
-    sourceColumn?.references.forEach((ref, index) => {
-      const newId = generateId();
-      const refColumn = { ...columns[ref] };
-
-      // TODO: For fullReference types, now all references are hidden columns,
-      // but in the future we will have references to visible columns
-      // and visible columns shouldn't be copied
-      const refColumnWithInnerRefs =
-        'references' in refColumn
-          ? copyReferencesRecursively(layer, refColumn, sourceId, newId, indexPattern).columns // if a column has references, copy them too
-          : { [newId]: refColumn };
-
-      const newColumn = columns[targetId];
-      let references = [newId];
-      if (newColumn && 'references' in newColumn) {
-        references = newColumn.references;
-        references[index] = newId;
-      }
-
-      columns = {
-        ...columns,
-        ...refColumnWithInnerRefs,
-        [targetId]: {
-          ...sourceColumn,
-          references,
-        },
-      };
-    });
+    columns = {
+      ...columns,
+      ...referenceColumns,
+      [target.columnId]: {
+        ...sourceColumn,
+        references: Object.keys(referenceColumns),
+      },
+    };
   } else {
     columns = {
       ...columns,
-      [targetId]: sourceColumn,
+      [target.columnId]: { ...sourceColumn },
     };
   }
 
-  return { ...layer, columns, columnOrder: getColumnOrder({ ...layer, columns }) };
+  return {
+    ...layers,
+    [target.layerId]: adjustColumnReferences({
+      ...targetLayer,
+      columns,
+      columnOrder: getColumnOrder({ ...targetLayer, columns }),
+    }),
+  };
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -455,6 +444,7 @@ export function replaceColumn({
       if (
         !shouldResetLabel &&
         previousColumn.customLabel &&
+        hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
       ) {
@@ -513,17 +503,14 @@ export function replaceColumn({
 
           tempLayer = {
             ...tempLayer,
+            columnOrder: getColumnOrder(tempLayer),
             columns: {
               ...tempLayer.columns,
               [columnId]: column,
             },
           };
           return updateDefaultLabels(
-            {
-              ...tempLayer,
-              columnOrder: getColumnOrder(tempLayer),
-              columns: adjustColumnReferencesForChangedColumn(tempLayer, columnId),
-            },
+            adjustColumnReferencesForChangedColumn(tempLayer, columnId),
             indexPattern
           );
         } else if (
@@ -583,11 +570,14 @@ export function replaceColumn({
       }
 
       return updateDefaultLabels(
-        {
-          ...tempLayer,
-          columnOrder: getColumnOrder(newLayer),
-          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-        },
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...tempLayer,
+            columnOrder: getColumnOrder(newLayer),
+            columns: newLayer.columns,
+          },
+          columnId
+        ),
         indexPattern
       );
     }
@@ -602,13 +592,18 @@ export function replaceColumn({
         indexPattern
       );
 
-      const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
+      const newLayer = {
+        ...tempLayer,
+        columns: { ...tempLayer.columns, [columnId]: newColumn },
+      };
       return updateDefaultLabels(
-        {
-          ...tempLayer,
-          columnOrder: getColumnOrder(newLayer),
-          columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-        },
+        adjustColumnReferencesForChangedColumn(
+          {
+            ...newLayer,
+            columnOrder: getColumnOrder(newLayer),
+          },
+          columnId
+        ),
         indexPattern
       );
     }
@@ -660,11 +655,13 @@ export function replaceColumn({
     }
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
-      {
-        ...tempLayer,
-        columnOrder: getColumnOrder(newLayer),
-        columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-      },
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
       indexPattern
     );
   } else if (
@@ -687,11 +684,13 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return {
-      ...newLayer,
-      columnOrder: getColumnOrder(newLayer),
-      columns: adjustColumnReferencesForChangedColumn(newLayer, columnId),
-    };
+    return adjustColumnReferencesForChangedColumn(
+      {
+        ...newLayer,
+        columnOrder: getColumnOrder(newLayer),
+      },
+      columnId
+    );
   } else {
     throw new Error('nothing changed');
   }
@@ -846,11 +845,13 @@ function applyReferenceTransition({
           },
         },
       };
-      layer = {
-        ...layer,
-        columnOrder: getColumnOrder(newLayer),
-        columns: adjustColumnReferencesForChangedColumn(newLayer, newId),
-      };
+      layer = adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        newId
+      );
       return newId;
     }
 
@@ -987,11 +988,13 @@ function applyReferenceTransition({
     },
   };
   return updateDefaultLabels(
-    {
-      ...layer,
-      columnOrder: getColumnOrder(layer),
-      columns: adjustColumnReferencesForChangedColumn(layer, columnId),
-    },
+    adjustColumnReferencesForChangedColumn(
+      {
+        ...layer,
+        columnOrder: getColumnOrder(layer),
+      },
+      columnId
+    ),
     indexPattern
   );
 }
@@ -1045,8 +1048,8 @@ function addBucket(
   }
   updatedColumnOrder = reorderByGroups(
     visualizationGroups,
-    targetGroup,
     updatedColumnOrder,
+    targetGroup,
     addedColumnId
   );
   const tempLayer = {
@@ -1054,17 +1057,19 @@ function addBucket(
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
-  return {
-    ...tempLayer,
-    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
-    columnOrder: getColumnOrder(tempLayer),
-  };
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...tempLayer,
+      columnOrder: getColumnOrder(tempLayer),
+    },
+    addedColumnId
+  );
 }
 
 export function reorderByGroups(
   visualizationGroups: VisualizationDimensionGroupConfig[],
-  targetGroup: string | undefined,
   updatedColumnOrder: string[],
+  targetGroup: string | undefined,
   addedColumnId: string
 ) {
   const hidesColumnGrouping =
@@ -1118,11 +1123,13 @@ function addMetric(
       [addedColumnId]: column,
     },
   };
-  return {
-    ...tempLayer,
-    columnOrder: getColumnOrder(tempLayer),
-    columns: adjustColumnReferencesForChangedColumn(tempLayer, addedColumnId),
-  };
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...tempLayer,
+      columnOrder: getColumnOrder(tempLayer),
+    },
+    addedColumnId
+  );
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
@@ -1156,7 +1163,7 @@ export function updateColumnLabel<C extends GenericIndexPatternColumn>({
   };
 }
 
-export function updateColumnParam<C extends GenericIndexPatternColumn>({
+export function updateColumnParam({
   layer,
   columnId,
   paramName,
@@ -1167,19 +1174,39 @@ export function updateColumnParam<C extends GenericIndexPatternColumn>({
   paramName: string;
   value: unknown;
 }): IndexPatternLayer {
-  const oldColumn = layer.columns[columnId];
+  const currentColumn = layer.columns[columnId];
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
-        ...oldColumn,
+        ...currentColumn,
         params: {
-          ...('params' in oldColumn ? oldColumn.params : {}),
+          ...('params' in currentColumn ? currentColumn.params : {}),
           [paramName]: value,
         },
       },
     } as Record<string, GenericIndexPatternColumn>,
+  };
+}
+
+export function adjustColumnReferences(layer: IndexPatternLayer) {
+  const newColumns = { ...layer.columns };
+  Object.keys(newColumns).forEach((currentColumnId) => {
+    const currentColumn = newColumns[currentColumnId];
+    if (currentColumn?.operationType) {
+      const operationDefinition = operationDefinitionMap[currentColumn.operationType];
+      newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
+        ? operationDefinition.onOtherColumnChanged(
+            { ...layer, columns: newColumns },
+            currentColumnId
+          )
+        : currentColumn;
+    }
+  });
+  return {
+    ...layer,
+    columns: newColumns,
   };
 }
 
@@ -1195,13 +1222,15 @@ export function adjustColumnReferencesForChangedColumn(
       newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(
             { ...layer, columns: newColumns },
-            currentColumnId,
-            changedColumnId
+            currentColumnId
           )
         : currentColumn;
     }
   });
-  return newColumns;
+  return {
+    ...layer,
+    columns: newColumns,
+  };
 }
 
 export function deleteColumn({
@@ -1229,13 +1258,13 @@ export function deleteColumn({
   const hypotheticalColumns = { ...layer.columns };
   delete hypotheticalColumns[columnId];
 
-  let newLayer = {
-    ...layer,
-    columns: adjustColumnReferencesForChangedColumn(
-      { ...layer, columns: hypotheticalColumns },
-      columnId
-    ),
-  };
+  let newLayer = adjustColumnReferencesForChangedColumn(
+    {
+      ...layer,
+      columns: hypotheticalColumns,
+    },
+    columnId
+  );
 
   extraDeletions.forEach((id) => {
     newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern });
@@ -1560,6 +1589,9 @@ export function isColumnValidAsReference({
   if (!column) return false;
   const operationType = column.operationType;
   const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error('No suitable operation definition found for ' + operationType);
+  }
   return (
     validation.input.includes(operationDefinition.input) &&
     maybeValidateOperations({
@@ -1775,6 +1807,8 @@ export function getSplitByTermsLayer(
         paramName: param,
         value: paramValue,
       });
+      // label must be updated after the param is updated (Top {size} values of {field})
+      termsLayer = updateDefaultLabels(termsLayer, indexPattern);
     }
   }
   return termsLayer;

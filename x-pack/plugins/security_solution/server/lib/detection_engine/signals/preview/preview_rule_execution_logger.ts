@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   RuleExecutionLogForExecutorsFactory,
   RuleExecutionContext,
   StatusChangeArgs,
 } from '../../rule_execution_log';
-
-export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLogForExecutorsFactory;
-}
 
 export const createPreviewRuleExecutionLogger = (
   loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>

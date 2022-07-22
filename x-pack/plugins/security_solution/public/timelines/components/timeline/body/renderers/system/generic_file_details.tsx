@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Ecs } from '../../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 
@@ -196,6 +196,8 @@ export const SystemGenericFileLine = React.memo<Props>(
             isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
+            isAggregatable={true}
+            fieldType="keyword"
           />
         </TokensFlexItem>
         <AuthSsh

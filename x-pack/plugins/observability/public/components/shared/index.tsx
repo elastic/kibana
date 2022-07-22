@@ -8,7 +8,10 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
-import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
+import type {
+  FieldValueSuggestionsProps,
+  FieldValueSelectionProps,
+} from './field_value_suggestions/types';
 import type { DatePickerProps } from './date_picker';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
 import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
@@ -32,6 +35,18 @@ export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <HeaderMenuPortalLazy {...props} />
+    </Suspense>
+  );
+}
+
+const FieldValueSelectionLazy = lazy(
+  () => import('./field_value_suggestions/field_value_selection')
+);
+
+export function FieldValueSelection(props: FieldValueSelectionProps) {
+  return (
+    <Suspense fallback={null}>
+      <FieldValueSelectionLazy {...props} />
     </Suspense>
   );
 }

@@ -24,7 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import { FilterManager, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -118,6 +119,7 @@ describe('Lens App', () => {
     );
 
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
+    lensStore.dispatch(setState({ ...preloadedState }));
     return { instance, frame, props, services, lensStore };
   }
 
@@ -408,7 +410,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           currentDataViewId: 'mockip',
           onChangeDataView: expect.any(Function),
-          onDataViewCreated: expect.any(Function),
+          onDataViewCreated: undefined,
           onAddField: undefined,
         })
       );
@@ -416,7 +418,7 @@ describe('Lens App', () => {
 
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { instance, lensStore, services } = await mountWith({ preloadedState: {} });
-      services.dataViewFieldEditor.userPermissions.editIndexPattern = () => true;
+      services.dataViewEditor.userPermissions.editDataView = () => true;
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
@@ -997,7 +999,7 @@ describe('Lens App', () => {
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
       });
-      act(() =>
+      await act(async () =>
         instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },

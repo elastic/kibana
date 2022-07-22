@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+echo "--- Promote snapshot"
 export ES_SNAPSHOT_MANIFEST="${ES_SNAPSHOT_MANIFEST:-"$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST)"}"
 
 cat << EOF | buildkite-agent annotate --style "info"
@@ -10,4 +11,9 @@ cat << EOF | buildkite-agent annotate --style "info"
   $ES_SNAPSHOT_MANIFEST
 EOF
 
-node "$(dirname "${0}")/promote_manifest.js" "$ES_SNAPSHOT_MANIFEST"
+ts-node "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"
+
+if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
+  echo "--- Trigger agent packer cache pipeline"
+  ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-agent-packer-cache main
+fi

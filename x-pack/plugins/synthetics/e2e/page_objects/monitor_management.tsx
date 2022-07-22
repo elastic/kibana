@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { Page } from '@elastic/synthetics';
+import { getQuerystring } from '@kbn/observability-plugin/e2e/utils';
 import { DataStream } from '../../common/runtime_types/monitor_management';
-import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -189,6 +189,7 @@ export function monitorManagementPageProvider({
       apmServiceName: string;
       locations: string[];
     }) {
+      await this.selectMonitorType('http');
       await this.createBasicMonitorDetails({ name, apmServiceName, locations });
       await this.fillByTestSubj('syntheticsUrlField', url);
     },

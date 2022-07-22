@@ -21,7 +21,7 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
-import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {

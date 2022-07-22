@@ -17,12 +17,15 @@ import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Users } from './users';
 import { Network } from './network';
+import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
 import { Rules } from './rules';
 
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LandingPages } from './landing_pages';
+
+import { CloudSecurityPosture } from './cloud_security_posture';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -34,11 +37,13 @@ const subPluginClasses = {
   Hosts,
   Users,
   Network,
+  Kubernetes,
 
   Overview,
   Rules,
   Timelines,
   Management,
   LandingPages,
+  CloudSecurityPosture,
 };
 export { subPluginClasses };

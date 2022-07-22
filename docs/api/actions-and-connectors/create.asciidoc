@@ -6,7 +6,6 @@
 
 Creates a connector.
 
-[discrete]
 [[create-connector-api-request]]
 === {api-request-title}
 
@@ -14,14 +13,12 @@ Creates a connector.
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
-[discrete]
 === {api-prereq-title}
 
 You must have `all` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
-[discrete]
 [[create-connector-api-path-params]]
 === {api-path-parms-title}
 
@@ -29,34 +26,93 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
   (Optional, string) An identifier for the space. If `space_id` is not provided
   in the URL, the default space is used.
 
-[discrete]
+[role="child_attributes"]
 [[create-connector-api-request-body]]
 === {api-request-body-title}
 
-`name`::
-  (Required, string) The display name for the connector.
+`config`::
+(Required^*^, object) The configuration for the connector. Configuration properties
+vary depending on the connector type. For example:
++
+--
+// tag::connector-config[]
+.Index connectors
+[%collapsible%open]
+====
+`executionTimeField`::
+(Optional, string) Specifies a field that will contain the time the alert
+condition was detected. The default value is `null`.
+
+`index`::
+(Required, string) The {es} index to be written to.
+
+`refresh`::
+(Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
+request. The default value is `false`.
+
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
+====
+
+.{jira} connectors
+[%collapsible%open]
+====
+
+`apiUrl`::
+(Required, string) The {jira} instance URL.
+
+`projectKey`::
+(Required, string) The {jira} project key.
+
+For more information, refer to
+{kibana-ref}/jira-action-type.html[{jira} connector and action].
+====
+
+This object is not required for server log connectors.
+
+For more configuration properties, refer to <<action-types>>.
+// end::connector-config[]  
+--
 
 `connector_type_id`::
-  (Required, string) The connector type ID for the connector.
+(Required, string) The connector type ID for the connector. For example,
+`.index`, `.jira`, or `.server-log`.
 
-`config`::
-  (Required, object) The configuration for the connector. Configuration properties vary depending on
-  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+`name`::
+(Required, string) The display name for the connector.
 
 `secrets`::
-  (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
-  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The secrets configuration for the connector. Secrets
+configuration properties vary depending on the connector type. For information
+about the secrets configuration properties, refer to <<action-types>>.
 +
+--
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
+--
++
+--
+// tag::connector-secrets[]
+.{jira} connectors
+[%collapsible%open]
+====
+`apiToken`::
+(Required, string) The {jira} API authentication token for HTTP basic
+authentication.
 
-[discrete]
+`email`::
+(Required, string) The account email for HTTP Basic authentication.
+====
+
+This object is not required for index or server log connectors.
+// end::connector-secrets[]  
+--
+
 [[create-connector-api-request-codes]]
 === {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
-[discrete]
 [[create-connector-api-example]]
 === {api-examples-title}
 

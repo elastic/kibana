@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { IndexPatternPrivateState } from './types';
 import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
@@ -224,13 +224,14 @@ describe('Layer Data Panel', () => {
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
+    const event = {} as MouseEvent;
     const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(instance).map(
       (option: IndexPatternPickerOption) =>
         option.label === selectedLabel
           ? { ...option, checked: 'on' }
           : { ...option, checked: undefined }
     );
-    return getIndexPatternPickerList(instance).prop('onChange')!(options);
+    return getIndexPatternPickerList(instance).prop('onChange')!(options, event);
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {

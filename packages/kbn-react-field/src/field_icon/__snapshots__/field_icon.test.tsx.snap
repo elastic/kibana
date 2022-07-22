@@ -135,6 +135,16 @@ exports[`FieldIcon renders known field types keyword is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types match_only_text is rendered 1`] = `
+<EuiToken
+  aria-label="match_only_text"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="match_only_text"
+/>
+`;
+
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"

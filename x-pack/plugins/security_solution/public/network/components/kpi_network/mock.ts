@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
-import { StatItems } from '../../../common/components/stat_items';
+import type { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
+import type { StatItems } from '../../../common/components/stat_items';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
@@ -75,85 +75,6 @@ export const mockNoChartMappings: Readonly<StatItems[]> = [
     enableBarChart: false,
   },
 ];
-
-export const mockDisableChartsInitialData = {
-  fields: [
-    {
-      key: 'uniqueSourcePrivateIps',
-      value: undefined,
-      name: 'Src.',
-      description: 'source',
-      color: '#D36086',
-      icon: 'visMapCoordinate',
-    },
-    {
-      key: 'uniqueDestinationPrivateIps',
-      value: undefined,
-      name: 'Dest.',
-      description: 'destination',
-      color: '#9170B8',
-      icon: 'visMapCoordinate',
-    },
-  ],
-  description: 'Unique private IPs',
-  enableAreaChart: false,
-  enableBarChart: false,
-  areaChart: undefined,
-  barChart: undefined,
-};
-
-export const mockEnableChartsInitialData = {
-  fields: [
-    {
-      key: 'uniqueSourcePrivateIps',
-      value: undefined,
-      name: 'Src.',
-      description: 'source',
-      color: '#D36086',
-      icon: 'visMapCoordinate',
-      lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
-    },
-    {
-      key: 'uniqueDestinationPrivateIps',
-      value: undefined,
-      name: 'Dest.',
-      description: 'destination',
-      color: '#9170B8',
-      icon: 'visMapCoordinate',
-      lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
-    },
-  ],
-  description: 'Unique private IPs',
-  enableAreaChart: true,
-  enableBarChart: true,
-  areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
-  barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
-  areaChart: [],
-  barChart: [
-    {
-      color: '#D36086',
-      key: 'uniqueSourcePrivateIps',
-      value: [
-        {
-          g: 'uniqueSourcePrivateIps',
-          x: 'Src.',
-          y: null,
-        },
-      ],
-    },
-    {
-      color: '#9170B8',
-      key: 'uniqueDestinationPrivateIps',
-      value: [
-        {
-          g: 'uniqueDestinationPrivateIps',
-          x: 'Dest.',
-          y: null,
-        },
-      ],
-    },
-  ],
-};
 
 export const mockEnableChartsData = {
   areaChart: [

@@ -32,12 +32,30 @@ describe('Infrastracture feature flag', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
+  });
+
+  describe('when infrastracture feature is enabled', () => {
+    it('shows the flag as enabled in kibana advanced settings', () => {
+      cy.visit(settingsPath);
+
+      cy.get(infraToggle)
+        .should('have.attr', 'aria-checked')
+        .and('equal', 'true');
+    });
+
+    it('shows infrastructure tab in service overview page', () => {
+      cy.visit(serviceOverviewPath);
+      cy.contains('a[role="tab"]', 'Infrastructure');
+    });
   });
 
   describe('when infrastracture feature is disabled', () => {
     it('shows the flag as disabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
+      cy.get(infraToggle).click();
+      cy.contains('Save changes').should('not.be.disabled');
+      cy.contains('Save changes').click();
 
       cy.get(infraToggle)
         .should('have.attr', 'aria-checked')
@@ -47,33 +65,6 @@ describe('Infrastracture feature flag', () => {
     it('hides infrastructure tab in service overview page', () => {
       cy.visit(serviceOverviewPath);
       cy.contains('a[role="tab"]', 'Infrastructure').should('not.exist');
-    });
-  });
-
-  describe('when infrastracture feature is enabled', () => {
-    after(() => {
-      // Reverts to default state, which is infrastructureView disabled
-      cy.visit(settingsPath);
-      cy.get(infraToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
-    });
-
-    it('shows the flag as enabled in kibana advanced settings', () => {
-      cy.visit(settingsPath);
-      cy.get(infraToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
-
-      cy.get(infraToggle)
-        .should('have.attr', 'aria-checked')
-        .and('equal', 'true');
-    });
-
-    it('shows infrastructure tab in service overview page', () => {
-      cy.visit(serviceOverviewPath);
-      cy.contains('a[role="tab"]', 'Infrastructure').click();
-      cy.contains('Infrastructure data coming soon');
     });
   });
 });

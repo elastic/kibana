@@ -13,7 +13,8 @@ import { Transaction as ITransaction } from '../../../../../typings/es_schemas/u
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 function FullTraceButton({
   isLoading,
@@ -48,8 +49,16 @@ export function MaybeViewTraceLink({
   environment: Environment;
 }) {
   const {
-    query: { latencyAggregationType, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+    query,
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/traces/explorer'
+  );
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;

@@ -103,6 +103,7 @@ export interface IVectorStyle extends IStyle {
 
   getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
   getIconSvg(symbolId: string): string | undefined;
@@ -115,6 +116,12 @@ export interface IVectorStyle extends IStyle {
     mbMap: MbMap,
     mbSourceId: string
   ) => boolean;
+
+  /*
+   * Returns true when "Label" style configuration is complete and map shows a label for layer features.
+   */
+  hasLabels: () => boolean;
+
   arePointsSymbolizedAsCircles: () => boolean;
   setMBPaintProperties: ({
     alpha,
@@ -272,7 +279,7 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IField[],
     mapColors: string[]
   ) {
-    const originalProperties = this.getRawProperties();
+    const originalProperties = this.getPropertiesDescriptor();
     const invalidStyleNames: VECTOR_STYLES[] = (
       Object.keys(originalProperties) as VECTOR_STYLES[]
     ).filter((key) => {
@@ -432,7 +439,7 @@ export class VectorStyle implements IVectorStyle {
         )
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
-          this.getRawProperties(),
+          this.getPropertiesDescriptor(),
           false,
           styleFieldsHelper,
           mapColors
@@ -470,7 +477,7 @@ export class VectorStyle implements IVectorStyle {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ) {
-    const rawProperties = this.getRawProperties();
+    const rawProperties = this.getPropertiesDescriptor();
     const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
       rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
@@ -522,7 +529,7 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getRawProperties(): VectorStylePropertiesDescriptor {
+  getPropertiesDescriptor(): VectorStylePropertiesDescriptor {
     return this._descriptor.properties || {};
   }
 
@@ -674,14 +681,14 @@ export class VectorStyle implements IVectorStyle {
   }
 
   _getLegendDetailStyleProperties = () => {
-    const hasLabel = getHasLabel(this._labelStyleProperty);
+    const hasLabels = this.hasLabels();
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
         return false;
       }
 
-      if (!hasLabel && LABEL_STYLES.includes(styleName)) {
+      if (!hasLabels && LABEL_STYLES.includes(styleName)) {
         // do not render legend for label styles when there is no label
         return false;
       }
@@ -766,6 +773,10 @@ export class VectorStyle implements IVectorStyle {
 
   arePointsSymbolizedAsCircles() {
     return !this._symbolizeAsStyleProperty.isSymbolizedAsIcon();
+  }
+
+  hasLabels() {
+    return getHasLabel(this._labelStyleProperty);
   }
 
   setMBPaintProperties({

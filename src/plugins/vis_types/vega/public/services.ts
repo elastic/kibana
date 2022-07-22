@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
+import { NotificationsStart, IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,12 +24,8 @@ export const [getNotifications, setNotifications] =
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 export const [getMapsEms, setMapsEms] = createGetterSetter<MapsEmsPluginPublicStart>('mapsEms');
 
-export const [getInjectedMetadata, setInjectedMetadata] =
-  createGetterSetter<CoreStart['injectedMetadata']>('InjectedMetadata');
-
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;
-  emsTileLayerId: unknown;
 }>('InjectedVars');
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;

@@ -35,7 +35,7 @@ const isRollup = (indexPatternType: string = '') => {
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
   const existingIndexPatterns = await dataViewsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
-    const { id, title, namespaces } = idxPattern;
+    const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault);
 
@@ -43,12 +43,14 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
       id,
       namespaces,
       title,
+      name,
       default: isDefault,
       tags,
       // the prepending of 0 at the default pattern takes care of prioritization
       // so the sorting will but the default index on top
       // or on bottom of a the table
       sort: `${isDefault ? '0' : '1'}${title}`,
+      getName: () => (name ? name : title),
     };
   });
 

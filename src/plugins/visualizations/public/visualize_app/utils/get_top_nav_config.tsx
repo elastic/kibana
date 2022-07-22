@@ -150,9 +150,12 @@ export const getTopNavConfig = (
     stateContainer.transitions.setVis({
       title: savedVis.title,
     });
+
+    savedVis.savedSearchId = vis.data.savedSearchId;
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = vis.uiState.toString();
+
     setHasUnsavedChanges(false);
 
     try {
@@ -230,7 +233,7 @@ export const getTopNavConfig = (
 
       return { id };
     } catch (error) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error(error);
       toastNotifications.addDanger({
         title: i18n.translate(

@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
@@ -65,7 +66,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const [fromPage, setFromPage] = useState<number>(1);
 
-  const [{}, { uiActions }] = services;
+  const [{}, { uiActions, charts: chartsService }] = services;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
@@ -148,6 +149,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
           }
         }}
         isLoading={isLoading}
+        yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
         noDataWarning={
           <EuiEmptyPrompt
             titleSize="xxs"
@@ -162,6 +164,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
             }
           />
         }
+        chartsService={chartsService}
       />
     </div>
   );

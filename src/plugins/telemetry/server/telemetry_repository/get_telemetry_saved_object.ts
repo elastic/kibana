@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
-import { TelemetrySavedObject } from '.';
+import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
+import type { TelemetrySavedObject } from '.';
 
 type GetTelemetrySavedObject = (
   repository: SavedObjectsClientContract

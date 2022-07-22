@@ -75,7 +75,16 @@ describe('integrated t_grid', () => {
 
     expect(screen.queryByTestId('updated-flex-group')).toHaveStyleRule(
       `margin-right`,
-      euiDarkVars.paddingSizes.xl
+      euiDarkVars.euiSizeXL
     );
+  });
+  it(`does not render the empty state when the graph overlay is open`, () => {
+    render(
+      <TestProviders>
+        <TGridIntegrated {...defaultProps} graphOverlay={<div />} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('tGridEmptyState')).toBeNull();
   });
 });

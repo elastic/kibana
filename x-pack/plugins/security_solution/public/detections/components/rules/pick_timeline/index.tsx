@@ -9,7 +9,8 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { SearchTimelineSuperSelect } from '../../../../timelines/components/timeline/search_super_select';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 export interface FieldValueTimeline {
   id: string | null;
@@ -21,6 +22,7 @@ interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
+  placeholder?: string;
 }
 
 export const PickTimeline = ({
@@ -28,6 +30,7 @@ export const PickTimeline = ({
   field,
   idAria,
   isDisabled = false,
+  placeholder,
 }: QueryBarDefineRuleProps) => {
   const [timelineId, setTimelineId] = useState<string | null>(null);
   const [timelineTitle, setTimelineTitle] = useState<string | null>(null);
@@ -36,23 +39,21 @@ export const PickTimeline = ({
 
   useEffect(() => {
     const { id, title } = field.value as FieldValueTimeline;
-    if (timelineTitle !== title && timelineId !== id) {
+    if (timelineId !== id) {
       setTimelineId(id);
       setTimelineTitle(title);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field.value]);
+  }, [field.value, timelineId]);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
       if (id === null) {
         field.setValue({ id, title: null });
-      } else if (timelineTitle !== title && timelineId !== id) {
+      } else if (timelineId !== id) {
         field.setValue({ id, title });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field]
+    [field, timelineId]
   );
 
   return (
@@ -71,6 +72,7 @@ export const PickTimeline = ({
         timelineId={timelineId}
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}
+        placeholder={placeholder}
       />
     </EuiFormRow>
   );

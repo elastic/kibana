@@ -95,7 +95,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
 }
 
 export const RuleForm = ({
@@ -110,7 +110,7 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredSolutions,
+  filteredRuleTypes: ruleTypeToFilter,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -163,7 +163,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
-  } = useLoadRuleTypes({ filteredSolutions });
+  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
   useEffect(() => {
@@ -724,10 +724,10 @@ export const RuleForm = ({
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    const value = e.target.value;
+                    const interval = value !== '' ? parseInt(value, 10) : undefined;
                     setRuleInterval(interval);
-                    setScheduleProperty('interval', `${e.target.value}${ruleIntervalUnit}`);
+                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
                   }}
                 />
               </EuiFlexItem>

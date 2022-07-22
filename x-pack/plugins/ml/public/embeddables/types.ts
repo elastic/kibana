@@ -6,10 +6,11 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
@@ -18,7 +19,6 @@ import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
-import { isPopulatedObject } from '../../common/util/object_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

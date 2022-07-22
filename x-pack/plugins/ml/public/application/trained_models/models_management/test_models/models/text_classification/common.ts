@@ -39,9 +39,7 @@ export function processResponse(
   const {
     inference_results: [inferenceResults],
   } = resp;
-  const labels: string[] =
-    // @ts-expect-error inference config is wrong
-    model.inference_config.text_classification?.classification_labels ?? [];
+  const labels: string[] = model.inference_config.text_classification?.classification_labels ?? [];
 
   let formattedResponse = [
     {

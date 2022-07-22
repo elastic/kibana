@@ -247,6 +247,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL Rules', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+          );
+        });
+
         it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
@@ -434,6 +446,38 @@ export default ({ getService }: FtrProviderContext) => {
               module: 'auditd',
             }),
           });
+        });
+
+        it('uses the provided timestamp_field', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['fake.index.1']),
+            query: 'any where true',
+            timestamp_field: 'created_at',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(3);
+
+          const createdAtHits = signals.hits.hits.map((hit) => hit._source?.created_at);
+          expect(createdAtHits).to.eql([1622676785, 1622676790, 1622676795]);
+        });
+
+        it('uses the provided tiebreaker_field', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['fake.index.1']),
+            query: 'any where true',
+            tiebreaker_field: 'locale',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(3);
+
+          const createdAtHits = signals.hits.hits.map((hit) => hit._source?.locale);
+          expect(createdAtHits).to.eql(['es', 'pt', 'ua']);
         });
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
@@ -704,6 +748,54 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
           expect(signals.hits.hits.length).eql(1);
+        });
+
+        it('uses the provided filters', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
+            query: 'any where true',
+            filters: [
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'source.ip',
+                  params: {
+                    query: '46.148.18.163',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'source.ip': '46.148.18.163',
+                  },
+                },
+              },
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'event.action',
+                  params: {
+                    query: 'error',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'event.action': 'error',
+                  },
+                },
+              },
+            ],
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(2);
         });
       });
 

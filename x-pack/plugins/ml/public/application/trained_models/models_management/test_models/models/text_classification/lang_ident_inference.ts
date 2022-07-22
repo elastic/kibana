@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase, InferenceType } from '../inference_base';
 import { processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
@@ -13,6 +14,15 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.langIdent.label',
+    { defaultMessage: 'Language identification' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.info1', {
+      defaultMessage: 'Test how well the model identifies the language of your text.',
+    }),
+  ];
 
   public async infer() {
     try {
@@ -44,7 +54,13 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {

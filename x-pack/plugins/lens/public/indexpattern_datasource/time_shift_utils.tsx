@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
 import { search } from '@kbn/data-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
@@ -98,6 +99,7 @@ export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: num
 );
 
 export function getDateHistogramInterval(
+  datatableUtilities: DatatableUtilitiesService,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   activeData: Record<string, Datatable> | undefined,
@@ -112,8 +114,7 @@ export function getDateHistogramInterval(
   if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
     if (column) {
-      const expression =
-        search.aggs.getDateHistogramMetaDataByDatatableColumn(column)?.interval || '';
+      const expression = datatableUtilities.getDateHistogramMeta(column)?.interval || '';
       return {
         interval: search.aggs.parseInterval(expression),
         expression,
@@ -184,6 +185,7 @@ export function getDisallowedPreviousShiftMessage(
 }
 
 export function getStateTimeShiftWarningMessages(
+  datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI
 ) {
@@ -195,6 +197,7 @@ export function getStateTimeShiftWarningMessages(
       return;
     }
     const dateHistogramInterval = getDateHistogramInterval(
+      datatableUtilities,
       layer,
       layerIndexPattern,
       activeData,

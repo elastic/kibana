@@ -9,12 +9,10 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath, getPolicyEventFiltersPath } from '../../../../../common/routing';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { PolicyArtifactsList } from './policy_artifacts_list';
@@ -22,7 +20,7 @@ import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({

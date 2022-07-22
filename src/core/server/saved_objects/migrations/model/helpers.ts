@@ -7,9 +7,14 @@
  */
 
 import { gt, valid } from 'semver';
-import { State } from '../state';
-import { IndexMapping } from '../../mappings';
-import { FetchIndexResponse } from '../actions';
+import type {
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import * as Either from 'fp-ts/lib/Either';
+import type { State } from '../state';
+import type { IndexMapping } from '../../mappings';
+import type { FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -69,6 +74,75 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
 }
 
 /**
+ * Add new must_not clauses to the given query
+ * in order to filter out the specified types
+ * @param boolQuery the bool query to be enriched
+ * @param types the types to be filtered out
+ * @returns a new query container with the enriched query
+ */
+export function addExcludedTypesToBoolQuery(
+  types: string[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  return addMustNotClausesToBoolQuery(
+    types.map((type) => ({ term: { type } })),
+    boolQuery
+  );
+}
+
+/**
+ * Add the given clauses to the 'must' of the given query
+ * @param boolQuery the bool query to be enriched
+ * @param mustClauses the clauses to be added to a 'must'
+ * @returns a new query container with the enriched query
+ */
+export function addMustClausesToBoolQuery(
+  mustClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  let must: QueryDslQueryContainer[] = [];
+
+  if (boolQuery?.must) {
+    must = must.concat(boolQuery.must);
+  }
+
+  must.push(...mustClauses);
+
+  return {
+    bool: {
+      ...boolQuery,
+      must,
+    },
+  };
+}
+
+/**
+ * Add the given clauses to the 'must_not' of the given query
+ * @param boolQuery the bool query to be enriched
+ * @param mustNotClauses the clauses to be added to a 'must_not'
+ * @returns a new query container with the enriched query
+ */
+export function addMustNotClausesToBoolQuery(
+  mustNotClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  let mustNot: QueryDslQueryContainer[] = [];
+
+  if (boolQuery?.must_not) {
+    mustNot = mustNot.concat(boolQuery.must_not);
+  }
+
+  mustNot.push(...mustNotClauses);
+
+  return {
+    bool: {
+      ...boolQuery,
+      must_not: mustNot,
+    },
+  };
+}
+
+/**
  * Extracts the version number from a >= 7.11 index
  * @param indexName A >= v7.11 index name
  */
@@ -79,12 +153,25 @@ export function indexVersion(indexName?: string): string | undefined {
 /**
  * Creates a record of alias -> index name pairs
  */
-export function getAliases(indices: FetchIndexResponse) {
-  return Object.keys(indices).reduce((acc, index) => {
-    Object.keys(indices[index].aliases || {}).forEach((alias) => {
-      // TODO throw if multiple .kibana aliases point to the same index?
-      acc[alias] = index;
-    });
-    return acc;
-  }, {} as Record<string, string>);
+export function getAliases(
+  indices: FetchIndexResponse
+): Either.Either<
+  { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
+  Record<string, string>
+> {
+  const aliases = {} as Record<string, string>;
+  for (const index of Object.getOwnPropertyNames(indices)) {
+    for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
+      if (aliases[alias] != null) {
+        return Either.left({
+          type: 'multiple_indices_per_alias',
+          alias,
+          indices: [aliases[alias], index],
+        });
+      }
+      aliases[alias] = index;
+    }
+  }
+
+  return Either.right(aliases);
 }

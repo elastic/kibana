@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 
 interface AddPackButtonComponentProps {

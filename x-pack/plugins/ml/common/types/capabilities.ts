@@ -39,6 +39,7 @@ export const userMlCapabilities = {
   canUseMlAlerts: false,
   // Trained models
   canGetTrainedModels: false,
+  canTestTrainedModels: false,
 };
 
 export const adminMlCapabilities = {

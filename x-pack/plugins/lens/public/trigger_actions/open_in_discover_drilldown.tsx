@@ -7,13 +7,9 @@
 
 import React from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import {
-  Query,
-  Filter,
-  TimeRange,
-  extractTimeRange,
-  APPLY_FILTER_TRIGGER,
-} from '@kbn/data-plugin/public';
+import type { Query, Filter, TimeRange } from '@kbn/es-query';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import {
@@ -24,7 +20,8 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
+import { isCompatible, isLensEmbeddable, getHref, getLocation } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -38,6 +35,7 @@ export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 interface UrlDrilldownDeps {
   locator: () => DiscoverAppLocator | undefined;
   hasDiscoverAccess: () => boolean;
+  application: () => ApplicationStart;
 }
 
 export type ActionContext = ApplyGlobalFilterActionContext;
@@ -119,6 +117,16 @@ export class OpenInDiscoverDrilldown
 
   public readonly isConfigurable = (context: ActionFactoryContext) => {
     return this.deps.hasDiscoverAccess() && isLensEmbeddable(context.embeddable as IEmbeddable);
+  };
+
+  public readonly getHref = async (config: Config, context: ActionContext) => {
+    return getHref({
+      discover: this.deps.discover,
+      dataViews: this.deps.dataViews(),
+      hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+      ...context,
+      embeddable: context.embeddable as IEmbeddable,
+    });
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {

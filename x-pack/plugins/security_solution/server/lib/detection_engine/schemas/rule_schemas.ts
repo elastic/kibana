@@ -37,7 +37,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   author,
   buildingBlockTypeOrUndefined,
@@ -48,6 +48,7 @@ import {
   false_positives,
   rule_id,
   immutable,
+  dataViewIdOrUndefined,
   indexOrUndefined,
   licenseOrUndefined,
   output_index,
@@ -63,19 +64,22 @@ import {
   timestampOverrideOrUndefined,
   to,
   references,
+  timestampFieldOrUndefined,
   eventCategoryOverrideOrUndefined,
+  tiebreakerFieldOrUndefined,
   savedIdOrUndefined,
   saved_id,
   thresholdNormalized,
   anomaly_threshold,
-  createdByOrNull,
-  updatedByOrNull,
-  created_at,
-  updated_at,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+  timestampOverrideFallbackDisabledOrUndefined,
+} from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
 export const baseRuleParams = t.exact(
   t.type({
     author,
@@ -100,11 +104,15 @@ export const baseRuleParams = t.exact(
     severity,
     severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
+    timestampOverrideFallbackDisabled: timestampOverrideFallbackDisabledOrUndefined,
     threat: threats,
     to,
     references,
     version,
     exceptionsList: listArray,
+    relatedIntegrations: t.union([RelatedIntegrationArray, t.undefined]),
+    requiredFields: t.union([RequiredFieldArray, t.undefined]),
+    setup: t.union([SetupGuide, t.undefined]),
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -115,9 +123,13 @@ const eqlSpecificRuleParams = t.type({
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,
+  timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
+  tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
+export type EqlSpecificRuleParams = t.TypeOf<typeof eqlSpecificRuleParams>;
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
 
 const threatSpecificRuleParams = t.type({
@@ -135,8 +147,10 @@ const threatSpecificRuleParams = t.type({
   threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
+export type ThreatSpecificRuleParams = t.TypeOf<typeof threatSpecificRuleParams>;
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
 
 const querySpecificRuleParams = t.exact(
@@ -147,9 +161,11 @@ const querySpecificRuleParams = t.exact(
     query,
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
+    dataViewId: dataViewIdOrUndefined,
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
+export type QuerySpecificRuleParams = t.TypeOf<typeof querySpecificRuleParams>;
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
 const savedQuerySpecificRuleParams = t.type({
@@ -158,11 +174,13 @@ const savedQuerySpecificRuleParams = t.type({
   // if the saved object gets deleted for some reason
   language: nonEqlLanguages,
   index: indexOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
+export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
 const thresholdSpecificRuleParams = t.type({
@@ -173,8 +191,10 @@ const thresholdSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
   threshold: thresholdNormalized,
+  dataViewId: dataViewIdOrUndefined,
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
+export type ThresholdSpecificRuleParams = t.TypeOf<typeof thresholdSpecificRuleParams>;
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 
 const machineLearningSpecificRuleParams = t.type({
@@ -186,6 +206,7 @@ export const machineLearningRuleParams = t.intersection([
   baseRuleParams,
   machineLearningSpecificRuleParams,
 ]);
+export type MachineLearningSpecificRuleParams = t.TypeOf<typeof machineLearningSpecificRuleParams>;
 export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
 export const typeSpecificRuleParams = t.union([
@@ -223,7 +244,6 @@ export const allRuleTypes = t.union([
   t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
-export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
 
 export const internalRuleCreate = t.type({
   name,
@@ -253,15 +273,3 @@ export const internalRuleUpdate = t.type({
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-export const internalRuleResponse = t.intersection([
-  internalRuleCreate,
-  t.type({
-    id: t.string,
-    createdBy: createdByOrNull,
-    updatedBy: updatedByOrNull,
-    createdAt: created_at,
-    updatedAt: updated_at,
-  }),
-]);
-export type InternalRuleResponse = t.TypeOf<typeof internalRuleResponse>;

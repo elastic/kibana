@@ -20,6 +20,8 @@ import { delay } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { APIEndpoint } from '../../../../server';
 
 function wrapper({
   children,
@@ -28,53 +30,56 @@ function wrapper({
   children?: ReactNode;
   error: boolean;
 }) {
-  const httpMethodMock = jest.fn().mockImplementation(async (endpoint) => {
-    await delay(100);
-    if (error) {
-      throw new Error('Something went wrong');
-    }
-    switch (endpoint) {
-      case '/internal/apm/latency/overall_distribution':
-        return {
-          overallHistogram: [{ key: 'the-key', doc_count: 1234 }],
-          percentileThresholdValue: 1.234,
-        };
-      case '/internal/apm/correlations/field_candidates':
-        return { fieldCandidates: ['field-1', 'field2'] };
-      case '/internal/apm/correlations/field_value_pairs':
-        return {
-          fieldValuePairs: [
-            { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
-          ],
-        };
-      case '/internal/apm/correlations/p_values':
-        return {
-          failedTransactionsCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              doc_count: 123,
-              bg_count: 1234,
-              score: 0.66,
-              pValue: 0.01,
-              normalizedScore: 0.85,
-              failurePercentage: 30,
-              successPercentage: 70,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-            },
-          ],
-        };
-      case '/internal/apm/correlations/field_stats':
-        return {
-          stats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
-        };
-      default:
-        return {};
-    }
-  });
+  const getHttpMethodMock = (method: 'GET' | 'POST') =>
+    jest.fn().mockImplementation(async (pathname) => {
+      await delay(100);
+      if (error) {
+        throw new Error('Something went wrong');
+      }
+      const endpoint = `${method} ${pathname}` as APIEndpoint;
+
+      switch (endpoint) {
+        case 'POST /internal/apm/latency/overall_distribution/transactions':
+          return {
+            overallHistogram: [{ key: 'the-key', doc_count: 1234 }],
+            percentileThresholdValue: 1.234,
+          };
+        case 'GET /internal/apm/correlations/field_candidates/transactions':
+          return { fieldCandidates: ['field-1', 'field2'] };
+        case 'POST /internal/apm/correlations/field_value_pairs/transactions':
+          return {
+            fieldValuePairs: [
+              { fieldName: 'field-name-1', fieldValue: 'field-value-1' },
+            ],
+          };
+        case 'POST /internal/apm/correlations/p_values/transactions':
+          return {
+            failedTransactionsCorrelations: [
+              {
+                fieldName: 'field-name-1',
+                fieldValue: 'field-value-1',
+                doc_count: 123,
+                bg_count: 1234,
+                score: 0.66,
+                pValue: 0.01,
+                normalizedScore: 0.85,
+                failurePercentage: 30,
+                successPercentage: 70,
+                histogram: [{ key: 'the-key', doc_count: 123 }],
+              },
+            ],
+          };
+        case 'POST /internal/apm/correlations/field_stats/transactions':
+          return {
+            stats: [
+              { fieldName: 'field-name-1', count: 123 },
+              { fieldName: 'field-name-2', count: 1111 },
+            ],
+          };
+        default:
+          return {};
+      }
+    });
 
   const history = createMemoryHistory();
   jest.spyOn(history, 'push');
@@ -90,7 +95,9 @@ function wrapper({
   });
 
   const mockPluginContext = merge({}, mockApmPluginContextValue, {
-    core: { http: { get: httpMethodMock, post: httpMethodMock } },
+    core: {
+      http: { get: getHttpMethodMock('GET'), post: getHttpMethodMock('POST') },
+    },
   }) as unknown as ApmPluginContextValue;
 
   return (

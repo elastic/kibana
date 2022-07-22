@@ -15,16 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import {
-  ElementClickListener,
-  XYBrushEvent,
-  XYChartElementEvent,
-} from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
@@ -96,8 +92,6 @@ export function DiscoverHistogram({
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, toMoment, bucketInterval, stateContainer]);
-
-
   const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
   });

@@ -17,19 +17,35 @@ import { PlatformSelector } from '../platform_selector';
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
+  enrollToken?: string;
+  fullCopyButton?: boolean;
+  isManaged?: boolean;
+  onCopy?: () => void;
 }
 
-export const InstallSection: React.FunctionComponent<Props> = ({ installCommand, isK8s }) => {
+export const InstallSection: React.FunctionComponent<Props> = ({
+  installCommand,
+  isK8s,
+  enrollToken,
+  fullCopyButton = false,
+  isManaged = true,
+  onCopy,
+}) => {
   return (
     <>
-      <InstallationMessage isK8s={isK8s} />
+      <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <PlatformSelector
+        fullCopyButton={fullCopyButton}
+        onCopy={onCopy}
         linuxCommand={installCommand.linux}
         macCommand={installCommand.mac}
         windowsCommand={installCommand.windows}
         linuxDebCommand={installCommand.deb}
         linuxRpmCommand={installCommand.rpm}
-        isK8s={isK8s === 'IS_KUBERNETES'}
+        k8sCommand={installCommand.kubernetes}
+        hasK8sIntegration={isK8s === 'IS_KUBERNETES'}
+        isManaged={isManaged}
+        enrollToken={enrollToken}
       />
     </>
   );

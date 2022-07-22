@@ -195,6 +195,7 @@ export interface LensPublicStart {
       openInNewTab?: boolean;
       originatingApp?: string;
       originatingPath?: string;
+      skipAppLeave?: boolean;
     }
   ) => void;
   /**
@@ -228,7 +229,6 @@ export class LensPlugin {
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
-
   private stopReportManager?: () => void;
 
   setup(
@@ -270,6 +270,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
@@ -282,6 +283,7 @@ export class LensPlugin {
         inspector: plugins.inspector,
         spaces: plugins.spaces,
         theme: core.theme,
+        uiSettings: core.uiSettings,
       };
     };
 
@@ -303,6 +305,7 @@ export class LensPlugin {
     setupExpressions(
       expressions,
       () => startServices().plugins.fieldFormats.deserialize,
+      () => startServices().plugins.data.datatableUtilities,
       async () => {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);
@@ -312,12 +315,6 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = () => {
-      // make sure a default index pattern exists
-      // if not, the page will be redirected to management and visualize won't be rendered
-      startServices().plugins.dataViews.ensureDefaultDataView();
-    };
-
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -325,18 +322,15 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await Promise.all([
-          this.initParts(
-            core,
-            data,
-            charts,
-            expressions,
-            fieldFormats,
-            deps.fieldFormats.deserialize,
-            eventAnnotation
-          ),
-          ensureDefaultDataView(),
-        ]);
+        await this.initParts(
+          core,
+          data,
+          charts,
+          expressions,
+          fieldFormats,
+          deps.fieldFormats.deserialize,
+          eventAnnotation
+        );
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
@@ -470,7 +464,7 @@ export class LensPlugin {
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,
-        { openInNewTab = false, originatingApp = '', originatingPath } = {}
+        { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input?.timeRange && !openInNewTab) {
@@ -488,6 +482,7 @@ export class LensPlugin {
             originatingPath,
             valueInput: input,
           },
+          skipAppLeave,
         });
       },
       canUseEditor: () => {

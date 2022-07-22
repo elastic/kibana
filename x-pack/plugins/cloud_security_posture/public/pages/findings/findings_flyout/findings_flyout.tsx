@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiCodeBlock,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -17,24 +16,55 @@ import {
   EuiTabs,
   EuiTab,
   EuiFlexGroup,
-  type PropsOf,
+  PropsOf,
+  EuiCodeBlock,
   EuiMarkdownFormat,
+  EuiIcon,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import * as TEXT from '../translations';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
+import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 
 const tabs = [
-  { title: TEXT.OVERVIEW, id: 'overview' },
-  { title: TEXT.RULE, id: 'rule' },
-  { title: TEXT.RESOURCE, id: 'resource' },
-  { title: TEXT.JSON, id: 'json' },
+  {
+    id: 'overview',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTabTitle', {
+      defaultMessage: 'Overview',
+    }),
+  },
+  {
+    id: 'rule',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTabTitle', {
+      defaultMessage: 'Rule',
+    }),
+  },
+  {
+    id: 'resource',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTabTitle', {
+      defaultMessage: 'Resource',
+    }),
+  },
+  {
+    id: 'json',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabTitle', {
+      defaultMessage: 'JSON',
+    }),
+  },
 ] as const;
+
+type FindingsTab = typeof tabs[number];
+
+interface FindingFlyoutProps {
+  onClose(): void;
+  findings: CspFinding;
+}
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
@@ -44,12 +74,16 @@ export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => 
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-type FindingsTab = typeof tabs[number];
-
-interface FindingFlyoutProps {
-  onClose(): void;
-  findings: CspFinding;
-}
+export const CisKubernetesIcons = () => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={cisLogoIcon} size="xxl" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={k8sLogoIcon} size="xxl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab.id) {
@@ -70,7 +104,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout ownFocus={false} onClose={onClose}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -93,7 +127,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
           ))}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody key={tab.id}>
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
     </EuiFlyout>

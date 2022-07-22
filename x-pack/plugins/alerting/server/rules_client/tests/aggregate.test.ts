@@ -18,6 +18,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -202,11 +203,7 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
@@ -217,14 +214,25 @@ describe('aggregate()', () => {
   });
 
   test('supports filters when aggregating', async () => {
+    const authFilter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: authFilter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'someTerm' } });
+    await rulesClient.aggregate({ options: { filter: 'foo: someTerm' } });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
       {
         fields: undefined,
-        filter: 'someTerm',
+        filter: nodeTypes.function.buildNode('and', [
+          fromKueryExpression('foo: someTerm'),
+          authFilter,
+        ]),
         page: 1,
         perPage: 0,
         type: 'alert',
@@ -239,11 +247,7 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 
 import {
   elementOrChildrenHasFocus,
@@ -14,16 +14,12 @@ import {
   handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { BrowserField, BrowserFields } from '../../containers/source';
-import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
+import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common/types';
+import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -35,11 +31,6 @@ export const search = {
     schema: true,
   },
 };
-
-export interface ItemValues {
-  value: JSX.Element;
-  valueAsString: string;
-}
 
 /**
  * An item rendered in the table
@@ -59,52 +50,6 @@ export interface AlertSummaryRow {
     isReadOnly?: boolean;
   };
 }
-
-export const getColumnHeaderFromBrowserField = ({
-  browserField,
-  width = DEFAULT_COLUMN_MIN_WIDTH,
-}: {
-  browserField: Partial<BrowserField>;
-  width?: number;
-}): ColumnHeaderOptions => ({
-  category: browserField.category,
-  columnHeaderType: 'not-filtered',
-  description: browserField.description != null ? browserField.description : undefined,
-  example: browserField.example != null ? `${browserField.example}` : undefined,
-  id: browserField.name || '',
-  type: browserField.type,
-  aggregatable: browserField.aggregatable,
-  initialWidth: width,
-});
-
-/**
- * Returns a collection of columns, where the first column in the collection
- * is a timestamp, and the remaining columns are all the columns in the
- * specified category
- */
-export const getColumnsWithTimestamp = ({
-  browserFields,
-  category,
-}: {
-  browserFields: BrowserFields;
-  category: string;
-}): ColumnHeaderOptions[] => {
-  const emptyFields: Record<string, Partial<BrowserField>> = {};
-  const timestamp = get('base.fields.@timestamp', browserFields);
-  const categoryFields: Array<Partial<BrowserField>> = [
-    ...Object.values(getOr(emptyFields, `${category}.fields`, browserFields)),
-  ];
-
-  return timestamp != null && categoryFields.length
-    ? uniqBy('id', [
-        getColumnHeaderFromBrowserField({
-          browserField: timestamp,
-          width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-        }),
-        ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
-      ])
-    : [];
-};
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>
@@ -224,4 +169,19 @@ export function getEnrichedFieldInfo({
     linkValue: linkValue ?? undefined,
     fieldFromBrowserField: browserField,
   };
+}
+
+/**
+ * A lookup table for fields that should not have actions
+ */
+export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
+  [AGENT_STATUS_FIELD_NAME]: true,
+};
+
+/**
+ * Checks whether the given field should have hover or row actions.
+ * The lookup is fast, so it is not necessary to memoize the result.
+ */
+export function hasHoverOrRowActions(field: string): boolean {
+  return !FIELDS_WITHOUT_ACTIONS[field];
 }

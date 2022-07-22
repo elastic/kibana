@@ -23,11 +23,7 @@ export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
 });
 
 export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
-  defaultMessage: 'Getting started',
-});
-
-export const THREAT_HUNTING = i18n.translate('xpack.securitySolution.navigation.threatHunting', {
-  defaultMessage: 'Threat Hunting',
+  defaultMessage: 'Get started',
 });
 
 export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dashboards', {
@@ -40,6 +36,10 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
 
 export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
+});
+
+export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kubernetes', {
+  defaultMessage: 'Kubernetes',
 });
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
@@ -108,6 +108,17 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
+});
+
+export const RESPONSE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.navigation.responseActions',
+  {
+    defaultMessage: 'Response Actions',
+  }
+);
+
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(

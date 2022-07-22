@@ -6,19 +6,29 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import {
+import type {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
   QueryCreateSchema,
   QueryUpdateSchema,
   SavedQueryCreateSchema,
-  SavedQueryUpdateSchema,
   ThreatMatchCreateSchema,
-  ThreatMatchUpdateSchema,
   ThresholdCreateSchema,
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'query',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+});
+
+export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  data_view_id: 'logs-*',
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -56,7 +66,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   language: 'kuery',
   rule_id: ruleId,
   threat_query: '*:*',
-  threat_index: ['list-index'],
+  threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   interval: '5m',
   from: 'now-6m',
@@ -129,64 +139,6 @@ export const getUpdateRulesSchemaMock = (
   risk_score: 55,
   language: 'kuery',
   id,
-});
-
-export const getUpdateSavedQuerySchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): SavedQueryUpdateSchema => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'saved_query',
-  saved_id: 'some id',
-  risk_score: 55,
-  language: 'kuery',
-  id,
-});
-
-export const getUpdateThreatMatchSchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): ThreatMatchUpdateSchema => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'threat_match',
-  risk_score: 55,
-  language: 'kuery',
-  id,
-  threat_query: '*:*',
-  threat_index: ['list-index'],
-  threat_mapping: [
-    {
-      entries: [
-        {
-          field: 'host.name',
-          value: 'host.name',
-          type: 'mapping',
-        },
-      ],
-    },
-  ],
-  threat_filters: [
-    {
-      bool: {
-        must: [
-          {
-            query_string: {
-              query: 'host.name: linux',
-              analyze_wildcard: true,
-              time_zone: 'Zulu',
-            },
-          },
-        ],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-  ],
 });
 
 export const getUpdateMachineLearningSchemaMock = (

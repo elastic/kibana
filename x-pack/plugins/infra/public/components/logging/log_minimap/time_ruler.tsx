@@ -28,7 +28,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
   return (
     <g>
       {ticks.map((tick, tickIndex) => {
-        const y = yScale(tick);
+        const y = yScale(tick) ?? 0;
 
         return (
           <g key={`tick${tickIndex}`}>

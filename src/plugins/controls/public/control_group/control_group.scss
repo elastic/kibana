@@ -18,14 +18,17 @@ $controlMinWidth: $euiSize * 14;
 
   &--small {
     width: $smallControl;
+    min-width:$smallControl;
   }
 
   &--medium {
     width: $mediumControl;
+    min-width:$mediumControl;
   }
 
   &--large {
     width: $largeControl;
+    min-width:$largeControl;
   }
 
   &--twoLine {
@@ -52,6 +55,21 @@ $controlMinWidth: $euiSize * 14;
   .controlFrame__draggable {
     .controlFrame__dragHandle {
       cursor: grabbing;
+    }
+  }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    width: 100%;
+    &--small {
+      min-width:unset;
+    }
+
+    &--medium {
+      min-width:unset;
+    }
+
+    &--large {
+      min-width:unset;
     }
   }
 }
@@ -111,14 +129,31 @@ $controlMinWidth: $euiSize * 14;
 
   &--small {
     width: $smallControl;
+    min-width: $smallControl;
   }
 
   &--medium {
     width: $mediumControl;
+    min-width: $mediumControl;
   }
 
   &--large {
     width: $largeControl;
+    min-width: $largeControl;
+  }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    &--small {
+      min-width:unset;
+    }
+
+    &--medium {
+      min-width:unset;
+    }
+
+    &--large {
+      min-width:unset;
+    }
   }
 
   &--insertBefore,
@@ -157,6 +192,15 @@ $controlMinWidth: $euiSize * 14;
     position: absolute;
 
     &--oneLine {
+      right: $euiSizeXS;
+      top: -$euiSizeL;
+      padding: $euiSizeXS;
+      border-radius: $euiBorderRadius;
+      background-color: $euiColorEmptyShade;
+      box-shadow: 0 0 0 1px $euiColorLightShade;
+    }
+
+    &--fatalError {
       right: $euiSizeXS;
       top: -$euiSizeL;
       padding: $euiSizeXS;

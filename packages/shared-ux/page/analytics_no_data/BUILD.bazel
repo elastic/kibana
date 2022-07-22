@@ -39,11 +39,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
-  "@npm//rxjs",
+  "@npm//@testing-library",
   "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-services",
-  "//packages/kbn-shared-ux-components",
-  "//packages/kbn-shared-ux-storybook"
+  "//packages/shared-ux/page/kibana_no_data",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,9 +58,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/react",
   "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
-  "//packages/kbn-shared-ux-components:npm_module_types",
+  "//packages/shared-ux/page/kibana_no_data:npm_module_types",
   "//packages/kbn-ambient-ui-types",
 ]
 
@@ -98,6 +94,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

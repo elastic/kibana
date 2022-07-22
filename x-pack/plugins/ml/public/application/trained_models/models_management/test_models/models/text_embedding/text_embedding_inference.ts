@@ -7,6 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
@@ -27,6 +28,15 @@ export type TextEmbeddingResponse = InferResponse<
 
 export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.label',
+    { defaultMessage: 'Text embedding' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textEmbedding.info1', {
+      defaultMessage: 'Test how well the model generates embeddings for your text.',
+    }),
+  ];
 
   public async infer() {
     try {
@@ -53,7 +63,13 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {

@@ -78,21 +78,10 @@ export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.d
   defaultMessage: 'Description',
 });
 
-export const BLANK = i18n.translate('xpack.securitySolution.eventDetails.blank', {
-  defaultMessage: ' ',
-});
-
 export const PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.eventDetails.filter.placeholder',
   {
     defaultMessage: 'Filter by Field, Value, or Description...',
-  }
-);
-
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.eventDetails.copyToClipboard',
-  {
-    defaultMessage: 'Copy to Clipboard',
   }
 );
 
@@ -146,13 +135,10 @@ export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason
   defaultMessage: 'Reason',
 });
 
-export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
-  'xpack.securitySolution.eventDetails.viewRuleDetailPage',
-  {
-    defaultMessage: 'View Rule detail page',
-  }
-);
-
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
+});
+
+export const SESSION_ID = i18n.translate('xpack.securitySolution.eventDetails.sessionId', {
+  defaultMessage: 'Session ID',
 });

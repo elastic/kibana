@@ -7,12 +7,9 @@
 
 import type { IFieldSubType } from '@kbn/es-query';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  FieldSpec,
-  RuntimeField,
-} from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IEsSearchResponse, FieldSpec } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
+
 import type { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
@@ -70,6 +67,7 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+  esTypes?: string[];
   subType?: IFieldSubType;
   readFromDocValues: boolean;
   runtimeField?: RuntimeField;

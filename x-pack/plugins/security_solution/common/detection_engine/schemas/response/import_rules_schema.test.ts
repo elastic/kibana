@@ -6,10 +6,12 @@
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { left, Either } from 'fp-ts/lib/Either';
-import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
-import { ErrorSchema } from './error_schema';
-import { Errors } from 'io-ts';
+import type { Either } from 'fp-ts/lib/Either';
+import { left } from 'fp-ts/lib/Either';
+import type { ImportRulesSchema } from './import_rules_schema';
+import { importRulesSchema } from './import_rules_schema';
+import type { ErrorSchema } from './error_schema';
+import type { Errors } from 'io-ts';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('import_rules_schema', () => {
@@ -17,6 +19,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: true,
       success_count: 0,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [],
       exceptions_success: true,
@@ -34,6 +37,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: 0,
+      rules_count: 0,
       errors: [{ error: { status_code: 400, message: 'some message' } }],
       exceptions_errors: [],
       exceptions_success: true,
@@ -51,6 +55,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: 0,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
       exceptions_success: true,
@@ -68,6 +73,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: 0,
+      rules_count: 0,
       errors: [
         { error: { status_code: 400, message: 'some message' } },
         { error: { status_code: 500, message: 'some message' } },
@@ -88,6 +94,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: 0,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [
         { error: { status_code: 400, message: 'some message' } },
@@ -108,6 +115,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: -1,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [],
       exceptions_success: true,
@@ -127,6 +135,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: 0,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [],
       exceptions_success: true,
@@ -164,6 +173,7 @@ describe('import_rules_schema', () => {
     const payload: Omit<ImportRulesSchema, 'success'> & { success: string } = {
       success: 'hello',
       success_count: 0,
+      rules_count: 0,
       errors: [],
       exceptions_errors: [],
       exceptions_success: true,
@@ -201,6 +211,7 @@ describe('import_rules_schema', () => {
       {
         success: true,
         success_count: 0,
+        rules_count: 0,
         errors: [],
         exceptions_errors: [],
         exceptions_success: 'hello',
@@ -220,6 +231,7 @@ describe('import_rules_schema', () => {
     const payload: ImportRulesSchema & { invalid_field: string } = {
       success: true,
       success_count: 0,
+      rules_count: 0,
       errors: [],
       invalid_field: 'invalid_data',
       exceptions_errors: [],
@@ -241,6 +253,7 @@ describe('import_rules_schema', () => {
     } = {
       success: true,
       success_count: 0,
+      rules_count: 0,
       errors: [
         { error: { status_code: 400, message: 'some message' } },
         { invalid_data: 'something', error: { status_code: 500, message: 'some message' } },

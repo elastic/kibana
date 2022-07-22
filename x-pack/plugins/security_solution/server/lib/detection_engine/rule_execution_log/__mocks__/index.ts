@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
-import {
+import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
+import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
 } from '../client_for_executors/client_interface';

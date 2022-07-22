@@ -6,8 +6,8 @@
  */
 
 import { transformValidate, transformValidateBulkError } from './validate';
-import { BulkError } from '../utils';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { BulkError } from '../utils';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getRuleMock, getRuleExecutionSummarySucceeded } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
@@ -63,6 +63,9 @@ export const ruleOutput = (): RulesSchema => ({
   note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });
 
 describe('validate', () => {

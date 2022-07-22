@@ -92,14 +92,14 @@ export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
 export const HOST_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.hostAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable hosts by severity',
+    defaultMessage: 'Hosts by alert severity',
   }
 );
 
 export const USER_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
   {
-    defaultMessage: 'Vulnerable users by severity',
+    defaultMessage: 'Users by alert severity',
   }
 );
 
@@ -153,12 +153,6 @@ export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
     defaultMessage: 'Open rule detail',
   }
 );
-export const OPEN_RULE_ALERTS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionResponse.openRuleAlertsTooltip',
-  {
-    defaultMessage: 'Open rule alerts',
-  }
-);
 
 export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionResponse.openAllAlertsButton',
@@ -167,24 +161,10 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_ALL_USER_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
-  {
-    defaultMessage: 'View all users',
-  }
-);
-
 export const VIEW_RECENT_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewRecentCases',
   {
     defaultMessage: 'View recent cases',
-  }
-);
-
-export const VIEW_ALL_HOST_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
-  {
-    defaultMessage: 'View all hosts',
   }
 );
 
@@ -206,13 +186,6 @@ export const CASES_TABLE_COLUMN_NAME = i18n.translate(
   'xpack.securitySolution.detectionResponse.caseColumnName',
   {
     defaultMessage: 'Name',
-  }
-);
-
-export const CASES_TABLE_COLUMN_NOTE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.caseColumnNote',
-  {
-    defaultMessage: 'Note',
   }
 );
 
@@ -241,5 +214,19 @@ export const ERROR_MESSAGE_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.errorMessage',
   {
     defaultMessage: 'Error fetching case data',
+  }
+);
+
+export const HOST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 hosts. Please consult Alerts page for further information.',
+  }
+);
+
+export const USER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userSectionTooltip',
+  {
+    defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );

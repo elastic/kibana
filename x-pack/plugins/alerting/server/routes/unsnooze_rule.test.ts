@@ -40,6 +40,9 @@ describe('unsnoozeAlertRoute', () => {
         params: {
           id: '1',
         },
+        body: {
+          scheduleIds: undefined,
+        },
       },
       ['noContent']
     );

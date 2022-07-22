@@ -11,7 +11,11 @@ import deepEqual from 'fast-deep-equal';
 
 import { pick } from 'lodash';
 import { ControlGroupInput } from '..';
-import { DEFAULT_CONTROL_STYLE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_WIDTH,
+} from './control_group_constants';
 import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
@@ -26,6 +30,7 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
 export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => ({
   panels: {},
   defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+  defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
   ignoreParentSettings: {

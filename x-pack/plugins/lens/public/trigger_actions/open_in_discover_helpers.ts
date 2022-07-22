@@ -7,7 +7,6 @@
 
 import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
@@ -15,7 +14,6 @@ import { DOC_TYPE } from '../../common';
 interface Context {
   embeddable: IEmbeddable;
   filters?: Filter[];
-  timeRange?: TimeRange;
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
   locator?: DiscoverAppLocator;
@@ -27,7 +25,14 @@ export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embedda
 
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
-  return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  try {
+    return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  } catch (e) {
+    // Fetching underlying data failed, log the error and behave as if the action is not compatible
+    // eslint-disable-next-line no-console
+    console.error(e);
+    return false;
+  }
 }
 
 export function execute({ embeddable, locator, timeRange, filters, openInSameTab }: Context) {

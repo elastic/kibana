@@ -10,7 +10,9 @@
   "from": "now-45m",
   "interval": "15m",
   "license": "Elastic License v2",
-  "machine_learning_job_id": "windows_anomalous_service",
+  "machine_learning_job_id": [
+    "v3_windows_anomalous_service"
+  ],
   "name": "Unusual Windows Service",
   "references": [
     "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
@@ -26,5 +28,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 4
+  "version": 5
 }

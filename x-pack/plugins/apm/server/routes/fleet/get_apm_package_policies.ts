@@ -13,7 +13,7 @@ import {
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
-export async function getApmPackgePolicies({
+export async function getApmPackagePolicies({
   core,
   fleetPluginStart,
 }: {

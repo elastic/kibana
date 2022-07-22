@@ -31,9 +31,10 @@ const ClassNameInput: FC<{
       label={i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.textClassification.classNamesInput',
         {
-          defaultMessage: 'Possible class names (comma-separated)',
+          defaultMessage: 'Class labels',
         }
       )}
+      helpText="Separate the labels with commas"
     >
       <EuiFieldText
         value={labelsText}

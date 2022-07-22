@@ -40,8 +40,9 @@ export {
   validationHasErrors,
   countValidationErrors,
   getStreamsForInputType,
+  downloadSourceRoutesService,
 } from '../../common';
-
+export * from './package_verification';
 export * from './pkg_key_from_package_info';
 export * from './ui_extensions';
 export * from './increment_policy_name';

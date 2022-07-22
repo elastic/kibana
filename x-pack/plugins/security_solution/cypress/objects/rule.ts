@@ -9,13 +9,10 @@ import type { RulesSchema } from '../../common/detection_engine/schemas/response
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
+import type { CompleteTimeline } from './timeline';
+import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
-
-export const totalNumberOfPrebuiltRulesInEsArchive = 127;
-
-export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
@@ -88,7 +85,7 @@ export interface ThreatIndicatorRule extends CustomRule {
 
 export interface MachineLearningRule {
   machineLearningJobs: string[];
-  anomalyScoreThreshold: string;
+  anomalyScoreThreshold: number;
   name: string;
   description: string;
   severity: string;
@@ -101,6 +98,7 @@ export interface MachineLearningRule {
   note: string;
   runsEvery: Interval;
   lookBack: Interval;
+  interval?: string;
 }
 
 export const getIndexPatterns = (): string[] => [
@@ -321,8 +319,11 @@ export const getNewThresholdRule = (): ThresholdRule => ({
 });
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
-  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
-  anomalyScoreThreshold: '20',
+  machineLearningJobs: [
+    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity',
+  ],
+  anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
   severity: 'Critical',
@@ -442,7 +443,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     severity,
     query,
   } = ruleResponse.body;
-  const rule = {
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const rule: RulesSchema = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
@@ -455,7 +458,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     description,
     risk_score: riskScore,
     severity,
-    output_index: '.siem-signals-default',
+    output_index: '',
     author: [],
     false_positives: [],
     from: 'now-50000h',
@@ -469,6 +472,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     version: 1,
     exceptions_list: [],
     immutable: false,
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     type: 'query',
     language: 'kuery',
     index: getIndexPatterns(),
@@ -476,6 +482,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     throttle: 'no_actions',
     actions: [],
   };
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
   const details = {
     exported_count: 1,
     exported_rules_count: 1,

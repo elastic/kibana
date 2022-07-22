@@ -7,10 +7,13 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { Logger } from '../logging';
-import { IConfigService } from '../config';
-import { CoreContext } from '../core_context';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';

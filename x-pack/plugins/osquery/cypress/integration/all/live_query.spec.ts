@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -24,9 +25,17 @@ import { getAdvancedButton } from '../../screens/integrations';
 import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
+  });
+
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
+  });
+
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -64,5 +73,23 @@ describe('ALL - Live Query', () => {
     })
       .react('EuiIconTip', { props: { type: 'indexMapping' } })
       .should('exist');
+  });
+
+  it('should run customized saved query', () => {
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
+    cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
+    inputQuery('{selectall}{backspace}{selectall}{backspace}select * from users');
+    cy.wait(1000);
+    submitQuery();
+    checkResults();
+    navigateTo('/app/osquery');
+    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
+      .eq(0)
+      .should('be.visible')
+      .click();
+
+    cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
   });
 });

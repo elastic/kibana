@@ -11,7 +11,7 @@ import {
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
@@ -62,7 +62,7 @@ export interface EmbeddableExamplesSetupDependencies {
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface ExampleEmbeddableFactories {

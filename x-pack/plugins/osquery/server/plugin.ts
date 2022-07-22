@@ -6,25 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsClient,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SavedObjectsClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { createConfig } from './create_config';
-import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
+import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
-import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
-import { ConfigType } from './config';
+import type { OsqueryAppContext } from './lib/osquery_app_context_services';
+import { OsqueryAppContextService } from './lib/osquery_app_context_services';
+import type { ConfigType } from './config';
 import {
   packSavedObjectType,
   packAssetSavedObjectType,
@@ -45,7 +45,6 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,
-    excludeFromBasePrivileges: true,
     privileges: {
       all: {
         api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],

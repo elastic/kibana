@@ -6,11 +6,11 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { AppPluginStartDependencies } from './types';
+import { AiOpsStartDependencies } from './plugin';
 
 let coreStart: CoreStart;
-let pluginsStart: AppPluginStartDependencies;
-export function setStartServices(core: CoreStart, plugins: AppPluginStartDependencies) {
+let pluginsStart: AiOpsStartDependencies;
+export function setStartServices(core: CoreStart, plugins: AiOpsStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
 }

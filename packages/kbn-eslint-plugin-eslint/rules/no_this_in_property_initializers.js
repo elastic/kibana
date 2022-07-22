@@ -17,7 +17,7 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 /**
  * @param {string} arg
  */
-const ERROR_MSG = `"this" is not fully initialized in class property intializers, define the value for this property in the constructor instead`;
+const ERROR_MSG = `"this" is not fully initialized in class property initializers, define the value for this property in the constructor instead`;
 
 /** @type {Rule} */
 module.exports = {

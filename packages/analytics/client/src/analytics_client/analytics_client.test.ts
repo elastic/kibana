@@ -7,16 +7,14 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, firstValueFrom, lastValueFrom, Subject } from 'rxjs';
+import { Subject, lastValueFrom, take, toArray } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
-import { take, toArray } from 'rxjs/operators';
 import { shippersMock } from '../shippers/mocks';
-import type { EventContext, TelemetryCounter } from '../events';
-import { TelemetryCounterType } from '../events';
+import type { TelemetryCounter } from '../events';
+import { ContextService } from './context_service';
 
 describe('AnalyticsClient', () => {
   let analyticsClient: AnalyticsClient;
@@ -103,6 +101,28 @@ describe('AnalyticsClient', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Attempted to report event type \\"testEvent\\", before registering it. Use the \\"registerEventType\\" API to register it."`
       );
+    });
+
+    test('fails to validate the event and throws', () => {
+      analyticsClient.registerEventType({
+        eventType: 'testEvent',
+        schema: {
+          a_field: {
+            type: 'keyword',
+            _meta: {
+              description: 'description of a_field',
+            },
+          },
+        },
+      });
+      analyticsClient.optIn({ global: { enabled: true } });
+
+      expect(
+        () => analyticsClient.reportEvent('testEvent', { a_field: 100 }) // a_field is expected to be a string
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "Failed to validate payload coming from \\"Event Type 'testEvent'\\":
+        	- [a_field]: {\\"expected\\":\\"string\\",\\"actual\\":\\"number\\",\\"value\\":100}"
+      `);
     });
 
     test('enqueues multiple events before specifying the optIn consent and registering a shipper', async () => {
@@ -267,7 +287,7 @@ describe('AnalyticsClient', () => {
       const counterEventPromise = lastValueFrom(analyticsClient.telemetryCounter$.pipe(take(1)));
 
       const counter: TelemetryCounter = {
-        type: TelemetryCounterType.succeeded,
+        type: 'succeeded',
         source: 'a random value',
         event_type: 'eventTypeA',
         code: '200',
@@ -390,15 +410,16 @@ describe('AnalyticsClient', () => {
     );
   });
 
-  describe('registerContextProvider', () => {
-    let globalContext$: Observable<Partial<EventContext>>;
+  describe('ContextProvider APIs', () => {
+    let contextService: ContextService;
 
     beforeEach(() => {
       // eslint-disable-next-line dot-notation
-      globalContext$ = analyticsClient['context$'];
+      contextService = analyticsClient['contextService'];
     });
 
-    test('Registers a context provider', async () => {
+    test('Registers a context provider', () => {
+      const registerContextProviderSpy = jest.spyOn(contextService, 'registerContextProvider');
       const context$ = new Subject<{ a_field: boolean }>();
       analyticsClient.registerContextProvider({
         name: 'contextProviderA',
@@ -413,17 +434,8 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(2), toArray()));
-      context$.next({ a_field: true });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-      ]);
-    });
-
-    test('It does not break if context emits `undefined`', async () => {
-      const context$ = new Subject<{ a_field: boolean } | undefined | void>();
-      analyticsClient.registerContextProvider({
+      expect(registerContextProviderSpy).toHaveBeenCalledTimes(1);
+      expect(registerContextProviderSpy).toHaveBeenCalledWith({
         name: 'contextProviderA',
         schema: {
           a_field: {
@@ -435,241 +447,13 @@ describe('AnalyticsClient', () => {
         },
         context$,
       });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(3), toArray()));
-      context$.next();
-      context$.next(undefined);
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        {},
-        {},
-      ]);
     });
 
-    test('It does not break for BehaviourSubjects (emitting as soon as they connect)', async () => {
-      const context$ = new BehaviorSubject<{ a_field: boolean }>({ a_field: true });
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(1), toArray()));
-      await expect(globalContextPromise).resolves.toEqual([
-        { a_field: true }, // No original empty state
-      ]);
-    });
-
-    test('Merges all the contexts together', async () => {
-      const contextA$ = new Subject<{ a_field: boolean }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$: contextA$,
-      });
-
-      const contextB$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderB',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$: contextB$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
-      contextA$.next({ a_field: true });
-      contextB$.next({ b_field: 1 });
-      contextB$.next({ a_field: false, b_field: 1 });
-      contextA$.next({ a_field: true });
-      contextB$.next({ b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-        { a_field: true, b_field: 1 }, // Merged A & B
-        { a_field: false, b_field: 1 }, // a_field updated from B
-        { a_field: false, b_field: 1 }, // a_field still from B because it was registered later.
-        // We may want to change this last behaviour in the future but, for now, it's fine.
-        { a_field: true, b_field: 2 }, // a_field is now taken from A because B is not providing it yet.
-      ]);
-    });
-
-    test('The global context is not polluted by context providers removing reported fields', async () => {
-      const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: false, b_field: 1 });
-      context$.next({ a_field: true, b_field: 1 });
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: true, b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { b_field: 1 },
-        { a_field: false, b_field: 1 },
-        { a_field: true, b_field: 1 },
-        { b_field: 1 }, // a_field is removed because the context provider removed it.
-        { a_field: true, b_field: 2 },
-      ]);
-    });
-
-    test('The undefined values are not forwarded to the global context', async () => {
-      const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-              optional: true,
-            },
-          },
-          b_field: {
-            type: 'long',
-            _meta: {
-              description: 'b_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = firstValueFrom(globalContext$.pipe(take(6), toArray()));
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: false, b_field: 1 });
-      context$.next({ a_field: true, b_field: 1 });
-      context$.next({ b_field: 1 });
-      context$.next({ a_field: undefined, b_field: 2 });
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { b_field: 1 },
-        { a_field: false, b_field: 1 },
-        { a_field: true, b_field: 1 },
-        { b_field: 1 }, // a_field is removed because the context provider removed it.
-        { b_field: 2 }, // a_field is not forwarded because it is `undefined`
-      ]);
-    });
-
-    test('Fails to register 2 context providers with the same name', () => {
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$: new Subject<{ a_field: boolean }>(),
-      });
-      expect(() => {
-        analyticsClient.registerContextProvider({
-          name: 'contextProviderA',
-          schema: {
-            a_field: {
-              type: 'boolean',
-              _meta: {
-                description: 'a_field description',
-              },
-            },
-          },
-          context$: new Subject<{ a_field: boolean }>(),
-        });
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Context provider with name 'contextProviderA' already registered"`
-      );
-    });
-
-    test('Does not remove the context provider after it completes', async () => {
-      const context$ = new Subject<{ a_field: boolean }>();
-
-      const contextProvidersRegistry =
-        // eslint-disable-next-line dot-notation
-        analyticsClient['contextService']['contextProvidersRegistry'];
-
-      // The context registry is empty
-      expect(contextProvidersRegistry.size).toBe(0);
-
-      analyticsClient.registerContextProvider({
-        name: 'contextProviderA',
-        schema: {
-          a_field: {
-            type: 'boolean',
-            _meta: {
-              description: 'a_field description',
-            },
-          },
-        },
-        context$,
-      });
-
-      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(4), toArray()));
-      context$.next({ a_field: true });
-      // The size of the registry grows on the first emission
-      expect(contextProvidersRegistry.size).toBe(1);
-
-      context$.next({ a_field: true });
-      // Still in the registry
-      expect(contextProvidersRegistry.size).toBe(1);
-      context$.complete();
-      // Still in the registry
-      expect(contextProvidersRegistry.size).toBe(1);
+    test('Removes a context provider', () => {
+      const removeContextProviderSpy = jest.spyOn(contextService, 'removeContextProvider');
       analyticsClient.removeContextProvider('contextProviderA');
-      // The context provider is removed from the registry
-      expect(contextProvidersRegistry.size).toBe(0);
-      await expect(globalContextPromise).resolves.toEqual([
-        {}, // Original empty state
-        { a_field: true },
-        { a_field: true },
-        {},
-      ]);
+      expect(removeContextProviderSpy).toHaveBeenCalledTimes(1);
+      expect(removeContextProviderSpy).toHaveBeenCalledWith('contextProviderA');
     });
   });
 
@@ -935,7 +719,7 @@ describe('AnalyticsClient', () => {
 
     test('Discards events from the internal queue when there are shippers and an opt-in response is false', async () => {
       const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3), toArray()) // Waiting for 3 enqueued
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
       );
 
       // Send multiple events of 1 type to test the grouping logic as well
@@ -947,9 +731,12 @@ describe('AnalyticsClient', () => {
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: false } });
 
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
+
       expect(reportEventsMock).toHaveBeenCalledTimes(0);
 
-      // Expect 2 enqueued, but not shipped
+      // Expect 4 enqueued, but not shipped
       await expect(telemetryCounterPromise).resolves.toEqual([
         {
           type: 'enqueued',
@@ -972,7 +759,68 @@ describe('AnalyticsClient', () => {
           code: 'enqueued',
           count: 1,
         },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
       ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
+    });
+
+    test('Discards events from the internal queue when there are no shippers and an opt-in response is false', async () => {
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
+      );
+
+      // Send multiple events of 1 type to test the grouping logic as well
+      analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+      analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+      analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+
+      analyticsClient.optIn({ global: { enabled: false } });
+
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
+
+      // Expect 4 enqueued, but not shipped
+      await expect(telemetryCounterPromise).resolves.toEqual([
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-b',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+      ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
     });
 
     test(

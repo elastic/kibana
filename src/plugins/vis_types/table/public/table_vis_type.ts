@@ -39,6 +39,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: TableOptions,
     schemas: [
       {
@@ -47,7 +48,13 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
           defaultMessage: 'Metric',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         aggSettings: {
           top_hits: {
             allowStrings: true,
@@ -90,7 +97,9 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       },
     ],
   },
+  fetchDatatable: true,
   toExpressionAst,
+  hasPartialRows: (vis) => vis.params.showPartialRows,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
 };

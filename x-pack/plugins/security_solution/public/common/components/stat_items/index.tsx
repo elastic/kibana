@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
+import type { Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +17,6 @@ import {
   EuiButtonIcon,
   EuiLoadingSpinner,
   EuiTitle,
-  IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
@@ -23,23 +24,33 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useQueryToggle } from '../../containers/query_toggle';
 
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import type {
+  ChartSeriesData,
+  ChartData,
+  ChartSeriesConfigs,
+  UpdateDateRange,
+} from '../charts/common';
 import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { LensAttributes } from '../visualization_actions/types';
+import type { LensAttributes } from '../visualization_actions/types';
 import * as i18n from '../../containers/query_toggle/translations';
-import { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
-
+import type { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
+const FlexGroup = styled(EuiFlexGroup)`
+  .no-margin {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+`;
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
   position: relative;
@@ -256,9 +267,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
         <EuiPanel hasBorder>
-          <EuiFlexGroup gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize={'none'}>
+          <FlexGroup gutterSize={'none'}>
+            <EuiFlexItem className={toggleStatus ? '' : 'no-margin'}>
+              <EuiFlexGroup gutterSize={'none'} responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
@@ -283,7 +294,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 <InspectButton queryId={id} title={description} inspectIndex={index} />
               </EuiFlexItem>
             )}
-          </EuiFlexGroup>
+          </FlexGroup>
           {loading && (
             <EuiFlexGroup justifyContent="center" alignItems="center">
               <EuiFlexItem grow={false}>

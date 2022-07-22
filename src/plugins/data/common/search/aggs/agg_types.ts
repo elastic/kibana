@@ -18,7 +18,9 @@ export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
   getConfig: <T = any>(key: string) => T;
   getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
-  isDefaultTimezone: () => boolean;
+  aggExecutionContext?: {
+    shouldDetectTimeZone?: boolean;
+  };
 }
 
 /** @internal */
@@ -29,6 +31,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.SUM, fn: metrics.getSumMetricAgg },
     { name: METRIC_TYPES.MEDIAN, fn: metrics.getMedianMetricAgg },
     { name: METRIC_TYPES.SINGLE_PERCENTILE, fn: metrics.getSinglePercentileMetricAgg },
+    { name: METRIC_TYPES.SINGLE_PERCENTILE_RANK, fn: metrics.getSinglePercentileRankMetricAgg },
     { name: METRIC_TYPES.MIN, fn: metrics.getMinMetricAgg },
     { name: METRIC_TYPES.MAX, fn: metrics.getMaxMetricAgg },
     { name: METRIC_TYPES.STD_DEV, fn: metrics.getStdDeviationMetricAgg },
@@ -102,6 +105,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggMax,
   metrics.aggMedian,
   metrics.aggSinglePercentile,
+  metrics.aggSinglePercentileRank,
   metrics.aggMin,
   metrics.aggMovingAvg,
   metrics.aggPercentileRanks,

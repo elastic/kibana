@@ -8,7 +8,7 @@ at website logs, but this type of dashboard works on any type of data.
 When you're done, you'll have a complete overview of the sample web logs data. 
 
 [role="screenshot"]
-image::images/lens_logsDashboard_7.16.png[Logs dashboard]
+image::images/lens_logsDashboard_8.3.png[Logs dashboard]
 
 Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
@@ -38,10 +38,10 @@ Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
-. Make sure the *kibana_sample_data_logs* index appears.
+. Make sure the *kibana_sample_data_logs* data view appears.
 +
 [role="screenshot"]
-image::images/lens_dataViewDropDown_8.0.png[Data view dropdown]
+image::images/lens_dataViewDropDown_8.3.png[Data view dropdown]
 
 To create the visualizations in this tutorial, you'll use the following fields:
 
@@ -79,12 +79,9 @@ In the layer pane, *Unique count of clientip* appears because the editor automat
 
 . In the layer pane, click *Unique count of clientip*.
 
-.. In the *Display name* field, enter `Unique visitors`.
+.. In the *Name* field, enter `Unique visitors`.
 
 .. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_metricUniqueVisitors_7.16.png[Metric visualization that displays number of unique visitors]
 
 . Click *Save and return*.
 +
@@ -122,23 +119,21 @@ To increase the minimum time interval:
 
 . In the layer pane, click *timestamp*.
 
-. Select *Customize time interval*.
-
-. Change the *Minimum interval* to *1 days*, then click *Close*.
+. Change the *Minimum interval* to *1d*, then click *Close*.
 +
-You can increase and decrease the minimum interval, but you are unable to decrease the interval below the <<advanced-options,*Advanced Settings*>>. 
+You can increase and decrease the minimum interval, but you are unable to decrease the interval below the configured <<advanced-options,*Advanced Settings*>>. 
 
 To save space on the dashboard, hide the axis labels.
 
-. Open the *Left axis* menu, then deselect *Show*.
+. Open the *Left axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_leftAxisMenu_7.16.png[Left axis menu]
+image::images/lens_lineChartMetricOverTimeLeftAxis_8.3.png[Left axis menu]
 
-. Open the *Bottom axis* menu, then deselect *Show*.
+. Open the *Bottom axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTime_7.16.png[Line chart that displays metric data over time]
+image::images/lens_lineChartMetricOverTimeBottomAxis_8.3.png[Line chart that displays metric data over time]
 
 . Click *Save and return*
 
@@ -183,7 +178,7 @@ image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword
 
 .. In the *Number of values* field, enter `10`.
 
-.. In the *Display name* field, enter `Page URL`.
+.. In the *Name* field, enter `Page URL`.
 
 .. Click *Close*.
 +
@@ -204,7 +199,9 @@ Create a proportional visualization that helps you determine if your users trans
 
 . From the *Available fields* list, drag *bytes* to the *Vertical axis* field in the layer pane.
 
-. Click *Median of bytes*, click the *Sum* function, then click *Close*.
+. In the layer pane, click *Median of bytes*. 
+
+. Click the *Sum* function, then click *Close*.
 
 . From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
 
@@ -261,7 +258,7 @@ The distribution of a number can help you find patterns. For example, you can an
 
 .. Click the *Sum* function.
 
-.. In the *Display name* field, enter `Transferred bytes`.
+.. In the *Name* field, enter `Transferred bytes`.
 
 .. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
 
@@ -292,11 +289,11 @@ Add a panel title:
 
 . From the *Available fields* list, drag *Records* to the *Size by* field in the layer pane. 
 
-. In the editor, click *Add or drag-and-drop a field* for *Group by*.
+. In the layer pane, click *Add or drag-and-drop a field* for *Group by*.
 
 Create a filter for each website traffic source:
 
-. From *Select a function*, click *Filters*.
+. Click the *Filters* function.
 
 . Click *All records*, enter the following in the query bar, then press Return:
 
@@ -331,7 +328,7 @@ Remove the documents that do not match the filter criteria:
 
 . In the layer pane, click *Top values of geo.srcdest*.
 
-. Click *Advanced*, then deselect *Group other values as "Other"*, the click *Close*.
+. Click *Advanced*, deselect *Group other values as "Other"*, then click *Close*.
 +
 [role="screenshot"]
 image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
@@ -361,7 +358,7 @@ Decrease the size of the following panels, then move the panels to the first row
 * *Website traffic*
 +
 [role="screenshot"]
-image::images/lens_logsDashboard_7.16.png[Logs dashboard]
+image::images/lens_logsDashboard_8.3.png[Logs dashboard]
 
 [discrete]
 === Save the dashboard

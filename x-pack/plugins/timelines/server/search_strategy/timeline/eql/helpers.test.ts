@@ -35,9 +35,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 0, querySize: 25 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -51,6 +52,16 @@ describe('Search Strategy EQL helper', () => {
           "allow_no_indices": true,
           "body": Object {
             "event_category_field": "event.category",
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
             "filter": Object {
               "bool": Object {
                 "filter": Array [
@@ -85,9 +96,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 1, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -104,6 +116,16 @@ describe('Search Strategy EQL helper', () => {
           "allow_no_indices": true,
           "body": Object {
             "event_category_field": "event.super.category",
+            "fields": Array [
+              Object {
+                "field": "*",
+                "include_unmapped": true,
+              },
+              Object {
+                "field": "@timestamp",
+                "format": "strict_date_optional_time",
+              },
+            ],
             "filter": Object {
               "bool": Object {
                 "filter": Array [
@@ -141,9 +163,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 0, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              field: '@timestamp',
+              esTypes: ['date'],
+              type: 'date',
             },
           ],
           timerange: {
@@ -205,6 +228,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qhymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -332,6 +358,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -418,9 +447,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 3, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -472,6 +502,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "rBymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -588,6 +621,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "pxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.process-default-2021.02.02-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],

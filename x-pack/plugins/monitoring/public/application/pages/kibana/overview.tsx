@@ -33,6 +33,11 @@ const KibanaOverview = ({ data }: { data: any }) => {
 
   if (!data) return null;
 
+  const showRules =
+    data.metrics.kibana_cluster_rule_overdue_count &&
+    data.metrics.kibana_cluster_rule_overdue_count.length &&
+    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.metricbeat;
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -57,6 +62,42 @@ const KibanaOverview = ({ data }: { data: any }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {showRules && (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_rule_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_count}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <MonitoringTimeseriesContainer
+                    series={data.metrics.kibana_cluster_action_overdue_duration}
+                    onBrush={onBrush}
+                    zoomInfo={zoomInfo}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

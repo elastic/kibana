@@ -69,7 +69,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search'],
-      fields: ['title'],
+      fields: ['title', 'name'],
       search: undefined,
       page: 1,
       perPage: 10,
@@ -224,7 +224,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['search'],
-        fields: ['title'],
+        fields: ['title', 'name'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -267,7 +267,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['type1', 'type2'],
-        fields: ['title', 'field1', 'field2', 'field3'],
+        fields: ['title', 'name', 'field1', 'field2', 'field3'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -333,7 +333,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search', 'vis'],
-      fields: ['title'],
+      fields: ['title', 'name'],
       search: undefined,
       page: 1,
       perPage: 10,

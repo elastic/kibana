@@ -46,6 +46,13 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlert
   defaultMessage: 'Show alert details',
 });
 
+export const SHOW_ALERT_TABLE_TOOLTIP = i18n.translate(
+  'xpack.cases.caseView.showAlertTableTooltip',
+  {
+    defaultMessage: 'Show alerts',
+  }
+);
+
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
 });
