@@ -119,7 +119,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                   <EuiFlexItem>
                     <EuiText size="s" color="subdued">
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredTitle"
+                        id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
                         defaultMessage="Recovered"
                       />
                     </EuiText>
