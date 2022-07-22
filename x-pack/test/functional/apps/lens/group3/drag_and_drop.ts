@@ -217,7 +217,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldToExtraDropType(
           'geo.src',
           'lnsXY_splitDimensionPanel',
-          'combine'
+          'combine',
+          xyChartContainer
         );
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
