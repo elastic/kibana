@@ -19,12 +19,19 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-const FlyoutHeaderComponent: React.FC<{
+interface Props {
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
   betaBadgeProps?: Partial<EuiBetaBadgeProps>;
-}> = ({ icon, actionTypeName, actionTypeMessage, betaBadgeProps }) => {
+}
+
+const FlyoutHeaderComponent: React.FC<Props> = ({
+  icon,
+  actionTypeName,
+  actionTypeMessage,
+  betaBadgeProps,
+}) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -75,9 +82,4 @@ const FlyoutHeaderComponent: React.FC<{
   );
 };
 
-export const FlyoutHeader: React.NamedExoticComponent<{
-  icon?: IconType | null;
-  actionTypeName?: string | null;
-  actionTypeMessage?: string | null;
-  betaBadgeProps?: Partial<EuiBetaBadgeProps>;
-}> = memo(FlyoutHeaderComponent);
+export const FlyoutHeader: React.NamedExoticComponent<Props> = memo(FlyoutHeaderComponent);
