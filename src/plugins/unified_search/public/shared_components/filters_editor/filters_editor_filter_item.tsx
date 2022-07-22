@@ -185,6 +185,19 @@ export function FilterItem({
             fullWidth
           />
         );
+      default:
+        return (
+          <PhraseValueInput
+            disabled={!dataView || !selectedOperator}
+            indexPattern={dataView}
+            field={selectedField!}
+            value={selectedParams}
+            onChange={onParamsChange}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            fullWidth
+            compressed
+          />
+        );
     }
   }
 

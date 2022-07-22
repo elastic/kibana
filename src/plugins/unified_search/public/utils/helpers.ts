@@ -16,7 +16,7 @@ export const getFieldValidityAndErrorMessage = (
   field: DataViewField,
   value?: string | undefined
 ): { isInvalid: boolean; errorMessage?: string } => {
-  const type = field.type;
+  const type = field?.type;
   switch (type) {
     case KBN_FIELD_TYPES.DATE:
     case KBN_FIELD_TYPES.DATE_RANGE:

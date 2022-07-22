@@ -22,6 +22,7 @@ interface Props extends PhraseSuggestorProps {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
+  disabled?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
@@ -37,6 +38,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
+            disabled={this.props.disabled}
             compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
@@ -61,6 +63,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
+        disabled={this.props.disabled}
         fullWidth={fullWidth}
         placeholder={intl.formatMessage({
           id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',

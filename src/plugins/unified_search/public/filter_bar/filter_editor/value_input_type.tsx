@@ -25,6 +25,7 @@ interface Props {
   fullWidth?: boolean;
   isInvalid?: boolean;
   compressed?: boolean;
+  disabled?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -38,13 +39,14 @@ class ValueInputTypeUI extends Component<Props> {
 
   public render() {
     const value = this.props.value;
-    const type = this.props.field.type;
+    const type = this.props.field ? this.props.field.type : 'string';
     let inputElement: React.ReactNode;
     switch (type) {
       case 'string':
         inputElement = (
           <EuiFieldText
             compressed={this.props.compressed}
+            disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -60,6 +62,7 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiFieldNumber
             compressed={this.props.compressed}
+            disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={this.getValueForNumberField(value)}
@@ -74,6 +77,7 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiFieldText
             compressed={this.props.compressed}
+            disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -90,6 +94,7 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiFieldText
             fullWidth={this.props.fullWidth}
+            disabled={this.props.disabled}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
