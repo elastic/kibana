@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import {
@@ -80,6 +81,7 @@ export function useDiscoverState({
   const [state, setState] = useState(appStateContainer.getState());
   const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
   const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
+  const prevQuery = usePrevious(state.query);
 
   /**
    * Search session logic
@@ -243,6 +245,12 @@ export function useDiscoverState({
   /**
    * Trigger data fetching on indexPattern or savedSearch changes
    */
+  useEffect(() => {
+    if (!isEqual(state.query, prevQuery)) {
+      setDocumentStateCols([]);
+    }
+  }, [state.query, prevQuery]);
+
   useEffect(() => {
     if (indexPattern) {
       refetch$.next(undefined);
