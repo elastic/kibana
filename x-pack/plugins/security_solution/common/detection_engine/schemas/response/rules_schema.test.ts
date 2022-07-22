@@ -663,7 +663,7 @@ describe('rules_schema', () => {
       expect(emptyArray).toEqual(expected);
     });
 
-    test('should array of size 1 given a "saved_query"', () => {
+    test('should array of size 2 given a "saved_query"', () => {
       const array = addSavedId({ type: 'saved_query' });
       expect(array.length).toEqual(2);
     });
