@@ -57,16 +57,11 @@ import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
-import type { UserProfileServiceStart } from './user_profile';
+import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
->;
-
-export type FeaturesService = Pick<
-  FeaturesPluginSetup,
-  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -113,6 +108,10 @@ export interface SecurityPluginStart {
    * Authorization services to manage and access the permissions a particular user has.
    */
   authz: AuthorizationServiceSetup;
+  /**
+   * User profiles services to retrieve user profiles.
+   */
+  userProfiles: UserProfileServiceStart;
 }
 
 export interface PluginSetupDependencies {
@@ -199,7 +198,7 @@ export class SecurityPlugin
   };
 
   private readonly userProfileService: UserProfileService;
-  private userProfileStart?: UserProfileServiceStart;
+  private userProfileStart?: UserProfileServiceStartInternal;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -318,6 +317,8 @@ export class SecurityPlugin
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
+
+    this.userProfileService.setup({ authz: this.authorizationSetup });
 
     setupSpacesClient({
       spaces,
@@ -441,6 +442,10 @@ export class SecurityPlugin
         checkSavedObjectsPrivilegesWithRequest:
           this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
+      },
+      userProfiles: {
+        bulkGet: this.userProfileStart.bulkGet,
+        suggest: this.userProfileStart.suggest,
       },
     });
   }

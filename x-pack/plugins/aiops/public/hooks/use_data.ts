@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { merge } from 'rxjs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { useAiOpsKibana } from '../kibana_context';
 import { useTimefilter } from './use_time_filter';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
@@ -16,16 +17,22 @@ import { TimeBuckets } from '../../common/time_buckets';
 import { useDocumentCountStats } from './use_document_count_stats';
 import { Dictionary } from './url_state';
 import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import {
+  getEsQueryFromSavedSearch,
+  SavedSearchSavedObject,
+} from '../application/utils/search_utils';
 import { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_wrapper';
 
 export const useData = (
-  currentDataView: DataView,
+  {
+    currentDataView,
+    currentSavedSearch,
+  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useAiOpsKibana();
-  const { uiSettings } = services;
+  const { uiSettings, data } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -36,7 +43,8 @@ export const useData = (
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
-      savedSearch: undefined,
+      savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
@@ -57,6 +65,7 @@ export const useData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    currentSavedSearch?.id,
     currentDataView.id,
     aiopsListState.searchString,
     aiopsListState.searchQueryLanguage,
