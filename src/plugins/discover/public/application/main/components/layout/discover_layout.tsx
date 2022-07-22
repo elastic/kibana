@@ -16,6 +16,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiResizableContainer,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +47,7 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
+import { css } from '@emotion/react';
 
 /**
  * Local storage key for sidebar persistence state
@@ -247,126 +249,141 @@ export function DiscoverLayout({
           spaces={spaces}
           history={history}
         />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SidebarMemoized
-              columns={columns}
-              documents$={savedSearchData$.documents$}
-              indexPatternList={indexPatternList}
-              onAddField={onAddColumn}
-              onAddFilter={onAddFilter}
-              onRemoveField={onRemoveColumn}
-              onChangeIndexPattern={onChangeIndexPattern}
-              selectedIndexPattern={indexPattern}
-              state={state}
-              isClosed={isSidebarClosed}
-              trackUiMetric={trackUiMetric}
-              useNewFieldsApi={useNewFieldsApi}
-              onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
-              onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
-            />
-          </EuiFlexItem>
-          <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiSpacer size="s" />
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="xs"
-                  onClick={toggleSidebarCollapse}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                />
-              </div>
-            </EuiFlexItem>
-          </EuiHideFor>
-          <EuiFlexItem className="dscPageContent__wrapper">
-            <EuiPageContent
-              verticalPosition={contentCentered ? 'center' : undefined}
-              horizontalPosition={contentCentered ? 'center' : undefined}
-              paddingSize="none"
-              hasShadow={false}
-              className={classNames('dscPageContent', {
-                'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': resultState === 'none',
-              })}
-            >
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  isTimeBased={isTimeBased}
-                  data={data}
-                  error={dataState.error}
-                  hasQuery={!!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
-                  onDisableFilters={onDisableFilters}
-                />
-              )}
-              {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
-              )}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
-                <EuiFlexGroup
-                  className="dscPageContent__inner"
-                  direction="column"
-                  alignItems="stretch"
-                  gutterSize="none"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <DiscoverChartMemoized
-                      resetSavedSearch={resetSavedSearch}
-                      savedSearch={savedSearch}
-                      savedSearchDataChart$={charts$}
-                      savedSearchDataTotalHits$={totalHits$}
-                      stateContainer={stateContainer}
-                      indexPattern={indexPattern}
+        <EuiResizableContainer className="dscPageBody__contents">
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={20}
+                minSize="240px"
+                paddingSize="s"
+                css={css('padding-bottom: 0; padding-right: 0;')}
+              >
+                <EuiFlexGroup gutterSize="s" className="eui-fullHeight" css={css('width: 100%;')}>
+                  <EuiFlexItem>
+                    <SidebarMemoized
+                      columns={columns}
+                      documents$={savedSearchData$.documents$}
+                      indexPatternList={indexPatternList}
+                      onAddField={onAddColumn}
+                      onAddFilter={onAddFilter}
+                      onRemoveField={onRemoveColumn}
+                      onChangeIndexPattern={onChangeIndexPattern}
+                      selectedIndexPattern={indexPattern}
+                      state={state}
+                      isClosed={isSidebarClosed}
+                      trackUiMetric={trackUiMetric}
+                      useNewFieldsApi={useNewFieldsApi}
+                      onFieldEdited={onFieldEdited}
                       viewMode={viewMode}
-                      setDiscoverViewMode={setDiscoverViewMode}
-                      hideChart={state.hideChart}
-                      interval={state.interval}
+                      onDataViewCreated={onDataViewCreated}
+                      availableFields$={savedSearchData$.availableFields$}
                     />
                   </EuiFlexItem>
-                  <EuiHorizontalRule margin="none" />
-                  {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-                    <DiscoverDocuments
-                      documents$={savedSearchData$.documents$}
-                      expandedDoc={expandedDoc}
-                      indexPattern={indexPattern}
-                      navigateTo={navigateTo}
-                      onAddFilter={onAddFilter as DocViewFilterFn}
-                      savedSearch={savedSearch}
-                      setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
-                      onFieldEdited={onFieldEdited}
-                    />
-                  ) : (
-                    <FieldStatisticsTableMemoized
-                      availableFields$={savedSearchData$.availableFields$}
-                      savedSearch={savedSearch}
-                      indexPattern={indexPattern}
-                      query={state.query}
-                      filters={state.filters}
-                      columns={columns}
-                      stateContainer={stateContainer}
-                      onAddFilter={onAddFilter}
-                      trackUiMetric={trackUiMetric}
-                      savedSearchRefetch$={savedSearchRefetch$}
-                    />
-                  )}
+                  <EuiHideFor sizes={['xs', 's']}>
+                    <EuiFlexItem grow={false} css={css('margin-right: -4px !important;')}>
+                      <EuiButtonIcon
+                        iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                        iconSize="m"
+                        size="xs"
+                        onClick={toggleSidebarCollapse}
+                        data-test-subj="collapseSideBarButton"
+                        aria-controls="discover-sidebar"
+                        aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                        aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                          defaultMessage: 'Toggle sidebar',
+                        })}
+                      />
+                    </EuiFlexItem>
+                  </EuiHideFor>
                 </EuiFlexGroup>
-              )}
-            </EuiPageContent>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiResizablePanel>
+              <EuiResizableButton />
+              <EuiResizablePanel initialSize={80} minSize="50%" paddingSize="s">
+                <div className="eui-fullHeight">
+                  <EuiPageContent
+                    verticalPosition={contentCentered ? 'center' : undefined}
+                    horizontalPosition={contentCentered ? 'center' : undefined}
+                    paddingSize="none"
+                    hasShadow={false}
+                    className={classNames('dscPageContent', {
+                      'dscPageContent--centered': contentCentered,
+                      'dscPageContent--emptyPrompt': resultState === 'none',
+                    })}
+                  >
+                    {resultState === 'none' && (
+                      <DiscoverNoResults
+                        isTimeBased={isTimeBased}
+                        data={data}
+                        error={dataState.error}
+                        hasQuery={!!state.query?.query}
+                        hasFilters={hasActiveFilter(state.filters)}
+                        onDisableFilters={onDisableFilters}
+                      />
+                    )}
+                    {resultState === 'uninitialized' && (
+                      <DiscoverUninitialized
+                        onRefresh={() => savedSearchRefetch$.next(undefined)}
+                      />
+                    )}
+                    {resultState === 'loading' && <LoadingSpinner />}
+                    {resultState === 'ready' && (
+                      <EuiFlexGroup
+                        className="dscPageContent__inner"
+                        direction="column"
+                        alignItems="stretch"
+                        gutterSize="none"
+                        responsive={false}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <DiscoverChartMemoized
+                            resetSavedSearch={resetSavedSearch}
+                            savedSearch={savedSearch}
+                            savedSearchDataChart$={charts$}
+                            savedSearchDataTotalHits$={totalHits$}
+                            stateContainer={stateContainer}
+                            indexPattern={indexPattern}
+                            viewMode={viewMode}
+                            setDiscoverViewMode={setDiscoverViewMode}
+                            hideChart={state.hideChart}
+                            interval={state.interval}
+                          />
+                        </EuiFlexItem>
+                        <EuiHorizontalRule margin="none" />
+                        {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+                          <DiscoverDocuments
+                            documents$={savedSearchData$.documents$}
+                            expandedDoc={expandedDoc}
+                            indexPattern={indexPattern}
+                            navigateTo={navigateTo}
+                            onAddFilter={onAddFilter as DocViewFilterFn}
+                            savedSearch={savedSearch}
+                            setExpandedDoc={setExpandedDoc}
+                            state={state}
+                            stateContainer={stateContainer}
+                            onFieldEdited={onFieldEdited}
+                          />
+                        ) : (
+                          <FieldStatisticsTableMemoized
+                            availableFields$={savedSearchData$.availableFields$}
+                            savedSearch={savedSearch}
+                            indexPattern={indexPattern}
+                            query={state.query}
+                            filters={state.filters}
+                            columns={columns}
+                            stateContainer={stateContainer}
+                            onAddFilter={onAddFilter}
+                            trackUiMetric={trackUiMetric}
+                            savedSearchRefetch$={savedSearchRefetch$}
+                          />
+                        )}
+                      </EuiFlexGroup>
+                    )}
+                  </EuiPageContent>
+                </div>
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
       </EuiPageBody>
     </EuiPage>
   );

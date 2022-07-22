@@ -2,12 +2,13 @@
   overflow: hidden;
   margin: 0 !important;
   flex-grow: 1;
-  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
-  width: $euiSize * 19;
+  // padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+  // width: $euiSize * 19;
+  width: 100%;
   height: 100%;
 
   @include euiBreakpoint('xs', 's') {
-    width: 100%;
+    // width: 100%;
     padding: $euiSize $euiSize 0 $euiSize;
     background-color: $euiPageBackgroundColor;
   }
