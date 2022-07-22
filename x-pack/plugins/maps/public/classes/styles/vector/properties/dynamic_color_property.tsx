@@ -250,18 +250,13 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getColorPaletteStops() {
-    const categories = this.getCategoryFieldMeta();
-    const othersCategoryIndex = categories.findIndex((category) => {
-      return category.key === OTHER_CATEGORY_KEY;
-    });
-    const stops = [];
-
     if (this._options.useCustomColorPalette && this._options.customColorPalette) {
       if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
         return [];
       }
 
-      for (let i = 1; i < this._options.customColorPalette.length; i++) {
+      const stops = [];
+      for (let i = 0; i < this._options.customColorPalette.length; i++) {
         const config = this._options.customColorPalette[i];
         stops.push({
           stop: config.stop,
@@ -269,45 +264,61 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           isOtherCategory: false,
         });
       }
-    } else {
-      const colors = this._options.colorCategory
-        ? getColorPalette(this._options.colorCategory)
-        : null;
-      if (categories.length === 0 || !colors) {
-        return [];
-      }
 
-      // Do not include "others" category when assigning colors
-      // "real" means category is from data value and not a virtual category (like "others")
-      const realCategories =
-        othersCategoryIndex > 0
-          ? [
-              ...categories.slice(0, othersCategoryIndex),
-              ...categories.slice(othersCategoryIndex + 1),
-            ]
-          : [...categories];
-      const maxLength = Math.min(colors.length, realCategories.length);
-      for (let i = 0; i < maxLength; i++) {
-        stops.push({
-          stop: realCategories[i].key,
-          color: this._chartsPaletteServiceGetColor
-            ? this._chartsPaletteServiceGetColor(realCategories[i].key)
-            : colors[i],
-          isOtherCategory: false,
-        });
-      }
+      // Custom color palette does not support field meta so there is no way of knowing whether "others" category is used
+      // Because of this limitation, "others" categor will always be displayed in legend
+      return [
+        ...stops,
+        {
+          stop: OTHER_CATEGORY_KEY,
+          color: this._getOtherCategoryColor(),
+          isOtherCategory: true,
+        },
+      ];
     }
 
-    return othersCategoryIndex > 0
-      ? [
-          ...stops,
-          {
-            stop: OTHER_CATEGORY_KEY,
-            color: this._getOtherCategoryColor(),
-            isOtherCategory: true,
-          },
-        ]
-      : stops;
+    const categories = this.getCategoryFieldMeta();
+    const colors = this._options.colorCategory
+      ? getColorPalette(this._options.colorCategory)
+      : null;
+    if (categories.length === 0 || !colors) {
+      return [];
+    }
+
+    const othersCategoryIndex = categories.findIndex((category) => {
+      return category.key === OTHER_CATEGORY_KEY;
+    });
+    // Do not include "others" category when assigning colors
+    // "real" means category is from data value and not a virtual category (like "others")
+    const realCategories =
+      othersCategoryIndex > 0
+        ? [
+            ...categories.slice(0, othersCategoryIndex),
+            ...categories.slice(othersCategoryIndex + 1),
+          ]
+        : [...categories];
+    const maxLength = Math.min(colors.length, realCategories.length);
+    const stops = [];
+    for (let i = 0; i < maxLength; i++) {
+      stops.push({
+        stop: realCategories[i].key,
+        color: this._chartsPaletteServiceGetColor
+          ? this._chartsPaletteServiceGetColor(realCategories[i].key)
+          : colors[i],
+        isOtherCategory: false,
+      });
+    }
+
+  return othersCategoryIndex > 0
+    ? [
+        ...stops,
+        {
+          stop: OTHER_CATEGORY_KEY,
+          color: this._getOtherCategoryColor(),
+          isOtherCategory: true,
+        },
+      ]
+    : stops;
   }
 
   _getCategoricalColorMbExpression() {
