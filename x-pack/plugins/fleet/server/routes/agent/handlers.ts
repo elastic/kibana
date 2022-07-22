@@ -16,6 +16,7 @@ import type {
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
   PostBulkUpdateAgentTagsResponse,
+  GetAgentTagsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -180,6 +181,26 @@ export const getAgentsHandler: RequestHandler<
       totalInactive,
       page,
       perPage,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getAgentTagsHandler: RequestHandler<undefined, undefined, undefined> = async (
+  context,
+  request,
+  response
+) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const tags = await AgentService.getAgentTags(esClient);
+
+    const body: GetAgentTagsResponse = {
+      items: tags,
     };
     return response.ok({ body });
   } catch (error) {

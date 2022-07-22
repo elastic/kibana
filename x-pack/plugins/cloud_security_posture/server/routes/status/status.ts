@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
@@ -16,7 +16,6 @@ import type {
 import moment, { MomentInput } from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, STATUS_ROUTE_PATH } from '../../../common/constants';
-import type { CspAppContext } from '../../plugin';
 import type { CspRouter } from '../../types';
 import type { CspSetupStatus, Status } from '../../../common/types';
 import {
@@ -71,7 +70,7 @@ const getStatus = (
 };
 
 const getCspSetupStatus = async (
-  logger: CspAppContext['logger'],
+  logger: Logger,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   packageService: PackageService,
@@ -123,7 +122,7 @@ const getCspSetupStatus = async (
   };
 };
 
-export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspAppContext): void =>
+export const defineGetCspSetupStatusRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATUS_ROUTE_PATH,
@@ -133,27 +132,16 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
       },
     },
     async (context, _, response) => {
+      const cspContext = await context.csp;
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const soClient = (await context.core).savedObjects.client;
-
-        const packageService = cspContext.service.packageService;
-        const agentService = cspContext.service.agentService;
-        const agentPolicyService = cspContext.service.agentPolicyService;
-        const packagePolicyService = cspContext.service.packagePolicyService;
-
-        if (!agentPolicyService || !agentService || !packagePolicyService || !packageService) {
-          throw new Error(`Failed to get Fleet services`);
-        }
-
         const cspSetupStatus = await getCspSetupStatus(
           cspContext.logger,
-          esClient,
-          soClient,
-          packageService,
-          packagePolicyService,
-          agentPolicyService,
-          agentService
+          cspContext.esClient.asCurrentUser,
+          cspContext.soClient,
+          cspContext.packageService,
+          cspContext.packagePolicyService,
+          cspContext.agentPolicyService,
+          cspContext.agentService
         );
 
         const body: CspSetupStatus = cspSetupStatus;

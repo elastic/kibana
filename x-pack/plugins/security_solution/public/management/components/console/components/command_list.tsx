@@ -47,6 +47,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
 
 const StyledEuiCallOut = styled(EuiCallOut)`
   margin: ${({ theme: { eui } }) => eui.euiSize};
+  padding: ${({ theme: { eui } }) => eui.euiSize};
   border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
 `;
 
@@ -153,7 +154,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         title: <EuiBadge>{commandNameWithArgs}</EuiBadge>,
                         description: (
                           <>
-                            <EuiSpacer size="s" />
+                            <EuiSpacer size="xs" />
                             <EuiText color="subdued" size="xs">
                               {command.about}
                             </EuiText>
@@ -164,23 +165,23 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     data-test-subj={getTestId('commandList-command')}
                   />
                 </EuiFlexItem>
-                {/* Show EuiButtonIcon if is a command */}
-                {command.RenderComponent && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.securitySolution.console.commandList.addButtonTooltip',
-                        { defaultMessage: 'Add to text bar' }
-                      )}
-                    >
-                      <EuiButtonIcon
-                        iconType="plusInCircle"
-                        aria-label={`updateTextInputCommand-${command.name}`}
-                        onClick={updateInputText(`${commandNameWithArgs} `)}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
+                {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&
+                  command.RenderComponent && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.securitySolution.console.commandList.addButtonTooltip',
+                          { defaultMessage: 'Add to text bar' }
+                        )}
+                      >
+                        <EuiButtonIcon
+                          iconType="plusInCircle"
+                          aria-label={`updateTextInputCommand-${command.name}`}
+                          onClick={updateInputText(`${commandNameWithArgs} `)}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
               </StyledEuiFlexGroup>
             );
           },
@@ -240,7 +241,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             columns={getTableColumns(commandsByGroup)}
           />
         ))}
-        <EuiSpacer size="s" />
         {callout}
       </>
     );
@@ -252,9 +252,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
         const groupedCommands =
-          groupLabel === HELP_GROUPS.supporting.label
-            ? [...commandsByGroup, ...COMMON_ARGS]
-            : commandsByGroup;
+          groupLabel === HELP_GROUPS.supporting.label ? [...COMMON_ARGS] : commandsByGroup;
         return (
           <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
             {groupedCommands.map((command) => {
