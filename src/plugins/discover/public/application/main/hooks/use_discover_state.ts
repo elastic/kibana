@@ -284,7 +284,7 @@ export function useDiscoverState({
             index: dataViewObj.id,
             ...(columns.length && { columns }),
           };
-          stateContainer.setAppState(nextState);
+          stateContainer.replaceUrlAppState(nextState);
         }
       }
     }
