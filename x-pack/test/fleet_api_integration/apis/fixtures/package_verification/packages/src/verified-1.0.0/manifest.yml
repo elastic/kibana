@@ -1,6 +1,6 @@
 format_version: 1.0.0
-name: valid
-title: Valid Signature
+name: verified
+title: Verified Package
 description: >-
   A package with a valid signature.
 type: integration

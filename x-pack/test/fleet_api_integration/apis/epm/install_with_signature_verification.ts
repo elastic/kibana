@@ -30,8 +30,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     describe('verified package', async () => {
-      // TODO: rename to verified
-      const pkgName = 'valid';
+      const pkgName = 'verified';
       const pkgVersion = '1.0.0';
       after(async () => {
         if (!server.enabled) return;

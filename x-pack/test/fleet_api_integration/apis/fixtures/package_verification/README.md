@@ -12,7 +12,7 @@ uid           [ultimate] Fleet Test (Fleet Integration Test Key) <fleet@elastic.
 
 The passphrase of the private key is 'test'
 
-### How were they keys generated?
+### How were the keys generated?
 
 *Note: the key ID will be different.*
 ```
@@ -41,13 +41,13 @@ The valid package was generated with the following commands:
 ```
 export ELASTIC_PACKAGE_SIGNER_PRIVATE_KEYFILE=../../../signatures/fleet_test_key_private.asc
 export ELASTIC_PACKAGE_SIGNER_PASSPHRASE=test
-cd packages/src/valid-1.0.0
+cd packages/src/verified-1.0.0
 elastic-package build --zip --sign -v
 
 # if successful then the last log line will contain:
-# Signature file written: /<path to you kibana>/kibana/build/packages/valid-1.0.0.zip.sig
-# Package built: /<path to you kibana>/kibana/build/packages/valid-1.0.0.zip
+# Signature file written: /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip.sig
+# Package built: /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip
 
-cp /<path to you kibana>/kibana/build/packages/valid-1.0.0.zip ../../zips/
-cp /<path to you kibana>/kibana/build/packages/valid-1.0.0.zip.sig ../../zips/
+cp /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip ../../zips/
+cp /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip.sig ../../zips/
 ```
