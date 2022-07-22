@@ -7683,7 +7683,6 @@
     "xpack.apm.errorsTable.groupIdColumnDescription": "堆栈跟踪的哈希。将类似错误分组在一起，即使因动态参数造成错误消息不同。",
     "xpack.apm.errorsTable.groupIdColumnLabel": "组 ID",
     "xpack.apm.errorsTable.lastSeenColumnLabel": "最后看到时间",
-    "xpack.apm.errorsTable.noErrorsLabel": "未找到错误",
     "xpack.apm.errorsTable.occurrencesColumnLabel": "发生次数",
     "xpack.apm.errorsTable.typeColumnLabel": "类型",
     "xpack.apm.errorsTable.unhandledLabel": "未处理",
