@@ -203,7 +203,17 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.visitSupportSections"
-        defaultMessage="Visit support section to read more about manual response actions."
+        defaultMessage="{readMore} about manual response actions."
+        values={{
+          readMore: (
+            <EuiLink>
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandList.callout.readMoreLink"
+                defaultMessage="Read more"
+              />
+            </EuiLink>
+          ),
+        }}
       />,
     ];
 
@@ -223,13 +233,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             </li>
           ))}
         </ol>
-        {/* //TODO: Add link to the read more page */}
-        <EuiLink>
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandList.callout.readMoreLink"
-            defaultMessage="Read more"
-          />
-        </EuiLink>
       </StyledEuiCallOut>
     );
 
