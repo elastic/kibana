@@ -1,4 +1,6 @@
 steps:
+  - wait
+
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
