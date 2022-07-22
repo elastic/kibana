@@ -7,13 +7,18 @@
 
 import { chunk } from 'lodash';
 
+import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
+import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
+import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
   addChangePointsAction,
+  addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   errorAction,
   resetAction,
@@ -21,7 +26,6 @@ import {
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
-import type { ChangePoint } from '../../common/types';
 
 import type { AiopsLicense } from '../types';
 
@@ -30,7 +34,8 @@ import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
-const PROGRESS_STEP_P_VALUES = 0.8;
+const PROGRESS_STEP_P_VALUES = 0.6;
+const PROGRESS_STEP_HISTOGRAMS = 0.2;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -149,6 +154,105 @@ export const defineExplainLogRateSpikesRoute = (
             end();
             return;
           }
+        }
+
+        if (changePoints?.length === 0) {
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded: 1,
+              loadingState: `Done.`,
+            })
+          );
+
+          end();
+          return;
+        }
+
+        const histogramFields: [NumericHistogramField] = [
+          { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
+        ];
+
+        const [overallTimeSeries] = (await fetchHistogramsForFields(
+          client,
+          request.body.index,
+          { match_all: {} },
+          // fields
+          histogramFields,
+          // samplerShardSize
+          -1,
+          undefined
+        )) as [NumericChartData];
+
+        // time series filtered by fields
+        if (changePoints) {
+          await asyncForEach(changePoints, async (cp, index) => {
+            if (changePoints) {
+              const histogramQuery = {
+                bool: {
+                  filter: [
+                    {
+                      term: { [cp.fieldName]: cp.fieldValue },
+                    },
+                  ],
+                },
+              };
+
+              const [cpTimeSeries] = (await fetchHistogramsForFields(
+                client,
+                request.body.index,
+                histogramQuery,
+                // fields
+                [
+                  {
+                    fieldName: request.body.timeFieldName,
+                    type: KBN_FIELD_TYPES.DATE,
+                    interval: overallTimeSeries.interval,
+                    min: overallTimeSeries.stats[0],
+                    max: overallTimeSeries.stats[1],
+                  },
+                ],
+                // samplerShardSize
+                -1,
+                undefined
+              )) as [NumericChartData];
+
+              const histogram =
+                overallTimeSeries.data.map((o, i) => {
+                  const current = cpTimeSeries.data.find(
+                    (d1) => d1.key_as_string === o.key_as_string
+                  ) ?? {
+                    doc_count: 0,
+                  };
+                  return {
+                    key: o.key,
+                    key_as_string: o.key_as_string ?? '',
+                    doc_count_change_point: current.doc_count,
+                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                  };
+                }) ?? [];
+
+              const { fieldName, fieldValue } = cp;
+
+              loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+              push(
+                updateLoadingStateAction({
+                  ccsWarning: false,
+                  loaded,
+                  loadingState: `Loading histogram data.`,
+                })
+              );
+              push(
+                addChangePointsHistogramAction([
+                  {
+                    fieldName,
+                    fieldValue,
+                    histogram,
+                  },
+                ])
+              );
+            }
+          });
         }
 
         end();
