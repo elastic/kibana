@@ -41,10 +41,7 @@ export const fetchDurationHistogramRangeSteps = async ({
 
   const steps = 100;
 
-  const durationField = getDurationField(
-    chartType,
-    searchMetrics
-  );
+  const durationField = getDurationField(chartType, searchMetrics);
 
   const resp = await apmEventClient.search(
     'get_duration_histogram_range_steps',
