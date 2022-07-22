@@ -127,7 +127,7 @@ export class HeadlessChromiumDriver {
     }
 
     await this.page.setRequestInterception(true);
-    this.registerListeners(url, headers, logger);
+    await this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     if (this.config.browser.chromium.inspect) {
@@ -340,13 +340,13 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
+  private async registerListeners(url: string, customHeaders: Headers, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
 
-    // FIXME: retrieve the client in open() and pass in the client
-    const client = this.page.client();
+    const target = this.page.target();
+    const client = await target.createCDPSession();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
