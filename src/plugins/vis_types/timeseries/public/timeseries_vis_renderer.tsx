@@ -68,7 +68,7 @@ export const getTimeseriesVisRenderer: (deps: {
     const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
     const canNavigateToLens = await triggerTSVBtoLensConfiguration(model);
 
-    const initialRender = () => {
+    const renderComplete = () => {
       const usageCollection = getUsageCollectionStart();
       const containerType = extractContainerType(handlers.getExecutionContext());
       const visualizationType = 'tsvb';
@@ -97,6 +97,7 @@ export const getTimeseriesVisRenderer: (deps: {
           <VisualizationContainer
             data-test-subj="timeseriesVis"
             handlers={handlers}
+            renderComplete={renderComplete}
             showNoResult={showNoResult}
             error={get(visData, [model.id, 'error'])}
           >
@@ -109,7 +110,7 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
-              initialRender={initialRender}
+              initialRender={renderComplete}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>

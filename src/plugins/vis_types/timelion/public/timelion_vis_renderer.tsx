@@ -84,7 +84,11 @@ export const getTimelionVisRenderer: (
     };
 
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+      <VisualizationContainer
+        renderComplete={renderComplete}
+        handlers={handlers}
+        showNoResult={showNoResult}
+      >
         <KibanaThemeProvider theme$={deps.theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (

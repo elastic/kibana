@@ -85,7 +85,11 @@ export const getXYVisRenderer: (deps: {
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <I18nProvider>
-          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+          <VisualizationContainer
+            renderComplete={renderComplete}
+            handlers={handlers}
+            showNoResult={showNoResult}
+          >
             <VisComponent
               visParams={visConfig}
               visData={visData}

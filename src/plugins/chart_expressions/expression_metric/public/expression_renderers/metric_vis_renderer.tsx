@@ -62,6 +62,7 @@ export const getMetricVisRenderer = (
               width: 100%;
             `}
             showNoResult={!visData.rows.length}
+            renderComplete={renderComplete}
             handlers={handlers}
           >
             <MetricVis data={visData} config={visConfig} renderComplete={renderComplete} />

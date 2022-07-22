@@ -95,6 +95,7 @@ export const getMetricVisRenderer: (
           data-test-subj="legacyMtrVis"
           className="legacyMtrVis"
           showNoResult={!visData.rows?.length}
+          renderComplete={renderComplete}
           handlers={handlers}
         >
           <MetricVisComponent

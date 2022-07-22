@@ -12,7 +12,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { setFormatService, setUsageCollectionStart } from './services';
+import { setFormatService } from './services';
 import { registerTableVis } from './register_vis';
 
 /** @internal */
@@ -36,11 +36,7 @@ export class TableVisPlugin
     registerTableVis(core, deps);
   }
 
-  public start(core: CoreStart, { data, usageCollection }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
-
-    if (usageCollection) {
-      setUsageCollectionStart(usageCollection);
-    }
   }
 }
