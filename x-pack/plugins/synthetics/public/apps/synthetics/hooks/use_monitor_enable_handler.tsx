@@ -53,7 +53,7 @@ export function useMonitorEnableHandler({
       });
       reloadPage();
     }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status, labels]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { isEnabled, setIsEnabled, status };
 }
