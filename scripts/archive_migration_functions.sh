@@ -7,15 +7,27 @@ new_archive="x-pack/test/functional/fixtures/kbn_archiver/spaces/copy_saved_obje
 test_config="x-pack/test/functional/apps/spaces/config.ts"
 
 create_space() {
+  # Ex: Id, Name, and Disabled Features.
+  #   create_space tre "Tre Space" apm,ml,canvas,dashboard,visualize,maps,monitoring,uptime
+  # Ex: Id. Name is generated
+  #   create_space rashmi
+  # Ex: Id and Name. No disabled features.
+  #   create_space another-space "Another Space"
   local id=${1:-sales}
   local upperCased=$(echo ${id:0:1} | tr '[a-z]' '[A-Z]')${id:1}
   local name=${2:-$upperCased}
+  local disabledFeatures=${3:-}
+
+  if [[ ! -z $3 ]]; then
+    disabledFeatures="$3"
+  fi
 
   # Use jq to create the i and n variables, then inject them.
-  local payloadWithJqInjectedVars=$(jq -n --arg i "$id" --arg n "$name" '{ "id": $i, "name": $n, "disabledFeatures": [] }')
+  local payload=$(jq -n --arg i "$id" --arg n "$name" --arg df "$disabledFeatures" \
+    '{ "id": $i, "name": $n, "disabledFeatures": [$df] }')
 
   curl -H "Content-Type: application/json" -H "kbn-xsrf: archive-migration-functions" \
-    -X POST -d "$payloadWithJqInjectedVars" \
+    -X POST -d "$payload" \
     --user elastic:changeme http://localhost:5620/api/spaces/space
 }
 
