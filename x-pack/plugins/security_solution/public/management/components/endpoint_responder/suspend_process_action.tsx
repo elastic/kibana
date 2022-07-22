@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -23,13 +23,15 @@ export const SuspendProcessActionResult = memo<
       actionId?: string;
       actionRequestSent?: boolean;
       completedActionDetails?: ActionDetails;
+      apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
-  const { actionId, completedActionDetails } = store;
+  const { actionId, completedActionDetails, apiError } = store;
   const isPending = status === 'pending';
+  const isError = status === 'error';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
   const { mutate, data, isSuccess, error } = useSendSuspendProcessRequest();
@@ -61,8 +63,13 @@ export const SuspendProcessActionResult = memo<
       setStore((prevState) => {
         return { ...prevState, actionId: data.data.id };
       });
+    } else if (error) {
+      setStatus('error');
+      setStore((prevState) => {
+        return { ...prevState, apiError: error };
+      });
     }
-  }, [actionId, data?.data.id, isSuccess, error, setStore]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
@@ -76,26 +83,28 @@ export const SuspendProcessActionResult = memo<
     }
   }, [actionDetails?.data, setStatus, setStore]);
 
-  // Show nothing if still pending
-  if (isPending) {
+  // Show API errors if perform action fails
+  if (isError && apiError) {
     return (
-      <ResultComponent showAs="pending">
+      <ResultComponent showAs="failure" data-test-subj="suspendProcessAPIErrorCallout">
         <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.suspendProcess.pendingMessage"
-          defaultMessage="Suspending process"
+          id="xpack.securitySolution.endpointResponseActions.suspendProcess.performApiErrorMessage"
+          defaultMessage="The following error was encountered: {error}"
+          values={{ error: apiError.message }}
         />
       </ResultComponent>
     );
+  }
+
+  // Show nothing if still pending
+  if (isPending) {
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.suspendProcess.errorMessageTitle',
-          { defaultMessage: 'Suspend process action failure' }
-        )}
         dataTestSubj={'suspendProcessErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -104,14 +113,6 @@ export const SuspendProcessActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.suspendProcess.successMessageTitle',
-        { defaultMessage: 'Process suspended successfully' }
-      )}
-      data-test-subj="suspendProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent data-test-subj="suspendProcessSuccessCallout" />;
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';

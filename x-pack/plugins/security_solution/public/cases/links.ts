@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  CREATE_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
@@ -16,16 +21,16 @@ export const getCasesLinkItems = (): LinkItem => {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
         globalNavOrder: 5,
-        capabilities: [`${CASES_FEATURE_ID}.read_cases`],
+        capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {
-        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
+        capabilities: [`${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`],
         licenseType: 'gold',
         sideNavDisabled: true,
         hideTimeline: true,
       },
       [SecurityPageName.caseCreate]: {
-        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
+        capabilities: [`${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`],
         sideNavDisabled: true,
         hideTimeline: true,
       },
