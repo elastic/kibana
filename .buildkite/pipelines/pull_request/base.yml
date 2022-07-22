@@ -10,7 +10,7 @@ steps:
   - command: PARALLEL_LINT=3 .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      queue: n2-2-spot
+      queue: n2-4-spot
     timeout_in_minutes: 90
 
   - command: PARALLEL_LINT=6 .buildkite/scripts/steps/lint.sh
