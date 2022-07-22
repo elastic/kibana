@@ -34,12 +34,6 @@ describe('syncEditedMonitor', () => {
     },
   } as unknown as UptimeServerSetup;
 
-  const syntheticsService = new SyntheticsService(serverMock);
-
-  const fakePush = jest.fn();
-
-  jest.spyOn(syntheticsService, 'editConfig').mockImplementationOnce(fakePush);
-
   const editedMonitor = {
     type: 'http',
     enabled: true,
@@ -68,10 +62,14 @@ describe('syncEditedMonitor', () => {
     id: 'saved-obj-id',
   } as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
 
+  const syntheticsService = new SyntheticsService(serverMock);
+
   const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
-  it('includes the isEdit flag', () => {
-    syncEditedMonitor({
+  syntheticsService.editConfig = jest.fn();
+
+  it('includes the isEdit flag', async () => {
+    await syncEditedMonitor({
       editedMonitor,
       editedMonitorSavedObject,
       previousMonitor,
@@ -79,7 +77,7 @@ describe('syncEditedMonitor', () => {
       server: serverMock,
     });
 
-    expect(fakePush).toHaveBeenCalledWith(
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'saved-obj-id',
       })
