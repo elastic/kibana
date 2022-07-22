@@ -562,13 +562,7 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      [
-        'Threshold Count',
-        'host.name [threshold]',
-        'host.id [threshold]',
-        'Threshold Cardinality',
-        'count(host.name) >= 9001',
-      ].forEach((fieldId) => {
+      ['Event Count', 'Event Cardinality', 'host.name', 'host.id'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
@@ -630,14 +624,14 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      ['Threshold Count'].forEach((fieldId) => {
+      ['Event Count'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
 
       [
         'host.name [threshold]',
         'host.id [threshold]',
-        'Threshold Cardinality',
+        'Event Cardinality',
         'count(host.name) >= 9001',
       ].forEach((fieldText) => {
         expect(() => getByText(fieldText)).toThrow();
