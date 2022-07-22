@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  DefaultItemAction,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
-} from '@elastic/eui';
+import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
@@ -24,8 +20,6 @@ import type { useStartTransaction } from '../../../../../common/lib/apm/use_star
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
-
-export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 export const getRulesTableActions = ({
   toasts,
