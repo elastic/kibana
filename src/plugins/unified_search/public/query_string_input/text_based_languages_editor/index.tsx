@@ -249,7 +249,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   useEffect(() => {
-    if (editor1.current) {
+    if (editor1.current && !isCompactFocused) {
       const editorElement = editor1.current.getDomNode();
       if (editorElement) {
         const contentWidth = Number(editorElement?.style.width.replace('px', ''));
@@ -259,7 +259,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     }
-  }, [calculateVisibleCode, code, queryString]);
+  }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
