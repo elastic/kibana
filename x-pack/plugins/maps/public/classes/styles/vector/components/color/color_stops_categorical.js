@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFieldText } from '@elastic/eui';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
@@ -19,9 +18,7 @@ import { ColorStops } from './color_stops';
 import { StopInput } from '../stop_input';
 
 export const ColorStopsCategorical = ({
-  colorStops = [
-    { stop: '', color: DEFAULT_CUSTOM_COLOR }
-  ],
+  colorStops = [{ stop: '', color: DEFAULT_CUSTOM_COLOR }],
   field,
   onChange,
   getValueSuggestions,

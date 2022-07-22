@@ -12,9 +12,12 @@ import { Category } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 
-export const OTHER_CATEGORY_LABEL = i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
-  defaultMessage: 'Other',
-});
+export const OTHER_CATEGORY_LABEL = i18n.translate(
+  'xpack.maps.styles.categorical.otherCategoryLabel',
+  {
+    defaultMessage: 'Other',
+  }
+);
 
 export const OTHER_CATEGORY_DEFAULT_COLOR = euiThemeVars.euiColorLightShade;
 

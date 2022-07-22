@@ -24,13 +24,12 @@ interface Props {
 }
 
 export function OtherCategoryColorPicker(props: Props) {
-    return (
-      <MbValidatedColorPicker
-        swatches={OTHER_CATEGORY_SWATCHES}
-        prepend={OTHER_CATEGORY_LABEL} 
-        onChange={props.onChange}
-        color={props.color ? props.color : OTHER_CATEGORY_DEFAULT_COLOR}
-        compressed={true}
-      />
-    )
+  return (
+    <MbValidatedColorPicker
+      swatches={OTHER_CATEGORY_SWATCHES}
+      prepend={OTHER_CATEGORY_LABEL}
+      onChange={props.onChange}
+      color={props.color ? props.color : OTHER_CATEGORY_DEFAULT_COLOR}
+    />
+  );
 }

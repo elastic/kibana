@@ -45,9 +45,10 @@ export function addCategoricalRow(colorStops, index) {
 }
 
 function addRow(colorStops, index, nextValue) {
-  const nextColorIndex = colorStops.length < DEFAULT_CUSTOM_PALETTE.length
-    ? colorStops.length
-    : colorStops.length % DEFAULT_CUSTOM_PALETTE.length;
+  const nextColorIndex =
+    colorStops.length < DEFAULT_CUSTOM_PALETTE.length
+      ? colorStops.length
+      : colorStops.length % DEFAULT_CUSTOM_PALETTE.length;
   const newRow = {
     stop: nextValue,
     color: DEFAULT_CUSTOM_PALETTE[nextColorIndex],

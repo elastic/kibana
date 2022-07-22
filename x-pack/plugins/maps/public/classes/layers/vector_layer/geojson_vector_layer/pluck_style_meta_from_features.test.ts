@@ -433,7 +433,7 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
     );
     dynamicColorProperty.getNumberOfCategories = () => {
       return 1;
-    }
+    };
 
     const categories = pluckCategoricalStyleMetaFromFeatures(dynamicColorProperty, features);
 

@@ -125,8 +125,8 @@ export function DynamicColorForm({
             swatches={swatches}
           />
           <OtherCategoryColorPicker
-            onChange={onOtherCategoryColorChange} 
-            color={styleOptions.otherCategoryColor} 
+            onChange={onOtherCategoryColorChange}
+            color={styleOptions.otherCategoryColor}
           />
         </>
       );

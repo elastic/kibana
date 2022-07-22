@@ -24,10 +24,7 @@ import {
 } from '../../../../../common/constants';
 // @ts-expect-error
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import {
-  OTHER_CATEGORY_LABEL,
-  OTHER_CATEGORY_DEFAULT_COLOR,
-} from '../style_util';
+import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
@@ -247,17 +244,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._chartsPaletteServiceGetColor('__other__');
     }
 
-    return this._options.otherCategoryColor ? this._options.otherCategoryColor : OTHER_CATEGORY_DEFAULT_COLOR;
+    return this._options.otherCategoryColor
+      ? this._options.otherCategoryColor
+      : OTHER_CATEGORY_DEFAULT_COLOR;
   }
 
   _getColorPaletteStops() {
     const categories = this.getCategoryFieldMeta();
-    console.log('categories', categories);
-    const othersCategoryIndex = categories.findIndex(category => {
+    const othersCategoryIndex = categories.findIndex((category) => {
       return category.key === OTHER_CATEGORY_KEY;
     });
     const stops = [];
-    
+
     if (this._options.useCustomColorPalette && this._options.customColorPalette) {
       if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
         return [];
@@ -268,7 +266,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         stops.push({
           stop: config.stop,
           color: config.color,
-          isOtherCategory:  false,
+          isOtherCategory: false,
         });
       }
     } else {
@@ -281,9 +279,13 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
       // Do not include "others" category when assigning colors
       // "real" means category is from data value and not a virtual category (like "others")
-      const realCategories = othersCategoryIndex > 0
-        ? [...categories.slice(0, othersCategoryIndex), ...categories.slice(othersCategoryIndex + 1)]
-        : [...categories];
+      const realCategories =
+        othersCategoryIndex > 0
+          ? [
+              ...categories.slice(0, othersCategoryIndex),
+              ...categories.slice(othersCategoryIndex + 1),
+            ]
+          : [...categories];
       const maxLength = Math.min(colors.length, realCategories.length);
       for (let i = 0; i < maxLength; i++) {
         stops.push({
@@ -302,8 +304,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           {
             stop: OTHER_CATEGORY_KEY,
             color: this._getOtherCategoryColor(),
-            isOtherCategory:  true,
-          }
+            isOtherCategory: true,
+          },
         ]
       : stops;
   }
@@ -426,18 +428,30 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getCategoricalBreaks(symbolId?: string, svg?: string): Break[] {
     const breaks: Break[] = [];
     const stops = this._getColorPaletteStops();
-    stops.forEach(({ stop, color, isOtherCategory }: { stop: string | number | null; color: string | null; isOtherCategory: boolean; }) => {
-      if (stop !== null && color != null) {
-        breaks.push({
-          color,
-          svg,
-          symbolId,
-          label: isOtherCategory 
-            ? <EuiTextColor color="subdued">{OTHER_CATEGORY_LABEL}</EuiTextColor> 
-            : this.formatField(stop),
-        });
+    stops.forEach(
+      ({
+        stop,
+        color,
+        isOtherCategory,
+      }: {
+        stop: string | number | null;
+        color: string | null;
+        isOtherCategory: boolean;
+      }) => {
+        if (stop !== null && color != null) {
+          breaks.push({
+            color,
+            svg,
+            symbolId,
+            label: isOtherCategory ? (
+              <EuiTextColor color="subdued">{OTHER_CATEGORY_LABEL}</EuiTextColor>
+            ) : (
+              this.formatField(stop)
+            ),
+          });
+        }
       }
-    });
+    );
     return breaks;
   }
 

@@ -224,6 +224,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
         { key: 'US', doc_count: 2 },
         { key: 'IN', doc_count: 1 },
       ],
+      sum_other_doc_count: 0,
     },
   });
 

@@ -55,7 +55,6 @@ export type OrdinalColorStop = {
 
 export type CategoryColorStop = {
   stop: string | null;
-  count: number;
   color: string;
 };
 
