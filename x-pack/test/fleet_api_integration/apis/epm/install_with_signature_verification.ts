@@ -54,6 +54,18 @@ export default function (providerContext: FtrProviderContext) {
           await installPackage('unverified_content', '1.0.0', { force: true }).expect(200);
         });
       });
+      describe('package verified with wrong key', async () => {
+        after(async () => {
+          if (!server.enabled) return;
+          await uninstallPackage('wrong_key', '1.0.0');
+        });
+        it('should return 400 for valid signature but incorrect key', async () => {
+          await installPackage('wrong_key', '1.0.0').expect(400);
+        });
+        it('should return 200 for valid signature but incorrect key force install', async () => {
+          await installPackage('wrong_key', '1.0.0', { force: true }).expect(200);
+        });
+      });
     });
   });
 }

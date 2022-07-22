@@ -54,10 +54,12 @@ cp /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip.sig ../../zips
 ```
 
 ### unverified_content-1.0.0
-Same process as verified-1.0.0, however it has the incorrect signature, in this case I use the verified signature:
+This package has a valid signature but for different content. Same process as verified-1.0.0, however it has the incorrect signature, in this case I use the verified signature:
 ```
 # Same buld steps as above
 cp /<path to you kibana>/kibana/build/packages/unverified_content-1.0.0.zip ../../zips/
 # now copy the incorrect signature
 cp ../../zips/verified-1.0.0.zip.sig ../../zips/unverified_content-1.0.0.zip.sig
 ```
+### wrong_key-1.0.0
+This package is signed correctly but not using the key that kibana uses. Same process as verified-1.0.0, however I generated a different key pair (See 'How were the keys generated?'), and specified it for the ELASTIC_PACKAGE_SIGNER_PRIVATE_KEYFILE 'elastic-package' argument
