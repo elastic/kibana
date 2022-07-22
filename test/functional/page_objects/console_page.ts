@@ -265,4 +265,11 @@ export class ConsolePageObject extends FtrService {
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
   }
+
+  async closeHelpIfExists() {
+    const helpPanelShown = await this.testSubjects.exists('help-close-button');
+    if (helpPanelShown) {
+      await this.dismissTutorial();
+    }
+  }
 }

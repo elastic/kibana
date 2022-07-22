@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.console.dismissTutorial();
+        await PageObjects.console.closeHelpIfExists();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
