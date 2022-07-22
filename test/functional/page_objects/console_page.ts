@@ -123,15 +123,6 @@ export class ConsolePageObject extends FtrService {
     return this.testSubjects.find('console-application');
   }
 
-  public async dismissTutorial() {
-    try {
-      const closeButton = await this.testSubjects.find('help-close-button');
-      await closeButton.click();
-    } catch (e) {
-      // Ignore because it is probably not there.
-    }
-  }
-
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
