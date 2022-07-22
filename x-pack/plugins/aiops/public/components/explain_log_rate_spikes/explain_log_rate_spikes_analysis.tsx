@@ -58,7 +58,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     {
       start: earliest,
       end: latest,
-      // TODO Consider an optional Kuery.
       searchQuery: JSON.stringify(searchQuery),
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
