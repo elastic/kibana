@@ -296,6 +296,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     fontSize: 14,
     padding: {
       top: 8,
+      bottom: 8,
     },
     scrollBeyondLastLine: false,
     quickSuggestions: true,
