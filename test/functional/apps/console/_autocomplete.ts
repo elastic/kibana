@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
-      await PageObjects.console.dismissTutorial();
+      await PageObjects.console.closeHelpIfExists();
       await PageObjects.console.clearTextArea();
     });
 
