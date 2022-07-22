@@ -27,5 +27,4 @@ export const links: LinkItem = {
       defaultMessage: 'Threat Intelligence',
     }),
   ],
-  globalNavOrder: 9005,
 };
