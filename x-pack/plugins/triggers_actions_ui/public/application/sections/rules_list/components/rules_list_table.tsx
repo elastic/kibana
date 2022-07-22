@@ -782,6 +782,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ruleTypesState.data,
     selectedPercentile,
     tagPopoverOpenIndex,
+    dateFormat,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
