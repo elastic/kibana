@@ -13,10 +13,10 @@ import {
 
 import { HttpError } from '../../../../../../common/types/api';
 
-import { MethodCrawlerLogic } from './method_crawler_logic';
+import { MethodApiLogic } from './method_api_logic';
 
-describe('MethodCrawlerLogic', () => {
-  const { mount } = new LogicMounter(MethodCrawlerLogic);
+describe('MethodApiLogic', () => {
+  const { mount } = new LogicMounter(MethodApiLogic);
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
@@ -28,15 +28,15 @@ describe('MethodCrawlerLogic', () => {
   describe('listeners', () => {
     describe('apiSuccess', () => {
       it('navigates user to index detail view', () => {
-        MethodCrawlerLogic.actions.apiSuccess({ created: 'my-index' });
+        MethodApiLogic.actions.apiSuccess({ indexName: 'my-index' });
 
-        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index/domain_management');
+        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index/overview');
       });
     });
 
     describe('makeRequest', () => {
       it('clears any displayed errors', () => {
-        MethodCrawlerLogic.actions.makeRequest({ indexName: 'my-index', language: 'Universal' });
+        MethodApiLogic.actions.makeRequest({ indexName: 'my-index', language: 'Universal' });
 
         expect(clearFlashMessages).toHaveBeenCalled();
       });
@@ -46,7 +46,7 @@ describe('MethodCrawlerLogic', () => {
       it('displays the error to the user', () => {
         const error = {} as HttpError;
 
-        MethodCrawlerLogic.actions.apiError(error);
+        MethodApiLogic.actions.apiError(error);
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });

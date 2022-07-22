@@ -11,8 +11,9 @@ import { shallow } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
+import { NewSearchIndexTemplate } from '../new_search_index_template';
+
 import { MethodApi } from './method_api';
-import { NewSearchIndexTemplate } from './new_search_index_template';
 
 describe('MethodApi', () => {
   beforeEach(() => {

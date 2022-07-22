@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- */
-
 import React from 'react';
+
+import { useActions } from 'kea';
 
 import { EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { NewSearchIndexTemplate } from '../new_search_index_template';
+
+import { MethodApiLogic } from './method_api_logic';
 
 export const MethodApi: React.FC = () => {
+  const { makeRequest } = useActions(MethodApiLogic);
   return (
     <NewSearchIndexTemplate
       title={
@@ -28,7 +28,7 @@ export const MethodApi: React.FC = () => {
         />
       }
       type="api"
-      onSubmit={() => null}
+      onSubmit={(indexName, language) => makeRequest({ indexName, language })}
     >
       <EuiSteps
         steps={[

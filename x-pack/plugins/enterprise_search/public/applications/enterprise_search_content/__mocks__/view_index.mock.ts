@@ -34,6 +34,7 @@ export const connectorIndex: ConnectorViewIndex = {
     configuration: {},
     id: '2',
     index_name: 'connector',
+    language: 'en',
     last_seen: null,
     last_sync_error: null,
     last_sync_status: SyncStatus.COMPLETED,
