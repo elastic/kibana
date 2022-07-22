@@ -183,6 +183,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       if (reason) {
         const actionGroupId =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS.id : FIRED_ACTIONS.id;
+        const useWarningThreshold = nextState === AlertStates.WARNING;
 
         const alert = alertFactory(group, reason);
         const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
@@ -202,7 +203,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           value: mapToConditionsLookup(results, (result) =>
             formatMetric(result[group].metric, result[group].currentValue)
           ),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          threshold: mapToConditionsLookup(criteria, (c) => useWarningThreshold ? c.warningThreshold! : c.threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         };
         alert.scheduleActions(actionGroupId, context);
@@ -279,9 +280,9 @@ const buildReasonWithVerboseMetricName = (
   return buildReason(resultWithVerboseMetricName);
 };
 
-const mapToConditionsLookup = (
-  list: any[],
-  mapFn: (value: any, index: number, array: any[]) => unknown
+const mapToConditionsLookup = <T>(
+  list: T[],
+  mapFn: (value: T, index: number, array: T[]) => unknown
 ) =>
   list
     .map(mapFn)
