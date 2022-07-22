@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TLSFields, ConfigKey } from '../types';
+import { TLSFields, ConfigKey } from '../../runtime_types/monitor_management';
 import { Formatter } from '../common/formatters';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;

@@ -6,13 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
   MonitorFields,
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {
   syntheticsMonitorType,
@@ -26,7 +27,7 @@ import {
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
-export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
@@ -34,11 +35,22 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    savedObjectsClient,
+    server,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
     const { monitorId } = request.params;
 
     try {
-      const errors = await deleteMonitor({ savedObjectsClient, server, monitorId });
+      const errors = await deleteMonitor({
+        savedObjectsClient,
+        server,
+        monitorId,
+        syntheticsMonitorClient,
+      });
 
       if (errors && errors.length > 0) {
         return response.ok({
@@ -61,12 +73,14 @@ export const deleteMonitor = async ({
   savedObjectsClient,
   server,
   monitorId,
+  syntheticsMonitorClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
   monitorId: string;
+  syntheticsMonitorClient: SyntheticsMonitorClient;
 }) => {
-  const { syntheticsService, logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
+  const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
   try {
     const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
@@ -86,14 +100,11 @@ export const deleteMonitor = async ({
     const normalizedMonitor = normalizeSecrets(monitor);
 
     await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
-    const errors = await syntheticsService.deleteConfigs([
-      {
-        ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          monitorId,
-      },
-    ]);
+    const errors = await syntheticsMonitorClient.deleteMonitor({
+      ...normalizedMonitor.attributes,
+      id:
+        (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
+    });
 
     sendTelemetryEvents(
       logger,

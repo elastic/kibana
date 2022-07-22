@@ -24,6 +24,7 @@ export const getDevLocation = (devUrl: string): ServiceLocation => ({
   url: devUrl,
   isServiceManaged: true,
   status: LocationStatus.EXPERIMENTAL,
+  isInvalid: false,
 });
 
 export async function getServiceLocations(server: UptimeServerSetup) {
@@ -58,6 +59,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
         url: location.url,
         isServiceManaged: true,
         status: location.status,
+        isInvalid: false,
       });
     });
 

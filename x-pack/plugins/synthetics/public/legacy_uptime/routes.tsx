@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { ManageLocations } from './pages/monitor_management/manage_locations';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
@@ -209,6 +210,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Add Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
@@ -233,6 +235,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Edit Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
@@ -273,7 +276,7 @@ const getRoutes = (): RouteProps[] => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />],
+        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />, <ManageLocations />],
       },
     },
   ];

@@ -37,6 +37,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
     unit: ScheduleUnit.MINUTES,
   },
   [ConfigKey.APM_SERVICE_NAME]: '',
+  [ConfigKey.CONFIG_ID]: '',
   [ConfigKey.TAGS]: [],
   [ConfigKey.TIMEOUT]: '16',
   [ConfigKey.NAME]: '',

@@ -6,19 +6,41 @@
  */
 
 import { getServiceLocations } from '../../synthetics_service/get_service_locations';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { API_URLS } from '../../../common/constants';
+import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 
-export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
+export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SERVICE_LOCATIONS,
   validate: {},
-  handler: async ({ server }): Promise<any> => {
-    if (server.syntheticsService.locations.length > 0) {
-      const { throttling, locations } = server.syntheticsService;
-      return { throttling, locations };
+  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+    const { syntheticsService, privateLocationAPI } = syntheticsMonitorClient;
+    const privateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
+    const agentPolicies = await privateLocationAPI.getAgentPolicies();
+
+    const privateLocs =
+      privateLocations?.map((loc) => ({
+        label: loc.name,
+        isServiceManaged: false,
+        isInvalid: agentPolicies.find((policy) => policy.id === loc.policyHostId) === undefined,
+        ...loc,
+      })) ?? [];
+
+    if (syntheticsService.locations.length > 0) {
+      const { throttling, locations } = syntheticsService;
+
+      return {
+        throttling,
+        locations: [...locations, ...privateLocs],
+      };
     }
 
-    return getServiceLocations(server);
+    const { locations, throttling } = await getServiceLocations(server);
+
+    return {
+      locations: [...locations, ...privateLocs],
+      throttling,
+    };
   },
 });

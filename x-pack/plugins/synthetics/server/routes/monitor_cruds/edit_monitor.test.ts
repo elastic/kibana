@@ -11,6 +11,7 @@ import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { EncryptedSyntheticsMonitor, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -25,18 +26,19 @@ describe('syncEditedMonitor', () => {
     kibanaVersion: null,
     authSavedObjectsClient: { bulkUpdate: jest.fn() },
     logger,
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+      },
+    },
   } as unknown as UptimeServerSetup;
 
-  const syntheticsService = new SyntheticsService(logger, serverMock, {
-    username: 'dev',
-    password: '12345',
-  });
+  const syntheticsService = new SyntheticsService(serverMock);
 
   const fakePush = jest.fn();
 
-  jest.spyOn(syntheticsService, 'pushConfigs').mockImplementationOnce(fakePush);
-
-  serverMock.syntheticsService = syntheticsService;
+  jest.spyOn(syntheticsService, 'editConfig').mockImplementationOnce(fakePush);
 
   const editedMonitor = {
     type: 'http',
@@ -61,21 +63,21 @@ describe('syncEditedMonitor', () => {
     id: 'saved-obj-id',
   } as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
 
+  const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+
   it('includes the isEdit flag', () => {
     syncEditedMonitor({
       editedMonitor,
       editedMonitorSavedObject,
       previousMonitor,
+      syntheticsMonitorClient,
       server: serverMock,
     });
 
     expect(fakePush).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: 'saved-obj-id',
-        }),
-      ]),
-      true
+      expect.objectContaining({
+        id: 'saved-obj-id',
+      })
     );
   });
 });

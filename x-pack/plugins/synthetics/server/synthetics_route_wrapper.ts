@@ -9,10 +9,14 @@ import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { createUptimeESClient, inspectableEsQueriesMap } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
-import { UMKibanaRouteWrapper } from './legacy_uptime/routes';
+import { SyntheticsRouteWrapper } from './legacy_uptime/routes';
 import { API_URLS } from '../common/constants';
 
-export const syntheticsRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
+export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
+  uptimeRoute,
+  server,
+  syntheticsMonitorClient
+) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
@@ -54,6 +58,7 @@ export const syntheticsRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server
       request,
       response,
       server,
+      syntheticsMonitorClient,
     });
 
     if (res instanceof KibanaResponse) {

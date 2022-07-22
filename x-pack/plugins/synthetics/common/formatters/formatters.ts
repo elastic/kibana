@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { DataStream } from '../types';
-
-import { httpFormatters, HTTPFormatMap } from '../http/formatters';
-import { tcpFormatters, TCPFormatMap } from '../tcp/formatters';
-import { icmpFormatters, ICMPFormatMap } from '../icmp/formatters';
-import { browserFormatters, BrowserFormatMap } from '../browser/formatters';
-import { commonFormatters, CommonFormatMap } from '../common/formatters';
+import { DataStream } from '../runtime_types';
+import { httpFormatters, HTTPFormatMap } from './http/formatters';
+import { tcpFormatters, TCPFormatMap } from './tcp/formatters';
+import { icmpFormatters, ICMPFormatMap } from './icmp/formatters';
+import { browserFormatters, BrowserFormatMap } from './browser/formatters';
+import { commonFormatters, CommonFormatMap } from './common/formatters';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 
