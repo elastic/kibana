@@ -33,6 +33,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.console.enterRequest(
           '\nPOST test/_doc/1 \n{\n "foo": """look "escaped" quotes"""'
         );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasErrorMarker()).to.be(false);
       });
     });
