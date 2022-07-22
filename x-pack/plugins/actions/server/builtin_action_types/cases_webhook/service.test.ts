@@ -465,7 +465,7 @@ describe('Cases webhook service', () => {
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
-      expect(res).toEqual({});
+      expect(res).toBeUndefined();
     });
 
     test('it fails silently if createCommentJson is missing', async () => {
@@ -480,7 +480,7 @@ describe('Cases webhook service', () => {
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
-      expect(res).toEqual({});
+      expect(res).toBeUndefined();
     });
   });
 });

@@ -304,8 +304,7 @@ export const UPDATE_INCIDENT_URL = i18n.translate(
 export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlHelp',
   {
-    defaultMessage:
-      'API URL to update case. Use the variable selector to add external system id to the url.',
+    defaultMessage: 'API URL to update case.',
   }
 );
 
@@ -339,8 +338,7 @@ export const CREATE_COMMENT_URL = i18n.translate(
 export const CREATE_COMMENT_URL_HELP = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlHelp',
   {
-    defaultMessage:
-      'API URL to add comment to case. Use the variable selector to add external system id to the url.',
+    defaultMessage: 'API URL to add comment to case.',
   }
 );
 
@@ -362,13 +360,6 @@ export const HAS_AUTH = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.hasAuthSwitchLabel',
   {
     defaultMessage: 'Require authentication for this webhook',
-  }
-);
-
-export const REENTER_VALUES = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.reenterValuesLabel',
-  {
-    defaultMessage: 'Username and password are encrypted. Please reenter values for these fields.',
   }
 );
 
@@ -534,5 +525,12 @@ export const EXTERNAL_TITLE_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.externalTitleDesc',
   {
     defaultMessage: 'External system title',
+  }
+);
+
+export const DOC_LINK = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.docLink',
+  {
+    defaultMessage: 'Configuring Webhook - Case Management connector.',
   }
 );

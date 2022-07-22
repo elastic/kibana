@@ -114,6 +114,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+    <EuiSpacer size="m" />
     <EuiText>
       <h3>{i18n.STEP_4B}</h3>
       <small>

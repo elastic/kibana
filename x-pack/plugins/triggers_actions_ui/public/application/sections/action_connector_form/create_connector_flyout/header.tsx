@@ -75,4 +75,5 @@ const FlyoutHeaderComponent: React.FC<{
   );
 };
 
+// @ts-ignore ts does not like the EuiBetaBadgeProps ¯\_(ツ)_/¯
 export const FlyoutHeader = memo(FlyoutHeaderComponent);

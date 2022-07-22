@@ -12,10 +12,12 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiStepStatus,
 } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { AuthStep, CreateStep, GetStep, UpdateStep } from './steps';
@@ -55,6 +57,7 @@ type PossibleStepNumbers = 1 | 2 | 3 | 4;
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
+  const { docLinks } = useKibana().services;
   const { isValid, getFields, validateFields } = useFormContext();
   const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);
   const [status, setStatus] = useState<Record<string, EuiStepStatus>>({
@@ -161,12 +164,17 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
   return (
     <>
       <EuiStepsHorizontal steps={horizontalSteps} />
+      <EuiLink
+        href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/cases-webhook-action-type.html`}
+        target="_blank"
+      >
+        {i18n.DOC_LINK}
+      </EuiLink>
       <EuiSpacer size="l" />
       <AuthStep readOnly={readOnly} display={currentStep === 1} />
       <CreateStep readOnly={readOnly} display={currentStep === 2} />
       <GetStep readOnly={readOnly} display={currentStep === 3} />
       <UpdateStep readOnly={readOnly} display={currentStep === 4} />
-
       <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart" direction="rowReverse">
         {currentStep < 4 && (
           <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
