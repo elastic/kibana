@@ -58,6 +58,4 @@ describe('OpenInDevConsoleButton', () => {
       ).toBeInTheDocument();
     });
   });
-
-
 });
