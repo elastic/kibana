@@ -14,6 +14,7 @@ import {
   SCALING_KEYS,
 } from '../../../common/telemetry/types';
 import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
+import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 
 import { ClusterCountStats, MapStats } from './types';
 
@@ -42,18 +43,11 @@ export class MapStatsCollector {
       return;
     }
 
-    let mapSettings;
-    try {
-      const mapState = JSON.parse(attributes.mapStateJSON);
-      mapSettings = mapState.settings;
-    } catch (e) {
-      return;
-    }
-
     this._mapCount++;
 
-    if (mapSettings && mapSettings.customIcons) {
-      const customIconsCount = mapSettings.customIcons.length;
+    const mapSettingsCollector = new MapSettingsCollector(attributes);
+    if (mapSettingsCollector) {
+      const customIconsCount = mapSettingsCollector.getCustomIconsCount();
       if (this._customIconsCountStats) {
         const customIconsCountTotal = this._customIconsCountStats.total + customIconsCount;
         this._customIconsCountStats = {
@@ -73,54 +67,57 @@ export class MapStatsCollector {
     }
 
     const layerStatsCollector = new LayerStatsCollector(attributes);
-    if (!layerStatsCollector) return;
+    if (layerStatsCollector) {
+      const layerCount = layerStatsCollector.getLayerCount();
+      if (this._layerCountStats) {
+        const layerCountTotal = this._layerCountStats.total + layerCount;
+        this._layerCountStats = {
+          min: Math.min(layerCount, this._layerCountStats.min),
+          max: Math.max(layerCount, this._layerCountStats.max),
+          total: layerCountTotal,
+          avg: layerCountTotal / this._mapCount,
+        };
+      } else {
+        this._layerCountStats = {
+          min: layerCount,
+          max: layerCount,
+          total: layerCount,
+          avg: layerCount,
+        };
+      }
 
-    const layerCount = layerStatsCollector.getLayerCount();
-    if (this._layerCountStats) {
-      const layerCountTotal = this._layerCountStats.total + layerCount;
-      this._layerCountStats = {
-        min: Math.min(layerCount, this._layerCountStats.min),
-        max: Math.max(layerCount, this._layerCountStats.max),
-        total: layerCountTotal,
-        avg: layerCountTotal / this._mapCount,
-      };
-    } else {
-      this._layerCountStats = {
-        min: layerCount,
-        max: layerCount,
-        total: layerCount,
-        avg: layerCount,
-      };
+      const sourceCount = layerStatsCollector.getSourceCount();
+      if (this._sourceCountStats) {
+        const sourceCountTotal = this._sourceCountStats.total + sourceCount;
+        this._sourceCountStats = {
+          min: Math.min(sourceCount, this._sourceCountStats.min),
+          max: Math.max(sourceCount, this._sourceCountStats.max),
+          total: sourceCountTotal,
+          avg: sourceCountTotal / this._mapCount,
+        };
+      } else {
+        this._sourceCountStats = {
+          min: sourceCount,
+          max: sourceCount,
+          total: sourceCount,
+          avg: sourceCount,
+        };
+      }
+
+      this._updateClusterStats(this._basemapClusterStats, layerStatsCollector.getBasemapCounts());
+      this._updateClusterStats(this._joinClusterStats, layerStatsCollector.getJoinCounts());
+      this._updateClusterStats(this._layerClusterStats, layerStatsCollector.getLayerCounts());
+      this._updateClusterStats(
+        this._resolutionClusterStats,
+        layerStatsCollector.getResolutionCounts()
+      );
+      this._updateClusterStats(this._scalingClusterStats, layerStatsCollector.getScalingCounts());
+      this._updateClusterStats(this._emsFileClusterStats, layerStatsCollector.getEmsFileCounts());
+      this._updateClusterStats(
+        this._layerTypeClusterStats,
+        layerStatsCollector.getLayerTypeCounts()
+      );
     }
-
-    const sourceCount = layerStatsCollector.getSourceCount();
-    if (this._sourceCountStats) {
-      const sourceCountTotal = this._sourceCountStats.total + sourceCount;
-      this._sourceCountStats = {
-        min: Math.min(sourceCount, this._sourceCountStats.min),
-        max: Math.max(sourceCount, this._sourceCountStats.max),
-        total: sourceCountTotal,
-        avg: sourceCountTotal / this._mapCount,
-      };
-    } else {
-      this._sourceCountStats = {
-        min: sourceCount,
-        max: sourceCount,
-        total: sourceCount,
-        avg: sourceCount,
-      };
-    }
-
-    this._updateClusterStats(this._basemapClusterStats, layerStatsCollector.getBasemapCounts());
-    this._updateClusterStats(this._joinClusterStats, layerStatsCollector.getJoinCounts());
-    this._updateClusterStats(this._layerClusterStats, layerStatsCollector.getLayerCounts());
-    this._updateClusterStats(
-      this._resolutionClusterStats,
-      layerStatsCollector.getResolutionCounts()
-    );
-    this._updateClusterStats(this._scalingClusterStats, layerStatsCollector.getScalingCounts());
-    this._updateClusterStats(this._emsFileClusterStats, layerStatsCollector.getEmsFileCounts());
-    this._updateClusterStats(this._layerTypeClusterStats, layerStatsCollector.getLayerTypeCounts());
   }
 
   getStats(): MapStats {

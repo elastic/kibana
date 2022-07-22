@@ -121,7 +121,7 @@ test('returns expected telemetry data from saved objects', () => {
       customIconsCount: {
         avg: 0.8,
         max: 3,
-        min: 1,
+        min: 0,
       },
       dataSourcesCount: {
         avg: 2,
