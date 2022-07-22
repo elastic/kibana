@@ -685,6 +685,36 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should NOT read a case`, async () => {
+          // super user creates a case at the appropriate space
+          await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: scenario.space,
+            }
+          );
+
+          // user should not be able to read cases at the appropriate space
+          await findCases({
+            supertest: supertestWithoutAuth,
+            auth: {
+              user: scenario.user,
+              space: scenario.space,
+            },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
       it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
         await Promise.all([
           // super user creates a case with owner securitySolutionFixture
@@ -723,36 +753,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
       });
-
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
-        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
-          scenario.space
-        } - should NOT read a case`, async () => {
-          // super user creates a case at the appropriate space
-          await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: scenario.space,
-            }
-          );
-
-          // user should not be able to read cases at the appropriate space
-          await findCases({
-            supertest: supertestWithoutAuth,
-            auth: {
-              user: scenario.user,
-              space: scenario.space,
-            },
-            expectedHttpCode: 403,
-          });
-        });
-      }
 
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
       // the authorizationFilter produced by the cases authorization class
