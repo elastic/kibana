@@ -107,7 +107,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const timeFormat = useMemo(
     () =>
-      uiSettings.get('dateFormat:scaled').find(([key]: string[]) => key === 'PT1M')[1] ?? 'HH:mm',
+      uiSettings?.get('dateFormat:scaled')?.find(([key]: string[]) => key === 'PT1M')[1] ?? 'HH:mm',
     [uiSettings]
   );
 
