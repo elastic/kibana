@@ -18,7 +18,6 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type {
   ElasticsearchClient,
@@ -58,7 +57,6 @@ import type {
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
-  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
@@ -68,27 +66,7 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
-interface SortExceptionsReturn {
-  exceptionsWithValueLists: ExceptionListItemSchema[];
-  exceptionsWithoutValueLists: ExceptionListItemSchema[];
-}
-
 export const MAX_RULE_GAP_RATIO = 4;
-
-export const shorthandMap = {
-  s: {
-    momentString: 'seconds',
-    asFn: (duration: moment.Duration) => duration.asSeconds(),
-  },
-  m: {
-    momentString: 'minutes',
-    asFn: (duration: moment.Duration) => duration.asMinutes(),
-  },
-  h: {
-    momentString: 'hours',
-    asFn: (duration: moment.Duration) => duration.asHours(),
-  },
-};
 
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
@@ -309,28 +287,6 @@ export const getExceptions = async ({
   }
 };
 
-export const sortExceptionItems = (exceptions: ExceptionListItemSchema[]): SortExceptionsReturn => {
-  return exceptions.reduce<SortExceptionsReturn>(
-    (acc, exception) => {
-      const { entries } = exception;
-      const { exceptionsWithValueLists, exceptionsWithoutValueLists } = acc;
-
-      if (hasLargeValueList(entries)) {
-        return {
-          exceptionsWithValueLists: [...exceptionsWithValueLists, { ...exception }],
-          exceptionsWithoutValueLists,
-        };
-      } else {
-        return {
-          exceptionsWithValueLists,
-          exceptionsWithoutValueLists: [...exceptionsWithoutValueLists, { ...exception }],
-        };
-      }
-    },
-    { exceptionsWithValueLists: [], exceptionsWithoutValueLists: [] }
-  );
-};
-
 export const generateId = (
   docIndex: string,
   docId: string,
@@ -383,14 +339,6 @@ export const wrapBuildingBlocks = (
       },
     };
   });
-};
-
-export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit => {
-  return {
-    _id: generateSignalId(signal.signal),
-    _index: index,
-    _source: signal,
-  };
 };
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
@@ -606,11 +554,13 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * @param searchResult The result to try and parse out the timestamp.
  * @param primaryTimestamp The primary timestamp to use.
  */
-export const lastValidDate = ({
+export const lastValidDate = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
   primaryTimestamp,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   primaryTimestamp: TimestampOverride;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -665,11 +615,13 @@ export const getValidDateFromDoc = ({
   }
 };
 
-export const createSearchAfterReturnTypeFromResponse = ({
+export const createSearchAfterReturnTypeFromResponse = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
   primaryTimestamp,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   primaryTimestamp: TimestampOverride;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -696,14 +648,9 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createPreviewReturnType = (): PreviewReturnType => ({
-  matrixHistogramData: [],
-  totalCount: 0,
-  errors: [],
-  warningMessages: [],
-});
-
-export const createSearchAfterReturnType = ({
+export const createSearchAfterReturnType = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   success,
   warning,
   searchAfterTimes,
@@ -737,7 +684,9 @@ export const createSearchAfterReturnType = ({
   };
 };
 
-export const createSearchResultReturnType = (): SignalSearchResponse => {
+export const createSearchResultReturnType = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
     took: 0,
@@ -799,14 +748,16 @@ export const mergeReturns = (
   });
 };
 
-export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
+export const mergeSearchResults = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(
+  searchResults: Array<SignalSearchResponse<TAggregations>>
+) => {
   return searchResults.reduce((prev, next) => {
     const {
       took: existingTook,
       timed_out: existingTimedOut,
-      // _scroll_id: existingScrollId,
       _shards: existingShards,
-      // aggregations: existingAggregations,
       hits: existingHits,
     } = prev;
 
@@ -870,7 +821,7 @@ export const calculateThresholdSignalUuid = (
   thresholdFields: string[],
   key?: string
 ): string => {
-  // used to generate constant Threshold Signals ID when run with the same params
+  // used to generate stable Threshold Signals ID when run with the same params
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
   const startedAtString = startedAt.toISOString();
@@ -878,30 +829,6 @@ export const calculateThresholdSignalUuid = (
   const baseString = `${ruleId}${startedAtString}${thresholdFields.join(',')}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
-};
-
-export const getThresholdAggregationParts = (
-  data: object,
-  index?: number
-):
-  | {
-      field: string;
-      index: number;
-      name: string;
-    }
-  | undefined => {
-  const idx = index != null ? index.toString() : '\\d';
-  const pattern = `threshold_(?<index>${idx}):(?<name>.*)`;
-  for (const key of Object.keys(data)) {
-    const matches = key.match(pattern);
-    if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
-      return {
-        field: matches.groups.name,
-        index: parseInt(matches.groups.index, 10),
-        name: key,
-      };
-    }
-  }
 };
 
 export const getThresholdTermsHash = (
@@ -914,8 +841,8 @@ export const getThresholdTermsHash = (
     .update(
       terms
         .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
-        .map((field) => {
-          return field.value;
+        .map((term) => {
+          return `${term.field}:${term.value}`;
         })
         .join(',')
     )
@@ -927,8 +854,6 @@ export const isThresholdParams = (params: RuleParams): params is ThresholdRulePa
   params.type === 'threshold';
 export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
   params.type === 'query';
-export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
-  params.type === 'saved_query';
 export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>

@@ -343,15 +343,20 @@ function enrichThresholdTerms(
     Array.isArray(termsValueArray) &&
     termsFieldArr.length === termsValueArray.length
   ) {
-    return termsFieldArr.map((field, index) => {
-      return {
-        title: `${field} [threshold]`,
+    return termsFieldArr
+      .map((field, index) => ({
+        title: field,
         description: {
           ...description,
           values: [termsValueArray[index]],
         },
-      };
-    });
+      }))
+      .filter(
+        (entry) =>
+          !alwaysDisplayedFields
+            .map((alwaysThereEntry) => alwaysThereEntry.id)
+            .includes(entry.title)
+      );
   }
 }
 
