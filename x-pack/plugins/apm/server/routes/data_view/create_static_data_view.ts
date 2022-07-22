@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -26,18 +26,18 @@ export async function createStaticDataView({
   dataViewService: DataViewsService;
   config: APMConfig;
   setup: Setup;
-}): Promise<boolean> {
+}): Promise<DataView | undefined> {
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
     if (!config.autoCreateApmDataView) {
-      return false;
+      return;
     }
 
     // Discover and other apps will throw errors if an data view exists without having matching indices.
     // The following ensures the data view is only created if APM data is found
     const hasData = await hasHistoricalAgentData(setup);
     if (!hasData) {
-      return false;
+      return;
     }
 
     const apmDataViewTitle = getApmDataViewTitle(setup.indices);
@@ -47,16 +47,16 @@ export async function createStaticDataView({
     });
 
     if (!shouldCreateOrUpdate) {
-      return false;
+      return;
     }
 
     try {
-      await withApmSpan('create_index_pattern_saved_object', async () => {
-        await dataViewService.createAndSave(
+      return await withApmSpan('create_data_view', async () => {
+        const dataView = await dataViewService.createAndSave(
           {
             allowNoIndex: true,
             id: APM_STATIC_DATA_VIEW_ID,
-            name: 'APM UI',
+            name: 'APM',
             title: apmDataViewTitle,
             timeFieldName: '@timestamp',
 
@@ -80,14 +80,14 @@ export async function createStaticDataView({
           },
           true
         );
-      });
 
-      return true;
+        return dataView;
+      });
     } catch (e) {
       // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
       // that error should be silenced
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        return false;
+        return;
       }
       throw e;
     }

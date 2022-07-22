@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { createStaticDataView } from './create_static_data_view';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -14,7 +15,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ created: boolean }> => {
+  handler: async (resources): Promise<{ dataView: DataView | undefined }> => {
     const setup = await setupRequest(resources);
     const { context, plugins, request, config } = resources;
 
@@ -27,13 +28,13 @@ const staticDataViewRoute = createApmServerRoute({
       true
     );
 
-    const didCreateDataView = await createStaticDataView({
+    const dataView = await createStaticDataView({
       dataViewService,
       config,
       setup,
     });
 
-    return { created: didCreateDataView };
+    return { dataView };
   },
 });
 
