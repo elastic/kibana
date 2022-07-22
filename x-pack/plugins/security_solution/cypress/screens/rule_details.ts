@@ -27,15 +27,11 @@ export const DATA_VIEW_DETAILS = 'Data View';
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
 
-export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
-
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
 export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
-
-export const EXCEPTIONS_TAB_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
@@ -86,8 +82,6 @@ export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-ac
 export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
-
-export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 
