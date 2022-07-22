@@ -294,6 +294,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     accessibilitySupport: 'off',
     folding: false,
     fontSize: 14,
+    padding: {
+      top: 8,
+    },
     scrollBeyondLastLine: false,
     quickSuggestions: true,
     minimap: { enabled: false },
