@@ -67,9 +67,9 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
   state$
     .pipe(
       takeUntil(input$.pipe(last())),
-      filter(() => !isUpstreamUpdate),
       pluck('input'),
       distinctUntilChanged(),
+      filter(() => !isUpstreamUpdate),
       debounceTime(0)
     )
     .subscribe((value) => {
@@ -81,9 +81,9 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
   state$
     .pipe(
       takeUntil(output$.pipe(last())),
-      filter(() => !isUpstreamUpdate),
       pluck('output'),
       distinctUntilChanged(),
+      filter(() => !isUpstreamUpdate),
       debounceTime(0)
     )
     .subscribe((value) => {
