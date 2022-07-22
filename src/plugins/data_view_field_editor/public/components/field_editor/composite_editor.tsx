@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
-import { useFieldPreviewContext } from '../preview';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 
 export interface CompositeEditorProps {

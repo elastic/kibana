@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
