@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -48,7 +48,12 @@ export default function (providerContext: FtrProviderContext) {
           await uninstallPackage('unverified_content', '1.0.0');
         });
         it('should return 400 for valid signature but incorrect content', async () => {
-          await installPackage('unverified_content', '1.0.0').expect(400);
+          const res = await installPackage('unverified_content', '1.0.0');
+
+          expect(res.status).equal(400);
+          expect(res.body.attributes).eql({
+            type: 'verification_failed',
+          });
         });
         it('should return 200 for valid signature but incorrect content force install', async () => {
           await installPackage('unverified_content', '1.0.0', { force: true }).expect(200);
@@ -60,7 +65,11 @@ export default function (providerContext: FtrProviderContext) {
           await uninstallPackage('wrong_key', '1.0.0');
         });
         it('should return 400 for valid signature but incorrect key', async () => {
-          await installPackage('wrong_key', '1.0.0').expect(400);
+          const res = await installPackage('wrong_key', '1.0.0');
+          expect(res.status).equal(400);
+          expect(res.body.attributes).eql({
+            type: 'verification_failed',
+          });
         });
         it('should return 200 for valid signature but incorrect key force install', async () => {
           await installPackage('wrong_key', '1.0.0', { force: true }).expect(200);
