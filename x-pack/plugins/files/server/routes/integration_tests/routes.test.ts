@@ -130,10 +130,14 @@ describe('File HTTP API', () => {
       {
         const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
         expect(metrics).toEqual({
-          esFixedSizeIndex: {
-            capacity: esMaxCapacity,
-            available: esMaxCapacity,
-            used: 0,
+          countByExtension: {},
+          countByStatus: {},
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: esMaxCapacity,
+              used: 0,
+            },
           },
         });
       }
@@ -143,10 +147,18 @@ describe('File HTTP API', () => {
       {
         const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
         expect(metrics).toEqual({
-          esFixedSizeIndex: {
-            capacity: esMaxCapacity,
-            available: esMaxCapacity,
-            used: 0,
+          countByExtension: {
+            png: 3,
+          },
+          countByStatus: {
+            AWAITING_UPLOAD: 3,
+          },
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: esMaxCapacity,
+              used: 0,
+            },
           },
         });
       }
@@ -165,10 +177,19 @@ describe('File HTTP API', () => {
       {
         const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
         expect(metrics).toEqual({
-          esFixedSizeIndex: {
-            capacity: esMaxCapacity,
-            available: 52428774,
-            used: 26,
+          countByExtension: {
+            png: 3,
+          },
+          countByStatus: {
+            AWAITING_UPLOAD: 1,
+            READY: 2,
+          },
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: 52428774,
+              used: 26,
+            },
           },
         });
       }
