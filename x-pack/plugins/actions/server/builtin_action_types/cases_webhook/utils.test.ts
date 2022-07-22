@@ -6,7 +6,7 @@
  */
 
 import {
-  getObjectValueByKey,
+  getObjectValueByKeyAsString,
   stringifyObjValues,
   throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
@@ -35,22 +35,20 @@ const bigOlObject = {
   },
 };
 describe('cases_webhook/utils', () => {
-  describe('getObjectValueByKey()', () => {
+  describe('getObjectValueByKeyAsString()', () => {
     it('Handles a simple key', () => {
-      expect(getObjectValueByKey<string | unknown>(bigOlObject, 'field.simple')).toEqual('simple');
+      expect(getObjectValueByKeyAsString(bigOlObject, 'field.simple')).toEqual('simple');
     });
     it('Handles a complicated key', () => {
-      expect(getObjectValueByKey<string | unknown>(bigOlObject, 'fields.id[0].good.cool')).toEqual(
-        'cool'
-      );
+      expect(getObjectValueByKeyAsString(bigOlObject, 'fields.id[0].good.cool')).toEqual('cool');
     });
     it('Handles a more complicated key', () => {
       expect(
-        getObjectValueByKey<string | unknown>(bigOlObject, 'fields.id[1].more[0].more.complicated')
+        getObjectValueByKeyAsString(bigOlObject, 'fields.id[1].more[0].more.complicated')
       ).toEqual('complicated');
     });
     it('Handles a bad key', () => {
-      expect(getObjectValueByKey<unknown>(bigOlObject, 'bad.key')).toEqual(undefined);
+      expect(getObjectValueByKeyAsString(bigOlObject, 'bad.key')).toEqual(undefined);
     });
   });
   describe('throwDescriptiveErrorIfResponseIsNotValid()', () => {
