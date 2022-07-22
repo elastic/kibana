@@ -295,7 +295,7 @@ export class HeadlessChromiumDriverFactory {
     for (const arg of message.args()) {
       const errorMessage = await arg
         .executionContext()
-        .evaluate<undefined | string>((_arg: unknown) => {
+        .evaluate((_arg: unknown) => {
           /* !! We are now in the browser context !! */
           if (_arg instanceof Error) {
             return _arg.message;
