@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
+import { INDEX_EXECUTABLES, INDEX_FRAMES, INDEX_TRACES } from '../../common';
 import {
   ProfilingExecutable,
   ProfilingStackFrame,
@@ -260,7 +261,7 @@ export async function mgetStackTraces({
         return client.mget<Pick<ProfilingStackTrace, 'FrameID' | 'Type'>>(
           'mget_stacktraces_chunk',
           {
-            index: 'profiling-stacktraces',
+            index: INDEX_TRACES,
             ids,
             realtime: false,
             _source_includes: ['FrameID', 'Type'],
@@ -332,7 +333,7 @@ export async function mgetStackFrames({
   }
 
   const resStackFrames = await client.mget<ProfilingStackFrame>('mget_stackframes', {
-    index: 'profiling-stackframes',
+    index: INDEX_FRAMES,
     ids: [...stackFrameIDs],
     realtime: false,
   });
@@ -378,7 +379,7 @@ export async function mgetExecutables({
   }
 
   const resExecutables = await client.mget<ProfilingExecutable>('mget_executables', {
-    index: 'profiling-executables',
+    index: INDEX_EXECUTABLES,
     ids: [...executableIDs],
     _source_includes: ['FileName'],
   });

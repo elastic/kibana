@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
-import { fromMapToRecord, getRoutePaths } from '../../common';
+import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { createTopNSamples } from '../../common/topn';
@@ -40,12 +40,11 @@ export async function topNElasticSearchQuery({
 }) {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-  const index = 'profiling-events-all';
 
   const eventsIndex = await findDownsampledIndex({
     logger,
     client,
-    index,
+    index: INDEX_EVENTS,
     filter,
     sampleSize: targetSampleSize,
   });

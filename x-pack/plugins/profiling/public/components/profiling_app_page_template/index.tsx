@@ -12,6 +12,7 @@ import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useHistory } from 'react-router-dom';
+import { INDEX_EVENTS } from '../../../common';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -58,7 +59,7 @@ export function ProfilingAppPageTemplate({
   useEffect(() => {
     dataViews
       .create({
-        title: 'profiling-events-all',
+        title: INDEX_EVENTS,
       })
       .then((nextDataView) => setDataView(nextDataView));
   }, [dataViews]);
