@@ -243,7 +243,7 @@ export const createExternalService = (
   const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
     try {
       if (!createCommentUrl || !createCommentJson) {
-        return {};
+        return;
       }
       const commentUrl = renderMustacheStringNoEscape(createCommentUrl, {
         external: {

@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { containsCommentsOrEmpty, containsTitleAndDesc, isUrlButCanBeEmpty } from '../validator';
@@ -25,6 +25,13 @@ interface Props {
 
 export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
   <span data-test-subj="updateStep" style={{ display: display ? 'block' : 'none' }}>
+    <EuiText>
+      <h3>{i18n.STEP_4A}</h3>
+      <small>
+        <p>{i18n.STEP_4A_DESCRIPTION}</p>
+      </small>
+    </EuiText>
+    <EuiSpacer size="s" />
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <UseField
@@ -107,6 +114,13 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+    <EuiText>
+      <h3>{i18n.STEP_4B}</h3>
+      <small>
+        <p>{i18n.STEP_4B_DESCRIPTION}</p>
+      </small>
+    </EuiText>
+    <EuiSpacer size="s" />
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <UseField

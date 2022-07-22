@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -24,6 +24,13 @@ interface Props {
 
 export const CreateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
   <span data-test-subj="createStep" style={{ display: display ? 'block' : 'none' }}>
+    <EuiText>
+      <h3>{i18n.STEP_2}</h3>
+      <small>
+        <p>{i18n.STEP_2_DESCRIPTION}</p>
+      </small>
+    </EuiText>
+    <EuiSpacer size="s" />
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <UseField

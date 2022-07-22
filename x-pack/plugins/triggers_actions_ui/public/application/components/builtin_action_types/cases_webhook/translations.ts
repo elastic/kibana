@@ -161,21 +161,21 @@ export const DELETE_BUTTON = i18n.translate(
 export const CREATE_INCIDENT_METHOD = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentMethodTextFieldLabel',
   {
-    defaultMessage: 'Create Incident Method',
+    defaultMessage: 'Create Case Method',
   }
 );
 
 export const CREATE_INCIDENT_URL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Create Incident URL',
+    defaultMessage: 'Create Case URL',
   }
 );
 
 export const CREATE_INCIDENT_JSON = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Create Incident Object',
+    defaultMessage: 'Create Case Object',
   }
 );
 
@@ -203,7 +203,7 @@ export const CODE_EDITOR = i18n.translate(
 export const CREATE_INCIDENT_RESPONSE_KEY = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentResponseKeyTextFieldLabel',
   {
-    defaultMessage: 'Create Incident Response Incident Key',
+    defaultMessage: 'Create Case Response Case Key',
   }
 );
 
@@ -224,7 +224,7 @@ export const ADD_CASES_VARIABLE = i18n.translate(
 export const GET_INCIDENT_URL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Get Incident URL',
+    defaultMessage: 'Get Case URL',
   }
 );
 export const GET_INCIDENT_URL_HELP = i18n.translate(
@@ -238,7 +238,7 @@ export const GET_INCIDENT_URL_HELP = i18n.translate(
 export const GET_INCIDENT_TITLE_KEY = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalTitleKeyTextFieldLabel',
   {
-    defaultMessage: 'Get Incident Response External Title Key',
+    defaultMessage: 'Get Case Response External Title Key',
   }
 );
 export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
@@ -251,7 +251,7 @@ export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
 export const GET_INCIDENT_CREATED_KEY = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
   {
-    defaultMessage: 'Get Incident Response Created Date Key',
+    defaultMessage: 'Get Case Response Created Date Key',
   }
 );
 export const GET_INCIDENT_CREATED_KEY_HELP = i18n.translate(
@@ -264,7 +264,7 @@ export const GET_INCIDENT_CREATED_KEY_HELP = i18n.translate(
 export const GET_INCIDENT_UPDATED_KEY = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
   {
-    defaultMessage: 'Get Incident Response Updated Date Key',
+    defaultMessage: 'Get Case Response Updated Date Key',
   }
 );
 export const GET_INCIDENT_UPDATED_KEY_HELP = i18n.translate(
@@ -277,7 +277,7 @@ export const GET_INCIDENT_UPDATED_KEY_HELP = i18n.translate(
 export const EXTERNAL_INCIDENT_VIEW_URL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
   {
-    defaultMessage: 'External Incident View URL',
+    defaultMessage: 'External Case View URL',
   }
 );
 export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
@@ -291,14 +291,14 @@ export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
 export const UPDATE_INCIDENT_METHOD = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentMethodTextFieldLabel',
   {
-    defaultMessage: 'Update Incident Method',
+    defaultMessage: 'Update Case Method',
   }
 );
 
 export const UPDATE_INCIDENT_URL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Update Incident URL',
+    defaultMessage: 'Update Case URL',
   }
 );
 export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
@@ -312,7 +312,7 @@ export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
 export const UPDATE_INCIDENT_JSON = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Update Incident Object',
+    defaultMessage: 'Update Case Object',
   }
 );
 export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
@@ -421,6 +421,14 @@ export const STEP_2 = i18n.translate(
   }
 );
 
+export const STEP_2_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step2Description',
+  {
+    defaultMessage:
+      'Set fields to create the case in the external system. Check your service’s API documentation to understand what fields are required',
+  }
+);
+
 export const STEP_3 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step3',
   {
@@ -428,10 +436,48 @@ export const STEP_3 = i18n.translate(
   }
 );
 
+export const STEP_3_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step3Description',
+  {
+    defaultMessage:
+      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases. Check your service’s API documentation to understand what fields are required.',
+  }
+);
+
 export const STEP_4 = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4',
   {
     defaultMessage: 'Comments and updates',
+  }
+);
+
+export const STEP_4A = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4a',
+  {
+    defaultMessage: 'Create update in case',
+  }
+);
+
+export const STEP_4A_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4aDescription',
+  {
+    defaultMessage:
+      'Set fields to create updates to the case in external system. For some systems, this may be the same method as adding comments to cases.',
+  }
+);
+
+export const STEP_4B = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4b',
+  {
+    defaultMessage: 'Add comment in case',
+  }
+);
+
+export const STEP_4B_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.step4bDescription',
+  {
+    defaultMessage:
+      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases.',
   }
 );
 
