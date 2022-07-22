@@ -86,11 +86,11 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
           const legacyTemplateExists = await lists.getLegacyListTemplateExists();
           const legacyItemTemplateExists = await lists.getLegacyListItemTemplateExists();
           if (legacyTemplateExists) {
-            await lists.deleteLegacyListBootStrapIndex();
+            await lists.deleteLegacyListTemplate();
           }
 
           if (legacyItemTemplateExists) {
-            await lists.deleteLegacyListItemBootStrapIndex();
+            await lists.deleteLegacyListItemTemplate();
           }
 
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);

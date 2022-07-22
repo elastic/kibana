@@ -463,7 +463,7 @@ export class ListClient {
    * Deletes the list boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
    */
-  public deleteLegacyListBootStrapIndex = async (): Promise<unknown> => {
+  public deleteLegacyListTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const listIndex = this.getListIndex();
     return deleteTemplate(esClient, listIndex);
@@ -473,7 +473,7 @@ export class ListClient {
    * Delete the list item boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
    */
-  public deleteLegacyListItemBootStrapIndex = async (): Promise<unknown> => {
+  public deleteLegacyListItemTemplate = async (): Promise<unknown> => {
     const { esClient } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteTemplate(esClient, listItemIndex);
