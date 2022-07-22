@@ -233,13 +233,14 @@ export function ChangeDataView({
             alignItems="center"
             gutterSize="none"
             justifyContent="spaceBetween"
+            responsive={false}
             css={css`
               margin: ${euiTheme.size.s};
               margin-bottom: 0;
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {Boolean(isTextBasedLangSelected) ? (
                     <EuiToolTip

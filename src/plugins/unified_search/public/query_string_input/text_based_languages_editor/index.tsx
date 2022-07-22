@@ -108,7 +108,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   const editorClassName = classNames('unifiedTextLangEditor', {
-    'unifiedTextLangEditor--expanded': isCompactFocused,
+    'unifiedTextLangEditor--expanded': isCodeEditorExpanded,
+    'unifiedTextLangEditor--compact': isCompactFocused,
+    'unifiedTextLangEditor--initial': !isCompactFocused,
   });
 
   // When the editor is on full size mode, the user can resize the height of the editor.
@@ -139,10 +141,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const linesCount = editorModel.current?.getLineCount() || 1;
       if (linesCount === 1 || clickedOutside || initialRender) return;
       const editorElement = editor1.current.getDomNode();
-      const contentHeight = Math.min(
-        MAX_COMPACT_VIEW_LENGTH,
-        editor1.current.getContentHeight() + 16
-      );
+      const contentHeight = Math.min(MAX_COMPACT_VIEW_LENGTH, editor1.current.getContentHeight());
 
       if (editorElement) {
         editorElement.style.height = `${contentHeight}px`;
@@ -292,6 +291,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
+    accessibilitySupport: 'off',
     folding: false,
     fontSize: 14,
     scrollBeyondLastLine: false,

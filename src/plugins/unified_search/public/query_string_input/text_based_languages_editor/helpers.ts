@@ -55,8 +55,11 @@ export const parseErrors = (errors: Error[], code: string) => {
       };
     } else if (error.message.includes('No data view found')) {
       const dataviewString = getIndexPatternFromSQLQuery(code);
+      const temp = code.split(dataviewString);
+      const lastChar = temp[0]?.charAt(temp[0]?.length - 1);
+      const additionnalLength = lastChar === '"' || "'" ? 2 : 0;
       // 5 is the length of FROM + space
-      const errorLength = 5 + dataviewString.length;
+      const errorLength = 5 + dataviewString.length + additionnalLength;
       // no dataview found error message
       const hasLines = /\r|\n/.exec(code);
       if (hasLines) {

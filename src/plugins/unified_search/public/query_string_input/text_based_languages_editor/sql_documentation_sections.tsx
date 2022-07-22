@@ -18,7 +18,7 @@ export const initialSection = (
 
 With Elasticsearch SQL, you can access that full text search, 
 blazing speed, and effortless scalability with a familiar query syntax.
-can use SQL to search and aggregate data natively inside Elasticsearch. 
+You can use SQL to search and aggregate data natively inside Elasticsearch. 
 One can think of Elasticsearch SQL as a translator, 
 one that understands both SQL and Elasticsearch and makes it easy
 to read and process data in real-time.
@@ -66,7 +66,7 @@ export const comparisonOperators = {
               defaultMessage: `### Equality (=)
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no = 10000 LIMIT 5;
+WHERE emp_no = 10000 LIMIT 5
 \`\`\`
             `,
               description:
@@ -90,18 +90,18 @@ WHERE emp_no = 10000 LIMIT 5;
             {
               defaultMessage: `### Null safe equality:
 \`\`\`
-SELECT 'elastic' <=> null AS "equals";
+SELECT 'elastic' <=> null AS "equals"
 
     equals
 ---------------
-false;
+false
 \`\`\`
 \`\`\`
-SELECT null <=> null AS "equals";
+SELECT null <=> null AS "equals"
 
     equals
 ---------------
-true;
+true
 \`\`\`
             `,
               description:
@@ -126,7 +126,7 @@ true;
               defaultMessage: `### Inequality (<> or !=)
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5;
+WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
               description:
@@ -151,7 +151,7 @@ WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5;
               defaultMessage: `### Comparison (<, <=, >, >=)
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5;
+WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
               description:
@@ -173,7 +173,7 @@ WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5;
               defaultMessage: `### Between
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no;
+WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no
 \`\`\`
             `,
               description:
@@ -198,7 +198,7 @@ WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no;
               defaultMessage: `### IS NULL/IS NOT NULL
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no IS NOT NULL AND gender IS NULL;
+WHERE emp_no IS NOT NULL AND gender IS NULL
 \`\`\`
             `,
               description:
@@ -223,7 +223,7 @@ WHERE emp_no IS NOT NULL AND gender IS NULL;
               defaultMessage: `### IN (<value1>, <value2>, ...)
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no IN (10000, 10001, 10002, 999) ORDER BY emp_no LIMIT 5;
+WHERE emp_no IN (10000, 10001, 10002, 999) ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
               description:
@@ -262,7 +262,7 @@ export const logicalOperators = {
               defaultMessage: `### AND
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5;
+WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5
 \`\`\`
               `,
               description:
@@ -287,7 +287,7 @@ WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5;
               defaultMessage: `### OR
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5;
+WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5
 \`\`\`
               `,
               description:
@@ -312,7 +312,7 @@ WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5;
               defaultMessage: `### NOT
 \`\`\`
 SELECT last_name l FROM "test_emp" 
-WHERE NOT emp_no = 10000 LIMIT 5;
+WHERE NOT emp_no = 10000 LIMIT 5
 \`\`\`
               `,
               description:
@@ -350,7 +350,7 @@ export const mathOperators = {
             {
               defaultMessage: `### Add (+)
 \`\`\`
-SELECT 1 + 1 AS x;
+SELECT 1 + 1 AS x
 \`\`\`
               `,
               description:
@@ -374,7 +374,7 @@ SELECT 1 + 1 AS x;
             {
               defaultMessage: `### Subtract (infix -)
 \`\`\`
-SELECT 1 - 1 AS x;
+SELECT 1 - 1 AS x
 \`\`\`
               `,
               description:
@@ -398,7 +398,7 @@ SELECT 1 - 1 AS x;
             {
               defaultMessage: `### Negate (unary -)
 \`\`\`
-SELECT - 1 AS x;
+SELECT - 1 AS x
 \`\`\`
               `,
               description:
@@ -422,7 +422,7 @@ SELECT - 1 AS x;
             {
               defaultMessage: `### Multiply (*)
 \`\`\`
-SELECT 2 * 3 AS x;
+SELECT 2 * 3 AS x
 \`\`\`
               `,
               description:
@@ -446,7 +446,7 @@ SELECT 2 * 3 AS x;
             {
               defaultMessage: `### Divide (/)
 \`\`\`
-SELECT 6 / 3 AS x;
+SELECT 6 / 3 AS x
 \`\`\`
               `,
               description:
@@ -470,7 +470,7 @@ SELECT 6 / 3 AS x;
             {
               defaultMessage: `### Modulo or remainder(%)
 \`\`\`
-SELECT 5 % 2 AS x;
+SELECT 5 % 2 AS x
 \`\`\`
               `,
               description:
@@ -513,7 +513,7 @@ AVG(numeric_field)
 \`\`\`
 - numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 \`\`\`
-SELECT AVG(salary) AS avg FROM emp;
+SELECT AVG(salary) AS avg FROM emp
 \`\`\`
               `,
               description:
@@ -544,7 +544,7 @@ COUNT(expression)
 \`\`\`
 - expression. a field name, wildcard (*) or any numeric value. For COUNT(*) or COUNT(<literal>), all values are considered, including null or missing ones. For COUNT(<field_name>), null values are not considered.
 \`\`\`
-SELECT COUNT(*) AS count FROM emp;
+SELECT COUNT(*) AS count FROM emp
 \`\`\`
               `,
               description:
@@ -574,7 +574,7 @@ COUNT(ALL field_name)
 \`\`\`
 - a field name. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 \`\`\`
-SELECT COUNT(ALL last_name) AS count_all, COUNT(DISTINCT last_name) count_distinct FROM emp;
+SELECT COUNT(ALL last_name) AS count_all, COUNT(DISTINCT last_name) count_distinct FROM emp
 \`\`\`
               `,
               description:
@@ -605,7 +605,7 @@ COUNT(DISTINCT field_name)
 - Input: a field name.
 - Output: numeric value. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 \`\`\`
-SELECT COUNT(DISTINCT hire_date) unique_hires, COUNT(hire_date) AS hires FROM emp;
+SELECT COUNT(DISTINCT hire_date) unique_hires, COUNT(hire_date) AS hires FROM emp
 
 \`\`\`
               `,
@@ -640,7 +640,7 @@ FIRST(
 - ordering_field_name: optional field used for ordering.
 
 \`\`\`
-SELECT gender, FIRST(first_name, birth_date) FROM emp GROUP BY gender ORDER BY gender;
+SELECT gender, FIRST(first_name, birth_date) FROM emp GROUP BY gender ORDER BY gender
 \`\`\`
 
 - FIRST cannot be used in a HAVING clause.
@@ -676,7 +676,7 @@ LAST(
 - field name: target field for the aggregation
 - ordering_field_name: optional field used for ordering.
 \`\`\`
-SELECT gender, LAST(first_name) FROM emp GROUP BY gender ORDER BY gender;
+SELECT gender, LAST(first_name) FROM emp GROUP BY gender ORDER BY gender
 \`\`\`
 - LAST cannot be used in a HAVING clause.
 - LAST cannot be used with columns of type text unless the field is also saved as a keyword.
@@ -709,7 +709,7 @@ MAX(field_name)
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MAX(salary) AS max FROM emp;
+SELECT MAX(salary) AS max FROM emp
 \`\`\`
 
 - MAX on a field of type text or keyword is translated into FIRST/FIRST_VALUE and therefore, it cannot be used in HAVING clause.
@@ -743,7 +743,7 @@ MIN(field_name)
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min FROM emp;
+SELECT MIN(salary) AS min FROM emp
 \`\`\`
 
 - MIN on a field of type text or keyword is translated into FIRST/FIRST_VALUE and therefore, it cannot be used in HAVING clause.
@@ -776,7 +776,7 @@ SUM(field_name)
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT SUM(salary) AS sum FROM emp;
+SELECT SUM(salary) AS sum FROM emp
 \`\`\`
               `,
               description:
@@ -807,7 +807,7 @@ KURTOSIS(field_name)
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp
 \`\`\`
 
 - KURTOSIS cannot be used on top of scalar functions or operators but only directly on a field. 
@@ -840,7 +840,7 @@ MAD(field_name)
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, AVG(salary) AS avg, MAD(salary) AS mad FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, AVG(salary) AS avg, MAD(salary) AS mad FROM emp
 \`\`\`
               `,
               description:
@@ -883,7 +883,7 @@ SELECT
     PERCENTILE(salary, 97.3, 'tdigest', 100.0) AS "97.3_TDigest",
     PERCENTILE(salary, 97.3, 'hdr', 3) AS "97.3_HDR"
 FROM emp
-GROUP BY languages;
+GROUP BY languages
 \`\`\`
               `,
               description:
@@ -926,7 +926,7 @@ SELECT
     ROUND(PERCENTILE_RANK(salary, 65000, 'tdigest', 100.0), 2) AS "rank_TDigest",
     ROUND(PERCENTILE_RANK(salary, 65000, 'hdr', 3), 2) AS "rank_HDR"
 FROM emp
-GROUP BY languages;
+GROUP BY languages
 \`\`\`
               `,
               description:
@@ -957,7 +957,7 @@ SKEWNESS(field_name)
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, SKEWNESS(salary) AS s FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, SKEWNESS(salary) AS s FROM emp
 \`\`\`
               `,
               description:
@@ -988,7 +988,7 @@ STDDEV_POP(field_name)
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_POP(salary) AS stddev FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_POP(salary) AS stddev FROM emp
 \`\`\`
               `,
               description:
@@ -1019,7 +1019,7 @@ STDDEV_SAMP(field_name)
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_SAMP(salary) AS stddev FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_SAMP(salary) AS stddev FROM emp
 \`\`\`
               `,
               description:
@@ -1051,7 +1051,7 @@ SUM_OF_SQUARES(field_name)
 
 \`\`\`
 SELECT MIN(salary) AS min, MAX(salary) AS max, SUM_OF_SQUARES(salary) AS sumsq
-       FROM emp;
+       FROM emp
 \`\`\`
               `,
               description:
@@ -1082,7 +1082,7 @@ VAR_POP(field_name)
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_POP(salary) AS varpop FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_POP(salary) AS varpop FROM emp
 \`\`\`
               `,
               description:
@@ -1113,7 +1113,7 @@ VAR_SAMP(field_name)
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
 \`\`\`
-SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_SAMP(salary) AS varsamp FROM emp;
+SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_SAMP(salary) AS varsamp FROM emp
 \`\`\`
               `,
               description:

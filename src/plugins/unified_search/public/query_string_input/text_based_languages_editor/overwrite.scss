@@ -3,21 +3,28 @@
   border-bottom-left-radius: 6px;
 }
 
+.unifiedTextLangEditor .monaco-editor .monaco-hover {
+  display: none !important;
+}
+
+.unifiedTextLangEditor--expanded .monaco-editor .monaco-hover {
+  display: block !important;
+}
+
 .unifiedTextLangEditor .monaco-editor .margin {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
 }
 
-.unifiedTextLangEditor--expanded .monaco-editor {
+.unifiedTextLangEditor--compact .monaco-editor {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-.unifiedTextLangEditor--expanded .monaco-editor .margin {
+.unifiedTextLangEditor--compact .monaco-editor .margin {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   background-color: $euiColorLightestShade;
-  padding-top: 8px;
   color: $euiColorDisabledText;
 }
 
@@ -29,10 +36,10 @@
   color: $euiTextSubduedColor;
 }
 
-.unifiedTextLangEditor .monaco-editor .monaco-scrollable-element .lines-content {
+.unifiedTextLangEditor--initial .monaco-editor .monaco-scrollable-element .lines-content {
   margin-top: 8px;
 }
 
-.unifiedTextLangEditor--expanded .monaco-editor .monaco-scrollable-element {
+.unifiedTextLangEditor--compact .monaco-editor .monaco-scrollable-element {
   margin-left: 4px;
 }

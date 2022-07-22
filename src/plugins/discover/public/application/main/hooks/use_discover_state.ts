@@ -250,7 +250,7 @@ export function useDiscoverState({
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   const getResultColumns = useCallback(() => {
-    if (documentState.result?.length) {
+    if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
       const firstRow = documentState.result[0];
       const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
       if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
@@ -259,7 +259,7 @@ export function useDiscoverState({
       return [];
     }
     return [];
-  }, [documentState.result, documentStateCols, sqlQuery, state.query]);
+  }, [documentState, documentStateCols, sqlQuery, state.query]);
 
   useEffect(() => {
     async function fetchDataview() {
