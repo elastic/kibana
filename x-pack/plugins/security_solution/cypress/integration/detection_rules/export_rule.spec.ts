@@ -49,7 +49,7 @@ describe('Export rules', () => {
     });
   });
 
-  it("shows modal that no rules can't be exported if all rules are prebuilt", function () {
+  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
     const expectedElasticRulesCount = 7;
 
     loadPrebuiltDetectionRulesFromHeaderBtn();

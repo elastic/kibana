@@ -11,6 +11,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkAction } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 import type { BulkActionForConfirmation, DryRunResult } from './types';
 
@@ -23,6 +24,8 @@ const getActionRejectedTitle = (
       return i18n.BULK_EDIT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     case BulkAction.export:
       return i18n.BULK_EXPORT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
+    default:
+      assertUnreachable(bulkAction);
   }
 };
 
@@ -35,6 +38,8 @@ const getActionConfirmLabel = (
       return i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeededRulesCount);
     case BulkAction.export:
       return i18n.BULK_EXPORT_CONFIRMATION_CONFIRM(succeededRulesCount);
+    default:
+      assertUnreachable(bulkAction);
   }
 };
 

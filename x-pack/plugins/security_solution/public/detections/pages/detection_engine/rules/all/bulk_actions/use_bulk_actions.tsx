@@ -217,12 +217,11 @@ export const useBulkActions = ({
 
         // if there are failed exported rules, show modal window to users.
         // they can either cancel action or proceed with export of succeeded rules
-        if (
-          (await showBulkActionConfirmation(
-            transformExportDetailsToDryRunResult(details),
-            BulkAction.export
-          )) === false
-        ) {
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          transformExportDetailsToDryRunResult(details),
+          BulkAction.export
+        );
+        if (hasActionBeenConfirmed === false) {
           return;
         }
 
@@ -245,7 +244,11 @@ export const useBulkActions = ({
         });
 
         // User has cancelled edit action or there are no custom rules to proceed
-        if ((await showBulkActionConfirmation(dryRunResult, BulkAction.edit)) === false) {
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkAction.edit
+        );
+        if (hasActionBeenConfirmed === false) {
           return;
         }
 
