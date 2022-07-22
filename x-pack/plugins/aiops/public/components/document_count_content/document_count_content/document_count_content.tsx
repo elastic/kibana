@@ -6,7 +6,8 @@
  */
 import React, { FC } from 'react';
 
-import { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
@@ -14,13 +15,17 @@ import { DocumentCountStats } from '../../../get_document_stats';
 
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (d: WindowParameters) => void;
+  changePoint?: ChangePoint;
   documentCountStats?: DocumentCountStats;
+  documentCountStatsSplit?: DocumentCountStats;
   totalCount: number;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
+  changePoint,
   documentCountStats,
+  documentCountStatsSplit,
   totalCount,
 }) => {
   if (documentCountStats === undefined) {
@@ -37,6 +42,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     chartPoints = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
   }
 
+  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
+  if (documentCountStatsSplit?.buckets !== undefined) {
+    const buckets: Record<string, number> = documentCountStatsSplit?.buckets;
+    chartPointsSplit = Object.entries(buckets).map(([time, value]) => ({ time: +time, value }));
+  }
+
   return (
     <>
       <TotalCountHeader totalCount={totalCount} />
@@ -44,9 +55,11 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
         <DocumentCountChart
           brushSelectionUpdateHandler={brushSelectionUpdateHandler}
           chartPoints={chartPoints}
+          chartPointsSplit={chartPointsSplit}
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
+          changePoint={changePoint}
         />
       )}
     </>

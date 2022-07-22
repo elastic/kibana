@@ -20,12 +20,13 @@ describe('getQueryWithParams', () => {
         deviationMin: 30,
         deviationMax: 40,
         includeFrozen: false,
-        kuery: '',
+        searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       },
     });
     expect(query).toEqual({
       bool: {
         filter: [
+          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
           {
             range: {
               'the-time-field-name': {
@@ -52,7 +53,7 @@ describe('getQueryWithParams', () => {
         deviationMin: 30,
         deviationMax: 40,
         includeFrozen: false,
-        kuery: '',
+        searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       },
       termFilters: [
         {
@@ -64,6 +65,7 @@ describe('getQueryWithParams', () => {
     expect(query).toEqual({
       bool: {
         filter: [
+          { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
           {
             range: {
               'the-time-field-name': {

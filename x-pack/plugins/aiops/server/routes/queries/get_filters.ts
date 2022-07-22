@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ESFilter } from '@kbn/core/types/elasticsearch';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
@@ -30,17 +29,7 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
-  if (!kql) {
-    return [];
-  }
-
-  const ast = fromKueryExpression(kql);
-  return [toElasticsearchQuery(ast)];
-}
-
 export function getFilters({
-  kuery,
   start,
   end,
   timeFieldName,
@@ -49,10 +38,6 @@ export function getFilters({
 
   if (timeFieldName !== '') {
     filters.push(...rangeQuery(start, end, timeFieldName));
-  }
-
-  if (kuery !== '') {
-    filters.push(...kqlQuery(kuery));
   }
 
   return filters;

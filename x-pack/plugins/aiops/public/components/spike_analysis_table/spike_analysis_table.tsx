@@ -19,13 +19,23 @@ const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.no
   defaultMessage: 'No data',
 });
 
-interface Props {
-  changePointData: ChangePoint[];
+interface SpikeAnalysisTableProps {
+  changePoints: ChangePoint[];
   error?: string;
   loading: boolean;
+  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  selectedChangePoint?: ChangePoint;
 }
 
-export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading }) => {
+export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
+  changePoints,
+  error,
+  loading,
+  onPinnedChangePoint,
+  onSelectedChangePoint,
+  selectedChangePoint,
+}) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -102,9 +112,9 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
   const { pagination, pageOfItems } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
 
-    const itemCount = changePointData?.length ?? 0;
+    const itemCount = changePoints?.length ?? 0;
     return {
-      pageOfItems: changePointData
+      pageOfItems: changePoints
         // Temporary default sorting by ascending pValue until we add native table sorting
         ?.sort((a, b) => {
           return (a?.pValue ?? 1) - (b?.pValue ?? 0);
@@ -117,7 +127,7 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
       },
     };
-  }, [pageIndex, pageSize, changePointData]);
+  }, [pageIndex, pageSize, changePoints]);
 
   return (
     <EuiBasicTable
@@ -130,29 +140,35 @@ export const SpikeAnalysisTable: FC<Props> = ({ changePointData, error, loading 
       loading={loading}
       error={error}
       // sorting={sorting}
-      //   rowProps={(term) => {
-      //     return {
-      //       onClick: () => {
-      //         // if (setPinnedSignificantTerm) {
-      //         //   setPinnedSignificantTerm(term);
-      //         // }
-      //       },
-      //       onMouseEnter: () => {
-      //         // setSelectedSignificantTerm(term);
-      //       },
-      //       onMouseLeave: () => {
-      //         // setSelectedSignificantTerm(null);
-      //       },
-      //       // style:
-      //       //   selectedTerm &&
-      //       //   selectedTerm.fieldValue === term.fieldValue &&
-      //       //   selectedTerm.fieldName === term.fieldName
-      //       //     ? {
-      //       //         backgroundColor: euiTheme.eui.euiColorLightestShade,
-      //       //       }
-      //       //     : null,
-      //     };
-      //   }}
+      rowProps={(changePoint) => {
+        return {
+          onClick: () => {
+            if (onPinnedChangePoint) {
+              onPinnedChangePoint(changePoint);
+            }
+          },
+          onMouseEnter: () => {
+            if (onSelectedChangePoint) {
+              onSelectedChangePoint(changePoint);
+            }
+          },
+          onMouseLeave: () => {
+            if (onSelectedChangePoint) {
+              onSelectedChangePoint(null);
+            }
+          },
+          style:
+            selectedChangePoint &&
+            selectedChangePoint.fieldValue === changePoint.fieldValue &&
+            selectedChangePoint.fieldName === changePoint.fieldName
+              ? {
+                  // TODO use euiTheme
+                  // backgroundColor: euiTheme.eui.euiColorLightestShade,
+                  backgroundColor: '#ddd',
+                }
+              : null,
+        };
+      }}
     />
   );
 };

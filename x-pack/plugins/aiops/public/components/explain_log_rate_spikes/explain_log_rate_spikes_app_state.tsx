@@ -15,9 +15,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { EuiPageBody } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
 
-import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
@@ -34,7 +34,9 @@ import {
   SetUrlState,
 } from '../../hooks/url_state';
 
-export interface ExplainLogRateSpikesWrapperProps {
+import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
+
+export interface ExplainLogRateSpikesAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The saved search to analyze. */
@@ -64,7 +66,7 @@ export const getDefaultAiOpsListState = (
 
 export const restorableDefaults = getDefaultAiOpsListState();
 
-export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({
+export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,
   savedSearch,
 }) => {
@@ -159,7 +161,7 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> =
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
-        <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />
+        <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
       </EuiPageBody>
     </UrlStateContextProvider>
   );
