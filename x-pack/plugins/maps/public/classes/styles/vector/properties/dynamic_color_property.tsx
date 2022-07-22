@@ -309,16 +309,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       });
     }
 
-  return othersCategoryIndex > 0
-    ? [
-        ...stops,
-        {
-          stop: OTHER_CATEGORY_KEY,
-          color: this._getOtherCategoryColor(),
-          isOtherCategory: true,
-        },
-      ]
-    : stops;
+    return othersCategoryIndex > 0
+      ? [
+          ...stops,
+          {
+            stop: OTHER_CATEGORY_KEY,
+            color: this._getOtherCategoryColor(),
+            isOtherCategory: true,
+          },
+        ]
+      : stops;
   }
 
   _getCategoricalColorMbExpression() {
