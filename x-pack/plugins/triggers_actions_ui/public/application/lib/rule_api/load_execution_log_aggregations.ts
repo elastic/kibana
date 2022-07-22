@@ -9,11 +9,10 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import {
   IExecutionLog,
   ExecutionLogSortFields,
-  IExecutionLogWithErrorsResult,
+  IExecutionLogResult,
 } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
@@ -36,19 +35,24 @@ const getRenamedLog = (data: IExecutionLog) => {
   };
 };
 
-const rewriteBodyRes: RewriteRequestCase<IExecutionLogWithErrorsResult> = ({
-  data,
-  ...rest
-}: any) => ({
+const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, ...rest }: any) => ({
   data: data.map((log: IExecutionLog) => getRenamedLog(log)),
   ...rest,
 });
 
-const getFilter = (filter: string[] | undefined) => {
-  if (!filter || !filter.length) {
-    return;
+// TODO (Jiawei): Use node builder instead of strings
+const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; message?: string }) => {
+  const filter: string[] = [];
+
+  if (outcomeFilter && outcomeFilter.length) {
+    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
   }
-  return filter.join(' OR ');
+
+  if (message) {
+    filter.push(`message: "${message}"`);
+  }
+
+  return filter;
 };
 
 export type SortField = Record<
@@ -62,7 +66,8 @@ export interface LoadExecutionLogAggregationsProps {
   id: string;
   dateStart: string;
   dateEnd?: string;
-  filter?: string[];
+  outcomeFilter?: string[];
+  message?: string;
   perPage?: number;
   page?: number;
   sort?: SortField[];
@@ -73,20 +78,22 @@ export const loadExecutionLogAggregations = async ({
   http,
   dateStart,
   dateEnd,
-  filter,
+  outcomeFilter,
+  message,
   perPage = 10,
   page = 0,
   sort = [],
 }: LoadExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
+  const filter = getFilter({ outcomeFilter, message });
 
-  const result = await http.get<AsApiContract<IExecutionLogWithErrorsResult>>(
+  const result = await http.get<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
     {
       query: {
         date_start: dateStart,
         date_end: dateEnd,
-        filter: getFilter(filter),
+        filter: filter.length ? filter.join(' and ') : undefined,
         per_page: perPage,
         // Need to add the + 1 for pages because APIs are 1 indexed,
         // whereas data grid sorts are 0 indexed.

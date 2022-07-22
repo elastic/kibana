@@ -85,6 +85,7 @@ export { Plugin } from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
 export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
+export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
 export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
