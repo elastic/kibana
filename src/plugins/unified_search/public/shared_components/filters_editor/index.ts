@@ -8,6 +8,7 @@
 
 import { FiltersEditor } from './filters_editor';
 
+export type { FiltersEditorProps } from './filters_editor';
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default FiltersEditor;

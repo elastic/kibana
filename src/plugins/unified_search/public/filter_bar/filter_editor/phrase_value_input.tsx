@@ -21,6 +21,7 @@ interface Props extends PhraseSuggestorProps {
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
@@ -31,19 +32,12 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
     );
 
     return (
-      <EuiFormRow
-        fullWidth={this.props.fullWidth}
-        label={this.props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
-          defaultMessage: 'Value',
-        })}
-        isInvalid={isInvalid}
-        error={errorMessage}
-      >
+      <EuiFormRow fullWidth={this.props.fullWidth} isInvalid={isInvalid} error={errorMessage}>
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',

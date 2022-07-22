@@ -42,7 +42,11 @@ const filterItemCss = css`
   border: 1px solid;
 `;
 
-export function FilterItem({ filter, path, timeRangeForSuggestionsOverride }: FilterItemProps) {
+export function FilterItem({
+  filter,
+  path,
+  timeRangeForSuggestionsOverride = false,
+}: FilterItemProps) {
   const conditionalOperationType = getConditionalOperationType(filter);
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
 
@@ -92,10 +96,9 @@ export function FilterItem({ filter, path, timeRangeForSuggestionsOverride }: Fi
     const operators = selectedField ? getOperatorOptions(selectedField) : [];
 
     function onOperatorChange([operator]: Operator[]) {
-      const params =
-        get(operator, 'type') === get(selectedOperator, 'type') ? selectedParams : undefined;
+      const params = get(operator, 'type') === get(operator, 'type') ? selectedParams : undefined;
 
-      setSelectedOperator(selectedOperator);
+      setSelectedOperator(operator);
       setSelectedParams(params);
     }
 
@@ -150,6 +153,7 @@ export function FilterItem({ filter, path, timeRangeForSuggestionsOverride }: Fi
       case 'phrase':
         return (
           <PhraseValueInput
+            compressed
             indexPattern={dataView}
             field={selectedField!}
             value={selectedParams}
@@ -161,6 +165,7 @@ export function FilterItem({ filter, path, timeRangeForSuggestionsOverride }: Fi
       case 'phrases':
         return (
           <PhrasesValuesInput
+            compressed
             indexPattern={dataView}
             field={selectedField!}
             values={selectedParams}
@@ -173,6 +178,7 @@ export function FilterItem({ filter, path, timeRangeForSuggestionsOverride }: Fi
       case 'range':
         return (
           <RangeValueInput
+            compressed
             field={selectedField!}
             value={selectedParams}
             onChange={onParamsChange}

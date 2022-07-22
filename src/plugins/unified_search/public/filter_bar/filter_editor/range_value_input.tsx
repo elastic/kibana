@@ -28,6 +28,7 @@ interface Props {
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
 }
 
 function RangeValueInputUI(props: Props) {
@@ -68,6 +69,7 @@ function RangeValueInputUI(props: Props) {
         startControl={
           <ValueInputType
             controlOnly
+            compressed={props.compressed}
             field={props.field}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
@@ -83,6 +85,7 @@ function RangeValueInputUI(props: Props) {
         endControl={
           <ValueInputType
             controlOnly
+            compressed={props.compressed}
             field={props.field}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}

@@ -20,12 +20,13 @@ interface Props extends PhraseSuggestorProps {
   onParamsUpdate: (value: string) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
 }
 
 class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     const { suggestions } = this.state;
-    const { values, intl, onChange, fullWidth, onParamsUpdate } = this.props;
+    const { values, intl, onChange, fullWidth, onParamsUpdate, compressed } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <EuiFormRow
@@ -37,6 +38,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
       >
         <StringComboBox
           fullWidth={fullWidth}
+          compressed={compressed}
           placeholder={intl.formatMessage({
             id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',

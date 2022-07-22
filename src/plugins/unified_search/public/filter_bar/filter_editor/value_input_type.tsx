@@ -24,6 +24,7 @@ interface Props {
   className?: string;
   fullWidth?: boolean;
   isInvalid?: boolean;
+  compressed?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -43,6 +44,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'string':
         inputElement = (
           <EuiFieldText
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -57,6 +59,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number_range':
         inputElement = (
           <EuiFieldNumber
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={this.getValueForNumberField(value)}
@@ -70,6 +73,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date_range':
         inputElement = (
           <EuiFieldText
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -119,6 +123,7 @@ class ValueInputTypeUI extends Component<Props> {
             onChange={this.onBoolChange}
             className={this.props.className}
             fullWidth={this.props.fullWidth}
+            compressed={this.props.compressed}
           />
         );
         break;
