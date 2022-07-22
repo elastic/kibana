@@ -13,12 +13,13 @@ import {
   getKibanaCliLoggers,
 } from '@kbn/test';
 
+const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:433d99a96f3289c5013ae35826877adf408eb9c9';
+  'docker.elastic.co/observability-ci/package-registry/distribution:PR-4631';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
@@ -35,10 +36,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     './apis/fixtures/test_packages': '/packages/test-packages',
     './apis/fixtures/package_verification/packages/zips': '/packages/signed-test-packages',
   };
-  const dockerArgs: string[] = Object.entries(volumes).flatMap(([src, dest]) => {
-    const relativeSrc = path.join(path.dirname(__filename), src);
-    return ['-v', `${relativeSrc}:${dest}`];
-  });
+  const dockerArgs: string[] = Object.entries(volumes).flatMap(([src, dest]) => [
+    '-v',
+    `${getFullPath(src)}:${dest}`,
+  ]);
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -68,6 +69,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         '--xpack.cloudSecurityPosture.enabled=true',
+        `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(
+          './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
+        )}`,
+        `--xpack.fleet.enableExperimental.0=packageVerification`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
