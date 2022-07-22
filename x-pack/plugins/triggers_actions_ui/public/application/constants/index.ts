@@ -81,4 +81,4 @@ export const LOCKED_COLUMNS = [
   'num_errored_actions',
 ];
 
-export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS, 'message,'];
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS];

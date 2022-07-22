@@ -178,6 +178,10 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       },
       {
         id: 'message',
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
           {
@@ -268,6 +272,10 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       },
       {
         id: 'num_errored_actions',
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
           {
@@ -423,7 +431,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
               <EuiFlexItem>
                 &nbsp;
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.erroredActionsTooltip"
+                  id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.erroredActionsCellPopover"
                   defaultMessage="{value, plural, one {errored action} other {errored actions}}"
                   values={{
                     value: actionErrors,
@@ -451,6 +459,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     if (columnId === 'num_errored_actions' && runLog) {
       return (
         <EuiBadge
+          data-test-subj="ruleEventLogDataGridErroredActionBadge"
           style={{
             cursor: 'pointer',
             borderRadius: euiTheme.border.radius.medium,

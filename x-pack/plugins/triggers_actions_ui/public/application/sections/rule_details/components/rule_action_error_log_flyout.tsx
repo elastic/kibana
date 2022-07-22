@@ -46,6 +46,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
       type={isFlyoutPush ? 'push' : 'overlay'}
       onClose={onClose}
       size={isFlyoutPush ? 'm' : 'l'}
+      data-test-subj="ruleActionErrorLogFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -69,7 +70,8 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
             defaultMessage="Message"
           />
         </EuiText>
-        <EuiSpacer size="xs" />.<EuiText>{message}</EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText data-test-subj="ruleActionErrorLogFlyoutMessageText">{message}</EuiText>
         <EuiHorizontalRule size="full" />
         <div>
           <RuleActionErrorBadge totalErrors={totalErrors} />
@@ -86,7 +88,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton onClick={onClose}>
+        <EuiButton data-test-subj="ruleActionErrorLogFlyoutCloseButton" onClick={onClose}>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.close"
             defaultMessage="Close"

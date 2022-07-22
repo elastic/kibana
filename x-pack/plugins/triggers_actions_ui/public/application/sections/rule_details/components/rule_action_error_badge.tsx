@@ -17,7 +17,11 @@ export const RuleActionErrorBadge = (props: RuleActionErrorBadge) => {
   const { totalErrors, showIcon = false } = props;
 
   return (
-    <EuiBadge iconType={showIcon ? 'alert' : undefined} color={totalErrors ? 'danger' : 'hollow'}>
+    <EuiBadge
+      iconType={showIcon ? 'alert' : undefined}
+      color={totalErrors ? 'danger' : 'hollow'}
+      data-test-subj="ruleActionErrorBadge"
+    >
       <EuiText size="s">{totalErrors}</EuiText>
     </EuiBadge>
   );
