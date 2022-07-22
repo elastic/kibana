@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
@@ -46,11 +46,7 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
     [usedHistory]
   );
 
-  const queryDataProviderProps = useMemo(() => {
-    return {
-      timefilter: data.query.timefilter.timefilter,
-    };
-  }, [data]);
+  const dataView = savedSearch.searchSource.getField('index')!; // TODO: get the data view in a safer way
 
   // TODO: We will want to rewrite the bulk of the query fetching logic in useDiscoverState > useSavedSearch (which returns data$)
   /**
@@ -106,7 +102,7 @@ export function LogExplorerMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <QueryDataProvider {...queryDataProviderProps}>
+    <QueryDataProvider dataView={dataView} query={data.query} searchSource={searchSource}>
       <LogExplorerLayoutMemoized
         indexPattern={indexPattern}
         indexPatternList={indexPatternList}

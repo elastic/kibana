@@ -6,30 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { normalizeSortRequest } from '@kbn/data-plugin/common';
-import { IEsSearchResponse, ISearchSource } from '@kbn/data-plugin/public';
+import {
+  EsQuerySortValue,
+  IEsSearchResponse,
+  ISearchSource,
+  QueryStart,
+  SortDirection,
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { forkJoin, Observable } from 'rxjs';
-import { LogExplorerPosition } from '../types';
+import { LogExplorerPosition, SortCriteria, SortCriterion } from '../types';
 
 export const fetchEntriesAround =
-  ({ searchSource }: { searchSource: ISearchSource }) =>
+  ({
+    dataView,
+    query,
+    searchSource,
+  }: {
+    dataView: DataView;
+    query: QueryStart;
+    searchSource: ISearchSource;
+  }) =>
   ({
     position,
+    sorting,
+    timeRange,
   }: {
     position: LogExplorerPosition;
+    sorting: SortCriteria;
+    timeRange: TimeRange;
   }): Observable<{ before: IEsSearchResponse; after: IEsSearchResponse }> => {
-    const forwardSort = normalizeSortRequest(searchSource.getField('sort'));
-    const backwardSort = invertSort(forwardSort);
-    // TODO: create and use point-in-time
-    const beforeResponse$ = searchSource
+    const normalizeSortCriteria = normalizeSortCriteriaForDataView(dataView);
+    const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
+
+    const commonSearchSource = searchSource.createCopy().setField('filter', timeRangeFilter);
+
+    // TODO: create and use point-in-time, not currently possible from client?
+    const beforeResponse$ = commonSearchSource
       .createCopy()
       .setField('searchAfter', getCursorFromPosition(position))
-      .setField('sort', backwardSort)
+      .setField('sort', normalizeSortCriteria(invertSorting(sorting)))
       .fetch$();
-    const afterResponse$ = searchSource
+    const afterResponse$ = commonSearchSource
       .createCopy()
       .setField('searchAfter', getCursorFromPosition(getPredecessorPosition(position)))
-      .setField('sort', forwardSort)
+      .setField('sort', normalizeSortCriteria(sorting))
       .fetch$();
 
     return forkJoin({
@@ -47,4 +69,24 @@ const getPredecessorPosition = (position: LogExplorerPosition): LogExplorerPosit
   tiebreaker: position.tiebreaker - 1,
 });
 
-const invertSort = (sort: any) => {};
+const normalizeSortCriteriaForDataView =
+  (dataView: DataView) =>
+  (sortCriteria: SortCriteria): EsQuerySortValue[] =>
+    sortCriteria.map(normalizeSortCriterionForDataView(dataView));
+
+const normalizeSortCriterionForDataView =
+  (dataView: DataView) =>
+  ([fieldName, sortDirection]: SortCriterion): EsQuerySortValue => ({
+    [fieldName]: {
+      order: SortDirection[sortDirection],
+      ...(fieldName === dataView.timeFieldName && dataView.isTimeNanosBased()
+        ? { numeric_type: 'date_nanos' }
+        : {}),
+    },
+  });
+
+const invertSorting = (sortCriteria: SortCriteria): SortCriteria =>
+  sortCriteria.map(([fieldName, sortDirection]) => [
+    fieldName,
+    sortDirection === 'asc' ? 'desc' : 'asc',
+  ]);

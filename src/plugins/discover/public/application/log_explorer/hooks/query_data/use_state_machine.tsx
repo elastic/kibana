@@ -6,32 +6,38 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, createContext } from 'react';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import createContainer from 'constate';
+import React from 'react';
+import { ISearchSource, QueryStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { useInterpret, useActor } from '@xstate/react';
 import { ignoreElements, timer } from 'rxjs';
 import { assign } from 'xstate';
 import { dataAccessStateMachine } from '../../state_machines';
+import { loadAround } from '../../state_machines/services/load_around';
 
 const createDummyService =
   (delay: number = 3000) =>
   () =>
     timer(delay).pipe(ignoreElements());
 
-export const StateMachineContext = createContext({});
-
-export const StateMachineProvider = ({
-  timefilter,
+export const useStateMachineService = ({
   children,
+  dataView,
+  query,
+  searchSource,
 }: {
-  timefilter: TimefilterContract;
   children: React.ReactNode;
+  dataView: DataView;
+  query: QueryStart;
+  searchSource: ISearchSource;
 }) => {
   const dataAccessService = useInterpret(
     () => {
-      const initialTimeRange = timefilter.getAbsoluteTime();
+      const initialTimeRange = query.timefilter.timefilter.getAbsoluteTime();
 
       return dataAccessStateMachine.withContext({
+        dataView,
         timeRange: initialTimeRange,
         position: {
           timestamp: initialTimeRange.from,
@@ -58,21 +64,20 @@ export const StateMachineProvider = ({
         })),
       },
       services: {
-        loadAround: createDummyService(),
+        loadAround: loadAround({ dataView, query, searchSource }),
       },
       devTools: true,
     }
   );
 
-  return (
-    <StateMachineContext.Provider value={{ dataAccessService }}>
-      {props.children}
-    </StateMachineContext.Provider>
-  );
+  return dataAccessService;
 };
 
-export const useStateMachineState = () => {
-  const services = useContext(StateMachineContext);
-  const [state] = useActor(services.dataAccessService);
+export const [StateMachineProvider, useStateMachineContext] =
+  createContainer(useStateMachineService);
+
+export const useStateMachineContextState = () => {
+  const dataAccessService = useStateMachineContext();
+  const [state] = useActor(dataAccessService);
   return state;
 };

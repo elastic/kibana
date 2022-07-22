@@ -11,6 +11,10 @@ import { TimeRange } from '@kbn/es-query';
 export type Timestamp = TimeRange['from'];
 export type Tiebreaker = number;
 
+export type SortDirection = 'asc' | 'desc';
+export type SortCriterion = [string, SortDirection];
+export type SortCriteria = SortCriterion[];
+
 export interface LogExplorerPosition {
   timestamp: Timestamp;
   tiebreaker: Tiebreaker;

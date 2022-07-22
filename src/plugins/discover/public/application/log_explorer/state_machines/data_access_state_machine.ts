@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { createMachine } from 'xstate';
+import { createMachine, InterpreterFrom } from 'xstate';
 import { LogExplorerChunk, LogExplorerPosition } from '../types';
 
 export interface LogExplorerContext {
+  dataView: DataView;
   timeRange: TimeRange;
   position: LogExplorerPosition;
   topChunk: LogExplorerChunk;
@@ -43,6 +45,7 @@ export type LogExplorerEvent =
     }
   | {
       type: 'data-view-changed';
+      dataView: DataView;
     }
   | {
       type: 'position-changed';
@@ -316,3 +319,6 @@ export const dataAccessStateMachine = createMachine({
     },
   },
 });
+
+export type DataAccessStateMachine = typeof dataAccessStateMachine;
+export type DataAccessService = InterpreterFrom<DataAccessStateMachine>;
