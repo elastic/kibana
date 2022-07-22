@@ -512,6 +512,11 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   },
 });
 
+export const sampleEmptyAggsSearchResults = (): SignalSearchResponse => ({
+  ...sampleEmptyDocSearchResults(),
+  aggregations: {},
+});
+
 export const sampleWrappedSignalHit = (): WrappedSignalHit => {
   return {
     _index: 'myFakeSignalIndex',
