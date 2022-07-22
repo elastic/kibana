@@ -21,7 +21,7 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 `;
 
 export interface EndpointAgentAndIsolationStatusProps
-  extends Pick<EndpointHostIsolationStatusProps, 'pendingIsolate' | 'pendingUnIsolate'> {
+  extends Pick<EndpointHostIsolationStatusProps, 'pendingActions'> {
   status: HostStatus;
   /**
    * If defined with a boolean, then the isolation status will be shown along with the agent status.
@@ -33,7 +33,7 @@ export interface EndpointAgentAndIsolationStatusProps
 }
 
 export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationStatusProps>(
-  ({ status, isIsolated, pendingIsolate, pendingUnIsolate, 'data-test-subj': dataTestSubj }) => {
+  ({ status, isIsolated, pendingActions, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <EuiFlexGroupStyled
@@ -50,8 +50,7 @@ export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationSta
             <EndpointHostIsolationStatus
               data-test-subj={getTestId('isolationStatus')}
               isIsolated={isIsolated}
-              pendingIsolate={pendingIsolate}
-              pendingUnIsolate={pendingUnIsolate}
+              pendingActions={pendingActions}
             />
           </EuiFlexItem>
         )}

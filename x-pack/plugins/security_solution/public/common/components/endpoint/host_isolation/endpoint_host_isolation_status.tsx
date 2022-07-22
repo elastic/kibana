@@ -6,17 +6,23 @@
  */
 
 import React, { memo, useMemo, useRef, useEffect } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { AgentPendingActionStatusBadge } from '../agent_pending_action_status_badge';
 
 export interface EndpointHostIsolationStatusProps {
   isIsolated: boolean;
-  /** the count of pending isolate actions */
-  pendingIsolate?: number;
-  /** the count of pending unisolate actions */
-  pendingUnIsolate?: number;
+  pendingActions: {
+    /** the count of pending isolate actions */
+    pendingIsolate?: number;
+    /** the count of pending unisolate actions */
+    pendingUnIsolate?: number;
+    pendingKillProcess?: number;
+    pendingSuspendProcess?: number;
+    pendingRunningProcesses?: number;
+  };
   'data-test-subj'?: string;
 }
 
@@ -26,11 +32,19 @@ export interface EndpointHostIsolationStatusProps {
  * (`null` is returned)
  */
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
-  ({ isIsolated, pendingIsolate = 0, pendingUnIsolate = 0, 'data-test-subj': dataTestSubj }) => {
+  ({ isIsolated, pendingActions, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPendingStatusDisabled = useIsExperimentalFeatureEnabled(
       'disableIsolationUIPendingStatuses'
     );
+
+    const {
+      pendingIsolate = 0,
+      pendingUnIsolate = 0,
+      pendingKillProcess = 0,
+      pendingSuspendProcess = 0,
+      pendingRunningProcesses = 0,
+    } = pendingActions;
 
     const wasReleasing = useRef<boolean>(false);
     const wasIsolating = useRef<boolean>(false);
@@ -40,6 +54,30 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       wasIsolating.current = pendingIsolate > 0 && pendingUnIsolate === 0;
     }, [pendingIsolate, pendingUnIsolate]);
 
+    const totalPending = useMemo(
+      () =>
+        pendingIsolate +
+        pendingUnIsolate +
+        pendingKillProcess +
+        pendingSuspendProcess +
+        pendingRunningProcesses,
+      [
+        pendingIsolate,
+        pendingKillProcess,
+        pendingRunningProcesses,
+        pendingSuspendProcess,
+        pendingUnIsolate,
+      ]
+    );
+
+    const showActionPending = useMemo(
+      () => totalPending > 0 && !(pendingIsolate > 0 || pendingUnIsolate > 0),
+      [pendingIsolate, pendingUnIsolate, totalPending]
+    );
+
+    // TODO: This logic needs some cleaning up
+    // cyclomatic complexity > 20 :'/
+    // eslint-disable-next-line complexity
     return useMemo(() => {
       if (isPendingStatusDisabled) {
         // If nothing is pending and host is not currently isolated, then render nothing
@@ -58,7 +96,10 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       }
 
       // If nothing is pending
-      if (!(pendingIsolate || pendingUnIsolate)) {
+      if (
+        !(pendingActions?.pendingIsolate || pendingActions?.pendingUnIsolate) &&
+        !showActionPending
+      ) {
         // and host is either releasing and or currently released, then render nothing
         if ((!wasIsolating.current && wasReleasing.current) || !isIsolated) {
           return null;
@@ -76,79 +117,61 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         }
       }
 
-      // If there are multiple types of pending isolation actions, then show count of actions with tooltip that displays breakdown
-      if (pendingIsolate && pendingUnIsolate) {
+      // If there are multiple types of pending isolation actions,
+      // then show count of actions with tooltip that displays breakdown
+      if (
+        pendingIsolate > 1 ||
+        pendingUnIsolate > 1 ||
+        pendingKillProcess > 0 ||
+        pendingSuspendProcess > 0 ||
+        pendingRunningProcesses > 0
+      ) {
         return (
-          <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
-            <EuiToolTip
-              display="block"
-              anchorClassName="eui-textTruncate"
-              content={
-                <div data-test-subj={getTestId('tooltipContent')}>
-                  <div>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingActions"
-                      defaultMessage="Pending actions:"
-                    />
-                  </div>
-                  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                    <EuiFlexItem grow>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingIsolate"
-                        defaultMessage="Isolate"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{pendingIsolate}</EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiFlexItem grow>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate"
-                        defaultMessage="Release"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              }
-            >
-              <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
-                  defaultMessage="{count} actions pending"
-                  values={{ count: pendingIsolate + pendingUnIsolate }}
-                />
-              </EuiTextColor>
-            </EuiToolTip>
-          </EuiBadge>
+          <AgentPendingActionStatusBadge
+            data-test-subj={dataTestSubj}
+            pendingActions={pendingActions}
+          />
         );
       }
 
-      // Show 'pending [un]isolate' depending on what's pending
+      // show pending badge if a single pending isolation or release
+      // or when other actions are pending
       return (
         <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
           <EuiTextColor color="subdued" data-test-subj={getTestId('pending')}>
-            {pendingIsolate ? (
+            {showActionPending ? (
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolationStatus.isActionPending"
+                defaultMessage="Action pending"
+              />
+            ) : pendingIsolate === 1 ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
                 defaultMessage="Isolating"
               />
             ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
-                defaultMessage="Releasing"
-              />
+              pendingUnIsolate === 1 && (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
+                  defaultMessage="Releasing"
+                />
+              )
             )}
           </EuiTextColor>
         </EuiBadge>
       );
     }, [
+      isPendingStatusDisabled,
+      pendingActions,
+      showActionPending,
+      pendingIsolate,
+      pendingUnIsolate,
+      pendingKillProcess,
+      pendingSuspendProcess,
+      pendingRunningProcesses,
       dataTestSubj,
       getTestId,
       isIsolated,
-      isPendingStatusDisabled,
-      pendingIsolate,
-      pendingUnIsolate,
     ]);
   }
 );
