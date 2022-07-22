@@ -162,7 +162,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             selectedChangePoint.fieldValue === changePoint.fieldValue &&
             selectedChangePoint.fieldName === changePoint.fieldName
               ? {
-                  // use euiTheme
+                  // TODO use euiTheme
                   // backgroundColor: euiTheme.eui.euiColorLightestShade,
                   backgroundColor: '#ddd',
                 }
