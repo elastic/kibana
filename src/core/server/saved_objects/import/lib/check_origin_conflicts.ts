@@ -13,7 +13,7 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { getObjectKey } from '../../service/lib/internal_utils';
 import type { ImportStateMap } from './types';

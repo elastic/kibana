@@ -7,7 +7,7 @@
  */
 
 import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '../../types';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 import type { ImportStateMap } from './types';

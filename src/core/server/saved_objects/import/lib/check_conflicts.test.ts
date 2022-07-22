@@ -12,7 +12,7 @@ import type {
   SavedObjectReference,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';
 

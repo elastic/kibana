@@ -30,7 +30,8 @@ import type {
   SavedObjectReference,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
-import { SavedObjectsClientContract, SavedObjectsType } from '../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsType } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';

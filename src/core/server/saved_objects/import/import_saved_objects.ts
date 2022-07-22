@@ -11,8 +11,8 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsImportHook } from './types';
 import {
   checkReferenceOrigins,
