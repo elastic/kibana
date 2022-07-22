@@ -8,20 +8,38 @@
 
 import Eslint from 'eslint';
 
-export const NAKED_DISABLE_MSG_ID = 'no-naked-eslint-disable';
+export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
-  [NAKED_DISABLE_MSG_ID]:
-    'Using a naked eslint disable is not allowed. Please specify the specific rules to disable.',
+  [PROTECTED_DISABLE_MSG_ID]:
+    'Disabling a protected rule is not allowed. Please remove it from the disable statement.',
 };
 
 const meta: Eslint.Rule.RuleMetaData = {
   type: 'problem',
   fixable: 'code',
   docs: {
-    description:
-      'Prevents declaring naked eslint-disable* comments who do not provide specific rules to disable',
+    description: 'Prevents the disabling of protected rules within eslint-disable* comments.',
   },
   messages,
+  schema: {
+    type: 'array',
+    uniqueItems: true,
+    items: {
+      type: ['string', 'array'],
+      items: {
+        type: ['string', 'object'],
+        properties: {
+          allowed: {
+            type: 'array',
+            uniqueItems: true,
+            items: {
+              type: 'string',
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 const ESLINT_DISABLE_RE =
@@ -72,7 +90,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         context.report({
           node,
           loc: reportLoc,
-          messageId: NAKED_DISABLE_MSG_ID,
+          messageId: PROTECTED_DISABLE_MSG_ID,
           fix(fixer) {
             return fixer.removeRange(comment.range as Eslint.AST.Range);
           },
