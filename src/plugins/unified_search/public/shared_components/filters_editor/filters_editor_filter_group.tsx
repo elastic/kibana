@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { css } from '@emotion/css';
 import type { Path } from './filter_editors_types';
@@ -22,8 +22,10 @@ export interface FilterGroupProps {
 }
 
 const filterGroupCss = css`
-  // temporary
-  padding-left: 20px;
+  background-color: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  box-shadow: inset 0 0 0 1px rgba(17, 43, 134, 0.1);
+  padding: 12px;
 `;
 
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
@@ -49,12 +51,14 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
 );
 
 export const FilterGroup = ({ filters, conditionType, path }: FilterGroupProps) => (
-  <EuiFlexGroup className={filterGroupCss} direction="column" gutterSize="none">
-    {filters.map((filter, index, acc) => (
-      <>
-        <FilterItem filter={filter} path={`${path ? path + '.' : ''}${index}`} />
-        {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
-      </>
-    ))}
-  </EuiFlexGroup>
+  <EuiPanel color="subdued" paddingSize="s" className={filterGroupCss}>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      {filters.map((filter, index, acc) => (
+        <>
+          <FilterItem filter={filter} path={`${path ? path + '.' : ''}${index}`} />
+          {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
+        </>
+      ))}
+    </EuiFlexGroup>
+  </EuiPanel>
 );

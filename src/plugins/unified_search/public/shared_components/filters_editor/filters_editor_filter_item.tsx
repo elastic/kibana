@@ -7,17 +7,9 @@
  */
 
 import React, { useContext, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiFormRow,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon, EuiFormRow } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FiltersEditorContextType } from './filters_editor_context';
@@ -43,11 +35,6 @@ export interface FilterItemProps {
   filter: Filter;
   timeRangeForSuggestionsOverride: boolean;
 }
-
-const filterItemCss = css`
-  // temporary
-  border: 1px solid;
-`;
 
 export function FilterItem({
   filter,
@@ -217,7 +204,7 @@ export function FilterItem({
   }
 
   return (
-    <EuiFlexItem className={filterItemCss}>
+    <EuiFlexItem>
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -225,54 +212,52 @@ export function FilterItem({
           filters={filter.meta?.params?.filters}
         />
       ) : (
-        <EuiPanel color="subdued" paddingSize="s">
-          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="grab" size="s" />
-            </EuiFlexItem>
+        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="grab" size="s" />
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={3}>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>{renderFieldInput()}</EuiFlexItem>
-                <EuiFlexItem>{renderOperatorInput()}</EuiFlexItem>
-                <EuiFlexItem>{renderParamsEditor()}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    onClick={() => {}}
-                    iconType="returnKey"
-                    size="s"
-                    aria-label="Add filter group with OR"
-                  />
-                </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>{renderFieldInput()}</EuiFlexItem>
+              <EuiFlexItem>{renderOperatorInput()}</EuiFlexItem>
+              <EuiFlexItem>{renderParamsEditor()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  onClick={() => {}}
+                  iconType="returnKey"
+                  size="s"
+                  aria-label="Add filter group with OR"
+                />
+              </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    display="base"
-                    onClick={() => {}}
-                    iconType="plus"
-                    size="s"
-                    aria-label="Add filter group with AND"
-                  />
-                </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  onClick={() => {}}
+                  iconType="plus"
+                  size="s"
+                  aria-label="Add filter group with AND"
+                />
+              </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    display="base"
-                    onClick={() => {}}
-                    iconType="trash"
-                    size="s"
-                    color="danger"
-                    aria-label="Delete filter group"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  display="base"
+                  onClick={() => {}}
+                  iconType="trash"
+                  size="s"
+                  color="danger"
+                  aria-label="Delete filter group"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </EuiFlexItem>
   );
