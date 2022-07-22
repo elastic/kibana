@@ -15,6 +15,7 @@ import {
   EuiButtonGroup,
   EuiFieldNumber,
   EuiColorPicker,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
@@ -201,6 +202,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
               placeholder={getDefaultColor(!!state.maxAccessor)}
               aria-label={colorLabel}
               showAlpha={false}
+              swatches={euiPaletteColorBlind()}
             />
           </EuiToolTip>
         </EuiFormRow>
