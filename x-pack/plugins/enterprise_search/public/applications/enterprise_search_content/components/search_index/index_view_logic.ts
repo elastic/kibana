@@ -74,7 +74,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'indices_logic'],
+  path: ['enterprise_search', 'content', 'view_index_logic'],
   reducers: {
     localSyncNowValue: [
       false,
