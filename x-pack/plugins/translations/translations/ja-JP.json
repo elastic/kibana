@@ -29115,8 +29115,6 @@
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error": "スクリプトが必要です",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText": "インラインで定義されたSyntheticテストスクリプトを実行します。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label": "インラインスクリプト",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText": "テストで必要な変数を定義するJSONオブジェクト。",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label": "パラメーター",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.closeButtonLabel": "スクリプトフライアウトを閉じる",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName": "test_script.js",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label": "ソースタイプ",
