@@ -52,7 +52,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         headerBackComponent: (
           <EuiButtonEmpty
             flush="left"
-            size="xs"
+            size="s"
             iconType="arrowLeft"
             onClick={handleCloseOverlayOnClick}
           >
