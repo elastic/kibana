@@ -18,7 +18,7 @@ const dataViewsMap: Record<string, DataView> = {
 };
 
 const getDataview = (id: string): DataView | undefined => dataViewsMap[id];
-jest.mock('../services', () => {
+jest.mock('../../../services', () => {
   return {
     getDataViewsStart: jest.fn(() => {
       return {

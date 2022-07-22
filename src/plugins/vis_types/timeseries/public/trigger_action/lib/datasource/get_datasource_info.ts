@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { fetchIndexPattern, isStringTypeIndexPattern } from '../../common/index_patterns_utils';
-import type { IndexPatternValue } from '../../common/types';
-import { getDataViewsStart } from '../services';
+import {
+  fetchIndexPattern,
+  isStringTypeIndexPattern,
+} from '../../../../common/index_patterns_utils';
+import type { IndexPatternValue } from '../../../../common/types';
+import { getDataViewsStart } from '../../../services';
 
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,

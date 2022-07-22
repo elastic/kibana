@@ -12,7 +12,7 @@ import type {
 } from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
-import { getDataSourceInfo } from './get_datasource_info';
+import { getDataSourceInfo } from './lib/datasource';
 import { getFieldType } from './get_field_type';
 import { getSeries } from './lib/series';
 import { getYExtents } from './get_extents';
