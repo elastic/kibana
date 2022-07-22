@@ -17,3 +17,7 @@ export interface ThreatIntelligencePluginSetup {}
 export interface ThreatIntelligencePluginStart {
   getComponent: () => VFC;
 }
+
+export interface ThreatIntelligencePluginStartDeps {
+  data: DataPublicPluginStart;
+}
