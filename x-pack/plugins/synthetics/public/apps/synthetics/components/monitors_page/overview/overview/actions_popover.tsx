@@ -19,7 +19,12 @@ import { selectOverviewState } from '../../../../state/overview/selectors';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 
-const ActionTrayItem = styled.div<{ borderRadius: string; boxShadow: string }>`
+interface ActionContainerProps {
+  borderRadius: string;
+  boxShadow: string;
+}
+
+const ActionContainer = styled.div<ActionContainerProps>`
   // position
   display: inline-block;
   position: relative;
@@ -52,6 +57,7 @@ export function ActionsPopover({
     monitorId: monitor.id,
     locationId: monitor.location.id,
   });
+  const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
   const labels = useMemo(
     () => ({
       enabledSuccessLabel: enabledSuccessLabel(monitor.name),
@@ -66,23 +72,22 @@ export function ActionsPopover({
     reloadPage: forceRefreshOnEnabledChange,
     labels,
   });
-  const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
   const [enableLabel, setEnableLabel] = useState(
-    monitor.isEnabled ? 'Disable monitor' : 'Enable monitor'
+    monitor.isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor
   );
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
-      setEnableLabel('Loading...');
+      setEnableLabel(enableLabelLoading);
     } else if (status === FETCH_STATUS.SUCCESS && isEnabled === monitor.isEnabled) {
-      setEnableLabel(monitor.isEnabled ? 'Disable monitor' : 'Enable monitor');
+      setEnableLabel(monitor.isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor);
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
   return (
-    <ActionTrayItem boxShadow={euiShadow} borderRadius={theme.eui.euiBorderRadius}>
+    <ActionContainer boxShadow={euiShadow} borderRadius={theme.eui.euiBorderRadius}>
       <EuiPopover
         button={
           <EuiButtonIcon
-            aria-label="View options"
+            aria-label={openActionsMenuAria}
             iconType="boxesHorizontal"
             color="primary"
             size="s"
@@ -102,10 +107,10 @@ export function ActionsPopover({
           panels={[
             {
               id: '0',
-              title: 'Actions',
+              title: actionsMenuTitle,
               items: [
                 {
-                  name: 'Go to monitor',
+                  name: actionsMenuGoToMonitorName,
                   icon: 'sortRight',
                   href: detailUrl,
                 },
@@ -124,7 +129,7 @@ export function ActionsPopover({
                 //   icon: 'beaker',
                 // },
                 {
-                  name: 'Edit monitor',
+                  name: actionsMenuEditMonitorName,
                   icon: 'pencil',
                   href: editUrl,
                 },
@@ -140,9 +145,57 @@ export function ActionsPopover({
           ]}
         />
       </EuiPopover>
-    </ActionTrayItem>
+    </ActionContainer>
   );
 }
+
+const openActionsMenuAria = i18n.translate(
+  'xpack.synthetics.overview.actions.openPopover.ariaLabel',
+  {
+    defaultMessage: 'Open actions menu',
+  }
+);
+
+const actionsMenuTitle = i18n.translate('xpack.synthetics.overview.actions.menu.title', {
+  defaultMessage: 'Actions',
+  description: 'This is the text in the heading of a menu containing a set of actions',
+});
+
+const actionsMenuGoToMonitorName = i18n.translate(
+  'xpack.syntietcs.overview.actions.goToMonitor.name',
+  {
+    defaultMessage: 'Go to monitor',
+    description:
+      'This is the text for a menu item that will take the user to the monitor detail page',
+  }
+);
+
+const actionsMenuEditMonitorName = i18n.translate(
+  'xpack.synthetics.overview.actions.editMonitor.name',
+  {
+    defaultMessage: 'Edit monitor',
+    description:
+      'This is the text for a menu item that will take the user to the monitor edit page',
+  }
+);
+
+const enableLabelLoading = i18n.translate('xpack.synthetics.overview.actions.enableLabel', {
+  defaultMessage: 'Loading...',
+});
+
+const enableLabelEnableMonitor = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabeleEnableMonitor',
+  {
+    defaultMessage: 'Enable monitor',
+  }
+);
+
+const enableLabelDisableMonitor = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
+  {
+    defaultMessage: 'Disable monitor',
+  }
+);
 
 const enabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.overview.actions.enabledSuccessLabel', {
