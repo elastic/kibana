@@ -86,7 +86,7 @@ export function SearchSessionsMgmtTable({
       }
     }
 
-    if (showLatestResultsHandler.current === renderResults) {
+    if (showLatestResultsHandler.current === renderResults && refreshInterval > 0) {
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }

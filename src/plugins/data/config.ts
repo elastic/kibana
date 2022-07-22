@@ -64,9 +64,9 @@ export const searchSessionsConfigSchema = schema.object({
      */
     maxSessions: schema.number({ defaultValue: 100 }),
     /**
-     * refreshInterval controls how often we refresh the management screen.
+     * refreshInterval controls how often we refresh the management screen. 0s as duration means that auto-refresh is turned off.
      */
-    refreshInterval: schema.duration({ defaultValue: '10s' }),
+    refreshInterval: schema.duration({ defaultValue: '0s' }),
     /**
      * refreshTimeout controls the timeout for loading search sessions on mgmt screen
      */
