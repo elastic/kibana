@@ -4,6 +4,7 @@ set -euo pipefail
 
 echo --- Pre-Build
 .buildkite/scripts/lifecycle/pre_build.sh
+source .buildkite/scripts/lifecycle/setup_ci_stats.sh
 
 echo --- Upload Pipeline
 ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
