@@ -23,6 +23,7 @@ import {
   DurationDistributionChart,
   DurationDistributionChartData,
 } from '../duration_distribution_chart';
+import { TotalDocCountLabel } from '../duration_distribution_chart/total_doc_count_label';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 
@@ -50,6 +51,7 @@ export function DurationDistributionChartWithScrubber({
   markerCurrentEvent,
   percentileThresholdValue,
   chartData,
+  totalDocCount,
   hasData,
   eventType,
 }: {
@@ -62,6 +64,7 @@ export function DurationDistributionChartWithScrubber({
   chartData: DurationDistributionChartData[];
   hasData: boolean;
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;
+  totalDocCount?: number;
 }) {
   const emptySelectionText = i18n.translate(
     'xpack.apm.durationDistributionChartWithScrubber.emptySelectionText',
@@ -115,6 +118,13 @@ export function DurationDistributionChartWithScrubber({
 
         <EuiFlexItem grow={false}>
           <ChartTitleToolTip />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <TotalDocCountLabel
+            eventType={eventType}
+            totalDocCount={totalDocCount}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
