@@ -36,6 +36,25 @@ export type APMPerService = Record<
       name: string | number | null;
       version: string | number | null;
     };
+    service: {
+      language: {
+        name: string | number | null;
+        version: string | number | null;
+      };
+      framework: {
+        name: string | number | null;
+        version: string | number | null;
+      };
+      runtime: {
+        name: string | number | null;
+        version: string | number | null;
+      };
+    };
+    kubernetes: {
+      pod: {
+        name: string | number | null;
+      };
+    };
   }
 >;
 

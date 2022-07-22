@@ -1186,6 +1186,27 @@ export const tasks: TelemetryTask[] = [
                           {
                             field: AGENT_VERSION,
                           },
+                          {
+                            field: SERVICE_LANGUAGE_NAME,
+                          },
+                          {
+                            field: SERVICE_LANGUAGE_VERSION,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_NAME,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_VERSION,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_NAME,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_VERSION,
+                          },
+                          {
+                            field: POD_NAME,
+                          },
                         ],
                       },
                     },
@@ -1240,6 +1261,40 @@ export const tasks: TelemetryTask[] = [
             agent: {
               name: serviceBucket.top_metrics?.top[0].metrics[AGENT_NAME],
               version: serviceBucket.top_metrics?.top[0].metrics[AGENT_VERSION],
+            },
+            service: {
+              language: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_NAME
+                ],
+                version:
+                  serviceBucket.top_metrics?.top[0].metrics[
+                    SERVICE_LANGUAGE_VERSION
+                  ],
+              },
+              framework: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_NAME
+                ],
+                version:
+                  serviceBucket.top_metrics?.top[0].metrics[
+                    SERVICE_FRAMEWORK_VERSION
+                  ],
+              },
+              runtime: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_NAME
+                ],
+                version:
+                  serviceBucket.top_metrics?.top[0].metrics[
+                    SERVICE_RUNTIME_VERSION
+                  ],
+              },
+            },
+            kubernetes: {
+              pod: {
+                name: serviceBucket.top_metrics?.top[0].metrics[POD_NAME],
+              },
             },
           };
         });
