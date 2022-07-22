@@ -6,7 +6,6 @@
  */
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
-import { TIMELINE_TITLE } from '../screens/timeline';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
@@ -74,21 +73,6 @@ export const isSourcererOptions = (patternNames: string[]) => {
   });
 };
 
-export const selectSourcererOption = (patternName: string) => {
-  cy.get(SOURCERER.comboBoxInput).click();
-  cy.get(SOURCERER.comboBoxOptions)
-    .find(`button.euiFilterSelectItem[title="${patternName}"]`)
-    .click();
-  clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
-};
-
-export const deselectSourcererOption = (patternName: string) => {
-  cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"] button`).click();
-  clickOutOfSelector();
-  return cy.get(SOURCERER.saveButton).click({ force: true });
-};
-
 export const deselectSourcererOptions = (patternNames: string[]) => {
   patternNames.forEach((patternName) =>
     cy.get(SOURCERER.comboBoxInput).find(`span[title="${patternName}"] button`).click()
@@ -103,20 +87,6 @@ export const saveSourcerer = () => {
 export const resetSourcerer = () => {
   return cy.get(SOURCERER.resetButton).click();
 };
-
-export const setSourcererOption = (patternName: string, sourcererScope?: string) => {
-  openSourcerer(sourcererScope);
-  isNotSourcererSelection(patternName);
-  selectSourcererOption(patternName);
-};
-
-export const unsetSourcererOption = (patternName: string, sourcererScope?: string) => {
-  openSourcerer(sourcererScope);
-  isSourcererSelection(patternName);
-  deselectSourcererOption(patternName);
-};
-
-export const clickOutOfSourcererTimeline = () => cy.get(TIMELINE_TITLE).first().click();
 
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
