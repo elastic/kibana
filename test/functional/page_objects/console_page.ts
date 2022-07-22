@@ -238,19 +238,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasInvalidSyntax() {
-    try {
-      return await this.find.existsByCssSelector('.ace_invalid');
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_invalid');
   }
 
   public async hasErrorMarker() {
-    try {
-      return await this.find.existsByCssSelector('.ace_error');
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_error');
   }
 
   public async clickFoldWidget() {
