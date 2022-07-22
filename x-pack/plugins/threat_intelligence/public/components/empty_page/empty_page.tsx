@@ -10,19 +10,17 @@ import React, { VFC } from 'react';
 import { EuiEmptyPrompt, EuiImage, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
+import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import illustration from './integrations_light.svg';
 
 export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
 export const EMPTY_PROMPT_TEST_ID = 'tiEmptyPage';
 export const INTEGRATION_LINK_ID = 'tiEmptyPageIntegrationsPageLink';
 
-interface EmptyPageProps {
-  integrationsPageLink: string;
-}
-
-export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
-  const { docLinks } = useKibana().services;
+export const EmptyPage: VFC = () => {
+  const integrationsPageLink = useIntegrationsPageLink();
+  const documentationLink = useTIDocumentationLink();
 
   return (
     <EuiEmptyPrompt
@@ -71,7 +69,7 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => {
               values={{
                 docsLink: (
                   <EuiLink
-                    href={docLinks.links.securitySolution.threatIntelInt}
+                    href={documentationLink}
                     target="_blank"
                     data-test-subj={DOCS_LINK_TEST_ID}
                   >

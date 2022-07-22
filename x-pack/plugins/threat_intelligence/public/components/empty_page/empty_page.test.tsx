@@ -7,26 +7,41 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { EmptyPage, INTEGRATION_LINK_ID, DOCS_LINK_TEST_ID } from './empty_page';
+import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
+import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+
+jest.mock('../../hooks/use_integrations_page_link');
+jest.mock('../../hooks/use_documentation_link');
+
+const INTEGRATION_HREF = 'INTEGRATION_HREF';
+const DOCUMENTATION_HREF = 'DOCUMENTATION_HREF';
 
 describe('<EmptyPage />', () => {
-  describe('default state', () => {
-    it('should render', () => {
-      const { getByTestId } = render(
-        <TestProvidersComponent>
-          <EmptyPage integrationsPageLink="https://google.com" />
-        </TestProvidersComponent>
-      );
-      const integrationsPageLink = getByTestId(`${INTEGRATION_LINK_ID}`);
+  it('should render', () => {
+    (
+      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+    ).mockReturnValue(INTEGRATION_HREF);
+    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+      DOCUMENTATION_HREF
+    );
 
-      expect(screen.getByText('Get started with Elastic Threat Intelligence')).toBeInTheDocument();
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <EmptyPage />
+      </TestProvidersComponent>
+    );
+    const integrationsPageLink = getByTestId(`${INTEGRATION_LINK_ID}`);
 
-      expect(integrationsPageLink).toBeInTheDocument();
-      expect(integrationsPageLink).toHaveAttribute('href', 'https://google.com');
+    expect(screen.getByText('Get started with Elastic Threat Intelligence')).toBeInTheDocument();
 
-      expect(getByTestId(DOCS_LINK_TEST_ID)).toBeInTheDocument();
-    });
+    expect(integrationsPageLink).toBeInTheDocument();
+    expect(integrationsPageLink).toHaveAttribute('href', INTEGRATION_HREF);
+
+    const documentationLink = getByTestId(`${DOCS_LINK_TEST_ID}`);
+
+    expect(documentationLink).toBeInTheDocument();
+    expect(documentationLink).toHaveAttribute('href', DOCUMENTATION_HREF);
   });
 });

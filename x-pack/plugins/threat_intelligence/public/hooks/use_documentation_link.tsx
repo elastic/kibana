@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { DocLinks } from '@kbn/doc-links';
 import { useKibana } from './use_kibana';
 
-export const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();
+const useKibanaDocumentationLinks = (): DocLinks => useKibana().services.docLinks.links;
+
+export const useTIDocumentationLink = (): string =>
+  useKibanaDocumentationLinks().securitySolution.threatIntelInt;

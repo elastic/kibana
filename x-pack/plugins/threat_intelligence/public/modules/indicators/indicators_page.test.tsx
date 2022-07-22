@@ -13,10 +13,13 @@ import { useIndicators } from './hooks/use_indicators';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID } from './components/indicators_table/indicators_table';
 import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_page';
+import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
+import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 
 jest.mock('./hooks/use_indicators');
 jest.mock('./hooks/use_indicators_total_count');
 jest.mock('../../hooks/use_integrations_page_link');
+jest.mock('../../hooks/use_documentation_link');
 
 const stub = () => {};
 
@@ -57,6 +60,12 @@ describe('<IndicatorsPage />', () => {
       count: 0,
       isLoading: false,
     });
+    (
+      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+    ).mockReturnValue('');
+    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+      ''
+    );
 
     const { getByTestId } = render(
       <TestProvidersComponent>

@@ -17,6 +17,11 @@ export default {
 
 export function BasicEmptyPage() {
   const KibanaReactContext = createKibanaReactContext({
+    http: {
+      basePath: {
+        get: () => '',
+      },
+    },
     docLinks: {
       links: {
         securitySolution: {
@@ -27,7 +32,7 @@ export function BasicEmptyPage() {
   } as unknown as Partial<CoreStart>);
   return (
     <KibanaReactContext.Provider>
-      <EmptyPage integrationsPageLink="https://google.com" />
+      <EmptyPage />
     </KibanaReactContext.Provider>
   );
 }

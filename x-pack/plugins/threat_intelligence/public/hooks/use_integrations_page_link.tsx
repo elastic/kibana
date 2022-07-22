@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { useKibanaBasePath } from './use_kibana_base_path';
+import { useKibana } from './use_kibana';
+
+const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();
 
 export const useIntegrationsPageLink = () =>
   `${useKibanaBasePath()}/app/integrations/browse?q=threat%20intelligence`;

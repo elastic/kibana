@@ -10,7 +10,6 @@ import { IndicatorsTable } from './components/indicators_table/indicators_table'
 import { useIndicators } from './hooks/use_indicators';
 import { EmptyPage } from '../../components/empty_page';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import { DefaultPageLayout } from '../../components/layout';
 
 export const IndicatorsPage: VFC = () => {
@@ -18,10 +17,9 @@ export const IndicatorsPage: VFC = () => {
   const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
     useIndicatorsTotalCount();
   const showEmptyPage = !isIndicatorsTotalCountLoading && indicatorsTotalCount === 0;
-  const integrationsPageLink = useIntegrationsPageLink();
 
   return showEmptyPage ? (
-    <EmptyPage integrationsPageLink={integrationsPageLink} />
+    <EmptyPage />
   ) : (
     <DefaultPageLayout pageTitle={'Indicators'}>
       <IndicatorsTable {...indicators} />
