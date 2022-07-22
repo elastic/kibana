@@ -442,7 +442,7 @@ export class HeadlessChromiumDriver {
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    const targetId = target._targetId;
+    const targetId = (target as unknown as {_targetId: string})._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 
