@@ -10,7 +10,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { uniq } from 'lodash';
 import {
   CasesFindResponse,
   CasesFindRequest,
@@ -46,8 +45,6 @@ export const find = async (
       excess(CasesFindRequestRt).decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
-
-    validateSearchFields(queryParams.searchFields);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
@@ -105,21 +102,3 @@ export const find = async (
     });
   }
 };
-
-const validateSearchFields = (searchFields?: string | string[]) => {
-  const invalidSearchFields = getUnsearchableFields(uniq(asArray(searchFields)));
-
-  if (invalidSearchFields.length > 0) {
-    throw Boom.badRequest(
-      `received invalid search fields: [${invalidSearchFields.join(',')}], must be one of [${[
-        ...SEARCHABLE_FIELDS,
-      ].join(',')}]`
-    );
-  }
-};
-
-const getUnsearchableFields = (fields: string[]) => {
-  return fields.filter((field) => !SEARCHABLE_FIELDS.has(field));
-};
-
-const SEARCHABLE_FIELDS = new Set<string>(['description', 'connector.name', 'title']);

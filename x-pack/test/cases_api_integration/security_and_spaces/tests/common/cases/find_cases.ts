@@ -281,10 +281,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       for (const field of ['owner', 'tags', 'severity', 'status']) {
-        it(`should return a 400 when attempting to query the invalid searchField ${field}`, async () => {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
           await findCases({
             supertest,
-            query: { searchFields: [field], search: 'some search string' },
+            query: { searchFields: [field], search: 'some search string*' },
             expectedHttpCode: 400,
           });
         });
@@ -683,6 +683,45 @@ export default ({ getService }: FtrProviderContext): void => {
 
           ensureSavedObjectIsAuthorized(res.cases, scenario.numberOfExpectedCases, scenario.owners);
         }
+      });
+
+      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
+        await Promise.all([
+          // super user creates a case with owner securitySolutionFixture
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+          // super user creates a case with owner observabilityFixture
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'observabilityFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          ),
+        ]);
+
+        const res = await findCases({
+          supertest: supertestWithoutAuth,
+          query: {
+            search: 'securitySolutionFixture observabilityFixture',
+            searchFields: 'owner',
+          },
+          auth: {
+            user: secOnly,
+            space: 'space1',
+          },
+        });
+
+        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
       });
 
       for (const scenario of [
