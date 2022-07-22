@@ -19,13 +19,17 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
+
 import { CronEditor, Frequency } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
+import { ConnectorIndex } from '../../../../../../common/types/indices';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+
+import { isConnectorIndex } from '../../../utils/indices';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
@@ -36,7 +40,8 @@ export const ConnectorSchedulingComponent: React.FC = () => {
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
   const { setHasChanges } = useActions(ConnectorSchedulingLogic);
 
-  const schedulingInput = data?.connector?.scheduling;
+  // Need to do this ugly casting because we can't check this after the below typecheck, because useState can't be used after an if
+  const schedulingInput = (data as ConnectorIndex)?.connector?.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{
@@ -47,7 +52,11 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
   });
 
-  const editor = scheduling && (
+  if (!isConnectorIndex(data)) {
+    return <></>;
+  }
+
+  const editor = (
     <CronEditor
       fieldToPreferredValueMap={fieldToPreferredValueMap}
       cronExpression={simpleCron.expression}
@@ -68,7 +77,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     />
   );
 
-  return scheduling ? (
+  return (
     <>
       <UnsavedChangesPrompt
         hasUnsavedChanges={hasChanges}
@@ -150,8 +159,6 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         </EuiFlexGroup>
       </EuiPanel>
     </>
-  ) : (
-    <></>
   );
 };
 

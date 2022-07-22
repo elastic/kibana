@@ -13,6 +13,8 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
@@ -23,19 +25,15 @@ import { TotalStats } from './total_stats';
 export const SearchIndexOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
 
-  const isCrawler = typeof indexData?.crawler !== 'undefined';
-  const isConnector = typeof indexData?.connector !== 'undefined';
-  const isApi = !(isCrawler || isConnector);
-
   return (
     <>
       <EuiSpacer />
-      {isCrawler ? (
+      {isCrawlerIndex(indexData) ? (
         <CrawlerTotalStats />
       ) : (
         <TotalStats
           ingestionType={
-            isConnector
+            isConnectorIndex(indexData)
               ? i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
                   {
@@ -51,13 +49,13 @@ export const SearchIndexOverview: React.FC = () => {
           }
         />
       )}
-      {isApi && (
+      {isApiIndex(indexData) && (
         <>
           <EuiSpacer />
           <GenerateApiKeyPanel />
         </>
       )}
-      {isCrawler && (
+      {isCrawlerIndex(indexData) && (
         <>
           <EuiSpacer />
           <CrawlRequestsPanel />

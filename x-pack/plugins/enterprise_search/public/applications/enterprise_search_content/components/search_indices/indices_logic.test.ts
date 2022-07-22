@@ -9,6 +9,8 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 
 import { indices } from '../../__mocks__/search_indices.mock';
 
+import { connectorIndex, elasticsearchViewIndices } from '../../__mocks__/view_index.mock';
+
 import moment from 'moment';
 
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -20,7 +22,9 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
-import { IndicesLogic, IngestionMethod, IngestionStatus, ViewSearchIndex } from './indices_logic';
+import { IngestionStatus } from '../../types';
+
+import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
   data: undefined,
@@ -30,69 +34,6 @@ const DEFAULT_VALUES = {
   meta: DEFAULT_META,
   status: Status.IDLE,
 };
-
-const apiIndex: ViewSearchIndex = {
-  ingestionMethod: IngestionMethod.API,
-  ingestionStatus: IngestionStatus.CONNECTED,
-  lastUpdated: null,
-  name: 'api',
-  total: {
-    docs: {
-      count: 1,
-      deleted: 0,
-    },
-    store: { size_in_bytes: '8024' },
-  },
-};
-const connectorIndex: ViewSearchIndex = {
-  connector: {
-    api_key_id: null,
-    configuration: {},
-    id: '2',
-    index_name: 'connector',
-    last_seen: null,
-    last_sync_error: null,
-    last_sync_status: SyncStatus.COMPLETED,
-    last_synced: null,
-    scheduling: {
-      enabled: false,
-      interval: '',
-    },
-    service_type: null,
-    status: ConnectorStatus.CONFIGURED,
-    sync_now: false,
-  },
-  ingestionMethod: IngestionMethod.CONNECTOR,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
-  lastUpdated: 'never',
-  name: 'connector',
-  total: {
-    docs: {
-      count: 1,
-      deleted: 0,
-    },
-    store: { size_in_bytes: '8024' },
-  },
-};
-const crawlerIndex: ViewSearchIndex = {
-  crawler: {
-    id: '3',
-    index_name: 'crawler',
-  },
-  ingestionMethod: IngestionMethod.CRAWLER,
-  ingestionStatus: IngestionStatus.INCOMPLETE,
-  lastUpdated: null,
-  name: 'crawler',
-  total: {
-    docs: {
-      count: 1,
-      deleted: 0,
-    },
-    store: { size_in_bytes: '8024' },
-  },
-};
-
-const viewSearchIndices = [apiIndex, connectorIndex, crawlerIndex];
 
 describe('IndicesLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchIndicesAPILogic);
@@ -150,7 +91,7 @@ describe('IndicesLogic', () => {
             meta: newMeta,
           },
           hasNoIndices: false,
-          indices: viewSearchIndices,
+          indices: elasticsearchViewIndices,
           isLoading: false,
           meta: newMeta,
           status: Status.SUCCESS,
@@ -275,19 +216,19 @@ describe('IndicesLogic', () => {
       it('updates when apiSuccess listener triggered', () => {
         expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
         IndicesLogic.actions.apiSuccess({
-          indices: viewSearchIndices,
+          indices: elasticsearchViewIndices,
           isInitialRequest: true,
           meta: DEFAULT_META,
         });
 
         expect(IndicesLogic.values).toEqual({
           data: {
-            indices: viewSearchIndices,
+            indices: elasticsearchViewIndices,
             isInitialRequest: true,
             meta: DEFAULT_META,
           },
           hasNoIndices: false,
-          indices: viewSearchIndices,
+          indices: elasticsearchViewIndices,
           isLoading: false,
           meta: DEFAULT_META,
           status: Status.SUCCESS,
@@ -300,9 +241,9 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.apiSuccess({
           indices: [
             {
-              ...indices[1],
+              ...connectorIndex,
               connector: {
-                ...indices[1].connector!,
+                ...connectorIndex.connector!,
                 last_seen: lastSeen,
                 status: ConnectorStatus.CONNECTED,
               },
@@ -316,9 +257,9 @@ describe('IndicesLogic', () => {
           data: {
             indices: [
               {
-                ...indices[1],
+                ...connectorIndex,
                 connector: {
-                  ...indices[1].connector!,
+                  ...connectorIndex.connector!,
                   last_seen: lastSeen,
                   status: ConnectorStatus.CONNECTED,
                 },
@@ -349,8 +290,8 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.apiSuccess({
           indices: [
             {
-              ...indices[1],
-              connector: { ...indices[1].connector!, status: ConnectorStatus.CONNECTED },
+              ...connectorIndex,
+              connector: { ...connectorIndex.connector, status: ConnectorStatus.CONNECTED },
             },
           ],
           isInitialRequest: true,
@@ -361,8 +302,8 @@ describe('IndicesLogic', () => {
           data: {
             indices: [
               {
-                ...indices[1],
-                connector: { ...indices[1].connector!, status: ConnectorStatus.CONNECTED },
+                ...connectorIndex,
+                connector: { ...connectorIndex.connector, status: ConnectorStatus.CONNECTED },
               },
             ],
             isInitialRequest: true,
@@ -389,8 +330,8 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.apiSuccess({
           indices: [
             {
-              ...indices[1],
-              connector: { ...indices[1].connector!, status: ConnectorStatus.ERROR },
+              ...connectorIndex,
+              connector: { ...connectorIndex.connector!, status: ConnectorStatus.ERROR },
             },
           ],
           isInitialRequest: true,
@@ -401,8 +342,8 @@ describe('IndicesLogic', () => {
           data: {
             indices: [
               {
-                ...indices[1],
-                connector: { ...indices[1].connector!, status: ConnectorStatus.ERROR },
+                ...connectorIndex,
+                connector: { ...connectorIndex.connector!, status: ConnectorStatus.ERROR },
               },
             ],
             isInitialRequest: true,
@@ -426,9 +367,9 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.apiSuccess({
           indices: [
             {
-              ...indices[1],
+              ...connectorIndex,
               connector: {
-                ...indices[1].connector!,
+                ...connectorIndex.connector!,
                 last_sync_status: SyncStatus.ERROR,
                 status: ConnectorStatus.CONNECTED,
               },
@@ -442,9 +383,9 @@ describe('IndicesLogic', () => {
           data: {
             indices: [
               {
-                ...indices[1],
+                ...connectorIndex,
                 connector: {
-                  ...indices[1].connector!,
+                  ...connectorIndex.connector!,
                   last_sync_status: SyncStatus.ERROR,
                   status: ConnectorStatus.CONNECTED,
                 },

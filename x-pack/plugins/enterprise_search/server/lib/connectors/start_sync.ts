@@ -6,17 +6,13 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
-import { ConnectorDocument, ConnectorScheduling } from '../../../common/types/connectors';
+import { ConnectorDocument } from '../../../common/types/connectors';
+import { ErrorCode } from '../../../common/types/error_codes';
 
-export const updateConnectorScheduling = async (
-  client: IScopedClusterClient,
-  connectorId: string,
-  scheduling: ConnectorScheduling
-) => {
+export const startConnectorSync = async (client: IScopedClusterClient, connectorId: string) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,
     index: CONNECTORS_INDEX,
@@ -24,17 +20,13 @@ export const updateConnectorScheduling = async (
   const connector = connectorResult._source;
   if (connector) {
     const result = await client.asCurrentUser.index<ConnectorDocument>({
-      document: { ...connector, scheduling },
+      document: { ...connector, sync_now: true },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
     await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
     return result;
   } else {
-    throw new Error(
-      i18n.translate('xpack.enterpriseSearch.server.connectors.scheduling.error', {
-        defaultMessage: 'Could not find document',
-      })
-    );
+    throw new Error(ErrorCode.RESOURCE_NOT_FOUND);
   }
 };

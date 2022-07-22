@@ -68,7 +68,7 @@ export const ConnectorConfigurationConfig: React.FC<ConnectorConfigurationConfig
   api_key: "${apiKey}"
 `
           : ''
-      }connector_package_id: "${connectorId}"
+      }connector_id: "${connectorId}"
 `}
     </EuiCodeBlock>
   );
