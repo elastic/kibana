@@ -31,7 +31,7 @@ export class HomePageObject extends FtrService {
     const className = await accordion.getAttribute('class');
 
     if (!className.includes('euiAccordion-isOpen')) {
-      await this.testSubjects.click('data-test-subj=sampleDataAccordionButton');
+      await this.testSubjects.click('sampleDataAccordionButton');
     }
   }
 
