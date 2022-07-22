@@ -427,7 +427,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 <div
                   style={{ height: `${containerHeight}px` }}
                   css={css`
-                    position: 'relative';
+                    position: relative;
                   `}
                   hidden={noSwimLaneData}
                 >
@@ -511,7 +511,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      css={{
+                      style={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
