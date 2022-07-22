@@ -14,14 +14,17 @@ import {
   EuiText,
   EuiFlyoutHeader,
   IconType,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBetaBadgeProps } from '@elastic/eui/src/components/badge/beta_badge';
 
 const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
-}> = ({ icon, actionTypeName, actionTypeMessage }) => {
+  betaBadgeProps?: Partial<EuiBetaBadgeProps>;
+}> = ({ icon, actionTypeName, actionTypeMessage, betaBadgeProps }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -59,6 +62,14 @@ const FlyoutHeaderComponent: React.FC<{
             </EuiTitle>
           )}
         </EuiFlexItem>
+        {betaBadgeProps && (
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={betaBadgeProps.label}
+              tooltipContent={betaBadgeProps.tooltipContent}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlyoutHeader>
   );

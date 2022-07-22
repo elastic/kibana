@@ -94,6 +94,7 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
+        betaBadgeProps: actionTypeModel.betaBadgeProps,
       };
     });
 
@@ -103,6 +104,7 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
+          betaBadgeProps={item.betaBadgeProps}
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}

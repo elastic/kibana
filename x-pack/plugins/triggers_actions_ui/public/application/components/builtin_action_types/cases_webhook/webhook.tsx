@@ -24,6 +24,15 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Send a request to a Case Management web service.',
       }
     ),
+    betaBadgeProps: {
+      label: i18n.translate('xpack.triggersActionsUi.technicalPreviewBadgeLabel', {
+        defaultMessage: 'Technical preview',
+      }),
+      tooltipContent: i18n.translate('xpack.triggersActionsUi.technicalPreviewBadgeDescription', {
+        defaultMessage:
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      }),
+    },
     actionTypeTitle: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.actionTypeTitle',
       {
