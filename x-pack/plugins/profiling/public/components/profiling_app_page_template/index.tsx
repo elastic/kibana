@@ -28,7 +28,7 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, projectID, index, kuery },
+    query: { rangeFrom, rangeTo, n, projectID, kuery },
   } = useProfilingParams('/*');
 
   const {
@@ -58,10 +58,10 @@ export function ProfilingAppPageTemplate({
   useEffect(() => {
     dataViews
       .create({
-        title: index,
+        title: 'profiling-events-all',
       })
       .then((nextDataView) => setDataView(nextDataView));
-  }, [index, dataViews]);
+  }, [dataViews]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -86,7 +86,6 @@ export function ProfilingAppPageTemplate({
               defaultMessage: 'Settings',
             })}
             values={{
-              index,
               projectID,
               n,
             }}
@@ -95,7 +94,6 @@ export function ProfilingAppPageTemplate({
                 path,
                 query: {
                   ...query,
-                  index: values.index,
                   projectID: values.projectID,
                   n: values.n,
                 },

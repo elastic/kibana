@@ -156,7 +156,6 @@ const routes = {
           query: t.type({
             rangeFrom: t.string,
             rangeTo: t.string,
-            index: t.string,
             n: toNumberRt,
             projectID: toNumberRt,
             kuery: t.string,
@@ -164,7 +163,6 @@ const routes = {
         }),
         defaults: {
           query: {
-            index: 'profiling-events-all',
             n: '100',
             projectID: '5',
             kuery: '',

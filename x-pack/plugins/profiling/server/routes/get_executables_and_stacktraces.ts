@@ -21,17 +21,16 @@ import {
 export async function getExecutablesAndStackTraces({
   logger,
   client,
-  index,
   filter,
   sampleSize,
 }: {
   logger: Logger;
   client: ProfilingESClient;
-  index: string;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }) {
   return withProfilingSpan('get_executables_and_stack_traces', async () => {
+    const index = 'profiling-events-all';
     const eventsIndex = await findDownsampledIndex({ logger, client, index, filter, sampleSize });
 
     const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace({

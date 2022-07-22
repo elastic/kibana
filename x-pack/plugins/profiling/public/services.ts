@@ -14,7 +14,6 @@ import { TopNSamples } from '../common/topn';
 export interface Services {
   fetchTopN: (params: {
     type: string;
-    index: string;
     projectID: number;
     timeFrom: number;
     timeTo: number;
@@ -22,7 +21,6 @@ export interface Services {
     kuery: string;
   }) => Promise<TopNSamples>;
   fetchTopNFunctions: (params: {
-    index: string;
     projectID: number;
     timeFrom: number;
     timeTo: number;
@@ -31,7 +29,6 @@ export interface Services {
     kuery: string;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
-    index: string;
     projectID: number;
     timeFrom: number;
     timeTo: number;
@@ -44,10 +41,9 @@ export function getServices(core: CoreStart): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ type, index, projectID, timeFrom, timeTo, n, kuery }) => {
+    fetchTopN: async ({ type, projectID, timeFrom, timeTo, n, kuery }) => {
       try {
         const query: HttpFetchQuery = {
-          index,
           projectID,
           timeFrom,
           timeTo,
@@ -61,7 +57,6 @@ export function getServices(core: CoreStart): Services {
     },
 
     fetchTopNFunctions: async ({
-      index,
       projectID,
       timeFrom,
       timeTo,
@@ -69,7 +64,6 @@ export function getServices(core: CoreStart): Services {
       endIndex,
       kuery,
     }: {
-      index: string;
       projectID: number;
       timeFrom: number;
       timeTo: number;
@@ -79,7 +73,6 @@ export function getServices(core: CoreStart): Services {
     }) => {
       try {
         const query: HttpFetchQuery = {
-          index,
           projectID,
           timeFrom,
           timeTo,
@@ -94,14 +87,12 @@ export function getServices(core: CoreStart): Services {
     },
 
     fetchElasticFlamechart: async ({
-      index,
       projectID,
       timeFrom,
       timeTo,
       n,
       kuery,
     }: {
-      index: string;
       projectID: number;
       timeFrom: number;
       timeTo: number;
@@ -110,7 +101,6 @@ export function getServices(core: CoreStart): Services {
     }) => {
       try {
         const query: HttpFetchQuery = {
-          index,
           projectID,
           timeFrom,
           timeTo,

@@ -19,13 +19,11 @@ import { createCommonFilter, ProjectTimeQuery } from './query';
 async function queryFlameGraph({
   logger,
   client,
-  index,
   filter,
   sampleSize,
 }: {
   logger: Logger;
   client: ProfilingESClient;
-  index: string;
   filter: ProjectTimeQuery;
   sampleSize: number;
 }): Promise<FlameGraph> {
@@ -33,7 +31,6 @@ async function queryFlameGraph({
     return getExecutablesAndStackTraces({
       logger,
       client,
-      index,
       filter,
       sampleSize,
     }).then(
@@ -65,7 +62,6 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       path: paths.FlamechartElastic,
       validate: {
         query: schema.object({
-          index: schema.string(),
           projectID: schema.string(),
           timeFrom: schema.string(),
           timeTo: schema.string(),
@@ -75,7 +71,7 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo, kuery } = request.query;
+      const { projectID, timeFrom, timeTo, kuery } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
@@ -90,7 +86,6 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
         const flamegraph = await queryFlameGraph({
           logger,
           client: createProfilingEsClient({ request, esClient }),
-          index,
           filter,
           sampleSize: targetSampleSize,
         });

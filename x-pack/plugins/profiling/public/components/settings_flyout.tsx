@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyout,
@@ -28,16 +27,14 @@ import {
 interface SettingsFlyoutProps {
   title: string;
   values: {
-    index: string;
     projectID: number;
     n: number;
   };
-  onChange: (nextValues: { index: string; projectID: number; n: number }) => void;
+  onChange: (nextValues: { projectID: number; n: number }) => void;
 }
 
 export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps) {
   const [formValues, setFormValues] = useState({
-    index: values.index.toString(),
     projectID: values.projectID.toString(),
     n: values.n.toString(),
   });
@@ -53,7 +50,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   const saveFlyout = () => {
     onChange({
-      index: formValues.index,
       projectID: Number(formValues.projectID),
       n: Number(formValues.n),
     });
@@ -62,11 +58,10 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   useEffect(() => {
     setFormValues({
-      index: values.index.toString(),
       projectID: values.projectID.toString(),
       n: values.n.toString(),
     });
-  }, [values.index, values.projectID, values.n]);
+  }, [values.projectID, values.n]);
 
   return (
     <div>
@@ -81,21 +76,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiForm component="form">
-              <EuiFormRow
-                label="Index"
-                helpText="This is the primary Elasticsearch index used before sampling."
-              >
-                <EuiFieldText
-                  name="index"
-                  value={formValues.index}
-                  onChange={(e) => {
-                    setFormValues((nextValues) => ({
-                      ...nextValues,
-                      index: e.target.value,
-                    }));
-                  }}
-                />
-              </EuiFormRow>
               <EuiFormRow
                 label="Project ID"
                 helpText="This is the project ID as defined by the host agent."

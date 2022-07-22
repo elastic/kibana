@@ -22,7 +22,6 @@ import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace'
 export async function topNElasticSearchQuery({
   client,
   logger,
-  index,
   projectID,
   timeFrom,
   timeTo,
@@ -33,7 +32,6 @@ export async function topNElasticSearchQuery({
 }: {
   client: ProfilingESClient;
   logger: Logger;
-  index: string;
   projectID: string;
   timeFrom: string;
   timeTo: string;
@@ -44,6 +42,7 @@ export async function topNElasticSearchQuery({
 }) {
   const filter = createCommonFilter({ projectID, timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
+  const index = 'profiling-events-all';
 
   const eventsIndex = await findDownsampledIndex({
     logger,
@@ -134,7 +133,6 @@ export function queryTopNCommon(
       path: pathName,
       validate: {
         query: schema.object({
-          index: schema.string(),
           projectID: schema.string(),
           timeFrom: schema.string(),
           timeTo: schema.string(),
@@ -144,14 +142,13 @@ export function queryTopNCommon(
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo, n, kuery } = request.query;
+      const { projectID, timeFrom, timeTo, n, kuery } = request.query;
       const client = await getClient(context);
 
       try {
         return await topNElasticSearchQuery({
           client: createProfilingEsClient({ request, esClient: client }),
           logger,
-          index,
           projectID,
           timeFrom,
           timeTo,
