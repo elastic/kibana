@@ -24080,7 +24080,6 @@
     "xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink": "Score de risque de l’hôte",
     "xpack.securitySolution.alertDetails.overview.investigationGuide": "Guide d'investigation",
     "xpack.securitySolution.alertDetails.overview.relatedCasesCount": "{caseCount} {caseCount, plural, =0 {cas.} =1 {cas :} other {cas :}}",
-    "xpack.securitySolution.alertDetails.overview.relatedCasesFailure": "Impossible de charger les cas connexes : \"{error}\".",
     "xpack.securitySolution.alertDetails.overview.relatedCasesFound": "Alerte détectée dans",
     "xpack.securitySolution.alertDetails.refresh": "Actualiser",
     "xpack.securitySolution.alertDetails.summary.readLess": "Lire moins",

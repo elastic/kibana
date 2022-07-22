@@ -24185,7 +24185,6 @@
     "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "主机风险数据",
     "xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink": "主机风险分数",
     "xpack.securitySolution.alertDetails.overview.investigationGuide": "调查指南",
-    "xpack.securitySolution.alertDetails.overview.relatedCasesFailure": "无法加载相关案例：“{error}”",
     "xpack.securitySolution.alertDetails.refresh": "刷新",
     "xpack.securitySolution.alertDetails.summary.readLess": "阅读更少内容",
     "xpack.securitySolution.alertDetails.summary.readMore": "阅读更多内容",
