@@ -7932,8 +7932,6 @@
     "xpack.apm.serviceDetails.metricsTabLabel": "Indicateurs",
     "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "Aperçu",
-    "xpack.apm.serviceDetails.profilingTabExperimentalDescription": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale.",
-    "xpack.apm.serviceDetails.profilingTabExperimentalLabel": "Version d'évaluation technique",
     "xpack.apm.serviceDetails.profilingTabLabel": "Profilage",
     "xpack.apm.serviceDetails.transactionsTabLabel": "Transactions",
     "xpack.apm.serviceGroup.allServices.title": "Tous les services",

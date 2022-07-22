@@ -7924,8 +7924,6 @@
     "xpack.apm.serviceDetails.metricsTabLabel": "メトリック",
     "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.overviewTabLabel": "概要",
-    "xpack.apm.serviceDetails.profilingTabExperimentalDescription": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.apm.serviceDetails.profilingTabExperimentalLabel": "テクニカルプレビュー",
     "xpack.apm.serviceDetails.profilingTabLabel": "プロファイリング",
     "xpack.apm.serviceDetails.transactionsTabLabel": "トランザクション",
     "xpack.apm.serviceGroup.allServices.title": "すべてのサービス",
