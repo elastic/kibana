@@ -107,7 +107,7 @@ const KubernetesSecurityRoutesComponent = ({
         </EuiFlexGroup>
         {!shouldHideCharts && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup css={styles.widgetsGroup}>
               <EuiFlexItem css={styles.leftWidgetsGroup}>
                 <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>

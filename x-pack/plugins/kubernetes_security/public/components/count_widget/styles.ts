@@ -28,6 +28,7 @@ export const useStyles = () => {
       marginBottom: size.m,
       fontSize: size.m,
       fontWeight: font.weight.bold,
+      whiteSpace: 'nowrap',
     };
 
     const dataInfo: CSSObject = {

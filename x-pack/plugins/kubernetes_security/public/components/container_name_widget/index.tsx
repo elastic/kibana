@@ -19,6 +19,7 @@ import {
   CONTAINER_NAME_SESSION_COUNT_COLUMN,
   CONTAINER_NAME_SESSION_ARIA_LABEL,
 } from '../../../common/translations';
+import { addCommasToNumber } from '../../utils/add_commas_to_number';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:containerNameWidgetLoading';
 export const NAME_COLUMN_TEST_ID = 'kubernetesSecurity:containerImageNameSessionNameColumn';
@@ -170,7 +171,7 @@ export const ContainerNameWidget = ({
             return aggsData?.buckets.map((aggData) => {
               return {
                 name: aggData.key as string,
-                count: aggData.count_by_aggs.value,
+                count: addCommasToNumber(aggData.count_by_aggs.value),
               };
             });
           })
@@ -198,13 +199,13 @@ export const ContainerNameWidget = ({
           );
         },
         align: 'left',
-        width: '74%',
+        width: '67%',
         sortable: false,
       },
       {
         field: 'count',
         name: CONTAINER_NAME_SESSION_COUNT_COLUMN,
-        width: '26%',
+        width: '33%',
         'data-test-subj': COUNT_COLUMN_TEST_ID,
         render: (count: number) => {
           return <span css={styles.countValue}>{count}</span>;

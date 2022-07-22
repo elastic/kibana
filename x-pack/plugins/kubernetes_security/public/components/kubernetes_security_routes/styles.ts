@@ -59,6 +59,9 @@ export const useStyles = () => {
     const countWidgetsGroup: CSSObject = {
       ...widgetsBottomSpacing,
       flexWrap: 'wrap',
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        flexDirection: 'column',
+      },
     };
 
     const leftWidgetsGroup: CSSObject = {
@@ -86,6 +89,12 @@ export const useStyles = () => {
       lineHeight: size.base,
     };
 
+    const widgetsGroup: CSSObject = {
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        flexDirection: 'column',
+      },
+    };
+
     return {
       titleSection,
       titleActions,
@@ -99,6 +108,7 @@ export const useStyles = () => {
       percentageChartTitle,
       noBottomSpacing,
       widgetHolder,
+      widgetsGroup,
     };
   }, [euiTheme]);
 
