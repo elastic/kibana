@@ -14,7 +14,7 @@ export interface PackageInfo {
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
-  revision: 901912 | 901913;
+  revision: 901912 | 901913 | 1022525;
   isPreInstalled: boolean;
   location: 'custom' | 'common';
 }
@@ -67,23 +67,23 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-70f5d88-locales-linux_x64.zip',
-      archiveChecksum: '759bda5e5d32533cb136a85e37c0d102',
+      archiveFilename: 'chromium-4440632-linux_x64.zip',
+      archiveChecksum: '2f88e9a17e156d27779e485dcce0946c',
       binaryChecksum: '82e80f9727a88ba3836ce230134bd126',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
-      revision: 901912,
+      revision: 1022525,
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-70f5d88-locales-linux_arm64.zip',
-      archiveChecksum: '33613b8dc5212c0457210d5a37ea4b43',
+      archiveFilename: 'chromium-4440632-linux_arm64.zip',
+      archiveChecksum: '270508a8a00a7cfe7e8d0c7203016df6',
       binaryChecksum: '29e943fbee6d87a217abd6cb6747058e',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
-      revision: 901912,
+      revision: 1022525,
       isPreInstalled: true,
     },
     {
