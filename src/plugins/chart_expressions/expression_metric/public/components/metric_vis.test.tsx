@@ -696,7 +696,38 @@ describe('MetricVisComponent', function () {
         ]
       `);
     });
+
+    it('renders with no data', () => {
+      const component = shallow(
+        <MetricVis
+          config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
+          data={{ type: 'datatable', rows: [], columns: table.columns }}
+          renderComplete={() => {}}
+          renderMode={'view'}
+        />
+      );
+
+      const { data } = component.find(Metric).props();
+
+      expect(data).toBeDefined();
+      expect(data).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+          ],
+          Array [
+            undefined,
+          ],
+        ]
+      `);
+    });
   });
+
+  describe('rendering with no data', () => {});
 
   it('should constrain dimensions in edit mode', () => {
     const getContainerStyles = (editMode: boolean, multipleTiles: boolean) =>
