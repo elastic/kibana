@@ -48,7 +48,7 @@ describe('Indices util functions', () => {
       expect(
         getIngestionStatus({
           ...connectorIndex,
-          connector: { ...connectorIndex.connector!, status: ConnectorStatus.CONNECTED },
+          connector: { ...connectorIndex.connector, status: ConnectorStatus.CONNECTED },
         })
       ).toEqual(IngestionStatus.CONNECTED);
     });
@@ -58,7 +58,7 @@ describe('Indices util functions', () => {
         getIngestionStatus({
           ...connectorIndex,
           connector: {
-            ...connectorIndex.connector!,
+            ...connectorIndex.connector,
             last_seen: lastSeen,
             status: ConnectorStatus.CONNECTED,
           },
@@ -70,7 +70,7 @@ describe('Indices util functions', () => {
         getIngestionStatus({
           ...connectorIndex,
           connector: {
-            ...connectorIndex.connector!,
+            ...connectorIndex.connector,
             last_sync_status: SyncStatus.ERROR,
             status: ConnectorStatus.NEEDS_CONFIGURATION,
           },
@@ -82,7 +82,7 @@ describe('Indices util functions', () => {
         getIngestionStatus({
           ...connectorIndex,
           connector: {
-            ...connectorIndex.connector!,
+            ...connectorIndex.connector,
             last_sync_status: SyncStatus.COMPLETED,
             status: ConnectorStatus.ERROR,
           },
@@ -98,7 +98,7 @@ describe('Indices util functions', () => {
       expect(
         getLastUpdated({
           ...connectorIndex,
-          connector: { ...connectorIndex.connector!, last_synced: 'last_synced' },
+          connector: { ...connectorIndex.connector, last_synced: 'last_synced' },
         })
       ).toEqual('last_synced');
     });
@@ -107,9 +107,6 @@ describe('Indices util functions', () => {
     });
   });
   describe('indexToViewIndex', () => {
-    it('should return undefined for undefined', () => {
-      expect(indexToViewIndex(undefined)).toEqual(undefined);
-    });
     it('should apply above transformations to viewIndex', () => {
       expect(indexToViewIndex(connectorIndex)).toEqual({
         ...connectorIndex,

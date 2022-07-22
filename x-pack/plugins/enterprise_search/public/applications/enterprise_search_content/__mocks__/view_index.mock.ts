@@ -7,9 +7,15 @@
 
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../types';
+import {
+  ApiViewIndex,
+  ConnectorViewIndex,
+  CrawlerViewIndex,
+  IngestionMethod,
+  IngestionStatus,
+} from '../types';
 
-export const apiIndex: ElasticsearchViewIndex = {
+export const apiIndex: ApiViewIndex = {
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   lastUpdated: null,
@@ -22,7 +28,7 @@ export const apiIndex: ElasticsearchViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-export const connectorIndex: ElasticsearchViewIndex = {
+export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
     configuration: {},
@@ -52,7 +58,7 @@ export const connectorIndex: ElasticsearchViewIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-export const crawlerIndex: ElasticsearchViewIndex = {
+export const crawlerIndex: CrawlerViewIndex = {
   crawler: {
     id: '3',
     index_name: 'crawler',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
+import { ConnectorIndex, CrawlerIndex, ElasticsearchIndex } from '../../../common/types/indices';
 
 export interface Crawler {
   domains: [];
@@ -24,8 +24,16 @@ export const enum IngestionStatus {
   INCOMPLETE,
 }
 
-export interface ElasticsearchViewIndex extends ElasticsearchIndexWithIngestion {
+interface ElasticsearchViewIndexExtension {
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
   lastUpdated: string | 'never' | null; // date string
 }
+
+export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;
+
+export type CrawlerViewIndex = CrawlerIndex & ElasticsearchViewIndexExtension;
+
+export type ApiViewIndex = ElasticsearchIndex & ElasticsearchViewIndexExtension;
+
+export type ElasticsearchViewIndex = CrawlerViewIndex | ConnectorViewIndex | ApiViewIndex;

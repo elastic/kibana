@@ -28,6 +28,7 @@ import {
   getIngestionStatus,
   getLastUpdated,
   indexToViewIndex,
+  isConnectorIndex,
 } from '../../utils/indices';
 
 export type IndicesActions = Pick<
@@ -67,7 +68,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
       );
     },
     makeRequest: () => clearFlashMessages(),
-    startSync: () => actions.makeRequest({ connectorId: values.data?.connector?.id ?? '' }),
+    startSync: () => {
+      if (isConnectorIndex(values.data)) {
+        actions.makeRequest({ connectorId: values.data?.connector?.id });
+      }
+    },
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: {
@@ -75,12 +80,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
       false,
       {
         apiSuccess: () => true,
-        fetchIndexSuccess: (_, index) => index.connector?.sync_now ?? false,
+        fetchIndexSuccess: (_, index) =>
+          isConnectorIndex(index) ? index.connector.sync_now : false,
       },
     ],
   },
   selectors: ({ selectors }) => ({
-    index: [() => [selectors.data], (data) => indexToViewIndex(data)],
+    index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
     ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
     isSyncing: [
@@ -92,6 +98,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
       (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
     ],
     lastUpdated: [() => [selectors.data], (data) => getLastUpdated(data)],
-    syncStatus: [() => [selectors.data], (data) => data?.last_sync_status],
+    syncStatus: [() => [selectors.data], (data) => data?.connector?.last_sync_status],
   }),
 });

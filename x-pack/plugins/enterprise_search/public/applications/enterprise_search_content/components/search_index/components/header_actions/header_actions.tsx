@@ -25,36 +25,16 @@ import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
 import { ENGINE_CREATION_PATH } from '../../../../../app_search/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
-import { IngestionMethod, IngestionStatus } from '../../../../types';
+import { IngestionMethod } from '../../../../types';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { HeaderActionsLogic } from './header_actions.logic';
+import { SyncButton } from './sync_button';
 
 const SearchEnginesPopover: React.FC = () => {
   const { isSearchEnginesPopoverOpen } = useValues(HeaderActionsLogic);
   const { toggleSearchEnginesPopover } = useActions(HeaderActionsLogic);
-  const { ingestionMethod, ingestionStatus, isSyncing, isWaitingForSync } =
-    useValues(IndexViewLogic);
-  const { startSync } = useActions(IndexViewLogic);
-
-  const getSyncButtonText = () => {
-    if (isWaitingForSync) {
-      return i18n.translate(
-        'xpack.enterpriseSearch.content.index.syncButton.waitingForSync.label',
-        {
-          defaultMessage: 'Waiting for sync',
-        }
-      );
-    }
-    if (isSyncing && ingestionStatus !== IngestionStatus.ERROR) {
-      return i18n.translate('xpack.enterpriseSearch.content.index.syncButton.syncing.label', {
-        defaultMessage: 'Sync in progress',
-      });
-    }
-    return i18n.translate('xpack.enterpriseSearch.content.index.syncButton.label', {
-      defaultMessage: 'Sync',
-    });
-  };
+  const { ingestionMethod } = useValues(IndexViewLogic);
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -117,17 +97,7 @@ const SearchEnginesPopover: React.FC = () => {
       </EuiFlexItem>
       {ingestionMethod === IngestionMethod.CONNECTOR && (
         <EuiFlexItem>
-          <EuiButton
-            onClick={startSync}
-            fill
-            disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
-            isLoading={
-              // If there's an error, the ingestion status may not be accurate and we may need to be able to trigger a sync
-              (isSyncing && !(ingestionStatus === IngestionStatus.ERROR)) || isWaitingForSync
-            }
-          >
-            {getSyncButtonText()}
-          </EuiButton>
+          <SyncButton />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

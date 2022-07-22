@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { startSync } from './start_sync_api_logic';
 
-describe('syncNowApiLogic', () => {
+describe('startSync', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();

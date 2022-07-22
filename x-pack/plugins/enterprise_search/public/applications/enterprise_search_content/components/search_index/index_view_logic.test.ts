@@ -13,6 +13,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError } from '../../../../../common/types/api';
 
+import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector_package/start_sync_api_logic';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
@@ -23,8 +24,8 @@ import { indexToViewIndex } from '../../utils/indices';
 import { IndexViewLogic } from './index_view_logic';
 
 const DEFAULT_VALUES = {
-  data: undefined,
-  index: undefined,
+  data: null,
+  index: null,
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   isSyncing: false,
@@ -43,7 +44,7 @@ const CONNECTOR_VALUES = {
   lastUpdated: 'never',
 };
 
-describe('ViewIndexLogic', () => {
+describe('IndexViewLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
   const { mount: fetchIndexMount } = new LogicMounter(FetchIndexApiLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
@@ -75,9 +76,10 @@ describe('ViewIndexLogic', () => {
           },
           index: {
             ...CONNECTOR_VALUES.index,
-            connector: { ...CONNECTOR_VALUES.index!.connector!, sync_now: true },
+            connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
           },
           isWaitingForSync: true,
+          syncStatus: SyncStatus.COMPLETED,
         });
       });
       it('should update values with no connector', () => {
@@ -85,7 +87,7 @@ describe('ViewIndexLogic', () => {
         expect(IndexViewLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: apiIndex,
-          index: indexToViewIndex(apiIndex),
+          index: apiIndex,
         });
       });
     });
@@ -98,7 +100,10 @@ describe('ViewIndexLogic', () => {
         expect(IndexViewLogic.actions.makeRequest).toHaveBeenCalledWith({
           connectorId: '2',
         });
-        expect(IndexViewLogic.values).toEqual(CONNECTOR_VALUES);
+        expect(IndexViewLogic.values).toEqual({
+          ...CONNECTOR_VALUES,
+          syncStatus: SyncStatus.COMPLETED,
+        });
       });
     });
     describe('apiSuccess', () => {
@@ -109,6 +114,7 @@ describe('ViewIndexLogic', () => {
           ...CONNECTOR_VALUES,
           isWaitingForSync: true,
           localSyncNowValue: true,
+          syncStatus: SyncStatus.COMPLETED,
         });
       });
     });
