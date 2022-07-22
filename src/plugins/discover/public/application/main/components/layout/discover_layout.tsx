@@ -17,7 +17,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiResizableContainer,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -25,6 +24,7 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -47,7 +47,6 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
-import { css } from '@emotion/react';
 
 /**
  * Local storage key for sidebar persistence state
