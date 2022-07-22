@@ -149,6 +149,7 @@ export function IsAboveField({
       )}
     >
       <EuiFieldNumber
+        min={0}
         value={value ?? ''}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
         append={unit}
