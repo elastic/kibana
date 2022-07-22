@@ -142,7 +142,7 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
-      const externalId = getObjectValueByKey<string>(data, createIncidentResponseKey);
+      const externalId = `${getObjectValueByKey<string>(data, createIncidentResponseKey)}`;
       const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
