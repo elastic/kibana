@@ -460,7 +460,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   private createHostData(): HostInfo {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
-    const agentVersion = this.randomVersion();
+    const agentVersion = '8.4.0';
     const minCapabilitiesVersion = '7.15.0';
     const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
     const randomCapabilities = () => {
@@ -506,7 +506,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
-        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? randomCapabilities() : [],
+        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
       },
     };
   }
