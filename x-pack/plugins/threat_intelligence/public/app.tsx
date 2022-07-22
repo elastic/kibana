@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import React, { VFC } from 'react';
+import React from 'react';
 import { IndicatorsPage } from './modules/indicators/indicators_page';
-import { KibanaContextProvider } from './hooks/use_kibana';
+import { KibanaContextProvider, useKibana } from './hooks/use_kibana';
 
-export interface AppProps {
-  services: CoreStart;
-}
+export const App = () => {
+  const services = useKibana().services;
 
-export const App: VFC<AppProps> = ({ services }) => {
   return (
     <KibanaContextProvider services={services}>
       <IndicatorsPage />

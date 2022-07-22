@@ -8,7 +8,6 @@
 import { VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { AppProps } from './app';
 
 export type Services = { data: DataPublicPluginStart } & CoreStart;
 
@@ -16,5 +15,5 @@ export type Services = { data: DataPublicPluginStart } & CoreStart;
 export interface ThreatIntelligencePluginSetup {}
 
 export interface ThreatIntelligencePluginStart {
-  getComponent: () => VFC<AppProps>;
+  getComponent: () => VFC;
 }
