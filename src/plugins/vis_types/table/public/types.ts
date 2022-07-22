@@ -7,7 +7,7 @@
  */
 
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import { TableVisParams } from '../common';
 

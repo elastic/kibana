@@ -10,7 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getMetricVisRenderer } from '../expression_renderers';

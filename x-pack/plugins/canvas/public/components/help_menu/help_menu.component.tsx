@@ -9,7 +9,7 @@ import React, { FC, lazy, Suspense, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeHelpMenuActions } from '@kbn/core/public';
-import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { CanvasPluginServices } from '../../services';
 
 let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;

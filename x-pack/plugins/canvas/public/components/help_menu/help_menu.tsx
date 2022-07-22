@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ChromeHelpMenuActions } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import { HelpMenu as Component } from './help_menu.component';

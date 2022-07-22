@@ -19,7 +19,7 @@ import { DataContext, DatatableComponent } from './table_basic';
 import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { Datatable, RenderMode } from '@kbn/expressions-plugin';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 

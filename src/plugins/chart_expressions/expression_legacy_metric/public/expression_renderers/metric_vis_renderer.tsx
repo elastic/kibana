@@ -20,7 +20,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
 // @ts-ignore
