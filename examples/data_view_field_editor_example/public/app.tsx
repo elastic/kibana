@@ -112,6 +112,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
         <EuiFlexItem data-test-subj="preconfiguredControlWrapper">
           <EuiCheckbox
             id={preconfigureId}
+            checked={preconfigured}
             label="Use preconfigured options"
             onChange={() => setPreconfigured(!preconfigured)}
           />
