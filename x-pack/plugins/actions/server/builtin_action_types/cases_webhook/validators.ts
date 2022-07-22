@@ -50,6 +50,11 @@ const validateConfig = (
 };
 
 export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) => {
+  console.log('hey', {
+    first: !secrets.password && !secrets.user,
+    second: secrets.password && secrets.user,
+    secrets,
+  });
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
   if (secrets.password && secrets.user) return;

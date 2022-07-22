@@ -61,8 +61,8 @@ export const ExternalIncidentServiceConfigurationSchema = schema.object(
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  user: schema.string(),
-  password: schema.string(),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
