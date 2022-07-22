@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
-import { topNElasticSearchQuery } from './topn';
-import { ElasticsearchClient, kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { topNElasticSearchQuery } from './topn';
 
 const anyQuery = 'any::query';
 const index = 'test';
@@ -26,7 +27,16 @@ jest.mock('./query', () => ({
 
 describe('TopN data from Elasticsearch', () => {
   const context = coreMock.createRequestHandlerContext();
-  const client = context.elasticsearch.client.asCurrentUser as ElasticsearchClient;
+  const client: ProfilingESClient = {
+    search: jest.fn(
+      (operationName, request) =>
+        context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
+    ),
+    mget: jest.fn(
+      (ooperationName, request) =>
+        context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
+    ),
+  };
   const logger = loggerMock.create();
 
   beforeEach(() => {

@@ -6,18 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { RouteRegisterParameters } from '.';
 import { fromMapToRecord, getRoutePaths } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
-import { createTopNSamples, TopNSamplesHistogramResponse } from '../../common/topn';
+import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
+import { createTopNSamples } from '../../common/topn';
+import { ProfilingRequestHandlerContext } from '../types';
+import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, createCommonFilter } from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
-import { getClient, getAggs } from './compat';
-import { ProfilingRequestHandlerContext } from '../types';
-import { RouteRegisterParameters } from '.';
-import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 
 export async function topNElasticSearchQuery({
   client,
@@ -31,7 +31,7 @@ export async function topNElasticSearchQuery({
   response,
   kuery,
 }: {
-  client: ElasticsearchClient;
+  client: ProfilingESClient;
   logger: Logger;
   index: string;
   projectID: string;
@@ -45,46 +45,41 @@ export async function topNElasticSearchQuery({
   const filter = createCommonFilter({ projectID, timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
-  const eventsIndex = await logExecutionLatency(
+  const eventsIndex = await findDownsampledIndex({
     logger,
-    'query to find downsampled index',
-    async () => {
-      return await findDownsampledIndex(logger, client, index, filter, targetSampleSize);
-    }
-  );
+    client,
+    index,
+    filter,
+    sampleSize: targetSampleSize,
+  });
 
-  const resEvents = await logExecutionLatency(
-    logger,
-    'query to fetch events from ' + eventsIndex.name,
-    async () => {
-      return await client.search(
-        {
-          index: eventsIndex.name,
-          size: 0,
-          query: filter,
-          aggs: {
-            histogram: autoHistogramSumCountOnGroupByField(searchField, n),
-          },
-        },
-        {
-          // Adrien and Dario found out this is a work-around for some bug in 8.1.
-          // It reduces the query time by avoiding unneeded searches.
-          querystring: {
-            pre_filter_shard_size: 1,
-          },
-        }
-      );
-    }
-  );
+  const resEvents = await client.search('get_top_n_histogram', {
+    index: eventsIndex.name,
+    size: 0,
+    query: filter,
+    aggs: {
+      histogram: autoHistogramSumCountOnGroupByField(searchField, n),
+    },
+    // Adrien and Dario found out this is a work-around for some bug in 8.1.
+    // It reduces the query time by avoiding unneeded searches.
+    pre_filter_shard_size: 1,
+  });
 
-  const histogram = getAggs(resEvents)?.histogram as unknown as
-    | TopNSamplesHistogramResponse
-    | undefined;
+  if (!resEvents.aggregations) {
+    return response.ok({
+      body: {
+        TopN: [],
+        Metadata: {},
+      },
+    });
+  }
+
+  const { histogram } = resEvents.aggregations;
   const topN = createTopNSamples(histogram);
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
-      body: { TopN: topN },
+      body: { TopN: topN, Metadata: {} },
     });
   }
 
@@ -96,25 +91,25 @@ export async function topNElasticSearchQuery({
   for (let i = 0; i < histogramBuckets.length; i++) {
     totalDocCount += histogramBuckets[i].doc_count;
     histogramBuckets[i].group_by.buckets.forEach((stackTraceItem) => {
-      const count = stackTraceItem.count.value;
-      const oldCount = stackTraceEvents.get(stackTraceItem.key);
+      const count = stackTraceItem.count.value ?? 0;
+      const oldCount = stackTraceEvents.get(String(stackTraceItem.key));
       totalCount += count + (oldCount ?? 0);
-      stackTraceEvents.set(stackTraceItem.key, count + (oldCount ?? 0));
+      stackTraceEvents.set(String(stackTraceItem.key), count + (oldCount ?? 0));
     });
   }
 
   logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
-  const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
+  const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
     logger,
     client,
-    stackTraceEvents
-  );
+    events: stackTraceEvents,
+  });
 
   return Promise.all([
-    mgetStackFrames(logger, client, stackFrameDocIDs),
-    mgetExecutables(logger, client, executableDocIDs),
+    mgetStackFrames({ logger, client, stackFrameIDs: stackFrameDocIDs }),
+    mgetExecutables({ logger, client, executableIDs: executableDocIDs }),
   ]).then(([stackFrames, executables]) => {
     const metadata = fromMapToRecord(
       groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables)
@@ -154,7 +149,7 @@ export function queryTopNCommon(
 
       try {
         return await topNElasticSearchQuery({
-          client,
+          client: createProfilingEsClient({ request, esClient: client }),
           logger,
           index,
           projectID,

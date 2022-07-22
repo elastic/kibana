@@ -6,75 +6,50 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
+import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
+import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
-import { logExecutionLatency } from './logger';
+import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter, ProjectTimeQuery } from './query';
-import {
-  mgetExecutables,
-  mgetStackFrames,
-  mgetStackTraces,
-  searchEventsGroupByStackTrace,
-} from './stacktrace';
 
-async function queryTopNFunctions(
-  logger: Logger,
-  client: ElasticsearchClient,
-  index: string,
-  filter: ProjectTimeQuery,
-  startIndex: number,
-  endIndex: number,
-  sampleSize: number
-): Promise<any> {
-  const eventsIndex = await logExecutionLatency(
-    logger,
-    'query to find downsampled index',
-    async () => {
-      return await findDownsampledIndex(logger, client, index, filter, sampleSize);
-    }
-  );
-
-  const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace(
-    logger,
-    client,
-    eventsIndex,
-    filter
-  );
-
-  // Manual downsampling if totalCount exceeds sampleSize by 10%.
-  if (totalCount > sampleSize * 1.1) {
-    let downsampledTotalCount = totalCount;
-    const p = sampleSize / totalCount;
-    logger.info('downsampling events with p=' + p);
-    await logExecutionLatency(logger, 'downsampling events', async () => {
-      downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+async function queryTopNFunctions({
+  logger,
+  client,
+  index,
+  filter,
+  startIndex,
+  endIndex,
+  sampleSize,
+}: {
+  logger: Logger;
+  client: ProfilingESClient;
+  index: string;
+  filter: ProjectTimeQuery;
+  startIndex: number;
+  endIndex: number;
+  sampleSize: number;
+}): Promise<any> {
+  return withProfilingSpan('query_topn_functions', async () => {
+    getExecutablesAndStackTraces({
+      client,
+      filter,
+      index,
+      logger,
+      sampleSize,
+    }).then(({ stackFrames, stackTraceEvents, stackTraces, executables }) => {
+      return createTopNFunctions(
+        stackTraceEvents,
+        stackTraces,
+        stackFrames,
+        executables,
+        startIndex,
+        endIndex
+      );
     });
-    logger.info('downsampled total count: ' + downsampledTotalCount);
-    logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
-  }
-
-  const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
-    logger,
-    client,
-    stackTraceEvents
-  );
-
-  return Promise.all([
-    mgetStackFrames(logger, client, stackFrameDocIDs),
-    mgetExecutables(logger, client, executableDocIDs),
-  ]).then(([stackFrames, executables]) => {
-    return createTopNFunctions(
-      stackTraceEvents,
-      stackTraces,
-      stackFrames,
-      executables,
-      startIndex,
-      endIndex
-    );
   });
 }
 
@@ -113,15 +88,15 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
           kuery,
         });
 
-        const topNFunctions = await queryTopNFunctions(
+        const topNFunctions = await queryTopNFunctions({
           logger,
-          esClient,
+          client: createProfilingEsClient({ request, esClient }),
           index,
           filter,
           startIndex,
           endIndex,
-          targetSampleSize
-        );
+          sampleSize: targetSampleSize,
+        });
         logger.info('returning payload response to client');
 
         return response.ok({

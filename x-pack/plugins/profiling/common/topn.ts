@@ -23,10 +23,10 @@ export interface TopNSamples {
 
 export interface TopNSamplesHistogramResponse {
   buckets: Array<{
-    key: string;
+    key: string | number;
     doc_count: number;
     group_by: {
-      buckets: Array<{ doc_count: number; key: string; count: { value: number } }>;
+      buckets: Array<{ doc_count: number; key: string | number; count: { value: number | null } }>;
     };
   }>;
 }
@@ -44,7 +44,7 @@ export function createTopNSamples(
     const items = histogramBuckets[i].group_by.buckets;
 
     for (let j = 0; j < items.length; j++) {
-      uniqueCategories.add(items[j].key);
+      uniqueCategories.add(String(items[j].key));
       frameCountsByCategory.set(items[j].key, items[j].count.value);
     }
     bucketsByTimestamp.set(histogramBuckets[i].key, frameCountsByCategory);
