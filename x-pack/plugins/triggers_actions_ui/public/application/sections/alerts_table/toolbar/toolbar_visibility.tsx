@@ -9,20 +9,16 @@ import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
+import { LastUpdatedAt } from './components/last_updated_at';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
-const LastUpdatedAt = lazy(() => import('./components/last_updated_at'));
 
 const getDefaultVisibility = (updatedAt: number) => {
   return {
     showColumnSelector: true,
     showSortSelector: true,
     additionalControls: {
-      right: (
-        <Suspense fallback={null}>
-          <LastUpdatedAt updatedAt={updatedAt} />
-        </Suspense>
-      ),
+      right: <LastUpdatedAt updatedAt={updatedAt} />,
     },
   };
 };
