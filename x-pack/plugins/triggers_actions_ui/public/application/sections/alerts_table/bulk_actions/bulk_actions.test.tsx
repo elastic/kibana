@@ -92,6 +92,7 @@ describe('AlertsTable.BulkActions', () => {
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
+    updatedAt: Date.now(),
   };
 
   const tablePropsWithBulkActions = {

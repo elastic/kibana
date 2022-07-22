@@ -88,6 +88,7 @@ describe('AlertsTable', () => {
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
+    updatedAt: Date.now(),
   };
 
   describe('Alerts table UI', () => {
