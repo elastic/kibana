@@ -96,7 +96,7 @@ describe('SaveTimelineButton', () => {
 
     expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
-    const saveTimelineIcon = screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN).firstChild;
+    const saveTimelineIcon = screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN);
 
     fireEvent.click(saveTimelineIcon);
 
