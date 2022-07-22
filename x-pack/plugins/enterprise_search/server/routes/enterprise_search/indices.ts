@@ -25,7 +25,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
     async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const indices = await fetchIndices(client, 'search-*', false, /^search-.*/);
+        const indices = await fetchIndices(client, '*', false);
         return response.ok({
           body: indices,
           headers: { 'content-type': 'application/json' },
