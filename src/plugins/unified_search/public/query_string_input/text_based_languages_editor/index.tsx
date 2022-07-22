@@ -229,7 +229,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         if (hasLines && !updateLinesFromModel) {
           setLines(queryString.split(/\r|\n/).length);
         }
-        const trimmedText = queryString.replace(/\r?\n|\r/g, ' ');
+        const trimmedText = queryString.replace(/\r?\n|\r/g, '');
         const text = hasLines ? trimmedText : queryString;
         const queryLength = text.length;
         const unusedSpace =
@@ -301,7 +301,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     lineNumbers: showLineNumbers ? 'on' : 'off',
     theme: 'vs',
     lineDecorationsWidth: 12,
-    accessibilitySupport: 'on',
     autoIndent: 'none',
     wrappingIndent: 'none',
     lineNumbersMinChars: 3,
@@ -379,7 +378,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                 <EuiToolTip
                   position="top"
                   content={i18n.translate(

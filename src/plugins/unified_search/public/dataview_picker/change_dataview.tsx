@@ -404,6 +404,9 @@ export function ChangeDataView({
           onSave: () => {
             cleanup(shouldDismissModal);
           },
+          onCancel: () => {
+            setIsTextLangTransitionModalVisible(false);
+          },
         });
       } else {
         cleanup(shouldDismissModal);

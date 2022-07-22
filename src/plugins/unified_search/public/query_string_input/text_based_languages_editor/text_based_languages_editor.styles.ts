@@ -45,6 +45,7 @@ export const textBasedLanguagedEditorStyles = (
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
       borderTopLeftRadius: '6px',
       borderBottomLeftRadius: '6px',
+      borderBottomWidth: hasErrors ? '2px' : '1px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
     linesBadge: {
@@ -65,7 +66,9 @@ export const textBasedLanguagedEditorStyles = (
       border: euiTheme.border.thin,
       borderTop:
         isCodeEditorExpanded && !isCodeEditorExpandedFocused
-          ? euiTheme.border.thin
+          ? hasErrors
+            ? `2px solid ${euiTheme.colors.danger}`
+            : euiTheme.border.thin
           : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
@@ -74,7 +77,7 @@ export const textBasedLanguagedEditorStyles = (
       paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
-      marginTop: '1px',
+      marginTop: 0,
       marginLeft: '-1px',
       borderBottomLeftRadius: '6px',
       borderBottomRightRadius: '6px',
@@ -84,8 +87,10 @@ export const textBasedLanguagedEditorStyles = (
       borderTopLeftRadius: '6px',
       borderTopRightRadius: '6px',
       backgroundColor: euiTheme.colors.lightestShade,
-      paddingLeft: euiTheme.size.s,
-      paddingRight: euiTheme.size.s,
+      paddingLeft: euiTheme.size.base,
+      paddingRight: euiTheme.size.base,
+      paddingTop: euiTheme.size.xs,
+      paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,

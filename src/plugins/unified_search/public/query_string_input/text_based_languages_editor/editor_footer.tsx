@@ -47,7 +47,7 @@ export const EditorFooter = memo(function EditorFooter({
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
             <EuiText size="xs" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
               <p>
                 {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
@@ -105,7 +105,7 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              <EuiFlexGroup gutterSize="s" alignItems="center">
+                              <EuiFlexGroup gutterSize="xl">
                                 <EuiFlexItem grow={false}>
                                   <EuiFlexGroup gutterSize="s" alignItems="center">
                                     <EuiFlexItem grow={false}>
@@ -153,6 +153,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCode
+              transparentBackground
               css={css`
                 font-size: 12px;
               `}

@@ -16,11 +16,20 @@
 .unifiedTextLangEditor--expanded .monaco-editor .margin {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  background-color: rgb(233, 237, 243);
+  background-color: $euiColorLightestShade;
   padding-top: 8px;
+  color: $euiColorDisabledText;
 }
 
-.unifiedTextLangEditor .monaco-editor .monaco-scrollable-element {
+.unifiedTextLangEditor .monaco-editor .margin-view-overlays .line-numbers {
+  color: $euiColorDisabledText;
+}
+
+.unifiedTextLangEditor .monaco-editor .current-line ~ .line-numbers {
+  color: $euiTextSubduedColor;
+}
+
+.unifiedTextLangEditor .monaco-editor .monaco-scrollable-element .lines-content {
   margin-top: 8px;
 }
 

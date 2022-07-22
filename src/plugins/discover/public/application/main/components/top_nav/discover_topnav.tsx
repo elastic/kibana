@@ -195,14 +195,14 @@ export const DiscoverTopNav = ({
   };
 
   const onTextBasedSavedAndExit = useCallback(
-    async ({ onSave }) => {
+    async ({ onSave, onCancel }) => {
       await onSaveSearch({
         savedSearch,
         services,
         indexPattern,
         navigateTo,
         state: stateContainer,
-        onClose: onSave,
+        onClose: onCancel,
         onSaveCb: onSave,
       });
     },
