@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import MetricVis, { MetricVisComponentProps } from './metric_vis';
+import MetricVis, { defaultColor, MetricVisComponentProps } from './metric_vis';
 import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
@@ -777,73 +777,33 @@ describe('MetricVisComponent', function () {
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
   });
 
-  describe('color palettes', () => {
-    const colorFromPalette = 'color-from-palette';
-    mockGetColorForValue.mockReturnValue(colorFromPalette);
+  describe('coloring', () => {
+    afterEach(() => mockGetColorForValue.mockClear());
 
-    it('should fetch color from palette if provided', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            dimensions: {
-              metric: basePriceColumnId,
-            },
-            metric: {
-              progressDirection: 'vertical',
-              maxCols: 5,
-              palette: {
-                colors: [],
-                gradient: true,
-                stops: [],
-                range: 'number',
-                rangeMin: 2,
-                rangeMax: 10,
-              },
-            },
-          }}
-          data={table}
-          renderComplete={() => {}}
-          renderMode={'view'}
-        />
-      );
+    describe('by palette', () => {
+      const colorFromPalette = 'color-from-palette';
+      mockGetColorForValue.mockReturnValue(colorFromPalette);
 
-      const [[datum]] = component.find(Metric).props().data!;
-
-      expect(datum!.color).toBe(colorFromPalette);
-      expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            28.984375,
-            Object {
-              "colors": Array [],
-              "gradient": true,
-              "range": "number",
-              "rangeMax": 10,
-              "rangeMin": 2,
-              "stops": Array [],
-            },
-            Object {
-              "max": 10,
-              "min": 2,
-            },
-          ],
-        ]
-      `);
-    });
-
-    describe('percent-based', () => {
-      const renderWithPalette = (
-        palette: CustomPaletteState,
-        dimensions: MetricVisComponentProps['config']['dimensions']
-      ) =>
-        shallow(
+      it('should fetch color from palette if provided', () => {
+        const component = shallow(
           <MetricVis
             config={{
-              dimensions,
+              dimensions: {
+                metric: basePriceColumnId,
+              },
               metric: {
-                palette,
                 progressDirection: 'vertical',
                 maxCols: 5,
+                // should be overridden
+                color: 'static-color',
+                palette: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
               },
             }}
             data={table}
@@ -852,46 +812,148 @@ describe('MetricVisComponent', function () {
           />
         );
 
-      const dimensionsAndExpectedBounds = [
-        [
-          'breakdown-by and max',
-          {
-            metric: minPriceColumnId,
-            max: basePriceColumnId,
-            breakdownBy: dayOfWeekColumnId,
-          },
-        ],
-        ['just breakdown-by', { metric: minPriceColumnId, breakdownBy: dayOfWeekColumnId }],
-        ['just max', { metric: minPriceColumnId, max: basePriceColumnId }],
-      ];
+        const [[datum]] = component.find(Metric).props().data!;
 
-      it.each(dimensionsAndExpectedBounds)(
-        'should set correct data bounds with %s dimension',
-        // @ts-expect-error
-        (label, dimensions) => {
-          mockGetColorForValue.mockClear();
+        expect(datum!.color).toBe(colorFromPalette);
+        expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              28.984375,
+              Object {
+                "colors": Array [],
+                "gradient": true,
+                "range": "number",
+                "rangeMax": 10,
+                "rangeMin": 2,
+                "stops": Array [],
+              },
+              Object {
+                "max": 10,
+                "min": 2,
+              },
+            ],
+          ]
+        `);
+      });
 
-          renderWithPalette(
-            {
-              range: 'percent',
-              // the rest of these params don't matter
-              colors: [],
-              gradient: false,
-              stops: [],
-              rangeMin: 2,
-              rangeMax: 10,
-            },
-            dimensions as DimensionsVisParam
+      describe('percent-based', () => {
+        const renderWithPalette = (
+          palette: CustomPaletteState,
+          dimensions: MetricVisComponentProps['config']['dimensions']
+        ) =>
+          shallow(
+            <MetricVis
+              config={{
+                dimensions,
+                metric: {
+                  palette,
+                  progressDirection: 'vertical',
+                  maxCols: 5,
+                },
+              }}
+              data={table}
+              renderComplete={() => {}}
+              renderMode={'view'}
+            />
           );
 
-          expect(
-            mockGetColorForValue.mock.calls.map(([value, _palette, bounds]) => ({
-              value,
-              ...bounds,
-            }))
-          ).toMatchSnapshot();
-        }
-      );
+        const dimensionsAndExpectedBounds = [
+          [
+            'breakdown-by and max',
+            {
+              metric: minPriceColumnId,
+              max: basePriceColumnId,
+              breakdownBy: dayOfWeekColumnId,
+            },
+          ],
+          ['just breakdown-by', { metric: minPriceColumnId, breakdownBy: dayOfWeekColumnId }],
+          ['just max', { metric: minPriceColumnId, max: basePriceColumnId }],
+        ];
+
+        it.each(dimensionsAndExpectedBounds)(
+          'should set correct data bounds with %s dimension',
+          // @ts-expect-error
+          (label, dimensions) => {
+            mockGetColorForValue.mockClear();
+
+            renderWithPalette(
+              {
+                range: 'percent',
+                // the rest of these params don't matter
+                colors: [],
+                gradient: false,
+                stops: [],
+                rangeMin: 2,
+                rangeMax: 10,
+              },
+              dimensions as DimensionsVisParam
+            );
+
+            expect(
+              mockGetColorForValue.mock.calls.map(([value, _palette, bounds]) => ({
+                value,
+                ...bounds,
+              }))
+            ).toMatchSnapshot();
+          }
+        );
+      });
+    });
+
+    describe('by static color', () => {
+      it('uses static color if no palette', () => {
+        const staticColor = 'static-color';
+
+        const component = shallow(
+          <MetricVis
+            config={{
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                color: staticColor,
+                palette: undefined,
+              },
+            }}
+            data={table}
+            renderComplete={() => {}}
+            renderMode={'view'}
+          />
+        );
+
+        const [[datum]] = component.find(Metric).props().data!;
+
+        expect(datum!.color).toBe(staticColor);
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
+
+      it('defaults if no static color', () => {
+        const component = shallow(
+          <MetricVis
+            config={{
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                color: undefined,
+                palette: undefined,
+              },
+            }}
+            data={table}
+            renderComplete={() => {}}
+            renderMode={'view'}
+          />
+        );
+
+        const [[datum]] = component.find(Metric).props().data!;
+
+        expect(datum!.color).toBe(defaultColor);
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
     });
   });
 

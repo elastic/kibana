@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MetricVisComponent color palettes percent-based should set correct data bounds with breakdown-by and max dimension 1`] = `
+exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with breakdown-by and max dimension 1`] = `
 Array [
   Object {
     "max": 28.984375,
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`MetricVisComponent color palettes percent-based should set correct data bounds with just breakdown-by dimension 1`] = `
+exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with just breakdown-by dimension 1`] = `
 Array [
   Object {
     "max": 13.639539930555555,
@@ -70,7 +70,7 @@ Array [
 ]
 `;
 
-exports[`MetricVisComponent color palettes percent-based should set correct data bounds with just max dimension 1`] = `
+exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with just max dimension 1`] = `
 Array [
   Object {
     "max": 28.984375,

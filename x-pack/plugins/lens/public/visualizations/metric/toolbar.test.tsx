@@ -9,13 +9,14 @@ import React, { ChangeEvent, FormEvent } from 'react';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Toolbar } from './toolbar';
-import { MetricVisualizationState } from './visualization';
+import { getDefaultColor, MetricVisualizationState } from './visualization';
 import { createMockFramePublicAPI } from '../../mocks';
 import { HTMLAttributes, ReactWrapper } from 'enzyme';
-import { EuiButtonGroup, EuiFieldText } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker, EuiFieldText } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
+import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -35,7 +36,7 @@ describe('metric toolbar', () => {
     },
   };
 
-  const fullState: MetricVisualizationState = {
+  const fullState: Required<MetricVisualizationState> = {
     layerId: 'first',
     layerType: 'data',
     metricAccessor: 'metric-col-id',
@@ -47,6 +48,7 @@ describe('metric toolbar', () => {
     secondaryPrefix: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
+    color: 'static-color',
     palette,
   };
 
@@ -69,6 +71,10 @@ describe('metric toolbar', () => {
 
     private get progressDirectionControl() {
       return this._wrapper.find(EuiButtonGroup);
+    }
+
+    public get colorPicker() {
+      return this._wrapper.find(EuiColorPicker);
     }
 
     public get currentState() {
@@ -107,15 +113,26 @@ describe('metric toolbar', () => {
         target: { value: String(max) },
       } as unknown as FormEvent);
     }
+
+    public setColor(color: string) {
+      act(() => {
+        this.colorPicker.props().onChange!(color, {} as EuiColorPickerOutput);
+      });
+    }
+
+    public get colorDisabled() {
+      return this.colorPicker.props().disabled;
+    }
   }
 
   let harness: Harness;
   const mockSetState = jest.fn();
+
+  const getHarnessWithState = (state: MetricVisualizationState) =>
+    new Harness(mountWithIntl(<Toolbar state={state} setState={mockSetState} frame={frame} />));
+
   beforeEach(() => {
-    const wrapper = mountWithIntl(
-      <Toolbar state={fullState} setState={mockSetState} frame={frame} />
-    );
-    harness = new Harness(wrapper);
+    harness = getHarnessWithState(fullState);
   });
 
   afterEach(() => mockSetState.mockClear());
@@ -144,16 +161,7 @@ describe('metric toolbar', () => {
     });
 
     it('disables progress direction toggle when no maximum', () => {
-      const localHarness = new Harness(
-        mountWithIntl(
-          <Toolbar
-            state={{ ...fullState, maxAccessor: undefined }}
-            setState={mockSetState}
-            frame={frame}
-          />
-        )
-      );
-
+      const localHarness = getHarnessWithState({ ...fullState, maxAccessor: undefined });
       localHarness.toggleOpenDisplayOptions();
       expect(localHarness.progressDirectionDisabled).toBe(true);
     });
@@ -189,6 +197,41 @@ describe('metric toolbar', () => {
           3,
         ]
       `);
+    });
+
+    describe('color picker', () => {
+      it('is disabled when color-by-value is enabled', () => {
+        const harnessWithPalette = getHarnessWithState({ ...fullState, palette });
+        harnessWithPalette.toggleOpenDisplayOptions();
+        expect(harnessWithPalette.colorDisabled).toBeTruthy();
+
+        const harnessNoPalette = getHarnessWithState({ ...fullState, palette: undefined });
+        harnessNoPalette.toggleOpenDisplayOptions();
+        expect(harnessNoPalette.colorDisabled).toBeFalsy();
+      });
+
+      it('fills placeholder with default value', () => {
+        const localHarness = getHarnessWithState({ ...fullState, color: undefined });
+        localHarness.toggleOpenDisplayOptions();
+        expect(localHarness.colorPicker.props().placeholder).toBe(
+          getDefaultColor(!!fullState.maxAccessor)
+        );
+      });
+
+      it('sets color', () => {
+        const newColor = 'new-color';
+        harness.setColor(newColor + 1);
+        harness.setColor(newColor + 2);
+        harness.setColor(newColor + 3);
+        expect(mockSetState).toHaveBeenCalledTimes(3);
+        expect(mockSetState.mock.calls.map((args) => args[0].color)).toMatchInlineSnapshot(`
+          Array [
+            "new-color1",
+            "new-color2",
+            "new-color3",
+          ]
+        `);
+      });
     });
   });
 });

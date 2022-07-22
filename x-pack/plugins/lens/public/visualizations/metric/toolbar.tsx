@@ -14,12 +14,14 @@ import {
   EuiToolTip,
   EuiButtonGroup,
   EuiFieldNumber,
+  EuiColorPicker,
 } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, useDebouncedValue } from '../../shared_components';
 import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
+import { getDefaultColor } from './visualization';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;
@@ -37,6 +39,21 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
       },
       { allowFalsyValue: true }
     );
+
+  const setColor = useCallback((color: string) => setState({ ...state, color }), [setState, state]);
+
+  const { inputValue: currentColor, handleInputChange: handleColorChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setColor,
+        value: state.color || '',
+      },
+      { allowFalsyValue: true }
+    );
+
+  const colorLabel = i18n.translate('xpack.lens.metric.color', {
+    defaultMessage: 'Color',
+  });
 
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
   const idPrefix = htmlIdGenerator()();
@@ -155,6 +172,37 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
             value={state.maxCols ?? DEFAULT_MAX_COLUMNS}
             onChange={(event) => setState({ ...state, maxCols: parseInt(event.target.value, 10) })}
           />
+        </EuiFormRow>
+
+        <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
+          {/* TODO - could we give the user a button to disable color-by-value? */}
+          <EuiToolTip
+            content={
+              state.palette ? (
+                <p>
+                  {i18n.translate('xpack.lens.metric.colorIgnoredExplanation', {
+                    defaultMessage:
+                      'Ignored because dynamic coloring is configured on the metric dimension. Disable "color by value" to use this color instead.',
+                  })}
+                </p>
+              ) : null
+            }
+            position="right"
+            display="block"
+          >
+            <EuiColorPicker
+              fullWidth
+              data-test-subj="lnsMetric_colorpicker"
+              compressed
+              isClearable={true}
+              onChange={(color: string) => handleColorChange(color)}
+              color={currentColor}
+              disabled={!!state.palette}
+              placeholder={getDefaultColor(!!state.maxAccessor)}
+              aria-label={colorLabel}
+              showAlpha={false}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </ToolbarPopover>
     </EuiFlexGroup>

@@ -13,6 +13,7 @@ import { Ast, AstFunction } from '@kbn/interpreter';
 import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
+import { euiLightVars } from '@kbn/ui-theme';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
@@ -24,6 +25,9 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
 export const DEFAULT_MAX_COLUMNS = 3;
+
+export const getDefaultColor = (hasMax: boolean) =>
+  hasMax ? euiLightVars.euiColorPrimary : '#F1F1F1';
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -38,6 +42,7 @@ export interface MetricVisualizationState {
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
+  color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 }
@@ -99,6 +104,8 @@ const toExpression = (
     };
   };
 
+  const defaultColor = getDefaultColor(!!state.maxAccessor);
+
   return {
     type: 'expression',
     chain: [
@@ -124,6 +131,7 @@ const toExpression = (
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
+          color: [state.color ?? defaultColor],
           palette: state.palette?.params
             ? [
                 paletteService

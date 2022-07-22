@@ -18,7 +18,7 @@ import {
   Visualization,
 } from '../../types';
 import { GROUP_ID } from './constants';
-import { getMetricVisualization, MetricVisualizationState } from './visualization';
+import { getDefaultColor, getMetricVisualization, MetricVisualizationState } from './visualization';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 
@@ -35,7 +35,7 @@ describe('metric visualization', () => {
     },
   };
 
-  const fullState: MetricVisualizationState = {
+  const fullState: Required<MetricVisualizationState> = {
     layerId: 'first',
     layerType: 'data',
     metricAccessor: 'metric-col-id',
@@ -47,6 +47,7 @@ describe('metric visualization', () => {
     secondaryPrefix: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
+    color: 'static-color',
     palette,
   };
 
@@ -221,6 +222,9 @@ describe('metric visualization', () => {
             Object {
               "arguments": Object {
                 "breakdownBy": Array [],
+                "color": Array [
+                  "static-color",
+                ],
                 "max": Array [
                   "max-metric-col-id",
                 ],
@@ -278,6 +282,9 @@ describe('metric visualization', () => {
               "arguments": Object {
                 "breakdownBy": Array [
                   "breakdown-col-id",
+                ],
+                "color": Array [
+                  "static-color",
                 ],
                 "max": Array [
                   "max-metric-col-id",
@@ -422,11 +429,57 @@ describe('metric visualization', () => {
       expect(ast.chain).toHaveLength(3);
       expect(ast.chain[0]).toEqual(datasourceFn);
     });
+
+    describe('static color', () => {
+      it('uses color from state', () => {
+        const color = 'color-fun';
+
+        expect(
+          (
+            visualization.toExpression(
+              {
+                ...fullState,
+                color,
+              },
+              datasourceLayers
+            ) as ExpressionAstExpression
+          ).chain[1].arguments.color[0]
+        ).toBe(color);
+      });
+
+      it('can use a default color', () => {
+        expect(
+          (
+            visualization.toExpression(
+              {
+                ...fullState,
+                color: undefined,
+              },
+              datasourceLayers
+            ) as ExpressionAstExpression
+          ).chain[1].arguments.color[0]
+        ).toBe(getDefaultColor(true));
+
+        expect(
+          (
+            visualization.toExpression(
+              {
+                ...fullState,
+                maxAccessor: undefined,
+                color: undefined,
+              },
+              datasourceLayers
+            ) as ExpressionAstExpression
+          ).chain[1].arguments.color[0]
+        ).toBe(getDefaultColor(false));
+      });
+    });
   });
 
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
       Object {
+        "color": "static-color",
         "layerId": "first",
         "layerType": "data",
         "maxCols": 5,

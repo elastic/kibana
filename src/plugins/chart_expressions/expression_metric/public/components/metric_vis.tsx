@@ -43,7 +43,7 @@ import {
 import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
-const defaultColor = euiLightVars.euiColorDarkestShade;
+export const defaultColor = euiLightVars.euiColorDarkestShade;
 
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
@@ -147,15 +147,11 @@ const getMetricFormatter = (
 
 const getColor = (
   value: number,
-  paletteParams: CustomPaletteState | undefined,
+  paletteParams: CustomPaletteState,
   accessors: { metric: string; max?: string; breakdownBy?: string },
   data: Datatable,
   rowNumber: number
 ) => {
-  if (!paletteParams) {
-    return defaultColor;
-  }
-
   let minBound = paletteParams.rangeMin;
   let maxBound = paletteParams.rangeMax;
 
@@ -240,17 +236,19 @@ const MetricVisComponent = ({
             : undefined}
         </span>
       ),
-      color: getColor(
-        value,
-        config.metric.palette,
-        {
-          metric: primaryMetricColumn.id,
-          max: maxColId,
-          breakdownBy: breakdownByColumn?.id,
-        },
-        data,
-        rowIdx
-      ),
+      color: config.metric.palette
+        ? getColor(
+            value,
+            config.metric.palette,
+            {
+              metric: primaryMetricColumn.id,
+              max: maxColId,
+              breakdownBy: breakdownByColumn?.id,
+            },
+            data,
+            rowIdx
+          )
+        : config.metric.color ?? defaultColor,
       ...getProgressBarConfig(row),
     };
   });

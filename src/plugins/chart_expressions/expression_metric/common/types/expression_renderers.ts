@@ -22,6 +22,7 @@ export interface DimensionsVisParam {
 export interface MetricVisParam {
   subtitle?: string;
   secondaryPrefix?: string;
+  color?: string;
   palette?: CustomPaletteState;
   progressDirection: LayoutDirection;
   maxCols: number;
