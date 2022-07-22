@@ -6,18 +6,19 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render, screen } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { expectTextsInDocument } from '../../../utils/test_helpers';
 import * as stories from './service_overview.stories';
 
 const { Example } = composeStories(stories);
 
 describe('ServiceOverview', () => {
   it('renders', async () => {
-    render(<Example />);
+    const component = render(<Example />);
 
-    expect(
-      await screen.findByRole('heading', { name: /Latency/ })
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expectTextsInDocument(component, ['Latency']);
+    });
   });
 });
