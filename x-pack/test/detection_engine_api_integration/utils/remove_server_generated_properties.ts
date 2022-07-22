@@ -20,7 +20,6 @@ export const removeServerGeneratedProperties = (
     created_at,
     updated_at,
     execution_summary,
-    /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
   return removedProperties;

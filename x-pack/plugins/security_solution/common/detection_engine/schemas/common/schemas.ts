@@ -14,6 +14,7 @@ import {
   PositiveInteger,
   PositiveIntegerGreaterThanZero,
   UUID,
+  LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
@@ -280,6 +281,13 @@ export const thresholdWithCardinality = t.intersection([
   ),
 ]);
 export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
+
+// New terms rule type currently only supports a single term, but should support more in the future
+export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
+export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
+
+export const historyWindowStart = NonEmptyString;
+export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
 
 export const created_at = IsoDateString;
 

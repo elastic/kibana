@@ -55,6 +55,10 @@ export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobS
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
+export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
+
+export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
+
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
 
