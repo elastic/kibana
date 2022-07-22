@@ -362,7 +362,7 @@ describe('IndexPatternDimensionEditorPanel#getDropProps', () => {
         })
       ).toEqual({
         dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-        nextLabel: 'Minimum',
+        nextLabel: 'Count',
       });
     });
 

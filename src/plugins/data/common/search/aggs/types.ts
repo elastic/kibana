@@ -15,6 +15,7 @@ import {
   aggBucketMin,
   aggBucketSum,
   aggCardinality,
+  aggValueCount,
   AggConfigs,
   AggConfigSerialized,
   aggCount,
@@ -41,6 +42,7 @@ import {
   AggParamsBucketSum,
   AggParamsFilteredMetric,
   AggParamsCardinality,
+  AggParamsValueCount,
   AggParamsCumulativeSum,
   AggParamsDateHistogram,
   AggParamsDateRange,
@@ -174,6 +176,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: AggParamsCount;
+  [METRIC_TYPES.VALUE_COUNT]: AggParamsValueCount;
   [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
@@ -222,6 +225,7 @@ export interface AggFunctionsMapping {
   aggBucketSum: ReturnType<typeof aggBucketSum>;
   aggFilteredMetric: ReturnType<typeof aggFilteredMetric>;
   aggCardinality: ReturnType<typeof aggCardinality>;
+  aggValueCount: ReturnType<typeof aggValueCount>;
   aggCount: ReturnType<typeof aggCount>;
   aggCumulativeSum: ReturnType<typeof aggCumulativeSum>;
   aggDerivative: ReturnType<typeof aggDerivative>;

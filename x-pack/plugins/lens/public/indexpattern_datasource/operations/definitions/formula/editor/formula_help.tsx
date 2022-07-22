@@ -483,7 +483,7 @@ export function getFunctionSignatureLabel(
     const def = operationDefinitionMap[name];
     let extraArgs = '';
     if (def.filterable) {
-      extraArgs += hasFunctionFieldArgument(name) || 'operationParams' in def ? ',' : '';
+      extraArgs += ',';
       extraArgs += i18n.translate('xpack.lens.formula.kqlExtraArguments', {
         defaultMessage: '[kql]?: string, [lucene]?: string',
       });
