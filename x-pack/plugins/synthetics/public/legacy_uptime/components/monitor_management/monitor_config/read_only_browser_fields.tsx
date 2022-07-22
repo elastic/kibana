@@ -121,6 +121,36 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
             readOnly={true}
           />
         </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.label"
+              defaultMessage="Parameters"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText"
+              defaultMessage="Use JSON to define parameters that can be referenced in your script with {code}"
+              values={{ code: <EuiCode>params.value</EuiCode> }}
+            />
+          }
+        >
+          <CodeEditor
+            ariaLabel={i18n.translate(
+              'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+              {
+                defaultMessage: 'JSON code editor',
+              }
+            )}
+            id="jsonParamsEditor"
+            languageId={MonacoEditorLangId.JSON}
+            value={fields[ConfigKey.PARAMS]}
+            readOnly={true}
+            data-test-subj="syntheticsBrowserParams"
+          />
+        </EuiFormRow>
       </DescribedFormGroupWithWrap>
       <EuiSpacer />
       <EuiAccordion
@@ -147,36 +177,6 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
           minColumnWidth={minColumnWidth}
         >
           <EuiSpacer size="s" />
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.label"
-                defaultMessage="Parameters"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText"
-                defaultMessage="Use JSON to define parameters that can be referenced in your script with {code}"
-                values={{ code: <EuiCode>params.value</EuiCode> }}
-              />
-            }
-          >
-            <CodeEditor
-              ariaLabel={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
-                {
-                  defaultMessage: 'JSON code editor',
-                }
-              )}
-              id="jsonParamsEditor"
-              languageId={MonacoEditorLangId.JSON}
-              value={fields[ConfigKey.PARAMS]}
-              readOnly={true}
-              data-test-subj="syntheticsBrowserParams"
-            />
-          </EuiFormRow>
           <EuiFormRow
             label={
               <FormattedMessage
