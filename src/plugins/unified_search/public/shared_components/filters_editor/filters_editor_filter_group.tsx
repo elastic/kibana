@@ -28,19 +28,25 @@ const filterGroupCss = css`
   padding: 12px;
 `;
 
+const delimiterOrCss = css`
+  color: $euiColorLightShade;
+  font-size: 13px;
+  padding: 3px 6px;
+`;
+
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
-  <EuiFlexGroup gutterSize="none" responsive={false}>
+  <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
     <EuiFlexItem>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText color="subdued">
+      <EuiText color="subdued" className={delimiterOrCss}>
         {conditionType === ConditionTypes.OR
           ? i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
-              defaultMessage: 'or',
+              defaultMessage: 'OR',
             })
           : i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
-              defaultMessage: 'and',
+              defaultMessage: 'AND',
             })}
       </EuiText>
     </EuiFlexItem>
