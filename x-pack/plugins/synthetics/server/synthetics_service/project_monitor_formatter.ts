@@ -105,13 +105,10 @@ export class ProjectMonitorFormatter {
 
   public configureAllProjectMonitors = async () => {
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
-    await Promise.all(
-      this.monitors.map((monitor) =>
-        this.configureProjectMonitor({
-          monitor,
-        })
-      )
-    );
+    for (const monitor of this.monitors) {
+      await this.configureProjectMonitor({ monitor });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
     await this.handleStaleMonitors();
   };
