@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
@@ -19,7 +20,6 @@ export const ColorStops = ({
   getStopError,
   renderStopInput,
   addNewRow,
-  canDeleteStop,
   swatches,
 }) => {
   function getStopInput(stop, index) {
@@ -75,7 +75,7 @@ export const ColorStops = ({
     };
 
     let deleteButton;
-    if (canDeleteStop(colorStops, index)) {
+    if (colorStops.length > 1) {
       const onRemove = () => {
         const newColorStops = removeRow(colorStops, index);
         onChange({
@@ -135,5 +135,10 @@ export const ColorStops = ({
     );
   });
 
-  return <div>{rows}</div>;
+  return (
+    <div>
+      {rows}
+      <EuiSpacer size="s" />
+    </div>
+  );
 };
