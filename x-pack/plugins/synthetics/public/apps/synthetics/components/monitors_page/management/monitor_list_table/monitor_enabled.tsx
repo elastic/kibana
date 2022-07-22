@@ -6,8 +6,7 @@
  */
 
 import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
@@ -24,35 +23,16 @@ interface Props {
 export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
-  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({ id, monitor });
-
-  const { notifications } = useKibana();
-
-  useEffect(() => {
-    if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateFailure">
-            {labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      setIsEnabled(null);
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
-            {isEnabled
-              ? labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME])
-              : labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME])}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      reloadPage();
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { isEnabled, setIsEnabled, status } = useMonitorEnableHandler({
+    id,
+    monitor,
+    reloadPage,
+    labels: {
+      failureLabel: labels.getMonitorEnabledUpdateFailureMessage(monitor[ConfigKey.NAME]),
+      enabledSuccessLabel: labels.getMonitorEnabledSuccessLabel(monitor[ConfigKey.NAME]),
+      disabledSuccessLabel: labels.getMonitorDisabledSuccessLabel(monitor[ConfigKey.NAME]),
+    },
+  });
 
   const enabled = isEnabled ?? monitor[ConfigKey.ENABLED];
   const isLoading = status === FETCH_STATUS.LOADING;
