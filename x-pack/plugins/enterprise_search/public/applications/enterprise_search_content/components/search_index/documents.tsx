@@ -38,7 +38,7 @@ export const SearchIndexDocuments: React.FC = () => {
   }, [indexName]);
 
   const resultToField = (result: SearchHit) => {
-    if (result._source && !Array.isArray(result._source)) {
+    if (simplifiedMapping && result._source && !Array.isArray(result._source)) {
       if (typeof result._source === 'object') {
         return Object.entries(result._source).map(([key, value]) => {
           return {

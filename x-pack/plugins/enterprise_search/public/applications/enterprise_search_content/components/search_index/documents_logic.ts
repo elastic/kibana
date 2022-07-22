@@ -14,7 +14,9 @@ import {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
+
+import { flashAPIErrors, clearFlashMessages } from '../../../shared/flash_messages';
 
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
 import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
@@ -22,9 +24,11 @@ import { SearchDocumentsApiLogic } from '../../api/search_documents/search_docum
 import { IndexNameLogic } from './index_name_logic';
 
 interface DocumentsLogicActions {
+  apiError(error: HttpError): HttpError;
   apiReset: typeof SearchDocumentsApiLogic.actions.apiReset;
   makeMappingRequest: typeof MappingsApiLogic.actions.makeRequest;
   makeRequest: typeof SearchDocumentsApiLogic.actions.makeRequest;
+  mappingsApiError(error: HttpError): HttpError;
   setSearchQuery(query: string): { query: string };
 }
 
@@ -36,7 +40,7 @@ interface DocumentsLogicValues {
   mappingStatus: Status;
   query: string;
   results: SearchHit[];
-  simplifiedMapping: Record<string, MappingProperty>;
+  simplifiedMapping: Record<string, MappingProperty> | undefined;
   status: Status;
 }
 
@@ -47,9 +51,9 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
   connect: {
     actions: [
       SearchDocumentsApiLogic,
-      ['apiReset', 'makeRequest'],
+      ['apiReset', 'makeRequest', 'apiError'],
       MappingsApiLogic,
-      ['makeRequest as makeMappingRequest'],
+      ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
     ],
     values: [
       SearchDocumentsApiLogic,
@@ -61,9 +65,9 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
     ],
   },
   listeners: ({ actions, values }) => ({
-    openGenerateModal: () => {
-      actions.apiReset();
-    },
+    apiError: (e) => flashAPIErrors(e),
+    makeRequest: () => clearFlashMessages(),
+    mappingsApiError: (e) => flashAPIErrors(e),
     setSearchQuery: async (_, breakpoint) => {
       await breakpoint(250);
       actions.makeRequest({ indexName: values.indexName, query: values.query });
@@ -94,7 +98,7 @@ export const DocumentsLogic = kea<MakeLogicType<DocumentsLogicValues, DocumentsL
     simplifiedMapping: [
       () => [selectors.mappingStatus, selectors.mappingData],
       (status: Status, mapping: IndicesGetMappingIndexMappingRecord) => {
-        if (status !== Status.SUCCESS) return {};
+        if (status !== Status.SUCCESS) return;
         return mapping?.mappings?.properties;
       },
     ],
