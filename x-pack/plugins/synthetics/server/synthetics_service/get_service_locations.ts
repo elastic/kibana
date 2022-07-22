@@ -30,7 +30,7 @@ export const getDevLocation = (devUrl: string): PublicLocation => ({
 export async function getServiceLocations(server: UptimeServerSetup) {
   let locations: PublicLocations = [];
 
-  if (process.env.NODE_ENV !== 'production' && server.config.service?.devUrl) {
+  if (server.config.service?.devUrl) {
     locations = [getDevLocation(server.config.service.devUrl)];
   }
 
