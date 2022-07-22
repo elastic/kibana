@@ -4,44 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { EuiButton, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import React from 'react';
+import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 interface OpenInDevConsoleButtonProps {
   enableButton: boolean;
-  learnMoreUrl?: string;
   loadFromUrl: string;
-  popoverContent?: string;
+  tooltipContent?: string;
   title: string;
 }
 
-const Popover = styled(EuiPanel)`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 340px;
-`;
-
-const PopoverWrapper = styled.div`
-  position: relative;
-`;
-
 const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = ({
   enableButton,
-  learnMoreUrl,
   loadFromUrl,
-  popoverContent,
+  tooltipContent,
   title,
 }) => {
   const href = `/app/dev_tools#/console?load_from=${loadFromUrl}`;
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const onMouseEnter = () => {
-    setIsPopoverOpen(true);
-  };
-
-  const closePopover = () => setIsPopoverOpen(false);
 
   return (
     <EuiFlexItem>
@@ -55,44 +34,23 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
         >
           {title}
         </EuiButton>
-      ) : popoverContent ? (
-        <PopoverWrapper onMouseEnter={onMouseEnter} onMouseLeave={closePopover}>
-          {isPopoverOpen && (
-            <Popover>
-              <EuiText>
-                {popoverContent}{' '}
-                {learnMoreUrl && (
-                  <EuiLink
-                    href={learnMoreUrl}
-                    target="_blank"
-                    external={false}
-                    data-test-subj="open-in-console-learn-more"
-                  >
-                    <FormattedMessage
-                      defaultMessage="Learn More"
-                      id="xpack.securitySolution.openInDevConsole.learnMoreLinkTitle"
-                    />
-                  </EuiLink>
-                )}
-              </EuiText>
-            </Popover>
-          )}
+      ) : tooltipContent ? (
+        <EuiToolTip content={tooltipContent}>
           <EuiButton
             href={href}
             color="warning"
             isDisabled={true}
-            data-test-subj="disabled-open-in-console-button-with-popover"
+            data-test-subj="disabled-open-in-console-button-with-tooltip"
           >
             {title}
           </EuiButton>
-        </PopoverWrapper>
+        </EuiToolTip>
       ) : (
         <EuiButton
           href={href}
           color="warning"
           isDisabled={true}
           data-test-subj="disabled-open-in-console-button"
-          onMouseEnter={onMouseEnter}
         >
           {title}
         </EuiButton>

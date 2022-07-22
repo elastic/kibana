@@ -44,7 +44,7 @@ export const RiskyHostsDisabledModuleComponent = () => {
           loadFromUrl={loadFromUrl}
           enableButton={!!signalIndexExists}
           title={ENABLE_VIA_DEV_TOOLS}
-          popoverContent={i18n.ENABLE_RISK_SCORE_POPOVER}
+          tooltipContent={i18n.ENABLE_RISK_SCORE_POPOVER}
         />
       }
     />

@@ -15,9 +15,8 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={true}
-          learnMoreUrl="/test"
           loadFromUrl="http://localhost:1234/test"
-          popoverContent="popover"
+          tooltipContent="popover"
           title="open in dev console"
         />
       </TestProviders>
@@ -30,7 +29,6 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          learnMoreUrl="/test"
           loadFromUrl="http://localhost:1234/test"
           title="open in dev console"
         />
@@ -44,42 +42,20 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={false}
-          learnMoreUrl="/test"
           loadFromUrl="http://localhost:1234/test"
           title="open in dev console"
-          popoverContent="popoverContent"
+          tooltipContent="tooltipContent"
         />
       </TestProviders>
     );
 
     act(() => {
-      fireEvent.mouseEnter(screen.getByTestId('disabled-open-in-console-button-with-popover'));
+      fireEvent.mouseEnter(screen.getByTestId('disabled-open-in-console-button-with-tooltip'));
     });
     await waitFor(() => {
       expect(
-        screen.getByTestId('disabled-open-in-console-button-with-popover')
+        screen.getByTestId('disabled-open-in-console-button-with-tooltip')
       ).toBeInTheDocument();
-    });
-  });
-
-  it('renders a disabled button with a learn more link in the popover', async () => {
-    render(
-      <TestProviders>
-        <OpenInDevConsoleButton
-          enableButton={false}
-          learnMoreUrl="/test"
-          loadFromUrl="http://localhost:1234/test"
-          title="open in dev console"
-          popoverContent="popoverContent"
-        />
-      </TestProviders>
-    );
-
-    act(() => {
-      fireEvent.mouseEnter(screen.getByTestId('disabled-open-in-console-button-with-popover'));
-    });
-    await waitFor(() => {
-      expect(screen.getByTestId('open-in-console-learn-more')).toBeInTheDocument();
     });
   });
 });
