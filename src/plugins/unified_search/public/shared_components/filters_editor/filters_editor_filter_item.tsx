@@ -7,7 +7,14 @@
  */
 
 import React, { useContext, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonIcon, EuiFormRow } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiFormRow,
+  EuiPanel,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/css';
@@ -218,7 +225,7 @@ export function FilterItem({
           filters={filter.meta?.params?.filters}
         />
       ) : (
-        <>
+        <EuiPanel color="subdued" paddingSize="s">
           <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="grab" size="s" />
@@ -265,7 +272,7 @@ export function FilterItem({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </EuiPanel>
       )}
     </EuiFlexItem>
   );
