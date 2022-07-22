@@ -15,11 +15,10 @@ echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
-PARALLEL_LINT=${PARALLEL_LINT:-4}
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|ts|tsx)$' | xargs -n 250 -P "$PARALLEL_LINT" node scripts/eslint --no-cache --fix
+  git ls-files | grep -E '\.(js|ts|tsx)$' | xargs -n 250 -P 6 node scripts/eslint --no-cache --fix
 else
-  git ls-files | grep -E '\.(js|ts|tsx)$' | xargs -n 250 -P "$PARALLEL_LINT" node scripts/eslint --no-cache
+  git ls-files | grep -E '\.(js|ts|tsx)$' | xargs -n 250 -P 6 node scripts/eslint --no-cache
 fi
 
 eslint_exit=$?
