@@ -108,24 +108,10 @@ export const COLUMN_ACTIONS = i18n.translate(
   }
 );
 
-export const ACTION_EXPORT_NAME = i18n.translate(
-  'xpack.securitySolution.lists.valueListsTable.exportActionName',
-  {
-    defaultMessage: 'Export',
-  }
-);
-
 export const ACTION_EXPORT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.exportActionDescription',
   {
     defaultMessage: 'Export value list',
-  }
-);
-
-export const ACTION_DELETE_NAME = i18n.translate(
-  'xpack.securitySolution.lists.valueListsTable.deleteActionName',
-  {
-    defaultMessage: 'Remove',
   }
 );
 

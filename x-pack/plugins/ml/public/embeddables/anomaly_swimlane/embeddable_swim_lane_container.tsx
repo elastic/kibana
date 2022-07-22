@@ -66,7 +66,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const [fromPage, setFromPage] = useState<number>(1);
 
-  const [{}, { uiActions }] = services;
+  const [{}, { uiActions, charts: chartsService }] = services;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
@@ -164,6 +164,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
             }
           />
         }
+        chartsService={chartsService}
       />
     </div>
   );
