@@ -84,7 +84,6 @@ const ImportSavedObjectsButtonComponent: React.FC<ImportSavedObjectsButtonProps>
     return (
       <EuiButton
         onClick={importPrebuiltSavedObjects}
-        color="warning"
         target="_blank"
         isDisabled={status === 'loading'}
         data-test-subj="create-saved-object-button"

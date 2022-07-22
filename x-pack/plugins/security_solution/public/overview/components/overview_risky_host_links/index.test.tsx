@@ -107,6 +107,6 @@ describe('RiskyHostLinks', () => {
       </Provider>
     );
 
-    expect(screen.getByTestId('disabled-open-in-console-button-with-popover')).toBeInTheDocument();
+    expect(screen.getByTestId('disabled-open-in-console-button-with-tooltip')).toBeInTheDocument();
   });
 });
