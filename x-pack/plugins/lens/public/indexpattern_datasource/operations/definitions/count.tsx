@@ -211,16 +211,15 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }),
     description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
       defaultMessage: `
-Calculates the number of documents. If a field is provided as first argument, the number of field values is counted. This is especially helpful for fields holding multiple values in a single document.
+The total number of documents. When you provide a field as the first argument, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
 
-Example: Calculate the number of documents:
-\`count()\`
+#### Examples
 
-Example: Calculate the number of products in all orders:
-\`count(products.id)\`
+To calculate the total number of documents, use \`count()\`.
 
-Example: Calculate the number of documents matching a certain filter:
-\`count(kql='price > 500')\`
+To calculate the number of products in all orders, use \`count(products.id)\`.
+
+To calculate the number of documents that match a specific filter, use \`count(kql='price > 500')\`.
       `,
     }),
   },
