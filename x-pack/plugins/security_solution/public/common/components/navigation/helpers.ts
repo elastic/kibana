@@ -21,7 +21,6 @@ import {
 } from '../url_state/helpers';
 
 import type { SearchNavTab } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useUiSetting$ } from '../../lib/kibana';
 import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
 
@@ -76,7 +75,6 @@ export const getUrlStateSearch = (urlState: UrlState): string =>
  * TODO: remove this function when flag and setting not needed
  */
 export const useIsGroupedNavigationEnabled = () => {
-  const groupedNavFlagEnabled = useIsExperimentalFeatureEnabled('groupedNavigation');
   const [groupedNavSettingEnabled] = useUiSetting$<boolean>(ENABLE_GROUPED_NAVIGATION);
-  return groupedNavFlagEnabled && groupedNavSettingEnabled;
+  return groupedNavSettingEnabled;
 };
