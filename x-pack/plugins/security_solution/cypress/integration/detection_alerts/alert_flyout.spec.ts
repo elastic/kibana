@@ -16,6 +16,7 @@ import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
 import { openOverview } from '../../tasks/alerts_details';
+import { closeTimeline } from '../../tasks/timeline';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -24,7 +25,6 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { CLOSE_TIMELINE_BUTTON } from '../../screens/security_main';
 
 describe('Alert Flyout', () => {
   before(() => {
@@ -36,13 +36,15 @@ describe('Alert Flyout', () => {
     expandFirstAlert();
   });
 
+  beforeEach(() => {
+    openOverview();
+  });
+
   afterEach(() => {
-    cy.get(CLOSE_TIMELINE_BUTTON).click();
+    closeTimeline();
   });
 
   it('Opens a new timeline investigation (from a prevalence field)', () => {
-    openOverview();
-
     cy.get(SUMMARY_VIEW_PREVALENCE_CELL)
       .first()
       .invoke('text')
@@ -59,8 +61,6 @@ describe('Alert Flyout', () => {
   });
 
   it('Opens a new timeline investigation (from an insights module)', () => {
-    openOverview();
-
     cy.get(INSIGHTS_RELATED_ALERTS_BY_SESSION)
       .click()
       .invoke('text')
