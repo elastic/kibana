@@ -62,7 +62,10 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
           isServiceManaged: false,
           label: 'Test private location 0',
-          latLon: '',
+          geo: {
+            lat: '',
+            lon: '',
+          },
           name: 'Test private location 0',
           policyHostId: testFleetPolicyID,
         },

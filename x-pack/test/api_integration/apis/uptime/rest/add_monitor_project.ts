@@ -721,7 +721,10 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'Test private location 0',
               policyHostId: agentId,
               id: agentId,
-              latLon: '',
+              geo: {
+                lat: '',
+                lon: '',
+              },
               concurrentMonitors: 1,
             },
           ]);

@@ -14,7 +14,7 @@ export const PrivateLocationType = t.intersection([
     policyHostId: t.string,
     concurrentMonitors: t.number,
   }),
-  t.partial({ geo: t.interface({ lat: t.string, lon: t.string }) }),
+  t.partial({ geo: t.interface({ lat: t.number, lon: t.number }) }),
 ]);
 
 export const SyntheticsPrivateLocationsType = t.type({
