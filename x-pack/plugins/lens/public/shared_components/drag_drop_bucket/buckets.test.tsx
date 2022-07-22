@@ -9,7 +9,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiIcon } from '@elastic/eui';
-import { DragDropBuckets, DraggableBucketContainer } from '.';
+import { DragDropBuckets, DraggableBucketContainer } from './buckets';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

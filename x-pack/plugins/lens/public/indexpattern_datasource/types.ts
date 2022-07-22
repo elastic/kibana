@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
-import { DragDropOperation } from '../types';
-import { IndexPatternRef } from '../shared_components';
+import type { DragDropOperation } from '../types';
+import type { IndexPattern, IndexPatternField } from '../editor_frame_service/types';
 
 export type {
   GenericIndexPatternColumn,
@@ -50,30 +47,6 @@ export type DraggedField = DragDropIdentifier & {
   indexPatternId: string;
 };
 
-export interface IndexPattern {
-  id: string;
-  fields: IndexPatternField[];
-  getFieldByName(name: string): IndexPatternField | undefined;
-  title: string;
-  name?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: FieldFormatParams;
-    }
-  >;
-  hasRestrictions: boolean;
-}
-
-export type IndexPatternField = FieldSpec & {
-  displayName: string;
-  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-  meta?: boolean;
-  runtime?: boolean;
-};
-
 export interface IndexPatternLayer {
   columnOrder: string[];
   columns: Record<string, GenericIndexPatternColumn>;
@@ -92,16 +65,16 @@ export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
-  indexPatternRefs: IndexPatternRef[];
-  indexPatterns: Record<string, IndexPattern>;
+  // indexPatternRefs: IndexPatternRef[];
+  // indexPatterns: Record<string, IndexPattern>;
 
-  /**
-   * indexPatternId -> fieldName -> boolean
-   */
-  existingFields: Record<string, Record<string, boolean>>;
-  isFirstExistenceFetch: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
+  // /**
+  //  * indexPatternId -> fieldName -> boolean
+  //  */
+  // existingFields: Record<string, Record<string, boolean>>;
+  // isFirstExistenceFetch: boolean;
+  // existenceFetchFailed?: boolean;
+  // existenceFetchTimeout?: boolean;
 
   isDimensionClosePrevented?: boolean;
 }

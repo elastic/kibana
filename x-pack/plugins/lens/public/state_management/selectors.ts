@@ -27,8 +27,7 @@ export const selectChangesApplied = (state: LensState) =>
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
-export const selectIndexPatternRefs = (state: LensState) => state.lens.indexPatternRefs;
-export const selectIndexPatterns = (state: LensState) => state.lens.indexPatterns;
+export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
@@ -167,16 +166,14 @@ export const selectFramePublicAPI = createSelector(
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
     selectResolvedDateRange,
-    selectIndexPatternRefs,
-    selectIndexPatterns,
+    selectDataViews,
   ],
-  (datasourceStates, activeData, datasourceMap, dateRange, indexPatternRefs, indexPatterns) => {
+  (datasourceStates, activeData, datasourceMap, dateRange, dataViews) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
       dateRange,
-      indexPatternRefs,
-      indexPatterns,
+      dataViews,
     };
   }
 );

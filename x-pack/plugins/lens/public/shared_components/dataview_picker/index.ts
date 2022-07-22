@@ -6,4 +6,4 @@
  */
 
 export { ChangeIndexPattern } from './dataview_picker';
-export type { IndexPatternRef } from './types';
+export { fieldExists, fieldContainsData } from './helpers';

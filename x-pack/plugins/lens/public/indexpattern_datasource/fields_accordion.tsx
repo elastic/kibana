@@ -22,10 +22,8 @@ import { Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import { DatasourceDataPanelProps } from '../types';
-import { IndexPattern } from './types';
+import type { DatasourceDataPanelProps, IndexPattern, IndexPatternField } from '../types';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];

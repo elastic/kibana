@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import {
   Visualization,
   FramePublicAPI,
@@ -18,6 +19,7 @@ export interface ConfigPanelWrapperProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
+  indexPatternService: IndexPatternServiceAPI;
 }
 
 export interface LayerPanelProps {

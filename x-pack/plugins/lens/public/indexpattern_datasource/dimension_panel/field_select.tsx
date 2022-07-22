@@ -11,11 +11,12 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { fieldExists } from '../pure_helpers';
 import type { OperationType } from '../indexpattern';
 import type { OperationSupportMatrix } from './operation_support';
-import type { IndexPattern, IndexPatternPrivateState } from '../types';
+import type { IndexPatternPrivateState } from '../types';
 import { FieldOption, FieldOptionValue, FieldPicker } from '../../shared_components/field_picker';
+import type { IndexPattern } from '../../editor_frame_service/types';
+import { fieldContainsData } from '../../shared_components';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -62,9 +63,10 @@ export function FieldSelect({
       fields,
       (field) => currentIndexPattern.getFieldByName(field)?.type === 'document'
     );
-    const containsData = (field: string) =>
-      currentIndexPattern.getFieldByName(field)?.type === 'document' ||
-      fieldExists(existingFields, currentIndexPattern.title, field);
+
+    function containsData(field: string) {
+      return fieldContainsData(field, currentIndexPattern, existingFields);
+    }
 
     function fieldNamesToOptions(items: string[]) {
       return items

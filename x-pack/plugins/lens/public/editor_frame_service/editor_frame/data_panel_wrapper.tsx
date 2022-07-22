@@ -10,10 +10,12 @@ import './data_panel_wrapper.scss';
 import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
+import { StateSetter, DatasourceDataPanelProps, DatasourceMap, FramePublicAPI } from '../../types';
 import {
   switchDatasource,
   useLensDispatch,
@@ -25,7 +27,8 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
 } from '../../state_management';
-import { initializeDatasources } from './state_helpers';
+import { initializeSources } from './state_helpers';
+import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
@@ -33,7 +36,9 @@ interface DataPanelWrapperProps {
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
-  plugins: { uiActions: UiActionsStart };
+  plugins: { uiActions: UiActionsStart; dataViews: DataViewsPublicPluginStart };
+  indexPatternService: IndexPatternServiceAPI;
+  frame: FramePublicAPI;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -63,9 +68,20 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   useEffect(() => {
     if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
-      initializeDatasources(props.datasourceMap, datasourceStates, undefined, undefined, {
-        isFullEditor: true,
-      }).then((result) => {
+      initializeSources(
+        {
+          datasourceMap: props.datasourceMap,
+          datasourceStates,
+          dataViews: props.plugins.dataViews,
+          references: undefined,
+          initialContext: undefined,
+          storage: new Storage(localStorage),
+          defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+        },
+        {
+          isFullEditor: true,
+        }
+      ).then((result) => {
         const newDatasourceStates = Object.entries(result).reduce(
           (state, [datasourceId, datasourceState]) => ({
             ...state,
@@ -79,7 +95,14 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         dispatchLens(setState({ datasourceStates: newDatasourceStates }));
       });
     }
-  }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
+  }, [
+    datasourceStates,
+    activeDatasourceId,
+    props.datasourceMap,
+    dispatchLens,
+    props.plugins.dataViews,
+    props.core.uiSettings,
+  ]);
 
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
@@ -91,6 +114,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
     uiActions: props.plugins.uiActions,
+    indexPatternService: props.indexPatternService,
+    frame: props.frame,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

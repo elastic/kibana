@@ -14,7 +14,7 @@ import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import { LensAppState, LensStoreDeps, VisualizationState } from './types';
+import { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
@@ -38,8 +38,12 @@ export const initialState: LensAppState = {
     state: null,
     activeId: null,
   },
-  indexPatternRefs: [],
-  indexPatterns: {},
+  dataViews: {
+    indexPatternRefs: [],
+    indexPatterns: {},
+    existingFields: {},
+    isFirstExistenceFetch: false,
+  },
 };
 
 export const getPreloadedState = ({
@@ -164,6 +168,10 @@ export const setLayerDefaultDimension = createAction<{
   groupId: string;
 }>('lens/setLayerDefaultDimension');
 
+export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
+  'lens/updateIndexPatterns'
+);
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -189,6 +197,7 @@ export const lensActions = {
   removeOrClearLayer,
   addLayer,
   setLayerDefaultDimension,
+  updateIndexPatterns,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -282,6 +291,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         isOnlyLayer || !activeVisualization.removeLayer
           ? activeVisualization.clearLayer(state.visualization.state, layerId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
+    },
+    [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
+      return {
+        ...state,
+        dataViews: { ...state.dataViews, ...payload },
+      };
     },
     [updateDatasourceState.type]: (
       state,
@@ -450,6 +465,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         datasourceStates: newState.datasourceStates,
         visualizationMap,
         visualizeTriggerFieldContext: payload.initialContext,
+        dataViews: newState.dataViews,
       });
       if (suggestion) {
         return {
@@ -636,8 +652,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           : undefined,
         datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
         dateRange: current(state.resolvedDateRange),
-        indexPatternRefs: current(state.indexPatternRefs),
-        indexPatterns: current(state.indexPatterns),
+        dataViews: current(state.dataViews),
       };
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
@@ -697,8 +712,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             : undefined,
           datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
           dateRange: current(state.resolvedDateRange),
-          indexPatternRefs: current(state.indexPatternRefs),
-          indexPatterns: current(state.indexPatterns),
+          dataViews: current(state.dataViews),
         },
         activeVisualization,
         activeDatasource,
@@ -756,10 +770,15 @@ function addInitialValueIfAvailable({
 
       if (!noDatasource && activeDatasource?.initializeDimension) {
         return {
-          activeDatasourceState: activeDatasource.initializeDimension(datasourceState, layerId, {
-            ...info,
-            columnId: columnId || info.columnId,
-          }),
+          activeDatasourceState: activeDatasource.initializeDimension(
+            datasourceState,
+            layerId,
+            framePublicAPI.dataViews.indexPatterns,
+            {
+              ...info,
+              columnId: columnId || info.columnId,
+            }
+          ),
           activeVisualizationState,
         };
       } else {

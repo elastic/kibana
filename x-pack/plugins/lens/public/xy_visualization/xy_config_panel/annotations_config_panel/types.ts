@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-  name?: string;
-}
+import {
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-plugin/common';
+
+export type ManualEventAnnotationType =
+  | PointInTimeEventAnnotationConfig
+  | RangeEventAnnotationConfig;

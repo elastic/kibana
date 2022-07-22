@@ -120,7 +120,7 @@ export interface LensEmbeddableDeps {
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
-  indexPatternService: DataViewsContract;
+  dataViews: DataViewsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
@@ -770,7 +770,7 @@ export class Embeddable
 
     const { indexPatterns } = await getIndexPatternsObjects(
       this.savedVis?.references.map(({ id }) => id) || [],
-      this.deps.indexPatternService
+      this.deps.dataViews
     );
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');

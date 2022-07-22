@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/public';
+import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { difference } from 'lodash';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   Datasource,
   DatasourceLayers,
   DatasourceMap,
   FramePublicAPI,
+  IndexPattern,
+  IndexPatternMap,
+  IndexPatternRef,
   InitializationOptions,
   Visualization,
   VisualizationMap,
@@ -22,63 +28,216 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { ErrorMessage } from '../types';
+import type { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
   getUnknownVisualizationTypeError,
 } from '../error_helper';
-import { DatasourceStates } from '../../state_management';
-import { IndexPattern } from '../../indexpattern_datasource/types';
+import type { DatasourceStates, DataViewsState } from '../../state_management';
+import { readFromStorage } from '../../settings_storage';
+import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 
-export function mergeIndexPatterns(
-  datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates
+function getIndexPatterns(
+  references?: SavedObjectReference[],
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+  initialId?: string
 ) {
-  const dataViewWithDuplicates = Object.entries(datasourceMap).map(([datasourceId, datasource]) =>
-    datasource.getIndexPatterns(datasourceStates[datasourceId].state)
-  );
-  // it's always the same, so just pick the first one
-  const indexPatternRefs = dataViewWithDuplicates[0].indexPatternRefs;
-  const indexPatternDedup: Record<string, IndexPattern> = {};
-  for (const { indexPatterns } of dataViewWithDuplicates) {
-    for (const [indexPatternId, indexPattern] of Object.entries(indexPatterns)) {
-      if (!(indexPatternId in indexPatternDedup)) {
-        indexPatternDedup[indexPatternId] = indexPattern;
+  const indexPatternIds = [];
+  if (initialContext) {
+    if ('isVisualizeAction' in initialContext) {
+      for (const { indexPatternId } of initialContext.layers) {
+        indexPatternIds.push(indexPatternId);
+      }
+    } else {
+      indexPatternIds.push(initialContext.indexPatternId);
+    }
+  } else {
+    // use the initialId only when no context is passed over
+    if (initialId) {
+      indexPatternIds.push(initialId);
+    }
+  }
+  if (references) {
+    for (const reference of references) {
+      if (reference.type === 'index-pattern') {
+        indexPatternIds.push(reference.id);
       }
     }
   }
-  return { indexPatternRefs, indexPatterns: indexPatternDedup };
+  return [...new Set(indexPatternIds)];
 }
 
-export async function initializeDatasources(
-  datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates,
-  references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+const getLastUsedIndexPatternId = (
+  storage: IStorageWrapper,
+  indexPatternRefs: IndexPatternRef[]
+) => {
+  const indexPattern = readFromStorage(storage, 'indexPatternId');
+  return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
+};
+
+export async function initializeDataViews(
+  {
+    dataViews,
+    datasourceMap,
+    datasourceStates,
+    storage,
+    defaultIndexPatternId,
+    references,
+    initialContext,
+  }: {
+    dataViews: DataViewsContract;
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    defaultIndexPatternId: string;
+    storage: IStorageWrapper;
+    references?: SavedObjectReference[];
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  },
   options?: InitializationOptions
 ) {
-  const states: DatasourceStates = {};
+  const { isFullEditor } = options ?? {};
+  // make it explicit or TS will infer never[] and break few lines down
+  const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
+    ? loadIndexPatternRefs(dataViews)
+    : []);
 
-  await Promise.all(
-    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
-      if (datasourceStates[datasourceId]) {
-        return datasource
-          .initialize(
-            datasourceStates[datasourceId].state || undefined,
-            references,
-            initialContext,
-            options
-          )
-          .then((datasourceState) => {
-            states[datasourceId] = { isLoading: false, state: datasourceState };
-          });
-      }
-    })
+  // if no state is available, use the fallbackId
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
+  const initialId =
+    !initialContext &&
+    Object.keys(datasourceMap).every((datasourceId) => !datasourceStates[datasourceId]?.state)
+      ? fallbackId
+      : undefined;
+
+  const usedIndexPatterns = getIndexPatterns(references, initialContext, initialId);
+
+  // load them
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatterns);
+
+  const indexPatterns = await loadIndexPatterns({
+    dataViews,
+    patterns: usedIndexPatterns,
+    notUsedPatterns,
+    cache: {},
+  });
+
+  return { indexPatternRefs, indexPatterns };
+}
+
+/**
+ * This function composes both initializeDataViews & initializeDatasources into a single call
+ */
+export async function initializeSources(
+  {
+    dataViews,
+    datasourceMap,
+    datasourceStates,
+    storage,
+    defaultIndexPatternId,
+    references,
+    initialContext,
+  }: {
+    dataViews: DataViewsContract;
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    defaultIndexPatternId: string;
+    storage: IStorageWrapper;
+    references?: SavedObjectReference[];
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  },
+  options?: InitializationOptions
+) {
+  const { indexPatternRefs, indexPatterns } = await initializeDataViews(
+    {
+      datasourceMap,
+      datasourceStates,
+      initialContext,
+      dataViews,
+      storage,
+      defaultIndexPatternId,
+      references,
+    },
+    {
+      isFullEditor: true,
+    }
   );
+  return {
+    indexPatterns,
+    indexPatternRefs,
+    states: initializeDatasources({
+      datasourceMap,
+      datasourceStates,
+      initialContext,
+      indexPatternRefs,
+      indexPatterns,
+    }),
+  };
+}
+
+export function initializeDatasources({
+  datasourceMap,
+  datasourceStates,
+  indexPatternRefs,
+  indexPatterns,
+  references,
+  initialContext,
+}: {
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  indexPatterns: Record<string, IndexPattern>;
+  indexPatternRefs: IndexPatternRef[];
+  references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+}) {
+  // init datasources
+  const states: DatasourceStates = {};
+  for (const [datasourceId, datasource] of Object.entries(datasourceMap)) {
+    if (datasourceStates[datasourceId]) {
+      const state = datasource.initialize(
+        datasourceStates[datasourceId] || undefined,
+        references,
+        initialContext,
+        indexPatternRefs,
+        indexPatterns
+      );
+      states[datasourceId] = { isLoading: false, state };
+    }
+  }
   return states;
 }
+
+// export async function initializeDatasources(
+//   datasourceMap: DatasourceMap,
+//   datasourceStates: DatasourceStates,
+//   references?: SavedObjectReference[],
+//   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+//   options?: InitializationOptions
+// ) {
+//   const states: DatasourceStates = {};
+
+//   await Promise.all(
+//     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
+//       if (datasourceStates[datasourceId]) {
+//         return datasource
+//           .initialize(
+//             datasourceStates[datasourceId].state || undefined,
+//             references,
+//             initialContext,
+//             options
+//           )
+//           .then((datasourceState) => {
+//             states[datasourceId] = { isLoading: false, state: datasourceState };
+//           });
+//       }
+//     })
+//   );
+//   return states;
+// }
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
@@ -96,6 +255,8 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
         datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
           state: datasourceState,
           layerId: layer,
+          // @TODO
+          indexPatterns: {},
         });
       });
     });
@@ -105,7 +266,12 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
-  doc: Document
+  doc: Document,
+  services: {
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    dataViews: DataViewsContract;
+  }
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
     state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
@@ -127,18 +293,30 @@ export async function persistedStateToExpression(
     };
   }
   const visualization = visualizations[visualizationType!];
-  const datasourceStates = await initializeDatasources(
-    datasourceMap,
-    Object.fromEntries(
-      Object.entries(persistedDatasourceStates).map(([id, state]) => [
-        id,
-        { isLoading: false, state },
-      ])
-    ),
-    references,
-    undefined,
+  const datasourceStatesFromSO = Object.fromEntries(
+    Object.entries(persistedDatasourceStates).map(([id, state]) => [
+      id,
+      { isLoading: false, state },
+    ])
+  );
+  const { indexPatterns, indexPatternRefs } = await initializeDataViews(
+    {
+      datasourceMap,
+      datasourceStates: datasourceStatesFromSO,
+      references,
+      dataViews: services.dataViews,
+      storage: services.storage,
+      defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
+    },
     { isFullEditor: false }
   );
+  const datasourceStates = initializeDatasources({
+    datasourceMap,
+    datasourceStates: datasourceStatesFromSO,
+    references,
+    indexPatterns,
+    indexPatternRefs,
+  });
 
   const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap);
 
@@ -152,7 +330,8 @@ export async function persistedStateToExpression(
 
   const indexPatternValidation = validateRequiredIndexPatterns(
     datasourceMap[datasourceId],
-    datasourceStates[datasourceId]
+    datasourceStates[datasourceId],
+    indexPatterns
   );
 
   if (indexPatternValidation) {
@@ -167,7 +346,7 @@ export async function persistedStateToExpression(
     datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
-    { datasourceLayers }
+    { datasourceLayers, dataViews: { indexPatterns } as DataViewsState }
   );
 
   return {
@@ -179,6 +358,7 @@ export async function persistedStateToExpression(
       datasourceMap,
       datasourceStates,
       datasourceLayers,
+      indexPatterns,
     }),
     errors: validationResult,
   };
@@ -186,12 +366,13 @@ export async function persistedStateToExpression(
 
 export function getMissingIndexPattern(
   currentDatasource: Datasource | null,
-  currentDatasourceState: { state: unknown } | null
+  currentDatasourceState: { state: unknown } | null,
+  indexPatterns: IndexPatternMap
 ) {
   if (currentDatasourceState == null || currentDatasource == null) {
     return [];
   }
-  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state);
+  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);
   if (!missingIds.length) {
     return [];
   }
@@ -200,9 +381,14 @@ export function getMissingIndexPattern(
 
 const validateRequiredIndexPatterns = (
   currentDatasource: Datasource,
-  currentDatasourceState: { state: unknown } | null
+  currentDatasourceState: { state: unknown } | null,
+  indexPatterns: IndexPatternMap
 ): ErrorMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(currentDatasource, currentDatasourceState);
+  const missingIds = getMissingIndexPattern(
+    currentDatasource,
+    currentDatasourceState,
+    indexPatterns
+  );
 
   if (!missingIds.length) {
     return;
@@ -216,14 +402,14 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
+  { datasourceLayers, dataViews }: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
 ): ErrorMessage[] | undefined => {
   const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState)
+    ? currentDataSource?.getErrorMessages(currentDatasourceState, dataViews.indexPatterns)
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, datasourceLayers)
     : undefined;
 
   if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {

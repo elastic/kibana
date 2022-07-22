@@ -44,7 +44,7 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, datasourceMap } = props;
+  const { activeVisualization, datasourceMap, indexPatternService } = props;
   const { activeDatasourceId, visualization } = useLensSelector((state) => state.lens);
 
   const dispatchLens = useLensDispatch();
@@ -184,6 +184,7 @@ export function LayerPanels(
             removeLayerRef(layerId);
           }}
           toggleFullscreen={toggleFullscreen}
+          indexPatternService={indexPatternService}
         />
       ))}
       <AddLayerButton

@@ -152,7 +152,7 @@ export function TextDecorationSetting<Icon extends string = string>({
           buttonSize="compressed"
           options={options}
           idSelected={
-            currentConfig?.textVisibility
+            !currentConfig?.textVisibility
               ? `${idPrefix}none`
               : `${idPrefix}${selectedVisibleOption ?? 'name'}`
           }

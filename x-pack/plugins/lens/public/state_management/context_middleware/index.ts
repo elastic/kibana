@@ -23,11 +23,14 @@ import { onActiveDataChange } from '../lens_slice';
 import { DatasourceMap } from '../../types';
 
 function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
-  const { activeDatasourceId, datasourceStates } = state.lens;
+  const { activeDatasourceId, datasourceStates, dataViews } = state.lens;
   return Boolean(
     activeDatasourceId &&
       datasourceStates[activeDatasourceId] &&
-      datasourceMap[activeDatasourceId].isTimeBased?.(datasourceStates[activeDatasourceId].state)
+      datasourceMap[activeDatasourceId].isTimeBased?.(
+        datasourceStates[activeDatasourceId].state,
+        dataViews.indexPatterns
+      )
   );
 }
 

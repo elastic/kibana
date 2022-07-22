@@ -163,7 +163,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
 
-  const { datasourceLayers } = framePublicAPI;
+  const { datasourceLayers, dataViews } = framePublicAPI;
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -171,7 +171,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    dataViews.indexPatterns
   );
 
   const missingRefsErrors = missingIndexPatterns.length
@@ -218,6 +219,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceMap,
           datasourceStates,
           datasourceLayers,
+          indexPatterns: dataViews.indexPatterns,
         });
 
         if (ast) {
@@ -259,6 +261,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     missingRefsErrors.length,
     unknownVisError,
     visualization.activeId,
+    dataViews.indexPatterns,
   ]);
 
   useEffect(() => {
