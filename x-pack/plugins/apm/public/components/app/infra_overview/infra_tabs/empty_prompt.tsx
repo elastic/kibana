@@ -5,38 +5,75 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
+  EuiImage,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import noResultsIllustrationDark from '../../../../assets/no_results_dark.svg';
+import noResultsIllustrationLight from '../../../../assets/no_results_light.svg';
 
 export function EmptyPrompt() {
   return (
-    <EuiPageTemplate
-      pageContentProps={{
-        color: 'transparent',
-      }}
-      template="centeredBody"
-    >
-      <EuiEmptyPrompt
-        iconType="metricsApp"
-        color="subdued"
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.infraTabs.noMetricsPromptTitle', {
-              defaultMessage: 'No infrastructure data found',
-            })}
-          </h2>
-        }
-        titleSize="m"
-        body={
-          <p>
-            {i18n.translate('xpack.apm.infraTabs.noMetricsPromptDescription', {
-              defaultMessage:
-                'Try adjusting your time range or check if you have any metrics data set up.',
-            })}
-          </p>
-        }
-      />
-    </EuiPageTemplate>
+    <EuiEmptyPrompt
+      body={
+        <EuiDescriptionList compressed>
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id="xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle"
+              defaultMessage="Expand your time range"
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <FormattedMessage
+              id="xpack.apm.infraTabs.emptyMessagePromptDescription"
+              defaultMessage="Try searching over a longer period of time."
+            />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      }
+      color="subdued"
+      data-test-subj="metricsTableEmptyIndicesContent"
+      icon={<NoResultsIllustration />}
+      layout="horizontal"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.apm.infraTabs.emptyMessagePromptTitle"
+            defaultMessage="No results match your search criteria"
+          />
+        </h2>
+      }
+      titleSize="m"
+    />
   );
 }
+
+function NoResultsIllustration() {
+  const { colorMode } = useEuiTheme();
+
+  const illustration =
+    colorMode === COLOR_MODES_STANDARD.dark
+      ? noResultsIllustrationDark
+      : noResultsIllustrationLight;
+
+  return (
+    <EuiImage
+      alt={noResultsIllustrationAlternativeText}
+      size="fullWidth"
+      src={illustration}
+    />
+  );
+}
+
+const noResultsIllustrationAlternativeText = i18n.translate(
+  'xpack.apm.infraTabs.emptyMessageIllustrationAlternativeText',
+  { defaultMessage: 'A magnifying glass with an exclamation mark' }
+);
