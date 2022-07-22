@@ -52,6 +52,7 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { hasAllPrivilege } from '../../../lib/capabilities';
+import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { RulesListNotifyBadge } from './rules_list_notify_badge';
@@ -199,6 +200,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
       return Percentiles[selectedOption.key as Percentiles];
     }
   }, [percentileOptions]);
+
+  const { uiSettings } = useKibana().services;
+  const dateFormat = useMemo(
+    () => uiSettings?.get('dateFormat') ?? 'MMM D, YYYY HH:mm:ss.SSS',
+    [uiSettings]
+  );
 
   const onLoading = (id: string, newIsLoading: boolean) => {
     setIsLoadingMap((prevState) => ({
@@ -427,9 +434,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             return (
               <>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {moment(date).format('MMM D, YYYY HH:mm:ssa')}
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{moment(date).format(dateFormat)}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="xs">
                       {moment(date).fromNow()}
