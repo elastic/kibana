@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 import { buildBaseFilterCriteria } from './application/utils/query_utils';
 

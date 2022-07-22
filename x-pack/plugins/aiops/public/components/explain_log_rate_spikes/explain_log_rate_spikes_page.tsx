@@ -199,6 +199,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
                 earliest={earliest}
                 latest={latest}
                 windowParameters={windowParameters}
+                searchQuery={searchQuery}
                 onPinnedChangePoint={setPinnedChangePoint}
                 onSelectedChangePoint={setSelectedChangePoint}
                 selectedChangePoint={currentSelectedChangePoint}
