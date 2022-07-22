@@ -59,7 +59,9 @@ export function createTopNFunctions(
 
     totalCount += count;
 
-    const frames = metadata.get(traceHash)!;
+    // It is possible that we do not have a stacktrace for an event,
+    // e.g. when stopping the host agent or on network errors.
+    const frames = metadata.get(traceHash) ?? [];
     for (let i = 0; i < frames.length; i++) {
       const frameGroup = defaultGroupBy(frames[i]);
       const frameGroupID = hashFrameGroup(frameGroup);
