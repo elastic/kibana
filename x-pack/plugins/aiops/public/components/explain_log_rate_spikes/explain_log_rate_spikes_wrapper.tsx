@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
+import { Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+
+import { EuiPageBody } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/public';
+
+import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../application/utils/search_utils';
+import { useAiOpsKibana } from '../../kibana_context';
 import {
   Accessor,
   Dictionary,
@@ -20,11 +29,58 @@ import {
   SetUrlState,
 } from '../../hooks/url_state';
 
-import { ExplainLogRateSpikes, ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
+export interface ExplainLogRateSpikesWrapperProps {
+  /** The data view to analyze. */
+  dataView: DataView;
+}
 
-export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props) => {
+const defaultSearchQuery = {
+  match_all: {},
+};
+
+export interface AiOpsIndexBasedAppState {
+  searchString?: Query['query'];
+  searchQuery?: Query['query'];
+  searchQueryLanguage: SearchQueryLanguage;
+  filters?: Filter[];
+}
+
+export const getDefaultAiOpsListState = (
+  overrides?: Partial<AiOpsIndexBasedAppState>
+): Required<AiOpsIndexBasedAppState> => ({
+  searchString: '',
+  searchQuery: defaultSearchQuery,
+  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  filters: [],
+  ...overrides,
+});
+
+export const restorableDefaults = getDefaultAiOpsListState();
+
+export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesWrapperProps> = ({ dataView }) => {
+  const { services } = useAiOpsKibana();
+  const { notifications } = services;
+  const { toasts } = notifications;
+
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
+
+  useEffect(() => {
+    if (!dataView.isTimeBased()) {
+      toasts.addWarning({
+        title: i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
+          values: { dataViewTitle: dataView.title },
+        }),
+        text: i18n.translate(
+          'xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
+          {
+            defaultMessage: 'Log rate spike analysis only runs over time-based indices',
+          }
+        ),
+      });
+    }
+  }, [dataView, toasts]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -88,9 +144,13 @@ export const ExplainLogRateSpikesWrapper: FC<ExplainLogRateSpikesProps> = (props
     [history, urlSearchString]
   );
 
+  if (!dataView) return null;
+
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      <ExplainLogRateSpikes {...props} />{' '}
+      <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+        <ExplainLogRateSpikes dataView={dataView} />
+      </EuiPageBody>
     </UrlStateContextProvider>
   );
 };

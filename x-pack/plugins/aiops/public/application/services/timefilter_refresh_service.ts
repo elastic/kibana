@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with near duplicate service in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/services/timefilter_refresh_service.ts`
+
 import { Subject } from 'rxjs';
 
 export interface Refresh {
@@ -12,4 +15,4 @@ export interface Refresh {
   timeRange?: { start: string; end: string };
 }
 
-export const aiOpsRefresh$ = new Subject<Refresh>();
+export const aiopsRefresh$ = new Subject<Refresh>();
