@@ -32,6 +32,7 @@ import {
   useKibanaVersion,
   useStartServices,
   useFlyoutContext,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -236,7 +237,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [agentsRequest, agentsStatusRequest] = await Promise.all([
+          const [agentsResponse, agentsStatusResponse, agentTagsResponse] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
@@ -249,36 +250,41 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
+            sendGetAgentTags(),
           ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
           }
-          if (agentsRequest.error) {
-            throw agentsRequest.error;
+          if (agentsResponse.error) {
+            throw agentsResponse.error;
           }
-          if (!agentsRequest.data) {
+          if (!agentsResponse.data) {
             throw new Error('Invalid GET /agents response');
           }
-          if (agentsStatusRequest.error) {
-            throw agentsStatusRequest.error;
+          if (agentsStatusResponse.error) {
+            throw agentsStatusResponse.error;
           }
-          if (!agentsStatusRequest.data) {
-            throw new Error('Invalid GET /agents-status response');
+          if (!agentsStatusResponse.data) {
+            throw new Error('Invalid GET /agents_status response');
+          }
+          if (agentTagsResponse.error) {
+            throw agentsStatusResponse.error;
+          }
+          if (!agentTagsResponse.data) {
+            throw new Error('Invalid GET /agent/tags response');
           }
 
           setAgentsStatus({
-            healthy: agentsStatusRequest.data.results.online,
-            unhealthy: agentsStatusRequest.data.results.error,
-            offline: agentsStatusRequest.data.results.offline,
-            updating: agentsStatusRequest.data.results.updating,
-            inactive: agentsRequest.data.totalInactive,
+            healthy: agentsStatusResponse.data.results.online,
+            unhealthy: agentsStatusResponse.data.results.error,
+            offline: agentsStatusResponse.data.results.offline,
+            updating: agentsStatusResponse.data.results.updating,
+            inactive: agentsResponse.data.totalInactive,
           });
 
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+          const newAllTags = agentTagsResponse.data.items;
 
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
@@ -288,9 +294,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setAllTags(newAllTags);
           }
 
-          setAgents(agentsRequest.data.items);
-          setTotalAgents(agentsRequest.data.total);
-          setTotalInactiveAgents(agentsRequest.data.totalInactive);
+          setAgents(agentsResponse.data.items);
+          setTotalAgents(agentsResponse.data.total);
+          setTotalInactiveAgents(agentsResponse.data.totalInactive);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
