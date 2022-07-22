@@ -36,6 +36,10 @@ const TestSaveTimelineButton = (_props: SaveTimelineComponentProps) => (
   </TestProviders>
 );
 
+jest.mock('raf', () => {
+  return jest.fn().mockImplementation((cb) => cb());
+});
+
 describe('SaveTimelineButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -56,22 +60,6 @@ describe('SaveTimelineButton', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toBeVisible();
-    });
-  });
-
-  it('Hide tooltip', async () => {
-    const { container } = render(<TestSaveTimelineButton {...props} />);
-
-    const saveTimelineIcon = container.querySelectorAll(
-      '[data-test-subj="save-timeline-button-icon"]'
-    )[0];
-
-    fireEvent.click(saveTimelineIcon);
-
-    await waitFor(() => {
-      expect(
-        container.querySelector('[data-test-subj="save-timeline-btn-tooltip"]')
-      ).not.toBeInTheDocument();
     });
   });
 
@@ -96,7 +84,29 @@ describe('SaveTimelineButton', () => {
     ).toBeDisabled();
   });
 
-  it('should show a modal when showOverlay equals true', async () => {
+  it('should not show modal if user does not have write access', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false },
+    });
+    const { container, baseElement } = render(<TestSaveTimelineButton {...props} />);
+    expect(
+      container.querySelector('[data-test-subj="save-timeline-modal"]')
+    ).not.toBeInTheDocument();
+
+    const saveTimelineIcon = container.querySelectorAll(
+      '[data-test-subj="save-timeline-button-icon"]'
+    )[0];
+
+    fireEvent.click(saveTimelineIcon);
+
+    await waitFor(() => {
+      expect(baseElement.querySelectorAll('[data-test-subj="save-timeline-modal"]')).toHaveLength(
+        0
+      );
+    });
+  });
+
+  it('should show a modal when user has crud privileges', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
