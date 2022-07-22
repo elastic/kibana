@@ -29,7 +29,9 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
     if (argvGrepFiles) {
       // eslint-disable-next-line no-console
       console.log(
-        `\nCommand "--grep-files=${argvGrepFiles}" matching ${tests.length} file(s):\n - ${tests}\n`
+        `\nCommand "--grep-files=${argvGrepFiles}" matched ${tests.length} file(s):\n${tests
+          .map((name) => ` - ${name}`)
+          .join('\n')}\n`
       );
     }
 
