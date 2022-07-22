@@ -8,18 +8,9 @@
 import './histogram.scss';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import {
-  ElementClickListener,
-  XYBrushEvent,
-  XYChartElementEvent,
-} from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../utils/use_saved_search';
@@ -58,7 +49,6 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
-
   const { timefilter } = data.query.timefilter;
 
   const { from, to } = timefilter.getAbsoluteTime();
@@ -96,7 +86,6 @@ export function DiscoverHistogram({
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, toMoment, bucketInterval, stateContainer]);
-
 
   const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
@@ -153,8 +142,8 @@ export function DiscoverHistogram({
           onLoad={(_, activeData) => {
             if (!activeData) return;
             savedSearchDataTotalHits$.next({
-               fetchStatus: FetchStatus.COMPLETE,
-               result: activeData?.layer1?.meta?.statistics?.totalCount
+              fetchStatus: FetchStatus.COMPLETE,
+              result: activeData?.layer1?.meta?.statistics?.totalCount,
             });
           }}
           attributes={{
