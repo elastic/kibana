@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexGrid,
@@ -31,6 +30,7 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
 import { getCommandNameWithArgs } from '../service/utils';
+import { ConsoleCodeBlock } from './console_code_block';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -55,6 +55,17 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
 `;
 
+const StyledEuiFlexGrid = styled(EuiFlexGrid)`
+  max-width: 50%;
+`;
+
+const StyledEuiBadge = styled(EuiBadge)`
+  font-size: 10px !important;
+  span {
+    color: ${({ theme: { eui } }) => eui.euiShadowColor} !important;
+  }
+`;
+
 export interface CommandListProps {
   commands: CommandDefinition[];
   display?: 'default' | 'table';
@@ -66,13 +77,27 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   const footerMessage = useMemo(() => {
     return (
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.footerText"
-        defaultMessage="For more details on the commands above use the {helpOption} argument. Example: {cmdExample}"
-        values={{
-          helpOption: <EuiCode>{'--help'}</EuiCode>,
-          cmdExample: <EuiCode>{'some-command --help'}</EuiCode>,
-        }}
+      <EuiDescriptionList
+        compressed
+        listItems={[
+          {
+            title: (
+              <StyledEuiBadge>
+                <ConsoleCodeBlock inline bold>
+                  {COMMON_ARGS.find((current) => current.name === '--help')?.name}
+                </ConsoleCodeBlock>
+              </StyledEuiBadge>
+            ),
+            description: (
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.console.commandList.footerText"
+                  defaultMessage="For more details on the commands above use the --help argument. Example: some-command --help"
+                />
+              </EuiText>
+            ),
+          },
+        ]}
       />
     );
   }, []);
@@ -191,6 +216,14 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     [getTestId, otherCommandsGroupLabel, updateInputText]
   );
 
+  const getFilteredCommands = useCallback(
+    (commandsByGroup): CommandDefinition[] =>
+      commandsByGroup.filter(
+        (current: CommandDefinition) => current.name !== 'help' && current.name !== 'cls'
+      ),
+    []
+  );
+
   if (display === 'table') {
     const calloutItems = [
       <FormattedMessage
@@ -251,22 +284,37 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   return (
     <>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
-        const groupedCommands =
-          groupLabel === HELP_GROUPS.supporting.label ? [...COMMON_ARGS] : commandsByGroup;
+        const filteredCommands = getFilteredCommands(commandsByGroup);
         return (
-          <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
-            {groupedCommands.map((command) => {
+          <StyledEuiFlexGrid
+            columns={3}
+            responsive={false}
+            gutterSize="l"
+            key={groupLabel}
+            direction="column"
+          >
+            {filteredCommands.map((command) => {
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
                     compressed
                     listItems={[
                       {
-                        title: <EuiBadge>{getCommandNameWithArgs(command)}</EuiBadge>,
-                        description: <>{command.about}</>,
+                        title: (
+                          <StyledEuiBadge>
+                            <ConsoleCodeBlock inline bold>
+                              {getCommandNameWithArgs(command)}{' '}
+                            </ConsoleCodeBlock>
+                          </StyledEuiBadge>
+                        ),
+                        description: (
+                          <EuiText color="subdued" size="xs">
+                            {command.about}
+                          </EuiText>
+                        ),
                       },
                     ]}
                     data-test-subj={getTestId('commandList-command')}
@@ -274,13 +322,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                 </EuiFlexItem>
               );
             })}
-          </EuiFlexGrid>
+          </StyledEuiFlexGrid>
         );
       })}
-      <EuiSpacer />
-      <EuiText size="s" color="subdued">
-        {footerMessage}
-      </EuiText>
+      <EuiSpacer size="xl" />
+      {footerMessage}
     </>
   );
 });
