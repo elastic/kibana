@@ -37,6 +37,7 @@ gpg --delete-keys EA69DC1F612FABF267850741D2A182A7B0E00C14
 
 ## How were the packages generated?
 
+### verified-1.0.0
 The valid package was generated with the following commands:
 ```
 export ELASTIC_PACKAGE_SIGNER_PRIVATE_KEYFILE=../../../signatures/fleet_test_key_private.asc
@@ -50,4 +51,13 @@ elastic-package build --zip --sign -v
 
 cp /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip ../../zips/
 cp /<path to you kibana>/kibana/build/packages/verified-1.0.0.zip.sig ../../zips/
+```
+
+### unverified_content-1.0.0
+Same process as verified-1.0.0, however it has the incorrect signature, in this case I use the verified signature:
+```
+# Same buld steps as above
+cp /<path to you kibana>/kibana/build/packages/unverified_content-1.0.0.zip ../../zips/
+# now copy the incorrect signature
+cp ../../zips/verified-1.0.0.zip.sig ../../zips/unverified_content-1.0.0.zip.sig
 ```
