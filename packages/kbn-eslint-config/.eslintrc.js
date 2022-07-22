@@ -234,6 +234,14 @@ module.exports = {
     ]],
 
     '@kbn/disable/no_naked_eslint_disable': 'error',
+    '@kbn/disable/no_protected_eslint_disable': [
+      'error',
+      [
+        '@kbn/disable/no_protected_eslint_disable',
+        '@kbn/imports/no_unused_imports',
+        ['no-console', { allowed: ['src/test.js'] }],
+      ],
+    ],
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
