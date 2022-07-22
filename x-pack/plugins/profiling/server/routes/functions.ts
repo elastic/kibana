@@ -32,9 +32,9 @@ async function queryTopNFunctions({
   startIndex: number;
   endIndex: number;
   sampleSize: number;
-}): Promise<any> {
+}) {
   return withProfilingSpan('query_topn_functions', async () => {
-    getExecutablesAndStackTraces({
+    return getExecutablesAndStackTraces({
       client,
       filter,
       index,
