@@ -126,7 +126,6 @@ export enum SecurityPageName {
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
-  usersExternalAlerts = 'users-external_alerts',
   usersRisk = 'users-risk',
 }
 
