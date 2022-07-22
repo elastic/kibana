@@ -17,7 +17,7 @@ function getGlobPattern() {
     return '**/*.spec.ts';
   }
 
-  return argvGrepFiles.includes('.spec.ts') ? argvGrepFiles : `**/*${argvGrepFiles}.spec.ts`;
+  return argvGrepFiles.includes('.spec.ts') ? argvGrepFiles : `**/*${argvGrepFiles}*.spec.ts`;
 }
 
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
