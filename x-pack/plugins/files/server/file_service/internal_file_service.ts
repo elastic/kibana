@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { reduce } from 'lodash';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -75,6 +76,14 @@ export interface FindFileArgs {
   perPage?: number;
 }
 
+interface TermsAgg {
+  buckets: Array<{ key: string; doc_count: number }>;
+}
+interface FilesMetricsAggs {
+  bytesUsed: AggregationsSumAggregate;
+  status: TermsAgg;
+  extension: TermsAgg;
+}
 /**
  * Service containing methods for working with files.
  *
@@ -233,41 +242,60 @@ export class InternalFileService {
     let pit: undefined | SavedObjectsOpenPointInTimeResponse;
     try {
       pit = await this.soClient.openPointInTimeForType(this.savedObjectType);
-      const deleted: FileStatus = 'DELETED';
       const { aggregations } = await this.soClient.find<
         FileSavedObjectAttributes,
-        { size: AggregationsSumAggregate }
+        FilesMetricsAggs
       >({
         type: this.savedObjectType,
         pit,
-        filter: `NOT ${this.savedObjectType}.attributes.Status: ${deleted}`,
         aggs: {
-          size: {
+          bytesUsed: {
             sum: {
               field: `${this.savedObjectType}.attributes.size`,
+            },
+          },
+          status: {
+            terms: {
+              field: `${this.savedObjectType}.attributes.Status`,
+            },
+          },
+          extension: {
+            terms: {
+              field: `${this.savedObjectType}.attributes.extension`,
             },
           },
         },
       });
 
-      if (aggregations?.size.value != null) {
+      if (aggregations) {
         const capacity =
           this.blobStorageService.getStaticBlobStorageSettings().esFixedSizeIndex.capacity;
+        const used = aggregations.bytesUsed!.value!;
         return {
-          [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
-            capacity,
-            available: capacity - aggregations.size.value,
-            used: aggregations.size.value,
+          storage: {
+            [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
+              capacity,
+              available: capacity - used,
+              used,
+            },
           },
+          countByExtension: reduce(
+            aggregations.extension.buckets,
+            (acc, { key, doc_count: docCount }) => ({ ...acc, [key]: docCount }),
+            {}
+          ),
+          countByStatus: reduce(
+            aggregations.status.buckets,
+            (acc, { key, doc_count: docCount }) => ({ ...acc, [key]: docCount }),
+            {} as Record<FileStatus, number>
+          ),
         };
       }
 
       throw new Error('Could not retrieve usage metrics');
     } finally {
       if (pit) {
-        await this.soClient.closePointInTime(pit.id).catch((e) => {
-          this.logger.error(e);
-        });
+        await this.soClient.closePointInTime(pit.id).catch(this.logger.error.bind(this.logger));
       }
     }
   }

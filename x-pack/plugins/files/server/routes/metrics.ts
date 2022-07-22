@@ -25,7 +25,7 @@ export function register(router: FilesRouter) {
   router[method](
     {
       path: FILES_API_ROUTES.metrics,
-      validate: false,
+      validate: {},
     },
     handler
   );
