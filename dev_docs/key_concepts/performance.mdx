@@ -33,7 +33,7 @@ some heavy-weight libraries that will also be removed from the initial
 plugin bundle, therefore, reducing its size by a significant amount.
 
 ```ts
-import type { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 export class MyPlugin implements Plugin<MyPluginSetup> {
   setup(core: CoreSetup, plugins: SetupDeps) {
     core.application.register({

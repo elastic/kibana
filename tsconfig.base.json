@@ -451,9 +451,6 @@
       "@kbn/stack-management-usage-test-plugin/*": ["x-pack/test/usage_collection/plugins/stack_management_usage_test/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "kibana": ["./kibana"],
-      "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
       "@emotion/core": ["typings/@emotion"],
       "resize-observer-polyfill": ["typings/resize-observer-polyfill"]
     },

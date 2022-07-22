@@ -17,7 +17,7 @@ See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-serv
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -54,7 +54,7 @@ The client-side HttpService is a preconfigured wrapper around `window.fetch` tha
 
 [source,typescript]
 ----
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 interface ResponseType {…};
 interface MyPluginData {…};
 async function fetchData<ResponseType>(core: CoreStart) {
