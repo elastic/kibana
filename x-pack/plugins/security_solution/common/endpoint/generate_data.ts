@@ -462,7 +462,17 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const isIsolated = this.randomBoolean(0.3);
     const agentVersion = this.randomVersion();
     const minCapabilitiesVersion = '7.15.0';
-    const capabilities = ['isolation'];
+    const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
+    const randomCapabilities = () => {
+      const choice = this.randomN(3);
+      if (choice === 0) {
+        return [capabilities[0]];
+      } else if (choice === 1) {
+        return capabilities.slice(2);
+      } else {
+        return capabilities;
+      }
+    };
     const agentId = this.seededUUIDv4();
 
     return {
@@ -496,7 +506,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
-        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
+        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? randomCapabilities() : [],
       },
     };
   }

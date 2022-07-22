@@ -34,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.responder.closeResponder();
   };
 
-  describe('Response Actions Responder', function () {
+  describe.skip('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
