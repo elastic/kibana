@@ -14,7 +14,7 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';
 import { getFieldType } from './get_field_type';
-import { getSeries } from './get_series';
+import { getSeries } from './lib/series';
 import { getYExtents } from './get_extents';
 import { getFieldsForTerms } from '../../common/fields_utils';
 

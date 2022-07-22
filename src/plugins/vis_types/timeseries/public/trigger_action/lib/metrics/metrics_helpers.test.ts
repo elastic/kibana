@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { Metric, MetricType } from '../../common/types';
+import type { Metric, MetricType } from '../../../../common/types';
 import {
   getPercentilesSeries,
   getPercentileRankSeries,

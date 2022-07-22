@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Metric } from '../../common/types';
-import { SUPPORTED_METRICS } from './supported_metrics';
+import type { Metric } from '../../../../common/types';
 import { getSeriesAgg } from './get_series_agg';
 import {
+  SUPPORTED_METRICS,
   getPercentilesSeries,
   getPercentileRankSeries,
   getFormulaSeries,
@@ -21,7 +21,7 @@ import {
   getParentPipelineSeriesFormula,
   getFilterRatioFormula,
   getTimeScale,
-} from './metrics_helpers';
+} from '../metrics';
 
 export const getSeries = (
   initialMetrics: Metric[],
