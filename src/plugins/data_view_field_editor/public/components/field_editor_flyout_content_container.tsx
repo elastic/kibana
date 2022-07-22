@@ -43,7 +43,9 @@ export interface Props {
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  field?: DataViewField;
+  fieldToEdit?: DataViewField;
+  /** Optional initial configuration for new field */
+  fieldToCreate?: Field;
   /** Services */
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
@@ -64,7 +66,8 @@ export interface Props {
  */
 
 export const FieldEditorFlyoutContentContainer = ({
-  field,
+  fieldToEdit,
+  fieldToCreate,
   onSave,
   onCancel,
   onMounted,
@@ -80,7 +83,6 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const fieldToEdit = deserializeField(dataView, field);
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = dataView;
@@ -92,7 +94,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
     fields
       .filter((fld) => {
-        const isFieldBeingEdited = field?.name === fld.name;
+        const isFieldBeingEdited = fieldToEdit?.name === fld.name;
         return !isFieldBeingEdited && fld.isMapped;
       })
       .forEach((fld) => {
@@ -103,7 +105,7 @@ export const FieldEditorFlyoutContentContainer = ({
       });
 
     return existing;
-  }, [fields, field]);
+  }, [fields, fieldToEdit]);
 
   const services = useMemo(
     () => ({
@@ -126,8 +128,8 @@ export const FieldEditorFlyoutContentContainer = ({
           // eslint-disable-next-line no-empty
         } catch {}
         // rename an existing runtime field
-        if (field?.name && field.name !== updatedField.name) {
-          dataView.removeRuntimeField(field.name);
+        if (fieldToEdit?.name && fieldToEdit.name !== updatedField.name) {
+          dataView.removeRuntimeField(fieldToEdit.name);
         }
 
         dataView.addRuntimeField(updatedField.name, {
@@ -184,7 +186,15 @@ export const FieldEditorFlyoutContentContainer = ({
         setIsSaving(false);
       }
     },
-    [onSave, dataView, dataViews, notifications, fieldTypeToProcess, field?.name, usageCollection]
+    [
+      onSave,
+      dataView,
+      dataViews,
+      notifications,
+      fieldTypeToProcess,
+      fieldToEdit?.name,
+      usageCollection,
+    ]
   );
 
   return (
@@ -204,7 +214,8 @@ export const FieldEditorFlyoutContentContainer = ({
           onSave={saveField}
           onCancel={onCancel}
           onMounted={onMounted}
-          field={fieldToEdit}
+          fieldToCreate={fieldToCreate}
+          fieldToEdit={deserializeField(dataView, fieldToEdit)}
           isSavingField={isSaving}
         />
       </FieldPreviewProvider>
