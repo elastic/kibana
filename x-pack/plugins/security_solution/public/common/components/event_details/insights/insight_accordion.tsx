@@ -35,7 +35,7 @@ interface Props {
 }
 
 /**
- * A special according that is used in the Insights section on the alert flyout.
+ * A special accordion that is used in the Insights section on the alert flyout.
  * It wraps logic and custom styling around the loading, error and success states of an insight section.
  */
 export const InsightAccordion = React.memo<Props>(
