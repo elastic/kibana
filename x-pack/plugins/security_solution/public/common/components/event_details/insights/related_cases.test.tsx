@@ -13,7 +13,7 @@ import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { RelatedCases } from './related_cases';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
-import { CASES_COUNT } from './translations';
+import { CASES_LOADING, CASES_COUNT } from './translations';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();
@@ -59,8 +59,8 @@ describe('Related Cases', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
     });
 
-    describe('When related cases are unable to be retrieved', () => {
-      test('should show 0 related cases when there are none', () => {
+    describe('When related cases are loading', () => {
+      test('should show the loading message', () => {
         mockGetRelatedCases.mockReturnValue([]);
         render(
           <TestProviders>
@@ -68,19 +68,34 @@ describe('Related Cases', () => {
           </TestProviders>
         );
 
-        expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
+        expect(screen.getByText(CASES_LOADING)).toBeInTheDocument();
+      });
+    });
+
+    describe('When related cases are unable to be retrieved', () => {
+      test('should show 0 related cases when there are none', async () => {
+        mockGetRelatedCases.mockReturnValue([]);
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByText(CASES_COUNT(0))).toBeInTheDocument();
+        });
       });
     });
 
     describe('When 1 related case is retrieved', () => {
-      test('should show 1 related case', () => {
+      test('should show 1 related case', async () => {
         mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
         render(
           <TestProviders>
             <RelatedCases eventId={eventId} />
           </TestProviders>
         );
-        waitFor(() => {
+        await waitFor(() => {
           expect(screen.getByText(CASES_COUNT(1))).toBeInTheDocument();
           expect(screen.getByTestId('case-details-link')).toHaveTextContent('Test Case');
         });
@@ -99,7 +114,7 @@ describe('Related Cases', () => {
           </TestProviders>
         );
 
-        waitFor(() => {
+        await waitFor(() => {
           expect(screen.getByText(CASES_COUNT(2))).toBeInTheDocument();
           const cases = screen.getAllByTestId('case-details-link');
           expect(cases).toHaveLength(2);

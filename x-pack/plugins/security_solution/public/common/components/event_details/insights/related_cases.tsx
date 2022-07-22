@@ -30,7 +30,7 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
   } = useKibana();
   const toasts = useToasts();
 
-  const [relatedCases, setRelatedCases] = useState<RelatedCaseList>([]);
+  const [relatedCases, setRelatedCases] = useState<RelatedCaseList | undefined>(undefined);
   const [areCasesLoading, setAreCasesLoading] = useState(true);
   const [hasError, setHasError] = useState<boolean>(false);
 
@@ -57,12 +57,10 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
     getRelatedCases();
   }, [eventId, getRelatedCases]);
 
-  const caseCount = relatedCases.length;
-
   let state: InsightAccordionState = 'loading';
   if (hasError) {
     state = 'error';
-  } else if (!areCasesLoading && caseCount === 0) {
+  } else if (!areCasesLoading && relatedCases?.length === 0) {
     state = 'empty';
   } else if (relatedCases) {
     state = 'success';
@@ -72,13 +70,13 @@ export const RelatedCases = React.memo<Props>(({ eventId }) => {
     <InsightAccordion
       prefix="RelatedCases"
       state={state}
-      text={getTextFromState(state, caseCount)}
+      text={getTextFromState(state, relatedCases?.length)}
       renderContent={renderContent}
     />
   );
 });
 
-function renderCaseContent(relatedCases: RelatedCaseList) {
+function renderCaseContent(relatedCases: RelatedCaseList = []) {
   const caseCount = relatedCases.length;
   return (
     <span>
@@ -116,7 +114,7 @@ function renderCaseContent(relatedCases: RelatedCaseList) {
 
 RelatedCases.displayName = 'RelatedCases';
 
-function getTextFromState(state: InsightAccordionState, caseCount: number) {
+function getTextFromState(state: InsightAccordionState, caseCount = 0) {
   switch (state) {
     case 'loading':
       return CASES_LOADING;
