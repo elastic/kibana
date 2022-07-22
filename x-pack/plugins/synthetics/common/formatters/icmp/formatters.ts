@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ICMPFields, ConfigKey } from '../types';
+import { ICMPFields, ConfigKey } from '../../runtime_types/monitor_management';
+
 import { Formatter, commonFormatters, secondsToCronFormatter } from '../common/formatters';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
