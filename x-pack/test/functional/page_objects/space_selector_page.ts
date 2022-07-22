@@ -38,6 +38,7 @@ export class SpaceSelectorPageObject extends FtrService {
       this.log.debug(`expectRoute(${spaceId}, ${route})`);
       await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
       const url = await this.browser.getCurrentUrl();
+      this.log.debug(`URL: ${url})`);
       if (spaceId === 'default') {
         expect(url).to.contain(route);
       } else {
@@ -51,6 +52,7 @@ export class SpaceSelectorPageObject extends FtrService {
       this.log.debug(`expectSpace(${spaceId}`);
       await this.find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
       const url = await this.browser.getCurrentUrl();
+      this.log.debug(`URL: ${url})`);
       if (spaceId === 'default') {
         expect(url).to.not.contain(`/s/${spaceId}`);
       } else {
