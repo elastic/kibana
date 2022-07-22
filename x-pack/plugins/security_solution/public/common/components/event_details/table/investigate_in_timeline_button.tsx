@@ -6,36 +6,23 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
-import type { AlertSummaryRow } from '../helpers';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
+import type { DataProvider } from '../../../../../common/types';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
-export const InvestigateInTimelineButton = React.memo<
-  React.PropsWithChildren<AlertSummaryRow['description']>
->(({ data, eventId, fieldFromBrowserField, linkValue, timelineId, values, children }) => {
+export const InvestigateInTimelineButton: React.FunctionComponent<{
+  asEmptyButton: boolean;
+  dataProviders: DataProvider[];
+}> = ({ asEmptyButton, children, dataProviders }) => {
   const dispatch = useDispatch();
-
-  const actionCellConfig = useActionCellDataProvider({
-    contextId: timelineId,
-    eventId,
-    field: data.field,
-    fieldFormat: data.format,
-    fieldFromBrowserField,
-    fieldType: data.type,
-    isObjectArray: data.isObjectArray,
-    linkValue,
-    values,
-  });
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -43,14 +30,14 @@ export const InvestigateInTimelineButton = React.memo<
   });
 
   const configureAndOpenTimeline = React.useCallback(() => {
-    if (actionCellConfig?.dataProvider) {
+    if (dataProviders) {
       // Reset the current timeline
       clearTimeline();
       // Update the timeline's providers to match the current prevalence field query
       dispatch(
         updateProviders({
           id: TimelineId.active,
-          providers: actionCellConfig.dataProvider,
+          providers: dataProviders,
         })
       );
       // Only show detection alerts
@@ -65,24 +52,22 @@ export const InvestigateInTimelineButton = React.memo<
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeGlobalLinkTo());
     }
-  }, [dispatch, clearTimeline, actionCellConfig]);
+  }, [dispatch, clearTimeline, dataProviders]);
 
-  const showButton = values != null && !isEmpty(actionCellConfig?.dataProvider);
-
-  if (showButton) {
-    return (
-      <EuiButtonEmpty
-        aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
-        onClick={configureAndOpenTimeline}
-        flush="right"
-        size="xs"
-      >
-        {children}
-      </EuiButtonEmpty>
-    );
-  } else {
-    return null;
-  }
-});
+  return asEmptyButton ? (
+    <EuiButtonEmpty
+      aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+      onClick={configureAndOpenTimeline}
+      flush="right"
+      size="xs"
+    >
+      {children}
+    </EuiButtonEmpty>
+  ) : (
+    <EuiButton aria-label={ACTION_INVESTIGATE_IN_TIMELINE} onClick={configureAndOpenTimeline}>
+      {children}
+    </EuiButton>
+  );
+};
 
 InvestigateInTimelineButton.displayName = 'InvestigateInTimelineButton';
