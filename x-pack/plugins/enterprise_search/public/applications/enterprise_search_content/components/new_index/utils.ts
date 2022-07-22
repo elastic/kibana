@@ -10,5 +10,5 @@ import { LanguageForOptimization } from './types';
 
 // Enterprise Search expects the Universal language option to be represented by null
 // but we can't use null as the value for an EuiSelectOption
-export const getLanguageForOptimizatioin = (language: string): LanguageForOptimization =>
+export const getLanguageForOptimization = (language: string): LanguageForOptimization =>
   language === UNIVERSAL_LANGUAGE_VALUE ? null : language;
