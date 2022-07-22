@@ -19,7 +19,6 @@ import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type { OverallLatencyDistributionResponse } from './types';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { getDurationField } from '../correlations/utils';
-import { appendFilterQuery } from './utils/append_filtery_query';
 
 export async function getOverallLatencyDistribution({
   chartType,
@@ -44,11 +43,14 @@ export async function getOverallLatencyDistribution({
 }) {
   // when using metrics data, ensure we filter by docs with the appropriate duration field
   const filteredQuery = searchMetrics
-    ? appendFilterQuery(query, {
-        exists: {
-          field: getDurationField(chartType, searchMetrics),
+    ? {
+        bool: {
+          filter: [
+            query,
+            { exists: { field: getDurationField(chartType, searchMetrics) } },
+          ],
         },
-      })
+      }
     : query;
 
   return withApmSpan('get_overall_latency_distribution', async () => {
