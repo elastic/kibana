@@ -33,4 +33,4 @@ export {
   asHttpRequestExecutionSource,
   isHttpRequestExecutionSource,
 } from './action_execution_source';
-export { trimStrings } from './trim_strings';
+export { validateEmptyStrings } from './validate_empty_strings';
