@@ -130,7 +130,7 @@ export const fetchSignificantCorrelations = async ({
           }, undefined);
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
-    const logHistogram = await fetchDurationRanges({
+    const { durationRanges: logHistogram } = await fetchDurationRanges({
       setup,
       eventType,
       start,
