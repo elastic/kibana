@@ -20,7 +20,9 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 
-import { IndicesLogic, IngestionMethod, IngestionStatus, ViewSearchIndex } from './indices_logic';
+import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+
+import { IndicesLogic } from './indices_logic';
 
 const DEFAULT_VALUES = {
   data: undefined,
@@ -31,7 +33,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 
-const apiIndex: ViewSearchIndex = {
+const apiIndex: ElasticsearchViewIndex = {
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   lastUpdated: null,
@@ -44,7 +46,7 @@ const apiIndex: ViewSearchIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-const connectorIndex: ViewSearchIndex = {
+const connectorIndex: ElasticsearchViewIndex = {
   connector: {
     api_key_id: null,
     configuration: {},
@@ -74,7 +76,7 @@ const connectorIndex: ViewSearchIndex = {
     store: { size_in_bytes: '8024' },
   },
 };
-const crawlerIndex: ViewSearchIndex = {
+const crawlerIndex: ElasticsearchViewIndex = {
   crawler: {
     id: '3',
     index_name: 'crawler',
