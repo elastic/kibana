@@ -51,7 +51,7 @@ export const TotalCountHeader = ({
         <EuiIconTip
           content={i18n.translate('xpack.dataVisualizer.searchPanel.randomSamplerMessage', {
             defaultMessage:
-              'Random sampler is being used for the total document count and the chart. Values shown are estimated.',
+              'Approximate values are shown in the total document count and chart, which use random sampler aggregations.',
           })}
           position="right"
           type="iInCircle"

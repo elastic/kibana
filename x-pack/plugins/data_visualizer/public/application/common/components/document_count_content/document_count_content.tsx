@@ -67,28 +67,28 @@ export const DocumentCountContent: FC<Props> = ({
   const calloutInfoMessage = useMemo(() => {
     switch (randomSamplerPreference) {
       case RANDOM_SAMPLER_OPTION.OFF:
-        return i18n.translate(
-          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCalloutMessage',
-          {
-            defaultMessage:
-              'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
-          }
-        );
+        return i18n.translate('xpack.dataVisualizer.randomSamplerSettingsPopUp.offCalloutMessage', {
+          defaultMessage:
+            'Random sampling can be turned on for the total document count and chart to increase speed although some accuracy will be lost.',
+        });
       case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
         return i18n.translate(
           'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCalloutMessage',
           {
             defaultMessage:
-              'Random sampling is being used for the total document count and the chart. The probability used in the aggregation will be automatically set to balance accuracy and speed.',
+              'The total document count and chart use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
           }
         );
 
       case RANDOM_SAMPLER_OPTION.ON_MANUAL:
       default:
-        return i18n.translate('xpack.dataVisualizer.randomSamplerSettingsPopUp.offCalloutMessage', {
-          defaultMessage:
-            'Random sampling is being used for the total document count and the chart. A lower percentage probability will increase performance, but some accuracy will be lost.',
-        });
+        return i18n.translate(
+          'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCalloutMessage',
+          {
+            defaultMessage:
+              'The total document count and chart use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+          }
+        );
     }
   }, [randomSamplerPreference]);
 
