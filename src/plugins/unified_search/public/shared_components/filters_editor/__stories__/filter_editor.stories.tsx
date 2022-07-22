@@ -26,7 +26,7 @@ const Template: ComponentStory<FC<FiltersEditorProps>> = (args) => <FiltersEdito
 
 export const Default = Template.bind({});
 
-Template.decorators = [
+Default.decorators = [
   (Story) => (
     <IntlProvider locale="en">
       <KibanaContextProvider services={services}>
