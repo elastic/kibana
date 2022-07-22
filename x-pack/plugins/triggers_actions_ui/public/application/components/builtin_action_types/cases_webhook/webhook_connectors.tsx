@@ -55,7 +55,7 @@ type PossibleStepNumbers = 1 | 2 | 3 | 4;
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const { isValid, validateFields } = useFormContext();
+  const { isValid, getFields, validateFields } = useFormContext();
   const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);
   const [status, setStatus] = useState<Record<string, EuiStepStatus>>({
     step1: 'incomplete',
@@ -65,26 +65,30 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
   });
   const updateStatus = useCallback(async () => {
     const steps: PossibleStepNumbers[] = [1, 2, 3, 4];
-    const statuses = await Promise.all(
-      steps.map(async (index) => {
-        if (typeof isValid !== 'undefined' && !isValid) {
-          const { areFieldsValid } = await validateFields(fields[`step${index}`]);
-          return {
-            [`step${index}`]: areFieldsValid ? 'complete' : ('danger' as EuiStepStatus),
-          };
-        }
+    const currentFields = getFields();
+    const statuses = steps.map((index) => {
+      if (typeof isValid !== 'undefined' && !isValid) {
+        const fieldsToValidate = fields[`step${index}`];
+        // submit validation fields have already been through validator
+        // so we can look at the isValid property from `getFields()`
+        const areFieldsValid = fieldsToValidate.every((field) =>
+          currentFields[field] !== undefined ? currentFields[field].isValid : true
+        );
         return {
-          [`step${index}`]:
-            currentStep === index
-              ? 'current'
-              : currentStep > index
-              ? 'complete'
-              : ('incomplete' as EuiStepStatus),
+          [`step${index}`]: areFieldsValid ? 'complete' : ('danger' as EuiStepStatus),
         };
-      })
-    );
+      }
+      return {
+        [`step${index}`]:
+          currentStep === index
+            ? 'current'
+            : currentStep > index
+            ? 'complete'
+            : ('incomplete' as EuiStepStatus),
+      };
+    });
     setStatus(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
-  }, [currentStep, isValid, validateFields]);
+  }, [currentStep, getFields, isValid]);
 
   useEffect(() => {
     updateStatus();
@@ -107,6 +111,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           : nextStep === 4
           ? [...fields.step1, ...fields.step2, ...fields.step3]
           : [];
+      // step validation needs async call in order to run each field through validator
       const { areFieldsValid } = await validateFields(fieldsToValidate);
 
       if (!areFieldsValid) {
