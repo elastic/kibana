@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { noop } from 'lodash/fp';
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiAccordion, EuiIcon, useGeneratedHtmlId, hexToRgb } from '@elastic/eui';
+import { EuiAccordion, EuiIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 const StyledAccordion = euiStyled(EuiAccordion)`
@@ -19,7 +19,6 @@ const StyledAccordion = euiStyled(EuiAccordion)`
 `;
 
 const EmptyAccordion = euiStyled(StyledAccordion)`
-  background-color: rgba(${({ theme }) => hexToRgb(theme.eui.euiColorDisabled).join(',')}, 0.15);
   color: ${({ theme }) => theme.eui.euiColorDisabledText};
   pointer-events: none;
 `;
