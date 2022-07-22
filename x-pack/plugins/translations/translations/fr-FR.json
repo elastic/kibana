@@ -24106,7 +24106,6 @@
     "xpack.securitySolution.alerts.severityMapping.sourceFieldTitle": "Champ source",
     "xpack.securitySolution.alerts.severityMapping.sourceValueTitle": "Valeur source",
     "xpack.securitySolution.alertsView.osqueryAlertTitle": "Exécuter Osquery",
-    "xpack.securitySolution.alertsView.osqueryBackToAlertDetails": "Détails de l'alerte",
     "xpack.securitySolution.allHost.errorSearchDescription": "Une erreur s'est produite lors de la recherche de tous les hôtes",
     "xpack.securitySolution.allHost.failSearchDescription": "Impossible de lancer une recherche sur tous les hôtes",
     "xpack.securitySolution.andOrBadge.and": "AND",
