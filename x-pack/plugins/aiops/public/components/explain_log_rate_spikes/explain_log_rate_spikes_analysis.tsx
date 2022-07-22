@@ -17,6 +17,7 @@ import type { Query } from '@kbn/es-query';
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
+
 import { SpikeAnalysisTable } from '../spike_analysis_table';
 
 /**

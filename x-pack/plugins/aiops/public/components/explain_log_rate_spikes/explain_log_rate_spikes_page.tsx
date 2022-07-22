@@ -21,17 +21,18 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, Query } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useAiOpsKibana } from '../../kibana_context';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
+import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/url_state';
 import { useData } from '../../hooks/use_data';
-import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
 
+import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
 /**
@@ -40,14 +41,27 @@ import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis
 interface ExplainLogRateSpikesPageProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
+  savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 
-export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ dataView }) => {
+export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
+  dataView,
+  savedSearch,
+}) => {
   const { services } = useAiOpsKibana();
   const { data: dataService } = services;
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
+
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+
+  useEffect(() => {
+    if (savedSearch) {
+      setCurrentSavedSearch(savedSearch);
+    }
+  }, [savedSearch]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -56,6 +70,12 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
+      // When the user loads saved search and then clear or modify the query
+      // we should remove the saved search and replace it with the index pattern id
+      if (currentSavedSearch !== null) {
+        setCurrentSavedSearch(null);
+      }
+
       setAiopsListState({
         ...aiopsListState,
         searchQuery: searchParams.searchQuery,
@@ -64,7 +84,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
         filters: searchParams.filters,
       });
     },
-    [aiopsListState, setAiopsListState]
+    [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePoint | null>(null);
@@ -88,7 +108,12 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
     searchQueryLanguage,
     searchString,
     searchQuery,
-  } = useData(dataView, aiopsListState, setGlobalState, currentSelectedChangePoint);
+  } = useData(
+    { currentDataView: dataView, currentSavedSearch },
+    aiopsListState,
+    setGlobalState,
+    currentSelectedChangePoint
+  );
 
   const totalCount = currentSelectedChangePoint
     ? overallDocStats.totalCount + selectedDocStats.totalCount
@@ -125,7 +150,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
   useEffect(() => {
     // Update data query manager if input string is updated
     dataService?.query.queryString.setQuery({
-      query: searchString,
+      query: searchString ?? '',
       language: searchQueryLanguage,
     });
   }, [dataService, searchQueryLanguage, searchString]);
@@ -172,7 +197,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ da
           <EuiFlexItem>
             <SearchPanel
               dataView={dataView}
-              searchString={searchString}
+              searchString={searchString ?? ''}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
