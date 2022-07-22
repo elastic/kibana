@@ -251,13 +251,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasFolds() {
-    try {
-      const requestEditor = await this.getRequestEditor();
-      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
-      return folds.length > 0;
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_fold');
   }
 
   public async getResponseStatus() {
@@ -267,9 +261,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   async closeHelpIfExists() {
-    const helpPanelShown = await this.testSubjects.exists('help-close-button');
-    if (helpPanelShown) {
-      await this.dismissTutorial();
-    }
+    await this.retry.try(async () => {
+      const helpPanelShown = await this.testSubjects.exists('help-close-button');
+      if (helpPanelShown) {
+        await this.collapseHelp();
+      }
+    });
   }
 }
