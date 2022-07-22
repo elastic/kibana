@@ -17,10 +17,10 @@ export const bodySchema = schema.object({
   name: schema.string({ validate: validateEmptyStrings }),
   connector_type_id: schema.string({ validate: validateEmptyStrings }),
   config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {}
+    defaultValue: {},
   }),
   secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {}
+    defaultValue: {},
   }),
 });
 
