@@ -93,16 +93,16 @@ describe('ALL - Live Query', () => {
 
     cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
   });
-  it('should run live pack', () => {
+  it.only('should run live pack', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
-    selectAllAgents();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
     cy.getBySel('select-live-pack').click();
     cy.contains('Integration').click();
     cy.contains('This table contains 1 rows.');
-    cy.contains('Integration (7b4c5b30-0987-11ed-9e06-0d02fcce9ea3)');
+    cy.contains('Integration (');
     cy.contains('system_memory_linux_elastic');
+    selectAllAgents();
     submitQuery();
     cy.getBySel('live-query-loading').should('exist');
     cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
