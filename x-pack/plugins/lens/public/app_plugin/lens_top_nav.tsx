@@ -501,7 +501,6 @@ export const LensTopNavMenu = ({
             indexPatterns,
             getEsQueryConfig(uiSettings)
           );
-
           return discover.locator!.getRedirectUrl({
             indexPatternId: meta.id,
             timeRange: data.query.timefilter.timefilter.getTime(),

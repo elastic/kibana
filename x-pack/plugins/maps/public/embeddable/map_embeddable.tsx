@@ -251,7 +251,6 @@ export class MapEmbeddable
   }
 
   public getFilters() {
-    console.log('maps get filters');
     let mapState: { filters?: Filter[] } = {};
     try {
       mapState = JSON.parse(this._savedMap.getAttributes().mapStateJSON ?? '');

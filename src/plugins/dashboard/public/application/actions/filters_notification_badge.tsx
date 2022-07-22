@@ -9,7 +9,6 @@
 import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -57,7 +56,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&
       isFilterableEmbeddable(embeddable) &&
-      embeddable.getFilters().length > 0 // THIS IS CAUSING UNSAVED CHANGES BUG????
+      embeddable.getFilters().length > 0
     );
   };
 
@@ -65,27 +64,21 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   public execute = async (context: FiltersNotificationActionContext) => {
     const { embeddable } = context;
     const isCompatible = await this.isCompatible({ embeddable });
-    if (!isCompatible) {
+    if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
-    const filters = embeddable.getFilters() ?? [];
+    const filters = embeddable.getFilters();
     const dataViewList: DataView[] =
       (embeddable.parent as DashboardContainer)?.getAllDataViews() ?? [];
-    // console.log('Dashboard dataviews:', dataViewList);
-    // console.log('Embeddable filters:', filters);
-    const filterPills = (
-      <FilterItems filters={filters} indexPatterns={dataViewList} readOnly={true} />
-    );
 
     const session = this.overlays.openModal(
       toMountPoint(
         <FiltersNotificationModal
           displayName={this.displayName}
-          context={context}
-          icon={this.getIconType({ embeddable })}
           id={this.id}
           closeModal={() => session.close()}
-          contents={filterPills}
+          filters={filters}
+          dataViewList={dataViewList}
         />,
         { theme$: this.theme.theme$ }
       ),

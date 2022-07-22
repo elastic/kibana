@@ -874,7 +874,6 @@ export class Embeddable
   }
 
   public getFilters() {
-    console.log('lens get filters');
     if (!this.savedVis) {
       throw new Error('savedVis is required for getFilters');
     }

@@ -39,6 +39,7 @@ import {
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -56,7 +57,6 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-import { FilterableEmbeddable } from '@kbn/presentation-util-plugin/public';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -194,9 +194,10 @@ export class VisualizeEmbeddable
   }
 
   public getFilters() {
-    console.log('vis get filters');
+    // because injection happens as part of the factory, we can reference filters directly here
     const filters = this.getInput().savedVis?.data.searchSource?.filter ?? [];
-    return mapAndFlattenFilters(filters);
+    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
+    return mapAndFlattenFilters(_.cloneDeep(filters));
   }
 
   public getInspectorAdapters = () => {
