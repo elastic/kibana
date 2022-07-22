@@ -12,7 +12,7 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
+import puppeteer, { ElementHandle, Page, EvaluateFunc, CDPSession } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
@@ -127,7 +127,7 @@ export class HeadlessChromiumDriver {
     }
 
     await this.page.setRequestInterception(true);
-    await this.registerListeners(url, headers, logger);
+    this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     if (this.config.browser.chromium.inspect) {
@@ -340,13 +340,12 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private async registerListeners(url: string, customHeaders: Headers, logger: Logger) {
+  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
 
-    const target = this.page.target();
-    const client = await target.createCDPSession();
+    const client = (this.page as unknown as {_client(): CDPSession})._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -437,12 +436,12 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
+    const client = (this.page as unknown as {_client(): CDPSession})._client();
     const target = this.page.target();
-    const client = await target.createCDPSession();
+    const targetId = (target as unknown as {_targetId: string})._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    const targetId = (target as unknown as {_targetId: string})._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 
