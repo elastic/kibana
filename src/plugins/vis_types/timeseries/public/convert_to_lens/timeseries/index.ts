@@ -5,37 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PaletteOutput } from '@kbn/coloring';
-import type {
-  NavigateToLensContext,
-  VisualizeEditorLayersContext,
-} from '@kbn/visualizations-plugin/public';
-import type { Panel } from '../../common/types';
-import { PANEL_TYPES } from '../../common/enums';
-import { getDataSourceInfo, getFieldType } from './lib/datasource';
-import { getSeries } from './lib/series';
-import { getYExtents } from './lib/xy';
-import { getFieldsForTerms } from '../../common/fields_utils';
-import { getDataViewsStart } from '../services';
+import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { getDataViewsStart } from '../../services';
+import { getDataSourceInfo, getFieldType } from '../lib/datasource';
+import { getSeries } from '../lib/series';
+import { SUPPORTED_FORMATTERS } from '../lib/formatters';
+import { getFieldsForTerms } from '../../../common/fields_utils';
+import { ConvertTsvbToLensVisualization } from '../types';
+import { getYExtents } from '../lib/xy';
 
-const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
-
-/*
- * This function is used to convert the TSVB model to compatible Lens model.
- * Returns the Lens model, only if it is supported. If not, it returns null.
- * In case of null, the menu item is disabled and the user can't navigate to Lens.
- */
-export const triggerTSVBtoLensConfiguration = async (
-  model: Panel
-): Promise<NavigateToLensContext | null> => {
-  // Disables the option for not timeseries charts, for the string mode and for series with annotations
-  if (
-    model.type !== PANEL_TYPES.TIMESERIES ||
-    !model.use_kibana_indexes ||
-    (model.annotations && model.annotations.length > 0)
-  ) {
-    return null;
-  }
+export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
   // get the active series number
   let seriesNum = 0;
