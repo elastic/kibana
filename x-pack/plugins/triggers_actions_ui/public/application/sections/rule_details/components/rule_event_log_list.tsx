@@ -284,7 +284,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
                     {formatMillisForDisplay(ruleSummary.executionDuration.average)}
                   </EuiFlexItem>
                 </EuiFlexGroup>
