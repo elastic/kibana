@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { Installation } from '@kbn/fleet-plugin/server/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
+const TEST_KEY_ID = 'd2a182a7b0e00c14';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+  const es: Client = getService('es');
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
   const server = dockerServers.get('registry');
@@ -25,6 +29,15 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: !!opts?.force });
   };
 
+  const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
+    const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
+      method: 'GET',
+      path: `/.kibana/_doc/epm-packages:${pkg}`,
+    });
+
+    return res?._source?.['epm-packages'] as Installation;
+  };
+
   describe('Installs verified and unverified packages', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
@@ -36,9 +49,9 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should install a package with a valid signature', async () => {
         await installPackage('verified', '1.0.0').expect(200);
-      });
-      it('should force install a package with a valid signature', async () => {
-        await installPackage('verified', '1.0.0').expect(200);
+        const installationSO = await getInstallationSavedObject('verified');
+        expect(installationSO?.verification_status).equal('verified');
+        expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
       });
     });
     describe('unverified packages', async () => {
@@ -57,6 +70,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         it('should return 200 for valid signature but incorrect content force install', async () => {
           await installPackage('unverified_content', '1.0.0', { force: true }).expect(200);
+          const installationSO = await getInstallationSavedObject('unverified_content');
+          expect(installationSO?.verification_status).equal('unverified');
+          expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
         });
       });
       describe('package verified with wrong key', async () => {
@@ -73,6 +89,9 @@ export default function (providerContext: FtrProviderContext) {
         });
         it('should return 200 for valid signature but incorrect key force install', async () => {
           await installPackage('wrong_key', '1.0.0', { force: true }).expect(200);
+          const installationSO = await getInstallationSavedObject('wrong_key');
+          expect(installationSO?.verification_status).equal('unverified');
+          expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
         });
       });
     });
