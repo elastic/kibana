@@ -24,8 +24,8 @@ import { indexToViewIndex } from '../../utils/indices';
 import { IndexViewLogic } from './index_view_logic';
 
 const DEFAULT_VALUES = {
-  data: null,
-  index: null,
+  data: undefined,
+  index: undefined,
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   isSyncing: false,
