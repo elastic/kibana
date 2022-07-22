@@ -7,6 +7,8 @@
  */
 
 /**
+ * An identifier for a saved object within a space.
+ *
  * @public
  */
 export interface SavedObjectTypeIdTuple {
