@@ -12,6 +12,12 @@ import { SaveTimelineButton } from './save_timeline_button';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
+const TEST_ID = {
+  SAVE_TIMELINE_MODAL: 'save-timeline-modal',
+  SAVE_TIMELINE_BTN: 'save-timeline-button-icon',
+  SAVE_TIMELINE_TOOLTIP: 'save-timeline-tooltip',
+};
+
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
   return {
@@ -49,10 +55,8 @@ describe('SaveTimelineButton', () => {
   //
   // Raised a bug with eui team: https://github.com/elastic/eui/issues/6065
   xit('Show tooltip', async () => {
-    const { container } = render(<TestSaveTimelineButton {...props} />);
-    const saveTimelineIcon = container.querySelectorAll(
-      '[data-test-subj="save-timeline-button-icon"]'
-    )[0];
+    render(<TestSaveTimelineButton {...props} />);
+    const saveTimelineIcon = screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_BTN)[0];
 
     fireEvent.mouseOver(saveTimelineIcon);
 
@@ -64,45 +68,40 @@ describe('SaveTimelineButton', () => {
   });
 
   it('should show a button with pencil icon', () => {
-    const { container } = render(<TestSaveTimelineButton {...props} />);
-    expect(
-      container.querySelectorAll('[data-test-subj="save-timeline-button-icon"]')[0].firstChild
-    ).toHaveAttribute('data-euiicon-type', 'pencil');
+    render(<TestSaveTimelineButton {...props} />);
+
+    expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN).firstChild).toHaveAttribute(
+      'data-euiicon-type',
+      'pencil'
+    );
   });
 
   it('should have edit timeline btn disabled with tooltip if user does not have write access', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: false },
     });
-    const { container } = render(
+    render(
       <TestProviders>
         <SaveTimelineButton {...props} />
       </TestProviders>
     );
-    expect(
-      container.querySelectorAll('[data-test-subj="save-timeline-button-icon"]')[0]
-    ).toBeDisabled();
+    expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN)).toBeDisabled();
   });
 
   it('should not show modal if user does not have write access', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: false },
     });
-    const { container, baseElement } = render(<TestSaveTimelineButton {...props} />);
-    expect(
-      container.querySelector('[data-test-subj="save-timeline-modal"]')
-    ).not.toBeInTheDocument();
+    render(<TestSaveTimelineButton {...props} />);
 
-    const saveTimelineIcon = container.querySelectorAll(
-      '[data-test-subj="save-timeline-button-icon"]'
-    )[0];
+    expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
+
+    const saveTimelineIcon = screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN).firstChild;
 
     fireEvent.click(saveTimelineIcon);
 
     await waitFor(() => {
-      expect(baseElement.querySelectorAll('[data-test-subj="save-timeline-modal"]')).toHaveLength(
-        0
-      );
+      expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toHaveLength(0);
     });
   });
 
@@ -110,24 +109,16 @@ describe('SaveTimelineButton', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
-    const { container, baseElement } = render(<TestSaveTimelineButton {...props} />);
-    expect(
-      container.querySelector('[data-test-subj="save-timeline-modal"]')
-    ).not.toBeInTheDocument();
+    render(<TestSaveTimelineButton {...props} />);
+    expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
-    const saveTimelineIcon = container.querySelectorAll(
-      '[data-test-subj="save-timeline-button-icon"]'
-    )[0];
+    const saveTimelineIcon = screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_BTN)[0];
 
     fireEvent.click(saveTimelineIcon);
 
     await waitFor(() => {
-      expect(
-        container.querySelector('[data-test-subj="save-timeline-btn-tooltip"]')
-      ).not.toBeInTheDocument();
-      expect(
-        baseElement.querySelectorAll('[data-test-subj="save-timeline-modal"]')[0]
-      ).toBeVisible();
+      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_TOOLTIP)).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)[0]).toBeVisible();
     });
   });
 });
