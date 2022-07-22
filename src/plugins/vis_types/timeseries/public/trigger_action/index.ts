@@ -12,10 +12,9 @@ import type {
 } from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
-import { getDataSourceInfo } from './lib/datasource';
-import { getFieldType } from './get_field_type';
+import { getDataSourceInfo, getFieldType } from './lib/datasource';
 import { getSeries } from './lib/series';
-import { getYExtents } from './get_extents';
+import { getYExtents } from './lib/xy';
 import { getFieldsForTerms } from '../../common/fields_utils';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];

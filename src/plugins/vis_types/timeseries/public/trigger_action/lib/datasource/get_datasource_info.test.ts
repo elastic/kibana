@@ -7,6 +7,7 @@
  */
 import type { DataView } from '@kbn/data-plugin/common';
 import { getDataSourceInfo } from './get_datasource_info';
+
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
   test2: {
