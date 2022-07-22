@@ -32,6 +32,7 @@ describe('ALL - Packs', () => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_2');
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'failing_pack');
     });
 
     beforeEach(() => {
@@ -44,6 +45,7 @@ describe('ALL - Packs', () => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_2');
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_3');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'failing_pack');
     });
 
     it('should add a pack from a saved query', () => {
@@ -96,6 +98,27 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
+
+    it('should verify that packs are triggered', () => {
+      cy.waitForReact();
+      preparePack(PACK_NAME);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.react('ScheduledQueryLastResults').within(() => {
+        cy.react('FormattedRelative');
+      });
+
+      cy.react('DocsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('2');
+      });
+      cy.react('AgentsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
+    });
+
     it('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
@@ -217,6 +240,30 @@ describe('ALL - Packs', () => {
       preparePack(PACK_NAME);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
+    });
+    it('should verify that packs are triggered', () => {
+      const FAILING_PACK = 'failingpack';
+      cy.waitForReact();
+      preparePack(FAILING_PACK);
+
+      cy.contains(`${FAILING_PACK} details`).should('exist');
+      cy.contains(/^Edit$/).click();
+      findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', DEFAULT_POLICY);
+      findAndClickButton('Update pack');
+      cy.contains('Save and deploy changes');
+      findAndClickButton('Save and deploy changes');
+      cy.contains(FAILING_PACK).click();
+      cy.contains(`${FAILING_PACK} details`).should('exist');
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.react('ErrorsColumnResults')
+        .within(() => {
+          cy.react('EuiNotificationBadge').contains('2');
+        })
+        .click();
+      cy.contains(
+        'Error executing scheduled query pack_failingpack_failingQuery: no such table: opera_extensions'
+      );
     });
   });
 

@@ -493,7 +493,7 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
     logsDataView,
   });
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={'docsLoading'} />;
   }
 
   if (!lastResultsData) {
@@ -534,7 +534,7 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   }
 
   if (!errorsData?.total) {
-    return <>{'-'}</>;
+    return <span data-test-subj="packResultsErrorsEmpty">{'-'}</span>;
   }
 
   return (
