@@ -26,9 +26,15 @@ export interface RemoveFilterPayload {
 }
 
 /** @internal **/
+export interface MoveFilterPayload {
+  path: Path;
+}
+
+/** @internal **/
 export type FiltersEditorActions =
   | { type: 'updateFilters'; payload: UpdateFiltersPayload }
-  | { type: 'removeFilter'; payload: RemoveFilterPayload };
+  | { type: 'removeFilter'; payload: RemoveFilterPayload }
+  | { type: 'moveFilter'; payload: MoveFilterPayload };
 
 export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActions> = (
   state,
@@ -40,6 +46,10 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
         filters: action.payload.filters,
       };
     case 'removeFilter':
+      console.log(action);
+      return state;
+
+    case 'moveFilter':
       console.log(action);
       return state;
     default:
