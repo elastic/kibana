@@ -17,7 +17,7 @@ import { createFieldFormatter } from './create_field_formatter';
 import moment from 'moment';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 
-export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap, dataView) => {
+export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
   const variables = {};
   const dateFormat = getConfig?.('dateFormat') ?? 'lll';
   model.series.forEach((seriesModel) => {
@@ -57,13 +57,7 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
 
           if (fieldsForTerms.length === 1) {
-            rowLabel = createFieldFormatter(
-              fieldsForTerms[0],
-              fieldFormatMap,
-              undefined,
-              false,
-              dataView
-            )(row.label);
+            rowLabel = createFieldFormatter(fieldsForTerms[0], fieldFormatMap)(row.label);
           }
         }
 
