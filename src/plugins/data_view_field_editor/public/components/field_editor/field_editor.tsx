@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
@@ -127,8 +127,8 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  // todo
   console.log('FieldEditorComponent - this is rerendering too much');
+  // todo - two initial sources, original field and preview
   const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
@@ -141,6 +141,28 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
+
+  console.log('SUBFIELDS', field?.fields);
+  const savedSubfieldTypes = Object.entries(field?.fields || {}).reduce<Record<string, string>>(
+    (col, [key, val]) => {
+      col[key] = val.type;
+      return col;
+    },
+    {}
+  );
+  const fieldsAndTypesDefault = fields.reduce<Record<string, string>>((collector, item) => {
+    // todo remove ! and use correct type
+    collector[item.key] = item.type!;
+    return collector;
+  }, {});
+
+  console.log('DEEEEEFAULT', fieldsAndTypesDefault);
+  // todo
+  const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
+
+  useEffect(() => {
+    console.log('useEffect fieldsAndTypes', fieldsAndTypes);
+  }, [fieldsAndTypes]);
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
 
@@ -173,22 +195,50 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   // console.log('RENDER FORM', form.getFields());
 
   useEffect(() => {
+    console.log('FIELDS HAVE BEEN UPDATED', fields);
+    const previewFieldsToFormFields = fields.map((fld) => ({
+      name: fld.key,
+      value: [{ label: 'keyword', type: 'keyword' }],
+    }));
+    console.log('previewFieldsToFormFields', previewFieldsToFormFields);
+    /*
+    form.setFieldValue('fields__array__', [
+      { name: 'a', value: [{ label: 'keyword', type: 'keyword' }] },
+    ]);
+    */
+    form.setFieldValue('fields__array__', previewFieldsToFormFields);
+    form.setFieldValue('TEST', 'TEST VALUE');
+    console.log('SET FIELDS COMPLETE');
+  }, [fields, form]);
+
+  useEffect(() => {
+    console.log('USE EFFECT ONCHANGE');
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
     }
   }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
 
+  /*
   useEffect(() => {
+    console.log('USE EFFECT updatePreviewParams');
     updatePreviewParams({
       name: Boolean(updatedName?.trim()) ? updatedName : null,
       type: updatedType?.[0].value,
       script:
         isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
           ? null
-          : updatedScript,
+          : { source: updatedScript!.source },
       format: updatedFormat?.id !== undefined ? updatedFormat : null,
     });
-  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
+  }, [
+    updatedName,
+    updatedType,
+    updatedScript?.source,
+    isValueVisible,
+    updatedFormat,
+    updatePreviewParams,
+  ]);
+  */
 
   useEffect(() => {
     if (onFormModifiedChange) {
@@ -260,9 +310,19 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiSpacer size="xl" />
         </>
       )}
-      {updatedType && updatedType[0].value !== 'composite' ? <FieldDetail /> : <CompositeEditor />}
+      {updatedType && updatedType[0].value !== 'composite' ? (
+        <FieldDetail />
+      ) : (
+        <CompositeEditor
+          value={fieldsAndTypes}
+          setValue={(update) => {
+            console.log('got update', update);
+            setFieldsAndTypes(update);
+          }}
+        />
+      )}
     </Form>
   );
 };
 
-export const FieldEditor = React.memo(FieldEditorComponent) as typeof FieldEditorComponent;
+export const FieldEditor = FieldEditorComponent as typeof FieldEditorComponent;
