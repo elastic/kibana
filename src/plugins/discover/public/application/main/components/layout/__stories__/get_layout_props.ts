@@ -9,7 +9,7 @@
 import { DataView, DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
 import { SearchSource } from '@kbn/data-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { FetchStatus } from '../../../../types';
 import {

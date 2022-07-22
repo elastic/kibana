@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Adapters } from '@kbn/inspector-plugin';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
