@@ -41,7 +41,6 @@ export const getMetricVisRenderer = (
               align-items: center;
               justify-content: center;
             `}
-            showNoResult={!visData.rows.length}
             handlers={handlers}
           >
             <MetricVis
