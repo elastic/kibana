@@ -14,7 +14,6 @@ import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/asset
 import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
-const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 
 export const getFieldCategory = (field: string): string => {
   const fieldCategory = field.split('.')[0];
@@ -43,8 +42,7 @@ export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
 
 export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
-  (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
-  !nonFlattenedFormatParamsFields.includes(field);
+  prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS;
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],
@@ -75,10 +73,9 @@ export const getDataFromFieldsHits = (
     // return simple field value (non-ecs object, non-array)
     if (
       !isObjectArray ||
-      (Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
+      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
         (ecsField) => ecsField === field
-      ) === undefined &&
-        !isRuleParametersFieldOrSubfield(field, prependField))
+      ) === undefined
     ) {
       return [
         ...accumulator,
