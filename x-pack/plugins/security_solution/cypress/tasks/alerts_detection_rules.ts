@@ -248,10 +248,6 @@ export const changeRowsPerPageTo = (rowsCount: number) => {
     .should('not.exist');
 };
 
-export const changeRowsPerPageTo100 = () => {
-  changeRowsPerPageTo(100);
-};
-
 export const goToPage = (pageNumber: number) => {
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
   cy.get(pageSelector(pageNumber)).last().click({ force: true });
