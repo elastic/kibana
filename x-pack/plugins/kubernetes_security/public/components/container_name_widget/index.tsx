@@ -36,7 +36,7 @@ export interface ContainerNameWidgetDataValueMap {
 
 export interface ContainerNameArrayDataValue {
   name: string;
-  count: number;
+  count: string;
 }
 
 export interface ContainerNameWidgetDeps {
