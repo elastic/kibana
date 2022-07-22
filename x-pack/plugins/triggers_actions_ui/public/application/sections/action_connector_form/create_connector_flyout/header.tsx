@@ -15,9 +15,9 @@ import {
   EuiFlyoutHeader,
   IconType,
   EuiBetaBadge,
+  EuiBetaBadgeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBetaBadgeProps } from '@elastic/eui/src/components/badge/beta_badge';
 
 const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;

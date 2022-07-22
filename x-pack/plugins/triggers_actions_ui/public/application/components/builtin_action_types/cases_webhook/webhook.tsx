@@ -25,10 +25,10 @@ export function getActionType(): ActionTypeModel<
       }
     ),
     betaBadgeProps: {
-      label: i18n.translate('xpack.triggersActionsUi.technicalPreviewBadgeLabel', {
+      label: i18n.translate('xpack.triggersActionsUI.technicalPreviewBadgeLabel', {
         defaultMessage: 'Technical preview',
       }),
-      tooltipContent: i18n.translate('xpack.triggersActionsUi.technicalPreviewBadgeDescription', {
+      tooltipContent: i18n.translate('xpack.triggersActionsUI.technicalPreviewBadgeDescription', {
         defaultMessage:
           'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
       }),
