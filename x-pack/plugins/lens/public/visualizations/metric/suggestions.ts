@@ -33,12 +33,20 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
     ({ operation }) => !supportedDataTypes.has(operation.dataType) && !operation.isBucketed
   );
 
+  const couldNeverFit =
+    unsupportedColumns.length ||
+    bucketedColumns.length > MAX_BUCKETED_COLUMNS ||
+    metricColumns.length > MAX_METRIC_COLUMNS;
+
   if (
     !table.columns.length ||
     hasLayerMismatch(keptLayerIds, table) ||
-    unsupportedColumns.length ||
-    bucketedColumns.length > MAX_BUCKETED_COLUMNS ||
-    metricColumns.length > MAX_METRIC_COLUMNS ||
+    couldNeverFit ||
+    // dragging the first field
+    (isActive &&
+      table.changeType === 'initial' &&
+      metricColumns.length &&
+      bucketedColumns.length) ||
     (isActive && table.changeType === 'unchanged')
   ) {
     return [];
@@ -59,29 +67,9 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
     {
-      metricAccessor: state?.metricAccessor,
-      breakdownByAccessor: state?.breakdownByAccessor,
+      metricAccessor: state?.metricAccessor ?? metricColumns[0]?.columnId,
+      breakdownByAccessor: state?.breakdownByAccessor ?? bucketedColumns[0]?.columnId,
     };
-
-  if (isActive) {
-    if (table.changeType === 'initial') {
-      if (metricColumns.length) {
-        accessorMappings.metricAccessor = metricColumns[0].columnId;
-      } else {
-        accessorMappings.breakdownByAccessor = bucketedColumns[0].columnId;
-      }
-    }
-
-    if (table.changeType === 'extended') {
-      accessorMappings.metricAccessor =
-        accessorMappings.metricAccessor ?? metricColumns[0]?.columnId;
-      accessorMappings.breakdownByAccessor =
-        accessorMappings.breakdownByAccessor ?? bucketedColumns[0]?.columnId;
-    }
-  } else {
-    accessorMappings.metricAccessor = metricColumns[0]?.columnId;
-    accessorMappings.breakdownByAccessor = bucketedColumns[0]?.columnId;
-  }
 
   baseSuggestion.score += 0.01 * Object.values(accessorMappings).filter(Boolean).length;
 

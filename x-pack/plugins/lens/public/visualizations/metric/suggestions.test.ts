@@ -133,7 +133,7 @@ describe('metric suggestions', () => {
             table: {
               layerId: 'first',
               isMultiRow: true,
-              columns: [metricColumn, bucketColumn],
+              columns: [metricColumn],
               changeType: 'initial',
             },
             state: {
@@ -186,6 +186,24 @@ describe('metric suggestions', () => {
             score: 0.51,
           },
         ]);
+      });
+
+      test('no suggestions for tables with both metric and bucket', () => {
+        expect(
+          getSuggestions({
+            table: {
+              layerId: 'first',
+              isMultiRow: true,
+              columns: [metricColumn, bucketColumn],
+              changeType: 'initial',
+            },
+            state: {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+            } as MetricVisualizationState,
+            keptLayerIds: ['first'],
+          })
+        ).toHaveLength(0);
       });
     });
 
