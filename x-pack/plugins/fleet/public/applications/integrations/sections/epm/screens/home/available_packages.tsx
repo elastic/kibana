@@ -219,11 +219,20 @@ export const AvailablePackages: React.FC<{
     category: '',
     excludeInstallStatus: true,
   });
+
+  // Remove Kubernetes package granularity
+  if (eprPackages?.items) {
+    eprPackages.items.forEach(function (element) {
+      if (element.id === 'kubernetes') {
+        element.policy_templates = [];
+      }
+    });
+  }
+
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
