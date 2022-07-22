@@ -353,6 +353,10 @@ export interface Datasource<T = unknown, P = unknown> {
     persistableState2: P,
     references2: SavedObjectReference[]
   ) => boolean;
+  /**
+   * Get the used DataView value from state
+   */
+  getUsedDataView: (state: T, layerId: string) => string;
 }
 
 export interface DatasourceFixAction<T> {
@@ -430,7 +434,10 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
+export type ParamEditorCustomProps = Record<string, unknown> & {
+  labels?: string[];
+  isInline?: boolean;
+};
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns

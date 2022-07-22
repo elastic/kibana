@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either, left, fold } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
+import { left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
@@ -82,7 +83,8 @@ import {
   SetupGuide,
 } from '../common';
 
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -225,7 +227,10 @@ export type RulesSchema = t.TypeOf<typeof rulesSchema>;
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
-    return [t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id }))];
+    return [
+      t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
+    ];
   } else {
     return [];
   }

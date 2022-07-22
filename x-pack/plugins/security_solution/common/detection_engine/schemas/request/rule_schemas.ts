@@ -45,6 +45,7 @@ import {
   meta,
   rule_name_override,
   timestamp_override,
+  timestamp_override_fallback_disabled,
   author,
   description,
   false_positives,
@@ -101,9 +102,9 @@ const patchSchema = <
   defaultableFields: Defaultable
 ) => {
   return t.intersection([
-    t.exact(t.partial(requiredFields)),
-    t.exact(t.partial(optionalFields)),
-    t.exact(t.partial(defaultableFields)),
+    t.partial(requiredFields),
+    t.partial(optionalFields),
+    t.partial(defaultableFields),
   ]);
 };
 
@@ -163,6 +164,7 @@ const baseParams = {
     meta,
     rule_name_override,
     timestamp_override,
+    timestamp_override_fallback_disabled,
     namespace,
   },
   defaultable: {
@@ -190,6 +192,7 @@ const {
   patch: basePatchParams,
   response: baseResponseParams,
 } = buildAPISchemas(baseParams);
+export { baseCreateParams };
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
 // with some variations for each route. These intersect with type specific schemas below
@@ -207,6 +210,13 @@ export const sharedUpdateSchema = t.intersection([
 ]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
+export const sharedPatchSchema = t.intersection([
+  basePatchParams,
+  t.exact(t.partial({ rule_id, id })),
+]);
+
+// START type specific parameter definitions
+// -----------------------------------------
 const eqlRuleParams = {
   required: {
     type: t.literal('eql'),
@@ -348,8 +358,10 @@ const {
 } = buildAPISchemas(machineLearningRuleParams);
 
 export { machineLearningCreateParams };
+// ---------------------------------------
+// END type specific parameter definitions
 
-const createTypeSpecific = t.union([
+export const createTypeSpecific = t.union([
   eqlCreateParams,
   threatMatchCreateParams,
   queryCreateParams,
@@ -380,16 +392,12 @@ export const previewRulesSchema = t.intersection([
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
-export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
-export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
 export type QueryUpdateSchema = UpdateSchema<t.TypeOf<typeof queryCreateParams>>;
-export type SavedQueryUpdateSchema = UpdateSchema<t.TypeOf<typeof savedQueryCreateParams>>;
-export type ThresholdUpdateSchema = UpdateSchema<t.TypeOf<typeof thresholdCreateParams>>;
 export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
 
-const patchTypeSpecific = t.union([
+export const patchTypeSpecific = t.union([
   eqlPatchParams,
   threatMatchPatchParams,
   queryPatchParams,
@@ -397,6 +405,21 @@ const patchTypeSpecific = t.union([
   thresholdPatchParams,
   machineLearningPatchParams,
 ]);
+export {
+  eqlPatchParams,
+  threatMatchPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  thresholdPatchParams,
+  machineLearningPatchParams,
+};
+
+export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
+export type ThreatMatchPatchParams = t.TypeOf<typeof threatMatchPatchParams>;
+export type QueryPatchParams = t.TypeOf<typeof queryPatchParams>;
+export type SavedQueryPatchParams = t.TypeOf<typeof savedQueryPatchParams>;
+export type ThresholdPatchParams = t.TypeOf<typeof thresholdPatchParams>;
+export type MachineLearningPatchParams = t.TypeOf<typeof machineLearningPatchParams>;
 
 const responseTypeSpecific = t.union([
   eqlResponseParams,
@@ -410,12 +433,6 @@ export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
-
-export const fullPatchSchema = t.intersection([
-  basePatchParams,
-  patchTypeSpecific,
-  t.exact(t.partial({ id })),
-]);
 
 const responseRequiredFields = {
   id,

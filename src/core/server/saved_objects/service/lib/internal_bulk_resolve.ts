@@ -8,12 +8,12 @@
 
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '../../../core_usage_data';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';

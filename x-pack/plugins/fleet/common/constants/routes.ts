@@ -106,6 +106,7 @@ export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/agents`,
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
+  BULK_UPDATE_AGENT_TAGS_PATTERN: `${API_ROOT}/agents/bulk_update_agent_tags`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
@@ -122,6 +123,7 @@ export const AGENT_API_ROUTES = {
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
   CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
+  LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

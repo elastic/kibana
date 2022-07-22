@@ -27,6 +27,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { OptionsListEmbeddableInput, OptionsListField, OPTIONS_LIST_CONTROL } from './types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
@@ -130,8 +131,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // push searchString changes into a debounced typeahead subject
     const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
-      debounceTime(100)
+      debounceTime(100),
+      tap((newSearchString) => (this.searchString = newSearchString))
     );
 
     // fetch available options when input changes or when search string has changed
@@ -314,12 +315,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
     this.node = node;
     ReactDOM.render(
-      <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
-        <OptionsListComponent
-          componentStateSubject={this.componentStateSubject$}
-          typeaheadSubject={this.typeaheadSubject}
-        />
-      </OptionsListReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
+          <OptionsListComponent
+            componentStateSubject={this.componentStateSubject$}
+            typeaheadSubject={this.typeaheadSubject}
+          />
+        </OptionsListReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };

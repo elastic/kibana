@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-
 import { NoDataViewsPromptServices } from './services';
 
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
+type ActionFn = (name: string) => any;
 
-export const getStoryServices = (params: Params) => {
+export const getStoryServices = (params: Params, action: ActionFn = () => {}) => {
   const services: NoDataViewsPromptServices = {
     ...params,
     openDataViewEditor: (options) => {

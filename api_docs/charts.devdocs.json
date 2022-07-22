@@ -147,7 +147,7 @@
         "label": "EmptyPlaceholder",
         "description": [],
         "signature": [
-          "({ icon, iconColor, message, dataTestSubj, className, }: ",
+          "({ icon, iconColor, message, dataTestSubj, className, renderComplete, }: ",
           "EmptyPlaceholderProps",
           ") => JSX.Element"
         ],
@@ -159,7 +159,7 @@
             "id": "def-public.EmptyPlaceholder.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  icon,\n  iconColor = 'subdued',\n  message = <FormattedMessage id=\"charts.noDataLabel\" defaultMessage=\"No results found\" />,\n  dataTestSubj = 'emptyPlaceholder',\n  className,\n}",
+            "label": "{\n  icon,\n  iconColor = 'subdued',\n  message = <FormattedMessage id=\"charts.noDataLabel\" defaultMessage=\"No results found\" />,\n  dataTestSubj = 'emptyPlaceholder',\n  className,\n  renderComplete,\n}",
             "description": [],
             "signature": [
               "EmptyPlaceholderProps"

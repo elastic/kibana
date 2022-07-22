@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
   /** The page number for the list. Must be 1 based. */
@@ -28,7 +28,7 @@ export interface ArtifactFormComponentProps {
   /** signals that the form should be made disabled (ex. while an update/create api call is in flight) */
   disabled: boolean;
   /** Error will be set if the submission of the form to the api results in an API error. Form can use it to provide feedback to the user */
-  error: HttpFetchError | undefined;
+  error: IHttpFetchError | undefined;
 
   policies: PolicyData[];
   policiesIsLoading: boolean;

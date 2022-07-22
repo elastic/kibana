@@ -18,6 +18,7 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';
+import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -55,6 +56,9 @@ import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
+import { IndexRefresh } from '../types';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -65,18 +69,18 @@ export interface UserActionItem {
   references: SavedObjectReference[];
 }
 
-interface PostCaseUserActionArgs extends ClientArgs {
+interface PostCaseUserActionArgs extends ClientArgs, IndexRefresh {
   actions: BuilderReturnValue[];
 }
 
-interface CreateUserActionES<T> extends ClientArgs {
+interface CreateUserActionES<T> extends ClientArgs, IndexRefresh {
   attributes: T;
   references: SavedObjectReference[];
 }
 
 type CommonUserActionArgs = ClientArgs & CommonArguments;
 
-interface BulkCreateCaseDeletionUserAction extends ClientArgs {
+interface BulkCreateCaseDeletionUserAction extends ClientArgs, IndexRefresh {
   cases: Array<{ id: string; owner: string; connectorId: string }>;
   user: User;
 }
@@ -87,25 +91,33 @@ interface GetUserActionItemByDifference extends CommonUserActionArgs {
   newValue: unknown;
 }
 
-interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
+interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs, IndexRefresh {
   originalCases: Array<SavedObject<CaseAttributes>>;
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }
 
-interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'> {
+interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
 }
 
 type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs;
+  CommonUserActionArgs &
+  IndexRefresh;
 
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
 
-  private readonly builderFactory: BuilderFactory = new BuilderFactory();
+  private readonly builderFactory: BuilderFactory;
 
-  constructor(private readonly log: Logger) {}
+  constructor(
+    private readonly log: Logger,
+    private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+  ) {
+    this.builderFactory = new BuilderFactory({
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+    });
+  }
 
   private getUserActionItemByDifference({
     field,
@@ -174,6 +186,7 @@ export class CaseUserActionService {
     unsecuredSavedObjectsClient,
     cases,
     user,
+    refresh,
   }: BulkCreateCaseDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
     const userActionsWithReferences = cases.reduce<BuilderReturnValue[]>((acc, caseInfo) => {
@@ -194,7 +207,11 @@ export class CaseUserActionService {
       return [...acc, deleteCaseUserAction];
     }, []);
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   public async bulkCreateUpdateCase({
@@ -202,6 +219,7 @@ export class CaseUserActionService {
     originalCases,
     updatedCases,
     user,
+    refresh,
   }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
     const userActionsWithReferences = updatedCases.reduce<BuilderReturnValue[]>(
       (acc, updatedCase) => {
@@ -240,7 +258,11 @@ export class CaseUserActionService {
       []
     );
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   private async bulkCreateAttachment({
@@ -249,6 +271,7 @@ export class CaseUserActionService {
     attachments,
     user,
     action = Actions.create,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     this.log.debug(`Attempting to create a bulk create case user action`);
     const userActionsWithReferences = attachments.reduce<BuilderReturnValue[]>(
@@ -272,7 +295,11 @@ export class CaseUserActionService {
       []
     );
 
-    await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+    await this.bulkCreate({
+      unsecuredSavedObjectsClient,
+      actions: userActionsWithReferences,
+      refresh,
+    });
   }
 
   public async bulkCreateAttachmentDeletion({
@@ -280,6 +307,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
@@ -287,6 +315,7 @@ export class CaseUserActionService {
       attachments,
       user,
       action: Actions.delete,
+      refresh,
     });
   }
 
@@ -295,6 +324,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
+    refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
@@ -302,6 +332,7 @@ export class CaseUserActionService {
       attachments,
       user,
       action: Actions.create,
+      refresh,
     });
   }
 
@@ -315,6 +346,7 @@ export class CaseUserActionService {
     payload,
     connectorId,
     attachmentId,
+    refresh,
   }: CreateUserActionClient<T>) {
     try {
       this.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -332,7 +364,7 @@ export class CaseUserActionService {
 
       if (userAction) {
         const { attributes, references } = userAction;
-        await this.create({ unsecuredSavedObjectsClient, attributes, references });
+        await this.create({ unsecuredSavedObjectsClient, attributes, references, refresh });
       }
     } catch (error) {
       this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
@@ -358,7 +390,10 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      return transformFindResponseToExternalModel(userActions);
+      return transformFindResponseToExternalModel(
+        userActions,
+        this.persistableStateAttachmentTypeRegistry
+      );
     } catch (error) {
       this.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
       throw error;
@@ -369,12 +404,14 @@ export class CaseUserActionService {
     unsecuredSavedObjectsClient,
     attributes,
     references,
+    refresh,
   }: CreateUserActionES<T>): Promise<void> {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 
       await unsecuredSavedObjectsClient.create<T>(CASE_USER_ACTION_SAVED_OBJECT, attributes, {
         references: references ?? [],
+        refresh,
       });
     } catch (error) {
       this.log.error(`Error on POST a new case user action: ${error}`);
@@ -385,6 +422,7 @@ export class CaseUserActionService {
   public async bulkCreate({
     unsecuredSavedObjectsClient,
     actions,
+    refresh,
   }: PostCaseUserActionArgs): Promise<void> {
     if (isEmpty(actions)) {
       return;
@@ -394,7 +432,8 @@ export class CaseUserActionService {
       this.log.debug(`Attempting to POST a new case user action`);
 
       await unsecuredSavedObjectsClient.bulkCreate(
-        actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
+        actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action })),
+        { refresh }
       );
     } catch (error) {
       this.log.error(`Error on POST a new case user action: ${error}`);
@@ -445,7 +484,9 @@ export class CaseUserActionService {
       let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
-          findResults.saved_objects.map((so) => transformToExternalModel(so))
+          findResults.saved_objects.map((so) =>
+            transformToExternalModel(so, this.persistableStateAttachmentTypeRegistry)
+          )
         );
       }
 
@@ -535,26 +576,28 @@ export class CaseUserActionService {
 }
 
 export function transformFindResponseToExternalModel(
-  userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>
+  userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsFindResponse<CaseUserActionResponse> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
       ...so,
-      ...transformToExternalModel(so),
+      ...transformToExternalModel(so, persistableStateAttachmentTypeRegistry),
     })),
   };
 }
 
 function transformToExternalModel(
-  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObject<CaseUserActionResponse> {
   const { references } = userAction;
 
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
   const commentId =
     findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
-  const payload = addReferenceIdToPayload(userAction);
+  const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
 
   return {
     ...userAction,
@@ -569,7 +612,8 @@ function transformToExternalModel(
 }
 
 const addReferenceIdToPayload = (
-  userAction: SavedObject<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): CaseUserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
@@ -603,6 +647,24 @@ const addReferenceIdToPayload = (
         comment: {
           ...userActionAttributes.payload.comment,
           externalReferenceId: externalReferenceId ?? '',
+        },
+      };
+    }
+
+    if (isCommentRequestTypePersistableState(userActionAttributes.payload.comment)) {
+      const injectedAttributes = injectPersistableReferencesToSO(
+        userActionAttributes.payload.comment,
+        userAction.references,
+        {
+          persistableStateAttachmentTypeRegistry,
+        }
+      );
+
+      return {
+        ...userAction.attributes.payload,
+        comment: {
+          ...userActionAttributes.payload.comment,
+          ...injectedAttributes,
         },
       };
     }

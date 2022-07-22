@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import {
+import type {
   ActionDetails,
-  ActivityLogItemTypes,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  RESPONSE_ACTION_COMMANDS,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../types';
+import { ActivityLogItemTypes, RESPONSE_ACTION_COMMANDS } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -59,14 +58,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
       _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
-  }
-
-  generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
-  }
-
-  generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
   }
 
   /** Generates an endpoint action response */
@@ -188,12 +179,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  randomResponseActionRunningProcesses(n?: number): RunningProcessesEntry[] {
+  randomResponseActionProcesses(n?: number): ProcessesEntry[] {
     const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
     const entries = [];
     for (let i = 0; i < numberOfEntries; i++) {
       entries.push({
-        command: this.randomResponseActionRunningProcessesCommand(),
+        command: this.randomResponseActionProcessesCommand(),
         pid: this.randomN(1000).toString(),
         entity_id: this.randomString(50),
         user: this.randomUser(),
@@ -203,7 +194,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return entries;
   }
 
-  protected randomResponseActionRunningProcessesCommand() {
+  protected randomResponseActionProcessesCommand() {
     const commands = [
       '/opt/cmd1',
       '/opt/cmd2',

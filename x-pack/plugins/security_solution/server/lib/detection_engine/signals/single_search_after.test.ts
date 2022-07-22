@@ -11,10 +11,10 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -42,7 +42,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -61,7 +62,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -112,7 +114,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -136,7 +139,8 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: {},
-      timestampOverride: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       buildRuleMessage,
       runtimeMappings: undefined,
     });
@@ -157,7 +161,8 @@ describe('singleSearchAfter', () => {
         logger: mockLogger,
         pageSize: 1,
         filter: {},
-        timestampOverride: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
         buildRuleMessage,
         runtimeMappings: undefined,
       })

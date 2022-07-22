@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-
 import { Services } from './services';
 
 /**
@@ -15,10 +13,12 @@ import { Services } from './services';
  */
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 
+type ActionFn = (name: string) => any;
+
 /**
  * Returns Storybook-compatible service abstractions for the `NoDataCard` Provider.
  */
-export const getStoryServices = () => {
+export const getStoryServices = (action: ActionFn = () => {}) => {
   const services: Services = {
     navigateToUrl: action('navigateToUrl'),
     currentAppId: 'currentAppId',

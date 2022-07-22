@@ -8,9 +8,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import type { DataViewState } from '../hooks/use_app_data_view';
@@ -27,10 +28,10 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 }
 
 export function getExploratoryViewEmbeddable(
-  uiSettings?: IUiSettingsClient,
-  dataViews?: DataViewsPublicPluginStart,
-  lens?: LensPublicStart
+  services: CoreStart & ObservabilityPublicPluginsStart
 ) {
+  const { lens, dataViews, uiSettings } = services;
+
   return (props: ExploratoryEmbeddableProps) => {
     if (!dataViews || !lens) {
       return null;
@@ -42,6 +43,10 @@ export function getExploratoryViewEmbeddable(
     const series = props.attributes && props.attributes[0];
 
     const isDarkMode = uiSettings?.get('theme:darkMode');
+
+    const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
+      return lens.stateHelperApi();
+    }, []);
 
     const loadIndexPattern = useCallback(
       async ({ dataType }: { dataType: AppDataType }) => {
@@ -70,14 +75,23 @@ export function getExploratoryViewEmbeddable(
       }
     }, [series?.dataType, loadIndexPattern]);
 
-    if (Object.keys(indexPatterns).length === 0 || loading) {
+    if (Object.keys(indexPatterns).length === 0 || loading || !lensHelper || lensLoading) {
       return <EuiLoadingSpinner />;
     }
 
     return (
-      <EuiThemeProvider darkMode={isDarkMode}>
-        <ExploratoryViewEmbeddable {...props} indexPatterns={indexPatterns} lens={lens} />
-      </EuiThemeProvider>
+      <EuiErrorBoundary>
+        <EuiThemeProvider darkMode={isDarkMode}>
+          <KibanaContextProvider services={services}>
+            <ExploratoryViewEmbeddable
+              {...props}
+              indexPatterns={indexPatterns}
+              lens={lens}
+              lensFormulaHelper={lensHelper.formula}
+            />
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </EuiErrorBoundary>
     );
   };
 }

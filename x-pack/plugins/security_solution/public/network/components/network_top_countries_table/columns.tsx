@@ -10,11 +10,11 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { CountryFlagAndName } from '../source_destination/country_flag';
-import {
-  FlowTargetSourceDest,
+import type {
   NetworkTopCountriesEdges,
   TopNetworkTablesEcsField,
 } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
 import {
   DragEffects,
@@ -22,7 +22,7 @@ import {
 } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Columns } from '../../../common/components/paginated_table';
+import type { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';

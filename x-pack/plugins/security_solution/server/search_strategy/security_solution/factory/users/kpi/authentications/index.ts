@@ -9,9 +9,9 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildUsersKpiAuthenticationsQuery } from './query.users_kpi_authentications.dsl';
-import {
+import type {
   UsersKpiAuthenticationsRequestOptions,
   UsersKpiAuthenticationsStrategyResponse,
   UsersQueries,
