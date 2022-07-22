@@ -16,6 +16,7 @@ import { getDataSourceInfo, getFieldType } from './lib/datasource';
 import { getSeries } from './lib/series';
 import { getYExtents } from './lib/xy';
 import { getFieldsForTerms } from '../../common/fields_utils';
+import { getDataViewsStart } from '../services';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 
@@ -42,6 +43,7 @@ export const triggerTSVBtoLensConfiguration = async (
     if (!series.hidden) seriesNum++;
   });
 
+  const dataViews = getDataViewsStart();
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
@@ -51,7 +53,8 @@ export const triggerTSVBtoLensConfiguration = async (
       model.index_pattern,
       model.time_field,
       Boolean(layer.override_index_pattern),
-      layer.series_index_pattern
+      layer.series_index_pattern,
+      dataViews
     );
 
     const timeShift = layer.offset_time;
@@ -111,7 +114,7 @@ export const triggerTSVBtoLensConfiguration = async (
     let splitWithDateHistogram = false;
     if (layer.terms_field && layer.split_mode === 'terms' && splitFields) {
       for (const f of splitFields) {
-        const fieldType = await getFieldType(indexPatternId, f);
+        const fieldType = await getFieldType(indexPatternId, f, dataViews);
 
         if (fieldType === 'date') {
           if (splitFields.length === 1) {
