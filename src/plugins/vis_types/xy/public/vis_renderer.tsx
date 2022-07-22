@@ -67,7 +67,7 @@ export const getXYVisRenderer: (deps: {
       const visualizationType = 'agg_based';
 
       if (plugins.usageCollection && containerType) {
-        const hasMixedXY = visConfig.seriesParams.some((item) => item.type !== visType);
+        const hasMixedXY = visConfig.seriesParams.some((item) => item.type !== visConfig.type);
 
         const counterEvents = [
           `render_${visualizationType}_${visTypeTelemetryMap[visType] ?? visType}`,

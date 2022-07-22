@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { flatten, isEqual, uniq } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -463,21 +463,20 @@ export function getIndexPatternDatasource({
         time_shift: false,
         filter: false,
       };
-      const operations = uniq(
-        flatten(
-          Object.values(state.layers ?? {}).map((l) =>
-            Object.values(l.columns).map((c) => {
-              if (c.timeShift) {
-                additionalEvents.time_shift = true;
-              }
-              if (c.filter) {
-                additionalEvents.filter = true;
-              }
-              return c.operationType;
-            })
-          )
+      const operations = flatten(
+        Object.values(state.layers ?? {}).map((l) =>
+          Object.values(l.columns).map((c) => {
+            if (c.timeShift) {
+              additionalEvents.time_shift = true;
+            }
+            if (c.filter) {
+              additionalEvents.filter = true;
+            }
+            return c.operationType;
+          })
         )
       );
+
       return [
         ...operations,
         ...Object.entries(additionalEvents).reduce<string[]>((acc, [key, isActive]) => {

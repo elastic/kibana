@@ -241,10 +241,6 @@ export const useDashboardAppState = ({
         executionContext: {
           type: 'dashboard',
           description: savedDashboard.title,
-          meta: {
-            viewMode: initialDashboardState.viewMode,
-            fullScreenMode: initialDashboardState.fullScreenMode,
-          },
         },
       });
 

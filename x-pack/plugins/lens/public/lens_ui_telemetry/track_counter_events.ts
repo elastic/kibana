@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -13,7 +14,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);
 
-/** @internal **/
 const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
   if (context) {
     const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
@@ -27,6 +27,7 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
   }
 };
 
+/** @internal **/
 export const trackUiCounterEvents = (
   events: string | string[],
   context?: KibanaExecutionContext
@@ -34,27 +35,22 @@ export const trackUiCounterEvents = (
   const usageCollection = getUsageCollectionStart();
   const containerType = extractContainerType(context) ?? 'application';
 
-  usageCollection?.reportUiCounter(
-    containerType,
-    METRIC_TYPE.COUNT,
-    (Array.isArray(events) ? events : [events]).map((item) => `render_lens_${item}`)
-  );
+  Object.entries(groupBy(Array.isArray(events) ? events : [events])).forEach(([key, counter]) => {
+    usageCollection?.reportUiCounter(
+      containerType,
+      METRIC_TYPE.COUNT,
+      `render_lens_${key}`,
+      counter.length
+    );
+  });
 };
 
+/** @internal **/
 export const getExecutionContextEvents = (context?: KibanaExecutionContext) => {
   const events = [];
 
-  if (context) {
-    events.push(
-      [
-        'vis',
-        context.type,
-        context.meta?.viewMode,
-        context.meta?.fullScreenMode ? 'fullscreen' : undefined,
-      ]
-        .filter(Boolean)
-        .join('_')
-    );
+  if (context?.type) {
+    events.push(`vis_${context.type}`);
   }
 
   return events;
