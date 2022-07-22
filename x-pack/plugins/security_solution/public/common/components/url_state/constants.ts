@@ -42,4 +42,5 @@ export type UrlStateType =
   | 'rules'
   | 'timeline'
   | 'explore'
-  | 'dashboards';
+  | 'dashboards'
+  | 'threat_intelligence';
