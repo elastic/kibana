@@ -192,10 +192,10 @@ describe('Completed inactivity', () => {
   test('save should be disabled after completed and timeout', async () => {
     const state$ = new BehaviorSubject(SearchSessionState.Loading);
 
-    const disableSaveAfterSessionCompleteTimedOut$ = new BehaviorSubject(false);
+    const disableSaveAfterSearchesExpire$ = new BehaviorSubject(false);
 
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
-      sessionService: { ...sessionService, state$, disableSaveAfterSessionCompleteTimedOut$ },
+      sessionService: { ...sessionService, state$, disableSaveAfterSearchesExpire$ },
       application,
       storage,
       usageCollector,
@@ -216,44 +216,7 @@ describe('Completed inactivity', () => {
     expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
 
     act(() => {
-      disableSaveAfterSessionCompleteTimedOut$.next(true);
-    });
-
-    expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
-  });
-
-  test('save should be disabled if session was continued', async () => {
-    const state$ = new BehaviorSubject(SearchSessionState.Loading);
-
-    const disableSaveAfterSessionContinuedFromDifferentApp$ = new BehaviorSubject(false);
-
-    const SearchSessionIndicator = createConnectedSearchSessionIndicator({
-      sessionService: {
-        ...sessionService,
-        state$,
-        disableSaveAfterSessionContinuedFromDifferentApp$,
-      },
-      application,
-      storage,
-      usageCollector,
-      basePath,
-      tourDisabled,
-    });
-
-    render(
-      <Container>
-        <SearchSessionIndicator />
-      </Container>
-    );
-
-    await waitFor(() => screen.getByTestId('searchSessionIndicator'));
-
-    await userEvent.click(screen.getByLabelText('Search session loading'));
-
-    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
-
-    act(() => {
-      disableSaveAfterSessionContinuedFromDifferentApp$.next(true);
+      disableSaveAfterSearchesExpire$.next(true);
     });
 
     expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();

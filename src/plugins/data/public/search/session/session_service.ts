@@ -9,7 +9,7 @@
 import { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
   distinctUntilChanged,
-  first,
+  filter,
   map,
   mapTo,
   mergeMap,
@@ -19,7 +19,17 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { BehaviorSubject, EMPTY, from, merge, Observable, of, Subscription, timer } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  EMPTY,
+  from,
+  merge,
+  Observable,
+  of,
+  Subscription,
+  timer,
+} from 'rxjs';
 import {
   PluginInitializerContext,
   StartServicesAccessor,
@@ -152,23 +162,21 @@ export class SessionService {
 
   public readonly sessionMeta$: Observable<SessionMeta>;
 
-  private readonly _disableSaveAfterSessionCompleteTimedOut$ = new BehaviorSubject<boolean>(false);
   /**
-   * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed
+   * Emits `true` when session completes and `config.search.sessions.notTouchedTimeout` duration has passed.
    * Used to stop keeping searches alive after some times and disabled "save session" button
+   *
+   * or when failed to extend searches after session completes
    */
-  public readonly disableSaveAfterSessionCompleteTimedOut$ =
-    this._disableSaveAfterSessionCompleteTimedOut$.asObservable();
+  private readonly _disableSaveAfterSearchesExpire$ = new BehaviorSubject<boolean>(false);
 
-  private readonly _disableSaveAfterSessionContinuedFromDifferentApp$ =
-    new BehaviorSubject<boolean>(false);
   /**
-   * Emits `true` for session that was continued from another app
-   * Need to separate search caching from search session to remove this limitation:
-   * https://github.com/elastic/kibana/issues/121543
+   * Emits `true` when it is no longer possible to save a session:
+   *   - Failed to keep searches alive after they completed
+   *   - `config.search.sessions.notTouchedTimeout` after searches completed hit
+   *   - Continued session from a different app and lost information about previous searches (https://github.com/elastic/kibana/issues/121543)
    */
-  public readonly disableSaveAfterSessionContinuedFromDifferentApp$ =
-    this._disableSaveAfterSessionContinuedFromDifferentApp$.asObservable();
+  public readonly disableSaveAfterSearchesExpire$: Observable<boolean>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
@@ -203,6 +211,17 @@ export class SessionService {
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
 
+    this.disableSaveAfterSearchesExpire$ = combineLatest([
+      this._disableSaveAfterSearchesExpire$,
+      this.sessionMeta$.pipe(map((meta) => meta.isContinued)),
+    ]).pipe(
+      map(
+        ([_disableSaveAfterSearchesExpire, isSessionContinued]) =>
+          _disableSaveAfterSearchesExpire || isSessionContinued
+      ),
+      distinctUntilChanged()
+    );
+
     const notTouchedTimeout = moment
       .duration(initializerContext.config.get().search.sessions.notTouchedTimeout)
       .asMilliseconds();
@@ -220,7 +239,7 @@ export class SessionService {
             if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
           })
         )
-        .subscribe(this._disableSaveAfterSessionCompleteTimedOut$)
+        .subscribe(this._disableSaveAfterSearchesExpire$)
     );
 
     this.subscription.add(
@@ -273,7 +292,6 @@ export class SessionService {
             if (this.isStored()) return EMPTY; // no need to keep searches alive because session and searches are already stored
             if (!this.hasAccess()) return EMPTY; // don't need to keep searches alive if the user can't save session
             if (!this.isSessionStorageReady()) return EMPTY; // don't need to keep searches alive if app doesn't allow saving session
-            if (this._disableSaveAfterSessionContinuedFromDifferentApp$.getValue()) return EMPTY; // don't poll searches because it won't be possible to save this session
 
             const schedulePollSearches = () => {
               return timer(KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL).pipe(
@@ -290,22 +308,24 @@ export class SessionService {
                       searchesToKeepAlive.map((s) =>
                         s.searchDescriptor.poll().catch((e) => {
                           // eslint-disable-next-line no-console
-                          console.warn(`Error while polling search to keep it alive`, e);
+                          console.warn(
+                            `Error while polling search to keep it alive. Considering that it is no longer possible to extend a session.`,
+                            e
+                          );
+                          if (this.isCurrentSession(sessionId)) {
+                            this._disableSaveAfterSearchesExpire$.next(true);
+                          }
                         })
                       )
                     )
                   );
                 }),
-                repeat()
+                repeat(),
+                takeUntil(this.disableSaveAfterSearchesExpire$.pipe(filter((disable) => disable)))
               );
             };
 
-            return schedulePollSearches().pipe(
-              takeUntil(
-                // stop polling this session when no longer possible to save the session
-                this.disableSaveAfterSessionCompleteTimedOut$.pipe(first((timeout) => timeout))
-              )
-            );
+            return schedulePollSearches();
           })
         )
         .subscribe(() => {})
@@ -415,7 +435,6 @@ export class SessionService {
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
-    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.start({ appName: this.currentApp });
 
     return this.getSessionId()!;
@@ -426,7 +445,6 @@ export class SessionService {
    * @param sessionId
    */
   public restore(sessionId: string) {
-    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
   }
@@ -446,7 +464,6 @@ export class SessionService {
    */
   public continue(sessionId: string) {
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
-      this._disableSaveAfterSessionContinuedFromDifferentApp$.next(true);
       this.state.set({
         ...this.lastSessionSnapshot,
         // have to change a name, so that current app can cancel a session that it continues
@@ -455,6 +472,7 @@ export class SessionService {
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
         trackedSearches: [],
+        isContinued: true,
       });
       this.lastSessionSnapshot = undefined;
     } else {
@@ -484,7 +502,6 @@ export class SessionService {
     if (this.getSessionId()) {
       this.lastSessionSnapshot = this.state.get();
     }
-    this._disableSaveAfterSessionContinuedFromDifferentApp$.next(false);
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
@@ -547,10 +564,14 @@ export class SessionService {
           (s) => s.state === TrackedSearchState.Completed && !s.searchMeta.isStored
         );
 
-      await Promise.all(completedSearches.map((s) => s.searchDescriptor.poll())).catch((e) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to extend search after session was saved', e);
-      });
+      await Promise.all(
+        completedSearches.map((s) =>
+          s.searchDescriptor.poll().catch((e) => {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to extend search after session was saved', e);
+          })
+        )
+      );
     }
   }
 

@@ -122,6 +122,17 @@ export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta ext
   isCanceled: boolean;
 
   /**
+   * If session was continued from a different app,
+   * If session continued from a different app, then it is very likely that `trackedSearches`
+   * doesn't have all the search that were included into the session.
+   * Session that was continued can't be saved because we can't guarantee all the searches saved.
+   * This limitation should be fixed in https://github.com/elastic/kibana/issues/121543
+   *
+   * @deprecated - https://github.com/elastic/kibana/issues/121543
+   */
+  isContinued: boolean;
+
+  /**
    * Start time of the current session (from browser perspective)
    */
   startTime?: Date;
@@ -146,6 +157,7 @@ const createSessionDefaultState: <
   isStored: false,
   isRestore: false,
   isCanceled: false,
+  isContinued: false,
   isStarted: false,
   trackedSearches: [],
 });
@@ -309,6 +321,11 @@ export interface SessionMeta {
   startTime?: Date;
   canceledTime?: Date;
   completedTime?: Date;
+
+  /**
+   * @deprecated - see remarks in {@link SessionStateInternal}
+   */
+  isContinued: boolean;
 }
 
 export interface SessionPureSelectors<
@@ -360,6 +377,7 @@ export const sessionPureSelectors: SessionPureSelectors = {
         : state.startTime,
       completedTime: state.completedTime,
       canceledTime: state.canceledTime,
+      isContinued: state.isContinued,
     });
   },
   getSearch(state) {
