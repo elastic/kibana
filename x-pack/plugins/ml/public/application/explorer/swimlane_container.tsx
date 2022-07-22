@@ -35,6 +35,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -406,12 +407,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
+          css={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+          }}
         >
           <EuiFlexItem
-            style={{
+            css={{
               width: '100%',
               overflowY: 'auto',
               overflowX: 'hidden',
@@ -421,7 +426,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             <>
               <div>
                 <div
-                  style={{ height: `${containerHeight}px`, position: 'relative' }}
+                  style={{ height: `${containerHeight}px` }}
+                  css={css`
+                    position: 'relative';
+                  `}
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
@@ -504,7 +512,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      style={{
+                      css={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
