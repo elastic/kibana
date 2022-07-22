@@ -15,7 +15,6 @@ import {
 import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
-import { openOverview } from '../../tasks/alerts_details';
 import { closeTimeline } from '../../tasks/timeline';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -34,10 +33,6 @@ describe('Alert Flyout', () => {
     visitWithoutDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlert();
-  });
-
-  beforeEach(() => {
-    openOverview();
   });
 
   afterEach(() => {
