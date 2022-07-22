@@ -8,3 +8,5 @@
 
 // Corresponds to src/plugins/home/server/services/sample_data/routes
 export const SAMPLE_DATA_API = '/api/sample_data';
+
+export const DEMO_ENV_DATA_TEST_SUBJ = 'goToDemoEnvButton';

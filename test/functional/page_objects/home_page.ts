@@ -59,7 +59,7 @@ export class HomePageObject extends FtrService {
   }
 
   async addSampleDataSet(id: string) {
-    await PageObjects.home.openSampleDataAccordion();
+    await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
       await this.retry.waitFor('wait until sample data is installed', async () => {
@@ -71,7 +71,7 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
-    await PageObjects.home.openSampleDataAccordion();
+    await this.openSampleDataAccordion();
     // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
     await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
     // https://github.com/elastic/kibana/issues/65949

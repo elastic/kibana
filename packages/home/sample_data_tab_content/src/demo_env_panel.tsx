@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DEMO_ENV_DATA_TEST_SUBJ } from './constants';
+
 const title = i18n.translate('homePackages.demoEnvironmentPanel.welcomeTitle', {
   defaultMessage: 'Explore our live demo environment',
 });
@@ -76,7 +78,14 @@ export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
           <EuiText size="s" grow={false}>
             <h2>{title}</h2>
             <p>{message}</p>
-            <EuiButton fill iconSide="right" iconType="popout" href={demoUrl} target="_blank">
+            <EuiButton
+              fill
+              iconSide="right"
+              iconType="popout"
+              href={demoUrl}
+              target="_blank"
+              data-test-subj={DEMO_ENV_DATA_TEST_SUBJ}
+            >
               Start exploring
             </EuiButton>
           </EuiText>
