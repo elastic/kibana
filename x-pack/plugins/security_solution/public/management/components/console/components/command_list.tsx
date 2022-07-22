@@ -111,7 +111,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
           acc[current[0].helpGroupPosition] = sortBy(current, 'helpCommandPosition');
         } else if (current.length) {
-          acc.push(current);
+          acc.push(sortBy(current, 'helpCommandPosition'));
         }
         return acc;
       },
