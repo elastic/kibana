@@ -29,17 +29,17 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.title',
-                { defaultMessage: 'Add your documents and data to Enterprise Search' }
+                { defaultMessage: 'Select or create an Elasticsearch index' }
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                         {
                           defaultMessage:
-                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices or third party connectors like Google Drive, Microsoft Sharepoint and more.',
+                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices , or third-party connectors like Google Drive, Microsoft Sharepoint and more.',
                         }
                       )}
                     </p>
@@ -53,17 +53,17 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.title',
-                { defaultMessage: 'Build a search experience' }
+                { defaultMessage: 'Assign your index to an App Search engine' }
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.message',
                         {
                           defaultMessage:
-                            'You can use Search Engines to build customized search experiences for your customers or internal teams with App Search or Workplace Search. Or you can use Search UI to connect directly to an Elasticsearch index to build client-side search experinces for your users.',
+                            'You can use search engines to build customizable search experiences for your customers with App Search.',
                         }
                       )}
                     </p>
@@ -88,16 +88,16 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.title',
-                { defaultMessage: 'Tune your search relevance' }
+                { defaultMessage: 'Build a client-side search experience with Search UI' }
               ),
               children: (
-                <EuiText>
+                <EuiText color="subdued">
                   <p>
                     {i18n.translate(
                       'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.message',
                       {
                         defaultMessage:
-                          "Dive into analytics and tune the result settings to help your users find exactly what they're looking for",
+                          'Take full control over your client-side search experience by building with the Search UI library. Connect directly to App Search or Elasticsearch.',
                       }
                     )}
                   </p>

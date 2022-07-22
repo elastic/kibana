@@ -47,10 +47,6 @@ export const ELASTICSEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
-  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
-    defaultMessage:
-      'Design and build performant, relevant search-powered applications or large-scale search implementations directly in Elasticsearch.',
-  }),
   URL: '/app/enterprise_search/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
 };
@@ -63,10 +59,6 @@ export const APP_SEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productDescription', {
     defaultMessage:
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-  }),
-  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
-    defaultMessage:
-      'Design, deploy, and manage powerful search experiences for your websites and web/mobile apps.',
   }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
@@ -81,13 +73,6 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     defaultMessage:
       'Search all documents, files, and sources available across your virtual workplace.',
   }),
-  CARD_DESCRIPTION: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
-    {
-      defaultMessage:
-        'Unify your content in one place, with instant connectivity to popular productivity and collaboration tools.',
-    }
-  ),
   URL: '/app/enterprise_search/workplace_search',
   NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
