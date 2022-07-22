@@ -43,7 +43,8 @@ export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
 
 export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
-  (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) && !nonFlattenedFormatParamsFields.includes(field);
+  (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
+  !nonFlattenedFormatParamsFields.includes(field);
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],
