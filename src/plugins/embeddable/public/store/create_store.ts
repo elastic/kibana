@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { combineReducers, Reducer, Store } from 'redux';
+import { combineReducers, Reducer, Store, ReducersMapObject } from 'redux';
 import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit';
 import {
   debounceTime,
@@ -18,37 +18,44 @@ import {
   Observable,
 } from 'rxjs';
 import reduceReducers from 'reduce-reducers';
-import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
+import type { Optional } from 'utility-types';
+import type { IEmbeddable } from '../lib';
 import { input } from './input_slice';
 import { output } from './output_slice';
 
-export interface State {
-  input: EmbeddableInput;
-  output: EmbeddableOutput;
+export interface State<E extends IEmbeddable = IEmbeddable> {
+  input: E extends IEmbeddable<infer I, infer O> ? I : never;
+  output: E extends IEmbeddable<infer I, infer O> ? O : never;
 }
 
-const GENERIC_REDUCER = combineReducers({
-  input: input.reducer,
-  output: output.reducer,
-}) as Reducer<State>;
+type CustomReducer<T extends State> = Reducer<T> | ReducersMapObject<Optional<T, keyof State>>;
 
-function createReducer(reducer?: ConfigureStoreOptions<State>['reducer']) {
+interface CreateStoreOptions<S extends State> extends Omit<ConfigureStoreOptions<S>, 'reducer'> {
+  reducer?: CustomReducer<S>;
+}
+
+function createReducer<S extends State>(reducer?: CustomReducer<S>): Reducer<S> {
+  const generic = combineReducers<Pick<S, keyof State>>({
+    input: input.reducer,
+    output: output.reducer,
+  }) as Reducer<S>;
+
   if (!reducer) {
-    return GENERIC_REDUCER;
+    return generic;
   }
 
-  return reduceReducers(
-    GENERIC_REDUCER,
-    reducer instanceof Function ? reducer : combineReducers(reducer)
-  ) as Reducer<State>;
+  const custom =
+    reducer instanceof Function ? reducer : (combineReducers(reducer) as unknown as Reducer<S>);
+
+  return reduceReducers(generic, custom) as Reducer<S>;
 }
 
-export function createStore(
-  embeddable: IEmbeddable,
-  { reducer, ...options }: Partial<ConfigureStoreOptions<State>> = {}
-): Store<State> {
+export function createStore<E extends IEmbeddable = IEmbeddable, S extends State<E> = State<E>>(
+  embeddable: E,
+  { reducer, ...options }: CreateStoreOptions<S> = {}
+): Store<S> {
   const store = configureStore({ ...options, reducer: createReducer(reducer) });
-  const state$ = new Observable<State>((subscriber) => {
+  const state$ = new Observable<S>((subscriber) => {
     subscriber.add(store.subscribe(() => subscriber.next(store.getState())));
   });
   const input$ = embeddable.getInput$();
