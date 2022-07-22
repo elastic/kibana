@@ -44,6 +44,10 @@ export interface ExternalServiceValidation {
     configObject: CasesWebhookPublicConfigurationType
   ) => void;
   secrets: (secrets: CasesWebhookSecretConfigurationType) => void;
+  connector: (
+    configObject: CasesWebhookPublicConfigurationType,
+    secrets: CasesWebhookSecretConfigurationType
+  ) => string | null;
 }
 
 export interface ExternalServiceIncidentResponse {

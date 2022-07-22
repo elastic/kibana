@@ -206,7 +206,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [user]: expected value of type [string] but got [undefined]',
+                'error validating action type connector: both user and password must be specified',
             });
           });
       });

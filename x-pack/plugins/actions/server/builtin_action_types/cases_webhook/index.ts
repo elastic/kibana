@@ -56,6 +56,7 @@ export function getActionType({
         validate: curry(validate.secrets),
       }),
       params: ExecutorParamsSchema,
+      connector: validate.connector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
   };

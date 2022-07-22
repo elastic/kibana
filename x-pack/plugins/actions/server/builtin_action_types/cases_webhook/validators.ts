@@ -49,6 +49,16 @@ const validateConfig = (
   }
 };
 
+export const validateConnector = (
+  configObject: CasesWebhookPublicConfigurationType,
+  secrets: CasesWebhookSecretConfigurationType
+): string | null => {
+  // user and password must be set together (or not at all)
+  if (!configObject.hasAuth) return null;
+  if (secrets.password && secrets.user) return null;
+  return i18n.INVALID_USER_PW;
+};
+
 export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) => {
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
@@ -59,6 +69,7 @@ export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) =>
 export const validate: ExternalServiceValidation = {
   config: validateConfig,
   secrets: validateSecrets,
+  connector: validateConnector,
 };
 
 const validProtocols: string[] = ['http:', 'https:'];
