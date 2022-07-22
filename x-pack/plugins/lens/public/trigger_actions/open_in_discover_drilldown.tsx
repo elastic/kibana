@@ -20,8 +20,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { isCompatible, isLensEmbeddable, getHref, getLocation } from './open_in_discover_helpers';
+import { isCompatible, isLensEmbeddable, getHref } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
