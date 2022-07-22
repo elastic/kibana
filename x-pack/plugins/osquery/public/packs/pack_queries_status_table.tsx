@@ -31,17 +31,14 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-plugin/common';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../common/lib/kibana';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
 import { usePackQueryErrors } from './use_pack_query_errors';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
-
-interface LogsDataView extends DataView {
-  id: string;
-}
+import type { LogsDataView } from '../common/hooks/use_logs_data_view';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -69,7 +66,6 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
-  logsDataView: LogsDataView | undefined;
 }
 
 function getLensAttributes(
@@ -212,10 +208,10 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   endDate,
   startDate,
   mode,
-  logsDataView,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
+  const logsDataView = useLogsDataView();
 
   const handleClick = useCallback(
     (event) => {
@@ -274,11 +270,11 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
-  logsDataView,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
+  const logsDataView = useLogsDataView();
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -411,14 +407,12 @@ interface ScheduledQueryLastResultsProps {
   actionId: string;
   queryId?: string;
   interval: number;
-  logsDataView: DataView | undefined;
 }
 
 interface ScheduledQueryErrorsProps {
   actionId: string;
   queryId: string;
   interval: number;
-  logsDataView: DataView | undefined;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
   expanded: boolean;
 }
@@ -426,12 +420,10 @@ interface ScheduledQueryErrorsProps {
 const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
   interval,
-  logsDataView,
 }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
 
   if (isLoading) {
@@ -469,16 +461,12 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   );
 };
 
-const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
-  actionId,
-  interval,
-  logsDataView,
-}) => {
+const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
+
   if (isLoading) {
     return <EuiLoadingSpinner />;
   }
@@ -498,15 +486,10 @@ const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
   );
 };
 
-const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
-  actionId,
-  interval,
-  logsDataView,
-}) => {
+const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, interval }) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
   if (isLoading) {
     return <EuiLoadingSpinner />;
@@ -533,7 +516,6 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   queryId,
   toggleErrors,
   expanded,
-  logsDataView,
 }) => {
   const handleErrorsToggle = useCallback(
     () => toggleErrors({ queryId, interval }),
@@ -543,7 +525,6 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
   const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
-    logsDataView,
   });
   if (errorsLoading) {
     return <EuiLoadingSpinner />;
@@ -581,14 +562,12 @@ interface PackViewInActionProps {
     id: string;
     interval: number;
   };
-  logsDataView: LogsDataView | undefined;
   packName: string;
   agentIds?: string[];
 }
 
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsDataView,
   packName,
   agentIds,
 }) => {
@@ -597,7 +576,6 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -615,7 +593,6 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
-      logsDataView={logsDataView}
     />
   );
 };
@@ -624,7 +601,6 @@ const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
 const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   item,
-  logsDataView,
   packName,
   agentIds,
 }) => {
@@ -633,7 +609,6 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -651,7 +626,6 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
-      logsDataView={logsDataView}
     />
   );
 };
@@ -672,25 +646,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
-
-  const dataViews = useKibana().services.data.dataViews;
-  const [logsDataView, setLogsDataView] = useState<LogsDataView | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchLogsDataView = async () => {
-      let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
-      if (!dataView && dataViews.getCanSaveSync()) {
-        dataView = await dataViews.createAndSave({
-          title: 'logs-osquery_manager.result*',
-          timeFieldName: '@timestamp',
-        });
-      }
-
-      setLogsDataView(dataView as LogsDataView);
-    };
-
-    fetchLogsDataView();
-  }, [dataViews]);
 
   const renderQueryColumn = useCallback((query: string, item) => {
     const singleLine = removeMultilines(query);
@@ -728,32 +683,23 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item) => (
       <ScheduledQueryLastResults
-        logsDataView={logsDataView}
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
       />
     ),
-    [packName, logsDataView]
+    [packName]
   );
   const renderDocsColumn = useCallback(
     (item) => (
-      <DocsColumnResults
-        logsDataView={logsDataView}
-        actionId={getPackActionId(item.id, packName)}
-        interval={item.interval}
-      />
+      <DocsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
-    [logsDataView, packName]
+    [packName]
   );
   const renderAgentsColumn = useCallback(
     (item) => (
-      <AgentsColumnResults
-        logsDataView={logsDataView}
-        actionId={getPackActionId(item.id, packName)}
-        interval={item.interval}
-      />
+      <AgentsColumnResults actionId={getPackActionId(item.id, packName)} interval={item.interval} />
     ),
-    [logsDataView, packName]
+    [packName]
   );
   const renderErrorsColumn = useCallback(
     (item) => (
@@ -762,35 +708,20 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         interval={item.interval}
         actionId={getPackActionId(item.id, packName)}
         toggleErrors={toggleErrors}
-        logsDataView={logsDataView}
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
     ),
-    [itemIdToExpandedRowMap, logsDataView, packName, toggleErrors]
+    [itemIdToExpandedRowMap, packName, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => (
-      <PackViewInDiscoverAction
-        item={item}
-        agentIds={agentIds}
-        logsDataView={logsDataView}
-        packName={packName}
-      />
-    ),
-    [agentIds, logsDataView, packName]
+    (item) => <PackViewInDiscoverAction item={item} agentIds={agentIds} packName={packName} />,
+    [agentIds, packName]
   );
 
   const renderLensResultsAction = useCallback(
-    (item) => (
-      <PackViewInLensAction
-        item={item}
-        agentIds={agentIds}
-        logsDataView={logsDataView}
-        packName={packName}
-      />
-    ),
-    [agentIds, logsDataView, packName]
+    (item) => <PackViewInLensAction item={item} agentIds={agentIds} packName={packName} />,
+    [agentIds, packName]
   );
 
   const getItemId = useCallback((item: PackQueryFormData) => item.id ?? '', []);

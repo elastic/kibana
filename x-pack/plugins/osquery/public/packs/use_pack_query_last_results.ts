@@ -8,15 +8,14 @@
 import { useQuery } from 'react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
-import type { DataView } from '@kbn/data-plugin/common';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryLastResultsProps {
   actionId?: string;
   agentIds?: string[];
   interval?: number;
-  logsDataView?: DataView;
   skip?: boolean;
   startDate?: string;
   endDate?: string;
@@ -25,12 +24,12 @@ interface UsePackQueryLastResultsProps {
 export const usePackQueryLastResults = ({
   actionId,
   interval,
-  logsDataView,
   startDate,
   endDate,
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
+  const logsDataView = useLogsDataView();
 
   return useQuery(
     ['scheduledQueryLastResults', { actionId }],

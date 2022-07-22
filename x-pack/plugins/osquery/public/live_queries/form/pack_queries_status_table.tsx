@@ -32,7 +32,6 @@ import type {
 } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-plugin/common';
 import styled from 'styled-components';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -40,10 +39,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
-
-interface LogsDataView extends DataView {
-  id: string;
-}
+import type { LogsDataView } from '../../common/hooks/use_logs_data_view';
+import { useLogsDataView } from '../../common/hooks/use_logs_data_view';
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -80,7 +77,6 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
-  logsDataView?: LogsDataView;
 }
 
 function getLensAttributes(
@@ -225,10 +221,10 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   endDate,
   startDate,
   mode,
-  logsDataView,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
+  const logsDataView = useLogsDataView();
 
   const handleClick = useCallback(
     (event) => {
@@ -290,11 +286,11 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
-  logsDataView,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
+  const logsDataView = useLogsDataView();
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -445,18 +441,13 @@ interface PackViewInActionProps {
     agents: string[];
   };
   actionId?: string;
-  logsDataView?: LogsDataView;
 }
 
-const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
-  item,
-  logsDataView,
-}) => {
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
   const { action_id: actionId, agents: agentIds, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -474,19 +465,17 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
-      logsDataView={logsDataView}
     />
   );
 };
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, logsDataView }) => {
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
   const { action_id: actionId, agents: agentIds, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    logsDataView,
   });
 
   const startDate = lastResultsData?.['@timestamp']
@@ -504,7 +493,6 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, 
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
-      logsDataView={logsDataView}
     />
   );
 };
@@ -540,27 +528,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
-
-  const {
-    data: { dataViews },
-  } = useKibana().services;
-  const [logsDataView, setLogsDataView] = useState<LogsDataView | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchLogsDataView = async () => {
-      let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
-      if (!dataView && dataViews.getCanSaveSync()) {
-        dataView = await dataViews.createAndSave({
-          title: 'logs-osquery_manager.result*',
-          timeFieldName: '@timestamp',
-        });
-      }
-
-      setLogsDataView(dataView as LogsDataView);
-    };
-
-    fetchLogsDataView();
-  }, [dataViews]);
 
   const renderQueryColumn = useCallback((query: string, item) => {
     const singleLine = removeMultilines(query);
@@ -598,14 +565,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => <PackViewInDiscoverAction item={item} logsDataView={logsDataView} />,
-    [logsDataView]
+    (item) => <PackViewInDiscoverAction item={item} />,
+    []
   );
 
-  const renderLensResultsAction = useCallback(
-    (item) => <PackViewInLensAction item={item} logsDataView={logsDataView} />,
-    [logsDataView]
-  );
+  const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
 
   const getHandleErrorsToggle = useCallback(
     (item) => () => {
