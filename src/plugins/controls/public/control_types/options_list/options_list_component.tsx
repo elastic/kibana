@@ -26,7 +26,6 @@ export const OptionsListComponent = ({
   typeaheadSubject: Subject<string>;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [searchString, setSearchString] = useState('');
 
   const resizeRef = useRef(null);
   const dimensions = useResizeObserver(resizeRef.current);
@@ -34,7 +33,7 @@ export const OptionsListComponent = ({
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection },
+    actions: { replaceSelection, setSearchString },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -68,14 +67,10 @@ export const OptionsListComponent = ({
   const updateSearchString = useCallback(
     (newSearchString: string) => {
       typeaheadSubject.next(newSearchString);
-      setSearchString(newSearchString);
+      dispatch(setSearchString(newSearchString));
     },
-    [typeaheadSubject]
+    [typeaheadSubject, dispatch, setSearchString]
   );
-
-  useEffect(() => {
-    updateSearchString('');
-  }, [field?.spec?.name, updateSearchString]);
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
     return {
@@ -133,11 +128,7 @@ export const OptionsListComponent = ({
         closePopover={() => setIsPopoverOpen(false)}
         anchorClassName="optionsList__anchorOverride"
       >
-        <OptionsListPopover
-          width={dimensions.width}
-          searchString={searchString}
-          updateSearchString={updateSearchString}
-        />
+        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
       </EuiPopover>
     </EuiFilterGroup>
   );

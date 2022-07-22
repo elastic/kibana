@@ -23,6 +23,7 @@ export interface OptionsListComponentState {
   availableOptions?: string[];
   invalidSelections?: string[];
   validSelections?: string[];
+  searchString: string;
 }
 
 // public only - redux embeddable state type

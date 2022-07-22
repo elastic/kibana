@@ -30,11 +30,9 @@ import { OptionsListReduxState } from './types';
 
 export const OptionsListPopover = ({
   width,
-  searchString,
   updateSearchString,
 }: {
   width: number;
-  searchString: string;
   updateSearchString: (newSearchString: string) => void;
 }) => {
   // Redux embeddable container Context
@@ -50,6 +48,7 @@ export const OptionsListPopover = ({
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const availableOptions = select((state) => state.componentState.availableOptions);
+  const searchString = select((state) => state.componentState.searchString);
   const field = select((state) => state.componentState.field);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);

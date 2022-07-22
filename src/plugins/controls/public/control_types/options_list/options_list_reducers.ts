@@ -36,6 +36,9 @@ export const optionsListReducers = {
       }
     }
   },
+  setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+    state.componentState.searchString = action.payload;
+  },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     state.explicitInput.selectedOptions?.push(action.payload);

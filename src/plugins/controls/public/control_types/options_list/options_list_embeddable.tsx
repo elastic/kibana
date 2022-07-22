@@ -12,7 +12,7 @@ import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
-import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
 import {
   Filter,
@@ -77,7 +77,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: OptionsListField;
-  private searchString = '';
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     OptionsListReduxState,
@@ -136,11 +135,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       distinctUntilChanged(diffDataFetchProps)
     );
 
-    // push searchString changes into a debounced typeahead subject
-    const typeaheadPipe = this.typeaheadSubject.pipe(
-      debounceTime(100),
-      tap((newSearchString) => (this.searchString = newSearchString))
-    );
+    // debounce typeahead pipe to slow down search string related queries
+    const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
@@ -249,21 +245,26 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   private runOptionsListQuery = async () => {
-    const { dataView, field } = await this.getCurrentDataViewAndField();
-
     const {
       dispatch,
       getState,
-      actions: { setLoading, updateQueryResults, publishFilters },
+      actions: { setLoading, updateQueryResults, publishFilters, setSearchString },
     } = this.reduxEmbeddableTools;
 
+    const previousFieldName = this.field?.name;
+    const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    dispatch(setLoading(true));
+    if (previousFieldName && field.name !== previousFieldName) {
+      dispatch(setSearchString(''));
+    }
 
     const {
+      componentState: { searchString },
       explicitInput: { selectedOptions, runPastTimeout },
     } = getState();
+
+    dispatch(setLoading(true));
 
     // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
     const { ignoreParentSettings, filters, query, timeRange } = this.getInput();
@@ -278,9 +279,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          searchString,
           runPastTimeout,
           selectedOptions,
-          searchString: this.searchString,
         },
         this.abortController.signal
       );
