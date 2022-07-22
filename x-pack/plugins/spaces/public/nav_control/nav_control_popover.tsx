@@ -75,7 +75,7 @@ export class NavControlPopover extends Component<Props, State> {
     const button = this.getActiveSpaceButton();
 
     let element: React.ReactNode;
-    if (!this.state.loading && this.state.spaces.length < 2) {
+    if (this.state.loading || this.state.spaces.length < 2) {
       element = (
         <SpacesDescription
           id={popoutContentId}
@@ -89,7 +89,6 @@ export class NavControlPopover extends Component<Props, State> {
         <SpacesMenu
           id={popoutContentId}
           spaces={this.state.spaces}
-          isLoading={this.state.loading}
           serverBasePath={this.props.serverBasePath}
           toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}

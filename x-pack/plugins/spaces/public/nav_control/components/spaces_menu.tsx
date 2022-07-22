@@ -35,7 +35,6 @@ const LazySpaceAvatar = lazy(() =>
 interface Props {
   id: string;
   spaces: Space[];
-  isLoading: boolean;
   serverBasePath: string;
   toggleSpaceSelector: () => void;
   intl: InjectedIntl;
@@ -70,7 +69,6 @@ class SpacesMenuUI extends Component<Props> {
       <>
         <EuiSelectable
           {...panelProps}
-          isLoading={this.props.isLoading}
           searchable={this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD}
           searchProps={
             this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD
