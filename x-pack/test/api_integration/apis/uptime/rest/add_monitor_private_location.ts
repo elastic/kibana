@@ -57,6 +57,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.body.locations).eql([
         {
+          id: 'localhost',
+          label: 'Local Synthetics Service',
+          geo: { lat: 0, lon: 0 },
+          url: 'mockDevUrl',
+          isServiceManaged: true,
+          status: 'experimental',
+          isInvalid: false,
+        },
+        {
           concurrentMonitors: 1,
           id: testFleetPolicyID,
           isInvalid: false,

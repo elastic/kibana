@@ -80,8 +80,8 @@ describe('useLocationsAPI', () => {
       name: 'new',
       concurrentMonitors: 1,
       geo: {
-        lat: '',
-        lon: '',
+        lat: 0,
+        lon: 0,
       },
     });
 
@@ -96,8 +96,8 @@ describe('useLocationsAPI', () => {
             concurrentMonitors: 1,
             id: 'newPolicy',
             geo: {
-              lat: '',
-              lon: '',
+              lat: 0,
+              lon: 0,
             },
             name: 'new',
             policyHostId: 'newPolicy',
