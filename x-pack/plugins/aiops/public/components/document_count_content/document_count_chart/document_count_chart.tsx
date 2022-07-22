@@ -134,7 +134,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     if (chartPointsSplit.length === 1) {
       return [
         ...chartPointsSplit,
-        { time: interval ? Number(chartPoints[0].time) + interval : timeRangeEarliest, value: 0 },
+        {
+          time: interval ? Number(chartPointsSplit[0].time) + interval : timeRangeEarliest,
+          value: 0,
+        },
       ];
     }
     return chartPointsSplit;
