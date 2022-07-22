@@ -69,11 +69,16 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  private contentUploaded(): boolean {
-    return (
-      this.fileSO.attributes.Status === 'AWAITING_UPLOAD' ||
-      this.fileSO.attributes.Status === 'UPLOAD_ERROR'
-    );
+  private hasContent(): boolean {
+    return this.status === 'READY';
+  }
+
+  private isDeleted(): boolean {
+    return this.status === 'DELETED';
+  }
+
+  private uploadInProgress(): boolean {
+    return this.status === 'UPLOADING';
   }
 
   public async update(attrs: Partial<UpdatableFileAttributes>): Promise<IFile> {
@@ -85,10 +90,11 @@ export class File<M = unknown> implements IFile {
   }
 
   public async uploadContent(content: Readable): Promise<void> {
-    if (!this.contentUploaded()) {
-      throw new ContentAlreadyUploadedError(
-        `Already uploaded file [id = ${this.id}][name = ${this.name}].`
-      );
+    if (this.uploadInProgress()) {
+      throw new UploadInProgressError('Upload already in progress.');
+    }
+    if (this.hasContent()) {
+      throw new ContentAlreadyUploadedError('Already uploaded file content.');
     }
     this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
     await this.updateFileState({
@@ -113,19 +119,18 @@ export class File<M = unknown> implements IFile {
 
   public downloadContent(): Promise<Readable> {
     const { size } = this.attributes;
-    if (this.status !== 'READY') {
-      throw new NoDownloadAvailableError('This file is not ready for download.');
+    if (!this.hasContent()) {
+      throw new NoDownloadAvailableError('This file content is not available for download.');
     }
     // We pass through this file ID to retrieve blob content.
     return this.blobStorage.download({ id: this.id, size });
   }
 
   public async delete(): Promise<void> {
-    const { attributes } = this.fileSO;
-    if (attributes.Status === 'UPLOADING') {
+    if (this.uploadInProgress()) {
       throw new UploadInProgressError('Cannot delete file while upload in progress');
     }
-    if (attributes.Status === 'DELETED') {
+    if (this.isDeleted()) {
       throw new AlreadyDeletedError('File has already been deleted');
     }
     await this.updateFileState({
@@ -133,7 +138,7 @@ export class File<M = unknown> implements IFile {
     });
     // Stop sharing this file
     await this.fileShareService.deleteForFile({ file: this });
-    if (attributes.Status === 'READY') {
+    if (this.hasContent()) {
       await this.blobStorage.delete(this.id);
     }
     await this.internalFileService.deleteSO(this.id);

@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import type { DeleteFileKindHttpEndpoint } from '../../../common/api_routes';
+import { fileErrors } from '../../file';
 import type { FileKindsRequestHandler } from './types';
 
 import { getById } from './helpers';
@@ -32,6 +33,12 @@ export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind
   try {
     await file.delete();
   } catch (e) {
+    if (
+      e instanceof fileErrors.AlreadyDeletedError ||
+      e instanceof fileErrors.UploadInProgressError
+    ) {
+      return res.badRequest({ body: e.message });
+    }
     return res.customError({
       statusCode: 500,
       body: {
