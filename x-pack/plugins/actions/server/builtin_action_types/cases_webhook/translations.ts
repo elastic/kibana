@@ -34,3 +34,11 @@ export const INVALID_USER_PW = i18n.translate(
     defaultMessage: 'both user and password must be specified',
   }
 );
+
+export const ALLOWED_HOSTS_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.casesWebhook.configuration.apiAllowedHostsError', {
+    defaultMessage: 'error configuring connector action: {message}',
+    values: {
+      message,
+    },
+  });

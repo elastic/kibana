@@ -50,11 +50,6 @@ const validateConfig = (
 };
 
 export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) => {
-  console.log('hey', {
-    first: !secrets.password && !secrets.user,
-    second: secrets.password && secrets.user,
-    secrets,
-  });
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
   if (secrets.password && secrets.user) return;
@@ -64,4 +59,36 @@ export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) =>
 export const validate: ExternalServiceValidation = {
   config: validateConfig,
   secrets: validateSecrets,
+};
+
+const validProtocols: string[] = ['http:', 'https:'];
+export const assertURL = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+
+    if (!parsedUrl.hostname) {
+      throw new Error('URL must contain hostname');
+    }
+
+    if (!validProtocols.includes(parsedUrl.protocol)) {
+      throw new Error('Invalid protocol');
+    }
+  } catch (error) {
+    throw new Error(`URL Error: ${error.message}`);
+  }
+};
+export const ensureUriAllowed = (
+  url: string,
+  configurationUtilities: ActionsConfigurationUtilities
+) => {
+  try {
+    configurationUtilities.ensureUriAllowed(url);
+  } catch (allowedListError) {
+    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
+  }
+};
+export const normalizeURL = (url: string) => {
+  const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+  const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
+  return urlWithoutTrailingSlash.replace(replaceDoubleSlashesRegex, '$1');
 };

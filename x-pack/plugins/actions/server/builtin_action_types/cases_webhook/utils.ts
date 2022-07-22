@@ -31,11 +31,12 @@ export const getPushedDate = (timestamp?: string) => {
   return new Date().toISOString();
 };
 
-export const getObjectValueByKey = <T = unknown>(
-  obj: Record<string, Record<string, T> | T>,
+export const getObjectValueByKeyAsString = (
+  obj: Record<string, Record<string, unknown> | unknown>,
   key: string
-): T => {
-  return get(obj, key) as T;
+): string | undefined => {
+  const value = get(obj, key);
+  return value === undefined ? value : `${value}`;
 };
 
 export const throwDescriptiveErrorIfResponseIsNotValid = ({
@@ -83,7 +84,7 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
      */
     requiredAttributesToBeInTheResponse.forEach((attr) => {
       // Check only for undefined as null is a valid value
-      if (typeof getObjectValueByKey(data, attr) === 'undefined') {
+      if (typeof getObjectValueByKeyAsString(data, attr) === 'undefined') {
         errorAttributes.push(attr);
       }
     });

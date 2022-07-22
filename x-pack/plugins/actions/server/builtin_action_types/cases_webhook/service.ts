@@ -9,10 +9,11 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
+import { assertURL, ensureUriAllowed, normalizeURL } from './validators';
 import { renderMustacheStringNoEscape } from '../../lib/mustache_renderer';
 import {
   createServiceError,
-  getObjectValueByKey,
+  getObjectValueByKeyAsString,
   getPushedDate,
   stringifyObjValues,
   removeSlash,
@@ -83,16 +84,20 @@ export const createExternalService = (
   });
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
+    const getUrl = renderMustacheStringNoEscape(getIncidentUrl, {
+      external: {
+        system: {
+          id,
+        },
+      },
+    });
+    assertURL(`${getUrl}`);
+    ensureUriAllowed(`${getUrl}`, configurationUtilities);
+    const normalizedUrl = normalizeURL(`${getUrl}`);
     try {
       const res = await request({
         axios: axiosInstance,
-        url: renderMustacheStringNoEscape(getIncidentUrl, {
-          external: {
-            system: {
-              id,
-            },
-          },
-        }),
+        url: normalizedUrl,
         logger,
         configurationUtilities,
       });
@@ -106,9 +111,9 @@ export const createExternalService = (
         ],
       });
 
-      const title = getObjectValueByKey<string>(res.data, getIncidentResponseExternalTitleKey);
-      const createdAt = getObjectValueByKey<string>(res.data, getIncidentResponseCreatedDateKey);
-      const updatedAt = getObjectValueByKey<string>(res.data, getIncidentResponseUpdatedDateKey);
+      const title = getObjectValueByKeyAsString(res.data, getIncidentResponseExternalTitleKey)!;
+      const createdAt = getObjectValueByKeyAsString(res.data, getIncidentResponseCreatedDateKey)!;
+      const updatedAt = getObjectValueByKeyAsString(res.data, getIncidentResponseUpdatedDateKey)!;
       return { id, title, createdAt, updatedAt };
     } catch (error) {
       throw createServiceError(error, `Unable to get case with id ${id}`);
@@ -119,10 +124,13 @@ export const createExternalService = (
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     const { tags, title, description } = incident;
+    assertURL(`${createIncidentUrl}`);
+    ensureUriAllowed(`${createIncidentUrl}`, configurationUtilities);
+    const normalizedUrl = normalizeURL(`${createIncidentUrl}`);
     try {
       const res: AxiosResponse = await request({
         axios: axiosInstance,
-        url: `${createIncidentUrl}`,
+        url: normalizedUrl,
         logger,
         method: createIncidentMethod,
         data: renderMustacheStringNoEscape(
@@ -142,22 +150,26 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
-      const externalId = `${getObjectValueByKey<string>(data, createIncidentResponseKey)}`;
+      const externalId = getObjectValueByKeyAsString(data, createIncidentResponseKey)!;
       const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
+      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+        external: {
+          system: {
+            id: externalId,
+            title: insertedIncident.title,
+          },
+        },
+      });
+      assertURL(`${viewUrl}`);
+      ensureUriAllowed(`${viewUrl}`, configurationUtilities);
+      const normalizedViewUrl = normalizeURL(`${viewUrl}`);
       return {
         id: externalId,
         title: insertedIncident.title,
-        url: renderMustacheStringNoEscape(incidentViewUrl, {
-          external: {
-            system: {
-              id: externalId,
-              title: insertedIncident.title,
-            },
-          },
-        }),
+        url: normalizedViewUrl,
         pushedDate: getPushedDate(insertedIncident.createdAt),
       };
     } catch (error) {
@@ -169,18 +181,22 @@ export const createExternalService = (
     incidentId,
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
+    const updateUrl = renderMustacheStringNoEscape(updateIncidentUrl, {
+      external: {
+        system: {
+          id: incidentId,
+        },
+      },
+    });
+    assertURL(`${updateUrl}`);
+    ensureUriAllowed(`${updateUrl}`, configurationUtilities);
+    const normalizedUrl = normalizeURL(`${updateUrl}`);
     try {
       const { tags, title, description } = incident;
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
-        url: renderMustacheStringNoEscape(updateIncidentUrl, {
-          external: {
-            system: {
-              id: incidentId,
-            },
-          },
-        }),
+        url: normalizedUrl,
         logger,
         data: renderMustacheStringNoEscape(updateIncidentJson, {
           ...stringifyObjValues({
@@ -202,18 +218,21 @@ export const createExternalService = (
       });
 
       const updatedIncident = await getIncident(incidentId as string);
-
+      const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
+        external: {
+          system: {
+            id: incidentId,
+            title: updatedIncident.title,
+          },
+        },
+      });
+      assertURL(`${viewUrl}`);
+      ensureUriAllowed(`${viewUrl}`, configurationUtilities);
+      const normalizedViewUrl = normalizeURL(`${viewUrl}`);
       return {
         id: incidentId,
         title: updatedIncident.title,
-        url: renderMustacheStringNoEscape(incidentViewUrl, {
-          external: {
-            system: {
-              id: incidentId,
-              title: updatedIncident.title,
-            },
-          },
-        }),
+        url: normalizedViewUrl,
         pushedDate: getPushedDate(updatedIncident.updatedAt),
       };
     } catch (error) {
@@ -226,16 +245,20 @@ export const createExternalService = (
       if (!createCommentUrl || !createCommentJson) {
         return {};
       }
+      const commentUrl = renderMustacheStringNoEscape(createCommentUrl, {
+        external: {
+          system: {
+            id: incidentId,
+          },
+        },
+      });
+      assertURL(`${commentUrl}`);
+      ensureUriAllowed(`${commentUrl}`, configurationUtilities);
+      const normalizedUrl = normalizeURL(`${commentUrl}`);
       const res = await request({
         axios: axiosInstance,
         method: createCommentMethod,
-        url: renderMustacheStringNoEscape(createCommentUrl, {
-          external: {
-            system: {
-              id: incidentId,
-            },
-          },
-        }),
+        url: normalizedUrl,
         logger,
         data: renderMustacheStringNoEscape(createCommentJson, {
           ...stringifyObjValues({ comment: comment.comment }),
