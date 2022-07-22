@@ -142,7 +142,7 @@ export function IsAboveField({
 }) {
   return (
     <PopoverExpression
-      value={value ? `${value.toString()}${unit}` : ''}
+      value={`${value.toString()}${unit}`}
       title={i18n.translate(
         'xpack.apm.transactionErrorRateAlertTrigger.isAbove',
         { defaultMessage: 'is above' }
