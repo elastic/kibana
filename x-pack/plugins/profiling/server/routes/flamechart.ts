@@ -62,7 +62,6 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       path: paths.FlamechartElastic,
       validate: {
         query: schema.object({
-          projectID: schema.string(),
           timeFrom: schema.string(),
           timeTo: schema.string(),
           n: schema.number({ defaultValue: 200 }),
@@ -71,13 +70,12 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
       },
     },
     async (context, request, response) => {
-      const { projectID, timeFrom, timeTo, kuery } = request.query;
+      const { timeFrom, timeTo, kuery } = request.query;
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
         const esClient = await getClient(context);
         const filter = createCommonFilter({
-          projectID,
           timeFrom,
           timeTo,
           kuery,

@@ -27,15 +27,13 @@ import {
 interface SettingsFlyoutProps {
   title: string;
   values: {
-    projectID: number;
     n: number;
   };
-  onChange: (nextValues: { projectID: number; n: number }) => void;
+  onChange: (nextValues: { n: number }) => void;
 }
 
 export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps) {
   const [formValues, setFormValues] = useState({
-    projectID: values.projectID.toString(),
     n: values.n.toString(),
   });
 
@@ -50,7 +48,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   const saveFlyout = () => {
     onChange({
-      projectID: Number(formValues.projectID),
       n: Number(formValues.n),
     });
     setIsFlyoutVisible(false);
@@ -58,10 +55,9 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   useEffect(() => {
     setFormValues({
-      projectID: values.projectID.toString(),
       n: values.n.toString(),
     });
-  }, [values.projectID, values.n]);
+  }, [values.n]);
 
   return (
     <div>
@@ -76,21 +72,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiForm component="form">
-              <EuiFormRow
-                label="Project ID"
-                helpText="This is the project ID as defined by the host agent."
-              >
-                <EuiFieldNumber
-                  name="projectID"
-                  value={formValues.projectID}
-                  onChange={(e) => {
-                    setFormValues((nextValues) => ({
-                      ...nextValues,
-                      projectID: e.target.value,
-                    }));
-                  }}
-                />
-              </EuiFormRow>
               <EuiFormRow
                 label="N"
                 helpText="This is the maximum number of items per histogram bucket (Stack Traces) or is currently ignored (FlameGraph)."

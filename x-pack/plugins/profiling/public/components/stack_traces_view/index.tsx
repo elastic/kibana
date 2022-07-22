@@ -29,7 +29,7 @@ export function StackTracesView() {
     path,
     query,
     path: { topNType },
-    query: { rangeFrom, rangeTo, projectID, n, kuery, displayAs, limit: limitFromQueryParams },
+    query: { rangeFrom, rangeTo, n, kuery, displayAs, limit: limitFromQueryParams },
   } = useProfilingParams('/stacktraces/{topNType}');
 
   const limit = limitFromQueryParams || 10;
@@ -61,7 +61,6 @@ export function StackTracesView() {
 
     fetchTopN({
       type: topNType,
-      projectID,
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
       n,
@@ -71,7 +70,7 @@ export function StackTracesView() {
       const charts = groupSamplesByCategory(samples);
       setTopN({ charts });
     });
-  }, [topNType, timeRange.start, timeRange.end, fetchTopN, projectID, n, kuery]);
+  }, [topNType, timeRange.start, timeRange.end, fetchTopN, n, kuery]);
 
   const [highlightedSubchart, setHighlightedSubchart] = useState<TopNSubchart | undefined>(
     undefined

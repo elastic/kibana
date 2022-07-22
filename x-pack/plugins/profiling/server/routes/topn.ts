@@ -22,7 +22,6 @@ import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace'
 export async function topNElasticSearchQuery({
   client,
   logger,
-  projectID,
   timeFrom,
   timeTo,
   n,
@@ -32,7 +31,6 @@ export async function topNElasticSearchQuery({
 }: {
   client: ProfilingESClient;
   logger: Logger;
-  projectID: string;
   timeFrom: string;
   timeTo: string;
   n: number;
@@ -40,7 +38,7 @@ export async function topNElasticSearchQuery({
   response: KibanaResponseFactory;
   kuery: string;
 }) {
-  const filter = createCommonFilter({ projectID, timeFrom, timeTo, kuery });
+  const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
   const index = 'profiling-events-all';
 
@@ -133,7 +131,6 @@ export function queryTopNCommon(
       path: pathName,
       validate: {
         query: schema.object({
-          projectID: schema.string(),
           timeFrom: schema.string(),
           timeTo: schema.string(),
           n: schema.number(),
@@ -142,14 +139,13 @@ export function queryTopNCommon(
       },
     },
     async (context, request, response) => {
-      const { projectID, timeFrom, timeTo, n, kuery } = request.query;
+      const { timeFrom, timeTo, n, kuery } = request.query;
       const client = await getClient(context);
 
       try {
         return await topNElasticSearchQuery({
           client: createProfilingEsClient({ request, esClient: client }),
           logger,
-          projectID,
           timeFrom,
           timeTo,
           n,

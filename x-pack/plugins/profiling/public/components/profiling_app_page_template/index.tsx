@@ -28,7 +28,7 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, projectID, kuery },
+    query: { rangeFrom, rangeTo, n, kuery },
   } = useProfilingParams('/*');
 
   const {
@@ -86,7 +86,6 @@ export function ProfilingAppPageTemplate({
               defaultMessage: 'Settings',
             })}
             values={{
-              projectID,
               n,
             }}
             onChange={(values) => {
@@ -94,7 +93,6 @@ export function ProfilingAppPageTemplate({
                 path,
                 query: {
                   ...query,
-                  projectID: values.projectID,
                   n: values.n,
                 },
               });

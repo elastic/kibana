@@ -157,14 +157,12 @@ const routes = {
             rangeFrom: t.string,
             rangeTo: t.string,
             n: toNumberRt,
-            projectID: toNumberRt,
             kuery: t.string,
           }),
         }),
         defaults: {
           query: {
             n: '100',
-            projectID: '5',
             kuery: '',
           },
         },

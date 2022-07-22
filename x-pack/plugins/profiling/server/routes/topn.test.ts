@@ -47,7 +47,6 @@ describe('TopN data from Elasticsearch', () => {
       const response = await topNElasticSearchQuery({
         client,
         logger,
-        projectID: '123',
         timeFrom: '456',
         timeTo: '789',
         n: 200,

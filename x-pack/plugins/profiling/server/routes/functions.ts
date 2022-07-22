@@ -51,7 +51,6 @@ async function queryTopNFunctions({
 }
 
 const querySchema = schema.object({
-  projectID: schema.string(),
   timeFrom: schema.string(),
   timeTo: schema.string(),
   startIndex: schema.number(),
@@ -72,13 +71,11 @@ export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegist
     },
     async (context, request, response) => {
       try {
-        const { projectID, timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType =
-          request.query;
+        const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
 
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
         const filter = createCommonFilter({
-          projectID,
           timeFrom,
           timeTo,
           kuery,
