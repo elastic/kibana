@@ -227,7 +227,10 @@ export type RulesSchema = t.TypeOf<typeof rulesSchema>;
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
-    return [t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id }))];
+    return [
+      t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
+    ];
   } else {
     return [];
   }
