@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { BULK_CREATE_SAVED_OBJECTS_ROUTE } from '../../../../common/constants';
+import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
@@ -19,7 +19,7 @@ import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects
 const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
   requestMock.create({
     method: 'post',
-    path: BULK_CREATE_SAVED_OBJECTS_ROUTE,
+    path: PREBUILT_SAVED_OBJECTS_BULK_CREATE,
     params: { template_name: savedObjectTemplate },
   });
 

@@ -10,13 +10,13 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
-import { DEV_TOOL_CONTENT } from '../../../../common/constants';
+import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../common/constants';
 import { readPrebuiltDevToolContentRoute } from './read_prebuilt_dev_tool_content_route';
 
 const readPrebuiltDevToolContentRequest = (consoleId: string) =>
   requestMock.create({
     method: 'get',
-    path: DEV_TOOL_CONTENT,
+    path: DEV_TOOL_PREBUILT_CONTENT,
     params: { console_id: consoleId },
   });
 

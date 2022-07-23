@@ -9,7 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-import { BULK_CREATE_SAVED_OBJECTS_ROUTE } from '../../../../common/constants';
+import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../common/constants';
 
 import type { SetupPlugins } from '../../../plugin';
 
@@ -25,7 +25,7 @@ export const createPrebuiltSavedObjectsRoute = (
 ) => {
   router.post(
     {
-      path: BULK_CREATE_SAVED_OBJECTS_ROUTE,
+      path: PREBUILT_SAVED_OBJECTS_BULK_CREATE,
       validate: createPrebuiltSavedObjectsSchema,
       options: {
         tags: ['access:securitySolution'],

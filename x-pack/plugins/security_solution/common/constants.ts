@@ -249,7 +249,7 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
-export const DETECTION_ENGINE_SIGNAL_INDEX_URL = `${DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_SIGNAL_INDEX_URL = `/internal${DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
@@ -263,12 +263,12 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-export const DEV_TOOL_CONTENT = `/internal/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolConsoleUrl = (consoleId: string) =>
+export const DEV_TOOL_PREBUILT_CONTENT = `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+export const devToolPrebuiltContentUrl = (consoleId: string) =>
   `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
-export const BULK_CREATE_SAVED_OBJECTS_ROUTE =
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
   '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
-export const bulkCreateSavedObjects = (templateName: string) =>
+export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
   `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 
 /**

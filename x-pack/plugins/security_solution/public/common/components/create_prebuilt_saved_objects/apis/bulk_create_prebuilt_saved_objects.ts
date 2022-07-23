@@ -6,14 +6,14 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { bulkCreateSavedObjects } from '../../../../../common/constants';
+import { prebuiltSavedObjectsBulkCreateUrl } from '../../../../../common/constants';
 
 interface Options {
   templateName: string;
 }
 
 export const bulkCreatePrebuiltSavedObjects = async (http: HttpStart, options: Options) => {
-  const res = await http.post(bulkCreateSavedObjects(options.templateName));
+  const res = await http.post(prebuiltSavedObjectsBulkCreateUrl(options.templateName));
 
   return res;
 };
