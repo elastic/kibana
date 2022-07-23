@@ -14,6 +14,18 @@ import { MockCodeEditor } from '../../../code_editor.mock';
 import * as i18n from './translations';
 const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        docLinks: { ELASTIC_WEBSITE_URL: 'url' },
+      },
+    }),
+  };
+});
+
 jest.mock(kibanaReactPath, () => {
   const original = jest.requireActual(kibanaReactPath);
   return {
