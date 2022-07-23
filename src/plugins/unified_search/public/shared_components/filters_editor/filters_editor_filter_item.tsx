@@ -210,6 +210,7 @@ export function FilterItem({
           path={path}
           conditionType={conditionalOperationType}
           filters={filter.meta?.params?.filters}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         />
       ) : (
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">

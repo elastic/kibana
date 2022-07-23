@@ -19,11 +19,17 @@ export interface FiltersEditorProps {
   filters: Filter[];
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
+  timeRangeForSuggestionsOverride: boolean;
 }
 
 const rootLevelConditionType = ConditionTypes.AND;
 
-export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProps) {
+export function FiltersEditor({
+  onChange,
+  dataView,
+  filters,
+  timeRangeForSuggestionsOverride,
+}: FiltersEditorProps) {
   const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
 
   useEffect(() => {
@@ -34,7 +40,12 @@ export function FiltersEditor({ onChange, dataView, filters }: FiltersEditorProp
 
   return (
     <FiltersEditorContextType.Provider value={{ dataView, dispatch }}>
-      <FilterGroup filters={state.filters} conditionType={rootLevelConditionType} path={''} />
+      <FilterGroup
+        filters={state.filters}
+        conditionType={rootLevelConditionType}
+        path={''}
+        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+      />
     </FiltersEditorContextType.Provider>
   );
 }

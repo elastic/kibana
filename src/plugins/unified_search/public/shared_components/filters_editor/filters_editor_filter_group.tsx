@@ -19,6 +19,7 @@ export interface FilterGroupProps {
   filters: Filter[];
   conditionType: ConditionTypes;
   path: Path;
+  timeRangeForSuggestionsOverride: boolean;
 }
 
 const filterGroupCss = css`
@@ -56,15 +57,28 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
   </EuiFlexGroup>
 );
 
-export const FilterGroup = ({ filters, conditionType, path }: FilterGroupProps) => (
-  <EuiPanel color="subdued" paddingSize="s" className={filterGroupCss}>
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {filters.map((filter, index, acc) => (
-        <>
-          <FilterItem filter={filter} path={`${path ? path + '.' : ''}${index}`} />
-          {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
-        </>
-      ))}
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+export const FilterGroup = ({
+  filters,
+  conditionType,
+  path,
+  timeRangeForSuggestionsOverride,
+}: FilterGroupProps) => {
+  const paths = path ? path + '.' : '';
+
+  return (
+    <EuiPanel color="subdued" paddingSize="s" className={filterGroupCss}>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {filters.map((filter, index, acc) => (
+          <>
+            <FilterItem
+              filter={filter}
+              path={`${paths}${index}`}
+              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            />
+            {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
+          </>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
