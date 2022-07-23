@@ -239,7 +239,9 @@ export function FilterItem({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   display="base"
-                  onClick={() => {}}
+                  onClick={() => {
+                    dispatch({ type: 'addFilter', payload: { path, dataViewId: dataView.id } });
+                  }}
                   iconType="plus"
                   size="s"
                   aria-label="Add filter group with AND"

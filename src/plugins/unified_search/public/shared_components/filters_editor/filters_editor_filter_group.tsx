@@ -14,6 +14,7 @@ import { css } from '@emotion/css';
 import type { Path } from './filter_editors_types';
 import { ConditionTypes } from './filters_editor_condition_types';
 import { FilterItem } from './filters_editor_filter_item';
+import { filterDepthCalculation } from './filters_editor_utils';
 
 export interface FilterGroupProps {
   filters: Filter[];
@@ -41,10 +42,6 @@ const delimiterOrCss = css`
   font-size: 13px;
   padding: 3px 6px;
 `;
-
-function filterDepthCalculation(path: string): number {
-  return path.replace(/([0-9])/g, '').split('.').length;
-}
 
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
   <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">

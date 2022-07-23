@@ -9,10 +9,17 @@
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filter_editors_types';
+import { addFilter } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
   filters: Filter[];
+}
+
+/** @internal **/
+export interface AddFiltersPayload {
+  path: Path;
+  dataViewId: string | undefined;
 }
 
 /** @internal **/
@@ -28,10 +35,12 @@ export interface RemoveFilterPayload {
 /** @internal **/
 export interface MoveFilterPayload {
   path: Path;
+  filter: Filter;
 }
 
 /** @internal **/
 export type FiltersEditorActions =
+  | { type: 'addFilter'; payload: AddFiltersPayload }
   | { type: 'updateFilters'; payload: UpdateFiltersPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload };
@@ -41,16 +50,20 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
   action
 ) => {
   switch (action.type) {
+    case 'addFilter':
+      return {
+        filters: addFilter(state.filters, action.payload),
+      };
     case 'updateFilters':
       return {
+        ...state,
         filters: action.payload.filters,
       };
     case 'removeFilter':
-      console.log(action);
+      // console.log(action);
       return state;
-
     case 'moveFilter':
-      console.log(action);
+      // console.log(action);
       return state;
     default:
       throw new Error('wrong action');
