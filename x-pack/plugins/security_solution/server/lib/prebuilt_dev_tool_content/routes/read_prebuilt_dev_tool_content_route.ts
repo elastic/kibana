@@ -10,7 +10,7 @@ import fs from 'fs';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
-import { DEV_TOOL_CONTENT } from '../../../../common/constants';
+import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { consoleMappings } from '../console_mappings';
@@ -44,7 +44,7 @@ const buildConsoleResponse = (response: KibanaResponseFactory) =>
 export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: DEV_TOOL_CONTENT,
+      path: DEV_TOOL_PREBUILT_CONTENT,
       validate: ReadConsoleRequestSchema,
       options: {
         tags: ['access:securitySolution'],

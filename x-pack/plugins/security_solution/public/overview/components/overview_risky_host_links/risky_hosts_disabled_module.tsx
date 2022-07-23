@@ -12,7 +12,7 @@ import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { ENABLE_VIA_DEV_TOOLS } from './translations';
-import { devToolConsoleUrl } from '../../../../common/constants';
+import { devToolPrebuiltContentUrl } from '../../../../common/constants';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 import { useChcekSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
@@ -28,7 +28,7 @@ export const RiskyHostsDisabledModuleComponent = () => {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
-    return `${protocol}//${hostname}:${port}${devToolConsoleUrl(hostRiskScoreConsoleId)}`;
+    return `${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(hostRiskScoreConsoleId)}`;
   }, []);
   const { signalIndexExists } = useChcekSignalIndex();
   return (
