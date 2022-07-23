@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
+import { relative } from 'path';
 import Eslint from 'eslint';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
@@ -65,10 +67,20 @@ const getDisabledProtectedRule = function (
   protectedRules: any
 ) {
   for (const disabledRule of disabledRules) {
-    if (
-      protectedRules[disabledRule] === '*' ||
-      sourceFilename.includes(protectedRules[disabledRule])
-    ) {
+    if (!protectedRules[disabledRule]) {
+      continue;
+    }
+
+    if (protectedRules[disabledRule] === '*') {
+      return disabledRule;
+    }
+
+    const relativeSourceFileName = relative(REPO_ROOT, sourceFilename);
+    const isSourceFileAllowedToDisableThisProtectedRule = protectedRules[disabledRule].some(
+      (allowedPath: string) => relativeSourceFileName.startsWith(allowedPath)
+    );
+
+    if (!isSourceFileAllowedToDisableThisProtectedRule) {
       return disabledRule;
     }
   }
@@ -158,11 +170,11 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
             const textToRemove = isLastDisabledRule
               ? `,${disabledProtectedRule}`
               : `${disabledProtectedRule},`;
-            const fixedComment = comment.value.trim().replace(textToRemove, '');
+            const fixedComment = comment.value.replace(textToRemove, '');
             const rangeToFix: Eslint.AST.Range =
               comment.type === 'Line'
-                ? [comment.range[0] + 3, comment.range[1]]
-                : [comment.range[0] + 3, comment.range[1] - 3];
+                ? [comment.range[0] + 2, comment.range[1]]
+                : [comment.range[0] + 2, comment.range[1] - 2];
 
             return fixer.replaceTextRange(rangeToFix, fixedComment);
           },

@@ -36,6 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "//packages/kbn-utils",
   "@npm//eslint",
 ]
 
@@ -49,6 +50,7 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@types/eslint",
   "@npm//@types/jest",
   "@npm//@types/node",
