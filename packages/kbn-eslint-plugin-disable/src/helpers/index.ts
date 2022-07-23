@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line no-console,no-var
-console.log('a');
+export * from './regex';
+export * from './report';

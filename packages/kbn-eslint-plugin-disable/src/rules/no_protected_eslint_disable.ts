@@ -9,6 +9,7 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { relative } from 'path';
 import Eslint from 'eslint';
+import { getReportLocFromComment, getRulesBlockFromEslintDisableComment } from '../helpers';
 
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
@@ -42,8 +43,6 @@ const meta: Eslint.Rule.RuleMetaData = {
     },
   },
 };
-
-const ESLINT_DISABLE_RE = /^eslint-disable(?:-next-line|-line)?(?<rulesBlock>.*)/;
 
 const getProtectedRulesFromOptions = function (ruleOptions: any[]) {
   const protectedRules: { [key: string]: string | string[] } = {};
@@ -93,12 +92,11 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
       const nodeComments = node.comments || [];
 
       nodeComments.forEach((comment) => {
-        const commentVal = comment.value.trim();
-        const eslintDisableRegexResult = commentVal.match(ESLINT_DISABLE_RE);
-        const rulesBlock = eslintDisableRegexResult?.groups?.rulesBlock;
+        // get rulesBlock from comment
+        const rulesBlock = getRulesBlockFromEslintDisableComment(comment);
 
         // no regex match, exit early
-        if (!eslintDisableRegexResult) {
+        if (rulesBlock === null) {
           return;
         }
 
@@ -125,26 +123,10 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
         }
 
         // at this point we'll collect the disabled rule position to report
-        const cStart = comment?.loc?.start;
-        const cEnd = comment?.loc?.end;
-        const cStartLine = comment?.loc?.start?.line;
-
-        // start or end loc is undefined, exit early
-        if (cStart === undefined || cEnd === undefined || cStartLine === undefined) {
+        const reportLoc = getReportLocFromComment(comment);
+        if (!reportLoc) {
           return;
         }
-
-        const disableStartsOnNextLine = comment.value.includes('disable-next-line');
-        const disableStartsInline = comment.value.includes('disable-line');
-        const cStartColumn = comment?.loc?.start?.column ?? 0;
-        const reportLoc = disableStartsOnNextLine
-          ? { start: cStart, end: cEnd }
-          : {
-              // At this point we could have eslint-disable block or an eslint-disable-line.
-              // If we have an inline disable we need to report the column as -1 in order to get the report
-              start: { line: cStartLine, column: disableStartsInline ? -1 : cStartColumn - 1 },
-              end: cEnd,
-            };
 
         // At this point we have a regex match, no rule name and a valid loc so lets report here
         context.report({
@@ -160,7 +142,7 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
               return fixer.removeRange(comment.range as Eslint.AST.Range);
             }
 
-            // its impossible to fix as we dont have a range
+            // it's impossible to fix as we don't have a range
             if (!comment.range) {
               return null;
             }
