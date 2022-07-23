@@ -22,7 +22,14 @@ export interface FilterGroupProps {
   timeRangeForSuggestionsOverride: boolean;
 }
 
-const filterGroupCss = css`
+const filterGroupWithWhiteBackgoundCss = css`
+  background-color: #ffffff;
+  border-radius: $euiBorderRadius;
+  box-shadow: inset 0 0 0 1px rgba(17, 43, 134, 0.1);
+  padding: 12px;
+`;
+
+const filterGroupWithGreyBackgoundCss = css`
   background-color: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
   box-shadow: inset 0 0 0 1px rgba(17, 43, 134, 0.1);
@@ -34,6 +41,10 @@ const delimiterOrCss = css`
   font-size: 13px;
   padding: 3px 6px;
 `;
+
+function filterDepthCalculation(path: string): number {
+  return path.replace(/([0-9])/g, '').split('.').length;
+}
 
 const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
   <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
@@ -66,9 +77,17 @@ export const FilterGroup = ({
   const paths = path ? path + '.' : '';
 
   return (
-    <EuiPanel color="subdued" paddingSize="s" className={filterGroupCss}>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {filters.map((filter, index, acc) => (
+    <EuiPanel
+      color="subdued"
+      paddingSize="s"
+      className={
+        filterDepthCalculation(paths) % 2 === 0
+          ? filterGroupWithWhiteBackgoundCss
+          : filterGroupWithGreyBackgoundCss
+      }
+    >
+      {filters.map((filter, index, acc) => (
+        <EuiFlexGroup direction="column" gutterSize="none">
           <>
             <FilterItem
               filter={filter}
@@ -77,8 +96,8 @@ export const FilterGroup = ({
             />
             {index + 1 < acc.length ? <Delimiter conditionType={conditionType} /> : null}
           </>
-        ))}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      ))}
     </EuiPanel>
   );
 };
