@@ -31,6 +31,7 @@ elif [[ "$UNAME" == "Darwin" ]]; then
   OS="darwin"
 fi
 echo " -- Running on OS: $OS"
+echo " -- Running on OS: $OS"
 
 nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
 
