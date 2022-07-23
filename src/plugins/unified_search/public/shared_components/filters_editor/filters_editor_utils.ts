@@ -26,17 +26,32 @@ export const filterDepthCalculation = (path: string): number => {
   return path.replace(/([0-9])/g, '').split('.').length;
 };
 
+export const insertFilterInFilterGroup = (arr: Filter[], index: number, newItem: Filter) => [
+  ...arr.slice(0, index),
+  newItem,
+  ...arr.slice(index),
+];
+
+export const removeFilterFromFilterGroup = (arr: Filter[], index: number, newItem: Filter) => [
+  ...arr.slice(0, index),
+  newItem,
+  ...arr.slice(index),
+];
+
 export const addFilter = (
   filters: Filter[],
   payload: { path: string; dataViewId: string | undefined }
 ) => {
-  const path = payload.path;
-  // console.log('depth', filterDepthCalculation(path));
-  // console.log('path', path);
-  // console.log('group', filters);
-  const resultFilters = filters;
-  if (filterDepthCalculation(path) === 1) {
-    resultFilters.push(buildEmptyFilter(true, payload.dataViewId));
-  }
+  const newFilter = buildEmptyFilter(true, payload.dataViewId);
+  const orderInFilterGroup = Number(payload.path.split('.').at(-1));
+
+  const numberOfFilterGroup = filterDepthCalculation(payload.path);
+  console.log('depth', filterDepthCalculation(payload.path));
+  console.log('payload.path', payload.path);
+
+  let resultFilters = filters;
+
+  resultFilters = insertFilterInFilterGroup(filters, orderInFilterGroup + 1, newFilter);
+
   return resultFilters;
 };
