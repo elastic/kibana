@@ -85,7 +85,7 @@ export const assertURL = (url: string) => {
       throw new Error('Invalid protocol');
     }
   } catch (error) {
-    throw new Error(`URL Error: ${error.message}`);
+    throw new Error(`${error.message}`);
   }
 };
 export const ensureUriAllowed = (
@@ -95,11 +95,33 @@ export const ensureUriAllowed = (
   try {
     configurationUtilities.ensureUriAllowed(url);
   } catch (allowedListError) {
-    throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
+    throw Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
   }
 };
 export const normalizeURL = (url: string) => {
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
   return urlWithoutTrailingSlash.replace(replaceDoubleSlashesRegex, '$1');
+};
+
+export const validateAndNormalizeUrl = (
+  url: string,
+  configurationUtilities: ActionsConfigurationUtilities,
+  urlDesc: string
+) => {
+  try {
+    assertURL(url);
+    ensureUriAllowed(url, configurationUtilities);
+    return normalizeURL(url);
+  } catch (e) {
+    throw Error(`${urlDesc} ${e}`);
+  }
+};
+
+export const validateJson = (jsonString: string, jsonDesc: string) => {
+  try {
+    JSON.parse(jsonString);
+  } catch (e) {
+    throw new Error(`JSON Error: ${jsonDesc} must be valid JSON`);
+  }
 };

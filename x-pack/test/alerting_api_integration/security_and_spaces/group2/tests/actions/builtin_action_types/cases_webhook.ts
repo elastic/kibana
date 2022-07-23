@@ -35,7 +35,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     getIncidentResponseExternalTitleKey: 'key',
     getIncidentResponseUpdatedDateKey: 'fields.updated',
     hasAuth: true,
-    headers: { ['content-type']: 'application/json' },
+    headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
     updateIncidentJson:
@@ -405,6 +405,336 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         if (proxyServer) {
           proxyServer.close();
         }
+      });
+    });
+
+    describe('CasesWebhook - Executor bad data', () => {
+      describe('bad case JSON', () => {
+        let simulatedActionId: string;
+        let proxyServer: httpProxy | undefined;
+        let proxyHaveBeenCalled = false;
+        const jsonExtraCommas =
+          '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}},,,,,';
+        before(async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createIncidentJson: jsonExtraCommas,
+                updateIncidentJson: jsonExtraCommas,
+              },
+              secrets,
+            });
+          simulatedActionId = body.id;
+
+          proxyServer = await getHttpProxyServer(
+            kibanaServer.resolveUrl('/'),
+            configService.get('kbnTestServer.serverArgs'),
+            () => {
+              proxyHaveBeenCalled = true;
+            }
+          );
+        });
+
+        it('should respond with bad JSON error when create case JSON is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(false);
+        });
+
+        it('should respond with bad JSON error when update case JSON is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                    externalId: '12345',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: JSON Error: Update case JSON body must be valid JSON. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(false);
+        });
+        after(() => {
+          if (proxyServer) {
+            proxyServer.close();
+          }
+        });
+      });
+      describe('bad comment JSON', () => {
+        let simulatedActionId: string;
+        let proxyServer: httpProxy | undefined;
+        let proxyHaveBeenCalled = false;
+        before(async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createCommentJson: '{"body":{{{case.comment}}}},,,,,,,',
+              },
+              secrets,
+            });
+          simulatedActionId = body.id;
+
+          proxyServer = await getHttpProxyServer(
+            kibanaServer.resolveUrl('/'),
+            configService.get('kbnTestServer.serverArgs'),
+            () => {
+              proxyHaveBeenCalled = true;
+            }
+          );
+        });
+
+        it('should respond with bad JSON error when create case comment JSON is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                  },
+                  comments: [
+                    {
+                      comment: 'first comment',
+                      commentId: '456',
+                    },
+                  ],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(true); // called for the create case successful call
+        });
+
+        after(() => {
+          if (proxyServer) {
+            proxyServer.close();
+          }
+        });
+      });
+    });
+
+    describe('CasesWebhook - Executor bad URLs', () => {
+      describe('bad case URL', () => {
+        let simulatedActionId: string;
+        let proxyServer: httpProxy | undefined;
+        let proxyHaveBeenCalled = false;
+        before(async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createIncidentUrl: `https${casesWebhookSimulatorURL}`,
+                updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}e\\\\whoathisisbad4{}\{\{`,
+              },
+              secrets,
+            });
+          simulatedActionId = body.id;
+
+          proxyServer = await getHttpProxyServer(
+            kibanaServer.resolveUrl('/'),
+            configService.get('kbnTestServer.serverArgs'),
+            () => {
+              proxyHaveBeenCalled = true;
+            }
+          );
+        });
+
+        it('should respond with bad URL error when create case URL is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to create case. Error: Create case URL Error: Invalid protocol. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(false);
+        });
+
+        it('should respond with bad URL error when update case URL is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                    externalId: '12345',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Update case URL Error: Invalid URL. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(false);
+        });
+        after(() => {
+          if (proxyServer) {
+            proxyServer.close();
+          }
+        });
+      });
+      describe('bad comment URL', () => {
+        let simulatedActionId: string;
+        let proxyServer: httpProxy | undefined;
+        let proxyHaveBeenCalled = false;
+        before(async () => {
+          const { body } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createCommentJson: '{"body":{{{case.comment}}}},,,,,,,',
+              },
+              secrets,
+            });
+          simulatedActionId = body.id;
+
+          proxyServer = await getHttpProxyServer(
+            kibanaServer.resolveUrl('/'),
+            configService.get('kbnTestServer.serverArgs'),
+            () => {
+              proxyHaveBeenCalled = true;
+            }
+          );
+        });
+
+        it('should respond with bad JSON error when create case comment JSON is bad', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'success',
+                    description: 'success',
+                  },
+                  comments: [
+                    {
+                      comment: 'first comment',
+                      commentId: '456',
+                    },
+                  ],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message: 'an error occurred while running the action',
+                service_message:
+                  '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON. ',
+              });
+            });
+          expect(proxyHaveBeenCalled).to.equal(true); // called for the create case successful call
+        });
+
+        after(() => {
+          if (proxyServer) {
+            proxyServer.close();
+          }
+        });
       });
     });
   });
