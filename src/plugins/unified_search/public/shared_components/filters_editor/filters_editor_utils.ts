@@ -37,36 +37,45 @@ export const removeFilterFromFilterGroup = (arr: Filter[], index: number) => [
   ...arr.slice(index + 1),
 ];
 
+const goIntoFilersGroup = (
+  root: Filter[],
+  index: number,
+  path: string,
+  newFilter: Filter
+): Filter[] => {
+  const orderInFilterGroup = path.split('.').length > 0 ? Number(path.split('.')[0]) : 0;
+
+  if (filterDepthCalculation(path) === 1) {
+    return insertFilterInFilterGroup(root, index + 1, newFilter);
+  } else {
+    return goIntoFilersGroup(
+      root[orderInFilterGroup].meta.params.filters,
+      orderInFilterGroup + 1,
+      path.split('.').slice(1).join('.'),
+      newFilter
+    );
+  }
+};
+
 export const addFilter = (
   filters: Filter[],
   payload: { path: string; dataViewId: string | undefined }
 ) => {
   const newFilter = buildEmptyFilter(true, payload.dataViewId);
-  const orderInFilterGroup = Number(payload.path.split('.').at(-1));
-  const numberOfFilterGroup = filterDepthCalculation(payload.path);
+  // const orderInFilterGroup = Number(payload.path.split('.').at(-1));
+  const orderInFilterGroup =
+    payload.path.split('.').length > 0 ? Number(payload.path.split('.')[0]) : 0;
+  const filterDepth = filterDepthCalculation(payload.path);
 
   console.log('payload.path', payload.path);
-  console.log('numberOfFilterGroup', numberOfFilterGroup);
+  console.log('filterDepth', filterDepth);
   console.log('orderInFilterGroup', orderInFilterGroup);
-  console.log('filters', filters);
-  let resultFilters = filters;
 
-  resultFilters = insertFilterInFilterGroup(filters, orderInFilterGroup + 1, newFilter);
-
-  return resultFilters;
+  return goIntoFilersGroup(filters, orderInFilterGroup, payload.path, newFilter);
 };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
   const orderInFilterGroup = Number(payload.path.split('.').at(-1));
-  const numberOfFilterGroup = filterDepthCalculation(payload.path);
 
-  console.log('payload.path', payload.path);
-  console.log('numberOfFilterGroup', numberOfFilterGroup);
-  console.log('orderInFilterGroup', orderInFilterGroup);
-  console.log('filters', filters);
-  let resultFilters = filters;
-
-  resultFilters = removeFilterFromFilterGroup(filters, orderInFilterGroup);
-
-  return resultFilters;
+  return removeFilterFromFilterGroup(filters, orderInFilterGroup);
 };

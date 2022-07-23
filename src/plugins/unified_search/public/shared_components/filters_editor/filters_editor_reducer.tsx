@@ -64,7 +64,6 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
         filters: removeFilter(state.filters, action.payload),
       };
     case 'moveFilter':
-      // console.log(action);
       return state;
     default:
       throw new Error('wrong action');
