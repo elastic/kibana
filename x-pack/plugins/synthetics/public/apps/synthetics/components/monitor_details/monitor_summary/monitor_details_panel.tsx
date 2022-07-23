@@ -36,7 +36,10 @@ export const MonitorDetailsPanel = () => {
 
   const { monitor, loading } = useSelectedMonitor();
 
-  if (!latestPing || latestPing.monitor.id !== monitorId) {
+  if (
+    (latestPing && latestPing.monitor?.id !== monitorId) ||
+    (monitor && monitor.id !== monitorId)
+  ) {
     return <EuiLoadingSpinner />;
   }
 
@@ -59,7 +62,7 @@ export const MonitorDetailsPanel = () => {
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiBadge>{capitalize(latestPing.monitor.type)}</EuiBadge>
+          <EuiBadge>{capitalize(monitor?.type)}</EuiBadge>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>Every 10 mins</EuiDescriptionListDescription>
@@ -69,8 +72,8 @@ export const MonitorDetailsPanel = () => {
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
-          <EuiLink href={latestPing.url?.full} external>
-            {latestPing.url?.full}
+          <EuiLink href={latestPing?.url?.full} external>
+            {latestPing?.url?.full}
           </EuiLink>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>

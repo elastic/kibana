@@ -6,13 +6,10 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
-import {
-  ScreenshotBlockDoc,
-  ScreenshotBlockCache,
-  isPendingBlock,
-} from '../../../../common/runtime_types';
-import { fetchScreenshotBlockSet } from '../api/journey';
+import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
+import { ScreenshotBlockDoc, ScreenshotBlockCache } from '../../../../../common/runtime_types';
+import { fetchScreenshotBlockSet } from './api';
+
 import {
   fetchBlocksAction,
   setBlockLoadingAction,
@@ -20,8 +17,15 @@ import {
   putBlocksAction,
   putCacheSize,
   updateHitCountsAction,
-} from '../reducers/synthetics';
-import { syntheticsSelector } from '../selectors';
+} from './actions';
+
+import { isPendingBlock } from './models';
+
+import { selectBrowserJourneyState } from './selectors';
+
+export function* browserJourneyEffects() {
+  yield all([fork(fetchScreenshotBlocks), fork(generateBlockStatsOnPut), fork(pruneBlockCache)]);
+}
 
 function* fetchBlocks(hashes: string[]) {
   yield put(setBlockLoadingAction(hashes));
@@ -29,7 +33,7 @@ function* fetchBlocks(hashes: string[]) {
   yield put(putBlocksAction({ blocks }));
 }
 
-export function* fetchScreenshotBlocks() {
+function* fetchScreenshotBlocks() {
   /**
    * We maintain a list of each hash and how many times it is requested so we can avoid
    * subsequent re-requests if the block is dropped due to cache pruning.
@@ -45,7 +49,7 @@ export function* fetchScreenshotBlocks() {
    * a fetch to the backend.
    */
   yield throttle(20, String(fetchBlocksAction), function* () {
-    const { blocks }: { blocks: ScreenshotBlockCache } = yield select(syntheticsSelector);
+    const { blocks }: { blocks: ScreenshotBlockCache } = yield select(selectBrowserJourneyState);
     const toFetch = Object.keys(blocks).filter((hash) => {
       const block = blocks[hash];
       return isPendingBlock(block) && block.status !== 'loading';
@@ -57,7 +61,7 @@ export function* fetchScreenshotBlocks() {
   });
 }
 
-export function* generateBlockStatsOnPut() {
+function* generateBlockStatsOnPut() {
   yield takeEvery(
     String(putBlocksAction),
     function* (action: Action<{ blocks: ScreenshotBlockDoc[] }>) {
@@ -72,9 +76,9 @@ export function* generateBlockStatsOnPut() {
 // 4 MB cap for cache size
 const MAX_CACHE_SIZE = 4000000;
 
-export function* pruneBlockCache() {
+function* pruneBlockCache() {
   yield takeEvery(String(putCacheSize), function* (_action: Action<number>) {
-    const { cacheSize }: { cacheSize: number } = yield select(syntheticsSelector);
+    const { cacheSize }: { cacheSize: number } = yield select(selectBrowserJourneyState);
 
     if (cacheSize > MAX_CACHE_SIZE) {
       yield put(pruneCacheAction(cacheSize - MAX_CACHE_SIZE));

@@ -19,6 +19,6 @@ export const selectSelectedLocationId = createSelector(
 
 export const selectLatestPing = createSelector(getState, (state) => state.pings?.[0] ?? null);
 
-export const selectMonitorRecentPings = createSelector(getState, (state) => state.pings);
+export const selectPingsLoading = createSelector(getState, (state) => state.loading);
 
-export const selectSyntheticsMonitor = (state: SyntheticsAppState) => state.syntheticsMonitor;
+export const selectMonitorRecentPings = createSelector(getState, (state) => state.pings);

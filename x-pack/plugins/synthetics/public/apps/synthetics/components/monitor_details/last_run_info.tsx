@@ -16,7 +16,6 @@ import { useSelectedLocation } from './hooks/use_selected_location';
 export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
   const selectedLocation = useSelectedLocation();
   const isBrowserType = ping.monitor.type === 'browser';
-
   const theme = useTheme();
 
   return (
@@ -26,7 +25,7 @@ export const MonitorSummaryLastRunInfo = ({ ping }: { ping: Ping }) => {
           <EuiBadge color={theme.eui.euiColorVis0}>
             {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
           </EuiBadge>
-        ) : ping.monitor.status === 'up' ? (
+        ) : ping.monitor.status === 'down' ? (
           <EuiBadge color={theme.eui.euiColorVis9}>
             {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
           </EuiBadge>

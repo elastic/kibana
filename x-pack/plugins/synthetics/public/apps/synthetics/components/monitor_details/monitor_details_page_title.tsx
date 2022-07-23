@@ -8,16 +8,18 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
-import { getMonitorRecentPingsAction, selectLatestPing } from '../../state';
+import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../state';
 import { MonitorSummaryLastRunInfo } from './last_run_info';
 
 export const MonitorDetailsPageTitle = () => {
   const dispatch = useDispatch();
 
   const latestPing = useSelector(selectLatestPing);
+  const pingsLoading = useSelector(selectPingsLoading);
 
   const { monitorId } = useParams<{ monitorId: string }>();
   const { monitor } = useSelectedMonitor();
@@ -34,10 +36,19 @@ export const MonitorDetailsPageTitle = () => {
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>{monitor?.name}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {!latestPing || latestPing.monitor.id !== monitorId ? (
+        {pingsLoading || (latestPing && latestPing.monitor.id !== monitorId) ? (
           <EuiLoadingSpinner />
-        ) : (
+        ) : latestPing ? (
           <MonitorSummaryLastRunInfo ping={latestPing} />
+        ) : (
+          <EuiText>
+            {i18n.translate('xpack.synthetics.monitorSummary.noLastRunInformationAvailable', {
+              defaultMessage: 'No last run information available for {location} yet.',
+              values: {
+                location: location?.label,
+              },
+            })}
+          </EuiText>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

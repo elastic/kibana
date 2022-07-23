@@ -8,7 +8,7 @@
 import { takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { getMonitorRecentPingsAction, getMonitorAction } from './actions';
-import { fetchMonitor, fetchMonitorRecentPings } from './api';
+import { fetchSyntheticsMonitor, fetchMonitorRecentPings } from './api';
 
 export function* fetchSyntheticsMonitorEffect() {
   yield takeLeading(
@@ -22,6 +22,6 @@ export function* fetchSyntheticsMonitorEffect() {
 
   yield takeLeading(
     getMonitorAction.get,
-    fetchEffectFactory(fetchMonitor, getMonitorAction.success, getMonitorAction.fail)
+    fetchEffectFactory(fetchSyntheticsMonitor, getMonitorAction.success, getMonitorAction.fail)
   );
 }

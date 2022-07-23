@@ -17,3 +17,4 @@ export * from './service_locations';
 export * from './monitor_list';
 export * from './monitor_details';
 export * from './overview';
+export * from './browser_journey';

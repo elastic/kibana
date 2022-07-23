@@ -7,15 +7,14 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
-import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
+import { composeScreenshotRef } from '../utils/browser_journey/compose_screenshot_images';
 import {
   ScreenshotRefImageData,
   ScreenshotBlockCache,
   StoreScreenshotBlock,
-  isPendingBlock,
-} from '../../../common/runtime_types';
-import { fetchBlocksAction } from '../state/reducers/synthetics';
-import { syntheticsSelector } from '../state/selectors';
+} from '../../../../common/runtime_types';
+import { fetchBlocksAction, isPendingBlock } from '../state';
+import { selectBrowserJourneyState } from '../state';
 
 function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes: string[]) {
   for (const hash of hashes) {
@@ -83,7 +82,7 @@ export const useCompositeImage = (
   imageData?: string
 ): void => {
   const dispatch = useDispatch();
-  const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(syntheticsSelector);
+  const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(selectBrowserJourneyState);
 
   React.useEffect(() => {
     dispatch(

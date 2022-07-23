@@ -7,6 +7,7 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
+import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 import {
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
@@ -19,7 +20,7 @@ export interface MonitorDetailsState {
   loading: boolean;
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
-  error: IHttpFetchError<ResponseErrorBody> | null;
+  error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
 }
 
@@ -37,6 +38,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(setMonitorDetailsLocationAction, (state, action) => {
       state.selectedLocationId = action.payload;
     })
+
     .addCase(getMonitorRecentPingsAction.get, (state) => {
       state.loading = true;
     })
@@ -45,9 +47,10 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getMonitorRecentPingsAction.fail, (state, action) => {
-      state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
       state.loading = false;
     })
+
     .addCase(getMonitorAction.get, (state) => {
       state.syntheticsMonitorLoading = true;
     })
@@ -56,7 +59,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.syntheticsMonitorLoading = false;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
-      state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.error = serializeHttpFetchError(action.payload as IHttpFetchError<ResponseErrorBody>);
       state.syntheticsMonitorLoading = false;
     });
 });

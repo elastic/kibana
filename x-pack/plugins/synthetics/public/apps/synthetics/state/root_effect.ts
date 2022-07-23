@@ -12,6 +12,7 @@ import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
 import { fetchMonitorListEffect, upsertMonitorEffect } from './monitor_list';
 import { fetchMonitorOverviewEffect, quietFetchOverviewEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
+import { browserJourneyEffects } from './browser_journey';
 
 export const rootEffect = function* root(): Generator {
   yield all([
@@ -23,5 +24,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchSyntheticsMonitorEffect),
     fork(fetchMonitorOverviewEffect),
     fork(quietFetchOverviewEffect),
+    fork(browserJourneyEffects),
   ]);
 };

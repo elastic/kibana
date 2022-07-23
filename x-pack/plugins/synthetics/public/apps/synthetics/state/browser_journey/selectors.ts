@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { MonitorDetailsTabs } from './monitor_detials_tabs';
+import { SyntheticsAppState } from '../root_reducer';
 
-export const MonitorDetailsPageHeader = () => {
-  return (
-    <>
-      <MonitorDetailsTabs />
-    </>
-  );
-};
+export const selectBrowserJourneyState = (state: SyntheticsAppState) => state.browserJourney;

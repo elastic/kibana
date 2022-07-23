@@ -6,16 +6,16 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { getMonitorAction, getMonitorRecentPingsAction } from '../../state/monitor_details';
-import { selectLatestPing } from '../../state/monitor_details';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 export const MonitorDetailsPage = () => {
-  const latestPing = useSelector(selectLatestPing);
+  const { monitor } = useSelectedMonitor();
 
-  useMonitorListBreadcrumbs([{ text: latestPing?.monitor.name ?? '' }]);
+  useMonitorListBreadcrumbs([{ text: monitor?.name ?? '' }]);
 
   const dispatch = useDispatch();
 

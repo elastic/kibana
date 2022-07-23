@@ -23,6 +23,7 @@ import { AvailabilityPanel } from './availability_panel';
 import { DurationPanel } from './duration_panel';
 import { MonitorDetailsPanel } from './monitor_details_panel';
 import { AvailabilitySparklines } from './availability_sparklines';
+import { LastTestRun } from './last_test_run';
 
 export const SummaryTabContent = () => {
   const { euiTheme } = useEuiTheme();
@@ -84,7 +85,7 @@ export const SummaryTabContent = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel>{/* TODO: Add last run panel*/}</EuiPanel>
+          <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem>
           <StepDurationPanel />

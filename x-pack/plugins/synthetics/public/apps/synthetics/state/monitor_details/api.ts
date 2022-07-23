@@ -47,14 +47,18 @@ export const fetchMonitorRecentPings = async ({
   );
 };
 
-export const fetchMonitor = async ({
+export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
 }): Promise<EncryptedSyntheticsSavedMonitor> => {
-  const { attributes } = (await apiService.get(
+  const savedObject = (await apiService.get(
     `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
   )) as SavedObject<SyntheticsMonitor>;
 
-  return attributes as EncryptedSyntheticsSavedMonitor;
+  return {
+    id: savedObject.id,
+    ...savedObject.attributes,
+    updated_at: savedObject.updated_at,
+  } as EncryptedSyntheticsSavedMonitor;
 };

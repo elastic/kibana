@@ -9,7 +9,7 @@ import {
   isScreenshotBlockDoc,
   ScreenshotRefImageData,
   ScreenshotBlockCache,
-} from '../../../../common/runtime_types';
+} from '../../../../../common/runtime_types';
 
 /**
  * Draws image fragments on a canvas.
