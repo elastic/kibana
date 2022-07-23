@@ -32,10 +32,9 @@ export const insertFilterInFilterGroup = (arr: Filter[], index: number, newItem:
   ...arr.slice(index),
 ];
 
-export const removeFilterFromFilterGroup = (arr: Filter[], index: number, newItem: Filter) => [
+export const removeFilterFromFilterGroup = (arr: Filter[], index: number) => [
   ...arr.slice(0, index),
-  newItem,
-  ...arr.slice(index),
+  ...arr.slice(index + 1),
 ];
 
 export const addFilter = (
@@ -44,14 +43,30 @@ export const addFilter = (
 ) => {
   const newFilter = buildEmptyFilter(true, payload.dataViewId);
   const orderInFilterGroup = Number(payload.path.split('.').at(-1));
-
   const numberOfFilterGroup = filterDepthCalculation(payload.path);
-  console.log('depth', filterDepthCalculation(payload.path));
-  console.log('payload.path', payload.path);
 
+  console.log('payload.path', payload.path);
+  console.log('numberOfFilterGroup', numberOfFilterGroup);
+  console.log('orderInFilterGroup', orderInFilterGroup);
+  console.log('filters', filters);
   let resultFilters = filters;
 
   resultFilters = insertFilterInFilterGroup(filters, orderInFilterGroup + 1, newFilter);
+
+  return resultFilters;
+};
+
+export const removeFilter = (filters: Filter[], payload: { path: string }) => {
+  const orderInFilterGroup = Number(payload.path.split('.').at(-1));
+  const numberOfFilterGroup = filterDepthCalculation(payload.path);
+
+  console.log('payload.path', payload.path);
+  console.log('numberOfFilterGroup', numberOfFilterGroup);
+  console.log('orderInFilterGroup', orderInFilterGroup);
+  console.log('filters', filters);
+  let resultFilters = filters;
+
+  resultFilters = removeFilterFromFilterGroup(filters, orderInFilterGroup);
 
   return resultFilters;
 };

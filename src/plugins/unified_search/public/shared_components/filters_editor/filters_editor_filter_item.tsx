@@ -251,7 +251,9 @@ export function FilterItem({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   display="base"
-                  onClick={() => {}}
+                  onClick={() => {
+                    dispatch({ type: 'removeFilter', payload: { path } });
+                  }}
                   iconType="trash"
                   size="s"
                   color="danger"

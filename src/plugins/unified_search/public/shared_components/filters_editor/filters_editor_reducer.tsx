@@ -9,7 +9,7 @@
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filter_editors_types';
-import { addFilter } from './filters_editor_utils';
+import { addFilter, removeFilter } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -60,8 +60,9 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
         filters: action.payload.filters,
       };
     case 'removeFilter':
-      // console.log(action);
-      return state;
+      return {
+        filters: removeFilter(state.filters, action.payload),
+      };
     case 'moveFilter':
       // console.log(action);
       return state;
