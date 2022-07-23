@@ -11,7 +11,7 @@ import Eslint from 'eslint';
 export const PROTECTED_DISABLE_MSG_ID = 'no-protected-eslint-disable';
 const messages = {
   [PROTECTED_DISABLE_MSG_ID]:
-    'Disabling a protected rule is not allowed. Please remove it from the disable statement.',
+    "The rule '{{ disabledRuleName }}' is protected and disabling it is not allowed. Please remove it from the statement.",
 };
 
 const meta: Eslint.Rule.RuleMetaData = {
@@ -59,6 +59,22 @@ const getProtectedRulesFromOptions = function (ruleOptions: any[]) {
   return protectedRules;
 };
 
+const getDisabledProtectedRule = function (
+  sourceFilename: string,
+  disabledRules: string[],
+  protectedRules: any
+) {
+  for (const disabledRule of disabledRules) {
+    if (
+      protectedRules[disabledRule] === '*' ||
+      sourceFilename.includes(protectedRules[disabledRule])
+    ) {
+      return disabledRule;
+    }
+  }
+  return false;
+};
+
 const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
   return {
     Program(node) {
@@ -85,63 +101,72 @@ const create = (context: Eslint.Rule.RuleContext): Eslint.Rule.RuleListener => {
           ? context.getPhysicalFilename()
           : context.getFilename();
 
-        // for (const disabledRule of disabledRules) {
-        //   if (!configuredProtectedRules[disabledRule])
-        // }
+        const disabledProtectedRule = getDisabledProtectedRule(
+          sourceFilename,
+          disabledRules,
+          configuredProtectedRules
+        );
 
-        console.log(disabledRules, configuredProtectedRules);
-        debugger;
+        // no protected rule was disabled, exit early
+        if (!disabledProtectedRule) {
+          return;
+        }
 
+        // at this point we'll collect the disabled rule position to report
+        const cStart = comment?.loc?.start;
+        const cEnd = comment?.loc?.end;
+        const cStartLine = comment?.loc?.start?.line;
+
+        // start or end loc is undefined, exit early
+        if (cStart === undefined || cEnd === undefined || cStartLine === undefined) {
+          return;
+        }
+
+        const disableStartsOnNextLine = comment.value.includes('disable-next-line');
+        const disableStartsInline = comment.value.includes('disable-line');
+        const cStartColumn = comment?.loc?.start?.column ?? 0;
+        const reportLoc = disableStartsOnNextLine
+          ? { start: cStart, end: cEnd }
+          : {
+              // At this point we could have eslint-disable block or an eslint-disable-line.
+              // If we have an inline disable we need to report the column as -1 in order to get the report
+              start: { line: cStartLine, column: disableStartsInline ? -1 : cStartColumn - 1 },
+              end: cEnd,
+            };
+
+        // At this point we have a regex match, no rule name and a valid loc so lets report here
         context.report({
           node,
-          loc: {
-            start: {
-              column: 0,
-              line: 1,
-            },
-            end: {
-              column: 1,
-              line: 1,
-            },
-          },
+          loc: reportLoc,
           messageId: PROTECTED_DISABLE_MSG_ID,
+          data: {
+            disabledRuleName: disabledProtectedRule,
+          },
           fix(fixer) {
-            return fixer.removeRange(comment.range as Eslint.AST.Range);
+            // if we only have a single disabled rule and that is protected, we can remove the entire comment
+            if (disabledRules.length === 1) {
+              return fixer.removeRange(comment.range as Eslint.AST.Range);
+            }
+
+            // its impossible to fix as we dont have a range
+            if (!comment.range) {
+              return null;
+            }
+
+            const isLastDisabledRule =
+              disabledRules[disabledRules.length - 1] === disabledProtectedRule;
+            const textToRemove = isLastDisabledRule
+              ? `,${disabledProtectedRule}`
+              : `${disabledProtectedRule},`;
+            const fixedComment = comment.value.trim().replace(textToRemove, '');
+            const rangeToFix: Eslint.AST.Range =
+              comment.type === 'Line'
+                ? [comment.range[0] + 3, comment.range[1]]
+                : [comment.range[0] + 3, comment.range[1] - 3];
+
+            return fixer.replaceTextRange(rangeToFix, fixedComment);
           },
         });
-
-        // const ruleOptions = context.options;
-        //
-        // const cStart = comment?.loc?.start;
-        // const cEnd = comment?.loc?.end;
-        // const cStartLine = comment?.loc?.start?.line;
-        //
-        // // start or end loc is undefined, exit early
-        // if (cStart === undefined || cEnd === undefined || cStartLine === undefined) {
-        //   return;
-        // }
-        //
-        // const disableStartsOnNextLine = comment.value.includes('disable-next-line');
-        // const disableStartsInline = comment.value.includes('disable-line');
-        // const cStartColumn = comment?.loc?.start?.column ?? 0;
-        // const reportLoc = disableStartsOnNextLine
-        //   ? { start: cStart, end: cEnd }
-        //   : {
-        //       // At this point we could have eslint-disable block or an eslint-disable-line.
-        //       // If we have an inline disable we need to report the column as -1 in order to get the report
-        //       start: { line: cStartLine, column: disableStartsInline ? -1 : cStartColumn - 1 },
-        //       end: cEnd,
-        //     };
-        //
-        // // At this point we have a regex match, no rule name and a valid loc so lets report here
-        // context.report({
-        //   node,
-        //   loc: reportLoc,
-        //   messageId: PROTECTED_DISABLE_MSG_ID,
-        //   fix(fixer) {
-        //     return fixer.removeRange(comment.range as Eslint.AST.Range);
-        //   },
-        // });
       });
     },
   };
