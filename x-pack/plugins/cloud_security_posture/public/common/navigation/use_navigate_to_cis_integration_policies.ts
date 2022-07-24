@@ -6,13 +6,15 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
+import { useCspIntegrationPackagePolicyApi } from '../api/use_csp_integration_package_policy_api';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
 
 export const useCISIntegrationPoliciesLink = (): string | undefined => {
   const { http } = useKibana().services;
   const cisIntegration = useCisKubernetesIntegration();
-  console.log(cisIntegration.data?.item);
+
+  const p = useCspIntegrationPackagePolicyApi();
 
   if (!cisIntegration.isSuccess) return;
 
