@@ -108,6 +108,7 @@ export function FiltersSection({
                   }
                 )}
                 onChange={(e) =>
+                  // set value to empty string to reset value when new field is selected
                   onChangeFilter(e.target.value as FilterKey, '', idx)
                 }
                 isInvalid={
