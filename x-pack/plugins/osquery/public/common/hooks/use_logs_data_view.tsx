@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../lib/kibana';
@@ -16,23 +16,16 @@ export interface LogsDataView extends DataView {
 
 export const useLogsDataView = () => {
   const dataViews = useKibana().services.data.dataViews;
-  const [logsDataView, setLogsDataView] = useState<LogsDataView | undefined>(undefined);
 
-  useEffect(() => {
-    const fetchLogsDataView = async () => {
-      let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
-      if (!dataView && dataViews.getCanSaveSync()) {
-        dataView = await dataViews.createAndSave({
-          title: 'logs-osquery_manager.result*',
-          timeFieldName: '@timestamp',
-        });
-      }
+  return useQuery(['logsDataView'], async () => {
+    let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
+    if (!dataView && dataViews.getCanSaveSync()) {
+      dataView = await dataViews.createAndSave({
+        title: 'logs-osquery_manager.result*',
+        timeFieldName: '@timestamp',
+      });
+    }
 
-      setLogsDataView(dataView as LogsDataView);
-    };
-
-    fetchLogsDataView();
-  }, [dataViews]);
-
-  return logsDataView;
+    return dataView;
+  });
 };
