@@ -151,8 +151,9 @@ export const SearchIndex: React.FC = () => {
       pageHeader={{
         pageTitle: indexName,
         rightSideItems: [
-          ...headerActions,
           ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
+          // ...(isConnectorIndex(indexData) ? [<ConnectorSyncButton />] : []),
+          ...headerActions,
         ],
       }}
     >

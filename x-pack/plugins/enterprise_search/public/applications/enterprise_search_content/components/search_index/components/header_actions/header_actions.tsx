@@ -45,7 +45,7 @@ const SearchEnginesPopover: React.FC = () => {
           button={
             <EuiButton iconSide="right" iconType="arrowDown" onClick={toggleSearchEnginesPopover}>
               {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
-                defaultMessage: 'Search Engines',
+                defaultMessage: 'Search engines',
               })}
             </EuiButton>
           }
