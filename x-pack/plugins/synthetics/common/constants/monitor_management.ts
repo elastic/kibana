@@ -9,6 +9,7 @@
 export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
+  CONFIG_ID = 'config_id',
   ENABLED = 'enabled',
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',

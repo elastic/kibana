@@ -18,17 +18,6 @@ export const NEWS_FEED_TITLE = i18n.translate(
   }
 );
 
-export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
-  defaultMessage: 'Security Information & Event Management with the Elastic Stack',
-});
-
-export const RECENT_CASES = i18n.translate(
-  'xpack.securitySolution.overview.recentCasesSidebarTitle',
-  {
-    defaultMessage: 'Recent cases',
-  }
-);
-
 export const RECENT_TIMELINES = i18n.translate(
   'xpack.securitySolution.overview.recentTimelinesSidebarTitle',
   {

@@ -7,8 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
@@ -16,7 +15,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
-import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
+import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -45,7 +44,12 @@ describe('threshold_executor', () => {
   beforeEach(() => {
     alertServices = alertsMock.createRuleExecutorServices();
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        ...sampleEmptyAggsSearchResults(),
+        aggregations: {
+          thresholdTerms: { buckets: [] },
+        },
+      })
     );
     logger = loggingSystemMock.createLogger();
   });

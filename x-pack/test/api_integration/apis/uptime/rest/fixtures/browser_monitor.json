@@ -8,6 +8,7 @@
     "unit": "m"
   },
   "service.name": "",
+  "config_id": "",
   "tags": [
     "cookie-test",
     "browser"
@@ -45,6 +46,6 @@
   "namespace": "testnamespace",
   "origin": "ui",
   "form_monitor_type": "multistep",
-  "urls": null,
+  "urls": "",
   "url.port": null
 }
