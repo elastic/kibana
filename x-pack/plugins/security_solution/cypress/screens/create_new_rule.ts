@@ -223,8 +223,18 @@ export const TAGS_INPUT =
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
 
-export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
+export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
 
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
+
+export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
+
+export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
+
+export const NEW_TERMS_HISTORY_SIZE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+
+export const NEW_TERMS_HISTORY_TIME_TYPE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
