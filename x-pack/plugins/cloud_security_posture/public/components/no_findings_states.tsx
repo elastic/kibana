@@ -21,7 +21,7 @@ const NotDeployed = () => {
       color="plain"
       iconType="fleetApp"
       title={<h2>{'No Agents Installed'}</h2>}
-      body={<p>{'To see findings, install an elastic agent</b> on your cluster'}</p>}
+      body={<p>To see findings, install an elastic agent on your cluster</p>}
       actions={[
         <EuiButton fill href={integrationLink} isDisabled={!integrationLink}>
           Install Agent
@@ -38,9 +38,7 @@ const Indexing = () => (
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
     title={<h2>{'No Findings Yet'}</h2>}
     body={
-      <p>
-        {'Waiting for data to be collected and indexed.</b> Check back later to see your findings'}
-      </p>
+      <p>Waiting for data to be collected and indexed. Check back later to see your findings</p>
     }
   />
 );
@@ -51,7 +49,7 @@ const IndexTimeout = () => (
     color="plain"
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
     title={<h2>{'Findings Delayed'}</h2>}
-    body={<p>{'Collecting findings is taking longer than expected,</b> check back again soon'}</p>}
+    body={<p>Collecting findings is taking longer than expected, check back again soon</p>}
   />
 );
 
