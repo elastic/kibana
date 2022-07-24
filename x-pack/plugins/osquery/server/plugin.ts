@@ -17,6 +17,7 @@ import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -38,6 +39,7 @@ import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
 import { initializeTransforms } from './create_transforms/create_transforms';
+import { createDataViews } from './create_data_views';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -283,20 +285,26 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
         OSQUERY_INTEGRATION_NAME
       );
+      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+        client,
+        core.elasticsearch.client.asInternalUser,
+        undefined,
+        true
+      );
 
       // If package is installed we want to make sure all needed assets are installed
       if (packageInfo) {
-        await this.initialize(core);
+        await this.initialize(core, dataViewsService);
       }
 
       if (registerIngestCallback) {
-        const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-
         registerIngestCallback(
           'packagePolicyPostCreate',
           async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
             if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
-              await this.initialize(core);
+              await this.initialize(core, dataViewsService);
             }
 
             return packagePolicy;
@@ -316,9 +324,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.osqueryAppContextService.stop();
   }
 
-  async initialize(core: CoreStart): Promise<void> {
+  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
     this.logger.debug('initialize');
     await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    await createDataViews(dataViewsService);
   }
 }
