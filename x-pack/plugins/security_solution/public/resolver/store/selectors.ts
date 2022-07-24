@@ -22,7 +22,6 @@ export const projectionMatrix = composeSelectors(
   cameraSelectors.projectionMatrix
 );
 
-export const clippingPlanes = composeSelectors(cameraStateSelector, cameraSelectors.clippingPlanes);
 export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
 
 /**
@@ -81,14 +80,6 @@ export const treeRequestParametersToAbort = composeSelectors(
 );
 
 /**
- * This should be the siem default indices to pass to the backend for querying data.
- */
-export const treeParameterIndices = composeSelectors(
-  dataStateSelector,
-  dataSelectors.treeParameterIndices
-);
-
-/**
  * An array of indices to use for resolver panel requests.
  */
 export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
@@ -114,13 +105,6 @@ export const relatedEventTotalCount: (
 ) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventTotalCount
-);
-
-export const relatedEventCountByCategory: (
-  state: ResolverState
-) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventCountByCategory
 );
 
 /**
@@ -205,11 +189,6 @@ export const hasMoreGenerations = composeSelectors(
   dataStateSelector,
   dataSelectors.hasMoreGenerations
 );
-
-/**
- * An array containing all the processes currently in the Resolver than can be graphed
- */
-export const graphableNodes = composeSelectors(dataStateSelector, dataSelectors.graphableNodes);
 
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
@@ -299,14 +278,6 @@ export const panelViewAndParameters = composeSelectors(
 );
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
-
-/**
- * @deprecated use `useLinkProps`
- */
-export const relatedEventsRelativeHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventsRelativeHrefs
-);
 
 /**
  * Total count of events related to `nodeID`.
