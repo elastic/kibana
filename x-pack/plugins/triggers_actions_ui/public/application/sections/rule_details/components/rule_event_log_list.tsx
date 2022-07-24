@@ -161,7 +161,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
       const result = await loadExecutionLogAggregations({
         id: rule.id,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
-        filter,
+        outcomeFilter: filter,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
