@@ -47,7 +47,7 @@ import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, DOCUMENT_FIELD_NAME, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
-import { LensFieldIcon } from './lens_field_icon';
+import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
@@ -432,7 +432,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id as string);
     if (FormatType) {
       formatter = new FormatType(
         indexPattern.fieldFormatMap[field.name].params,

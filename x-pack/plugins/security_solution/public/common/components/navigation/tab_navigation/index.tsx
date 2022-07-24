@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { useNavigation } from '../../../lib/kibana';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
-import { TabNavigationProps, TabNavigationItemProps } from './types';
+import type { TabNavigationProps, TabNavigationItemProps } from './types';
 import { BETA } from '../../../translations';
 
 const TabNavigationItemComponent = ({

@@ -44,6 +44,9 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
 
   // TODO: Move deletion logic to redux state
   useEffect(() => {
+    if (!isDeleting) {
+      return;
+    }
     if (
       monitorDeleteStatus === FETCH_STATUS.SUCCESS ||
       monitorDeleteStatus === FETCH_STATUS.FAILURE
@@ -71,7 +74,7 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
         { toastLifeTimeMs: 3000 }
       );
     }
-  }, [setIsDeleting, reloadPage, monitorDeleteStatus]);
+  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus]);
 
   const openPopover = () => {
     setIsPopoverOpen(true);

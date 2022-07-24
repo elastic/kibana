@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
@@ -32,9 +21,6 @@ export interface GettingStartedStepsProps {
 }
 
 export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step = 'first' }) => {
-  // TODO replace with logic file
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -43,17 +29,17 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.title',
-                { defaultMessage: 'Add your documents and data to Enterprise Search' }
+                { defaultMessage: 'Select or create an Elasticsearch index' }
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                         {
                           defaultMessage:
-                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices or third party connectors like Google Drive, Microsoft Sharepoint and more.',
+                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices , or third-party connectors like Google Drive, Microsoft Sharepoint and more.',
                         }
                       )}
                     </p>
@@ -67,82 +53,23 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.title',
-                { defaultMessage: 'Build a search experience' }
+                { defaultMessage: 'Assign your index to an App Search engine' }
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.message',
                         {
                           defaultMessage:
-                            'You can use Search Engines to build customized search experiences for your customers or internal teams with App Search or Workplace Search. Or you can use Search UI to connect directly to an Elasticsearch index to build client-side search experinces for your users.',
+                            'You can use search engines to build customizable search experiences for your customers with App Search.',
                         }
                       )}
                     </p>
                   </EuiText>
                   <EuiSpacer size="m" />
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        button={
-                          <EuiButton
-                            disabled={step !== 'second'}
-                            iconType="arrowDown"
-                            iconSide="right"
-                            fill
-                            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.overview.gettingStartedSteps.createASearchEngineButton',
-                              { defaultMessage: 'Create a search engine' }
-                            )}
-                          </EuiButton>
-                        }
-                        isOpen={isPopoverOpen}
-                        closePopover={() => setIsPopoverOpen(false)}
-                      >
-                        {/* TODO add onclick for these links*/}
-                        <EuiContextMenuPanel
-                          items={[
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.title',
-                                    { defaultMessage: 'Create an App Search engine' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.description',
-                                  {
-                                    defaultMessage:
-                                      'All the power of Elasticsearch, without the learning curve.',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.title',
-                                    { defaultMessage: 'Create a Workplace Search group' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.description',
-                                  {
-                                    defaultMessage: 'A secure search experience for internal teams',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                          ]}
-                        />
-                      </EuiPopover>
-                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiLinkTo shouldNotCreateHref to={ELASTICSEARCH_PLUGIN.URL}>
                         <EuiIcon type="iInCircle" />
@@ -161,16 +88,16 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.title',
-                { defaultMessage: 'Tune your search relevance' }
+                { defaultMessage: 'Build a client-side search experience with Search UI' }
               ),
               children: (
-                <EuiText>
+                <EuiText color="subdued">
                   <p>
                     {i18n.translate(
                       'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.message',
                       {
                         defaultMessage:
-                          "Dive into analytics and tune the result settings to help your users find exactly what they're looking for",
+                          'Take full control over your client-side search experience by building with the Search UI library. Connect directly to App Search or Elasticsearch.',
                       }
                     )}
                   </p>

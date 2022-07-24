@@ -19,7 +19,7 @@ export const MonitorSummaryTitle = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   useEffect(() => {
-    dispatch(getMonitorStatusAction.get({ monitorId, dateStart: 'now-15m', dateEnd: 'now' }));
+    dispatch(getMonitorStatusAction.get({ monitorId, dateStart: 'now-30d', dateEnd: 'now' }));
   }, [dispatch, monitorId]);
 
   return (

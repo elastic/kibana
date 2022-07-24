@@ -33,10 +33,12 @@ export const initiateState = (
     footerContent: '',
     input: {
       textEntered: '',
+      rightOfCursor: { text: '' },
       commandEntered: '',
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
       history: [],
+      visibleState: undefined,
     },
   };
 
@@ -92,6 +94,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputHistoryState':
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
+    case 'setInputState':
       newState = handleInputAreaState(state, action);
       break;
 

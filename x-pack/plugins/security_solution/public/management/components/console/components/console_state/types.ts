@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
-import { CommandInputProps } from '../command_input';
+import type { CommandInputProps } from '../command_input';
 import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {
@@ -44,8 +44,15 @@ export interface ConsoleDataState {
 
   /** state for the command input area */
   input: {
-    /** The text the user is typing into the console input area */
-    textEntered: string;
+    /**
+     * The text the user is typing into the console input area. By default, this
+     * value goes into the left of the cursor position
+     */
+    textEntered: string; // FIXME:PT convert this to same structure as `rightOfCursor`
+
+    rightOfCursor: {
+      text: string;
+    };
 
     /** The command name that was entered (derived from `textEntered` */
     commandEntered: string;
@@ -58,6 +65,9 @@ export interface ConsoleDataState {
 
     /** Show the input area popover */
     showPopover: 'input-history' | undefined; // Other values will exist in the future
+
+    /** The state of the input area. Set to `error` if wanting to show it as being in error state */
+    visibleState: 'error' | undefined;
   };
 }
 
@@ -68,6 +78,8 @@ export interface InputHistoryItem {
 
 export interface CommandHistoryItem {
   id: string;
+  enteredAt: string;
+  isValid: boolean;
   command: Command;
   state: CommandExecutionState;
 }
@@ -104,9 +116,11 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateInputTextEnteredState';
-      payload: {
-        textEntered: string | ((prevState: string) => string);
-      };
+      payload: PayloadValueOrFunction<{
+        textEntered: string;
+        /** When omitted, the right side of the cursor value will be blanked out */
+        rightOfCursor?: ConsoleDataState['input']['rightOfCursor'];
+      }>;
     }
   | {
       type: 'updateInputPopoverState';
@@ -121,11 +135,19 @@ export type ConsoleDataAction =
       };
     }
   | {
+      type: 'setInputState';
+      payload: {
+        value: ConsoleDataState['input']['visibleState'];
+      };
+    }
+  | {
       type: 'updateInputHistoryState';
       payload: {
         command: string;
       };
     };
+
+type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
 
 export interface ConsoleStore {
   state: ConsoleDataState;

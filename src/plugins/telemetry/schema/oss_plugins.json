@@ -8020,6 +8020,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "discover:sampleRowsPerPage": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "discover:maxDocFieldsDisplayed": {
           "type": "long",
           "_meta": {
@@ -8490,6 +8496,90 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
+        },
+        "discover:rowHeightOption": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "hideAnnouncements": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "isDefaultIndexMigrated": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "lens:useFieldExistenceSampling": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "metrics:allowCheckingForFailedShards": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmDefaultServiceEnvironment": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
+        "observability:apmOperationsTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmProgressiveLoading": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceGroupMaxNumberOfServices": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceInventoryOptimizedSorting": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmTraceExplorerTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:enableGroupedNav": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:showRelatedIntegrations": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "visualization:visualize:legacyGaugeChartsLibrary": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
         }
       }
     },
@@ -8555,6 +8645,12 @@
     },
     "saved_objects_counts": {
       "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
         "by_type": {
           "type": "array",
           "items": {
@@ -8571,6 +8667,21 @@
                   "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
                 }
               }
+            }
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
+          }
+        },
+        "non_registered_types": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
             }
           }
         }

@@ -69,8 +69,11 @@ export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boo
   );
 
 const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
-  if (!rule.snoozeSchedule || rule.snoozeSchedule.length === 0) return null;
-  const nextSchedule = rule.snoozeSchedule.reduce(
+  if (!rule.snoozeSchedule) return null;
+  // Disregard any snoozes without ids; these are non-scheduled snoozes
+  const explicitlyScheduledSnoozes = rule.snoozeSchedule.filter((s) => Boolean(s.id));
+  if (explicitlyScheduledSnoozes.length === 0) return null;
+  const nextSchedule = explicitlyScheduledSnoozes.reduce(
     (a: RuleSnoozeSchedule, b: RuleSnoozeSchedule) => {
       if (moment(b.rRule.dtstart).isBefore(moment(a.rRule.dtstart))) return b;
       return a;
@@ -142,7 +145,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       return i18n.translate(
         'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
         {
-          defaultMessage: 'Notifications snoozed for {snoozeTime}',
+          defaultMessage: 'Notifications snoozing for {snoozeTime}',
           values: {
             snoozeTime: moment(isSnoozedUntil).fromNow(true),
           },
@@ -311,6 +314,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       closePopover={onClosePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
+      panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
     >
       <SnoozePanel
         snoozeRule={onApplySnooze}
@@ -318,6 +322,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
         scheduledSnoozes={rule.snoozeSchedule ?? []}
+        activeSnoozes={rule.activeSnoozes ?? []}
+        inPopover
       />
     </EuiPopover>
   );

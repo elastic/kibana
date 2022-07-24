@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ImmutableMiddlewareFactory } from '../../../../../../common/store';
-import { MiddlewareRunnerContext, PolicyDetailsState } from '../../../types';
+import type { ImmutableMiddlewareFactory } from '../../../../../../common/store';
+import type { MiddlewareRunnerContext, PolicyDetailsState } from '../../../types';
 import { policySettingsMiddlewareRunner } from './policy_settings_middleware';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (

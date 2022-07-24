@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
+
 import { RedirectAppLinks as Component } from '.';
 import { getStoryArgTypes, getStoryServices } from './mocks';
 import mdx from '../README.mdx';
@@ -28,7 +28,7 @@ export default {
 export const RedirectAppLinks = () => {
   return (
     <>
-      <Component {...getStoryServices()}>
+      <Component {...getStoryServices(action)}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton

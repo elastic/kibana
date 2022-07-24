@@ -296,7 +296,12 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
+            {!loading && !loaded && (
+              <AboutPanel
+                onFilePickerChange={this.onFilePickerChange}
+                hasPermissionToImport={hasPermissionToImport}
+              />
+            )}
 
             {loading && <LoadingPanel />}
 

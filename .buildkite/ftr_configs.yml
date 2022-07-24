@@ -55,7 +55,9 @@ disabled:
   - x-pack/test/load/config.ts
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
+  - x-pack/test/fleet_packages/config.ts
 
+defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
@@ -238,6 +240,7 @@ enabled:
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
   - x-pack/test/security_api_integration/token.config.ts
+  - x-pack/test/security_api_integration/user_profiles.config.ts
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts

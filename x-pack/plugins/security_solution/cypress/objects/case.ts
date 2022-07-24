@@ -6,7 +6,8 @@
  */
 
 import { flatten } from 'lodash';
-import { CompleteTimeline, getTimeline } from './timeline';
+import type { CompleteTimeline } from './timeline';
+import { getTimeline } from './timeline';
 
 export interface TestCase extends TestCaseWithoutTimeline {
   timeline: CompleteTimeline;
@@ -92,8 +93,6 @@ export const getIbmResilientConnectorOptions = (): IbmResilientConnectorOptions 
   severity: 'Medium',
   incidentTypes: ['Communication error (fax; email)', 'Denial of Service'],
 });
-
-export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';
 
 export const getConnectorIds = () => ({
   jira: '000e5f86-08b0-4882-adfd-6df981d45c1b',

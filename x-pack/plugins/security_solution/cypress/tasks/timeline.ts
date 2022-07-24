@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Timeline, TimelineFilter } from '../objects/timeline';
+import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
@@ -68,7 +68,6 @@ import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
-  PINNED_TAB_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
@@ -128,15 +127,6 @@ export const goToQueryTab = () => {
     .pipe(($el) => {
       $el.find(QUERY_TAB_BUTTON).trigger('click');
       return $el.find(QUERY_TAB_BUTTON);
-    })
-    .should('have.class', 'euiTab-isSelected');
-};
-
-export const goToPinnedTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(PINNED_TAB_BUTTON).trigger('click');
-      return $el.find(PINNED_TAB_BUTTON);
     })
     .should('have.class', 'euiTab-isSelected');
 };

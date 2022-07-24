@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   GetAggregateRuleExecutionEventsResponse,
   GetInstalledIntegrationsResponse,
   RulesSchema,
@@ -14,7 +14,7 @@ import {
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { savedRuleMock, rulesMock } from '../mock';
 
-import {
+import type {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
@@ -106,6 +106,7 @@ export const fetchRuleExecutionEvents = async ({
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
 
+// do not delete
 export const fetchInstalledIntegrations = async ({
   packages,
   signal,

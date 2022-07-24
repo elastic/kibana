@@ -6,7 +6,7 @@
  */
 
 import { has, isEmpty } from 'lodash/fp';
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 
@@ -15,7 +15,7 @@ import type {
   NamespaceType,
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   ThreatMapping,
   Threats,
   ThreatSubtechnique,
@@ -26,8 +26,8 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { Rule } from '../../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
@@ -39,13 +39,13 @@ import {
   RuleStepsFormData,
   RuleStep,
 } from '../types';
-import { FieldValueQueryBar } from '../../../../components/rules/query_bar';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
 import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
-import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
-import { EqlOptionsSelected } from '../../../../../../common/search_strategy';
+import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
+import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -97,6 +97,8 @@ export interface RuleFields {
   threatMapping?: unknown;
   threatLanguage?: unknown;
   eqlOptions: unknown;
+  newTermsFields?: unknown;
+  historyWindowSize?: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -108,6 +110,8 @@ type QueryRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'eqlOptions'
+  | 'newTermsFields'
+  | 'historyWindowSize'
 >;
 type EqlQueryRuleFields<T> = Omit<
   T,
@@ -117,6 +121,8 @@ type EqlQueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'newTermsFields'
+  | 'historyWindowSize'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
@@ -126,6 +132,8 @@ type ThresholdRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'eqlOptions'
+  | 'newTermsFields'
+  | 'historyWindowSize'
 >;
 type MlRuleFields<T> = Omit<
   T,
@@ -136,10 +144,27 @@ type MlRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'eqlOptions'
+  | 'newTermsFields'
+  | 'historyWindowSize'
 >;
 type ThreatMatchRuleFields<T> = Omit<
   T,
-  'anomalyThreshold' | 'machineLearningJobId' | 'threshold' | 'eqlOptions'
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'eqlOptions'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+>;
+type NewTermsRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
 >;
 
 const isMlFields = <T>(
@@ -149,6 +174,7 @@ const isMlFields = <T>(
     | MlRuleFields<T>
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
@@ -158,6 +184,7 @@ const isThresholdFields = <T>(
     | MlRuleFields<T>
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
@@ -167,7 +194,18 @@ const isThreatMatchFields = <T>(
     | MlRuleFields<T>
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
+
+const isNewTermsFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
+): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
 
 const isEqlFields = <T>(
   fields:
@@ -176,6 +214,7 @@ const isEqlFields = <T>(
     | MlRuleFields<T>
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
@@ -186,7 +225,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | EqlQueryRuleFields<T>
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
-  | ThreatMatchRuleFields<T> => {
+  | ThreatMatchRuleFields<T>
+  | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
       const {
@@ -197,6 +237,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar,
         threatMapping,
         eqlOptions,
+        newTermsFields,
+        historyWindowSize,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -208,6 +250,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: _removedThreatQueryBar,
         threatMapping: _removedThreatMapping,
         eqlOptions: _eqlOptions,
+        newTermsFields: removedNewTermsFields,
+        historyWindowSize: removedHistoryWindowSize,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -217,6 +261,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         machineLearningJobId: _removedMachineLearningJobId,
         threshold: _removedThreshold,
         eqlOptions: __eqlOptions,
+        newTermsFields: _removedNewTermsFields,
+        historyWindowSize: _removedHistoryWindowSize,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
@@ -230,6 +276,8 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: __removedThreatQueryBar,
         threatMapping: __removedThreatMapping,
         eqlOptions: ___eqlOptions,
+        newTermsFields: __removedNewTermsFields,
+        historyWindowSize: __removedHistoryWindowSize,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -241,9 +289,23 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: ___removedThreatIndex,
         threatQueryBar: ___removedThreatQueryBar,
         threatMapping: ___removedThreatMapping,
+        newTermsFields: ___removedNewTermsFields,
+        historyWindowSize: ___removedHistoryWindowSize,
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
+    case 'new_terms':
+      const {
+        anomalyThreshold: ___a,
+        machineLearningJobId: ___m,
+        threshold: ___t,
+        threatIndex: ____removedThreatIndex,
+        threatQueryBar: ____removedThreatQueryBar,
+        threatMapping: ____removedThreatMapping,
+        eqlOptions: ____eqlOptions,
+        ...newTermsRuleFields
+      } = fields;
+      return newTermsRuleFields;
   }
   assertUnreachable(type);
 };
@@ -339,6 +401,15 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
       }
+    : isNewTermsFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        new_terms_fields: ruleFields.newTermsFields,
+        history_window_start: `now-${ruleFields.historyWindowSize}`,
+      }
     : {
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
@@ -392,6 +463,7 @@ export const formatAboutStepData = (
     ruleNameOverride,
     threatIndicatorPath,
     timestampOverride,
+    timestampOverrideFallbackDisabled,
     ...rest
   } = aboutStepData;
 
@@ -435,6 +507,7 @@ export const formatAboutStepData = (
     })),
     threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
+    timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };
@@ -489,6 +562,8 @@ export const formatPreviewRule = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
 }: {
   index: string[];
   dataViewId?: string;
@@ -502,6 +577,8 @@ export const formatPreviewRule = ({
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -516,6 +593,8 @@ export const formatPreviewRule = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,

@@ -13,12 +13,13 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import { DASHBOARDS, EXPLORE } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import { overviewLinks, detectionResponseLinks } from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';
 import { links as usersLinks } from '../users/links';
 import { links as kubernetesLinks } from '../kubernetes/links';
+import { dashboardLinks as cloudSecurityPostureLinks } from '../cloud_security_posture/links';
 
 export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
@@ -32,7 +33,7 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
-  links: [overviewLinks, detectionResponseLinks, kubernetesLinks],
+  links: [overviewLinks, detectionResponseLinks, kubernetesLinks, cloudSecurityPostureLinks],
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -42,7 +43,7 @@ export const threatHuntingLandingLinks: LinkItem = {
   title: EXPLORE,
   path: EXPLORE_PATH,
   globalNavEnabled: true,
-  globalNavOrder: 5,
+  globalNavOrder: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {

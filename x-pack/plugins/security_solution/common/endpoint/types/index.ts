@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { ManifestSchema } from '../schema/manifest';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
 export * from './os';
@@ -913,7 +913,14 @@ export interface PolicyConfig {
   windows: {
     advanced?: {
       [key: string]: unknown;
-      rollback?: string | boolean;
+      alerts?: {
+        [key: string]: unknown;
+        rollback: {
+          remediation: {
+            enabled: boolean;
+          };
+        };
+      };
     };
     events: {
       dll_and_driver_load: boolean;
@@ -951,6 +958,11 @@ export interface PolicyConfig {
     };
     antivirus_registration: {
       enabled: boolean;
+    };
+    attack_surface_reduction: {
+      credential_hardening: {
+        enabled: boolean;
+      };
     };
   };
   mac: {
@@ -1029,6 +1041,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
+    | 'attack_surface_reduction'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI

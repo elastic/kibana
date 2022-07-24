@@ -294,8 +294,7 @@ export function ServiceInventory() {
             isFailure={isFailure}
             items={items}
             comparisonDataLoading={
-              comparisonFetch.status === FETCH_STATUS.LOADING ||
-              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+              comparisonFetch.status === FETCH_STATUS.LOADING
             }
             displayHealthStatus={displayHealthStatus}
             initialSortField={initialSortField}

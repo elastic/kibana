@@ -173,8 +173,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;

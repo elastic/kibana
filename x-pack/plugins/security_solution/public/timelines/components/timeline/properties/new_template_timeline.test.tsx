@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -15,7 +16,8 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../../common/mock';
-import { createStore, State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
+import { createStore } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { NewTemplateTimeline } from './new_template_timeline';
 

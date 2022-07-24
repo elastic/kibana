@@ -12,14 +12,12 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import {
-  ActionType,
-  loadActionTypes,
-  ActionVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ActionType, ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { FieldHook, useFormContext } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { useFormContext } from '../../../../shared_imports';
 import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 

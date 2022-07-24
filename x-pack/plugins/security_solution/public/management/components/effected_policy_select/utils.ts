@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PolicyData } from '../../../../common/endpoint/types';
-import { EffectedPolicySelection } from './effected_policy_select';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import type { EffectedPolicySelection } from './effected_policy_select';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 
 /**
@@ -71,13 +71,4 @@ export function getEffectedPolicySelectionByTags(
 
 export function isGlobalPolicyEffected(tags?: string[]): boolean {
   return tags !== undefined && tags.find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
-}
-
-/**
- * Given an array of an artifact tags, return the ids of policies inside
- * those tags. It will only return tags starting with `policy:` and it will
- * return them without the suffix
- */
-export function getArtifactPoliciesIdByTag(tags: string[] = []): string[] {
-  return tags.filter((tag) => tag.startsWith('policy:')).map((tag) => tag.substring(7));
 }
