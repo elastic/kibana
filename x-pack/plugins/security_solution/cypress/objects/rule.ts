@@ -37,12 +37,15 @@ interface Interval {
   type: string;
 }
 
+type RuleDataSource =
+  | { type: 'indexPatterns'; index?: string[] }
+  | { type: 'dataView'; dataView?: string };
+
 export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index?: string[];
-  dataView?: string;
+  dataSource: RuleDataSource;
   interval?: string;
   severity: string;
   riskScore: string;

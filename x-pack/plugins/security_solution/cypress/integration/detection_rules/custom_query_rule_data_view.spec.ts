@@ -75,6 +75,11 @@ describe('Custom query rules', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
+      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we 
+      are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
+      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
+      cleaning in all the other tests. */
+
       esArchiverResetKibana();
       createTimeline(getDataViewRule().timeline).then((response) => {
         cy.wrap({
