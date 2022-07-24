@@ -58,7 +58,7 @@ describe('ALL - Edit saved query', () => {
       }).should('exist');
     });
 
-    cy.get('#windows').check();
+    cy.get('#windows').check({ force: true });
 
     cy.react('EuiButton').contains('Update query').click();
 
