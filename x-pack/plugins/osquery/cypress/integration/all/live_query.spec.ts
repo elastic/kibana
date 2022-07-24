@@ -93,7 +93,8 @@ describe('ALL - Live Query', () => {
 
     cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
   });
-  it('should run live pack', () => {
+
+  it.skip('should run live pack', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
