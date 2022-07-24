@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-import * as Public from './public';
-import * as Server from './server';
-
-export { Public, Server };
+export { encodePath } from './encode_path';
+export { toURL } from './to_url';
