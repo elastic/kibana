@@ -58,7 +58,7 @@ const getFilter = ({ runId, message }: { runId?: string; message?: string }) => 
   }
 
   if (message) {
-    filter.push(`message: "${message}"`);
+    filter.push(`message: "${message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')}"`);
   }
 
   return filter;
