@@ -224,7 +224,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const logsDataView = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView();
 
   const handleClick = useCallback(
     (event) => {
@@ -290,7 +290,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const logsDataView = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView();
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 

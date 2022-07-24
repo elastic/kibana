@@ -26,7 +26,7 @@ export const usePackQueryErrors = ({
   skip = false,
 }: UsePackQueryErrorsProps) => {
   const data = useKibana().services.data;
-  const logsDataView = useLogsDataView();
+  const { data: logsDataView } = useLogsDataView();
 
   return useQuery(
     ['scheduledQueryErrors', { actionId, interval }],

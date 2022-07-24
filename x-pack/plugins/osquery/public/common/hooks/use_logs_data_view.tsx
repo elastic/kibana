@@ -17,7 +17,7 @@ export interface LogsDataView extends DataView {
 export const useLogsDataView = () => {
   const dataViews = useKibana().services.data.dataViews;
 
-  return useQuery(['logsDataView'], async () => {
+  return useQuery<LogsDataView>(['logsDataView'], async () => {
     let dataView = (await dataViews.find('logs-osquery_manager.result*', 1))[0];
     if (!dataView && dataViews.getCanSaveSync()) {
       dataView = await dataViews.createAndSave({
@@ -26,6 +26,6 @@ export const useLogsDataView = () => {
       });
     }
 
-    return dataView;
+    return dataView as LogsDataView;
   });
 };
