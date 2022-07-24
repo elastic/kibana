@@ -37,9 +37,9 @@ interface Interval {
   type: string;
 }
 
-type RuleDataSource =
-  | { type: 'indexPatterns'; index?: string[] }
-  | { type: 'dataView'; dataView?: string };
+export type RuleDataSource =
+  | { type: 'indexPatterns'; index: string[] }
+  | { type: 'dataView'; dataView: string };
 
 export interface CustomRule {
   customQuery?: string;
@@ -194,7 +194,7 @@ const getLookBack = (): Interval => ({
 
 export const getDataViewRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  dataView: 'auditbeat-2022',
+  dataSource: { dataView: 'auditbeat-2022', type: 'dataView' },
   name: 'New Data View Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -212,7 +212,7 @@ export const getDataViewRule = (): CustomRule => ({
 
 export const getNewRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -230,7 +230,7 @@ export const getNewRule = (): CustomRule => ({
 
 export const getBuildingBlockRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Building Block Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -249,7 +249,7 @@ export const getBuildingBlockRule = (): CustomRule => ({
 
 export const getUnmappedRule = (): CustomRule => ({
   customQuery: '*:*',
-  index: ['unmapped*'],
+  dataSource: { index: ['unmapped*'], type: 'indexPatterns' },
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'High',
@@ -267,7 +267,7 @@ export const getUnmappedRule = (): CustomRule => ({
 
 export const getUnmappedCCSRule = (): CustomRule => ({
   customQuery: '*:*',
-  index: [`${ccsRemoteName}:unmapped*`],
+  dataSource: { index: [`${ccsRemoteName}:unmapped*`], type: 'indexPatterns' },
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'High',
@@ -287,7 +287,7 @@ export const getExistingRule = (): CustomRule => ({
   customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
-  index: ['auditbeat-*'],
+  dataSource: { index: ['auditbeat-*'], type: 'indexPatterns' },
   interval: '100m',
   severity: 'High',
   riskScore: '19',
@@ -306,7 +306,7 @@ export const getExistingRule = (): CustomRule => ({
 
 export const getNewOverrideRule = (): OverrideRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Override Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -333,7 +333,7 @@ export const getNewOverrideRule = (): OverrideRule => ({
 
 export const getNewThresholdRule = (): ThresholdRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Threshold Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -353,7 +353,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
 
 export const getNewTermsRule = (): NewTermsRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Terms Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -393,7 +393,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 export const getEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -411,7 +411,7 @@ export const getEqlRule = (): CustomRule => ({
 export const getCCSEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "run-parts"',
   name: 'New EQL Rule',
-  index: [`${ccsRemoteName}:run-parts`],
+  dataSource: { index: [`${ccsRemoteName}:run-parts`], type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -432,7 +432,7 @@ export const getEqlSequenceRule = (): CustomRule => ({
      [any where agent.name == "test.local"]\
      [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -450,7 +450,7 @@ export const getEqlSequenceRule = (): CustomRule => ({
 export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['suspicious-*'],
+  dataSource: { index: ['suspicious-*'], type: 'indexPatterns' },
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],

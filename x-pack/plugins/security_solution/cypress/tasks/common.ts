@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleDataSource } from '../objects/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -179,14 +180,23 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string | undefined) => {
+export const postDataView = (dataSource: string | RuleDataSource) => {
+  let title = '';
+  if (typeof dataSource === 'string') {
+    title = dataSource;
+  } else {
+    if (dataSource.type === 'dataView') {
+      title = dataSource.dataView;
+    }
+  }
+
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
         fieldAttrs: '{}',
-        title: indexPattern,
+        title,
         timeFieldName: '@timestamp',
         fields: '{}',
       },

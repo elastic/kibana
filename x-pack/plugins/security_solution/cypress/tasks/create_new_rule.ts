@@ -260,9 +260,9 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
-  if (rule.dataView) {
+  if (rule.dataSource.type === 'dataView') {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataView}{enter}`);
+    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataSource.dataView}{enter}`);
   }
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id)).click();
@@ -288,9 +288,11 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
-  rule.index?.forEach((index) => {
-    cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
-  });
+  if (rule.dataSource.type === 'indexPatterns') {
+    rule.dataSource.index.forEach((index) => {
+      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
+    });
+  }
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
@@ -500,7 +502,9 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
  * @param rule The rule to use to fill in everything
  */
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
-  fillIndexAndIndicatorIndexPattern(rule.index, rule.indicatorIndexPattern);
+  if (rule.dataSource.type === 'indexPatterns') {
+    fillIndexAndIndicatorIndexPattern(rule.dataSource.index, rule.indicatorIndexPattern);
+  }
   fillIndicatorMatchRow({
     indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,

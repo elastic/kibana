@@ -90,7 +90,7 @@ describe('Custom query rules', () => {
           },
         }).as('rule');
       });
-      postDataView(getDataViewRule().dataView);
+      postDataView(getDataViewRule().dataSource);
     });
 
     it('Creates and enables a new rule', function () {
@@ -127,7 +127,7 @@ describe('Custom query rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(DATA_VIEW_DETAILS).should('have.text', this.rule.dataView);
+        getDetails(DATA_VIEW_DETAILS).should('have.text', this.rule.dataSource.dataView);
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');

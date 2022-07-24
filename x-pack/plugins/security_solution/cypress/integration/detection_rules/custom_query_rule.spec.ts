@@ -295,10 +295,12 @@ describe('Custom query rules', () => {
     });
 
     context('Edition', () => {
-      const expectedEditedtags = getEditedRule().tags.join('');
-      const expectedEditedIndexPatterns = getEditedRule().index
-        ? getEditedRule().index
-        : getIndexPatterns();
+      const rule = getEditedRule();
+      const expectedEditedtags = rule.tags.join('');
+      const expectedEditedIndexPatterns =
+        rule.dataSource.type === 'indexPatterns' && rule.dataSource.index
+          ? rule.dataSource.index
+          : getIndexPatterns();
 
       before(() => {
         deleteAlertsAndRules();
@@ -328,8 +330,8 @@ describe('Custom query rules', () => {
 
         // expect define step to populate
         cy.get(CUSTOM_QUERY_INPUT).should('have.value', getExistingRule().customQuery);
-        if (getExistingRule().index) {
-          cy.get(DEFINE_INDEX_INPUT).should('have.text', getExistingRule().index?.join(''));
+        if (rule.dataSource.type === 'indexPatterns' && rule.dataSource.index) {
+          cy.get(DEFINE_INDEX_INPUT).should('have.text', rule.dataSource.index?.join(''));
         }
 
         goToAboutStepTab();
