@@ -108,7 +108,7 @@ export function FiltersSection({
                   }
                 )}
                 onChange={(e) =>
-                  onChangeFilter(e.target.value as FilterKey, value, idx)
+                  onChangeFilter(e.target.value as FilterKey, '', idx)
                 }
                 isInvalid={
                   !isEmpty(value) &&
@@ -118,6 +118,7 @@ export function FiltersSection({
             </EuiFlexItem>
             <EuiFlexItem>
               <SuggestionsSelect
+                key={key}
                 dataTestSubj={`${key}.value`}
                 fieldName={key}
                 placeholder={i18n.translate(
