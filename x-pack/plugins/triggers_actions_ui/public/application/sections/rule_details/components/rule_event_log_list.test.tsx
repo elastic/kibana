@@ -158,7 +158,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -224,7 +224,7 @@ describe('rule_event_log_list', () => {
             },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -253,7 +253,7 @@ describe('rule_event_log_list', () => {
             },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -290,7 +290,7 @@ describe('rule_event_log_list', () => {
             execution_duration: { order: 'asc' },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -324,7 +324,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: ['success'],
+        outcomeFilter: ['success'],
         page: 0,
         perPage: 10,
       })
@@ -344,7 +344,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: ['success', 'failure'],
+        outcomeFilter: ['success', 'failure'],
         page: 0,
         perPage: 10,
       })
@@ -383,7 +383,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 1,
         perPage: 10,
       })
@@ -403,7 +403,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 50,
       })
@@ -429,7 +429,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-30T19:00:00-05:00',
@@ -454,7 +454,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-31T18:45:00-05:00',
