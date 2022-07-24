@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiLoadingLogo,
+  EuiButton,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { MISSING_FINDINGS_NO_DATA_CONFIG } from '../pages/compliance_dashboard/test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
@@ -22,9 +24,7 @@ import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 const Panel = ({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) => (
   <EuiPanel
     css={css`
-      margin-top: 50px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 50px auto;
       max-width: 450px;
       // TODO: get size from eui
       padding: 26px 52px;
@@ -36,42 +36,67 @@ const Panel = ({ icon, title, text }: { icon: React.ReactNode; title: string; te
       <EuiFlexItem>{icon}</EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>{'test'}</h2>
+          <h2>{title}</h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="text" textAlign="center">
-          {'test test test test test test test test test test test test test test test test test '}
+          {text}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
 );
 
+const Panel2 = () => (
+  <EuiEmptyPrompt
+    color="plain"
+    iconType="dashboardApp"
+    iconColor="default"
+    title={<h2>Dashboards</h2>}
+    body={<p>You don&apos;t have any dashboards yet.</p>}
+    actions={[
+      <EuiButton fill iconType="plusInCircleFilled">
+        Create new dashboard
+      </EuiButton>,
+    ]}
+  />
+);
+
 const NotDeployed = () => (
-  <Panel
-    title="No Agents Installed "
-    text="text"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+  <EuiEmptyPrompt
+    data-test-subj="no-agent-deployed"
+    color="plain"
+    title={<h2>{'No Agents Installed'}</h2>}
+    body={<p>{'To see findings, install an elastic agent</b> on your cluster'}</p>}
+    iconType="fleetApp"
   />
 );
-const IndexTimeout = () => (
-  <Panel
-    title="Indexing Timeout"
-    text="text"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-  />
-);
+
 const Indexing = () => (
-  <Panel
-    title="No Findings Yet"
-    text="text"
+  <EuiEmptyPrompt
+    color="plain"
+    title={<h2>{'No Findings Yet'}</h2>}
+    body={
+      <p>
+        {'Waiting for data to be collected and indexed.</b> Check back later to see your findings'}
+      </p>
+    }
+    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+  />
+);
+
+const IndexTimeout = () => (
+  <EuiEmptyPrompt
+    color="plain"
+    title={<h2>{'Findings Delayed'}</h2>}
+    body={<p>{'Collecting findings is taking longer than expected,</b> check back again soon'}</p>}
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
   />
 );
 
 /**
- * This component will return the render states based on cloud posture setup status
+ * This component will return the render states based on cloud posture setup status API
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
 export const NoFindingsStates = () => {
@@ -80,9 +105,13 @@ export const NoFindingsStates = () => {
 
   const render = () => {
     if (status === 'not-deployed') return <NotDeployed />;
-    if (status === 'index-timeout' || true) return <IndexTimeout />;
     if (status === 'indexing') return <Indexing />;
+    if (status === 'index-timeout' || true) return <IndexTimeout />;
   };
 
-  return <CloudPosturePage query={getSetupStatus}>{render()}</CloudPosturePage>;
+  return (
+    <CloudPosturePage query={getSetupStatus}>
+      <div style={{ margin: '50px auto' }}>{render()}</div>
+    </CloudPosturePage>
+  );
 };
