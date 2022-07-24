@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { MouseEvent } from 'react';
 import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
+import { type RouteProps, useRouteMatch } from 'react-router-dom';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { string } from 'io-ts';
-import { i18n } from '@kbn/i18n';
-import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '../..';
-import type { CspNavigationItem } from './types';
+import useObservable from 'react-use/lib/useObservable';
+import type { BreadcrumbEntry } from './types';
 
-const getClickableBreadcrumb = (
-  routeMatch: RouteProps['path'],
-  breadcrumbPath: CspNavigationItem['path']
-) => {
+const getClickableBreadcrumb = (routeMatch: RouteProps['path'], breadcrumbPath: string) => {
   const hasParams = breadcrumbPath.includes(':');
   if (hasParams) return;
 
@@ -27,15 +23,20 @@ const getClickableBreadcrumb = (
   }
 };
 
-export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
+export const useCspBreadcrumbs = (breadcrumbs: BreadcrumbEntry[]) => {
   const {
     services: {
       chrome: { setBreadcrumbs, docTitle },
-      application: { getUrlForApp },
+      application: { currentAppId$, applications$, navigateToApp },
     },
   } = useKibana<CoreStart>();
+
   const match = useRouteMatch();
-  const history = useHistory();
+
+  const appId = useObservable(currentAppId$);
+  const applications = useObservable(applications$);
+  const application = appId ? applications?.get(appId) : undefined;
+  const appTitle = application?.title;
 
   useEffect(() => {
     const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => {
@@ -43,31 +44,32 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
 
       return {
         text: breadcrumb.name,
-        ...(clickableLink && {
-          onClick: (e) => {
-            e.preventDefault();
-            history.push(clickableLink);
-          },
-        }),
+        ...(clickableLink &&
+          appId && {
+            onClick: (e) => {
+              e.preventDefault();
+              void navigateToApp(appId, { path: clickableLink });
+            },
+          }),
       };
     });
 
     const nextBreadcrumbs = [
       {
-        text: i18n.translate('xpack.csp.navigation.cloudPostureBreadcrumbLabel', {
-          defaultMessage: 'Cloud Posture',
+        text: appTitle,
+        ...(appId && {
+          onClick: (e: MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            void navigateToApp(appId);
+          },
         }),
-        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
-          e.preventDefault();
-          history.push(CLOUD_SECURITY_POSTURE_BASE_PATH);
-        },
       },
       ...additionalBreadCrumbs,
     ];
 
     setBreadcrumbs(nextBreadcrumbs);
     docTitle.change(getTextBreadcrumbs(nextBreadcrumbs));
-  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history, docTitle]);
+  }, [match.path, setBreadcrumbs, breadcrumbs, docTitle, appTitle, appId, navigateToApp]);
 };
 
 const getTextBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) =>

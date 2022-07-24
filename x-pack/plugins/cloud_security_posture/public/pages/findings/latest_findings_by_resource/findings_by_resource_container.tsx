@@ -26,7 +26,6 @@ import {
 import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -57,8 +56,6 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
-  useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
-
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
