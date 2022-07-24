@@ -7,20 +7,29 @@
 
 import React from 'react';
 import { EuiLoadingLogo, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 
-const NotDeployed = () => (
-  <EuiEmptyPrompt
-    data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED}
-    color="plain"
-    iconType="fleetApp"
-    title={<h2>{'No Agents Installed'}</h2>}
-    body={<p>{'To see findings, install an elastic agent</b> on your cluster'}</p>}
-    actions={[<EuiButton fill>Install Agent</EuiButton>]}
-  />
-);
+const NotDeployed = () => {
+  const integrationLink = useCISIntegrationPoliciesLink();
+
+  return (
+    <EuiEmptyPrompt
+      data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED}
+      color="plain"
+      iconType="fleetApp"
+      title={<h2>{'No Agents Installed'}</h2>}
+      body={<p>{'To see findings, install an elastic agent</b> on your cluster'}</p>}
+      actions={[
+        <EuiButton fill href={integrationLink} isDisabled={!integrationLink}>
+          Install Agent
+        </EuiButton>,
+      ]}
+    />
+  );
+};
 
 const Indexing = () => (
   <EuiEmptyPrompt
