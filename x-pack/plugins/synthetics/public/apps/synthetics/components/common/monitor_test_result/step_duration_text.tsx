@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_duration';
 
 export const StepDurationText = ({ step }: { step: JourneyStep }) => {
   const stepDurationText = useMemo(() => {
@@ -15,13 +16,7 @@ export const StepDurationText = ({ step }: { step: JourneyStep }) => {
       return '-';
     }
 
-    const microSecs = step.synthetics.step?.duration?.us ?? 0;
-    const secs = microSecs / (1000 * 1000);
-    if (secs >= 1) {
-      return `${secs.toFixed(1)} s`;
-    }
-
-    return `${(microSecs / 1000).toFixed(0)} ms`;
+    return formatTestDuration(step.synthetics.step?.duration?.us);
   }, [step.synthetics.step?.duration.us, step.synthetics.step?.status]);
 
   return <EuiText size="s">{stepDurationText}</EuiText>;

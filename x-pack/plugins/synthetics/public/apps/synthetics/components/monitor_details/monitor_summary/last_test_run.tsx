@@ -25,24 +25,31 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
-import { Ping } from '../../../../../../common/runtime_types';
+import { DataStream, Ping } from '../../../../../../common/runtime_types';
 import { selectLatestPing, selectPingsLoading } from '../../../state';
 import { FAILED_LABEL, COMPLETE_LABEL } from '../../common/monitor_test_result/status_badge';
+import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
 export const LastTestRun = () => {
   const { euiTheme } = useEuiTheme();
   const latestPing = useSelector(selectLatestPing);
-  const loading = useSelector(selectPingsLoading);
+  const pingsLoading = useSelector(selectPingsLoading);
+  const { monitor } = useSelectedMonitor();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
     latestPing?.monitor?.check_group
   );
 
+  const loading =
+    (monitor?.id && latestPing?.monitor?.id && monitor.id !== latestPing.monitor.id) ||
+    stepsLoading ||
+    pingsLoading;
+
   return (
-    <EuiPanel>
-      <PanelHeader latestPing={latestPing} />
-      {loading ? <EuiLoadingSpinner /> : null}
-      {latestPing?.error ? (
+    <EuiPanel css={{ minHeight: 356 }}>
+      <PanelHeader latestPing={latestPing} loading={loading} />
+      {!loading && latestPing?.error ? (
         <EuiCallOut
           style={{
             marginTop: euiTheme.base,
@@ -63,16 +70,21 @@ export const LastTestRun = () => {
       ) : null}
 
       <EuiSpacer size="m" />
-      <BrowserStepsList
-        steps={stepsData?.steps ?? []}
-        loading={stepsLoading}
-        showStepNumber={true}
-      />
+
+      {monitor?.type === DataStream.BROWSER ? (
+        <BrowserStepsList
+          steps={stepsData?.steps ?? []}
+          loading={stepsLoading}
+          showStepNumber={true}
+        />
+      ) : (
+        <SinglePingResult ping={latestPing} loading={loading} />
+      )}
     </EuiPanel>
   );
 };
 
-const PanelHeader = ({ latestPing }: { latestPing: Ping }) => {
+const PanelHeader = ({ latestPing, loading }: { latestPing: Ping; loading: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const lastRunTimestamp = useMemo(
     () => (latestPing?.timestamp ? formatLastRunAt(latestPing?.timestamp) : ''),
@@ -84,6 +96,19 @@ const PanelHeader = ({ latestPing }: { latestPing: Ping }) => {
       <h3>{LAST_TEST_RUN_LABEL}</h3>
     </EuiTitle>
   );
+
+  if (loading) {
+    return (
+      <>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
 
   if (!latestPing) {
     return <>{TitleNode}</>;
