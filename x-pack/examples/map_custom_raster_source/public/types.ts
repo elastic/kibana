@@ -6,7 +6,6 @@
  */
 
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MapsPluginSetup, MapsPluginStart } from '@kbn/maps-plugin/public/plugin';
 
 export interface MapCustomRasterSourcePluginSetup {
@@ -15,5 +14,4 @@ export interface MapCustomRasterSourcePluginSetup {
 }
 export interface MapCustomRasterSourcePluginStart {
   maps: MapsPluginStart;
-  data: DataPublicPluginStart;
 }

@@ -35,7 +35,6 @@ export const customRasterLayerWizard: LayerWizard = {
         type: LAYER_TYPE.RASTER_TILE,
         sourceDescriptor: CustomRasterSource.createDescriptor({
           urlTemplate: sourceConfig.urlTemplate,
-          isTimeAware: sourceConfig.isTimeAware,
         }),
         style: {
           type: 'RASTER',

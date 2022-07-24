@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { MapCustomRasterSourcePluginSetup, MapCustomRasterSourcePluginStart } from './types';
 import { CustomRasterSource } from './classes/custom_raster_source';
 import { customRasterLayerWizard } from './classes/custom_raster_layer_wizard';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { setStartServices } from './kibana_services';
 
 export class MapCustomRasterSourcePlugin
   implements Plugin<void, void, MapCustomRasterSourcePluginSetup, MapCustomRasterSourcePluginStart>
@@ -32,7 +31,7 @@ export class MapCustomRasterSourcePlugin
       title: PLUGIN_NAME,
       mount: ({ history }) => {
         (async () => {
-          const [coreStart] = await core.getStartServices();
+          const [coreStart, { maps: mapsStart }] = await core.getStartServices();
           // if it's a regular navigation, open a new map
           if (history.action === 'PUSH') {
             coreStart.application.navigateToApp('maps', { path: 'map' });
@@ -60,9 +59,7 @@ export class MapCustomRasterSourcePlugin
     });
   }
 
-  public start(core: CoreStart, plugins: MapCustomRasterSourcePluginStart) {
-    setStartServices(core, plugins);
-  }
+  public start() {}
 
   public stop() {}
 }

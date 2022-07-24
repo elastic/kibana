@@ -13,7 +13,6 @@
 //  */
 
 import { ReactElement } from 'react';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,
@@ -27,7 +26,6 @@ import type {
   ITMSSource,
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
-import { getTimeFilter } from '../kibana_services';
 
 export interface CustomRasterSourceConfig {
   urlTemplate: string;
@@ -43,7 +41,6 @@ export class CustomRasterSource implements ITMSSource {
   static type = 'CUSTOM_RASTER';
 
   readonly _descriptor: CustomRasterSourceDescriptor;
-  readonly _timefilter: TimefilterContract;
 
   static createDescriptor({
     urlTemplate,
@@ -58,7 +55,6 @@ export class CustomRasterSource implements ITMSSource {
 
   constructor(sourceDescriptor: any) {
     this._descriptor = sourceDescriptor;
-    this._timefilter = getTimeFilter();
   }
 
   cloneDescriptor(): CustomRasterSourceDescriptor {
@@ -176,11 +172,13 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   async getUrlTemplate(): Promise<string> {
-    const { max } = this._timefilter.getBounds();
-    if (!max || !this.getApplyGlobalTime() || (await !this.isTimeAware())) {
+    if (!this.getApplyGlobalQuery() && (await !this.isTimeAware())) {
       return this._descriptor.urlTemplate;
     }
 
-    return this._descriptor.urlTemplate.replace('{time}', max.toISOString().split('.')[0] + 'Z');
+    // TODO Replace this with date from time picker
+    const date = new Date();
+    date.setHours(date.getHours() - 6); // Data may not be current, use data from 6 hours ago
+    return this._descriptor.urlTemplate.replace('{time}', date.toISOString().split('.')[0] + 'Z');
   }
 }
