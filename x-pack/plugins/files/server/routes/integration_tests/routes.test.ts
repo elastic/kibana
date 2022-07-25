@@ -6,7 +6,7 @@
  */
 
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../tests';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../test_utils';
 
 describe('File HTTP API', () => {
   let testHarness: TestEnvironmentUtils;

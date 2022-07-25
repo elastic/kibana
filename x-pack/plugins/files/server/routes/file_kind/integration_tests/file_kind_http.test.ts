@@ -137,7 +137,7 @@ describe('File kind HTTP API', () => {
 
     const { body: share } = await request
       .post(root, `/api/files/share/${fileKind}/${id}`)
-      .send({ validUntil: twoDaysFromNow(), name: 'my share' })
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
       .expect(200);
 
     expect(share).toEqual(

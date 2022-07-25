@@ -155,3 +155,14 @@ export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
     token: string;
   }
 >;
+
+export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  {
+    token: string;
+  },
+  unknown,
+  unknown,
+  {
+    ok: true;
+  }
+>;
