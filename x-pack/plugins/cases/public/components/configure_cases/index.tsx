@@ -13,7 +13,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -84,11 +84,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     data: actionTypes = [],
     refetch: refetchActionTypes,
   } = useGetActionTypes();
-
-  const supportedActionTypes = useMemo(
-    () => actionTypes.filter((actionType) => SUPPORTED_CONNECTORS.includes(actionType.id)),
-    [actionTypes]
-  );
 
   const onConnectorUpdated = useCallback(async () => {
     refetchConnectors();
@@ -169,12 +164,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
       addFlyoutVisible
         ? triggersActionsUi.getAddConnectorFlyout({
             onClose: onCloseAddFlyout,
-            supportedActionTypes,
+            featureId: CasesConnectorFeatureId,
             onConnectorCreated: onConnectorUpdated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [addFlyoutVisible, supportedActionTypes]
+    [addFlyoutVisible]
   );
 
   const ConnectorEditFlyout = useMemo(
