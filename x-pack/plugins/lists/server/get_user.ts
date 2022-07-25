@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-
-import { SecurityPluginStart } from '../../security/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface GetUserOptions {
   security: SecurityPluginStart | null | undefined;

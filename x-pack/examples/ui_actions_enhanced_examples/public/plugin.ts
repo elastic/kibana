@@ -6,22 +6,26 @@
  */
 
 import { createElement as h } from 'react';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '@kbn/core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-} from '../../../../x-pack/plugins/ui_actions_enhanced/public';
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import {
+  UiActionsEnhancedMemoryActionStorage,
+  UiActionsEnhancedDynamicActionManager,
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
 import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
-import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
-import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import {
   sampleApp1ClickTrigger,
   sampleApp2ClickTrigger,
@@ -30,10 +34,6 @@ import {
   sampleApp2ClickContext,
 } from './triggers';
 import { mount } from './mount';
-import {
-  UiActionsEnhancedMemoryActionStorage,
-  UiActionsEnhancedDynamicActionManager,
-} from '../../../plugins/ui_actions_enhanced/public';
 import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldown';
 
 export interface SetupDependencies {

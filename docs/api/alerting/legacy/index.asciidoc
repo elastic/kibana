@@ -1,7 +1,7 @@
 [[alerts-api]]
 === Deprecated 7.x APIs
 
-These APIs are deprecated and will be removed as of 8.0.
+These APIs are deprecated and will be removed in a future release.
 
 include::create.asciidoc[leveloffset=+1]
 include::delete.asciidoc[leveloffset=+1]

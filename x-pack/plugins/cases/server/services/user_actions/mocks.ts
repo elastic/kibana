@@ -7,7 +7,7 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 
@@ -30,6 +30,7 @@ export const casePayload = {
     },
   },
   settings: { syncAlerts: true },
+  severity: CaseSeverity.LOW,
   owner: SECURITY_SOLUTION_OWNER,
 };
 
@@ -69,6 +70,7 @@ export const updatedCases = [
       description: 'updated desc',
       tags: ['one', 'two'],
       settings: { syncAlerts: false },
+      severity: CaseSeverity.CRITICAL,
     },
     references: [],
   },

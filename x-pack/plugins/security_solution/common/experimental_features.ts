@@ -12,19 +12,16 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
-  ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  usersEnabled: false,
-  detectionResponseEnabled: false,
+  kubernetesEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
-  securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
+  policyResponseInFleetEnabled: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.
@@ -39,7 +36,16 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Endpoint response actions console in various areas of the app
    */
-  responseActionsConsoleEnabled: false,
+  responseActionsConsoleEnabled: true,
+  /**
+   * Enables the cloud security posture navigation inside the security solution
+   */
+  cloudSecurityPostureNavigation: false,
+
+  /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

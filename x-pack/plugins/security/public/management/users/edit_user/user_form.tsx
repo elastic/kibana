@@ -25,8 +25,8 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 import type { Role, User } from '../../../../common/model';
 import { isRoleDeprecated } from '../../../../common/model';
@@ -255,7 +255,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             !isNewUser && !isReservedUser
               ? i18n.translate(
                   'xpack.security.management.users.userForm.changingUserNameAfterCreationDescription',
-                  { defaultMessage: `Username can't be changed once created.` }
+                  { defaultMessage: 'User name cannot be changed after account creation.' }
                 )
               : undefined
           }

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
 import { i18n } from '@kbn/i18n';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
@@ -56,9 +55,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
 
   readonly _descriptor: EMSTMSSourceDescriptor;
 
-  constructor(descriptor: Partial<EMSTMSSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<EMSTMSSourceDescriptor>) {
     const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);
-    super(emsTmsDescriptor, inspectorAdapters);
+    super(emsTmsDescriptor);
     this._descriptor = emsTmsDescriptor;
   }
 
@@ -67,7 +66,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   async getImmutableProperties() {
-    const displayName = await this.getDisplayName();
+    const tileServiceName = await this._getTileServiceName();
     const autoSelectMsg = i18n.translate('xpack.maps.source.emsTile.isAutoSelectLabel', {
       defaultMessage: 'autoselect based on Kibana theme',
     });
@@ -81,7 +80,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
           defaultMessage: `Tile service`,
         }),
-        value: this._descriptor.isAutoSelect ? `${displayName} - ${autoSelectMsg}` : displayName,
+        value: this._descriptor.isAutoSelect
+          ? `${tileServiceName} - ${autoSelectMsg}`
+          : tileServiceName,
       },
     ];
 
@@ -115,6 +116,12 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   async getDisplayName() {
+    return i18n.translate('xpack.maps.source.emsTile.basemapLabel', {
+      defaultMessage: 'Basemap',
+    });
+  }
+
+  async _getTileServiceName() {
     try {
       const emsTMSService = await this._getEMSTMSService();
       return emsTMSService.getDisplayName();

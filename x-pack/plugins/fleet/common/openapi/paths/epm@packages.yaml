@@ -9,4 +9,14 @@ get:
           schema:
             $ref: ../components/schemas/get_packages_response.yaml
   operationId: list-all-packages
-parameters: []
+parameters:
+  - in: query
+    name: excludeInstallStatus
+    schema:
+      type: boolean
+      default: false
+    description: >-
+      Whether to exclude the install status of each package. Enabling this option will opt in to
+      caching for the response via `cache-control` headers. If you don't need up-to-date installation
+      info for a package, and are querying for a list of available packages, providing this flag can
+      improve performance substantially.

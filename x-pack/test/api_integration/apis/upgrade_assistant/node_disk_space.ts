@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { API_BASE_PATH } from '@kbn/upgrade-assistant-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { API_BASE_PATH } from '../../../../plugins/upgrade_assistant/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

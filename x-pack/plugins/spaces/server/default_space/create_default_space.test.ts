@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createDefaultSpace } from './create_default_space';
 

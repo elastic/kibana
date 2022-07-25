@@ -10,21 +10,18 @@ import { useDispatch } from 'react-redux';
 
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../common/components/links';
+import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 
-import {
-  Columns,
-  Criteria,
-  ItemsPerRow,
-  PaginatedTable,
-} from '../../../common/components/paginated_table';
+import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
 import { usersActions, usersModel, usersSelectors } from '../../store';
-import { User } from '../../../../common/search_strategy/security_solution/users/all';
-import { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
+import type { User } from '../../../../common/search_strategy/security_solution/users/all';
+import type { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
 
 const tableType = usersModel.UsersTableType.allUsers;
 
@@ -66,12 +63,16 @@ const getUsersColumns = (): UsersTableColumns => [
     sortable: true,
     mobileOptions: { show: true },
     render: (name) =>
-      getRowItemDraggables({
-        rowItems: [name],
-        attrName: 'user.name',
-        idPrefix: `users-table-${name}-name`,
-        render: (item) => <UserDetailsLink userName={item} />,
-      }),
+      name != null && name.length > 0
+        ? getRowItemDraggables({
+            rowItems: [name],
+            attrName: 'user.name',
+            idPrefix: `users-table-${name}-name`,
+            render: (item) => <UserDetailsLink userName={item} />,
+            isAggregatable: true,
+            fieldType: 'keyword',
+          })
+        : getOrEmptyTagFromValue(name),
   },
   {
     field: 'lastSeen',
@@ -88,11 +89,15 @@ const getUsersColumns = (): UsersTableColumns => [
     truncateText: false,
     mobileOptions: { show: true },
     render: (domain) =>
-      getRowItemDraggables({
-        rowItems: [domain],
-        attrName: 'user.domain',
-        idPrefix: `users-table-${domain}-domain`,
-      }),
+      domain != null && domain.length > 0
+        ? getRowItemDraggables({
+            rowItems: [domain],
+            attrName: 'user.domain',
+            idPrefix: `users-table-${domain}-domain`,
+            isAggregatable: true,
+            fieldType: 'keyword',
+          })
+        : getOrEmptyTagFromValue(domain),
   },
 ];
 

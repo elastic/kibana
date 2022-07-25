@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';

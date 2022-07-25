@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SampleDataRegistrySetup } from '../../../../../src/plugins/home/server';
+import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { registerLogsSampleData, registerLogsSampleDataLink } from './logs';
 import { registerEcommerceSampleData, registerEcommerceSampleDataLink } from './ecommerce';
 import { registerFlightsSampleData, registerFlightsSampleDataLink } from './flights';

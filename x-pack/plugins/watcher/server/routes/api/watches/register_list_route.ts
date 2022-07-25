@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 
 function fetchWatches(dataClient: IScopedClusterClient) {
   return dataClient.asCurrentUser
@@ -36,7 +36,8 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const hits = await fetchWatches(ctx.core.elasticsearch.client);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchWatches(esClient);
         const watches = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchJson = get(hit, '_source');

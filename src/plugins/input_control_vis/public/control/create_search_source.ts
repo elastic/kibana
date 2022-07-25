@@ -11,9 +11,9 @@ import {
   SerializedSearchSourceFields,
   TimefilterContract,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 
-import { DataView } from '../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],

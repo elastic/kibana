@@ -16,7 +16,7 @@ import {
   transformSavedObjectToExternalModel,
   transformUpdateResponseToExternalModel,
 } from './transform';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,

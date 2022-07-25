@@ -2,19 +2,6 @@
 .ml-time-series-explorer {
   color: $euiColorDarkShade;
 
-  .results-container {
-    .panel-title {
-      font-size: $euiFontSizeM;
-      font-weight: 400;
-      color: $euiColorDarkShade;
-    }
-
-    .entity-count-text {
-      color: $euiColorSuccess;
-      font-size: $euiFontSizeS;
-    }
-  }
-
   .forecast-controls {
     float: right;
   }
@@ -131,7 +118,6 @@
       stroke-width: 1px;
       stroke: $euiColorDarkShade;
       fill: $euiColorLightShade;
-      pointer-events: none;
     }
 
     .forecast {

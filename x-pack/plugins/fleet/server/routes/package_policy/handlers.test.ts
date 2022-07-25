@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import type { KibanaRequest } from 'kibana/server';
-import type { RouteConfig } from 'kibana/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RouteConfig } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
@@ -26,7 +26,7 @@ import type { FleetAuthzRouter } from '../security';
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
-import { registerRoutes } from './index';
+import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
@@ -85,7 +85,7 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
+    getPackageInfo: jest.fn(() => Promise.resolve()),
   };
 });
 
@@ -93,7 +93,7 @@ describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let context: jest.Mocked<FleetRequestHandlerContext>;
+  let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
@@ -261,6 +261,38 @@ describe('When calling package policy', () => {
             version: '0.5.0',
           },
         });
+      });
+    });
+
+    describe('postCreate callback registration', () => {
+      it('should call to packagePolicyCreate and packagePolicyPostCreate call backs', async () => {
+        const request = getCreateKibanaRequest();
+        await routeHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalled();
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(2);
+
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+        const secondCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[1][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(secondCB).toEqual('packagePolicyPostCreate');
+      });
+
+      it('should not call packagePolicyPostCreate call back in case of packagePolicy create failed', async () => {
+        const request = getCreateKibanaRequest();
+
+        packagePolicyServiceMock.create.mockImplementationOnce(
+          async (soClient, esClient, newData) => {
+            throw new Error('foo');
+          }
+        );
+
+        await routeHandler(context, request, response);
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(1);
       });
     });
   });

@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
   describe('for user with no ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {

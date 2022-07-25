@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { get } from 'lodash';
 
 import { FieldHook, FormHook } from '../types';
@@ -36,6 +36,8 @@ export const useFormIsModified = ({
   form: formFromOptions,
   discard: fieldPathsToDiscard = [],
 }: Options = {}): boolean => {
+  const [isFormModified, setIsFormModified] = useState(false);
+
   // Hook calls can not be conditional we first try to access the form through context
   let form = useFormContext({ throwIfNotFound: false });
 
@@ -76,28 +78,34 @@ export const useFormIsModified = ({
     ? ([path]: [string, FieldHook]) => fieldsToDiscard[path] !== true
     : () => true;
 
+  // Calculate next state value
   // 1. Check if any field has been modified
-  let isModified = Object.entries(getFields())
+  let nextIsModified = Object.entries(getFields())
     .filter(isFieldIncluded)
     .some(([_, field]) => field.isModified);
 
-  if (isModified) {
-    return isModified;
+  if (!nextIsModified) {
+    // 2. Check if any field has been removed.
+    // If somme field has been removed **and** they were originaly present on the
+    // form "defaultValue" then the form has been modified.
+    const formDefaultValue = __getFormDefaultValue();
+    const fieldOnFormDefaultValue = (path: string) => Boolean(get(formDefaultValue, path));
+
+    const fieldsRemovedFromDOM: string[] = fieldsToDiscard
+      ? Object.keys(__getFieldsRemoved())
+          .filter((path) => fieldsToDiscard[path] !== true)
+          .filter(fieldOnFormDefaultValue)
+      : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
+
+    nextIsModified = fieldsRemovedFromDOM.length > 0;
   }
 
-  // 2. Check if any field has been removed.
-  // If somme field has been removed **and** they were originaly present on the
-  // form "defaultValue" then the form has been modified.
-  const formDefaultValue = __getFormDefaultValue();
-  const fieldOnFormDefaultValue = (path: string) => Boolean(get(formDefaultValue, path));
+  // Update the state **only** if it has changed to avoid creating an infinite re-render
+  if (nextIsModified && !isFormModified) {
+    setIsFormModified(true);
+  } else if (!nextIsModified && isFormModified) {
+    setIsFormModified(false);
+  }
 
-  const fieldsRemovedFromDOM: string[] = fieldsToDiscard
-    ? Object.keys(__getFieldsRemoved())
-        .filter((path) => fieldsToDiscard[path] !== true)
-        .filter(fieldOnFormDefaultValue)
-    : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
-
-  isModified = fieldsRemovedFromDOM.length > 0;
-
-  return isModified;
+  return isFormModified;
 };

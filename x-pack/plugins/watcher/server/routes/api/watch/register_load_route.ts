@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
@@ -34,7 +34,8 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
       const id = request.params.id;
 
       try {
-        const hit = await fetchWatch(ctx.core.elasticsearch.client, id);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await fetchWatch(esClient, id);
         const watchJson = get(hit, 'watch');
         const watchStatusJson = get(hit, 'status');
         const json = {

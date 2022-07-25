@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataViewField, DataView } from 'src/plugins/data/common';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
@@ -121,10 +121,15 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _loadEmsFileFields = async () => {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
-      return fileLayer.getId() === this.state.leftEmsFileId;
-    });
+    let emsFileLayer: FileLayer | undefined;
+    try {
+      const emsFileLayers = await getEmsFileLayers();
+      emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
+        return fileLayer.getId() === this.state.leftEmsFileId;
+      });
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in EMS file select
+    }
 
     if (!this._isMounted || !emsFileLayer) {
       return;

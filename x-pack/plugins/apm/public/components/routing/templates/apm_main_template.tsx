@@ -8,16 +8,14 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  useKibana,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
-import { enableServiceGroups } from '../../../../../observability/public';
 import { ServiceGroupSaveButton } from '../../app/service_groups';
 
 // Paths that must skip the no data screen
@@ -73,15 +71,17 @@ export function ApmMainTemplate({
       [shouldBypassNoDataScreen, data?.hasData]
     );
 
+  const isLoading =
+    status === FETCH_STATUS.LOADING ||
+    fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
+
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
     hasApmData: data?.hasData,
     hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
     shouldBypassNoDataScreen,
-    loading:
-      status === FETCH_STATUS.LOADING ||
-      fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
+    loading: isLoading,
   });
 
   const {
@@ -98,6 +98,7 @@ export function ApmMainTemplate({
   const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+      isPageDataLoaded={isLoading === false}
       pageHeader={{
         pageTitle,
         rightSideItems,

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -34,14 +34,13 @@ export default function ({ getService }: FtrProviderContext) {
             ip: '151.205.0.17',
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.details,
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',
         });
 
-        expect(body.networkDetails.source?.geo.continent_name).to.be('North America');
-        expect(body.networkDetails.source?.geo.location?.lat!).to.be(37.751);
+        expect(body.networkDetails.source?.geo.continent_name).to.eql(['North America']);
+        expect(body.networkDetails.source?.geo.location?.lat!).to.eql([37.751]);
         expect(body.networkDetails.host?.os?.platform).to.eql(['raspbian']);
       });
     });
@@ -61,7 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
             ip: '185.53.91.88',
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.details,
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',

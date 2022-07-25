@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'kibana/server';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { CoreSetup } from '@kbn/core/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { APP_ID, OPEN_LAYER_WIZARD, getFullPath, WIZARD_ID } from '../common/constants';
 
 export function registerIntegrations(

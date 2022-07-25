@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
-  executionContextServiceMock,
-} from '../../../../../../src/core/public/mocks';
-
+} from '@kbn/core/public/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
-import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
 
 import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
 import { init as initHttp } from '../../../public/application/services/http';

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { LicenseBadge } from './';
+import { LicenseBadge } from '.';
 
 describe('LicenseBadge', () => {
   it('renders', () => {

@@ -21,13 +21,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { EuiCodeEditor } from '../../../../../../shared_imports';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';
 import { useServices } from '../../../../../app_context';
-
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policy: SlmPolicy;

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '../../../../../../../../src/core/server';
-import { IEventLogService, SAVED_OBJECT_REL_PRIMARY } from '../../../../../../event_log/server';
-import {
+import { SavedObjectsUtils } from '@kbn/core/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type {
   RuleExecutionStatus,
-  ruleExecutionStatusOrderByStatus,
   RuleExecutionMetrics,
 } from '../../../../../common/detection_engine/schemas/common';
+import { ruleExecutionStatusOrderByStatus } from '../../../../../common/detection_engine/schemas/common';
 import {
   RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,

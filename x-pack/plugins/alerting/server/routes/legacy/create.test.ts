@@ -6,20 +6,20 @@
  */
 
 import { createAlertRoute } from './create';
-import { httpServiceMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { Rule } from '../../../common/rule';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../lib/license_api_access.ts', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

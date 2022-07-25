@@ -44,9 +44,9 @@ import {
   validateFilePathInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { HttpStart } from '@kbn/core/public';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
@@ -118,10 +118,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
       const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
-
+      handleError(false);
       onChange(updatedEntry, index);
     },
-    [onChange, entry]
+    [onChange, entry, handleError]
   );
 
   const handleFieldMatchValueChange = useCallback(
@@ -292,6 +292,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     );
   };
 
+  // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
@@ -338,13 +339,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
-        let os: OperatingSystem = OperatingSystem.WINDOWS;
-        if (osTypes) {
-          [os] = osTypes as OperatingSystem[];
+        let actualWarning: React.ReactNode | string | undefined;
+        if (listType !== 'detection') {
+          let os: OperatingSystem = OperatingSystem.WINDOWS;
+          if (osTypes) {
+            [os] = osTypes as OperatingSystem[];
+          }
+          const warning = validateFilePathInput({ os, value: wildcardValue });
+          actualWarning =
+            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
         }
-        const warning = validateFilePathInput({ os, value: wildcardValue });
-        const actualWarning =
-          warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
 
         return (
           <AutocompleteFieldWildcardComponent

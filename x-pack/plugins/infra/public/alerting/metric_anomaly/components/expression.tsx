@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { euiStyled, EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled, EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
   WhenExpression,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';

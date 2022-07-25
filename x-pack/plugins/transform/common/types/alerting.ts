@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Rule, RuleTypeParams } from '../../../alerting/common';
+import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];

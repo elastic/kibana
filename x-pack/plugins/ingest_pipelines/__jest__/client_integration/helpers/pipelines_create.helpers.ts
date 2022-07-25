@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
@@ -16,15 +16,18 @@ export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [getCreatePath()],
-    componentRoutePath: ROUTES.create,
-  },
-  doMountAsync: true,
-};
+export const setup = async (
+  httpSetup: HttpSetup,
+  queryParams: string = ''
+): Promise<PipelinesCreateTestBed> => {
+  const testBedConfig: AsyncTestBedConfig = {
+    memoryRouter: {
+      initialEntries: [`${getCreatePath()}${queryParams}`],
+      componentRoutePath: ROUTES.create,
+    },
+    doMountAsync: true,
+  };
 
-export const setup = async (httpSetup: HttpSetup): Promise<PipelinesCreateTestBed> => {
   const initTestBed = registerTestBed(
     WithAppDependencies(PipelinesCreate, httpSetup),
     testBedConfig

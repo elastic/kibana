@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../../reporting/server/types';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 import { getCanvasFeature } from './feature';
 
 let mockReportingPlugin: ReportingStart;

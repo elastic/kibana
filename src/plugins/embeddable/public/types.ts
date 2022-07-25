@@ -7,7 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactory,
   EmbeddableInput,
@@ -15,7 +16,6 @@ import {
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;

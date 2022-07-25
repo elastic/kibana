@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ILM_POLICY_NAME } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
-
-import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

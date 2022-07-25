@@ -10,14 +10,14 @@ import type {
   SecurityGetUserResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
   DeprecationsServiceSetup,
   ElasticsearchClient,
   Logger,
   PackageInfo,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import type { SecurityLicense } from '../../common';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';

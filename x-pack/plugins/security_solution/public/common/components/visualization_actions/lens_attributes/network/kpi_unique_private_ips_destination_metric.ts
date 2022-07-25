@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { DESTINATION_CHART_LABEL } from '../../translations';
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes = {
   description: '',
@@ -21,7 +20,7 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: DESTINATION_CHART_LABEL,
+                label: '',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',

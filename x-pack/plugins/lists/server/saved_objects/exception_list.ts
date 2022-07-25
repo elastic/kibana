@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,

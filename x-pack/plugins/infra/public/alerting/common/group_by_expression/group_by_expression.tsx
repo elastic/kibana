@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { FieldSpec } from 'src/plugins/data_views/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { GroupBySelector } from './selector';
 
 interface Props {

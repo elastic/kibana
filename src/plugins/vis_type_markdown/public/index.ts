@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { MarkdownPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

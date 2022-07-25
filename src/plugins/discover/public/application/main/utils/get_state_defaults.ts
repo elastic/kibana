@@ -7,7 +7,9 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -15,12 +17,10 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 import { SavedSearch } from '../../../services/saved_searches';
-import { DataPublicPluginStart } from '../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import { Storage } from '../../../../../kibana_utils/public';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -51,7 +51,7 @@ export function getStateDefaults({
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
-  const defaultState = {
+  const defaultState: AppState = {
     query,
     sort: !sort.length
       ? getDefaultSort(
@@ -63,13 +63,14 @@ export function getStateDefaults({
     columns,
     index: indexPattern?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')),
+    filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
-  } as AppState;
+    rowsPerPage: undefined,
+  };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
@@ -82,9 +83,11 @@ export function getStateDefaults({
   if (savedSearch.viewMode) {
     defaultState.viewMode = savedSearch.viewMode;
   }
-
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+  }
+  if (savedSearch.rowsPerPage) {
+    defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
 
   return defaultState;

@@ -8,7 +8,7 @@
 import React, { Component, RefObject } from 'react';
 import uuid from 'uuid/v4';
 import { EuiLoadingChart } from '@elastic/eui';
-import { EmbeddableFactory, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common';
 import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';

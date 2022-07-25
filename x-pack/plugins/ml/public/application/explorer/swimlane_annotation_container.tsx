@@ -68,7 +68,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         )
         .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
-        .attr('alignment-baseline', 'middle')
+        .attr('dominant-baseline', 'middle')
         .style('fill', euiTheme.euiTextSubduedColor)
         .style('font-size', euiTheme.euiFontSizeXS);
 
@@ -126,11 +126,14 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       // Add annotation marker
       mergedAnnotations.forEach((d) => {
         const annotationWidth = Math.max(
-          d.end ? xScale(Math.min(d.end, domain.max)) - Math.max(xScale(d.start), startingXPos) : 0,
+          d.end
+            ? (xScale(Math.min(d.end, domain.max)) as number) -
+                Math.max(xScale(d.start) as number, startingXPos)
+            : 0,
           ANNOTATION_MIN_WIDTH
         );
 
-        const xPos = d.start >= domain.min ? xScale(d.start) : startingXPos;
+        const xPos = d.start >= domain.min ? (xScale(d.start) as number) : startingXPos;
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)

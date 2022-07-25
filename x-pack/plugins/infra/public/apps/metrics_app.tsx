@@ -6,12 +6,12 @@
  */
 
 import { History } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { AppMountParameters } from '../../../../../src/core/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';

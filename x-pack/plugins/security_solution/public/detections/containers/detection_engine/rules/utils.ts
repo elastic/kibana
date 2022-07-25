@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
 import { escapeKuery } from '../../../../common/lib/keury';
-import { FilterOptions } from './types';
+import type { FilterOptions } from './types';
 
 const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.name',
@@ -32,15 +31,16 @@ export const convertRulesFilterToKQL = ({
   showElasticRules,
   filter,
   tags,
+  excludeRuleTypes = [],
 }: FilterOptions): string => {
   const filters: string[] = [];
 
-  if (showCustomRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`);
-  }
-
-  if (showElasticRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`);
+  if (showCustomRules && showElasticRules) {
+    // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
+  } else if (showElasticRules) {
+    filters.push('alert.attributes.params.immutable: true');
+  } else if (showCustomRules) {
+    filters.push('alert.attributes.params.immutable: false');
   }
 
   if (tags.length > 0) {
@@ -55,6 +55,14 @@ export const convertRulesFilterToKQL = ({
     ).join(' OR ');
 
     filters.push(`(${searchQuery})`);
+  }
+
+  if (excludeRuleTypes.length) {
+    filters.push(
+      `NOT alert.attributes.params.type: (${excludeRuleTypes
+        .map((ruleType) => `"${escapeKuery(ruleType)}"`)
+        .join(' OR ')})`
+    );
   }
 
   return filters.join(' AND ');

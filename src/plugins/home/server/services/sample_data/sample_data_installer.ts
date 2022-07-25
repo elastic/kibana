@@ -13,7 +13,7 @@ import type {
   ISavedObjectsImporter,
   Logger,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import type { SampleDatasetSchema, DataIndexSchema } from './lib/sample_dataset_registry_types';
 import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
 import { createIndexName } from './lib/create_index_name';

@@ -9,36 +9,19 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
     <EuiText
       size="xs"
     >
-      <EuiFlexGroup
-        data-test-subj="overflow-items"
-        direction="column"
-        gutterSize="none"
-      >
-        <EuiFlexItem
-          key="idPrefix-idPrefix-attrName-item2-0"
-        >
-          <Memo(OverflowItemComponent)
-            dataProvider={
-              Object {
-                "and": Array [],
-                "enabled": true,
-                "excluded": false,
-                "id": "idPrefix-attrName-item2-0",
-                "kqlQuery": "",
-                "name": "item2",
-                "queryMatch": Object {
-                  "displayValue": "item2",
-                  "field": "attrName",
-                  "operator": ":",
-                  "value": "item2",
-                },
-              }
-            }
-            field="attrName"
-            rowItem="item2"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <MoreContainer
+        attrName="attrName"
+        idPrefix="idPrefix"
+        moreMaxHeight="none"
+        overflowIndexStart={1}
+        rowItems={
+          Array [
+            "item1",
+            "item2",
+            "item3",
+          ]
+        }
+      />
       <p
         data-test-subj="popover-additional-overflow"
       >
@@ -103,6 +86,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item1-0"
     render={[Function]}
   />
@@ -123,6 +108,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item2-1"
     render={[Function]}
   />
@@ -143,13 +130,17 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item3-2"
     render={[Function]}
   />
    
   <Memo(RowItemOverflowComponent)
     attrName="attrName"
+    fieldType="keyword"
     idPrefix="idPrefix"
+    isAggregatable={false}
     maxOverflowItems={5}
     overflowIndexStart={5}
     rowItems={

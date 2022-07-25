@@ -9,14 +9,15 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
-} from 'src/core/server/mocks';
+  coreMock,
+} from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
-import type { KibanaRequest } from 'kibana/server';
+} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type {
   PackageInfo,
@@ -26,6 +27,7 @@ import type {
   RegistryDataStream,
   PackagePolicyInputStream,
   PackagePolicy,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -1269,7 +1271,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
       expect(callbackCallingOrder).toEqual(['a', 'b']);
@@ -1282,7 +1284,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
 
@@ -1329,7 +1331,7 @@ describe('Package policy service', () => {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           );
         } catch (e) {
@@ -1348,11 +1350,106 @@ describe('Package policy service', () => {
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
+    });
+  });
+
+  describe('runPostPackagePolicyPostCreateCallback', () => {
+    let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+    let request: KibanaRequest;
+    const packagePolicy = {
+      id: '93ac25fe-0467-4fcc-a3c5-57a26a8496e2',
+      version: 'WzYyMzcsMV0=',
+      name: 'my-cis_kubernetes_benchmark',
+      namespace: 'default',
+      description: '',
+      package: {
+        name: 'cis_kubernetes_benchmark',
+        title: 'CIS Kubernetes Benchmark',
+        version: '0.0.3',
+      },
+      enabled: true,
+      policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
+      output_id: '',
+      inputs: [
+        {
+          type: 'cloudbeat',
+          policy_template: 'findings',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'cis_kubernetes_benchmark.findings',
+              },
+              id: 'cloudbeat-cis_kubernetes_benchmark.findings-66b402b3-f24a-4018-b3d0-b88582a836ab',
+              compiled_stream: {
+                processors: [
+                  {
+                    add_cluster_id: null,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+      vars: {
+        dataYaml: {
+          type: 'yaml',
+        },
+      },
+      elasticsearch: undefined,
+      revision: 1,
+      created_at: '2022-04-11T12:44:43.385Z',
+      created_by: 'elastic',
+      updated_at: '2022-04-11T12:44:43.385Z',
+      updated_by: 'elastic',
+    };
+    const callbackCallingOrder: string[] = [];
+
+    beforeEach(() => {
+      context = xpackMocks.createRequestHandlerContext();
+      request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+      jest.clearAllMocks();
+      callbackCallingOrder.length = 0;
+    });
+
+    it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
+      const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('a');
+        return ds;
+      });
+
+      const callbackB: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('b');
+        return ds;
+      });
+
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
+
+      const requestContext = coreMock.createCustomRequestHandlerContext(context);
+      await packagePolicyService.runExternalCallbacks(
+        'packagePolicyPostCreate',
+        packagePolicy,
+        requestContext,
+        request
+      );
+
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });
 
@@ -3231,6 +3328,7 @@ describe('Package policy service', () => {
     beforeEach(() => {
       savedObjectsClient = savedObjectsClientMock.create();
     });
+
     function mockPackage(pkgName: string) {
       const mockPackagePolicy = createPackagePolicyMock();
 
@@ -3251,6 +3349,7 @@ describe('Package policy service', () => {
         attributes,
       });
     }
+
     it('should return success if package and policy versions match', async () => {
       mockPackage('apache');
 

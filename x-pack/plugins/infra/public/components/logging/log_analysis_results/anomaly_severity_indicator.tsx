@@ -7,7 +7,7 @@
 
 import { EuiHealth } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { getFormattedSeverityScore } from '../../../../../ml/public';
+import { getFormattedSeverityScore } from '@kbn/ml-plugin/public';
 import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
 export const AnomalySeverityIndicator: React.FunctionComponent<{

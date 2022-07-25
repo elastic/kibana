@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -37,10 +37,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/89073
   describe.skip('maps integration', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
+      );
+      await kibanaServer.savedObjects.clean({ types: ['tag'] });
     });
 
     describe('listing', () => {

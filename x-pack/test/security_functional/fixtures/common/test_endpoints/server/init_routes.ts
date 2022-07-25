@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
   const logger = initializerContext.logger.get();
@@ -62,7 +62,7 @@ export function initRoutes(initializerContext: PluginInitializerContext, core: C
       if (request.body.client === 'start-contract') {
         scopedClient = (await core.getStartServices())[0].elasticsearch.client.asScoped(request);
       } else if (request.body.client === 'request-context') {
-        scopedClient = context.core.elasticsearch.client;
+        scopedClient = (await context.core).elasticsearch.client;
       } else {
         scopedClient = (await core.getStartServices())[0].elasticsearch
           .createClient('custom')

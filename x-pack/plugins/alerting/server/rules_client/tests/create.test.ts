@@ -7,21 +7,26 @@
 
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -113,6 +118,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     taskManager.schedule.mockResolvedValue({
@@ -294,7 +300,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -406,6 +412,7 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
+        "isSnoozedUntil": null,
         "legacyId": null,
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
@@ -428,7 +435,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -500,7 +507,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -560,7 +567,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -612,6 +619,7 @@ describe('create()', () => {
           "status": "pending",
           "warning": null,
         },
+        "isSnoozedUntil": null,
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
@@ -634,7 +642,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": "1m",
         },
-        "snoozeEndTime": null,
+        "snoozeSchedule": Array [],
         "tags": Array [
           "foo",
         ],
@@ -687,6 +695,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -702,6 +711,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -857,6 +867,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -872,6 +883,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -887,6 +899,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -1033,6 +1046,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
+        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1043,7 +1057,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1166,11 +1180,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1237,6 +1246,7 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
         enabled: true,
+        isSnoozedUntil: null,
         legacyId: null,
         executionStatus: {
           error: null,
@@ -1247,7 +1257,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1339,11 +1349,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1406,6 +1411,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        isSnoozedUntil: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1420,7 +1426,7 @@ describe('create()', () => {
         monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: 'onActiveAlert',
@@ -1529,7 +1535,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActionGroupChange',
       actions: [
@@ -1570,6 +1576,7 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
+        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: null,
@@ -1586,7 +1593,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onActionGroupChange',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1661,7 +1668,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onThrottleInterval',
       actions: [
@@ -1699,6 +1706,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -1718,7 +1726,7 @@ describe('create()', () => {
         throttle: '10m',
         notifyWhen: 'onThrottleInterval',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1793,7 +1801,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       notifyWhen: 'onActiveAlert',
       actions: [
@@ -1831,6 +1839,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -1850,7 +1859,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -1934,7 +1943,7 @@ describe('create()', () => {
       updatedBy: 'elastic',
       updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       mutedInstanceIds: [],
       actions: [
         {
@@ -1992,13 +2001,14 @@ describe('create()', () => {
         ],
         apiKeyOwner: null,
         apiKey: null,
+        isSnoozedUntil: null,
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         executionStatus: {
           status: 'pending',
@@ -2098,11 +2108,6 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2128,25 +2133,17 @@ describe('create()', () => {
       result: { id: '123', name: '123', api_key: 'abc' },
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
-    const createdAt = new Date().toISOString();
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt,
-      },
-      references: [],
-    });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
-      apiKeyId: '123',
-      createdAt,
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   test('fails if task scheduling fails due to conflict', async () => {
@@ -2357,6 +2354,7 @@ describe('create()', () => {
         alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
+        isSnoozedUntil: null,
         legacyId: null,
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -2373,7 +2371,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2456,6 +2454,7 @@ describe('create()', () => {
             params: { foo: true },
           },
         ],
+        isSnoozedUntil: null,
         legacyId: null,
         alertTypeId: '123',
         consumer: 'bar',
@@ -2475,7 +2474,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: false,
-        snoozeEndTime: null,
+        snoozeSchedule: [],
         mutedInstanceIds: [],
         tags: ['foo'],
         executionStatus: {
@@ -2538,6 +2537,7 @@ describe('create()', () => {
         isMissingSecrets: true,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -2627,11 +2627,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
 

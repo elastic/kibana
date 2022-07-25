@@ -10,30 +10,31 @@ import type {
   IRouter,
   Logger,
   ICustomClusterClient,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   ElasticsearchClient,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { TypeOf } from '@kbn/config-schema';
-import { LicenseFeature, ILicense } from '../../licensing/server';
+import { LicenseFeature, ILicense } from '@kbn/licensing-plugin/server';
 import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,
-} from '../../actions/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
-import type { RacApiRequestHandlerContext } from '../../rule_registry/server';
+} from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
-import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
-import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
-import { LicensingPluginStart } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
-import { CloudSetup } from '../../cloud/server';
+} from '@kbn/alerting-plugin/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -57,12 +58,12 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
-export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
   ruleRegistry?: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface PluginsStart {
   alerting: AlertingPluginStartContract;
@@ -79,10 +80,24 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
+type LegacyHandler<Params, Query, Body> = (req: LegacyRequest<Params, Query, Body>) => Promise<any>;
+
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = RouteConfig<
+  Params,
+  Query,
+  Body,
+  Method
+> & {
+  method: Method;
+  handler: LegacyHandler<Params, Query, Body>;
+};
+
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: (options: any) => void;
+  route: <Params, Query, Body, Method extends RouteMethod>(
+    options: MonitoringRouteConfig<Params, Query, Body, Method>
+  ) => void;
 }
 
 export interface LegacyShimDependencies {
@@ -103,15 +118,13 @@ export interface MonitoringPluginSetup {
   getKibanaStats: IBulkUploader['getKibanaStats'];
 }
 
-export interface LegacyRequest {
+export interface LegacyRequest<Params = any, Query = any, Body = any> {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: {
-    [key: string]: any;
-  };
-  params: {
-    [key: string]: string;
-  };
+  payload: Body;
+  params: Params;
+  query: Query;
+  headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
@@ -144,7 +157,8 @@ export interface LegacyServer {
   };
 }
 
-export type Cluster = ElasticsearchModifiedSource & {
+export type Cluster = Omit<ElasticsearchModifiedSource, 'timestamp'> & {
+  timestamp?: string;
   ml?: { jobs: any };
   logs?: any;
   alerts?: AlertsOnCluster;
@@ -167,6 +181,7 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+
 export interface ClusterSettingsReasonResponse {
   found: boolean;
   reason?: {
@@ -184,11 +199,7 @@ export type Pipeline = {
   [key in PipelineMetricKey]?: number;
 };
 
-export type PipelineMetricKey =
-  | 'logstash_cluster_pipeline_throughput'
-  | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count'
-  | 'logstash_node_pipeline_throughput';
+export type PipelineMetricKey = PipelineThroughputMetricKey | PipelineNodeCountMetricKey;
 
 export type PipelineThroughputMetricKey =
   | 'logstash_cluster_pipeline_throughput'
@@ -196,16 +207,18 @@ export type PipelineThroughputMetricKey =
 
 export type PipelineNodeCountMetricKey =
   | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count';
+  | 'logstash_cluster_pipeline_nodes_count'
+  | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_nodes_count';
 
 export interface PipelineWithMetrics {
   id: string;
-  metrics: {
-    logstash_cluster_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_cluster_pipeline_node_count?: PipelineMetricsProcessed;
-    logstash_node_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_node_pipeline_node_count?: PipelineMetricsProcessed;
-  };
+  metrics:
+    | {
+        [key in PipelineMetricKey]: PipelineMetricsProcessed | undefined;
+      }
+    // backward compat with references that don't properly type the metric keys
+    | { [key: string]: PipelineMetricsProcessed | undefined };
 }
 
 export interface PipelineResponse {
@@ -217,10 +230,12 @@ export interface PipelineResponse {
     throughput?: PipelineMetricsProcessed;
   };
 }
+
 export interface PipelinesResponse {
   pipelines: PipelineResponse[];
   totalPipelineCount: number;
 }
+
 export interface PipelineMetrics {
   bucket_size: string;
   timeRange: {
@@ -238,6 +253,7 @@ export interface PipelineMetrics {
     isDerivative: boolean;
   };
 }
+
 export type PipelineMetricsRes = PipelineMetrics & {
   data: Array<[number, { [key: string]: number }]>;
 };

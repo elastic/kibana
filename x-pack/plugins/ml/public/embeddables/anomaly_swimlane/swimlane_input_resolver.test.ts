@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import { CoreStart, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { MlStartDependencies } from '../../plugin';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
@@ -19,6 +19,8 @@ describe('useSwimlaneInputResolver', () => {
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   let onInputChange: jest.Mock;
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const renderCallbacks = {
     onRenderComplete: jest.fn(),
     onLoading: jest.fn(),
@@ -26,8 +28,6 @@ describe('useSwimlaneInputResolver', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-
     embeddableInput = new BehaviorSubject({
       id: 'test-swimlane-embeddable',
       jobIds: ['test-job'],
@@ -86,7 +86,6 @@ describe('useSwimlaneInputResolver', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -107,8 +106,7 @@ describe('useSwimlaneInputResolver', () => {
     expect(result.current[1]).toBe(undefined);
 
     await act(async () => {
-      jest.advanceTimersByTime(501);
-      await waitForNextUpdate();
+      await Promise.all([delay(501), waitForNextUpdate()]);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
@@ -125,8 +123,7 @@ describe('useSwimlaneInputResolver', () => {
         filters: [],
         query: { language: 'kuery', query: '' },
       });
-      jest.advanceTimersByTime(501);
-      await waitForNextUpdate();
+      await Promise.all([delay(501), waitForNextUpdate()]);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
@@ -143,8 +140,7 @@ describe('useSwimlaneInputResolver', () => {
         filters: [],
         query: { language: 'kuery', query: '' },
       });
-      jest.advanceTimersByTime(501);
-      await waitForNextUpdate();
+      await Promise.all([delay(501), waitForNextUpdate()]);
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);

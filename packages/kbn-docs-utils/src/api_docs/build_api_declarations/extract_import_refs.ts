@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
 import { ApiScope, PluginOrPackage, TextWithLinks } from '../types';
 import { getRelativePath, pathsOutsideScopes } from './utils';

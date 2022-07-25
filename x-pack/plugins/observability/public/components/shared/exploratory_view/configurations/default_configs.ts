@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AppDataType, ReportViewType, SeriesConfig } from '../types';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 
 interface Props {

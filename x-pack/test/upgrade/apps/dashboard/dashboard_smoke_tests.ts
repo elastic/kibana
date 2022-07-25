@@ -15,10 +15,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
-  describe('dashboard smoke tests', function describeIndexTests() {
+  describe('upgrade dashboard smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -31,18 +30,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space, () => {
+      describe('space: ' + space, () => {
         beforeEach(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await kibanaServer.uiSettings.update(
-            {
-              'visualization:visualize:legacyPieChartsLibrary': true,
-            },
-            { space }
-          );
           await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {

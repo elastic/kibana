@@ -20,8 +20,10 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { Query, generateFilters } from '../../../../../../../../src/plugins/data/public';
+import { Filter, Query } from '@kbn/es-query';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
 import {
@@ -47,11 +49,11 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { ResultLink } from '../../../common/components/results_links';
-import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
+import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
+import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -103,6 +105,8 @@ export const getDefaultDataVisualizerListState = (
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
+  probability: null,
+  rndSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
   ...overrides,
 });
 
@@ -110,11 +114,26 @@ export interface IndexDataVisualizerViewProps {
   currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
-  additionalLinks?: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
-const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
+  const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
+    useStorage<RandomSamplerOption>(
+      DV_RANDOM_SAMPLER_PREFERENCE,
+      RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
+    );
+
+  const restorableDefaults = useMemo(
+    () =>
+      getDefaultDataVisualizerListState({
+        rndSamplerPref: savedRandomSamplerPreference,
+      }),
+    // We just  need to load the saved preference when the page is first loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const { services } = useDataVisualizerKibana();
   const { docLinks, notifications, uiSettings, data } = services;
   const { toasts } = notifications;
@@ -129,7 +148,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -247,7 +266,42 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setLastRefresh,
     progress,
     extendedColumns,
-  } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+    overallStatsProgress,
+  } = useDataVisualizerGridData(
+    input,
+    dataVisualizerListState,
+    savedRandomSamplerPreference,
+    setGlobalState
+  );
+
+  useEffect(
+    () => {
+      switch (savedRandomSamplerPreference) {
+        case RANDOM_SAMPLER_OPTION.OFF:
+          setSamplingProbability(1);
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+          setSamplingProbability(
+            dataVisualizerListState?.probability ?? documentCountStats?.probability ?? null
+          );
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+        default:
+          setSamplingProbability(null);
+          return;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      dataVisualizerListState.probability,
+      documentCountStats?.probability,
+      savedRandomSamplerPreference,
+    ]
+  );
+
+  const setSamplingProbability = (value: number | null) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+  };
 
   useEffect(() => {
     return () => {
@@ -287,7 +341,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         field,
         values,
         operation,
-        String(currentDataView.id)
+        currentDataView
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);
@@ -398,8 +452,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiPageContentHeader className="dataVisualizerPageHeader">
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
-                  <EuiTitle>
-                    <h1>{currentDataView.title}</h1>
+                  <EuiTitle size={'s'}>
+                    <h2>{currentDataView.getName()}</h2>
                   </EuiTitle>
                   <DataVisualizerDataViewManagement
                     currentDataView={currentDataView}
@@ -436,14 +490,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasShadow={false} hasBorder>
-                {overallStats?.totalCount !== undefined && (
-                  <EuiFlexItem grow={true}>
-                    <DocumentCountContent
-                      documentCountStats={documentCountStats}
-                      totalCount={overallStats.totalCount}
-                    />
-                  </EuiFlexItem>
-                )}
                 <SearchPanel
                   dataView={currentDataView}
                   searchString={searchString}
@@ -461,6 +507,27 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   showEmptyFields={showEmptyFields}
                   onAddFilter={onAddFilter}
                 />
+
+                {overallStats?.totalCount !== undefined && (
+                  <>
+                    <EuiSpacer size={'m'} />
+                    <EuiFlexItem grow={true}>
+                      <DocumentCountContent
+                        documentCountStats={documentCountStats}
+                        totalCount={overallStats.totalCount}
+                        setSamplingProbability={setSamplingProbability}
+                        samplingProbability={
+                          dataVisualizerListState.probability === null
+                            ? documentCountStats?.probability
+                            : dataVisualizerListState.probability
+                        }
+                        loading={overallStatsProgress.loaded < 100}
+                        randomSamplerPreference={savedRandomSamplerPreference}
+                        setRandomSamplerPreference={saveRandomSamplerPreference}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
                 <EuiSpacer size={'m'} />
                 <FieldCountPanel
                   showEmptyFields={showEmptyFields}
@@ -487,7 +554,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 dataView={currentDataView}
                 searchQueryLanguage={searchQueryLanguage}
                 searchString={searchString}
-                additionalLinks={additionalLinks ?? []}
+                getAdditionalLinks={getAdditionalLinks}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { TimeBuckets } from '../../../../util/time_buckets';
@@ -155,8 +155,8 @@ export class ResultsLoader {
     if (agg === null) {
       return { [dtrIndex]: [emptyModelItem] };
     }
-    const resp = await mlResultsService
-      .getModelPlotOutput(
+    const resp = await lastValueFrom(
+      mlResultsService.getModelPlotOutput(
         this._jobCreator.jobId,
         dtrIndex,
         [],
@@ -165,7 +165,7 @@ export class ResultsLoader {
         this._chartInterval.getInterval().asMilliseconds(),
         agg.mlModelPlotAgg
       )
-      .toPromise();
+    );
 
     return this._createModel(resp, dtrIndex);
   }

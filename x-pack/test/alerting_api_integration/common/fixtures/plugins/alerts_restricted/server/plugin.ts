@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {

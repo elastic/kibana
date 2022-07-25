@@ -10,13 +10,15 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+
+import './_annotations_editor.scss';
 
 interface AnnotationsEditorProps {
   fields: VisFields;

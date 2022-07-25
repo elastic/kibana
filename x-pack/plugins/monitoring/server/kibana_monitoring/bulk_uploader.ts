@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import moment from 'moment';
 import type {
   ElasticsearchClient,
@@ -14,8 +14,8 @@ import type {
   OpsMetrics,
   ServiceStatus,
   ServiceStatusLevel,
-} from 'src/core/server';
-import { ServiceStatusLevels } from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
 import { sendBulkPayload } from './lib';
@@ -70,6 +70,7 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
+
   constructor({
     log,
     config,
@@ -150,7 +151,7 @@ export class BulkUploader implements IBulkUploader {
       collected_at: collectedAt,
       requests: { statusCodes, ...requests },
       ...lastMetrics
-    } = await this.opsMetrics$.pipe(take(1)).toPromise();
+    } = await firstValueFrom(this.opsMetrics$);
     return {
       ...lastMetrics,
       process,

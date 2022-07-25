@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import type { MlClient } from '../../lib/ml_client';
-import { mlLog } from '../../lib/log';
+import { KibanaRequest } from '@kbn/core/server';
+import type { MlClient } from '../ml_client';
+import { mlLog } from '../log';
 import {
   MlCapabilities,
   adminMlCapabilities,

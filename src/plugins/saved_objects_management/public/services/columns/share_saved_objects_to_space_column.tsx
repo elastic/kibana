@@ -10,14 +10,14 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { Capabilities, SavedObjectsNamespaceType } from 'src/core/public';
+import type { Capabilities, SavedObjectsNamespaceType } from '@kbn/core/public';
 import { EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import type {
   ShareToSpaceFlyoutProps,
   SpaceListProps,
   SpacesApiUi,
-} from '../../../../../../x-pack/plugins/spaces/public';
+} from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementColumn } from '../types';
 import { SHAREABLE_SOON_OBJECT_TYPES } from './constants';

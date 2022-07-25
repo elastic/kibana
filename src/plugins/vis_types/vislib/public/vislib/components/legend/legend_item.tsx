@@ -20,8 +20,8 @@ import {
   EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
+import { ColorPicker } from '@kbn/charts-plugin/public';
 import { LegendItem } from './models';
-import { ColorPicker } from '../../../../../../charts/public';
 
 interface Props {
   item: LegendItem;

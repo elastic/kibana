@@ -7,7 +7,7 @@
 
 import { Feature } from 'geojson';
 import { createChunks, toEsDoc } from './create_chunks';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',

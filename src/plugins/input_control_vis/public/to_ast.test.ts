@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { InputControlVisParams } from './types';
 import { toExpressionAst } from './to_ast';
 

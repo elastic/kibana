@@ -6,20 +6,34 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../error_missing_required';
-import { getSeries } from './get_series';
-import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { getTimezone } from '../get_timezone';
-import { LegacyRequest } from '../../types';
 import { INDEX_PATTERN_TYPES } from '../../../common/constants';
+import { TimeRange } from '../../../common/http_api/shared';
+import { LegacyRequest } from '../../types';
+import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
+import { checkParam } from '../error_missing_required';
+import { getTimezone } from '../get_timezone';
+import { getSeries } from './get_series';
 
-type Metric = string | { keys: string | string[]; name: string };
+export interface NamedMetricDescriptor {
+  keys: string | string[];
+  name: string;
+}
+
+export type SimpleMetricDescriptor = string;
+
+export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
+
+export function isNamedMetricDescriptor(
+  metricDescriptor: MetricDescriptor
+): metricDescriptor is NamedMetricDescriptor {
+  return (metricDescriptor as NamedMetricDescriptor).name !== undefined;
+}
 
 // TODO: Switch to an options object argument here
 export async function getMetrics(
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
   moduleType: INDEX_PATTERN_TYPES,
-  metricSet: Metric[] = [],
+  metricSet: MetricDescriptor[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
@@ -42,7 +56,7 @@ export async function getMetrics(
   }
 
   return Promise.all(
-    metricSet.map((metric: Metric) => {
+    metricSet.map((metric: MetricDescriptor) => {
       // metric names match the literal metric name, but they can be supplied in groups or individually
       let metricNames;
 

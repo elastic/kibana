@@ -23,20 +23,10 @@ import {
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
 } from '@kbn/coloring';
-import {
-  GaugeTicksPositions,
-  GaugeColorModes,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
-import {
-  getMaxValue,
-  getMinValue,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
+import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
+import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
-import {
-  applyPaletteParams,
-  PalettePanelContainer,
-  TooltipWrapper,
-} from '../../shared_components/';
+import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import './dimension_editor.scss';
 import { GaugeVisualizationState } from './constants';

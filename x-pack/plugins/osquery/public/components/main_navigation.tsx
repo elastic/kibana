@@ -22,11 +22,12 @@ enum Section {
 export const MainNavigation = () => {
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+
   return (
     <Nav>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
-          <EuiTabs display="condensed">
+          <EuiTabs bottomBorder={false}>
             <EuiTab
               isSelected={section === Section.LiveQueries}
               {...useRouterNavigate(Section.LiveQueries)}

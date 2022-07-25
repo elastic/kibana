@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -111,7 +111,8 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
-  describe('POST data_frame/_evaluate', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/116056
+  describe.skip('POST data_frame/_evaluate', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');

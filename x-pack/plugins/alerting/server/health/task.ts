@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from 'kibana/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';

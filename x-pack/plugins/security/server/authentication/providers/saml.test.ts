@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -18,6 +18,7 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
@@ -63,6 +64,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
@@ -108,6 +110,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
           state: {
             accessToken: 'some-token',
             refreshToken: 'some-refresh-token',
@@ -184,6 +187,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'user-initiated-login-token' },
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
@@ -225,6 +229,7 @@ describe('SAMLAuthenticationProvider', () => {
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'user-initiated-login-token' },
           state: {
             accessToken: 'user-initiated-login-token',
             refreshToken: 'user-initiated-login-refresh-token',
@@ -258,6 +263,7 @@ describe('SAMLAuthenticationProvider', () => {
         })
       ).resolves.toEqual(
         AuthenticationResult.redirectTo('/mock-server-basepath/', {
+          userProfileGrant: { type: 'accessToken', accessToken: 'idp-initiated-login-token' },
           state: {
             accessToken: 'idp-initiated-login-token',
             refreshToken: 'idp-initiated-login-refresh-token',
@@ -331,6 +337,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -349,6 +356,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -357,6 +365,43 @@ describe('SAMLAuthenticationProvider', () => {
             user: mockUser,
           })
         );
+      });
+
+      it('recognizes Elastic Cloud users.', async () => {
+        const nonElasticCloudUser = mockAuthenticatedUser({
+          authentication_provider: { type: 'saml', name: 'saml' },
+          authentication_realm: { type: 'saml', name: 'random-saml' },
+        });
+        const elasticCloudUser = mockAuthenticatedUser({
+          authentication_provider: { type: 'saml', name: 'saml' },
+          authentication_realm: { type: 'saml', name: ELASTIC_CLOUD_SSO_REALM_NAME },
+        });
+
+        // The only case when user should be recognized as Elastic Cloud user: Kibana is running inside Cloud
+        // deployment and user is authenticated with SAML realm of the predefined name.
+        for (const [authentication, isElasticCloudDeployment, isElasticCloudUser] of [
+          [nonElasticCloudUser, false, false],
+          [nonElasticCloudUser, true, false],
+          [elasticCloudUser, false, false],
+          [elasticCloudUser, true, true],
+        ]) {
+          mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+            username: 'user',
+            access_token: 'valid-token',
+            refresh_token: 'valid-refresh-token',
+            realm: 'test-realm',
+            authentication,
+          });
+
+          mockOptions.isElasticCloudDeployment.mockReturnValue(isElasticCloudDeployment);
+
+          const loginResult = await provider.login(
+            httpServerMock.createKibanaRequest({ headers: {} }),
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' }
+          );
+
+          expect(loginResult.user?.elastic_cloud_user).toBe(isElasticCloudUser);
+        }
       });
 
       it('redirects to the home page if `relayState` includes external URL', async () => {
@@ -368,6 +413,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -387,6 +433,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -408,6 +455,7 @@ describe('SAMLAuthenticationProvider', () => {
           AuthenticationResult.redirectTo(
             `${mockOptions.basePath.serverBasePath}/app/some-app#some-deep-link`,
             {
+              userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
               state: {
                 accessToken: 'valid-token',
                 refreshToken: 'valid-refresh-token',
@@ -432,6 +480,7 @@ describe('SAMLAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo(`${mockOptions.basePath.serverBasePath}/`, {
+            userProfileGrant: { type: 'accessToken', accessToken: 'valid-token' },
             state: {
               accessToken: 'valid-token',
               refreshToken: 'valid-refresh-token',
@@ -601,6 +650,7 @@ describe('SAMLAuthenticationProvider', () => {
             )
           ).resolves.toEqual(
             AuthenticationResult.redirectTo('/mock-server-basepath/', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'new-valid-token' },
               state: {
                 accessToken: 'new-valid-token',
                 refreshToken: 'new-valid-refresh-token',
@@ -663,6 +713,7 @@ describe('SAMLAuthenticationProvider', () => {
             )
           ).resolves.toEqual(
             AuthenticationResult.redirectTo('/mock-server-basepath/app/some-app#some-deep-link', {
+              userProfileGrant: { type: 'accessToken', accessToken: 'new-valid-token' },
               state: {
                 accessToken: 'new-valid-token',
                 refreshToken: 'new-valid-refresh-token',

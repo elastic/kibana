@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { BfetchServerPlugin } from './plugin';
 
 export type { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';

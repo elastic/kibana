@@ -13,7 +13,7 @@ import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-import { NotFound } from './';
+import { NotFound } from '.';
 
 describe('NotFound', () => {
   const wrapper = shallow(<NotFound />);

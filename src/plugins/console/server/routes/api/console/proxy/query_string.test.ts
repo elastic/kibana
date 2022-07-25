@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaResponse } from 'src/core/server';
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
 import * as requestModule from '../../../../lib/proxy_request';
@@ -43,7 +43,7 @@ describe('Console Proxy Route', () => {
           await request('GET', 'http://evil.com/test');
           expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).toBe('http://localhost:9200/http://evil.com/test?pretty=true');
+          expect(args.uri.href).toBe('http://localhost:9200/http%3A//evil.com/test?pretty=true');
         });
       });
       describe('starts with a slash', () => {

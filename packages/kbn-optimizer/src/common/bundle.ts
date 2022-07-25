@@ -14,6 +14,7 @@ import { UnknownVals } from './ts_helpers';
 import { omit } from './obj_helpers';
 import { includes } from './array_helpers';
 import type { Hashes } from './hashes';
+import { ParsedDllManifest } from './dll_manifest';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -88,12 +89,19 @@ export class Bundle {
 
   /**
    * Calculate the cache key for this bundle based from current
-   * mtime values.
+   * state determined by looking at files on disk.
    */
-  createCacheKey(paths: string[], hashes: Hashes): unknown {
+  createCacheKey(
+    paths: string[],
+    hashes: Hashes,
+    dllManifest: ParsedDllManifest,
+    dllRefKeys: string[]
+  ): unknown {
     return {
       spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
       checksums: Object.fromEntries(paths.map((p) => [p, hashes.getCached(p)] as const)),
+      dllName: dllManifest.name,
+      dllRefs: Object.fromEntries(dllRefKeys.map((k) => [k, dllManifest.content[k]] as const)),
     };
   }
 

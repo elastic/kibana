@@ -19,12 +19,13 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { State, createStore } from '../../common/store';
+import type { State } from '../../common/store';
+import { createStore } from '../../common/store';
 import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
-import { mockCasesContract } from '../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
@@ -106,6 +107,7 @@ jest.mock('../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      remove: jest.fn(),
     }),
   };
 });

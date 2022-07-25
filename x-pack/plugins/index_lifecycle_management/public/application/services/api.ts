@@ -7,7 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { IndexSettings } from '../../../../index_management/common';
+import { IndexSettings } from '@kbn/index-management-plugin/common';
 
 import {
   PolicyFromES,

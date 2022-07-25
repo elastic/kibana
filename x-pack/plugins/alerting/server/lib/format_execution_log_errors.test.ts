@@ -6,7 +6,7 @@
  */
 
 import { formatExecutionErrorsResult } from './format_execution_log_errors';
-import { QueryEventsBySavedObjectResult } from '../../../event_log/server';
+import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
 describe('formatExecutionErrorsResult', () => {
   test('should return empty results if data is undefined', () => {

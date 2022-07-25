@@ -6,28 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
 import {
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+  SimpleSavedObject,
+} from '@kbn/core/public';
+import { omit } from 'lodash';
+import { DataViewSavedObjectConflictError } from '../common/errors';
+import {
+  DataViewAttributes,
+  SavedObject,
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-  SavedObject,
-  DataViewSavedObjectConflictError,
-} from '../common';
+} from '../common/types';
 
-type SOClient = Pick<SavedObjectsClient, 'find' | 'resolve' | 'update' | 'create' | 'delete'>;
+type SOClient = Pick<
+  SavedObjectsClientContract,
+  'find' | 'resolve' | 'update' | 'create' | 'delete'
+>;
 
 const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
-  } as any);
+  } as SavedObject<T>);
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;
+
   constructor(savedObjectClient: SOClient) {
     this.savedObjectClient = savedObjectClient;
   }
+
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
     return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
@@ -40,19 +51,22 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     }
     return simpleSavedObjectToSavedObject<T>(response.saved_object);
   }
+
   async update(
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsUpdateOptions<unknown>
   ) {
     const response = await this.savedObjectClient.update(type, id, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
-  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+
+  async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
     const response = await this.savedObjectClient.create(type, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
+
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id, { force: true });
   }

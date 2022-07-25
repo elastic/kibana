@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { AppMountParameters } from '../../../../../../src/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { UXMetrics } from './core_web_vitals';
 
 export interface HeaderMenuPortalProps {

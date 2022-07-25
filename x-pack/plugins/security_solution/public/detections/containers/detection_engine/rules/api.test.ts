@@ -200,7 +200,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "__internal_immutable:false"',
+          filter: 'alert.attributes.params.immutable: false',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -228,7 +228,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "__internal_immutable:true"',
+          filter: 'alert.attributes.params.immutable: true',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -383,7 +383,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
+            'alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -434,14 +434,13 @@ describe('Detections Rules API', () => {
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules({ signal: abortCtrl.signal });
+      await createPrepackagedRules();
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        signal: abortCtrl.signal,
         method: 'PUT',
       });
     });
     test('happy path', async () => {
-      const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
+      const resp = await createPrepackagedRules();
       expect(resp).toEqual({
         rules_installed: 0,
         rules_updated: 0,
@@ -508,6 +507,7 @@ describe('Detections Rules API', () => {
         success: true,
         success_count: 33,
         errors: [],
+        rules_count: 33,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -517,6 +517,7 @@ describe('Detections Rules API', () => {
         success: true,
         success_count: 33,
         errors: [],
+        rules_count: 33,
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
@@ -630,7 +631,7 @@ describe('Detections Rules API', () => {
         start: '2001-01-01T17:00:00.000Z',
         end: '2001-01-02T17:00:00.000Z',
         queryText: '',
-        statusFilters: '',
+        statusFilters: [],
         signal: abortCtrl.signal,
       });
 
@@ -659,7 +660,7 @@ describe('Detections Rules API', () => {
         start: 'now-30',
         end: 'now',
         queryText: '',
-        statusFilters: '',
+        statusFilters: [],
         signal: abortCtrl.signal,
       });
       expect(response).toEqual(responseMock);

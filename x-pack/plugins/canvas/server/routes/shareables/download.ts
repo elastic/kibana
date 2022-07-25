@@ -7,7 +7,7 @@
 
 import { readFileSync } from 'fs';
 import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../common/lib/constants';
 
 export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDeps) {

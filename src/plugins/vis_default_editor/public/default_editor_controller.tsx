@@ -11,9 +11,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { IEditorController, EditorRenderProps } from 'src/plugins/visualizations/public';
-import { KibanaThemeProvider } from '../../kibana_react/public';
+import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getTheme } from './services';
 
 // @ts-ignore

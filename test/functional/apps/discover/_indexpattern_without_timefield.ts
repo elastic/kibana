@@ -91,7 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.goBack();
           await PageObjects.discover.waitForDocTableLoadingComplete();
           return (
-            (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
+            (await testSubjects.getVisibleText('discover-dataView-switch-link')) ===
+            'without-timefield'
           );
         }
       );

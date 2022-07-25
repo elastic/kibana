@@ -6,7 +6,7 @@
  */
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import type { KibanaExecutionContext } from 'kibana/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { FONTS_API_PATH } from '../common/constants';
 import {
   getHttp,

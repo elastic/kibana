@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ShareToSpaceFlyoutProps,
-  SpacesApiUi,
-} from '../../../../../../x-pack/plugins/spaces/public';
+import type { ShareToSpaceFlyoutProps, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementAction } from '../types';
 
@@ -33,10 +30,10 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   public euiAction = {
     name: i18n.translate('savedObjectsManagement.shareToSpace.actionTitle', {
-      defaultMessage: 'Assign spaces',
+      defaultMessage: 'Share to spaces',
     }),
     description: i18n.translate('savedObjectsManagement.shareToSpace.actionDescription', {
-      defaultMessage: 'Change the spaces this object is assigned to',
+      defaultMessage: 'Share this object to one or more spaces',
     }),
     icon: 'share',
     type: 'icon',

@@ -23,12 +23,12 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
-import { DataViewField } from '../../../../data_views/public';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListComponentState } from './options_list_component';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 
 export const OptionsListPopover = ({
   field,

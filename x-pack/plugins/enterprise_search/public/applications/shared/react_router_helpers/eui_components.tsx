@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { generateReactRouterProps, ReactRouterProps } from './';
+import { generateReactRouterProps, ReactRouterProps } from '.';
 
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props

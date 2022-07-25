@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { first, isEmpty, last, orderBy, uniq } from 'lodash';
-import { ServiceConnectionNode } from '../../../../plugins/apm/common/service_map';
+import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-type BackendResponse = SupertestReturnType<'GET /internal/apm/service-map/backend'>;
+type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
   SupertestReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 type ServiceMapResponse = SupertestReturnType<'GET /internal/apm/service-map'>;
@@ -101,14 +101,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/backend', () => {
-      let response: BackendResponse;
+    describe('/internal/apm/service-map/dependency', () => {
+      let response: DependencyResponse;
       before(async () => {
         response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/backend`,
+          endpoint: `GET /internal/apm/service-map/dependency`,
           params: {
             query: {
-              backendName: 'postgres',
+              dependencyName: 'postgres',
               start: metadata.start,
               end: metadata.end,
               environment: 'ENVIRONMENT_ALL',
@@ -371,14 +371,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/backend', () => {
-      let response: BackendResponse;
+    describe('/internal/apm/service-map/dependency', () => {
+      let response: DependencyResponse;
       before(async () => {
         response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/backend`,
+          endpoint: `GET /internal/apm/service-map/dependency`,
           params: {
             query: {
-              backendName: 'postgresql',
+              dependencyName: 'postgresql',
               start: metadata.start,
               end: metadata.end,
               environment: 'ENVIRONMENT_ALL',
@@ -416,14 +416,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
 
     describe('With comparison', () => {
-      describe('/internal/apm/service-map/backend', () => {
-        let response: BackendResponse;
+      describe('/internal/apm/service-map/dependency', () => {
+        let response: DependencyResponse;
         before(async () => {
           response = await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/service-map/backend`,
+            endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
               query: {
-                backendName: 'postgresql',
+                dependencyName: 'postgresql',
                 start: metadata.start,
                 end: metadata.end,
                 environment: 'ENVIRONMENT_ALL',

@@ -12,7 +12,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -22,11 +21,10 @@ Array [
         dismissToast={[Function]}
         toasts$={
           Observable {
-            "_isScalar": false,
             "source": BehaviorSubject {
-              "_isScalar": false,
               "_value": Array [],
               "closed": false,
+              "currentObservers": null,
               "hasError": false,
               "isStopped": false,
               "observers": Array [],

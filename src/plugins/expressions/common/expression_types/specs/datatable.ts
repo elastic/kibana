@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
-import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
@@ -186,7 +186,7 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
       meta: {},
       rows: value.rows,
       columns: map(value.columns, (val: PointSeriesColumn, colName) => {
-        return { id: colName, name: colName, meta: { type: val.type } };
+        return { id: colName, name: val.expression, meta: { type: val.type } };
       }),
     }),
   },

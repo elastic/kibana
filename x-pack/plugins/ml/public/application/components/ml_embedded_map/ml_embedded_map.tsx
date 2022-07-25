@@ -8,24 +8,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import {
-  INITIAL_LOCATION,
-  LayerDescriptor,
-  MAP_SAVED_OBJECT_TYPE,
-} from '../../../../../maps/common';
+import { INITIAL_LOCATION, LayerDescriptor, MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
   RenderTooltipContentParams,
-} from '../../../../../maps/public';
+} from '@kbn/maps-plugin/public';
 
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 
 export function MlEmbeddedMapComponent({

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { REPORT_TABLE_ID } from '../../../../plugins/reporting/common/constants';
+import { REPORT_TABLE_ID } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

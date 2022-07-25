@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
-import { ReadOperations } from '../../../alerting/server';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
+import { ReadOperations } from '@kbn/alerting-plugin/server';
 import { getAuthzFilter } from './get_authz_filter';
 
 describe('getAuthzFilter()', () => {

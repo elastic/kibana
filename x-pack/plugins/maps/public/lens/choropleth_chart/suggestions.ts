@@ -8,7 +8,7 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
-import type { SuggestionRequest, VisualizationSuggestion } from '../../../../lens/public';
+import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-plugin/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
 import { getEmsSuggestion } from './get_ems_suggestion';

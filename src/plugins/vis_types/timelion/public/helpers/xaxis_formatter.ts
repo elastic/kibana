@@ -9,7 +9,7 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 export function xaxisFormatterProvider(config: IUiSettingsClient) {
   function getFormat(esInterval: any) {

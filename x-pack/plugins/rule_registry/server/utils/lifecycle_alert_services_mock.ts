@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, AlertInstanceState } from '../../../alerting/server';
-import { alertsMock } from '../../../alerting/server/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { LifecycleAlertServices } from './create_lifecycle_executor';
 
 /**

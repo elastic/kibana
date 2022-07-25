@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
 import { Datafeed, Job } from './anomaly_detection_jobs';
 import { ErrorType } from '../util/errors';
 

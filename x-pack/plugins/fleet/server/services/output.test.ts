@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import type { OutputSOAttributes } from '../types';
 
 import { outputService, outputIdToUuid } from './output';

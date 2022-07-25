@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { FeaturesPlugin } from './plugin';
 
 // These exports are part of public Features plugin contract, any change in signature of exported

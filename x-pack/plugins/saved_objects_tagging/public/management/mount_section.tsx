@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreSetup, ApplicationStart } from 'src/core/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { CoreSetup, ApplicationStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';

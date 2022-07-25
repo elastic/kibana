@@ -9,11 +9,11 @@
 import {
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
 import { registerVegaUsageCollector } from './register_vega_collector';
 
-import type { HomeServerPluginSetup } from '../../../../home/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ConfigObservable } from '../types';
 
 describe('registerVegaUsageCollector', () => {

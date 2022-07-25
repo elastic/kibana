@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasourcePublicAPI } from '../types';
+import { DatasourceLayers } from '../types';
 
 type VisState = { layers: Array<{ layerId: string }> } | { layerId: string };
 
@@ -28,7 +28,7 @@ function mergeValues(memo: MappedVisualValue, values: Partial<MappedVisualValue>
 
 export function getDefaultVisualValuesForLayer(
   state: VisState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: DatasourceLayers
 ): MappedVisualValue {
   const defaultValues = { truncateText: true };
   if (!state) {

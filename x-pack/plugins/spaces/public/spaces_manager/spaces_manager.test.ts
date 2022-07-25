@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { SpacesManager } from './spaces_manager';
 

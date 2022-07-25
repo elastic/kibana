@@ -11,8 +11,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverFieldDetails } from './discover_field_details';
-import { DataViewField } from '../../../../../../data_views/public';
-import { stubDataView } from '../../../../../../data_views/common/data_view.stub';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 describe('discover sidebar field details', function () {
   const onAddFilter = jest.fn();

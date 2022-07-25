@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { APMPlugin, APMRouteHandlerResources } from '../..';
 import {
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import {
   NewPackagePolicy,
   UpdatePackagePolicy,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
@@ -39,7 +39,7 @@ export async function registerFleetPolicyCallbacks({
   const fleetPluginStart = await plugins.fleet.start();
 
   // Registers a callback invoked when a policy is created to populate the APM
-  // integration policy with pre-existing agent configurations
+  // integration policy with pre-existing agent configurations and source maps
   registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyCreate',
@@ -51,7 +51,7 @@ export async function registerFleetPolicyCallbacks({
   });
 
   // Registers a callback invoked when a policy is updated to populate the APM
-  // integration policy with existing agent configurations
+  // integration policy with existing agent configurations and source maps
   registerPackagePolicyExternalCallback({
     fleetPluginStart,
     callbackName: 'packagePolicyUpdate',

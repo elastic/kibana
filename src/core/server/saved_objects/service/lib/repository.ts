@@ -9,9 +9,12 @@
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
-import type { ElasticsearchClient } from '../../../elasticsearch/';
-import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import type { Logger } from '../../../logging';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+} from '@kbn/core-elasticsearch-server-internal';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   ISavedObjectsPointInTimeFinder,
@@ -151,6 +154,7 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 }
 
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_RETRY_COUNT = 3;
 
 /**
  * See {@link SavedObjectsRepository}
@@ -314,7 +318,6 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
-      originId,
       initialNamespaces,
       version,
     } = options;
@@ -322,6 +325,7 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     this.validateInitialNamespaces(type, initialNamespaces);
+    this.validateOriginId(type, options);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -330,6 +334,7 @@ export class SavedObjectsRepository {
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
+    let existingOriginId: string | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
       savedObjectNamespace = initialNamespaces
@@ -353,11 +358,17 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
+    // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
+    // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+    const originId = Object.keys(options).includes('originId')
+      ? options.originId
+      : existingOriginId;
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -441,6 +452,7 @@ export class SavedObjectsRepository {
       } else {
         try {
           this.validateInitialNamespaces(type, initialNamespaces);
+          this.validateOriginId(type, object);
         } catch (e) {
           error = e;
         }
@@ -498,6 +510,7 @@ export class SavedObjectsRepository {
 
       let savedObjectNamespace: string | undefined;
       let savedObjectNamespaces: string[] | undefined;
+      let existingOriginId: string | undefined;
       let versionProperties;
       const {
         preflightCheckIndex,
@@ -523,7 +536,8 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-        versionProperties = getExpectedVersionProperties(version, existingDocument);
+        versionProperties = getExpectedVersionProperties(version);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -535,6 +549,11 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      // 1. If the originId has been *explicitly set* for the object (defined or undefined), respect that.
+      // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+      const originId = Object.keys(object).includes('originId')
+        ? object.originId
+        : existingOriginId;
       const migrated = this._migrator.migrateDocument({
         id: object.id,
         type: object.type,
@@ -545,7 +564,7 @@ export class SavedObjectsRepository {
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         updated_at: time,
         references: object.references || [],
-        originId: object.originId,
+        originId,
       }) as SavedObjectSanitizedDoc<T>;
 
       /**
@@ -761,7 +780,7 @@ export class SavedObjectsRepository {
       {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(undefined),
         refresh,
       },
       { ignore: [404], meta: true }
@@ -1312,7 +1331,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
-    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      version,
+      references,
+      upsert,
+      refresh = DEFAULT_REFRESH_SETTING,
+      retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1373,8 +1398,9 @@ export class SavedObjectsRepository {
       .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(version),
         refresh,
+        retry_on_conflict: retryOnConflict,
         body: {
           doc,
           ...(rawUpsert && { upsert: rawUpsert._source }),
@@ -1608,8 +1634,7 @@ export class SavedObjectsRepository {
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
+          versionProperties = getExpectedVersionProperties(version);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`
@@ -2326,6 +2351,18 @@ export class SavedObjectsRepository {
       validator.validate(this._migrator.kibanaVersion, doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
+    }
+  }
+
+  /** This is used when objects are created. */
+  private validateOriginId(type: string, objectOrOptions: { originId?: string }) {
+    if (
+      Object.keys(objectOrOptions).includes('originId') &&
+      !this._registry.isMultiNamespace(type)
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"originId" can only be set for multi-namespace object types'
+      );
     }
   }
 }

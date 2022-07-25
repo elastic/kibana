@@ -10,7 +10,6 @@ import { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import { materialize, toArray } from 'rxjs/operators';
-import { firstValueFrom } from '@kbn/std';
 
 import { TestLog } from './log';
 import { Watcher, Options } from './watcher';
@@ -112,7 +111,7 @@ it('closes chokidar watcher when unsubscribed', () => {
 
 it('rethrows chokidar errors', async () => {
   const watcher = new Watcher(defaultOptions);
-  const promise = firstValueFrom(watcher.run$.pipe(materialize(), toArray()));
+  const promise = Rx.firstValueFrom(watcher.run$.pipe(materialize(), toArray()));
 
   isMock(mockChokidar);
   mockChokidar.emit('error', new Error('foo bar'));

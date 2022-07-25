@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginName } from 'kibana/server';
+import { PluginName } from '../../server';
 import { Plugin } from './plugin';
 
 export type MockedPluginInitializer = jest.Mock<Plugin<unknown, unknown>>;

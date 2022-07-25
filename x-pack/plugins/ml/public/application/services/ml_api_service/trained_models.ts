@@ -8,9 +8,9 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { HttpService } from '../http_service';
-import { basePath } from './index';
+import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
   TrainedModelConfigResponse,
@@ -124,10 +124,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(modelId: string) {
+    startModelAllocation(
+      modelId: string,
+      queryParams?: { number_of_allocations: number; threads_per_allocation: number }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
+        query: queryParams,
       });
     },
 
@@ -143,26 +147,17 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     inferTrainedModel(modelId: string, payload: any, timeout?: string) {
       const body = JSON.stringify(payload);
-      return httpService.http<estypes.MlInferTrainedModelDeploymentResponse>({
+      return httpService.http<estypes.MlInferTrainedModelResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
       });
     },
-
-    ingestPipelineSimulate(payload: estypes.IngestSimulateRequest['body']) {
-      const body = JSON.stringify(payload);
-      return httpService.http<estypes.IngestSimulateResponse>({
-        path: `${apiBasePath}/trained_models/ingest_pipeline_simulate`,
-        method: 'POST',
-        body,
-      });
-    },
   };
 }
 
-type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
+export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
 
 /**
  * Hooks for accessing {@link TrainedModelsApiService} in React components.

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringCollectionPlugin } from './plugin';
 
 describe('monitoring_collection plugin', () => {

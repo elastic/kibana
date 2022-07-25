@@ -7,15 +7,15 @@
 
 import { flatten, isObject, mapValues } from 'lodash';
 
-import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
-
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import type {
   ElasticsearchFeature,
   FeatureElasticsearchPrivileges,
   KibanaFeature,
-} from '../../../features/server';
+} from '@kbn/features-plugin/server';
+import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
+
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuthorizationServiceSetup } from './authorization_service';
 import type { CheckPrivilegesResponse } from './types';

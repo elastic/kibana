@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { usageMetricSavedObjectType } from '../../../common/types';
 
-import {
-  CounterValue,
-  getOrCreateMetricObject,
-  getRouteMetric,
-  incrementCount,
-  RouteString,
-  routeStrings,
-} from './recorder';
+import type { CounterValue, RouteString } from './recorder';
+import { getOrCreateMetricObject, getRouteMetric, incrementCount, routeStrings } from './recorder';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -82,6 +76,7 @@ describe('Usage metric recorder', () => {
           count: 0,
           errors: 0,
         };
+
         return acc;
       }, {} as { [key: string]: CounterValue });
       get.mockClear();

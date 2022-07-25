@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { BfetchPublicPlugin } from './plugin';
 
 export type { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';

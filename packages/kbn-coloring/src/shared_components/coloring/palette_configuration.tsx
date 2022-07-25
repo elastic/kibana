@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { useReducer, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { PalettePicker } from './palette_picker';
 import {
   PaletteOutput,
@@ -18,8 +19,6 @@ import {
   CustomPaletteParams,
   RequiredPaletteParamTypes,
 } from '../../palettes';
-
-import './palette_configuration.scss';
 
 import { toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
@@ -72,8 +71,19 @@ export const CustomizablePalette = ({
     [localState]
   );
 
+  const { euiTheme } = useEuiTheme();
+
+  const styles = useMemo(
+    () => css`
+      padding: ${euiTheme.size.base};
+      background-color: ${euiTheme.colors.lightestShade};
+      border-bottom: ${euiTheme.border.thin};
+    `,
+    [euiTheme.size.base, euiTheme.colors.lightestShade, euiTheme.border.thin]
+  );
+
   return (
-    <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded">
+    <div css={styles} className="lnsPalettePanel__section">
       <EuiFormRow
         display="rowCompressed"
         label={i18n.translate('coloring.dynamicColoring.palettePicker.label', {
@@ -100,6 +110,7 @@ export const CustomizablePalette = ({
       </EuiFormRow>
       {showRangeTypeSelector && (
         <EuiFormRow
+          fullWidth
           label={
             <>
               {i18n.translate('coloring.dynamicColoring.rangeType.label', {
@@ -121,6 +132,7 @@ export const CustomizablePalette = ({
           display="rowCompressed"
         >
           <EuiButtonGroup
+            isFullWidth
             legend={i18n.translate('coloring.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
@@ -159,7 +171,6 @@ export const CustomizablePalette = ({
                 payload: { rangeType: newRangeType, dataBounds, palettes },
               });
             }}
-            isFullWidth
           />
         </EuiFormRow>
       )}

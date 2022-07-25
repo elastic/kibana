@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Action, MiddlewareAPI } from 'redux';
-import { ActionsObservable, Epic } from 'redux-observable';
-import { Observable } from 'rxjs';
+import { Action } from 'redux';
+import { Epic } from 'redux-observable';
 
 declare module 'redux-observable' {
   function combineEpics<

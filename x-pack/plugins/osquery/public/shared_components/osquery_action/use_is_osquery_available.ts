@@ -6,12 +6,25 @@
  */
 
 import { useMemo } from 'react';
-import { find } from 'lodash';
+import { find, isString } from 'lodash';
+import type { AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useAgentDetails } from '../../agents/use_agent_details';
 import { useAgentPolicy } from '../../agent_policies';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
-export const useIsOsqueryAvailable = (agentId?: string) => {
+interface IIsOsqueryAvailable {
+  osqueryAvailable: boolean;
+  agentFetched: boolean;
+  isLoading: boolean;
+  policyFetched: boolean;
+  policyLoading: boolean;
+  agentData?: {
+    status?: AgentStatus;
+    policy_id?: string;
+  };
+}
+
+export const useIsOsqueryAvailable = (agentId?: string): IIsOsqueryAvailable => {
   const {
     data: agentData,
     isFetched: agentFetched,
@@ -35,11 +48,12 @@ export const useIsOsqueryAvailable = (agentId?: string) => {
   const osqueryAvailable = useMemo(() => {
     if (policyError) return false;
 
-    const osqueryPackageInstalled = find(agentPolicyData?.package_policies, [
-      'package.name',
-      OSQUERY_INTEGRATION_NAME,
-    ]);
-    return osqueryPackageInstalled?.enabled;
+    const osqueryPackageInstalled = find<PackagePolicy | string>(
+      agentPolicyData?.package_policies,
+      ['package.name', OSQUERY_INTEGRATION_NAME]
+    );
+
+    return !isString(osqueryPackageInstalled) ? !!osqueryPackageInstalled?.enabled : false;
   }, [agentPolicyData?.package_policies, policyError]);
 
   return { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData };

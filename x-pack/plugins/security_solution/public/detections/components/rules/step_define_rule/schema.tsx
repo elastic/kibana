@@ -18,19 +18,15 @@ import {
 } from '../../../../common/components/threat_match/helpers';
 import {
   isEqlRule,
+  isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { FieldValueQueryBar } from '../query_bar';
-import {
-  ERROR_CODE,
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-} from '../../../../shared_imports';
-import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
@@ -44,6 +40,7 @@ import {
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
+    defaultValue: [],
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -59,9 +56,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const skipValidation = isMlRule(formData.ruleType) || formData.dataViewId != null;
 
-          if (!needsValidation) {
+          if (skipValidation) {
             return;
           }
 
@@ -77,6 +74,49 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
+    validations: [],
+  },
+  dataViewId: {
+    fieldsToValidateOnChange: ['dataViewId'],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
+
+          if (skipValidation) {
+            return;
+          }
+
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
+              {
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
+              }
+            ),
+          };
+        },
+      },
+    ],
+  },
+  eqlOptions: {},
   queryBar: {
     validations: [
       {
@@ -174,6 +214,34 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  relatedIntegrations: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
+      {
+        defaultMessage: 'Related integrations',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
+      {
+        defaultMessage: 'Integration related to this Rule.',
+      }
+    ),
+  },
+  requiredFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsLabel',
+      {
+        defaultMessage: 'Required fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsHelpText',
+      {
+        defaultMessage: 'Fields required for this Rule to function.',
+      }
+    ),
   },
   timeline: {
     label: i18n.translate(
@@ -480,5 +548,76 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  newTermsFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsLabel',
+      {
+        defaultMessage: 'Fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
+      {
+        defaultMessage: 'Select a field to check for new terms.',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
+              {
+                defaultMessage: 'Number of fields must be 1.',
+              }
+            )
+          )(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: 1,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
+              {
+                defaultMessage: 'Number of fields must be 1.',
+              }
+            ),
+          })(...args);
+        },
+      },
+    ],
+  },
+  historyWindowSize: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel',
+      {
+        defaultMessage: 'History Window Size',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
+      {
+        defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
+      }
+    ),
   },
 };

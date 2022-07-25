@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldSearch } from '@elastic/eui';
 
-import { AnalyticsSearch } from './';
+import { AnalyticsSearch } from '.';
 
 describe('AnalyticsSearch', () => {
   const { navigateToUrl } = mockKibanaValues;

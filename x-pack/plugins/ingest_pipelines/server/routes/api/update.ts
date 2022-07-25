@@ -30,7 +30,7 @@ export const registerUpdateRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { description, processors, version, on_failure } = req.body;

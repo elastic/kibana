@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { CommentAttributes } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
@@ -53,6 +53,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     const deleteCasesMapper = async (id: string) =>
       caseService.deleteCase({
         id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -81,6 +82,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
         attachmentService.delete({
           unsecuredSavedObjectsClient,
           attachmentId: comment.id,
+          refresh: false,
         })
       );
 

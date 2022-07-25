@@ -11,7 +11,7 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
-} from '../../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
 import type { Scale } from '../types';
 
 export type ExpressionValueScale = ExpressionValueBoxed<

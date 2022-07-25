@@ -47,11 +47,28 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
+  const executionTimestamp = Date.now();
+  const { rangeFilter } = buildFiltersFromCriteria(
+    expandedAlertParams,
+    timestampField,
+    executionTimestamp
+  );
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
+    ? getGroupedESQuery(
+        expandedAlertParams,
+        timestampField,
+        indices,
+        runtimeMappings,
+        executionTimestamp
+      )
+    : getUngroupedESQuery(
+        expandedAlertParams,
+        timestampField,
+        indices,
+        runtimeMappings,
+        executionTimestamp
+      );
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

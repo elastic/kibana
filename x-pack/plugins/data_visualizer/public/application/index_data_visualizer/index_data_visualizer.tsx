@@ -10,12 +10,10 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
-import { SimpleSavedObject } from 'kibana/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
@@ -31,18 +29,16 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataView } from '../../../../../../src/plugins/data_views/public';
-import { ResultLink } from '../common/components/results_links';
+import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 
-export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
-
 export interface DataVisualizerUrlStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
-  additionalLinks: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
+export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
 export const getLocatorParams = (params: {
   dataViewId?: string;
@@ -76,7 +72,7 @@ export const getLocatorParams = (params: {
 
 export const DataVisualizerUrlStateContextProvider: FC<
   DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, additionalLinks }) => {
+> = ({ IndexDataVisualizerComponent, getAdditionalLinks }) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -250,8 +246,8 @@ export const DataVisualizerUrlStateContextProvider: FC<
         <IndexDataVisualizerComponent
           currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
-          additionalLinks={additionalLinks}
           currentSessionId={currentSessionId}
+          getAdditionalLinks={getAdditionalLinks}
         />
       ) : (
         <div />
@@ -260,7 +256,9 @@ export const DataVisualizerUrlStateContextProvider: FC<
   );
 };
 
-export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ additionalLinks }) => {
+export const IndexDataVisualizer: FC<{
+  getAdditionalLinks?: GetAdditionalLinks;
+}> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -297,7 +295,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
       <KibanaContextProvider services={{ ...services }}>
         <DataVisualizerUrlStateContextProvider
           IndexDataVisualizerComponent={IndexDataVisualizerView}
-          additionalLinks={additionalLinks}
+          getAdditionalLinks={getAdditionalLinks}
         />
       </KibanaContextProvider>
     </KibanaThemeProvider>

@@ -12,8 +12,8 @@ import dateMath from '@kbn/datemath';
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/field_formats/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 const unitsDesc = dateMath.unitsDesc;
 

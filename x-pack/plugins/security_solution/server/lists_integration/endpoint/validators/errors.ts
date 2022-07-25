@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListsErrorWithStatusCode } from '../../../../../lists/server';
+import { ListsErrorWithStatusCode } from '@kbn/lists-plugin/server';
 
 export class EndpointArtifactExceptionValidationError extends ListsErrorWithStatusCode {
   constructor(message: string, statusCode: number = 400) {

@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { takeUntil } from 'rxjs/operators';
 import { from } from 'rxjs';
 import React from 'react';
-import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import {
   KibanaContextProvider,
   toMountPoint,
   wrapWithTheme,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { DashboardConstants } from '@kbn/dashboard-plugin/public';
+import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
-import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
 

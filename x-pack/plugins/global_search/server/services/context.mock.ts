@@ -6,13 +6,13 @@
  */
 
 import { of } from 'rxjs';
-import { Capabilities } from 'src/core/server';
+import { Capabilities } from '@kbn/core/server';
 import {
   savedObjectsTypeRegistryMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
   capabilitiesServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 const createContextMock = (capabilities: Partial<Capabilities> = {}) => {
   return {

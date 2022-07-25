@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { DataView, DataViewField } from '../../../../../../../data_views/public';
-import { ElasticSearchHit } from '../../../../../types';
+import { DataTableRecord } from '../../../../../types';
 
 export function getDetails(
   field: DataViewField,
-  hits: ElasticSearchHit[] | undefined,
+  hits: DataTableRecord[] | undefined,
   columns: string[],
   indexPattern?: DataView
 ) {
@@ -24,7 +24,6 @@ export function getDetails(
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
-      indexPattern,
       count: 5,
       grouped: false,
     }),

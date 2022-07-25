@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 
-import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
-import type { ThemeServiceStart } from '../../../../core/public';
+import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 

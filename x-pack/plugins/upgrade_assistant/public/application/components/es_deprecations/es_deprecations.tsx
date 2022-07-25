@@ -11,7 +11,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';

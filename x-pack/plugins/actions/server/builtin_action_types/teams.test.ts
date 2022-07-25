@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { Services } from '../types';
 import { validateParams, validateSecrets } from '../lib';
 import axios from 'axios';
@@ -160,22 +160,10 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
     });
+    delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
         "data": Object {
           "text": "this invocation should succeed",
         },
@@ -225,22 +213,10 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
     });
+    delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
         "data": Object {
           "text": "this invocation should succeed",
         },

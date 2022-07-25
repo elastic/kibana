@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 export interface ICoreStartContext {
   appName: string;

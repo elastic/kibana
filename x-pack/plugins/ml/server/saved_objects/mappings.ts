@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTypeMappingDefinition } from 'kibana/server';
+import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const mlJob: SavedObjectsTypeMappingDefinition = {
   properties: {

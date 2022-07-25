@@ -18,6 +18,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
+import { Rule } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getAlertsTargetIndices,
@@ -29,7 +30,6 @@ import {
   deleteAlert,
 } from '../../../common/lib/helpers';
 import { AlertDef, AlertParams } from '../../../common/types';
-import { Rule } from '../../../../../plugins/alerting/common';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
 

@@ -10,7 +10,7 @@ export type {
   KibanaReactContext,
   KibanaReactContextValue,
   ExitFullScreenButtonProps,
-} from '../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 export {
   context,
   useKibana,
@@ -21,4 +21,4 @@ export {
   ExitFullScreenButton,
   KibanaContextProvider,
   KibanaThemeProvider,
-} from '../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';

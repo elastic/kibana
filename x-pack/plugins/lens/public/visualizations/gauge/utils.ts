@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Accessors } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { Accessors } from '@kbn/expression-gauge-plugin/common';
 import { GaugeVisualizationState } from './constants';
 
 export const getAccessorsFromState = (state?: GaugeVisualizationState): Accessors | undefined => {

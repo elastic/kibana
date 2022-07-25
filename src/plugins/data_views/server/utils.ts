@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import {
-  IFieldType,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataViewAttributes,
-  SavedObject,
-} from '../common';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
 
+/**
+ * @deprecated Use data views api instead
+ */
 export const getFieldByName = (
   fieldName: string,
   indexPattern: SavedObject<DataViewAttributes>
-): IFieldType | undefined => {
-  const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+): FieldSpec | undefined => {
+  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;
 };
 
+/**
+ * @deprecated Use data views api instead
+ */
 export const findIndexPatternById = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string

@@ -11,8 +11,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable } from 'rxjs';
 
+import type { CoreSetup, CoreStart, CoreTheme, Plugin } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreSetup, CoreStart, CoreTheme, Plugin } from 'src/core/public';
 
 import { App } from './app';
 import { KibanaThemeProvider } from './theme'; // TODO: replace this with the one exported from `kibana_react` after https://github.com/elastic/kibana/issues/119204 is implemented.

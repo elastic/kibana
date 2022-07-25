@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { HostDetailsNavTab } from './types';
+import type { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 
@@ -67,6 +67,7 @@ export const navTabsHostDetails = ({
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
       disabled: false,
+      isBeta: true,
     },
   };
 

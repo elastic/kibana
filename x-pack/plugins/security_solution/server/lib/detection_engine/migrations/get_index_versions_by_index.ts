@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-
-export interface IndexMappingsResponse {
-  [indexName: string]: { mappings: { _meta: { version: number } } };
-}
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export interface IndexVersionsByIndex {
   [indexName: string]: number | undefined;

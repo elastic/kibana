@@ -9,7 +9,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const commonConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const commonConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     testFiles: [require.resolve('./index.ts')],
@@ -22,7 +22,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
         '--telemetry.optIn=false',
         '--dashboard.allowByValueEmbeddables=true',
       ],

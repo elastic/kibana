@@ -7,8 +7,8 @@
  */
 
 import { AccessorFn, Accessor } from '@elastic/charts';
-import { BUCKET_TYPES } from '../../../../data/public';
-import { FakeParams } from '../../../../visualizations/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { FakeParams } from '@kbn/visualizations-plugin/public';
 import type { Aspect } from '../types';
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';

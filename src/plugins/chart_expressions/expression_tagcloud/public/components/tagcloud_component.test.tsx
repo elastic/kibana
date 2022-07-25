@@ -7,8 +7,8 @@
  */
 import React from 'react';
 import { Wordcloud, Settings, WordcloudSpec } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';

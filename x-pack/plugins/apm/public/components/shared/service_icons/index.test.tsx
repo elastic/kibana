@@ -6,11 +6,11 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 // import { renderWithTheme } from '../../../../utils/test_helpers';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as fetcherHook from '../../../hooks/use_fetcher';
 import { ServiceIcons } from '.';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },

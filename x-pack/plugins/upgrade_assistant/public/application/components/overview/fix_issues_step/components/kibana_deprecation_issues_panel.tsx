@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from '@kbn/core/public';
 
 import { useAppContext } from '../../../../app_context';
 import { DeprecationIssuesPanel } from './deprecation_issues_panel';

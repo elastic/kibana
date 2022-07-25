@@ -6,9 +6,45 @@
  * Side Public License, v 1.
  */
 
-export { LegendToggle } from './legend_toggle';
-export { ColorPicker } from './color_picker';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+
 export { CurrentTime } from './current_time';
 export { EmptyPlaceholder } from './empty_placeholder';
-import './common_chart_styles.scss';
+
+export { useCommonChartStyles } from './common_chart_styles';
 export * from './endzones';
+
+/**
+ * The Lazily-loaded `ColorPicker` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const ColorPickerLazy = React.lazy(() =>
+  import('./color_picker').then(({ ColorPicker }) => ({
+    default: ColorPicker,
+  }))
+);
+
+/**
+ * A `ColorPicker` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `ColorPickerLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const ColorPicker = withSuspense(ColorPickerLazy);
+
+/**
+ * The Lazily-loaded `LegendToggle` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const LegendToggleLazy = React.lazy(() =>
+  import('./legend_toggle').then(({ LegendToggle }) => ({
+    default: LegendToggle,
+  }))
+);
+
+/**
+ * A `LegendToggle` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `LegendToggleLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const LegendToggle = withSuspense(LegendToggleLazy);

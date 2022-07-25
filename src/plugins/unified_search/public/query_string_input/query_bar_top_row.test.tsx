@@ -14,12 +14,15 @@ import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
 import QueryBarTopRow from './query_bar_top_row';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { stubIndexPattern } from '../../../data/public/stubs';
-import { UI_SETTINGS } from '../../../data/common';
+import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { setAutocomplete } from '../services';
+import { unifiedSearchPluginMock } from '../mocks';
+
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
@@ -110,6 +113,11 @@ describe('QueryBarTopRowTopRow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
   });
 
   it('Should render query and time picker', () => {

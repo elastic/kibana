@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 

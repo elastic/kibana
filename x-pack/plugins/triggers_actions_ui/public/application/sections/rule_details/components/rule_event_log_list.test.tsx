@@ -29,6 +29,7 @@ const mockLogResponse: any = {
       duration: 5000000,
       status: 'success',
       message: 'rule execution #1',
+      version: '8.2.0',
       num_active_alerts: 2,
       num_new_alerts: 4,
       num_recovered_alerts: 3,
@@ -46,6 +47,7 @@ const mockLogResponse: any = {
       duration: 6000000,
       status: 'success',
       message: 'rule execution #2',
+      version: '8.2.0',
       num_active_alerts: 4,
       num_new_alerts: 2,
       num_recovered_alerts: 4,
@@ -63,6 +65,7 @@ const mockLogResponse: any = {
       duration: 340000,
       status: 'failure',
       message: 'rule execution #3',
+      version: '8.2.0',
       num_active_alerts: 8,
       num_new_alerts: 5,
       num_recovered_alerts: 0,
@@ -80,6 +83,7 @@ const mockLogResponse: any = {
       duration: 3000000,
       status: 'unknown',
       message: 'rule execution #4',
+      version: '8.2.0',
       num_active_alerts: 4,
       num_new_alerts: 4,
       num_recovered_alerts: 4,
@@ -154,7 +158,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -163,18 +167,15 @@ describe('rule_event_log_list', () => {
     // Loading
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeTruthy();
 
-    // Verify the initial columns are rendered
-    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
-      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
-    });
-
-    // No data initially
-    expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(1);
-
     // Let the load resolve
     await act(async () => {
       await nextTick();
       wrapper.update();
+    });
+
+    // Verify the initial columns are rendered
+    RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
+      expect(wrapper.find(`[data-test-subj="dataGridHeaderCell-${column}"]`).exists()).toBeTruthy();
     });
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
@@ -223,7 +224,7 @@ describe('rule_event_log_list', () => {
             },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -252,7 +253,7 @@ describe('rule_event_log_list', () => {
             },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -289,7 +290,7 @@ describe('rule_event_log_list', () => {
             execution_duration: { order: 'asc' },
           },
         ],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
       })
@@ -323,7 +324,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: ['success'],
+        outcomeFilter: ['success'],
         page: 0,
         perPage: 10,
       })
@@ -343,7 +344,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: ['success', 'failure'],
+        outcomeFilter: ['success', 'failure'],
         page: 0,
         perPage: 10,
       })
@@ -382,7 +383,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 1,
         perPage: 10,
       })
@@ -402,7 +403,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 50,
       })
@@ -428,7 +429,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-30T19:00:00-05:00',
@@ -453,7 +454,7 @@ describe('rule_event_log_list', () => {
       expect.objectContaining({
         id: mockRule.id,
         sort: [],
-        filter: [],
+        outcomeFilter: [],
         page: 0,
         perPage: 10,
         dateStart: '1969-12-31T18:45:00-05:00',
@@ -516,13 +517,13 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
   });
 
   it('shows the refine search prompt when our queries return too much data', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
-      ...mockLogResponse,
-      total: 1000,
+      data: [],
+      total: 1100,
     });
 
     const wrapper = mountWithIntl(
@@ -537,8 +538,122 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
+    // Initially do not show the prompt
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+
+    // Go to the last page
+    wrapper.find('[data-test-subj="pagination-button-99"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is shown
     expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
-      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+      'These are the first 1000 documents matching your search, refine your search to see others. Back to top.'
+    );
+
+    // Go to the second last page
+    wrapper.find('[data-test-subj="pagination-button-98"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Prompt is not shown
+    expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
+  });
+
+  it('shows the correct pagination results when results are 0', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 0,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 0 of 0 log entries'
+    );
+  });
+
+  it('shows the correct pagination result when result is 1', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 1 of 1 log entry'
+    );
+  });
+
+  it('shows the correct pagination result when paginated', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 10 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 11 - 20 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 81 - 85 of 85 log entries'
     );
   });
 });

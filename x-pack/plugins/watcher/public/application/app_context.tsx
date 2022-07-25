@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import { ACTION_TYPES } from '../../common/constants';
 import { AppDeps } from './app';
 

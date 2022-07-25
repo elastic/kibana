@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectSanitizedDoc } from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { SavedObjectSanitizedDoc } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ConnectorTypes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';

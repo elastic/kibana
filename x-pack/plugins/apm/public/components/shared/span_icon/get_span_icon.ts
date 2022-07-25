@@ -23,7 +23,7 @@ import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
 import websocketIcon from './icons/websocket.svg';
-import javaIcon from '../../shared/agent_icon/icons/java.svg';
+import javaIcon from '../agent_icon/icons/java.svg';
 
 const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,

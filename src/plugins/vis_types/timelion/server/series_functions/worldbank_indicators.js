@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import worldbank from './worldbank.js';
+import worldbank from './worldbank';
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource('worldbank_indicators', {

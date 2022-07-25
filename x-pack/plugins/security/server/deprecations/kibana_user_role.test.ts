@@ -8,13 +8,13 @@
 import { errors } from '@elastic/elasticsearch';
 import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/lib/api/types';
 
-import type { PackageInfo, RegisterDeprecationsConfig } from 'src/core/server';
+import type { PackageInfo, RegisterDeprecationsConfig } from '@kbn/core/server';
 import {
   deprecationsServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';

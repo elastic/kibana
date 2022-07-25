@@ -11,11 +11,11 @@ import {
   executionContextServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { CollectorOptions, CollectorSet } from './collector';
 import { Collector } from './collector/collector';
-import { UsageCollectionSetup, CollectorFetchContext } from './index';
+import { UsageCollectionSetup, CollectorFetchContext } from '.';
 import { usageCountersServiceMock } from './usage_counters/usage_counters_service.mock';
 export type { CollectorOptions };
 export { Collector };

@@ -6,8 +6,15 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { UserActionPropertyActions } from './property_actions';
+import { UserActionPropertyActions, UserActionPropertyActionsProps } from './property_actions';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {
+  noCreateCasesPermissions,
+  noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 
@@ -22,52 +29,178 @@ const props = {
   isLoading: false,
   onEdit,
   onQuote,
-  userCanCrud: true,
 };
 
 describe('UserActionPropertyActions ', () => {
-  let wrapper: ReactWrapper;
-
-  beforeAll(() => {
-    wrapper = mount(<UserActionPropertyActions {...props} />);
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('it renders', async () => {
-    expect(
-      wrapper.find('[data-test-subj="user-action-title-loading"]').first().exists()
-    ).toBeFalsy();
+  it('renders', async () => {
+    render(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
 
-    expect(wrapper.find('[data-test-subj="property-actions"]').first().exists()).toBeTruthy();
+    expect(screen.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('property-actions')).toBeInTheDocument();
   });
 
-  it('it shows the edit and quote buttons', async () => {
-    wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('[data-test-subj="property-actions-pencil"]').exists();
-    wrapper.find('[data-test-subj="property-actions-quote"]').exists();
+  it('shows the edit and quote buttons', async () => {
+    const renderResult = render(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    expect(screen.getByTestId('property-actions-pencil')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-quote')).toBeInTheDocument();
   });
 
   it('quote click calls onQuote', async () => {
-    wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('[data-test-subj="property-actions-quote"]').first().simulate('click');
+    const renderResult = render(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    userEvent.click(renderResult.getByTestId('property-actions-quote'));
+
     expect(onQuote).toHaveBeenCalledWith(props.id);
   });
 
   it('pencil click calls onEdit', async () => {
-    wrapper.find('[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('[data-test-subj="property-actions-pencil"]').first().simulate('click');
+    const renderResult = render(
+      <TestProviders>
+        <UserActionPropertyActions {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    userEvent.click(renderResult.getByTestId('property-actions-pencil'));
     expect(onEdit).toHaveBeenCalledWith(props.id);
   });
 
-  it('it shows the spinner when loading', async () => {
-    wrapper = mount(<UserActionPropertyActions {...props} isLoading={true} />);
-    expect(
-      wrapper.find('[data-test-subj="user-action-title-loading"]').first().exists()
-    ).toBeTruthy();
+  it('shows the spinner when loading', async () => {
+    render(
+      <TestProviders>
+        <UserActionPropertyActions {...props} isLoading={true} />
+      </TestProviders>
+    );
+    expect(screen.getByTestId('user-action-title-loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions')).not.toBeInTheDocument();
+  });
 
-    expect(wrapper.find('[data-test-subj="property-actions"]').first().exists()).toBeFalsy();
+  describe('deletion props', () => {
+    let onDelete: jest.Mock;
+    let deleteProps: UserActionPropertyActionsProps;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      onDelete = jest.fn();
+      deleteProps = {
+        ...props,
+        onDelete,
+        deleteLabel: 'delete me',
+        deleteConfirmTitle: 'confirm delete me',
+      };
+    });
+
+    it('does not show the delete icon when the user does not have delete permissions', () => {
+      const renderResult = render(
+        <TestProviders permissions={noDeleteCasesPermissions()}>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      expect(renderResult.queryByTestId('property-actions-trash')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    });
+
+    it('does not show the pencil icon when the user does not have update permissions', () => {
+      const renderResult = render(
+        <TestProviders permissions={noUpdateCasesPermissions()}>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-pencil')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
+    });
+
+    it('does not show the quote icon when the user does not have create permissions', () => {
+      const renderResult = render(
+        <TestProviders permissions={noCreateCasesPermissions()}>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('property-actions-quote')).not.toBeInTheDocument();
+    });
+
+    it('shows the delete button', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      expect(renderResult.getByTestId('property-actions-trash')).toBeTruthy();
+    });
+
+    it('shows a confirm dialog when the delete button is clicked', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+    });
+
+    it('closes the confirm dialog when the cancel button is clicked', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+
+      userEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
+      expect(renderResult.queryByTestId('property-actions-confirm-modal')).toBe(null);
+    });
+
+    it('calls onDelete when the confirm is pressed', () => {
+      const renderResult = render(
+        <TestProviders>
+          <UserActionPropertyActions {...deleteProps} />
+        </TestProviders>
+      );
+
+      userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      userEvent.click(renderResult.getByTestId('property-actions-trash'));
+      expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
+
+      userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
+      expect(onDelete).toHaveBeenCalledWith(deleteProps.id);
+    });
   });
 });

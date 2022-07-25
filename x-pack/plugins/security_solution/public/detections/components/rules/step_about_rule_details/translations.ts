@@ -28,6 +28,13 @@ export const ABOUT_PANEL_NOTES_TAB = i18n.translate(
   }
 );
 
+export const ABOUT_PANEL_SETUP_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.details.stepAboutRule.setupGuideLabel',
+  {
+    defaultMessage: 'Setup guide',
+  }
+);
+
 export const ABOUT_CONTROL_LEGEND = i18n.translate(
   'xpack.securitySolution.detectionEngine.details.stepAboutRule.controlLegend',
   {

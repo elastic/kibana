@@ -9,18 +9,19 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
 
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -52,14 +53,17 @@ import {
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -141,35 +145,29 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const pkgInfoPromise = getPackageInfo({
+      if (!options?.skipEnsureInstalled) {
+        await ensureInstalledPackage({
+          esClient,
+          spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          force: options?.force,
+        });
+      }
+
+      const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
-
-      let pkgInfo: PackageInfo;
-
-      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
-      else {
-        const [, packageInfo] = await Promise.all([
-          ensureInstalledPackage({
-            esClient,
-            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-          }),
-          pkgInfoPromise,
-        ]);
-        pkgInfo = packageInfo;
-      }
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
-            `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
+            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
       }
@@ -377,6 +375,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
+    if (packagePolicyUpdate.is_managed && !options?.force) {
+      throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+    }
+
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
@@ -478,6 +480,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
+        }
+
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
@@ -602,7 +609,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
@@ -617,6 +624,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           packagePolicy,
           pkgVersion
         ));
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+        }
 
         await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
       } catch (error) {
@@ -836,6 +847,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      skipArchive: true,
     });
     if (packageInfo) {
       return packageToPackagePolicy(packageInfo, '', '');
@@ -869,16 +881,24 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy | void> {
+  ): Promise<PackagePolicy | NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
@@ -888,7 +908,21 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (externalCallbacks && externalCallbacks.size > 0) {
           let updatedNewData = newData;
           for (const callback of externalCallbacks) {
-            const result = await callback(updatedNewData, context, request);
+            let result;
+            if (externalCallbackType === 'packagePolicyPostCreate') {
+              result = await (callback as PostPackagePolicyPostCreateCallback)(
+                updatedNewData as PackagePolicy,
+                context,
+                request
+              );
+              updatedNewData = PackagePolicySchema.validate(result);
+            } else {
+              result = await (callback as PostPackagePolicyCreateCallback)(
+                updatedNewData as NewPackagePolicy,
+                context,
+                request
+              );
+            }
             if (externalCallbackType === 'packagePolicyCreate') {
               updatedNewData = NewPackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyUpdate') {
@@ -1276,10 +1310,18 @@ export interface PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
 

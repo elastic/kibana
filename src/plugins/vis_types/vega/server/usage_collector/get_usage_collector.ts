@@ -8,11 +8,8 @@
 
 import { parse } from 'hjson';
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '../../../../../core/server';
-import type { SavedVisState } from '../../../../visualizations/common';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedVisState } from '@kbn/visualizations-plugin/common';
 import type { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IClusterClient } from 'kibana/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server';
+import type { IClusterClient } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { LogstashBaseStats } from './get_logstash_stats';
 import type { BeatsBaseStats } from './get_beats_stats';
 import { getAllStats } from './get_all_stats';

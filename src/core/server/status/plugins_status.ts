@@ -17,7 +17,7 @@ import {
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 
-import { type PluginName } from '../plugins';
+import type { PluginName } from '@kbn/core-base-common';
 import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
 

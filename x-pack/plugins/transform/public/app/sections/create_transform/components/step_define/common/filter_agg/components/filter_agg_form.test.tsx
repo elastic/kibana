@@ -10,11 +10,9 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FilterAggForm } from './filter_agg_form';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import {
-  KBN_FIELD_TYPES,
-  RuntimeField,
-} from '../../../../../../../../../../../../src/plugins/data/common';
-import { DataView } from '../../../../../../../../../../../../src/plugins/data_views/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
 describe('FilterAggForm', () => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup } from 'src/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { Location } from 'history';
-import { migrateToLatest } from '../../../../kibana_utils/common';
+import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { UrlService } from '../../../common/url_service';
 import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import {
@@ -66,7 +66,7 @@ export class RedirectManager {
         let redirectUrl = (locatorState as LegacyShortUrlLocatorParams).url;
         const storeInSessionStorage = core.uiSettings.get('state:storeInSessionStorage');
         if (storeInSessionStorage) {
-          const { hashUrl } = await import('../../../../kibana_utils/public');
+          const { hashUrl } = await import('@kbn/kibana-utils-plugin/public');
           redirectUrl = hashUrl(redirectUrl);
         }
         const url = core.http.basePath.prepend(redirectUrl);

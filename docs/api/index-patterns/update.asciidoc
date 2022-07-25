@@ -58,7 +58,7 @@ Update a title of the `<my-pattern>` index pattern:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/index_patterns/index-pattern/my-pattern
 {
   "index_pattern": {
     "title": "some-other-pattern-*"
@@ -71,7 +71,7 @@ Customize the update behavior:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/index_patterns/index-pattern/my-pattern
 {
   "refresh_fields": true,
   "index_pattern": {
@@ -86,7 +86,7 @@ All update fields are optional, but you can specify the following fields:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/index_patterns/index-pattern/my-pattern
 {
   "index_pattern": {
     "title": "...",

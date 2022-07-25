@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import React from 'react';
-import TutorialConfigAgent from './';
+import TutorialConfigAgent from '.';
 
 interface Props {
   http: HttpStart;

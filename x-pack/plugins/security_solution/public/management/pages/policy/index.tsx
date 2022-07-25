@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,

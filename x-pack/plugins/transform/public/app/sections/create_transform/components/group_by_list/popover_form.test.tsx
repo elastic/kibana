@@ -8,10 +8,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 const startMock = coreMock.createStart();
 
 import { AggName } from '../../../../../../common/types/aggregations';

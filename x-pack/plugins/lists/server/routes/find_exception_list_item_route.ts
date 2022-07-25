@@ -35,7 +35,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const {
           filter,
           list_id: listId,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../../../../common';
+import { Filter } from '@kbn/es-query';
 
 const noop = () => {
   throw new Error('No mappings have been found for filter.');

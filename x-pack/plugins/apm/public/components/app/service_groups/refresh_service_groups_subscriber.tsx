@@ -8,7 +8,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Subject, Subscription } from 'rxjs';
 
-const refreshServiceGroupsSubject = new Subject();
+const refreshServiceGroupsSubject = new Subject<void>();
 
 export function refreshServiceGroups() {
   refreshServiceGroupsSubject.next();

@@ -8,12 +8,12 @@
 
 import fetch from 'node-fetch';
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import type { UnencryptedTelemetryPayload } from '../../common/types';
@@ -72,6 +72,15 @@ export function registerTelemetryOptInStatsRoutes(
       try {
         const newOptInStatus = req.body.enabled;
         const unencrypted = req.body.unencrypted;
+
+        if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
+          // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
+          // But let's keep it here should that changes at any point.
+          return res.customError({
+            statusCode: 503,
+            body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+          });
+        }
 
         const statsGetterConfig: StatsGetterConfig = {
           unencrypted,

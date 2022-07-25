@@ -22,14 +22,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
-
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
@@ -39,9 +39,9 @@ import { IField } from '../../classes/fields/field';
 const localStorage = new Storage(window.localStorage);
 
 export interface Props {
-  clearJoins: (layer: ILayer) => void;
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
+  updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
 }
 
 interface State {
@@ -139,12 +139,6 @@ export class EditLayerPanel extends Component<Props, State> {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
 
-  _clearJoins = () => {
-    if (this.props.selectedLayer) {
-      this.props.clearJoins(this.props.selectedLayer);
-    }
-  };
-
   _renderLayerErrors() {
     if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
       return null;
@@ -230,6 +224,9 @@ export class EditLayerPanel extends Component<Props, State> {
       return null;
     }
 
+    const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
+    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
+
     return (
       <KibanaContextProvider
         services={{
@@ -277,12 +274,11 @@ export class EditLayerPanel extends Component<Props, State> {
               />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
-                clearJoins: this._clearJoins,
                 currentLayerType: this.props.selectedLayer.getType(),
-                hasJoins: isVectorLayer(this.props.selectedLayer)
-                  ? (this.props.selectedLayer as IVectorLayer).hasJoins()
-                  : false,
+                numberOfJoins,
                 onChange: this._onSourceChange,
+                onStyleDescriptorChange: this.props.updateStyleDescriptor,
+                style: this.props.selectedLayer.getStyleForEditing(),
               })}
 
               {this._renderFilterSection()}

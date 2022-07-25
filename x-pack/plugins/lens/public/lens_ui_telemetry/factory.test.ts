@@ -12,9 +12,9 @@ import {
   trackUiEvent,
   trackSuggestionEvent,
 } from './factory';
-import { coreMock } from 'src/core/public/mocks';
-import { HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.useFakeTimers();
 

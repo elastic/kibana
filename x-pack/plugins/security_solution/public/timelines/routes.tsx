@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { Timelines } from './pages';
 import { TIMELINES_PATH } from '../../common/constants';
 
-import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
 
 const TimelinesRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.timelines}>

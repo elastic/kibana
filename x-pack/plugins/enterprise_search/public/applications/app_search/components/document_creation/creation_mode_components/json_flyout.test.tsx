@@ -19,7 +19,7 @@ import {
   UploadJsonFileTabContent,
   PasteJsonTextFooterContent,
   UploadJsonFileFooterContent,
-} from './';
+} from '.';
 
 describe('JsonFlyout', () => {
   const values = {

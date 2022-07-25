@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { ChartPanel } from '../../../components/chart_panel';
-import * as TEXT from '../translations';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
@@ -32,21 +32,28 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ 'result.evaluation': evaluation });
+    navToFindings({ 'result.evaluation.keyword': evaluation });
   };
 
-  const handleCellClick = (resourceTypeName: string) => {
-    navToFindings({ 'resource.type': resourceTypeName, 'result.evaluation': RULE_FAILED });
+  const handleCellClick = (ruleSection: string) => {
+    navToFindings({
+      'rule.section.keyword': ruleSection,
+      'result.evaluation.keyword': RULE_FAILED,
+    });
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED });
+    navToFindings({ 'result.evaluation.keyword': RULE_FAILED });
   };
 
   return (
     <EuiFlexGrid columns={3} style={summarySectionWrapperStyle}>
       <EuiFlexItem>
-        <ChartPanel title={TEXT.CLOUD_POSTURE_SCORE}>
+        <ChartPanel
+          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
+            defaultMessage: 'Cloud Posture Score',
+          })}
+        >
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
@@ -56,9 +63,13 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartPanel title={TEXT.RISKS}>
+        <ChartPanel
+          title={i18n.translate('xpack.csp.dashboard.summarySection.failedFindingsPanelTitle', {
+            defaultMessage: 'Failed Findings',
+          })}
+        >
           <RisksTable
-            data={complianceData.resourcesTypes}
+            data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
             onCellClick={handleCellClick}
             onViewAllClick={handleViewAllClick}
@@ -66,7 +77,11 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartPanel title={TEXT.OPEN_CASES}>
+        <ChartPanel
+          title={i18n.translate('xpack.csp.dashboard.summarySection.openCasesPanelTitle', {
+            defaultMessage: 'Open Cases',
+          })}
+        >
           <CasesTable />
         </ChartPanel>
       </EuiFlexItem>

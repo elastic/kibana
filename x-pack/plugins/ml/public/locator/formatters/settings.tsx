@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { CalendarEditUrlState, FilterEditUrlState } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function formatEditCalendarUrl(
   appBasePath: string,

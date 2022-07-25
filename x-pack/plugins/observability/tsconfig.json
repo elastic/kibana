@@ -29,6 +29,7 @@
     { "path": "../spaces/tsconfig.json" },
     { "path": "../timelines/tsconfig.json"},
     { "path": "../translations/tsconfig.json" },
-    { "path":  "../../../src/plugins/unified_search/tsconfig.json"}
+    { "path":  "../../../src/plugins/unified_search/tsconfig.json"},
+    { "path": "../../../src/plugins/shared_ux/tsconfig.json" },
   ]
 }

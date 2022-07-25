@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
@@ -23,12 +23,6 @@ jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
       metric: 'apm-*',
       apmAgentConfigurationIndex: 'apm-*',
     } as Awaited<ReturnType<typeof getApmIndices>>),
-}));
-
-jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
-  getDynamicDataView: async () => {
-    return;
-  },
 }));
 
 function getMockResources() {

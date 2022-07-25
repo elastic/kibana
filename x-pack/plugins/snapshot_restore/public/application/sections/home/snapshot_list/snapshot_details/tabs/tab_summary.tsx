@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import {
@@ -28,8 +29,7 @@ import {
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
 import { useServices } from '../../../../../app_context';
-
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SnapshotFeatureStatesSummary } from '../../../../../components/summaries';
 
 interface Props {
   snapshotDetails: SnapshotDetails;
@@ -42,6 +42,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
     // TODO: Add a tooltip explaining that: a false value means that the cluster global state
     // is not stored as part of the snapshot.
     includeGlobalState,
+    featureStates,
     dataStreams,
     indices,
     state,
@@ -98,6 +99,32 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
+        <EuiFlexItem data-test-subj="duration">
+          <EuiDescriptionListTitle data-test-subj="title">
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
+              defaultMessage="Duration"
+            />
+          </EuiDescriptionListTitle>
+
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+            {state === SNAPSHOT_STATE.IN_PROGRESS ? (
+              <EuiLoadingSpinner size="m" />
+            ) : (
+              <DataPlaceholder data={durationInMillis}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
+                  data-test-subj="srSnapshotDetailsDurationValue"
+                  defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                  values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+                />
+              </DataPlaceholder>
+            )}
+          </EuiDescriptionListDescription>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
         <EuiFlexItem data-test-subj="includeGlobalState">
           <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
@@ -107,19 +134,23 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {includeGlobalState ? (
+            {includeGlobalState === false ? (
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-                defaultMessage="Yes"
+                data-test-subj="withoutGlobalState"
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
+                defaultMessage="No"
               />
             ) : (
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
-                defaultMessage="No"
+                data-test-subj="withGlobalState"
+                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
+                defaultMessage="Yes"
               />
             )}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
+
+        <SnapshotFeatureStatesSummary featureStates={featureStates} />
       </EuiFlexGroup>
 
       <EuiFlexGroup>
@@ -191,30 +222,6 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="duration">
-          <EuiDescriptionListTitle data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.itemDurationLabel"
-              defaultMessage="Duration"
-            />
-          </EuiDescriptionListTitle>
-
-          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {state === SNAPSHOT_STATE.IN_PROGRESS ? (
-              <EuiLoadingSpinner size="m" />
-            ) : (
-              <DataPlaceholder data={durationInMillis}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotDetails.itemDurationValueLabel"
-                  data-test-subj="srSnapshotDetailsDurationValue"
-                  defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                  values={{ seconds: Math.ceil(durationInMillis / 1000) }}
-                />
-              </DataPlaceholder>
-            )}
-          </EuiDescriptionListDescription>
-        </EuiFlexItem>
-
         {policyName ? (
           <EuiFlexItem data-test-subj="policy">
             <EuiDescriptionListTitle data-test-subj="title">

@@ -18,7 +18,7 @@ import {
   DocLinksStart,
   CoreTheme,
   ExecutionContextStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { KibanaThemeProvider, useExecutionContext } from '../shared_imports';
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';

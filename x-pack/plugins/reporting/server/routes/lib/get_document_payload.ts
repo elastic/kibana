@@ -10,7 +10,7 @@ import { Stream } from 'stream';
 import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
-import { ReportingCore } from '../../';
+import { ReportingCore } from '../..';
 import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
 import { jobsQueryFactory } from './jobs_query';

@@ -20,7 +20,6 @@
   "extraPublicDirs": ["common"],
   "requiredBundles": [
     "esUiShared",
-    "kibanaReact",
-    "home"
+    "kibanaReact"
   ]
 }

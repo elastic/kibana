@@ -10,7 +10,7 @@ import {
   getServiceHealthStatus,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { getServiceAnomalies } from '../../../routes/service_map/get_service_anomalies';
+import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {

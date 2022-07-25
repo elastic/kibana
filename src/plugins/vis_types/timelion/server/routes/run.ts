@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger, CoreSetup } from 'kibana/server';
+import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
 // @ts-ignore
-import chainRunnerFn from '../handlers/chain_runner.js';
+import chainRunnerFn from '../handlers/chain_runner';
 // @ts-ignore
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
@@ -77,10 +77,11 @@ export function runRoute(
     },
     router.handleLegacyErrors(async (context, request, response) => {
       const [, { dataViews }] = await core.getStartServices();
-      const uiSettings = await context.core.uiSettings.client.getAll();
+      const coreCtx = await context.core;
+      const uiSettings = await coreCtx.uiSettings.client.getAll();
       const indexPatternsService = await dataViews.dataViewsServiceFactory(
-        context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        coreCtx.savedObjects.client,
+        coreCtx.elasticsearch.client.asCurrentUser
       );
 
       const tlConfig = getTlConfig({

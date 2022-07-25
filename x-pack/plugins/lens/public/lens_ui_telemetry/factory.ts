@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BASE_API_URL } from '../../common';
 
 const STORAGE_KEY = 'lens-ui-telemetry';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   CorePluginChromelessPlugin,
   CorePluginChromelessPluginSetup,

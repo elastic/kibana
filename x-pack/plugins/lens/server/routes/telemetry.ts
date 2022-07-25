@@ -6,9 +6,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -33,7 +33,7 @@ export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) 
       const { events, suggestionEvents } = req.body;
 
       try {
-        const client = context.core.savedObjects.client;
+        const client = (await context.core).savedObjects.client;
 
         const allEvents: Array<{
           type: 'lens-ui-telemetry';

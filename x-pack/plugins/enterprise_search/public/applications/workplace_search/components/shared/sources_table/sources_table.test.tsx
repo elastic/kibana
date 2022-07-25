@@ -15,7 +15,7 @@ import { EuiTable, EuiTableHeaderCell } from '@elastic/eui';
 
 import { SourceRow } from '../source_row';
 
-import { SourcesTable } from './';
+import { SourcesTable } from '.';
 
 const onToggle = jest.fn();
 

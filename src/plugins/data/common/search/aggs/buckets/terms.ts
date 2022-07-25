@@ -19,7 +19,7 @@ import {
 import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 
 import {
   createOtherBucketPostFlightRequest,
@@ -39,13 +39,16 @@ export interface AggParamsTerms extends BaseAggParams {
   orderAgg?: AggConfigSerialized;
   order?: 'asc' | 'desc';
   size?: number;
+  shardSize?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string;
-  include?: string;
+  exclude?: string[] | number[];
+  include?: string[] | number[];
+  includeIsRegex?: boolean;
+  excludeIsRegex?: boolean;
 }
 
 export const getTermsBucketAgg = () =>
@@ -116,6 +119,12 @@ export const getTermsBucketAgg = () =>
         default: 5,
       },
       {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
+      },
+      {
         name: 'otherBucket',
         default: false,
         write: noop,
@@ -170,6 +179,16 @@ export const getTermsBucketAgg = () =>
         advanced: true,
         shouldShow: isStringOrNumberType,
         ...migrateIncludeExcludeFormat,
+      },
+      {
+        name: 'includeIsRegex',
+        default: true,
+        write: noop,
+      },
+      {
+        name: 'excludeIsRegex',
+        default: true,
+        write: noop,
       },
     ],
   });

@@ -14,10 +14,16 @@ export const AUTHENTICATIONS = i18n.translate(
   }
 );
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.authenticationsTable.unit', {
+export const USERS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.authenticationsTable.usersUnit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {user} other {users}}`,
+  });
+
+export const HOSTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.authenticationsTable.hostsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
@@ -74,6 +80,10 @@ export const USER = i18n.translate('xpack.securitySolution.authenticationsTable.
   defaultMessage: 'User',
 });
 
+export const HOST = i18n.translate('xpack.securitySolution.authenticationsTable.host', {
+  defaultMessage: 'Host',
+});
+
 export const ROWS_5 = i18n.translate('xpack.securitySolution.authenticationsTable.rows', {
   values: { numRows: 5 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
@@ -83,3 +93,17 @@ export const ROWS_10 = i18n.translate('xpack.securitySolution.authenticationsTab
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
+
+export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.authenticationsTitle',
+  {
+    defaultMessage: 'Authentications',
+  }
+);
+
+export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
+  {
+    defaultMessage: 'Failed to query authentications data',
+  }
+);

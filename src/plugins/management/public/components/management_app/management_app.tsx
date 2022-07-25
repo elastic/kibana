@@ -10,17 +10,21 @@ import './management_app.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
-import { ManagementRouter } from './management_router';
-import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateProps,
   reactRouterNavigate,
   KibanaThemeProvider,
-} from '../../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import {
+  ManagementSection,
+  MANAGEMENT_BREADCRUMB,
+  MANAGEMENT_BREADCRUMB_NO_HREF,
+} from '../../utils';
+import { ManagementRouter } from './management_router';
+import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {
@@ -53,8 +57,14 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      // Clicking the Management breadcrumb to navigate back to the "root" only
+      // makes sense if there's a management app open. So when one isn't open
+      // this breadcrumb shouldn't be a clickable link.
+      const managementBreadcrumb = crumbs.length
+        ? MANAGEMENT_BREADCRUMB
+        : MANAGEMENT_BREADCRUMB_NO_HREF;
       setBreadcrumbs([
-        wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
+        wrapBreadcrumb(managementBreadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },

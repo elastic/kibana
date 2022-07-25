@@ -26,7 +26,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 
 import { UrlParamExtension } from '../types';
 import {

@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import clusterFixture from './fixtures/cluster';
+import clusterFixture from './fixtures/cluster.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('cluster', () => {
+  describe('cluster', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     const archive = 'x-pack/test/functional/es_archives/monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',

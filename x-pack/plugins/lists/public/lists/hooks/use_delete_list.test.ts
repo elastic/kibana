@@ -8,8 +8,8 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useDeleteList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
 jest.mock('@kbn/securitysolution-list-api');

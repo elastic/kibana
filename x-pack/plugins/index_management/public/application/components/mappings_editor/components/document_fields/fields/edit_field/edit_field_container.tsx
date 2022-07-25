@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { useKibana } from '../../../../../../index';
+import { useKibana } from '../../../../../..';
 import { useForm } from '../../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Field } from '../../../../types';

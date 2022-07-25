@@ -67,12 +67,14 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
+  snoozeSchedule,
   executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
 }) => ({
   ...rest,
   rule_type_id: alertTypeId,
   scheduled_task_id: scheduledTaskId,
+  snooze_schedule: snoozeSchedule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,
@@ -110,7 +112,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = context.alerting.getRulesClient();
+          const rulesClient = (await context.alerting).getRulesClient();
           const rule = req.body;
           const params = req.params;
 

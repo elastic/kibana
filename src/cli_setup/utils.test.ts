@@ -7,7 +7,7 @@
  */
 
 import { decodeEnrollmentToken, getCommand } from './utils';
-import type { EnrollmentToken } from '../plugins/interactive_setup/common';
+import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
 
 describe('kibana setup cli', () => {
   describe('getCommand', () => {

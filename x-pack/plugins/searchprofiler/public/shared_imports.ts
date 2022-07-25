@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { ace } from '../../../../src/plugins/es_ui_shared/public';
+export { ace } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
+export { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

@@ -9,7 +9,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../common/mock';
-import { UtilityBarAction } from './index';
+import { UtilityBarAction } from '.';
 
 describe('UtilityBarAction', () => {
   test('it renders', () => {

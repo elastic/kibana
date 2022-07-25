@@ -18,8 +18,9 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ALL_OPERATORS,
   BuilderEntry,
-  EXCEPTION_OPERATORS,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
@@ -53,12 +54,12 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -596,13 +597,6 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns all operator options if "listType" is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false);
-      const expected: OperatorOption[] = EXCEPTION_OPERATORS;
-      expect(output).toEqual(expected);
-    });
-
     test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
@@ -618,13 +612,26 @@ describe('Exception builder helpers', () => {
     test('it returns list operators if specified to', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      expect(output).toEqual(EXCEPTION_OPERATORS);
+      expect(output.some((operator) => operator.value === 'is_not_in_list')).toBeTruthy();
+      expect(output.some((operator) => operator.value === 'is_in_list')).toBeTruthy();
     });
 
     test('it does not return list operators if specified not to', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false, false);
       expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
+    });
+
+    test('it returns all possible operators if list type is not "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'endpoint_events', false, true);
+      expect(output).toEqual(ALL_OPERATORS);
+    });
+
+    test('it returns all operators supported by detection engine if list type is "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      expect(output).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
     });
   });
 

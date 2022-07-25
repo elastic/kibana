@@ -18,9 +18,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { CombinedField, CombinedFieldsForm } from '../../../common/components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';
 

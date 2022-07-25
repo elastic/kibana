@@ -6,12 +6,11 @@
  */
 
 import { DEFAULT_META } from '../../../../shared/constants';
-import { ContentSource, User, Group } from '../../../types';
+import { ContentSource, Group } from '../../../types';
 
 export const mockGroupsValues = {
   groups: [] as Group[],
   contentSources: [] as ContentSource[],
-  users: [] as User[],
   groupsDataLoading: true,
   groupListLoading: true,
   newGroupModalOpen: false,
@@ -21,10 +20,6 @@ export const mockGroupsValues = {
   newGroupNameErrors: [],
   filterSourcesDropdownOpen: false,
   filteredSources: [],
-  filterUsersDropdownOpen: false,
-  filteredUsers: [],
-  allGroupUsersLoading: false,
-  allGroupUsers: [],
   filterValue: '',
   groupsMeta: DEFAULT_META,
 };

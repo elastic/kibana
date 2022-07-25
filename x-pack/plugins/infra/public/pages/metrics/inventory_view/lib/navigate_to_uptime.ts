@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { InfraWaffleMapNode } from '../../../../lib/lib';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { uptimeOverviewLocatorID } from '../../../../../../observability/public';
-import { LocatorClient } from '../../../../../../../../src/plugins/share/common/url_service/locators';
 
 export const navigateToUptime = (
   locators: LocatorClient,

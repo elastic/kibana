@@ -6,7 +6,7 @@
  */
 
 import { toExpression as toExpressionString } from '@kbn/interpreter';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { SavedLensInput } from '../../../functions/external/saved_lens';
 
 export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): string {

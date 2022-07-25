@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 
 export const CLEAR_SELECTION_ACTION = 'clearSelectionAction';

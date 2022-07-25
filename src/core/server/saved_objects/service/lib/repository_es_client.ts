@@ -8,8 +8,8 @@
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
-import { ElasticsearchClient } from '../../../elasticsearch/';
-import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { retryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import { decorateEsError } from './decorate_es_error';
 
 const methods = [

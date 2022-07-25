@@ -7,7 +7,7 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import { isEqualWith } from 'lodash';
-import type { Ecs, KibanaExecutionContext } from 'kibana/server';
+import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
 import type { RetryService } from '../../../test/common/services/retry';
 
 export const logFilePath = Path.resolve(__dirname, './kibana.log');

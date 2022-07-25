@@ -11,7 +11,7 @@ import { EuiCard, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../../app_context';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 export const AddLicense = ({ uploadPath = `/upload_license` }) => {
   const { services } = useAppContext();

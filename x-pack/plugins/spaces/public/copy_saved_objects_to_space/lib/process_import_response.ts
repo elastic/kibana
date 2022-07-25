@@ -14,7 +14,7 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 export interface FailedImport {
   obj: Omit<SavedObjectsImportFailure, 'error'>;

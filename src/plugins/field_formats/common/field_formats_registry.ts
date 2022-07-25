@@ -23,7 +23,7 @@ import {
 } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
-import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from './constants/ui_settings';
 import { FieldFormatNotFoundError } from './errors';
 
 export class FieldFormatsRegistry {

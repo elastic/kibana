@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/server';
+import { PluginInitializer } from '@kbn/core/server';
 import { GlobalSearchProvidersPlugin, GlobalSearchProvidersPluginSetupDeps } from './plugin';
 
 export const plugin: PluginInitializer<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> = () =>

@@ -20,12 +20,11 @@ import {
   EuiTableSortingType,
   EuiBasicTableColumn,
 } from '@elastic/eui';
+import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import { IExecutionErrors } from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -51,23 +50,16 @@ const updateButtonProps = {
   fill: false,
 };
 
-const sortErrorLog = (
-  a: IExecutionErrors,
-  b: IExecutionErrors,
-  direction: 'desc' | 'asc' = 'desc'
-) =>
-  direction === 'desc'
-    ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+const MAX_RESULTS = 1000;
 
 export type RuleErrorLogProps = {
   rule: Rule;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+} & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { rule, loadExecutionLogAggregations, refreshToken } = props;
+  const { rule, loadActionErrorLog, refreshToken } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -100,26 +92,46 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     );
   });
 
+  const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
+
   const isInitialized = useRef(false);
+
+  const isOnLastPage = useMemo(() => {
+    const { pageIndex, pageSize } = pagination;
+    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+  }, [pagination]);
+
+  const formattedSort = useMemo(() => {
+    if (!sort) {
+      return;
+    }
+    const { field, direction } = sort;
+    return [
+      {
+        [field]: {
+          order: direction,
+        },
+      },
+    ];
+  }, [sort]);
 
   const loadEventLogs = async () => {
     setIsLoading(true);
     try {
-      const result = await loadExecutionLogAggregations({
+      const result = await loadActionErrorLog({
         id: rule.id,
-        sort: {
-          [sort?.field || 'timestamp']: { order: sort?.direction || 'desc' },
-        } as unknown as LoadExecutionLogAggregationsProps['sort'],
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
-        page: 0,
-        perPage: 1,
+        page: pagination.pageIndex,
+        perPage: pagination.pageSize,
+        sort: formattedSort,
       });
       setLogs(result.errors);
       setPagination({
         ...pagination,
-        totalItemCount: result.totalErrors,
+        totalItemCount: Math.min(result.totalErrors, MAX_RESULTS),
       });
+      setActualTotalItemCount(result.totalErrors);
     } catch (e) {
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
@@ -182,16 +194,10 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     [dateFormat]
   );
 
-  const logList = useMemo(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const logsSortDesc = logs.sort((a, b) => sortErrorLog(a, b, sort?.direction));
-    return logsSortDesc.slice(start, start + pagination.pageSize);
-  }, [logs, pagination.pageIndex, pagination.pageSize, sort?.direction]);
-
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateStart, dateEnd]);
+  }, [dateStart, dateEnd, formattedSort, pagination.pageIndex, pagination.pageSize]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -227,7 +233,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       <EuiBasicTable
         data-test-subj="RuleErrorLog"
         loading={isLoading}
-        items={logList ?? []}
+        items={logs ?? []}
         columns={columns}
         sorting={{ sort }}
         pagination={pagination}
@@ -257,10 +263,13 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
           }
         }}
       />
-      <RefineSearchPrompt
-        documentSize={pagination.totalItemCount}
-        backToTopAnchor="rule_error_log_list"
-      />
+      {isOnLastPage && (
+        <RefineSearchPrompt
+          documentSize={actualTotalItemCount}
+          visibleDocumentSize={MAX_RESULTS}
+          backToTopAnchor="rule_error_log_list"
+        />
+      )}
     </div>
   );
 };

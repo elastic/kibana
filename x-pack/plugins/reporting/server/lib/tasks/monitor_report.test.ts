@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
-import { RunContext } from '../../../../task_manager/server';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { RunContext } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ReportingConfigType } from '../../config';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { MonitorReportsTask } from './';
+import { MonitorReportsTask } from '.';
 
 const logger = loggingSystemMock.createLogger();
 

@@ -7,8 +7,8 @@
  */
 
 import type { CustomPaletteParams } from '@kbn/coloring';
-import type { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { getAccessorByDimension } from '../../../../../visualizations/common/utils';
+import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { Accessors, GaugeArguments } from '../../../common';
 
 export const getValueFromAccessor = (

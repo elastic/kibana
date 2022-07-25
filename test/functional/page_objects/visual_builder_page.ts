@@ -374,11 +374,13 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getTopNLabel() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNLabel = await this.find.byCssSelector('.tvbVisTopN__label');
     return await topNLabel.getVisibleText();
   }
 
   public async getTopNCount() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
   }
@@ -645,7 +647,9 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clickColorPicker(nth: number = 0): Promise<void> {
-    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
+    const picker = (await this.find.allByCssSelector('[data-test-subj="tvbColorPicker"] button'))[
+      nth
+    ];
     await picker.clickMouseButton();
   }
 
@@ -891,6 +895,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getChartDebugState(chartData?: DebugState) {
+    await this.header.waitUntilLoadingHasFinished();
     return chartData ?? (await this.elasticChart.getChartDebugData())!;
   }
 
@@ -908,7 +913,6 @@ export class VisualBuilderPageObject extends FtrService {
     chartData?: DebugState,
     itemType: 'areas' | 'bars' | 'annotations' = 'areas'
   ) {
-    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
@@ -932,7 +936,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getVisualizeError() {
     const visError = await this.testSubjects.find(`visualization-error`);
-    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    const errorSpans = await visError.findAllByTestSubject('visualization-error-text');
     return await errorSpans[0].getVisibleText();
   }
 

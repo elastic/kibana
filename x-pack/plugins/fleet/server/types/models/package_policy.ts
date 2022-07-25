@@ -55,6 +55,7 @@ const PackagePolicyStreamsSchema = {
       })
     )
   ),
+  compiled_stream: schema.maybe(schema.any()),
 };
 
 const PackagePolicyInputsSchema = {
@@ -150,4 +151,24 @@ export const PackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.string(),
   version: schema.maybe(schema.string()),
+  revision: schema.number(),
+  updated_at: schema.string(),
+  updated_by: schema.string(),
+  created_at: schema.string(),
+  created_by: schema.string(),
+  elasticsearch: schema.maybe(
+    schema.object({
+      privileges: schema.maybe(
+        schema.object({
+          cluster: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+    })
+  ),
+  inputs: schema.arrayOf(
+    schema.object({
+      ...PackagePolicyInputsSchema,
+      compiled_input: schema.maybe(schema.any()),
+    })
+  ),
 });

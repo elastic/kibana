@@ -19,7 +19,8 @@ import {
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
 import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({

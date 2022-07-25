@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../../..';
 import { PdfScreenshotOptions } from '../../../types';
 import type { PdfMetrics } from '../../../../common/types';
 import { getTracker } from '../../common/pdf_tracker';

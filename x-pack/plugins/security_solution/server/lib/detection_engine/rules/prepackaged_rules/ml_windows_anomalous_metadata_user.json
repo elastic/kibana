@@ -11,8 +11,7 @@
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": [
-    "windows_rare_metadata_user",
-    "v2_windows_rare_metadata_user"
+    "v3_windows_rare_metadata_user"
   ],
   "name": "Unusual Windows User Calling the Metadata Service",
   "risk_score": 21,
@@ -26,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

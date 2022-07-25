@@ -7,9 +7,9 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
-import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 
 export function getAlertType(): RuleTypeModel<IndexThresholdAlertParams> {
   return {

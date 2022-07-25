@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
-import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

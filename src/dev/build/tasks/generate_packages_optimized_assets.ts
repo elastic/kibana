@@ -19,7 +19,7 @@ import gulpGzip from 'gulp-gzip';
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
@@ -44,12 +44,8 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     log.debug('Minify CSS');
     await asyncPipeline(
       vfs.src(['**/*.css'], { cwd: assetDir }),
-      gulpPostCSS([
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require('cssnano')({
-          preset: ['default', { discardComments: false }],
-        }),
-      ]),
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      gulpPostCSS(require('@kbn/optimizer/postcss.config.js').plugins),
       vfs.dest(assetDir)
     );
 

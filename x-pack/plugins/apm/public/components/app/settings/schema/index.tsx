@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { SchemaOverview } from './schema_overview';

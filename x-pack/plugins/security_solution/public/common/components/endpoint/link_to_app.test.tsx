@@ -8,9 +8,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { LinkToApp } from './link_to_app';
-import { CoreStart } from 'kibana/public';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 type LinkToAppOnClickMock<Return = void> = jest.Mock<
   Return,
@@ -52,7 +52,7 @@ describe('LinkToApp component', () => {
       </LinkToApp>
     );
 
-    renderResult.find('EuiLink').simulate('click', { button: 0 });
+    renderResult.find('EuiLink').find('a').simulate('click', { button: 0 });
     const clickEventArg = spyOnClickHandler.mock.calls[0][0];
 
     expect(spyOnClickHandler).toHaveBeenCalled();
@@ -69,7 +69,7 @@ describe('LinkToApp component', () => {
         {'link'}
       </LinkToApp>
     );
-    renderResult.find('EuiLink').simulate('click', { button: 0 });
+    renderResult.find('EuiLink').find('a').simulate('click', { button: 0 });
     expect(fakeCoreStart.application.navigateToApp).toHaveBeenCalledWith('fleet', {
       path: '/some/path',
       state: undefined,
@@ -124,12 +124,12 @@ describe('LinkToApp component', () => {
         {'link'}
       </LinkToApp>
     );
-    renderResult.find('EuiLink').simulate('click', { button: 0 });
+    renderResult.find('EuiLink').find('a').simulate('click', { button: 0 });
     expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
   it('should not to navigate if it was not left click', () => {
     const renderResult = render(<LinkToApp appId="fleet">{'link'}</LinkToApp>);
-    renderResult.find('EuiLink').simulate('click', { button: 1 });
+    renderResult.find('EuiLink').find('button').simulate('click', { button: 1 });
     expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
   it('should not to navigate if it includes an anchor target', () => {
@@ -138,7 +138,7 @@ describe('LinkToApp component', () => {
         {'link'}
       </LinkToApp>
     );
-    renderResult.find('EuiLink').simulate('click', { button: 0 });
+    renderResult.find('EuiLink').find('a').simulate('click', { button: 0 });
     expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
   it('should not to navigate if if meta|alt|ctrl|shift keys are pressed', () => {
@@ -147,7 +147,7 @@ describe('LinkToApp component', () => {
         {'link'}
       </LinkToApp>
     );
-    const euiLink = renderResult.find('EuiLink');
+    const euiLink = renderResult.find('EuiLink').find('button');
     ['meta', 'alt', 'ctrl', 'shift'].forEach((key) => {
       euiLink.simulate('click', { button: 0, [`${key}Key`]: true });
       expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();

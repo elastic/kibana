@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { LoadingIndices } from '../loading_indices';
+import { LoadingIndices } from '.';
 import { shallow } from 'enzyme';
 
 describe('LoadingIndices', () => {

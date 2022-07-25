@@ -12,7 +12,7 @@ import type {
   ISavedObjectsRepository,
   KibanaRequest,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';

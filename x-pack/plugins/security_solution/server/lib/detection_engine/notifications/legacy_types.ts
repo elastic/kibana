@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import {
+import type {
   RulesClient,
   PartialRule,
   RuleType,
@@ -16,8 +17,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutorOptions,
-} from '../../../../../alerting/server';
-import { Rule, RuleAction } from '../../../../../alerting/common';
+} from '@kbn/alerting-plugin/server';
+import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**

@@ -8,7 +8,7 @@
 import { appContextService } from '../../../app_context';
 import type { Field, Fields } from '../../fields/field';
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
 const flattenFieldsToNameAndType = (

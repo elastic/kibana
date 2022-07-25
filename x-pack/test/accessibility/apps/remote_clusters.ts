@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ClusterPayloadEs } from '@kbn/remote-clusters-plugin/common/lib';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { ClusterPayloadEs } from '../../../plugins/remote_clusters/common/lib';
 
 const emptyPrompt = 'remoteClusterListEmptyPrompt';
 const createButton = 'remoteClusterEmptyPromptCreateButton';
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const retry = getService('retry');
 
-  describe('Remote Clusters', () => {
+  describe('Remote Clusters Accessibility', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('remoteClusters');
     });

@@ -8,8 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { CoreStart } from '../../../../../../src/core/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface RuleNameProps {
   name: string;

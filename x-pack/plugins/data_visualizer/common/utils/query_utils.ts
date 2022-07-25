@@ -40,35 +40,6 @@ export function buildBaseFilterCriteria(
   return filterCriteria;
 }
 
-// Wraps the supplied aggregations in a sampler aggregation.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and the aggs are returned as-is.
-export function buildSamplerAggregation(
-  aggs: any,
-  samplerShardSize: number
-): Record<string, estypes.AggregationsAggregationContainer> {
-  if (samplerShardSize < 1) {
-    return aggs;
-  }
-
-  return {
-    sample: {
-      sampler: {
-        shard_size: samplerShardSize,
-      },
-      aggs,
-    },
-  };
-}
-
-// Returns the path of aggregations in the elasticsearch response, as an array,
-// depending on whether sampling is being used.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and an empty array is returned.
-export function getSamplerAggregationsResponsePath(samplerShardSize: number): string[] {
-  return samplerShardSize > 0 ? ['sample'] : [];
-}
-
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied
 // field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
 // so if the supplied field names contains disallowed characters, the provided index

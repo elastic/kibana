@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 import { convertTagNameToId } from '../utils';
 

@@ -16,7 +16,7 @@ import {
   createNodeAllocationActions,
   createReplicasAction,
   createSnapshotPolicyActions,
-} from './';
+} from '.';
 
 export const createHotPhaseActions = (testBed: TestBed) => {
   return {

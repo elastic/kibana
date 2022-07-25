@@ -16,6 +16,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'resilient-2',
@@ -26,6 +27,7 @@ export const connectorsMock: ActionConnector[] = [
       orgId: '201',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'jira-1',
@@ -35,6 +37,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'servicenow-sir',
@@ -44,6 +47,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isDeprecated: false,
   },
   {
     id: 'servicenow-uses-table-api',
@@ -54,6 +58,7 @@ export const connectorsMock: ActionConnector[] = [
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isDeprecated: true,
   },
 ];
 

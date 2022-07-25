@@ -6,13 +6,12 @@
  */
 
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import type { CriteriaWithPagination, EuiSearchBarProps } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
-  EuiSearchBarProps,
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
@@ -28,9 +27,10 @@ import { Loader } from '../../../../../../common/components/loader';
 
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
-import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
+import type { AllExceptionListsColumns } from './columns';
+import { getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
+import { ReferenceErrorModal } from '../../../../../components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
@@ -38,7 +38,7 @@ import { SecurityPageName } from '../../../../../../../common/constants';
 import { useUserData } from '../../../../../components/user_info';
 import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
-import { ExceptionsTableItem } from './types';
+import type { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 
@@ -96,7 +96,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { navigateToUrl } = application;
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
@@ -165,9 +165,10 @@ export const ExceptionListsTable = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string) =>
       (blob: Blob): void => {
+        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
         setExportDownload({ name: listId, blob });
       },
-    []
+    [addSuccess]
   );
 
   const handleExportError = useCallback(

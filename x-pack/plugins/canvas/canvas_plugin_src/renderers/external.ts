@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { imageRendererFactory } from '../../../../../src/plugins/expression_image/public';
-import { metricRendererFactory } from '../../../../../src/plugins/expression_metric/public';
-import {
-  errorRendererFactory,
-  debugRendererFactory,
-} from '../../../../../src/plugins/expression_error/public';
-import { revealImageRendererFactory } from '../../../../../src/plugins/expression_reveal_image/public';
-import { repeatImageRendererFactory } from '../../../../../src/plugins/expression_repeat_image/public';
-import {
-  shapeRendererFactory,
-  progressRendererFactory,
-} from '../../../../../src/plugins/expression_shape/public';
+import { imageRendererFactory } from '@kbn/expression-image-plugin/public';
+import { metricRendererFactory } from '@kbn/expression-metric-plugin/public';
+import { errorRendererFactory, debugRendererFactory } from '@kbn/expression-error-plugin/public';
+import { revealImageRendererFactory } from '@kbn/expression-reveal-image-plugin/public';
+import { repeatImageRendererFactory } from '@kbn/expression-repeat-image-plugin/public';
+import { shapeRendererFactory, progressRendererFactory } from '@kbn/expression-shape-plugin/public';
 
 export const renderFunctions = [];
 

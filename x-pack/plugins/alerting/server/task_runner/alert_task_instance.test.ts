@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
 import { SanitizedRule } from '../types';

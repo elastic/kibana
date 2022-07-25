@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart, AppMountParameters, MountPoint, CoreTheme } from 'kibana/public';
+import { CoreStart, AppMountParameters, MountPoint, CoreTheme } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { Observable } from 'rxjs';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';

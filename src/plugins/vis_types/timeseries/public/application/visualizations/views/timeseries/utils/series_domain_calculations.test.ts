@@ -7,7 +7,7 @@
  */
 
 import { calculateDomainForSeries } from './series_domain_calculation';
-import { PanelData } from 'src/plugins/vis_types/timeseries/common/types';
+import { PanelData } from '../../../../../../common/types';
 
 describe('calculateDomainForSeries', () => {
   it('should return 0 for domainStart and 3 for domainEnd', () => {

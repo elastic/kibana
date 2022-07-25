@@ -10,9 +10,9 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import { ActionType, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -41,9 +41,6 @@ describe('connector_add_modal', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({ config: { errors: {} }, secrets: { errors: {} } });
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

@@ -11,11 +11,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderDefinition } from '../../../../expressions/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisTypePieDependencies } from '../plugin';
-import { withSuspense } from '../../../../presentation_util/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
 
@@ -64,7 +64,7 @@ export const getPartitionVisRenderer: (
               visParams={visConfig}
               visData={visData}
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={handlers.done}
+              renderComplete={() => handlers.done()}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               services={{ data: services.data, fieldFormats: services.fieldFormats }}
@@ -73,10 +73,7 @@ export const getPartitionVisRenderer: (
           </div>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

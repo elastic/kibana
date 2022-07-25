@@ -9,29 +9,29 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import { inputsModel, State } from '../../store';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
+import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { APP_ID, APP_UI_ID } from '../../../../common/constants';
+import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { eventsViewerSelector } from './selectors';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import type { EntityType } from '../../../../../timelines/common';
-import { TGridCellAction } from '../../../../../timelines/common/types';
-import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
-import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import {
-  useFieldBrowserOptions,
-  FieldEditorActions,
-} from '../../../timelines/components/fields_browser';
+import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import {
   useSessionViewNavigation,
   useSessionView,
@@ -114,11 +114,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, id));
 
-  const { timelines: timelinesUi, cases } = useKibana().services;
+  const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     selectedPatterns,
@@ -186,14 +185,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
-  const onAlertStatusActionSuccess = useCallback(() => {
-    if (id === TimelineId.active) {
-      refetchQuery([timelineQuery]);
-    } else {
-      refetchQuery(globalQueries);
-    }
-  }, [id, timelineQuery, globalQueries]);
-  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        if (id === TimelineId.active) {
+          refetchQuery([timelineQuery]);
+        } else {
+          refetchQuery(globalQueries);
+        }
+      },
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+  );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,
@@ -201,62 +207,57 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     editorActionsRef,
   });
 
-  const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = cases.ui.getCasesContext();
   const isLive = input.policy.kind === 'interval';
 
   return (
     <>
-      <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
-        <FullScreenContainer $isFullScreen={globalFullScreen}>
-          <InspectButtonContainer>
-            {timelinesUi.getTGrid<'embedded'>({
-              additionalFilters,
-              appId: APP_UI_ID,
-              browserFields,
-              bulkActions,
-              columns,
-              dataProviders,
-              dataViewId,
-              defaultCellActions,
-              deletedEventIds,
-              disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-              docValueFields,
-              end,
-              entityType,
-              fieldBrowserOptions,
-              filters: globalFilters,
-              filterStatus: currentFilter,
-              globalFullScreen,
-              graphEventId,
-              graphOverlay,
-              hasAlertsCrud,
-              id,
-              indexNames: selectedPatterns,
-              indexPattern,
-              isLive,
-              isLoadingIndexPattern,
-              itemsPerPage,
-              itemsPerPageOptions,
-              kqlMode,
-              leadingControlColumns,
-              onRuleChange,
-              query,
-              renderCellValue,
-              rowRenderers,
-              runtimeMappings,
-              setQuery,
-              sort,
-              start,
-              tGridEventRenderedViewEnabled,
-              trailingControlColumns,
-              type: 'embedded',
-              unit,
-            })}
-          </InspectButtonContainer>
-        </FullScreenContainer>
-        {DetailsPanel}
-      </CasesContext>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          {timelinesUi.getTGrid<'embedded'>({
+            additionalFilters,
+            appId: APP_UI_ID,
+            browserFields,
+            bulkActions,
+            columns,
+            dataProviders,
+            dataViewId,
+            defaultCellActions,
+            deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+            end,
+            entityType,
+            fieldBrowserOptions,
+            filters: globalFilters,
+            filterStatus: currentFilter,
+            globalFullScreen,
+            graphEventId,
+            graphOverlay,
+            hasAlertsCrud,
+            id,
+            indexNames: selectedPatterns,
+            indexPattern,
+            isLive,
+            isLoadingIndexPattern,
+            itemsPerPage,
+            itemsPerPageOptions,
+            kqlMode,
+            leadingControlColumns,
+            onRuleChange,
+            query,
+            renderCellValue,
+            rowRenderers,
+            runtimeMappings,
+            setQuery,
+            sort,
+            start,
+            tGridEventRenderedViewEnabled,
+            trailingControlColumns,
+            type: 'embedded',
+            unit,
+          })}
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      {DetailsPanel}
     </>
   );
 };

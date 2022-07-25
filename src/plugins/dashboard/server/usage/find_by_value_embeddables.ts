@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 
 export const findByValueEmbeddables = async (

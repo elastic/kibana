@@ -6,11 +6,10 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../';
-import { LayoutTypes } from '../../../../screenshotting/common';
+import type { ReportingCore } from '../..';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';
@@ -27,7 +26,7 @@ export function generatePngObservable(
   options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
-  if (!options.layout.dimensions) {
+  if (!options.layout?.dimensions) {
     throw new Error(`LayoutParams.Dimensions is undefined.`);
   }
 
@@ -38,10 +37,7 @@ export function generatePngObservable(
     .getScreenshots({
       ...options,
       format: 'png',
-      layout: {
-        id: LayoutTypes.PRESERVE_LAYOUT,
-        ...options.layout,
-      },
+      layout: { id: 'preserve_layout', ...options.layout },
     })
     .pipe(
       tap(({ metrics }) => {

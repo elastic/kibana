@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { roleHasScopedEngines } from './';
+import { roleHasScopedEngines } from '.';
 
 describe('roleHasScopedEngines', () => {
   it('returns false for owner and admin roles', () => {

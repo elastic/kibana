@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import type { ApplicationStart } from 'src/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import type { Role } from '../../../common/model';
 import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';

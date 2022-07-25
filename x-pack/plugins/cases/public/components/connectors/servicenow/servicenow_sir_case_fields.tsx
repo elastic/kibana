@@ -17,7 +17,6 @@ import { Choice, Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
-import { connectorValidator } from './validator';
 import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -43,7 +42,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
 
   const { http, notifications } = useKibana().services;
   const [choices, setChoices] = useState<Fields>(defaultFields);
-  const showConnectorWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
+  const showConnectorWarning = connector.isDeprecated;
 
   const onChangeCb = useCallback(
     (

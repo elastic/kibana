@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../plugins/security_solution/common/constants';
-import { RAC_ALERTS_BULK_UPDATE_URL } from '../../../../plugins/timelines/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RAC_ALERTS_BULK_UPDATE_URL } from '@kbn/timelines-plugin/common/constants';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -23,7 +24,6 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { DetectionAlert } from '../../../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

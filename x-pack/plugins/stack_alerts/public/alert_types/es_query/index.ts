@@ -7,11 +7,11 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { validateExpression } from './validation';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { EsQueryAlertParams, SearchType } from './types';
-import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
-import { SanitizedRule } from '../../../../alerting/common';
+import { validateExpression } from './validation';
 
 const PLUGIN_ID = 'discover';
 const ES_QUERY_ALERT_TYPE = '.es-query';

@@ -13,9 +13,9 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
-} from '../../../../src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { RotatingNumberState } from '../common/types';
-import { FormatFactory } from '../../../../src/plugins/field_formats/common';
 
 export const getRotatingNumberRenderer = (
   formatFactory: Promise<FormatFactory>

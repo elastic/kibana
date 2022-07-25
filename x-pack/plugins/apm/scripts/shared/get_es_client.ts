@@ -10,7 +10,7 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 

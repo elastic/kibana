@@ -21,7 +21,7 @@ export function registerStartBasicRoute({
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const { client } = ctx.core.elasticsearch;
+      const { client } = (await ctx.core).elasticsearch;
       try {
         return res.ok({
           body: await startBasic({

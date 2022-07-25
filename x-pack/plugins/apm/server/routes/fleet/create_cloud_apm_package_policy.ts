@@ -10,8 +10,8 @@ import {
   SavedObjectsClientContract,
   Logger,
   KibanaRequest,
-} from 'kibana/server';
-import { PackagePolicy } from '../../../../fleet/common';
+} from '@kbn/core/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../services/documentation';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 

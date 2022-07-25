@@ -8,7 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
 
@@ -19,7 +19,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const template = request.body as TypeOf<typeof bodySchema>;
 
       try {

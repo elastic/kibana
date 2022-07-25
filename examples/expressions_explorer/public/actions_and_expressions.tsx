@@ -19,9 +19,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ExpressionsStart } from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionEditor } from './editor/expression_editor';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
 
 interface Props {

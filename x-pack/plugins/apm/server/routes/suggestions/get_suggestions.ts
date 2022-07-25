@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getSuggestions({
-  field,
+  fieldName,
+  fieldValue,
   searchAggregatedTransactions,
   setup,
   size,
-  string,
+  start,
+  end,
 }: {
-  field: string;
+  fieldName: string;
+  fieldValue: string;
   searchAggregatedTransactions: boolean;
   setup: Setup;
   size: number;
-  string: string;
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -34,9 +37,18 @@ export async function getSuggestions({
     },
     body: {
       case_insensitive: true,
-      field,
+      field: fieldName,
       size,
-      string,
+      string: fieldValue,
+      index_filter: {
+        range: {
+          ['@timestamp']: {
+            gte: start,
+            lte: end,
+            format: 'epoch_millis',
+          },
+        },
+      },
     },
   });
 

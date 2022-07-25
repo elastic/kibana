@@ -15,8 +15,8 @@ import {
 
 import { load } from 'cheerio';
 
-import { httpServerMock } from '../http/http_server.mocks';
-import { mockRouter } from '../http/router/router.mock';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import {
   mockRenderingServiceParams,
@@ -25,6 +25,7 @@ import {
 } from './__mocks__/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
+import { AuthStatus } from '@kbn/core-http-server';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -69,6 +70,23 @@ function renderTestCases(
     it('renders "core" page', async () => {
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" page for unauthenticated requests', async () => {
+      mockRenderingSetupDeps.http.auth.get.mockReturnValueOnce({
+        status: AuthStatus.unauthenticated,
+        state: {},
+      });
+
+      const [render] = await getRender();
+      const content = await render(
+        createKibanaRequest({ auth: { isAuthenticated: false } }),
+        uiSettings
+      );
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 

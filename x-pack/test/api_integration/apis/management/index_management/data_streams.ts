@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { DataStream } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 // @ts-ignore
 import { API_BASE_PATH } from './constants';
-import { DataStream } from '../../../../../plugins/index_management/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -37,6 +37,33 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     await es.indices.createDataStream({ name });
+  };
+
+  const updateIndexTemplateMappings = async (name: string, mappings: any) => {
+    await es.indices.putIndexTemplate({
+      name,
+      body: {
+        // We need to match the names of backing indices with this template.
+        index_patterns: [name + '*'],
+        template: {
+          mappings,
+        },
+        data_stream: {},
+      },
+    });
+  };
+
+  const getDatastream = async (name: string) => {
+    const {
+      data_streams: [datastream],
+    } = await es.indices.getDataStream({ name });
+    return datastream;
+  };
+
+  const getMapping = async (name: string) => {
+    const res = await es.indices.getMapping({ index: name });
+
+    return Object.values(res)[0]!.mappings;
   };
 
   const deleteComposableIndexTemplate = async (name: string) => {
@@ -212,6 +239,63 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName2}`)
           .set('kbn-xsrf', 'xxx')
           .expect(404);
+      });
+    });
+
+    describe('Mappings from template', () => {
+      const testDataStreamName1 = 'test-data-stream-mappings-1';
+
+      before(async () => {
+        await createDataStream(testDataStreamName1);
+      });
+
+      after(async () => {
+        await deleteDataStream(testDataStreamName1);
+      });
+
+      it('Apply mapping from index template', async () => {
+        const beforeMapping = await getMapping(testDataStreamName1);
+        expect(beforeMapping.properties).eql({
+          '@timestamp': { type: 'date' },
+        });
+        await updateIndexTemplateMappings(testDataStreamName1, {
+          properties: {
+            test: { type: 'integer' },
+          },
+        });
+        await supertest
+          .post(`${API_BASE_PATH}/data_streams/${testDataStreamName1}/mappings_from_template`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const afterMapping = await getMapping(testDataStreamName1);
+        expect(afterMapping.properties).eql({
+          '@timestamp': { type: 'date' },
+          test: { type: 'integer' },
+        });
+      });
+    });
+
+    describe('Rollover', () => {
+      const testDataStreamName1 = 'test-data-stream-rollover-1';
+
+      before(async () => {
+        await createDataStream(testDataStreamName1);
+      });
+
+      after(async () => {
+        await deleteDataStream(testDataStreamName1);
+      });
+
+      it('Rollover datastreams', async () => {
+        await supertest
+          .post(`${API_BASE_PATH}/data_streams/${testDataStreamName1}/rollover`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const datastream = await getDatastream(testDataStreamName1);
+
+        expect(datastream.generation).equal(2);
       });
     });
   });

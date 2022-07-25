@@ -8,18 +8,18 @@
 import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { schema } from '@kbn/config-schema';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 
-import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.delete(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -28,8 +28,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
       const currentPackSO = await savedObjectsClient.get<{ name: string }>(
@@ -62,6 +63,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 draft,
                 `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
               );
+
               return draft;
             })
           )

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
+import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 

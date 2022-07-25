@@ -12,7 +12,7 @@ export class Timerange {
   constructor(private from: Date, private to: Date) {}
 
   interval(interval: string) {
-    return new Interval(this.from, this.to, interval);
+    return new Interval({ from: this.from, to: this.to, interval });
   }
 }
 

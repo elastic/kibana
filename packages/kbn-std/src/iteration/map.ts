@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { from } from 'rxjs';
+import { from, lastValueFrom } from 'rxjs';
 import { toArray } from 'rxjs/operators';
-import { lastValueFrom } from '../rxjs_7';
 
 import { IterableInput, AsyncMapFn, AsyncMapResult } from './types';
 import { mapWithLimit$ } from './observable';

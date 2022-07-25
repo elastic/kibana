@@ -6,14 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import multiclusterFixture from './fixtures/multicluster';
+import multiclusterFixture from './fixtures/multicluster.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('list mb', () => {
+  describe('list mb', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     describe('with trial license clusters', () => {
       const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster_mb';
       const timeRange = {

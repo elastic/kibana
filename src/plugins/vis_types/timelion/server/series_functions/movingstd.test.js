@@ -9,8 +9,8 @@
 import fn from './movingstd';
 
 import moment from 'moment';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import expect from '@kbn/expect';
+import invoke from './helpers/invoke_series_fn';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';
 

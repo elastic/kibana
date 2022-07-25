@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiPageContentBody, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  UiActionsStart,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
 import { GlobeIllustration } from '../../../assets/globe_illustration';

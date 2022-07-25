@@ -11,7 +11,7 @@ import { licenseMock } from '../common/licensing.mock';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { featureUsageMock } from './services/feature_usage_service.mock';
 import { FeatureUsageServiceStart } from './services';
-import { StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { LicensingPluginStart } from './types';
 
 const createStartServices = (

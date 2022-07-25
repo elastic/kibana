@@ -7,11 +7,11 @@
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import moment from 'moment';
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { parseExpression } from '@kbn/expressions-plugin/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
-import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;
@@ -251,7 +251,7 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
     try {
       pages = { count: workpad.pages.length };
     } catch (err) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.warn(err, workpad);
     }
     const elementCounts = workpad.pages.reduce<number[]>(

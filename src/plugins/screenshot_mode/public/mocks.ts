@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 
 export const screenshotModePluginMock = {

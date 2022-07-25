@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '../../../utils/test_helper';
-import { SectionContainer } from './';
+import { SectionContainer } from '.';
 
 describe('SectionContainer', () => {
   it('renders section without app link', () => {

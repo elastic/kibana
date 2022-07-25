@@ -17,11 +17,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
-import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
 // @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';

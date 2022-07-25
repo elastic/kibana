@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { QueryBarDefineRule } from './index';
+import { QueryBarDefineRule } from '.';
 import {
   TestProviders,
   useFormFieldMock,

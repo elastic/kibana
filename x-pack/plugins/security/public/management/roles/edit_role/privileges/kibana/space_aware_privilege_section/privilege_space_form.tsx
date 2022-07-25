@@ -28,8 +28,8 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space } from '@kbn/spaces-plugin/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';

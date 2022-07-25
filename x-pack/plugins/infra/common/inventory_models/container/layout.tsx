@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { withTheme } from '@kbn/kibana-react-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutPropsWithTheme } from '../../../public/pages/metrics/metric_detail/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -17,7 +18,6 @@ import { SubSection } from '../../../public/pages/metrics/metric_detail/componen
 import { GaugesSectionVis } from '../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-import { withTheme } from '../../../../../../src/plugins/kibana_react/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutContent } from '../../../public/pages/metrics/metric_detail/components/layout_content';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -43,6 +43,35 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
         metrics={metrics}
         onChangeRangeTime={onChangeRangeTime}
       >
+        <SubSection id="containerK8sOverview">
+          <GaugesSectionVis
+            seriesOverrides={{
+              cpu: {
+                name: i18n.translate(
+                  'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.cpuUsageSeriesLabel',
+                  {
+                    defaultMessage: 'CPU Usage',
+                  }
+                ),
+                color: theme.eui.euiColorFullShade,
+                formatter: 'percent',
+                gaugeMax: 1,
+              },
+              memory: {
+                name: i18n.translate(
+                  'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.memoryUsageSeriesLabel',
+                  {
+                    defaultMessage: 'Memory Usage',
+                  }
+                ),
+                color: theme.eui.euiColorFullShade,
+                formatter: 'percent',
+                gaugeMax: 1,
+              },
+            }}
+          />
+        </SubSection>
+
         <SubSection id="containerOverview">
           <GaugesSectionVis
             seriesOverrides={{
@@ -90,6 +119,42 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                 formatter: 'bits',
                 formatterTemplate: '{{value}}/s',
               },
+            }}
+          />
+        </SubSection>
+        <SubSection
+          id="containerK8sCpuUsage"
+          label={i18n.translate(
+            'xpack.infra.metricDetailPage.containerMetricsLayout.cpuUsageSection.sectionLabel',
+            {
+              defaultMessage: 'CPU Usage',
+            }
+          )}
+        >
+          <ChartSectionVis
+            stacked={true}
+            type="area"
+            formatter="percent"
+            seriesOverrides={{
+              cpu: { color: theme.eui.euiColorVis1 },
+            }}
+          />
+        </SubSection>
+        <SubSection
+          id="containerK8sMemoryUsage"
+          label={i18n.translate(
+            'xpack.infra.metricDetailPage.containerMetricsLayout.memoryUsageSection.sectionLabel',
+            {
+              defaultMessage: 'Memory Usage',
+            }
+          )}
+        >
+          <ChartSectionVis
+            stacked={true}
+            type="area"
+            formatter="percent"
+            seriesOverrides={{
+              memory: { color: theme.eui.euiColorVis1 },
             }}
           />
         </SubSection>

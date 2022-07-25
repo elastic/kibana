@@ -7,7 +7,7 @@
  */
 
 import vfs from 'vinyl-fs';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r?\n/g;

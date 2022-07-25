@@ -8,10 +8,10 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { css, CSSObject } from '@emotion/react';
+import { isValidUrl } from '@kbn/presentation-util-plugin/public';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl } from '../../../presentation_util/public';
 
 const revealImageParentStyle = css`
   height: 100%;

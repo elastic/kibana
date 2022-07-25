@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   CSharpFrameHeadingRenderer,

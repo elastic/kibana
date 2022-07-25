@@ -9,11 +9,11 @@ import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
-} from '../../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,

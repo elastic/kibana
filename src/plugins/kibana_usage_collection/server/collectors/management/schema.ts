@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
@@ -73,10 +73,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:tileMap:WMSdefaults': {
     type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:legacyChartsLibrary': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'timelion:target_buckets': {
@@ -172,6 +168,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'discover:sampleSize': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -418,6 +418,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableNewSyntheticsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:maxSuggestions': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -479,6 +483,62 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'discover:showMultiFields': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:rowHeightOption': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  hideAnnouncements: {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  isDefaultIndexMigrated: {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'lens:useFieldExistenceSampling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'metrics:allowCheckingForFailedShards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmDefaultServiceEnvironment': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'observability:apmOperationsTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmProgressiveLoading': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmServiceGroupMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmServiceInventoryOptimizedSorting': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmTraceExplorerTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableGroupedNav': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:showRelatedIntegrations': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyGaugeChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

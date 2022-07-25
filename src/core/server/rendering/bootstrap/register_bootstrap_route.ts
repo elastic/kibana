@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
+import type { InternalRenderingRouter } from '../internal_types';
 import type { BootstrapRenderer } from './bootstrap_renderer';
 
 export const registerBootstrapRoute = ({
   router,
   renderer,
 }: {
-  router: IRouter;
+  router: InternalRenderingRouter;
   renderer: BootstrapRenderer;
 }) => {
   router.get(
@@ -25,7 +25,7 @@ export const registerBootstrapRoute = ({
       validate: false,
     },
     async (ctx, req, res) => {
-      const uiSettingsClient = ctx.core.uiSettings.client;
+      const uiSettingsClient = (await ctx.core).uiSettings.client;
       const { body, etag } = await renderer({ uiSettingsClient, request: req });
 
       return res.ok({
@@ -48,7 +48,7 @@ export const registerBootstrapRoute = ({
       validate: false,
     },
     async (ctx, req, res) => {
-      const uiSettingsClient = ctx.core.uiSettings.client;
+      const uiSettingsClient = (await ctx.core).uiSettings.client;
       const { body, etag } = await renderer({
         uiSettingsClient,
         request: req,

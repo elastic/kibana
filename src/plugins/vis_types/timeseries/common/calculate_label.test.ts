@@ -9,7 +9,7 @@
 import { calculateLabel } from './calculate_label';
 import type { Metric } from './types';
 import { SanitizedFieldType } from './types';
-import { KBN_FIELD_TYPES } from '../../../data/common';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 describe('calculateLabel(metric, metrics)', () => {
   test('returns the metric.alias if set', () => {

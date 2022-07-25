@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 export class IndicesAPIClient {
   private readonly fieldCache = new Map<string, string[]>();

@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { createAction, IncompatibleActionError } from '../../ui_actions';
-import { CoreStart } from '../../../../../../core/public';
-import { toMountPoint } from '../../../../../kibana_react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';

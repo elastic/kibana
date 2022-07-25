@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import {
   DestructiveRouteMethod,
   RouteConfig,
   RouteConfigOptions,
   RouteMethod,
   RouteValidatorFullConfig,
-} from 'kibana/server';
-
-import { schema } from '@kbn/config-schema';
+} from '@kbn/core/server';
 
 type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknown, unknown, Method>;
 

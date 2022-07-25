@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-} from 'src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
 import { pluginServices } from '../services';
@@ -27,6 +27,7 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   onDestroy() {},
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
 });
 

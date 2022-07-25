@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import buildTarget from '../../lib/build_target.js';
+import buildTarget from '../../lib/build_target';
 
 export default function tlConfigFn(setup) {
   let targetSeries;

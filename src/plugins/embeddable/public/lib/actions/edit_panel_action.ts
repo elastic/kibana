@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
-import { Action } from 'src/plugins/ui_actions/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';

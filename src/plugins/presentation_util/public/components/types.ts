@@ -10,9 +10,9 @@ import type { MutableRefObject } from 'react';
 import type { monaco } from '@kbn/monaco';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
-import type { ExpressionFunction } from '../../../expressions/common';
+import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
+import { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -34,6 +34,10 @@ export interface SaveModalDashboardProps {
  * ExpressionInput.
  */
 export type ExpressionInputEditorRef = MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
+
+export type OnExpressionInputEditorDidMount = (
+  editor: monaco.editor.IStandaloneCodeEditor | null
+) => void;
 
 /**
  * React Props for the ExpressionInput component.
@@ -64,4 +68,6 @@ export interface ExpressionInputProps
    * (e.g. to determine if the editor is focused, etc).
    */
   editorRef?: ExpressionInputEditorRef;
+
+  onEditorDidMount?: OnExpressionInputEditorDidMount;
 }

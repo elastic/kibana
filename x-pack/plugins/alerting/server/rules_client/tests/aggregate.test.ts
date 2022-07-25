@@ -6,18 +6,19 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -112,6 +113,22 @@ describe('aggregate()', () => {
             },
           ],
         },
+        tags: {
+          buckets: [
+            {
+              key: 'a',
+              doc_count: 10,
+            },
+            {
+              key: 'b',
+              doc_count: 20,
+            },
+            {
+              key: 'c',
+              doc_count: 30,
+            },
+          ],
+        },
       },
     });
 
@@ -160,6 +177,11 @@ describe('aggregate()', () => {
         "ruleSnoozedStatus": Object {
           "snoozed": 2,
         },
+        "ruleTags": Array [
+          "a",
+          "b",
+          "c",
+        ],
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -181,11 +203,10 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },
@@ -193,14 +214,25 @@ describe('aggregate()', () => {
   });
 
   test('supports filters when aggregating', async () => {
+    const authFilter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: authFilter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'someTerm' } });
+    await rulesClient.aggregate({ options: { filter: 'foo: someTerm' } });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
       {
         fields: undefined,
-        filter: 'someTerm',
+        filter: nodeTypes.function.buildNode('and', [
+          fromKueryExpression('foo: someTerm'),
+          authFilter,
+        ]),
         page: 1,
         perPage: 0,
         type: 'alert',
@@ -215,11 +247,10 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            date_range: {
-              field: 'alert.attributes.snoozeEndTime',
-              format: 'strict_date_time',
-              ranges: [{ from: 'now' }],
-            },
+            terms: { field: 'alert.attributes.isSnoozedUntil' },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },

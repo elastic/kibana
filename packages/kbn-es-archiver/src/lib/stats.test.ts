@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import sinon from 'sinon';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { createStats } from './stats';
 

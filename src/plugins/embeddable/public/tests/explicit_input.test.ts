@@ -20,7 +20,7 @@ import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from '.
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createEmbeddablePanelMock } from '../mocks';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(

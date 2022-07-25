@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 import { chunk, find } from 'lodash/fp';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { BrowserFields } from '../../../containers/source';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../types';
 import { getEnrichedFieldInfo } from '../helpers';
@@ -26,11 +26,11 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { OverviewCardWithActions, OverviewCard } from '../overview/overview_card';
-import { StatusPopoverButton } from '../overview/status_popover_button';
-import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
+import { OverviewCardWithActions, OverviewCard } from './overview_card';
+import { StatusPopoverButton } from './status_popover_button';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../../public/timelines/store/timeline/helpers';
+import { isNotNull } from '../../../../timelines/store/timeline/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;

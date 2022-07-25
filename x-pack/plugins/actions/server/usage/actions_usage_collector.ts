@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ActionsUsage, byServiceProviderTypeSchema, byTypeSchema } from './types';
 import { ActionsConfig } from '../config';
 

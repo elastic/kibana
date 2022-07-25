@@ -7,7 +7,7 @@
 
 import { apm, ApmSynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../plugins/apm/common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 
@@ -20,19 +20,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
   function createDataViewViaApmApi() {
-    return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
+    return apmApiClient.writeUser({ endpoint: 'POST /internal/apm/data_view/static' });
   }
 
   function deleteDataView() {
-    // return supertest.delete('/api/saved_objects/<type>/<id>').set('kbn-xsrf', 'foo').expect(200)
     return supertest
-      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`)
+      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }
 
   function getDataView() {
-    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`);
+    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`);
   }
 
   function getDataViewSuggestions(field: string) {
@@ -51,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('does not create data view', async () => {
         expect(response.status).to.be(200);
-        expect(response.body.created).to.be(false);
+        expect(response.body.dataView).to.be(undefined);
       });
 
       it('cannot fetch data view', async () => {
@@ -79,7 +78,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('successfully creates the apm data view', async () => {
           expect(response.status).to.be(200);
-          expect(response.body.created).to.be(true);
+
+          expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
+          expect(response.body.dataView!.name).to.be('APM');
+          expect(response.body.dataView!.title).to.be(
+            'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+          );
         });
 
         describe('when fetching the data view', async () => {
@@ -142,8 +146,8 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
     range
       .interval('1s')
       .rate(1)
-      .spans((timestamp) =>
-        instance.transaction('GET /api').timestamp(timestamp).duration(30).success().serialize()
+      .generator((timestamp) =>
+        instance.transaction('GET /api').timestamp(timestamp).duration(30).success()
       ),
   ]);
 }

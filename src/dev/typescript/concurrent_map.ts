@@ -8,7 +8,6 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, toArray, map } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
 
 export async function concurrentMap<T, T2>(
   concurrency: number,
@@ -19,7 +18,7 @@ export async function concurrentMap<T, T2>(
     return [];
   }
 
-  return await lastValueFrom(
+  return await Rx.lastValueFrom(
     Rx.from(arr).pipe(
       // execute items in parallel based on concurrency
       mergeMap(async (item, index) => ({ index, result: await fn(item, index) }), concurrency),

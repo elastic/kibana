@@ -6,19 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import expect from '@kbn/expect';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
+
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
+      await testSubjects.click('closeFlyoutButton');
+    });
+
+    it('uses preconfigured options for a new field', async () => {
+      // find the checkbox label and click it - `testSubjects.setCheckbox()` is not working for our checkbox
+      const controlWrapper = await testSubjects.find('preconfiguredControlWrapper');
+      const control = await find.descendantDisplayedByCssSelector('label', controlWrapper);
+      await control.click();
+
+      await testSubjects.click('addField');
+      await testSubjects.existOrFail('flyoutTitle');
+
+      const nameField = await testSubjects.find('nameField');
+      const nameInput = await find.descendantDisplayedByCssSelector(
+        '[data-test-subj=input]',
+        nameField
+      );
+
+      expect(await nameInput.getAttribute('value')).to.equal('demotestfield');
     });
   });
 }

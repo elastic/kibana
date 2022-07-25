@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 import type { ListWithKuery } from '../types';

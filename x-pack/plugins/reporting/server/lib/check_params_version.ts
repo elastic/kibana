@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { UNVERSIONED_VERSION } from '../../common/constants';
 import type { BaseParams } from '../../common/types';
 

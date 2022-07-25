@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   useUiSetting$,
-} from '../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { NavigationWarningPromptProvider } from '../../../observability/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
+} from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NavigationWarningPromptProvider } from '@kbn/observability-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';

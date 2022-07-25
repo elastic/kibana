@@ -6,8 +6,14 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
 import { i18n } from '@kbn/i18n';
+
+export interface ReportingError {
+  /**
+   * Return a message describing the error that is human friendly
+   */
+  humanFriendlyMessage?(): string;
+}
 export abstract class ReportingError extends Error {
   /**
    * A string that uniquely brands an error type. This is used to power telemetry
@@ -15,7 +21,7 @@ export abstract class ReportingError extends Error {
    *
    * @note Convention for codes: lower-case, snake-case and end in `_error`.
    */
-  public abstract code: string;
+  public abstract get code(): string;
 
   constructor(public details?: string) {
     super();
@@ -34,65 +40,113 @@ export abstract class ReportingError extends Error {
 }
 
 /**
+ * While validating the page layout parameters for a screenshot type report job
+ */
+export class InvalidLayoutParametersError extends ReportingError {
+  static code = 'invalid_layout_parameters_error' as const;
+  public get code() {
+    return InvalidLayoutParametersError.code;
+  }
+}
+
+/**
+ * While loading requests in the Kibana app, a URL was encountered that the network policy did not allow.
+ */
+export class DisallowedOutgoingUrl extends ReportingError {
+  static code = 'disallowed_outgoing_url_error' as const;
+  public get code() {
+    return DisallowedOutgoingUrl.code;
+  }
+}
+
+/**
  * While performing some reporting action, like fetching data from ES, our
  * access token expired.
  */
 export class AuthenticationExpiredError extends ReportingError {
-  code = 'authentication_expired_error';
+  static code = 'authentication_expired_error' as const;
+  public get code(): string {
+    return AuthenticationExpiredError.code;
+  }
 }
 
 export class QueueTimeoutError extends ReportingError {
-  code = 'queue_timeout_error';
+  static code = 'queue_timeout_error' as const;
+  public get code(): string {
+    return QueueTimeoutError.code;
+  }
 }
 
 /**
  * An unknown error has occurred. See details.
  */
 export class UnknownError extends ReportingError {
-  code = 'unknown_error';
+  static code = 'unknown_error' as const;
+  public get code(): string {
+    return UnknownError.code;
+  }
 }
 
 export class PdfWorkerOutOfMemoryError extends ReportingError {
-  code = 'pdf_worker_out_of_memory_error';
+  static code = 'pdf_worker_out_of_memory_error' as const;
+  public get code(): string {
+    return PdfWorkerOutOfMemoryError.code;
+  }
 
-  details = i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
-    defaultMessage:
-      'Cannot generate PDF due to low memory. Consider making a smaller PDF before retrying this report.',
-  });
-
-  /**
-   * No need to provide extra details, we know exactly what happened and can provide
-   * a nicely formatted message
-   */
-  public override get message(): string {
-    return this.details;
+  public humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
+      defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
+    });
   }
 }
 
 export class BrowserCouldNotLaunchError extends ReportingError {
-  code = 'browser_could_not_launch_error';
+  static code = 'browser_could_not_launch_error' as const;
+  public get code(): string {
+    return BrowserCouldNotLaunchError.code;
+  }
 
-  details = i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
-    defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
-  });
-
-  /**
-   * For this error message we expect that users will use the diagnostics
-   * functionality in reporting to debug further.
-   */
-  public override get message() {
-    return this.details;
+  public humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+      defaultMessage: `Can't generate screenshots because the browser did not launch. See the server logs for more information.`,
+    });
   }
 }
 
 export class BrowserUnexpectedlyClosedError extends ReportingError {
-  code = 'browser_unexpectedly_closed_error';
+  static code = 'browser_unexpectedly_closed_error' as const;
+  public get code(): string {
+    return BrowserUnexpectedlyClosedError.code;
+  }
 }
 
 export class BrowserScreenshotError extends ReportingError {
-  code = 'browser_screenshot_error';
+  static code = 'browser_screenshot_error' as const;
+  public get code(): string {
+    return BrowserScreenshotError.code;
+  }
 }
 
 export class KibanaShuttingDownError extends ReportingError {
-  code = 'kibana_shutting_down_error';
+  static code = 'kibana_shutting_down_error' as const;
+  public get code(): string {
+    return KibanaShuttingDownError.code;
+  }
+}
+
+/**
+ * Special error case that should only occur on Cloud when trying to generate
+ * a report on a Kibana instance that is too small to be running Chromium.
+ */
+export class VisualReportingSoftDisabledError extends ReportingError {
+  static code = 'visual_reporting_soft_disabled_error' as const;
+  public get code(): string {
+    return VisualReportingSoftDisabledError.code;
+  }
+
+  humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
+      defaultMessage: `Can't generate this report due to insufficient memory.`,
+    });
+  }
 }

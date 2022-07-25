@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 export enum AGGS_ACTION_KEYS {
   TOUCHED = 'aggsTouched',

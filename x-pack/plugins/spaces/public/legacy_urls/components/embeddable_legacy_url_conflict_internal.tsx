@@ -16,9 +16,9 @@ import {
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { StartServicesAccessor } from 'src/core/public';
 
 import type { PluginsStart } from '../../plugin';
 import type { SpacesManager } from '../../spaces_manager';

@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { ScopedHistory } from 'src/core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 export const HistoryContext = createContext<ScopedHistory | undefined>(undefined);
 

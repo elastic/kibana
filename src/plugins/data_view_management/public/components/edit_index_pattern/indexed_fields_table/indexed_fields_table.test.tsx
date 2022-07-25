@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { DataViewField, DataView, DataViewType } from 'src/plugins/data_views/public';
+import { DataViewField, DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
-import { RuntimeField } from 'src/plugins/data_views/common';
+import { RuntimeField } from '@kbn/data-views-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',

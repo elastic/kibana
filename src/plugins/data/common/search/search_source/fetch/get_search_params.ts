@@ -8,7 +8,7 @@
 
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { ISearchRequestParams } from '../../index';
+import { ISearchRequestParams } from '../..';
 import type { SearchRequest } from './types';
 
 const sessionId = Date.now();

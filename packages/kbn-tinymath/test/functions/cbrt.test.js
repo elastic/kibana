@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { cbrt } = require('../../src/functions/cbrt.js');
+const { cbrt } = require('../../src/functions/cbrt');
 
 describe('Cbrt', () => {
   it('numbers', () => {

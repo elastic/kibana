@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { ManifestManager } from '../../endpoint/services';
-import { Manifest, reportErrors } from '../../endpoint/lib/artifacts';
-import { InternalArtifactCompleteSchema } from '../../endpoint/schemas';
-import { manifestDispatchSchema, ManifestSchema } from '../../../common/endpoint/schema/manifest';
+import type { Manifest } from '../../endpoint/lib/artifacts';
+import { reportErrors } from '../../endpoint/lib/artifacts';
+import type { InternalArtifactCompleteSchema } from '../../endpoint/schemas';
+import type { ManifestSchema } from '../../../common/endpoint/schema/manifest';
+import { manifestDispatchSchema } from '../../../common/endpoint/schema/manifest';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;

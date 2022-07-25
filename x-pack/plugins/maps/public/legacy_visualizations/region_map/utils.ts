@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 

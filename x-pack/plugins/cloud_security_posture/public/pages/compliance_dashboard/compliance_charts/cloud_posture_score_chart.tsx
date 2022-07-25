@@ -23,8 +23,9 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { statusColors } from '../../../common/constants';
 import type { PostureTrend, Stats } from '../../../../common/types';
-import * as TEXT from '../translations';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
+import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface CloudPostureScoreChartProps {
   trend: PostureTrend[];
@@ -41,21 +42,29 @@ const ScoreChart = ({
   partitionOnElementClick,
 }: Omit<CloudPostureScoreChartProps, 'trend'>) => {
   const data = [
-    { label: TEXT.PASSED, value: totalPassed },
-    { label: TEXT.FAILED, value: totalFailed },
+    { label: RULE_PASSED, value: totalPassed },
+    { label: RULE_FAILED, value: totalFailed },
   ];
+  const {
+    services: { charts },
+  } = useKibana();
 
   return (
     <Chart size={{ height: 90, width: 90 }}>
       <Settings
-        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-        theme={{
-          partition: {
-            linkLabel: { maximumSection: Infinity, maxCount: 0 },
-            outerSizeRatio: 0.9,
-            emptySizeRatio: 0.75,
+        theme={[
+          // theme overrides
+          {
+            partition: {
+              linkLabel: { maximumSection: Infinity, maxCount: 0 },
+              outerSizeRatio: 0.75,
+              emptySizeRatio: 0.7,
+            },
           },
-        }}
+          // theme
+          charts.theme.useChartsTheme(),
+        ]}
+        baseTheme={charts.theme.useChartsBaseTheme()}
         onElementClick={partitionOnElementClick as ElementClickListener}
       />
       <Partition
@@ -69,7 +78,7 @@ const ScoreChart = ({
             groupByRollup: (d: { label: string }) => d.label,
             shape: {
               fillColor: (d, index) =>
-                d.dataName === 'Passed' ? statusColors.success : statusColors.danger,
+                d.dataName === RULE_PASSED ? statusColors.success : statusColors.danger,
             },
           },
         ]}
@@ -105,10 +114,15 @@ const convertTrendToEpochTime = (trend: PostureTrend) => ({
 
 const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
   const epochTimeTrend = trend.map(convertTrendToEpochTime);
+  const {
+    services: { charts },
+  } = useKibana();
 
   return (
     <Chart>
       <Settings
+        theme={charts.theme.useChartsTheme()}
+        baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"
         tooltip={{
@@ -129,7 +143,12 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />
-      <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(2))} />
+      <Axis
+        id="bottom-axis"
+        position="bottom"
+        tickFormat={timeFormatter(niceTimeFormatByDay(2))}
+        ticks={4}
+      />
       <Axis
         ticks={3}
         id="left-axis"

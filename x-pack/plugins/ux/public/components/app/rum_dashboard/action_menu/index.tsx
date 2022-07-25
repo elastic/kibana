@@ -12,9 +12,9 @@ import {
   RECORDS_FIELD,
   createExploratoryViewUrl,
   HeaderMenuPortal,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { AppMountParameters } from '../../../../../../../../src/core/public';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { getFullPath } from '../common/constants';
-
-import type { GlobalSearchResultProvider } from '../../global_search/public';
 
 /**
  * Global search provider adding a Lens entry.

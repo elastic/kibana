@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from './debounced_value';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 export const DEFAULT_FLOATING_COLUMNS = 1;
 
@@ -23,10 +22,6 @@ interface ColumnsNumberSettingProps {
    */
   onFloatingColumnsChange?: (value: number) => void;
   /**
-   * Flag to disable the location settings
-   */
-  isDisabled: boolean;
-  /**
    * Indicates if legend is located outside
    */
   isLegendOutside: boolean;
@@ -35,13 +30,14 @@ interface ColumnsNumberSettingProps {
 export const ColumnsNumberSetting = ({
   floatingColumns,
   onFloatingColumnsChange = () => {},
-  isDisabled,
   isLegendOutside,
 }: ColumnsNumberSettingProps) => {
   const { inputValue, handleInputChange } = useDebouncedValue({
     value: floatingColumns ?? DEFAULT_FLOATING_COLUMNS,
     onChange: onFloatingColumnsChange,
   });
+
+  if (isLegendOutside) return null;
 
   return (
     <EuiFormRow
@@ -51,34 +47,17 @@ export const ColumnsNumberSetting = ({
       fullWidth
       display="columnCompressed"
     >
-      <TooltipWrapper
-        tooltipContent={
-          isDisabled
-            ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
-              })
-            : i18n.translate('xpack.lens.shared.legendInsideTooltip', {
-                defaultMessage: 'Requires legend to be located inside visualization',
-              })
-        }
-        condition={isDisabled || isLegendOutside}
-        position="top"
-        delay="regular"
-        display="block"
-      >
-        <EuiFieldNumber
-          data-test-subj="lens-legend-location-columns-input"
-          value={inputValue}
-          min={1}
-          max={5}
-          compressed
-          disabled={isDisabled || isLegendOutside}
-          onChange={(e) => {
-            handleInputChange(Number(e.target.value));
-          }}
-          step={1}
-        />
-      </TooltipWrapper>
+      <EuiFieldNumber
+        data-test-subj="lens-legend-location-columns-input"
+        value={inputValue}
+        min={1}
+        max={5}
+        compressed
+        onChange={(e) => {
+          handleInputChange(Number(e.target.value));
+        }}
+        step={1}
+      />
     </EuiFormRow>
   );
 };

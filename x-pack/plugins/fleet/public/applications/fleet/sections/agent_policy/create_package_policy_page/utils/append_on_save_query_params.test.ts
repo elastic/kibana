@@ -8,7 +8,7 @@ import { parse } from 'query-string';
 
 import type { PackagePolicy, OnSaveQueryParamKeys } from '../../../../types';
 
-import { appendOnSaveQueryParamsToPath } from './';
+import { appendOnSaveQueryParamsToPath } from '.';
 
 const mockPolicy: PackagePolicy = { policy_id: '1234' } as PackagePolicy;
 

@@ -1070,7 +1070,15 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => ",
+          " | undefined, { ignoreFilterIfFieldNotInIndex, nestedIgnoreUnmapped }?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryFiltersConfig",
+            "text": "EsQueryFiltersConfig"
+          },
+          ") => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1127,14 +1135,18 @@
           {
             "parentPluginId": "@kbn/es-query",
             "id": "def-common.buildQueryFromFilters.$3",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
-            "label": "ignoreFilterIfFieldNotInIndex",
-            "description": [
-              "by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway."
-            ],
+            "label": "{ ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }",
+            "description": [],
             "signature": [
-              "boolean"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryFiltersConfig",
+                "text": "EsQueryFiltersConfig"
+              }
             ],
             "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
             "deprecated": false,
@@ -1172,7 +1184,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          ", indexPattern: ",
+          ", indexPattern?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1180,7 +1192,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          ", formattedValue?: string | undefined) => ",
+          " | undefined, formattedValue?: string | undefined) => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1256,11 +1268,12 @@
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.DataViewBase",
                 "text": "DataViewBase"
-              }
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "@kbn/es-query",
@@ -1484,6 +1497,51 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.convertRangeFilterToTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "convertRangeFilterToTimeRange",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilter",
+            "text": "RangeFilter"
+          },
+          ") => { from: moment.Moment; to: moment.Moment; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.convertRangeFilterToTimeRange.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.RangeFilter",
+                "text": "RangeFilter"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.decorateQuery",
         "type": "Function",
         "tags": [],
@@ -1693,6 +1751,158 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.extractTimeFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeFilter",
+        "description": [],
+        "signature": [
+          "(timeFieldName: string, filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => { restOfFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; timeRangeFilter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilter",
+            "text": "RangeFilter"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeFilter.$1",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeFilter.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.extractTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeRange",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], timeFieldName: string | undefined) => { restOfFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeRange.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeRange.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2711,7 +2921,9 @@
             "section": "def-common.KueryQueryOptions",
             "text": "KueryQueryOptions"
           },
-          " | undefined, context?: Record<string, any> | undefined) => ",
+          " | undefined, context?: ",
+          "KqlContext",
+          " | undefined) => ",
           "QueryDslQueryContainer"
         ],
         "path": "packages/kbn-es-query/src/kuery/index.ts",
@@ -2749,7 +2961,9 @@
                 "section": "def-common.KueryQueryOptions",
                 "text": "KueryQueryOptions"
               },
-              " | undefined, context?: Record<string, any> | undefined]"
+              " | undefined, context?: ",
+              "KqlContext",
+              " | undefined]"
             ],
             "path": "packages/kbn-es-query/src/kuery/index.ts",
             "deprecated": false,
@@ -3155,157 +3369,44 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.DataViewBase",
+        "id": "def-common.EsQueryFiltersConfig",
         "type": "Interface",
         "tags": [],
-        "label": "DataViewBase",
+        "label": "EsQueryFiltersConfig",
         "description": [
-          "\nA base interface for an index pattern"
+          "\nOptions for building query for filters"
         ],
-        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewBase.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.DataViewFieldBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataViewFieldBase",
-        "description": [
-          "\nA base interface for an index pattern field"
-        ],
-        "path": "packages/kbn-es-query/src/es_query/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nKibana field type"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.subType",
+            "id": "def-common.EsQueryFiltersConfig.ignoreFilterIfFieldNotInIndex",
             "type": "CompoundType",
             "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
+            "label": "ignoreFilterIfFieldNotInIndex",
             "description": [
-              "\nScripted field painless script"
+              "\nby default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway."
             ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.lang",
-            "type": "string",
-            "tags": [],
-            "label": "lang",
-            "description": [
-              "\nScripted field langauge\nPainless is the only valid scripted field language"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.DataViewFieldBase.scripted",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "scripted",
-            "description": [],
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-es-query/src/es_query/types.ts",
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.EsQueryFiltersConfig.nestedIgnoreUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedIgnoreUnmapped",
+            "description": [
+              "\nthe nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.\nThe optional ignore_unmapped parameter defaults to false.\nThis `nestedIgnoreUnmapped` param allows creating queries with \"ignore_unmapped\": true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
             "deprecated": false
           }
         ],
@@ -3420,7 +3521,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"exists\" | \"and\" | \"or\" | \"is\" | \"range\" | \"not\""
+              "\"nested\" | \"exists\" | \"range\" | \"is\" | \"and\" | \"or\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
@@ -3511,14 +3612,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "keyof ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.NodeTypes",
-                "text": "NodeTypes"
-              }
+              "\"function\" | \"wildcard\" | \"literal\""
             ],
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false
@@ -3574,6 +3668,21 @@
             ],
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.KueryQueryOptions.nestedIgnoreUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedIgnoreUnmapped",
+            "description": [
+              "\nthe Nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.\nThe optional ignore_unmapped parameter defaults to false.\nThe `nestedIgnoreUnmapped` param allows creating queries with \"ignore_unmapped\": true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3608,58 +3717,6 @@
             "label": "lon",
             "description": [],
             "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.NodeTypes",
-        "type": "Interface",
-        "tags": [],
-        "label": "NodeTypes",
-        "description": [],
-        "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.function",
-            "type": "Object",
-            "tags": [],
-            "label": "function",
-            "description": [],
-            "signature": [
-              "FunctionType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.literal",
-            "type": "Object",
-            "tags": [],
-            "label": "literal",
-            "description": [],
-            "signature": [
-              "LiteralType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.NodeTypes.wildcard",
-            "type": "Object",
-            "tags": [],
-            "label": "wildcard",
-            "description": [],
-            "signature": [
-              "WildcardType"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
           }
         ],
@@ -3833,6 +3890,54 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewBase",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewBase",
+        "description": [
+          "\nA base interface for an index pattern"
+        ],
+        "signature": [
+          "{ fields: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          },
+          "[]; id?: string | undefined; title: string; }"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.DataViewFieldBase",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewFieldBase",
+        "description": [
+          "\nA base interface for an index pattern field"
+        ],
+        "signature": [
+          "{ name: string; type: string; subType?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.IFieldSubType",
+            "text": "IFieldSubType"
+          },
+          " | undefined; script?: string | undefined; lang?: string | undefined; scripted?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.DslQuery",
         "type": "Type",
         "tags": [],
@@ -3862,9 +3967,17 @@
             "section": "def-common.KueryQueryOptions",
             "text": "KueryQueryOptions"
           },
-          " & { allowLeadingWildcards: boolean; queryStringOptions: ",
+          " & ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryFiltersConfig",
+            "text": "EsQueryFiltersConfig"
+          },
+          " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
           "SerializableRecord",
-          "; ignoreFilterIfFieldNotInIndex: boolean; }"
+          " | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/es_query/build_es_query.ts",
         "deprecated": false,
@@ -4254,6 +4367,20 @@
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.TimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "signature": [
+          "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

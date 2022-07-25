@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { ActionType } from '../../../../../../../plugins/actions/server';
+import {
+  getTestSubActionConnector,
+  getTestSubActionConnectorWithoutSubActions,
+} from './sub_action_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -23,6 +27,7 @@ export function defineActionTypes(
       return { status: 'ok', actionId: '' };
     },
   };
+
   const throwActionType: ActionType = {
     id: 'test.throw',
     name: 'Test: Throw',
@@ -31,8 +36,19 @@ export function defineActionTypes(
       throw new Error('this action is intended to fail');
     },
   };
+
+  const cappedActionType: ActionType = {
+    id: 'test.capped',
+    name: 'Test: Capped',
+    minimumLicenseRequired: 'gold',
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+  };
+
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
+  actions.registerType(cappedActionType);
   actions.registerType(getIndexRecordActionType());
   actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());
@@ -40,6 +56,11 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+
+  /** Sub action framework */
+
+  actions.registerSubActionConnectorType(getTestSubActionConnector(actions));
+  actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions(actions));
 }
 
 function getIndexRecordActionType() {

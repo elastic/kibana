@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
@@ -34,7 +34,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       indexPatternId = body.id;
       expect(body.id).not.empty();
       expect(body.title).to.equal(title);
-      expect(body.fields.length).to.equal(15);
+      expect(body.fields.length).to.equal(14);
       expect(body.fieldFormatMap).to.eql(fieldFormats);
     });
 

@@ -6,7 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -17,8 +19,8 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { ActionsClient } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
+import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
 /**
  * Parameters for initializing a cases client
@@ -36,4 +38,6 @@ export interface CasesClientArgs {
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
+  readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }

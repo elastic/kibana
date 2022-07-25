@@ -7,7 +7,7 @@
  */
 
 import { renderOptInBanner } from './render_opt_in_banner';
-import { overlayServiceMock } from '../../../../../core/public/mocks';
+import { overlayServiceMock } from '@kbn/core/public/mocks';
 import { mockTelemetryConstants } from '../../mocks';
 
 describe('renderOptInBanner', () => {

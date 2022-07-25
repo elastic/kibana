@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

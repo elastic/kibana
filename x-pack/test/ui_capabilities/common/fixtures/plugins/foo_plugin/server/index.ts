@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../../../../../../plugins/features/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 
 export const plugin = () => new FooPlugin();
 

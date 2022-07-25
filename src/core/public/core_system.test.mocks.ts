@@ -6,27 +6,41 @@
  * Side Public License, v 1.
  */
 
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
-import { integrationsServiceMock } from './integrations/integrations_service.mock';
+import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppMock } from './core_app/core_app.mock';
-import { themeServiceMock } from './theme/theme_service.mock';
+
+export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
+export const MockAnalyticsService = analyticsServiceMock.create();
+MockAnalyticsService.start.mockReturnValue(analyticsServiceStartMock);
+export const AnalyticsServiceConstructor = jest.fn().mockReturnValue(MockAnalyticsService);
+jest.doMock('@kbn/core-analytics-browser-internal', () => ({
+  AnalyticsService: AnalyticsServiceConstructor,
+}));
+
+export const fetchOptionalMemoryInfoMock = jest.fn();
+jest.doMock('./fetch_optional_memory_info', () => ({
+  fetchOptionalMemoryInfo: fetchOptionalMemoryInfoMock,
+}));
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockInjectedMetadataService);
-jest.doMock('./injected_metadata', () => ({
+jest.doMock('@kbn/core-injected-metadata-browser-internal', () => ({
   InjectedMetadataService: InjectedMetadataServiceConstructor,
 }));
 
@@ -34,13 +48,13 @@ export const MockFatalErrorsService = fatalErrorsServiceMock.create();
 export const FatalErrorsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockFatalErrorsService);
-jest.doMock('./fatal_errors', () => ({
+jest.doMock('@kbn/core-fatal-errors-browser-internal', () => ({
   FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
 export const MockI18nService = i18nServiceMock.create();
 export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
-jest.doMock('./i18n', () => ({
+jest.doMock('@kbn/core-i18n-browser-internal', () => ({
   I18nService: I18nServiceConstructor,
 }));
 
@@ -54,7 +68,7 @@ jest.doMock('./notifications', () => ({
 
 export const MockHttpService = httpServiceMock.create();
 export const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
-jest.doMock('./http', () => ({
+jest.doMock('@kbn/core-http-browser-internal', () => ({
   HttpService: HttpServiceConstructor,
 }));
 
@@ -62,7 +76,7 @@ export const MockUiSettingsService = uiSettingsServiceMock.create();
 export const UiSettingsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockUiSettingsService);
-jest.doMock('./ui_settings', () => ({
+jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
   UiSettingsService: UiSettingsServiceConstructor,
 }));
 
@@ -94,7 +108,7 @@ jest.doMock('./application', () => ({
 
 export const MockDocLinksService = docLinksServiceMock.create();
 export const DocLinksServiceConstructor = jest.fn().mockImplementation(() => MockDocLinksService);
-jest.doMock('./doc_links', () => ({
+jest.doMock('@kbn/core-doc-links-browser-internal', () => ({
   DocLinksService: DocLinksServiceConstructor,
 }));
 
@@ -108,7 +122,7 @@ export const MockIntegrationsService = integrationsServiceMock.create();
 export const IntegrationsServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockIntegrationsService);
-jest.doMock('./integrations', () => ({
+jest.doMock('@kbn/core-integrations-browser-internal', () => ({
   IntegrationsService: IntegrationsServiceConstructor,
 }));
 
@@ -120,6 +134,6 @@ jest.doMock('./core_app', () => ({
 
 export const MockThemeService = themeServiceMock.create();
 export const ThemeServiceConstructor = jest.fn().mockImplementation(() => MockThemeService);
-jest.doMock('./theme', () => ({
+jest.doMock('@kbn/core-theme-browser-internal', () => ({
   ThemeService: ThemeServiceConstructor,
 }));

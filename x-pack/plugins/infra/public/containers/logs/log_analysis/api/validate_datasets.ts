@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
   validateLogEntryDatasetsRequestPayloadRT,

@@ -11,7 +11,7 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
         data-test-subj="canvasDropdownFilter__select"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -56,7 +56,7 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
         data-test-subj="canvasDropdownFilter__select"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -119,7 +119,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
         data-test-subj="canvasDropdownFilter__select"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -182,7 +182,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
         data-test-subj="canvasDropdownFilter__select"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -245,7 +245,7 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--compressed canvasDropdownFilter__select"
         data-test-subj="canvasDropdownFilter__select"
         onChange={[Function]}
         onMouseUp={[Function]}

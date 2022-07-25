@@ -12,7 +12,7 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';

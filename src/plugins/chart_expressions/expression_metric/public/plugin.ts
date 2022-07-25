@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginSetup } from '../../../charts/public';
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { metricVisFunction } from '../common';
 import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
-import { FieldFormatsStart } from '../../../field_formats/public';
+import { setThemeService } from './services/theme_service';
+import { setUiSettingsService } from './services/ui_settings';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -27,12 +29,14 @@ export interface ExpressionMetricPluginStart {
 
 /** @internal */
 export class ExpressionMetricPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
+  public async setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer(core.theme));
-    charts.palettes.getPalettes().then((palettes) => {
-      setPaletteService(palettes);
-    });
+
+    setUiSettingsService(core.uiSettings);
+    setThemeService(charts.theme);
+    const palettes = await charts.palettes.getPalettes();
+    setPaletteService(palettes);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {

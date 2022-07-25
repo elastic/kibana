@@ -7,12 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TransformHealthTests } from './types/alerting';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
 export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
+
+export const DEFAULT_MAX_AUDIT_MESSAGE_SIZE = 500;
 
 export const PLUGIN = {
   ID: 'transform',

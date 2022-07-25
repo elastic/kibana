@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { throttle } from 'lodash';
 
-import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin';
 import { createVegaVisualization } from '../vega_visualization';
 import { VegaVisualizationDependencies } from '../plugin';
 import { VegaParser } from '../data_model/vega_parser';

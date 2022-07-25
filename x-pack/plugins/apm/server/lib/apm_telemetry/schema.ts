@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import {
   AggregatedTransactionsCounts,
   APMUsage,
@@ -74,6 +74,7 @@ const apmPerAgentSchema: Pick<
   // TODO: Find a way for `@kbn/telemetry-tools` to understand and evaluate expressions.
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
+    'android/java': long,
     dotnet: long,
     'iOS/swift': long,
     go: long,
@@ -98,6 +99,7 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/webjs': long,
   },
   agents: {
+    'android/java': agentSchema,
     dotnet: agentSchema,
     'iOS/swift': agentSchema,
     go: agentSchema,
@@ -187,6 +189,9 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
   },
+  service_groups: {
+    kuery_fields: { type: 'array', items: { type: 'keyword' } },
+  },
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
@@ -201,5 +206,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
     environments: { took: { ms: long } },
+    service_groups: { took: { ms: long } },
   },
 };

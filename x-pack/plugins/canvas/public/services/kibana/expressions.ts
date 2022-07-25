@@ -9,11 +9,11 @@ import {
   ExpressionAstExpression,
   ExpressionExecutionParams,
   ExpressionValue,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 import { pluck } from 'rxjs/operators';
+import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionsServiceStart } from '../../../../../../src/plugins/expressions/public';
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasFiltersService } from './filters';
 import { CanvasNotifyService } from '../notify';

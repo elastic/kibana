@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -17,11 +19,9 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { Alert } from '../../../alerting/server';
 import { RULE_ELASTICSEARCH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 

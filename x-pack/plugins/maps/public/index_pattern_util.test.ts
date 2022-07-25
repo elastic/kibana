@@ -14,18 +14,18 @@ import {
   supportsGeoTileAgg,
 } from './index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
-    const agent = new IndexPatternField({
+    const agent = new DataViewField({
       name: 'agent',
       searchable: true,
       aggregatable: true,
       type: 'string',
     });
 
-    const agentKeyword = new IndexPatternField({
+    const agentKeyword = new DataViewField({
       name: 'agent.keyword',
       subType: {
         multi: {
@@ -52,7 +52,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_point',
         aggregatable: true,
-      } as IndexPatternField,
+      } as DataViewField,
       supportedInBasic: true,
       supportedInGold: true,
     },
@@ -61,7 +61,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: false,
-      } as IndexPatternField,
+      } as DataViewField,
       supportedInBasic: false,
       supportedInGold: false,
     },
@@ -70,7 +70,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: true,
-      } as IndexPatternField,
+      } as DataViewField,
       supportedInBasic: false,
       supportedInGold: true,
     },

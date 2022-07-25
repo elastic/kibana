@@ -8,22 +8,22 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
+import type { InspectResponse } from '../common/helpers';
 import {
   createFilter,
   generateTablePaginationOptions,
   getInspectResponse,
-  InspectResponse,
 } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
+import type {
   ActionEdges,
-  PageInfoPaginated,
-  OsqueryQueries,
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
+import { OsqueryQueries } from '../../common/search_strategy';
+import type { ESTermQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -32,8 +32,6 @@ export interface ActionsArgs {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  pageInfo: PageInfoPaginated;
-  totalCount: number;
 }
 
 interface UseAllActions {
@@ -59,8 +57,8 @@ export const useAllActions = ({
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
-      const responseData = await data.search
-        .search<ActionsRequestOptions, ActionsStrategyResponse>(
+      const responseData = await lastValueFrom(
+        data.search.search<ActionsRequestOptions, ActionsStrategyResponse>(
           {
             factoryQueryType: OsqueryQueries.actions,
             filterQuery: createFilter(filterQuery),
@@ -74,7 +72,7 @@ export const useAllActions = ({
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       return {
         ...responseData,

@@ -10,10 +10,10 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
-import {
+import type {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
-} from '../../../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../common/lib/kibana/hooks';
 import {
   getPolicyDetailPath,
@@ -23,7 +23,7 @@ import {
   getPolicyEventFiltersPath,
 } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
-import { AppAction } from '../../../../../common/store/actions';
+import type { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
   apiError,
@@ -35,12 +35,13 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
 import { BlocklistsApiClient } from '../../../blocklist/services';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint';
 
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -50,7 +51,7 @@ export const BLOCKLISTS_LABELS = {
     }),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      id="xpack.securitySolution.endpoint.blocklist.fleetIntegration.title"
       defaultMessage="Blocklist"
     />
   ),
@@ -158,6 +159,7 @@ const WrappedPolicyDetailsForm = memo<{
 
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+  const { canAccessEndpointManagement } = useEndpointPrivileges();
 
   const hostIsolationExceptionsApiClientInstance = useMemo(
     () => HostIsolationExceptionsApiClient.getInstance(http),
@@ -225,8 +227,8 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
-  return (
-    <div data-test-subj="endpointIntegrationPolicyForm">
+  const artifactCards = useMemo(
+    () => (
       <>
         <div>
           <EuiText>
@@ -276,6 +278,22 @@ const WrappedPolicyDetailsForm = memo<{
           />
         </div>
         <EuiSpacer size="l" />
+      </>
+    ),
+    [
+      blocklistsApiClientInstance,
+      eventFiltersApiClientInstance,
+      hostIsolationExceptionsApiClientInstance,
+      policyId,
+      privileges.canIsolateHost,
+      trustedAppsApiClientInstance,
+    ]
+  );
+
+  return (
+    <div data-test-subj="endpointIntegrationPolicyForm">
+      <>
+        {canAccessEndpointManagement && artifactCards}
         <div>
           <EuiText>
             <h5>

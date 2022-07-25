@@ -112,6 +112,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'slack',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
     const configErrors = {};
@@ -128,6 +129,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'jira',
       config: {} as any,
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = {};
     const configErrors = { apiUrl: ['apiUrl is required'] };
@@ -146,6 +148,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       name: 'slack',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
     const configErrors = {};

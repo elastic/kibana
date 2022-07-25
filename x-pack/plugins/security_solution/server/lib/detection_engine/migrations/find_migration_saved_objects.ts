@@ -8,10 +8,11 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import { signalsMigrationSOClient } from './saved_objects_client';
-import { SignalsMigrationSO, signalsMigrationSOs } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
+import { signalsMigrationSOs } from './saved_objects_schema';
 
 export const findMigrationSavedObjects = async ({
   options,

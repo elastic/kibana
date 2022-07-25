@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { PluginInitializerContext } from 'kibana/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../src/plugins/data/public';
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
-import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
 import { Config } from '../common';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, DocLinksStart } from 'kibana/public';
+import { HttpSetup, DocLinksStart } from '@kbn/core/public';
 import { ObservabilityFetchDataPlugins } from '../../../typings/fetch_overview_data';
 
 export interface ObservabilityStatusContent {

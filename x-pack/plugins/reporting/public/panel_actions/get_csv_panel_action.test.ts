@@ -7,13 +7,13 @@
 
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
-import { CoreStart } from 'src/core/public';
-import type { SearchSource } from 'src/plugins/data/common';
-import type { SavedSearch } from 'src/plugins/discover/public';
-import { LicenseCheckState } from '../../../licensing/public';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import type { SearchSource } from '@kbn/data-plugin/common';
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+import { LicenseCheckState } from '@kbn/licensing-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';

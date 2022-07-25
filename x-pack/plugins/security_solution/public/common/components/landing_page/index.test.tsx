@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { LandingPageComponent } from './index';
+import { LandingPageComponent } from '.';
 
 describe('LandingPageComponent component', () => {
   it('renders page properly', () => {

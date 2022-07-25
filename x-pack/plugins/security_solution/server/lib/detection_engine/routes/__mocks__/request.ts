@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '../../../../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,

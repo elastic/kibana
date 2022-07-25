@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { rangeQuery } from '../../../../observability/server';
+import { sumBy } from 'lodash';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -84,7 +84,7 @@ export function getServiceMapServiceNodeInfo({
       ...environmentQuery(environment),
     ];
 
-    const minutes = Math.abs((end - start) / (1000 * 60));
+    const minutes = (end - start) / 1000 / 60;
     const numBuckets = 20;
     const { intervalString, bucketSize } =
       getBucketSizeForAggregatedTransactions({
@@ -193,7 +193,6 @@ async function getTransactionStats({
           ],
         },
       },
-      track_total_hits: true,
       aggs: {
         duration: { avg: { field: durationField } },
         timeseries: {
@@ -215,7 +214,10 @@ async function getTransactionStats({
     params
   );
 
-  const totalRequests = response.hits.total.value;
+  const throughputValue = sumBy(
+    response.aggregations?.timeseries.buckets,
+    'doc_count'
+  );
 
   return {
     latency: {
@@ -226,7 +228,7 @@ async function getTransactionStats({
       })),
     },
     throughput: {
-      value: totalRequests > 0 ? totalRequests / minutes : null,
+      value: throughputValue ? throughputValue / minutes : null,
       timeseries: response.aggregations?.timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key + offsetInMs,

@@ -83,6 +83,14 @@ export const EDIT_COMMENT = i18n.translate('xpack.cases.caseView.edit.comment', 
   defaultMessage: 'Edit comment',
 });
 
+export const DELETE_COMMENT = i18n.translate('xpack.cases.caseView.delete.comment', {
+  defaultMessage: 'Delete comment',
+});
+
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.caseView.deleteTitle.comment', {
+  defaultMessage: 'Delete this comment?',
+});
+
 export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
@@ -147,3 +155,18 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
+
+export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {
+  defaultMessage: 'Activity',
+});
+
+export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.tabs.alerts.emptyDescription',
+  {
+    defaultMessage: 'No alerts have been added to this case.',
+  }
+);

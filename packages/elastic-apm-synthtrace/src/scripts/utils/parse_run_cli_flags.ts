@@ -6,15 +6,40 @@
  * Side Public License, v 1.
  */
 
+import { existsSync } from 'fs';
 import { pick } from 'lodash';
+import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
-import { RunCliFlags } from '../run';
-import { intervalToMs } from './interval_to_ms';
+import { RunCliFlags } from '../run_synthtrace';
+
+function getParsedFile(flags: RunCliFlags) {
+  const { file, _ } = flags;
+  const parsedFile = (file || _[0]) as string;
+
+  if (!parsedFile) {
+    throw new Error('Please specify a scenario to run');
+  }
+
+  const filepath = [
+    path.resolve(parsedFile),
+    path.resolve(`${parsedFile}.ts`),
+    path.resolve(__dirname, '../../scenarios', parsedFile),
+    path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
+    path.resolve(__dirname, '../../scenarios', `${parsedFile}.js`),
+  ].find((p) => existsSync(p));
+
+  if (filepath) {
+    // eslint-disable-next-line no-console
+    console.log(`Loading scenario from ${filepath}`);
+    return filepath;
+  }
+
+  throw new Error(`Could not find scenario file: "${parsedFile}"`);
+}
 
 export function parseRunCliFlags(flags: RunCliFlags) {
-  const { file, _, logLevel, interval, bucketSize } = flags;
-
-  const parsedFile = String(file || _[0]);
+  const { logLevel } = flags;
+  const parsedFile = getParsedFile(flags);
 
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
@@ -35,35 +60,25 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       break;
   }
 
-  const intervalInMs = intervalToMs(interval);
-  if (!intervalInMs) {
-    throw new Error('Invalid interval');
-  }
-
-  const bucketSizeInMs = intervalToMs(bucketSize);
-
-  if (!bucketSizeInMs) {
-    throw new Error('Invalid bucket size');
-  }
-
   return {
     ...pick(
       flags,
       'maxDocs',
+      'maxDocsConfidence',
       'target',
       'cloudId',
       'username',
       'password',
       'workers',
-      'clientWorkers',
-      'batchSize',
-      'writeTarget',
+      'flushSizeBulk',
+      'flushSize',
       'numShards',
       'scenarioOpts',
-      'dryRun'
+      'forceLegacyIndices',
+      'dryRun',
+      'gcpRepository',
+      'streamProcessors'
     ),
-    intervalInMs,
-    bucketSizeInMs,
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

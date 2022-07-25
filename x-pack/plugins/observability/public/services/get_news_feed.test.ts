@@ -6,7 +6,7 @@
  */
 
 import { getNewsFeed } from './get_news_feed';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
 describe('getNewsFeed', () => {
   const originalConsole = global.console;

@@ -19,7 +19,7 @@ import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
 
-import { EngineOverviewLogic } from './';
+import { EngineOverviewLogic } from '.';
 
 export const EngineOverviewMetrics: React.FC = () => {
   const { loadOverviewMetrics } = useActions(EngineOverviewLogic);

@@ -7,11 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService } from '../../common/data_views';
+import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SPECIFIC_DATA_VIEW_PATH,
@@ -161,8 +162,9 @@ const updateDataViewRouteFactory =
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
 
           const dataViewsService = await dataViewsServiceFactory(

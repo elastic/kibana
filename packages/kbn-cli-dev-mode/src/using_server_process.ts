@@ -18,14 +18,19 @@ interface ProcResource extends Rx.Unsubscribable {
   unsubscribe(): void;
 }
 
+interface Options {
+  script: string;
+  argv: string[];
+  forceColor: boolean;
+}
+
 export function usingServerProcess<T>(
-  script: string,
-  argv: string[],
+  options: Options,
   fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(script, argv, {
+      const proc = execa.node(options.script, options.argv, {
         stdio: 'pipe',
         nodeOptions: [
           ...process.execArgv,
@@ -36,7 +41,7 @@ export function usingServerProcess<T>(
           NODE_OPTIONS: process.env.NODE_OPTIONS,
           isDevCliChild: 'true',
           ELASTIC_APM_SERVICE_NAME: 'kibana',
-          ...(process.stdout.isTTY ? { FORCE_COLOR: 'true' } : {}),
+          ...(options.forceColor ? { FORCE_COLOR: 'true' } : {}),
         },
       });
 

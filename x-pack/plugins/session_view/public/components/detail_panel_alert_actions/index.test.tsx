@@ -12,7 +12,7 @@ import {
   BUTTON_TEST_ID,
   SHOW_DETAILS_TEST_ID,
   JUMP_TO_PROCESS_TEST_ID,
-} from './index';
+} from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import userEvent from '@testing-library/user-event';
 import { ProcessEvent } from '../../../common/types/process_tree';

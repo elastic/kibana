@@ -11,17 +11,18 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import { Case, CaseStatuses, StatusAll } from '../../../../common';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
-import { usePostComment } from '../../../containers/use_post_comment';
-import { SupportedCaseAttachment } from '../../../types';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/use_cases_toast');
-jest.mock('../../../containers/use_post_comment');
+jest.mock('../../../containers/use_create_attachments');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
   return {
@@ -35,22 +36,23 @@ const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({
-    attachments: [alertComment as SupportedCaseAttachment],
-  });
+  const hook = useCasesAddToExistingCaseModal();
 
   const onClick = () => {
-    hook.open();
+    hook.open({ attachments: [alertComment] });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
 };
 
-const usePostCommentMock = usePostComment as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+
+const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
-  usePostCommentMock.mockReturnValue({
-    postComment: jest.fn(),
+  useCreateAttachmentsMock.mockReturnValue({
+    createAttachments: jest.fn(),
   });
 
   const dispatch = jest.fn();
@@ -59,8 +61,10 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
+          externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
           owner: ['test'],
-          userCanCrud: true,
+          permissions: allCasesPermissions(),
           appId: 'test',
           appTitle: 'jest',
           basePath: '/jest',
@@ -130,10 +134,10 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
-  it('should call postComment when a case is selected and show a toast message', async () => {
-    const mockedPostMessage = jest.fn();
-    usePostCommentMock.mockReturnValueOnce({
-      postComment: mockedPostMessage,
+  it('should call createAttachments when a case is selected and show a toast message', async () => {
+    const mockBulkCreateAttachments = jest.fn();
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -150,19 +154,20 @@ describe('use cases add to existing case modal hook', () => {
     userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockedPostMessage).toHaveBeenCalledWith({
+      expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
+      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
-        data: alertComment,
+        data: [alertComment],
         throwOnError: true,
       });
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call postComment nor show toast success when  a case is not selected', async () => {
-    const mockedPostMessage = jest.fn();
-    usePostCommentMock.mockReturnValueOnce({
-      postComment: mockedPostMessage,
+  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
+    const mockBulkCreateAttachments = jest.fn();
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -180,15 +185,15 @@ describe('use cases add to existing case modal hook', () => {
     // give a small delay for the reducer to run
 
     act(() => {
-      expect(mockedPostMessage).not.toHaveBeenCalled();
+      expect(mockBulkCreateAttachments).not.toHaveBeenCalled();
       expect(mockedToastSuccess).not.toHaveBeenCalled();
     });
   });
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
-    const mockedPostMessage = jest.fn().mockRejectedValue(new Error('Impossible'));
-    usePostCommentMock.mockReturnValueOnce({
-      postComment: mockedPostMessage,
+    const mockBulkCreateAttachments = jest.fn().mockRejectedValue(new Error('Impossible'));
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToast = jest.fn();
@@ -206,15 +211,15 @@ describe('use cases add to existing case modal hook', () => {
     userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockedPostMessage).toHaveBeenCalledWith({
+      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
-        data: alertComment,
+        data: [alertComment],
         throwOnError: true,
       });
     });
 
     act(() => {
-      expect(mockedPostMessage).toHaveBeenCalled();
+      expect(mockBulkCreateAttachments).toHaveBeenCalled();
       expect(mockedToast).not.toHaveBeenCalled();
     });
   });

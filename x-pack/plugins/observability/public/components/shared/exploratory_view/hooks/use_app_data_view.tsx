@@ -6,15 +6,15 @@
  */
 
 import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
-import { HttpFetchError } from 'kibana/public';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
-import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 import { getApmDataViewTitle } from '../utils/utils';
 
 export interface DataViewContext {
@@ -33,7 +33,7 @@ interface ProviderProps {
 
 type HasAppDataState = Record<AppDataType, boolean | undefined>;
 export type DataViewState = Record<AppDataType, DataView>;
-export type DataViewErrors = Record<AppDataType, HttpFetchError>;
+export type DataViewErrors = Record<AppDataType, IHttpFetchError<any>>;
 type LoadingState = Record<AppDataType, boolean>;
 
 export function DataViewContextProvider({ children }: ProviderProps) {
@@ -96,7 +96,7 @@ export function DataViewContextProvider({ children }: ProviderProps) {
         } catch (e) {
           if (
             e instanceof DataViewInsufficientAccessError ||
-            (e as HttpFetchError).body === 'Forbidden'
+            (e as IHttpFetchError).body === 'Forbidden'
           ) {
             setDataViewErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }

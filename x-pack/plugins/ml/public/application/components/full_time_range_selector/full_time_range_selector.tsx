@@ -21,16 +21,17 @@ import {
 } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { useStorage } from '../../contexts/ml/use_storage';
 import { ML_FROZEN_TIER_PREFERENCE } from '../../../../common/types/storage';
+import { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 
 interface Props {
   dataView: DataView;
   query: QueryDslQueryContainer;
   disabled: boolean;
-  callback?: (a: any) => void;
+  callback?: (a: GetTimeFieldRangeResponse) => void;
 }
 
 const FROZEN_TIER_PREFERENCE = {

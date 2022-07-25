@@ -14,7 +14,8 @@ import {
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   CaseAttributes,
   CaseConnector,
@@ -27,7 +28,6 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../../common/utils';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../actions/server';
 import { UserActionVersion800 } from './types';
 import { logError } from '../utils';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';

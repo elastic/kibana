@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
@@ -29,12 +29,14 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions['action']> = ({
 const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
+  isDeprecated,
   isMissingSecrets,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
 });
 
@@ -51,7 +53,7 @@ export const createActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const action = rewriteBodyReq(req.body);
         return res.ok({
           body: rewriteBodyRes(await actionsClient.create({ action })),

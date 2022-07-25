@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

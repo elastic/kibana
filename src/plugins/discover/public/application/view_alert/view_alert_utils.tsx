@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ToastsStart } from 'kibana/public';
-import type { Rule } from '../../../../../../x-pack/plugins/alerting/common';
-import type { RuleTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
-import { SerializedSearchSourceFields } from '../../../../data/common';
-import type { DataPublicPluginStart } from '../../../../data/public';
-import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
@@ -106,11 +106,26 @@ export const getAlertUtils = (
     }
   };
 
+  const showDataViewUpdatedWarning = async () => {
+    const warnTitle = i18n.translate('discover.viewAlert.dataViewChangedWarnTitle', {
+      defaultMessage: 'Data View has changed',
+    });
+    const warnDescription = i18n.translate('discover.viewAlert.dataViewChangedWarnDescription', {
+      defaultMessage: `Data view has been updated after the last update of the alert rule.`,
+    });
+
+    toastNotifications.addWarning({
+      title: warnTitle,
+      text: toMountPoint(<MarkdownSimple>{warnDescription}</MarkdownSimple>),
+    });
+  };
+
   return {
+    fetchAlert,
+    fetchSearchSource,
     displayRuleChangedWarn,
     displayPossibleDocsDiffInfoAlert,
     showDataViewFetchError,
-    fetchAlert,
-    fetchSearchSource,
+    showDataViewUpdatedWarning,
   };
 };

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   RuleActionParams,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
 } from '../types';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;

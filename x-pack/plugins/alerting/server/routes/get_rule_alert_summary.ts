@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { GetAlertSummaryParams } from '../rules_client';
@@ -72,7 +72,7 @@ export const getRuleAlertSummaryRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const summary = await rulesClient.getAlertSummary(rewriteReq({ id, ...req.query }));
         return res.ok({ body: rewriteBodyRes(summary) });

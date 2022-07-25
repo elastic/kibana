@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition, ParamEditorProps } from './index';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
 import {
@@ -35,6 +35,7 @@ const supportedTypes = new Set([
   'ip_range',
   'date',
   'date_range',
+  'murmur3',
 ]);
 
 const SCALE = 'ratio';
@@ -64,11 +65,17 @@ export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternCol
   };
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
+export const cardinalityOperation: OperationDefinition<
+  CardinalityIndexPatternColumn,
+  'field',
+  {},
+  true
+> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  allowAsReference: true,
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -122,41 +129,35 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
-        optionElement: (
-          <>
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                defaultMessage: 'Hide zero values',
-              })}
-              labelProps={{
-                style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
-                },
-              }}
-              checked={Boolean(currentColumn.params?.emptyAsNull)}
-              onChange={() => {
-                updateLayer(
-                  updateColumnParam({
-                    layer,
-                    columnId,
-                    paramName: 'emptyAsNull',
-                    value: !currentColumn.params?.emptyAsNull,
-                  })
-                );
-              }}
-              compressed
-            />
-          </>
+        inlineElement: (
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+              defaultMessage: 'Hide zero values',
+            })}
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
         ),
-        title: '',
-        showInPopover: true,
-        inlineElement: null,
-        onClick: () => {},
       },
     ];
   },

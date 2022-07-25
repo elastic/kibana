@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
 import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from '../legacy_urls';

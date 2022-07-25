@@ -8,17 +8,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieTypeProps } from '../types';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
   LegendDisplay,
-} from '../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
+import { DEFAULT_PERCENT_DECIMALS } from '../../common';
+import { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -33,6 +33,7 @@ export const getPieVisTypeDefinition = ({
   description: i18n.translate('visTypePie.pie.pieDescription', {
     defaultMessage: 'Compare data in proportion to a whole.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
@@ -63,6 +64,7 @@ export const getPieVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,

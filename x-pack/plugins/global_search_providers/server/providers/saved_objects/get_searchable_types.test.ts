@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectTypeRegistry } from '../../../../../../src/core/server';
+import { SavedObjectTypeRegistry } from '@kbn/core/server';
 import { getSearchableTypes } from './get_searchable_types';
 
 describe('getSearchableTypes', () => {

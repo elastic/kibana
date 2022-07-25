@@ -11,6 +11,6 @@
   "server": true,
   "extraPublicDirs": ["common"],
   "requiredPlugins": [],
-  "requiredBundles": ["presentationUtil"],
+  "requiredBundles": [],
   "optionalPlugins": []
 }

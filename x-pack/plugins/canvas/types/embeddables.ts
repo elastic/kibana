@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
+import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
-import { EmbeddableInput as Input } from '../../../../src/plugins/embeddable/common/';
+import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;

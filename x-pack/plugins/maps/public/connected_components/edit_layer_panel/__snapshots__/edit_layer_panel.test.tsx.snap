@@ -52,16 +52,9 @@ exports[`EditLayerPanel is rendered 1`] = `
       <div
         className="mapLayerPanel__sourceDetails"
       >
-        <EuiAccordion
-          arrowDisplay="left"
+        <EuiAccordionClass
           buttonContent="Source details"
-          buttonElement="button"
-          element="div"
           id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          paddingSize="none"
         >
           <EuiText
             color="subdued"
@@ -83,7 +76,7 @@ exports[`EditLayerPanel is rendered 1`] = `
               </span>
             </p>
           </EuiText>
-        </EuiAccordion>
+        </EuiAccordionClass>
       </div>
     </EuiFlyoutHeader>
     <div
@@ -96,10 +89,12 @@ exports[`EditLayerPanel is rendered 1`] = `
           layer={
             Object {
               "canShowTooltip": [Function],
+              "getDescriptor": [Function],
               "getDisplayName": [Function],
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
               "getLayerTypeIconName": [Function],
+              "getStyleForEditing": [Function],
               "getType": [Function],
               "hasErrors": [Function],
               "hasJoins": [Function],
@@ -119,10 +114,12 @@ exports[`EditLayerPanel is rendered 1`] = `
             layer={
               Object {
                 "canShowTooltip": [Function],
+                "getDescriptor": [Function],
                 "getDisplayName": [Function],
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],
                 "getLayerTypeIconName": [Function],
+                "getStyleForEditing": [Function],
                 "getType": [Function],
                 "hasErrors": [Function],
                 "hasJoins": [Function],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import type { CollectorDependencies } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';

@@ -23,7 +23,12 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { staticSourceData } from './source_data';
-import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
+import {
+  SourcesLogic,
+  fetchSourceStatuses,
+  POLLING_INTERVAL,
+  mergeServerAndStaticData,
+} from './sources_logic';
 
 describe('SourcesLogic', () => {
   const { http } = mockHttpValues;
@@ -37,8 +42,16 @@ describe('SourcesLogic', () => {
   const defaultValues = {
     contentSources: [],
     privateContentSources: [],
-    sourceData: staticSourceData.map((data) => ({ ...data, connected: false })),
-    availableSources: staticSourceData.map((data) => ({ ...data, connected: false })),
+    sourceData: mergeServerAndStaticData([], staticSourceData, []).map((data) => ({
+      ...data,
+      connected: false,
+    })),
+    availableSources: mergeServerAndStaticData([], staticSourceData, [])
+      .map((data) => ({
+        ...data,
+        connected: false,
+      }))
+      .filter((source) => source.serviceType !== 'external'),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,

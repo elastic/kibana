@@ -15,7 +15,7 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';

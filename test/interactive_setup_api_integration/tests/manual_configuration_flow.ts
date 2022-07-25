@@ -19,7 +19,7 @@ export default function (context: FtrProviderContext) {
   const config = context.getService('config');
 
   describe('Interactive setup APIs - Manual configuration flow', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags('skipCloud');
 
     let kibanaVerificationCode: string;
     let elasticsearchCaCertificate: string;

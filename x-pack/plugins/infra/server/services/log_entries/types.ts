@@ -8,7 +8,7 @@
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 import type { LogViewsServiceStart } from '../log_views/types';
 
 export interface LogEntriesServiceSetupDeps {

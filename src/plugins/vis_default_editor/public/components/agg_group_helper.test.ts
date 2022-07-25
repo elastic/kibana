@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IAggConfig } from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import {
   isAggRemovable,

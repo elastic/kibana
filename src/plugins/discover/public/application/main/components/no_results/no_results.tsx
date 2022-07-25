@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';

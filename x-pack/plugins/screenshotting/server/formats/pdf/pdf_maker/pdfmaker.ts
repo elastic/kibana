@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
@@ -33,8 +33,9 @@ export class PdfMaker {
 
   private worker?: Worker;
   private pageCount: number = 0;
+  private transferList: ArrayBuffer[] = [];
 
-  protected workerModulePath = path.resolve(__dirname, './worker.js');
+  protected workerModulePath: string;
 
   /**
    * The maximum heap size for old memory region of the worker thread.
@@ -65,16 +66,26 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
+    { dist }: PackageInfo,
     private readonly logger: Logger
   ) {
     this.title = '';
     this.content = [];
+
+    // running in dist: `worker.ts` becomes `worker.js`
+    // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
+    this.workerModulePath = path.resolve(
+      __dirname,
+      dist ? './worker.js' : './worker_src_harness.js'
+    );
   }
 
   _addContents(contents: Content[]) {
     const groupCount = this.content.length;
 
     // inject a page break for every 2 groups on the page
+    // TODO: Remove this code since we are now using Chromium to drive this
+    // layout via native print functionality.
     if (groupCount > 0 && groupCount % this.layout.groupCount === 0) {
       contents = [
         {
@@ -126,11 +137,15 @@ export class PdfMaker {
     this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
     const size = this.layout.getPdfImageSize();
     const img = {
-      image: `data:image/png;base64,${image.toString('base64')}`,
+      // The typings are incomplete for the image property.
+      // It's possible to pass a Buffer as the image data.
+      // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
+      image,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
-    };
+    } as unknown as ContentImage;
+    this.transferList.push(image.buffer);
 
     if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
@@ -222,7 +237,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
-        myPort.postMessage(generatePdfRequest);
+        myPort.postMessage(generatePdfRequest, this.transferList);
       });
     } finally {
       await this.cleanupWorker();

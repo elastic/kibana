@@ -11,14 +11,16 @@ import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
+    const coreContext = await context.core;
     const isFleetServerSetup = await hasFleetServers(
-      context.core.elasticsearch.client.asInternalUser
+      coreContext.elasticsearch.client.asInternalUser
     );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
@@ -42,6 +44,12 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missing_optional_features: missingOptionalFeatures,
     };
 
+    const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
+
+    if (packageVerificationKeyId) {
+      body.package_verification_key_id = packageVerificationKeyId;
+    }
+
     return response.ok({
       body,
     });
@@ -52,8 +60,8 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
 
 export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.fleet.epm.internalSoClient;
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const soClient = (await context.fleet).epm.internalSoClient;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,

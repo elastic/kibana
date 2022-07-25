@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 
-import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
+import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
 
-import type { KibanaFeature } from '../../../features/server';
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import type { SpacesServiceStart } from '../spaces_service';

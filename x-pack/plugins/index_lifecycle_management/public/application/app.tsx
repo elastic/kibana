@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { useKibana, useExecutionContext } from '../shared_imports';

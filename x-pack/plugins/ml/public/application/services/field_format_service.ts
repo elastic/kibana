@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
-import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;

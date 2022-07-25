@@ -7,7 +7,7 @@
 
 import { existsSync } from 'fs';
 import del from 'del';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { md5 } from './checksum';
 import { fetch } from './fetch';

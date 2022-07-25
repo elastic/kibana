@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { CaseStatuses } from '../../../../plugins/cases/common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -64,9 +65,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a case correctly from the list', async () => {
-        await testSubjects.click('action-delete');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.existOrFail('euiToastHeader');
+        await cases.casesTable.deleteFirstListedCase();
         await cases.casesTable.waitForTableToFinishLoading();
 
         await retry.tryForTime(2000, async () => {
@@ -83,13 +82,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filtering', () => {
-      const id = uuid.v4();
-      const caseTitle = 'matchme-' + id;
+      const caseTitle = 'matchme';
 
       before(async () => {
-        await cases.api.createNthRandomCases(2);
         await cases.api.createCase({ title: caseTitle, tags: ['one'] });
-        await cases.api.createCase({ tags: ['two'] });
+        await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        await cases.api.createCase({ title: 'test3' });
+        await cases.api.createCase({ title: 'test4' });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
@@ -143,6 +142,51 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('filters cases by reporter', async () => {
         await cases.casesTable.filterByReporter('elastic');
         await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+    });
+
+    describe('severity filtering', () => {
+      before(async () => {
+        await cases.api.createCase({ severity: CaseSeverity.LOW });
+        await cases.api.createCase({ severity: CaseSeverity.LOW });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH });
+        await cases.api.createCase({ severity: CaseSeverity.CRITICAL });
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+      beforeEach(async () => {
+        /**
+         * There is no easy way to clear the filtering.
+         * Refreshing the page seems to be easier.
+         */
+        await cases.navigation.navigateToApp();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('filters cases by severity', async () => {
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+
+        // low
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        // high
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        // critical
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+
+        // back to all
+        await cases.casesTable.filterBySeverity(SeverityAll);
+        await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });
 

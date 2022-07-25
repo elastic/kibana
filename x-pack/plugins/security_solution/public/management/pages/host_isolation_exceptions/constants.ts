@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ExceptionListType,
-  ExceptionListTypeEnum,
-  CreateExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
@@ -22,13 +19,10 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `entries.value`,
 ];
 
-export const HOST_ISOLATION_EXCEPTIONS_LIST_TYPE: ExceptionListType =
-  ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS;
-
 export const HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION: CreateExceptionListSchema = {
   name: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
   namespace_type: 'agnostic',
   description: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
   list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  type: HOST_ISOLATION_EXCEPTIONS_LIST_TYPE,
+  type: ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
 };

@@ -20,7 +20,7 @@ import { getPageHeaderActions, getPageTitle, getPageDescription } from '../../..
 
 import { SchemaCallouts, SchemaTable } from '../components';
 
-import { Schema } from './';
+import { Schema } from '.';
 
 describe('Schema', () => {
   const values = {

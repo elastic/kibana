@@ -5,27 +5,8 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
-import { ESQuery } from '../../typed_json';
-import {
-  TimelineEventsQueries,
-  TimelineEventsAllRequestOptions,
-  TimelineEventsAllStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
-  TimelineEventsDetailsStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
-  TimelineEventsLastEventTimeStrategyResponse,
-  TimelineKpiStrategyResponse,
-} from './events';
-import {
-  DocValueFields,
-  PaginationInputPaginated,
-  TimerangeInput,
-  SortField,
-  Maybe,
-} from '../common';
-import {
+import type { SortField, Maybe } from '../common';
+import type {
   DataProviderType,
   TimelineType,
   TimelineStatus,
@@ -34,48 +15,10 @@ import {
 
 export * from './events';
 
-export type TimelineFactoryQueryTypes = TimelineEventsQueries;
-
-export interface TimelineRequestBasicOptions extends IEsSearchRequest {
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | string | undefined;
-  defaultIndex: string[];
-  docValueFields?: DocValueFields[];
-  factoryQueryType?: TimelineFactoryQueryTypes;
-  runtimeMappings: MappingRuntimeFields;
-}
-
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   type: string;
+  esTypes: string[];
 }
-
-export interface TimelineRequestOptionsPaginated<Field = string>
-  extends TimelineRequestBasicOptions {
-  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: Array<TimelineRequestSortField<Field>>;
-}
-
-export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
-  T extends TimelineEventsQueries.all
-    ? TimelineEventsAllStrategyResponse
-    : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsStrategyResponse
-    : T extends TimelineEventsQueries.kpi
-    ? TimelineKpiStrategyResponse
-    : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeStrategyResponse
-    : never;
-
-export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
-  T extends TimelineEventsQueries.all
-    ? TimelineEventsAllRequestOptions
-    : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsRequestOptions
-    : T extends TimelineEventsQueries.kpi
-    ? TimelineRequestBasicOptions
-    : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeRequestOptions
-    : never;
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;

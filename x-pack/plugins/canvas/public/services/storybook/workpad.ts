@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { action } from '@storybook/addon-actions';
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { getId } from '../../lib/get_id';
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';

@@ -21,7 +21,6 @@ const SystemExampleComponent: React.FC = () => {
   return (
     <>
       {systemRowRenderer.renderRow({
-        browserFields: {},
         data: mockEndgameTerminationEvent,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

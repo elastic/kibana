@@ -13,8 +13,8 @@ import {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
-} from '../../../alerting/server';
-import { WithoutReservedActionGroups } from '../../../alerting/common';
+} from '@kbn/alerting-plugin/server';
+import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
@@ -24,12 +24,14 @@ export type PersistenceAlertService = <T>(
     _id: string;
     _source: T;
   }>,
-  refresh: boolean | 'wait_for'
+  refresh: boolean | 'wait_for',
+  maxAlerts?: number
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
+  alertsWereTruncated: boolean;
 }
 
 export interface PersistenceServices {

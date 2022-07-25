@@ -10,7 +10,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../plugins/alerting/server';
+} from '@kbn/alerting-plugin/server';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 
 import { LifecycleAlertServices, LifecycleRuleExecutor } from './create_lifecycle_executor';

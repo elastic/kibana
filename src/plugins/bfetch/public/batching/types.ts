@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Defer } from '../../../kibana_utils/public';
+import { Defer } from '@kbn/kibana-utils-plugin/public';
 
 export interface BatchItem<Payload, Result> {
   payload: Payload;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import {
+import type {
   ResultsStrategyResponse,
   ResultsRequestOptions,
   OsqueryQueries,
 } from '../../../../../common/search_strategy/osquery';
 import { inspectStringifyObject } from '../../../../../common/utils/build_query';
-import { OsqueryFactory } from '../types';
+import type { OsqueryFactory } from '../types';
 import { buildResultsQuery } from './query.all_results.dsl';
 
 export const allResults: OsqueryFactory<OsqueryQueries.results> = {
@@ -21,13 +21,13 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildResultsQuery(options);
   },
   parse: async (
     options: ResultsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<ResultsStrategyResponse> => {
-    const { activePage } = options.pagination;
     const inspect = {
       dsl: [inspectStringifyObject(buildResultsQuery(options))],
     };
@@ -36,13 +36,6 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
-      // @ts-expect-error doesn't handle case when total TotalHits
-      totalCount: response.rawResponse.hits.total,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
     };
   },
 };

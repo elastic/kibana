@@ -15,7 +15,7 @@ import {
   pickLevelFromFlags,
   ToolingLogTextWriter,
   parseLogLevel,
-} from '@kbn/dev-utils';
+} from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs/operators';
 import {

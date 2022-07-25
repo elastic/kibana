@@ -6,6 +6,7 @@
  */
 import { useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { RisonObject } from 'rison-node';
 import { decodeQuery, encodeQuery } from '../navigation/query_utils';
 
 /**
@@ -14,7 +15,7 @@ import { decodeQuery, encodeQuery } from '../navigation/query_utils';
  * @note shallow-merges default, current and next query
  */
 export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
-  const { push } = useHistory();
+  const { push, replace } = useHistory();
   const { search, key } = useLocation();
 
   const urlQuery = useMemo(
@@ -32,11 +33,10 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
 
   // Set initial query
   useEffect(() => {
-    // TODO: condition should be if decoding failed
     if (search) return;
 
-    setUrlQuery(getDefaultQuery());
-  }, [getDefaultQuery, search, setUrlQuery]);
+    replace({ search: encodeQuery(getDefaultQuery() as RisonObject) });
+  }, [getDefaultQuery, search, replace]);
 
   return {
     key,

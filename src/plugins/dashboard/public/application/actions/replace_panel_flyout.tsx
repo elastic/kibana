@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { NotificationsStart, Toast } from 'src/core/public';
+import { NotificationsStart, Toast } from '@kbn/core/public';
 import { DashboardPanelState } from '../embeddable';
 import {
   EmbeddableInput,

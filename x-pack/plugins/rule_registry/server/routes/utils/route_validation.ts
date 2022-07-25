@@ -20,7 +20,7 @@ import {
   RouteValidationError,
   RouteValidationFunction,
   RouteValidationResultFactory,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 
 type RequestValidationResult<T> =
   | {

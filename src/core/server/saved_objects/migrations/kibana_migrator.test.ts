@@ -9,13 +9,15 @@
 import { take } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { lastValueFrom } from 'rxjs';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -97,9 +99,7 @@ describe('KibanaMigrator', () => {
     it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();
 
-      options.client.cat.templates.mockResponse([], { statusCode: 404 });
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       const migrator = new KibanaMigrator(options);
 
@@ -110,8 +110,7 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       options.client.cluster.getSettings.mockResponse(
         {
@@ -134,7 +133,7 @@ describe('KibanaMigrator', () => {
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
@@ -286,6 +285,7 @@ const mockOptions = () => {
       retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;
 };

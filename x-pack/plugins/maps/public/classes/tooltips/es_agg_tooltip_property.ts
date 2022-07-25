@@ -6,11 +6,11 @@
  */
 
 import { ReactNode } from 'react';
+import { DataView } from '@kbn/data-plugin/common';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';
 import { IESAggField } from '../fields/agg';
-import { DataView } from '../../../../../../src/plugins/data/common';
 
 export class ESAggTooltipProperty extends ESTooltipProperty {
   private readonly _aggType: AGG_TYPE;

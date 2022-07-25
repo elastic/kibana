@@ -6,7 +6,8 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, RequestHandler } from 'kibana/server';
+import type { Logger, RequestHandler } from '@kbn/core/server';
+import { incrementApiUsageCounter } from '..';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
@@ -27,9 +28,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return handler(ctx, req, res);
       }
 
-      const {
-        core: { elasticsearch },
-      } = ctx;
+      const { elasticsearch } = await ctx.core;
 
       const store = await reporting.getStore();
 
@@ -59,51 +58,53 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   };
 
   router.get(
-    {
-      path: API_GET_ILM_POLICY_STATUS,
-      validate: false,
-    },
-    authzWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client: scopedClient },
-          },
-        },
-        _req,
-        res
-      ) => {
-        const checkIlmMigrationStatus = () => {
-          return deprecations.checkIlmMigrationStatus({
-            reportingCore: reporting,
-            // We want to make the current status visible to all reporting users
-            elasticsearchClient: scopedClient.asInternalUser,
-          });
-        };
+    { path: API_GET_ILM_POLICY_STATUS, validate: false },
+    authzWrapper(async ({ core }, req, res) => {
+      incrementApiUsageCounter(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
 
-        try {
-          const response: IlmPolicyStatusResponse = {
-            status: await checkIlmMigrationStatus(),
-          };
-          return res.ok({ body: response });
-        } catch (e) {
-          logger.error(e);
-          return res.customError({
-            statusCode: e?.statusCode ?? 500,
-            body: { message: e.message },
-          });
-        }
+      const {
+        elasticsearch: { client: scopedClient },
+      } = await core;
+      const checkIlmMigrationStatus = () => {
+        return deprecations.checkIlmMigrationStatus({
+          reportingCore: reporting,
+          // We want to make the current status visible to all reporting users
+          elasticsearchClient: scopedClient.asInternalUser,
+        });
+      };
+
+      try {
+        const response: IlmPolicyStatusResponse = {
+          status: await checkIlmMigrationStatus(),
+        };
+        return res.ok({ body: response });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: e?.statusCode ?? 500,
+          body: { message: e.message },
+        });
       }
-    )
+    })
   );
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    authzWrapper(async ({ core: { elasticsearch } }, _req, res) => {
+    authzWrapper(async ({ core }, req, res) => {
+      incrementApiUsageCounter(
+        req.route.method,
+        API_GET_ILM_POLICY_STATUS,
+        reporting.getUsageCounter()
+      );
+
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
-      } = elasticsearch;
+      } = (await core).elasticsearch;
 
       const scopedIlmPolicyManager = IlmPolicyManager.create({
         client,

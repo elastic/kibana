@@ -12,9 +12,9 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { CustomPaletteState } from '../../../../charts/common';
+} from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import {
   EXPRESSION_GAUGE_NAME,
   GAUGE_FUNCTION_RENDERER_NAME,

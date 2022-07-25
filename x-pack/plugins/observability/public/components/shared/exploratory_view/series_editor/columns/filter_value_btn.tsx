@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { SeriesUrl } from '../../types';
 import { NestedFilterOpen } from './filter_expanded';

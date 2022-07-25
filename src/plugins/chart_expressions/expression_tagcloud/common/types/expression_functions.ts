@@ -12,8 +12,8 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+} from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 interface TagCloudCommonParams {

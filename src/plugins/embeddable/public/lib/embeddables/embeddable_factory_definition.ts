@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from '@kbn/core/server';
 import { IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableInput, EmbeddableOutput } from '..';

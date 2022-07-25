@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStart } from '../../../field_formats/public';
-import type { FieldFormat } from '../../../field_formats/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { indexPatternMock } from '../__mocks__/index_pattern';
 import { formatFieldValue } from './format_value';
 

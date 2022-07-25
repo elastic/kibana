@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../alerting/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import {
   createLifecycleExecutor,
   IRuleDataClient,
   RuleRegistryPluginSetupContract,
-} from '../../../../rule_registry/server';
+} from '@kbn/rule-registry-plugin/server';
 
 type LifecycleRuleExecutorCreator = ReturnType<typeof createLifecycleExecutor>;
 

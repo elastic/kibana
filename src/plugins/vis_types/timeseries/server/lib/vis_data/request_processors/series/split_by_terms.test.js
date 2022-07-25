@@ -111,6 +111,37 @@ describe('splitByTerms', () => {
     });
   });
 
+  test('should ignore "include/exclude" for multi terms', () => {
+    series.terms_include = 'a';
+    series.terms_exclude = 'b';
+    series.terms_field = ['c', 'd'];
+    const next = jest.fn((doc) => doc);
+    const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
+
+    expect(doc).toMatchInlineSnapshot(`
+      Object {
+        "aggs": Object {
+          "test": Object {
+            "multi_terms": Object {
+              "order": Object {
+                "_count": "desc",
+              },
+              "size": 10,
+              "terms": Array [
+                Object {
+                  "field": "c",
+                },
+                Object {
+                  "field": "d",
+                },
+              ],
+            },
+          },
+        },
+      }
+    `);
+  });
+
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
     const next = jest.fn((doc) => doc);

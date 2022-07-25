@@ -6,6 +6,7 @@
  */
 
 import { Location } from 'history';
+import { toQuery } from '@kbn/observability-plugin/public';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import {
@@ -16,7 +17,6 @@ import {
   toString,
 } from './helpers';
 import { UrlParams, UxUrlParams } from './types';
-import { toQuery } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 type TimeUrlParams = Pick<

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { GetInfoResponse, InstalledRegistry } from '../../../../plugins/fleet/common';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should upgrade package policy on setup if keep policies up to date set to true', async () => {
-        const oldVersion = '1.9.0';
+        const oldVersion = '1.11.0';
         await supertest
           .post(`/api/fleet/epm/packages/system/${oldVersion}`)
           .set('kbn-xsrf', 'xxxx')

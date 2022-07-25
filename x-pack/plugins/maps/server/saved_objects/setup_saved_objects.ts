@@ -6,10 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
-import type { CoreSetup, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import type { SavedObjectMigrationMap } from 'src/core/server';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
-import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
+import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectMigrationMap } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';

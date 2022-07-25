@@ -18,12 +18,12 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
+import { ApplicationStart, HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (

@@ -8,8 +8,8 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 
@@ -24,7 +24,7 @@ interface IndexedFieldsTableProps {
     deleteField: (fieldName: string) => void;
     getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
   };
-  fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
@@ -57,8 +57,7 @@ export class IndexedFieldsTable extends Component<
   mapFields(fields: DataViewField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters &&
-      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
+      indexPattern.sourceFilters && indexPattern.sourceFilters.map((f) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (
@@ -83,10 +82,11 @@ export class IndexedFieldsTable extends Component<
 
   getFilteredFields = createSelector(
     (state: IndexedFieldsTableState) => state.fields,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
       props.indexedFieldTypeFilter,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.schemaFieldTypeFilter,
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
+      props.schemaFieldTypeFilter,
     (fields, fieldFilter, indexedFieldTypeFilter, schemaFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();

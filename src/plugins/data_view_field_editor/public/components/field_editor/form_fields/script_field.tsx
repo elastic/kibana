@@ -7,13 +7,12 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { first } from 'rxjs/operators';
+import { first, firstValueFrom } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
-import { firstValueFrom } from '@kbn/std';
 
 import {
   UseField,

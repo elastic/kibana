@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { WithAppDependencies } from '../helpers';
 

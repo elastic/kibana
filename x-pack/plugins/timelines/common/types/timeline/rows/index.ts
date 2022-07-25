@@ -7,18 +7,15 @@
 
 import { RowRendererId } from '..';
 import { Ecs } from '../../../ecs';
-import { BrowserFields } from '../../../search_strategy/index_fields';
 
 export interface RowRenderer {
   id: RowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
-    browserFields,
     data,
     isDraggable,
     timelineId,
   }: {
-    browserFields: BrowserFields;
     data: Ecs;
     isDraggable: boolean;
     timelineId: string;

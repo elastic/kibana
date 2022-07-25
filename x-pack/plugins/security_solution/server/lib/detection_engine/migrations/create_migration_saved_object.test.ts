@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { createMigrationSavedObject } from './create_migration_saved_object';
 

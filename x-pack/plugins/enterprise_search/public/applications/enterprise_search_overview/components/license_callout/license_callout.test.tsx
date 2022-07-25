@@ -11,23 +11,22 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
-import { ManageLicenseButton } from '../../../shared/licensing';
+import { LicenseCallout } from '.';
 
-import { LicenseCallout } from './';
-
+// TODO: Remove this license callout code completely (eventually)
+// for now, the test is merely updated to reflect that it shouldn't
+// render at all
 describe('LicenseCallout', () => {
-  it('renders when non-platinum or on trial', () => {
+  it('never renders a license callout', () => {
     setMockValues({
       hasPlatinumLicense: false,
       isTrial: true,
     });
     const wrapper = shallow(<LicenseCallout />);
 
-    expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(2);
-    expect(wrapper.find(ManageLicenseButton)).toHaveLength(1);
+    expect(wrapper.find(EuiPanel)).toHaveLength(0);
   });
 
   it('does not render for platinum', () => {

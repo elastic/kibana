@@ -8,8 +8,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../../expressions';
-import { withSuspense } from '../../../presentation_util/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { NodeDimensions } from '../../common/types';
 import { LazyDebugComponent } from '.';
 

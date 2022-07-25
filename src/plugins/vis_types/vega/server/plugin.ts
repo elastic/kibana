@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { registerVegaUsageCollector } from './usage_collector';
 import {
   ConfigObservable,

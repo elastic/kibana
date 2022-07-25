@@ -37,6 +37,7 @@ type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
 const createMetricsSubClientMock = (): MetricsSubClientMock => {
   return {
     getCaseMetrics: jest.fn(),
+    getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
   };
 };
@@ -46,6 +47,7 @@ type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
   return {
     add: jest.fn(),
+    bulkCreate: jest.fn(),
     deleteAll: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),

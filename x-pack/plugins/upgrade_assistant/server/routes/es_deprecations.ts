@@ -23,41 +23,29 @@ export function registerESDeprecationRoutes({
       path: `${API_BASE_PATH}/es_deprecations`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects: { client: savedObjectsClient },
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const status = await getESUpgradeStatus(client);
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          savedObjects: { client: savedObjectsClient },
+          elasticsearch: { client },
+        } = await core;
+        const status = await getESUpgradeStatus(client);
 
-          const asCurrentUser = client.asCurrentUser;
-          const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
-          const reindexService = reindexServiceFactory(
-            asCurrentUser,
-            reindexActions,
-            log,
-            licensing
-          );
-          const indexNames = status.deprecations
-            .filter(({ index }) => typeof index !== 'undefined')
-            .map(({ index }) => index as string);
+        const asCurrentUser = client.asCurrentUser;
+        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
+        const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
+        const indexNames = status.deprecations
+          .filter(({ index }) => typeof index !== 'undefined')
+          .map(({ index }) => index as string);
 
-          await reindexService.cleanupReindexOperations(indexNames);
+        await reindexService.cleanupReindexOperations(indexNames);
 
-          return response.ok({
-            body: status,
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({
+          body: status,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

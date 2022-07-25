@@ -11,8 +11,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { parseDuration } from '../../../../alerting/server';
-import { MAX_INTERVALS } from '../index';
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import { MAX_INTERVALS } from '..';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
   getTooManyIntervalsErrorMessage,

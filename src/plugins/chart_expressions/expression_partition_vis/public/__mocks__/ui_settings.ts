@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from 'kibana/public';
+import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 
 export const uiSettings: IUiSettingsClient = {

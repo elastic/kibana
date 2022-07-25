@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsResolveResponse } from 'src/core/public';
+import { SavedObjectsResolveResponse } from '@kbn/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 

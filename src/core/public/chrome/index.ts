@@ -27,6 +27,7 @@ export type {
   InternalChromeStart,
   ChromeStart,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumb,
   ChromeBadge,

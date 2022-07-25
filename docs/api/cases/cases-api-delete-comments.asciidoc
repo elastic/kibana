@@ -4,9 +4,9 @@
 <titleabbrev>Delete comments</titleabbrev>
 ++++
 
-Deletes one or all comments from a case.
+Deletes one or all comments and alerts from a case.
 
-=== Request
+=== {api-request-title}
 
 `DELETE <kibana host>:<port>/api/cases/<case_id>/comments`
 
@@ -16,14 +16,14 @@ Deletes one or all comments from a case.
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments/<comment_id>`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're updating.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<case_id>`::
 (Required, string) The identifier for the case. To retrieve case IDs, use
@@ -38,12 +38,12 @@ comments are deleted.
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Response code
+=== {api-response-codes-title}
 
 `204`::
    Indicates a successful call.
 
-=== Example
+=== {api-examples-title}
 
 Delete all comments from case ID `9c235210-6834-11ea-a78c-6ffb38a34414`:
 

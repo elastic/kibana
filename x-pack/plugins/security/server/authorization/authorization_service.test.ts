@@ -7,25 +7,25 @@
 
 import { Subject } from 'rxjs';
 
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 // Note: this import must be before other relative imports for the mocks to work as intended.
 // eslint-disable-next-line import/order
 import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,
-  mockCheckPrivilegesWithRequestFactory,
+  mockCheckPrivilegesFactory,
   mockCheckSavedObjectsPrivilegesWithRequestFactory,
   mockPrivilegesFactory,
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { AuthorizationService } from './authorization_service';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
@@ -34,12 +34,16 @@ import { privilegesFactory } from './privileges';
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
 const mockCheckPrivilegesWithRequest = Symbol();
+const mockCheckUserProfilesPrivileges = Symbol();
 const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
 const mockCheckSavedObjectsPrivilegesWithRequest = Symbol();
 const mockPrivilegesService = Symbol();
 const mockAuthorizationMode = Symbol();
 beforeEach(() => {
-  mockCheckPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
+  mockCheckPrivilegesFactory.mockReturnValue({
+    checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+    checkUserProfilesPrivileges: mockCheckUserProfilesPrivileges,
+  });
   mockCheckPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
     mockCheckPrivilegesDynamicallyWithRequest
   );
@@ -83,7 +87,7 @@ it(`#setup returns exposed services`, () => {
   expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
-  expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(
+  expect(checkPrivilegesFactory).toHaveBeenCalledWith(
     authz.actions,
     getClusterClient,
     authz.applicationName
@@ -92,6 +96,7 @@ it(`#setup returns exposed services`, () => {
   expect(authz.checkPrivilegesDynamicallyWithRequest).toBe(
     mockCheckPrivilegesDynamicallyWithRequest
   );
+  expect(authz.checkUserProfilesPrivileges).toBe(mockCheckUserProfilesPrivileges);
   expect(checkPrivilegesDynamicallyWithRequestFactory).toHaveBeenCalledWith(
     mockCheckPrivilegesWithRequest,
     mockGetSpacesService

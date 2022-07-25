@@ -7,10 +7,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreSetup, Plugin } from 'src/core/public';
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { SCREENSHOTTING_APP_ID } from '../common';
 import { App, ScreenshotModeContext } from './app';
 

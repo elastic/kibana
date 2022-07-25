@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DocumentCreationLogic } from '..';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 import { API_CLIENTS_DOCS_URL, INDEXING_DOCS_URL } from '../../../routes';
@@ -35,7 +36,6 @@ import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
 
 import { DOCUMENTS_API_JSON_EXAMPLE, FLYOUT_ARIA_LABEL_ID } from '../constants';
-import { DocumentCreationLogic } from '../index';
 
 export const ApiCodeExample: React.FC = () => (
   <>

@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
   ToastsStart as ToastService,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../../config';
 import { createSessionStateContainer } from './search_session_state';

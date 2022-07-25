@@ -7,7 +7,7 @@
 
 import React, { createContext, ReactNode, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { RequestAdapter } from '../../../../../../src/plugins/inspector/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { FetcherResult } from '../../hooks/use_fetcher';
 import { InspectResponse } from '../../../typings/common';
 

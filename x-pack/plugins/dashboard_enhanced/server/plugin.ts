@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from '@kbn/ui-actions-enhanced-plugin/server';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN, createExtract, createInject } from '../common';
 
 export interface SetupDependencies {
@@ -17,10 +20,10 @@ export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
 export class DashboardEnhancedPlugin

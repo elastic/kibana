@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createAction } from '../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 export const ACTION_NAVIGATE = 'ACTION_NAVIGATE';
 

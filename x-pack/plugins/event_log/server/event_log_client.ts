@@ -8,9 +8,9 @@
 import { omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SpacesServiceStart } from '../../spaces/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';

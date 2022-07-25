@@ -7,9 +7,9 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuleParams, ErrorCountAlertTrigger } from '.';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 

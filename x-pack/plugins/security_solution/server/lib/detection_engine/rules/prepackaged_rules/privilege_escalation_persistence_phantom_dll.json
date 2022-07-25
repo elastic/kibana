@@ -18,7 +18,7 @@
     "https://itm4n.github.io/windows-dll-hijacking-clarified/",
     "http://remoteawesomethoughts.blogspot.com/2019/05/windows-10-task-schedulerservice.html",
     "https://googleprojectzero.blogspot.com/2018/04/windows-exploitation-tricks-exploiting.html",
-    "https://shellz.club/edgegdi-dll-for-persistence-and-lateral-movement/",
+    "https://shellz.club/2020/10/16/edgegdi-dll-for-persistence-and-lateral-movement.html",
     "https://windows-internals.com/faxing-your-way-to-system/",
     "http://waleedassar.blogspot.com/2013/01/wow64logdll.html"
   ],
@@ -81,5 +81,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

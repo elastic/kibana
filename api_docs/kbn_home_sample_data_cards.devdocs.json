@@ -1,0 +1,241 @@
+{
+  "id": "@kbn/home-sample-data-cards",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-cards",
+        "id": "def-common.SampleDataCard",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCard",
+        "description": [
+          "\nA card representing a Sample Data Set that can be installed.  Uses Kibana services to\ndisplay and install the data set.  Requires a `SampleDataCardsProvider` to render and\nfunction."
+        ],
+        "signature": [
+          "({ sampleDataSet, onStatusChange }: ",
+          {
+            "pluginId": "@kbn/home-sample-data-cards",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardsPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_cards/src/sample_data_card.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-cards",
+            "id": "def-common.SampleDataCard.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sampleDataSet, onStatusChange }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/home-sample-data-cards",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardsPluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "packages/home/sample_data_cards/src/sample_data_card.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-cards",
+        "id": "def-common.SampleDataCards",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCards",
+        "description": [
+          "\nFetches and displays a collection of Sample Data Sets in a grid."
+        ],
+        "signature": [
+          "({ columns }: ",
+          {
+            "pluginId": "@kbn/home-sample-data-cards",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardsPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_cards/src/sample_data_cards.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-cards",
+            "id": "def-common.SampleDataCards.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ columns = 3 }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/home-sample-data-cards",
+                "scope": "common",
+                "docId": "kibKbnHomeSampleDataCardsPluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "packages/home/sample_data_cards/src/sample_data_cards.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-cards",
+        "id": "def-common.SampleDataCardsKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCardsKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<KibanaDependencies>) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_cards/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-cards",
+            "id": "def-common.SampleDataCardsKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<KibanaDependencies>"
+            ],
+            "path": "packages/home/sample_data_cards/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-cards",
+        "id": "def-common.SampleDataCardsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataCardsProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "Services",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_cards/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-cards",
+            "id": "def-common.SampleDataCardsProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Services",
+              ">"
+            ],
+            "path": "packages/home/sample_data_cards/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-cards",
+        "id": "def-common.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nProps for the `SampleDataCard` component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/home-sample-data-cards",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardsPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/home-sample-data-cards",
+            "scope": "common",
+            "docId": "kibKbnHomeSampleDataCardsPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ", \"onStatusChange\">"
+        ],
+        "path": "packages/home/sample_data_cards/src/sample_data_card.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-cards",
+            "id": "def-common.Props.sampleDataSet",
+            "type": "Object",
+            "tags": [],
+            "label": "sampleDataSet",
+            "description": [
+              "A Sample Data Set to display."
+            ],
+            "signature": [
+              "SampleDataSet"
+            ],
+            "path": "packages/home/sample_data_cards/src/sample_data_card.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

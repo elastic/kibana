@@ -16,7 +16,7 @@ import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 // Add all locale data to `IntlMessageFormat`.
-import './locales.js';
+import './locales';
 
 const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};

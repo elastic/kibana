@@ -13,8 +13,8 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../../../common';
 import type { SpacesManager } from '../../../spaces_manager';
 

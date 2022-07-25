@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 export type Maybe<T> = T | null;
 
@@ -18,12 +18,6 @@ export interface TotalValue {
 
 export interface Inspect {
   dsl: string[];
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
 }
 
 export interface CursorType {
@@ -64,8 +58,6 @@ export interface PaginationInputPaginated {
   activePage: number;
   /** The cursorStart parameter defines the start of the results to be displayed */
   cursorStart: number;
-  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
 }

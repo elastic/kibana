@@ -11,7 +11,6 @@ import React from 'react';
 import '../../../../common/mock/match_media';
 import { mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ExpandableHostDetails } from './expandable_host';
-import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../../../common/containers/sourcerer';
 
 describe('Expandable Host Component', () => {
   const mockProps = {
@@ -27,7 +26,7 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').render()).toMatchSnapshot();
     });
 
     test('it should render the HostOverview of the ExpandableHostDetails with the correct indices', () => {
@@ -37,10 +36,9 @@ describe('Expandable Host Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual([
-        EXCLUDE_ELASTIC_CLOUD_INDEX,
-        ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
-      ]);
+      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(
+        mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns
+      );
     });
   });
 });

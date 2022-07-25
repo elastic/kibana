@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { docLinksServiceMock } from '../../../../../../../src/core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
-import { docLinks } from './';
+import { docLinks } from '.';
 
 describe('DocLinks', () => {
   it('setDocLinks', () => {

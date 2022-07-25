@@ -14,17 +14,15 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { CaseAttachments } from '../../../types';
-import { usePostComment } from '../../../containers/use_post_comment';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
   toastContent?: string;
-  attachments?: CaseAttachments;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    attachments: props.attachments,
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
     // in a follow up clean up
@@ -39,7 +37,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
 
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
-  const { postComment } = usePostComment();
+  const { createAttachments } = useCreateAttachments();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -53,61 +51,65 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
   }, [dispatch]);
 
   const handleOnRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase: Case | undefined, attachments: CaseAttachments) => {
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open();
+        createNewCaseFlyout.open({ attachments });
         return;
       }
 
       try {
         // add attachments to the case
-        const attachments = props.attachments;
         if (attachments !== undefined && attachments.length > 0) {
-          for (const attachment of attachments) {
-            await postComment({
-              caseId: theCase.id,
-              data: attachment,
-              throwOnError: true,
-            });
-          }
+          await createAttachments({
+            caseId: theCase.id,
+            data: attachments,
+            throwOnError: true,
+          });
+
           casesToasts.showSuccessAttach({
             theCase,
-            attachments: props.attachments,
+            attachments,
             title: props.toastTitle,
             content: props.toastContent,
           });
         }
       } catch (error) {
         // error toast is handled
-        // inside the postComment method
+        // inside the createAttachments method
       }
 
       if (props.onRowClick) {
         props.onRowClick(theCase);
       }
     },
-    [casesToasts, closeModal, createNewCaseFlyout, postComment, props]
+    [casesToasts, closeModal, createNewCaseFlyout, createAttachments, props]
   );
 
-  const openModal = useCallback(() => {
-    dispatch({
-      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
-      payload: {
-        ...props,
-        hiddenStatuses: [CaseStatuses.closed, StatusAll],
-        onRowClick: handleOnRowClick,
-        onClose: () => {
-          closeModal();
-          if (props.onClose) {
-            return props.onClose();
-          }
+  const openModal = useCallback(
+    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
+      dispatch({
+        type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
+        payload: {
+          ...props,
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          onRowClick: (theCase?: Case) => {
+            const caseAttachments = attachments ?? [];
+            handleOnRowClick(theCase, caseAttachments);
+          },
+          onClose: () => {
+            closeModal();
+            if (props.onClose) {
+              return props.onClose();
+            }
+          },
         },
-      },
-    });
-  }, [closeModal, dispatch, handleOnRowClick, props]);
+      });
+    },
+    [closeModal, dispatch, handleOnRowClick, props]
+  );
   return {
     open: openModal,
     close: closeModal,

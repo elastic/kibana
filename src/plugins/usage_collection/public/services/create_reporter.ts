@@ -7,7 +7,7 @@
  */
 
 import { Reporter, Storage } from '@kbn/analytics';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '../../../../../../../src/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
@@ -23,7 +26,7 @@ import type {
   KibanaAssetReference,
   Installation,
 } from '../../../types';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
@@ -31,9 +34,8 @@ import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
-import { SavedObjectsUtils } from '../../../../../../../src/core/server';
 
-import { getInstallation, kibanaSavedObjectTypes } from './index';
+import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -42,11 +44,9 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false && !force)
-    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
@@ -127,6 +127,8 @@ function deleteESAssets(
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
+      return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
       return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.mlModel) {
       return deleteMlModel(esClient, [id]);

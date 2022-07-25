@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
@@ -217,6 +217,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(tokens.authentication),
       {
+        userProfileGrant: { type: 'accessToken', accessToken: tokens.access_token },
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
         },

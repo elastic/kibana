@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import moment from 'moment';
-import { ExitFullScreenButton } from '@kbn/shared-ux-components';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { getData } from '../../kibana_services';
+import { getData, isScreenshotMode } from '../../kibana_services';
 import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
@@ -232,7 +231,7 @@ export class MapContainer extends Component<Props, State> {
             onSingleValueTrigger={onSingleValueTrigger}
             renderTooltipContent={renderTooltipContent}
           />
-          {!this.props.settings.hideToolbarOverlay && (
+          {!this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
             <ToolbarOverlay
               addFilters={addFilters}
               getFilterActions={getFilterActions}

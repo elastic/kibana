@@ -8,7 +8,7 @@
 
 import { groupFields } from './group_fields';
 import { getDefaultFieldFilter } from './field_filter';
-import { DataViewField } from '../../../../../../../data_views/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 const fields = [
   {

@@ -25,7 +25,7 @@ import { RestoreSettings } from '../../../../../common/types';
 import { EuiCodeEditor } from '../../../../shared_imports';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
-import { StepProps } from './';
+import { StepProps } from '.';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,
