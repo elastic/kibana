@@ -486,11 +486,6 @@ describe('tabbed content', () => {
       tabbedContent.update();
     });
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
-
-    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
-
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
 
@@ -498,6 +493,11 @@ describe('tabbed content', () => {
 
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+
+    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
   });
 });
 
