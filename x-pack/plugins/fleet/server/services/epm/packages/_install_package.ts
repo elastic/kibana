@@ -18,7 +18,7 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-} from '../../../../common';
+} from '../../../../common/constants';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
 import type {
   AssetReference,

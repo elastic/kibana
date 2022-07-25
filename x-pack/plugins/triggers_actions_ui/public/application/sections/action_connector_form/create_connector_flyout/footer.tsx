@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   isSaving: boolean;
   disabled: boolean;
-  buttonType: 'back' | 'cancel';
+  hasConnectorTypeSelected: boolean;
   onSubmit: () => Promise<void>;
   onTestConnector?: () => void;
   onBack: () => void;
@@ -29,7 +29,7 @@ interface Props {
 const FlyoutFooterComponent: React.FC<Props> = ({
   isSaving,
   disabled,
-  buttonType,
+  hasConnectorTypeSelected,
   onCancel,
   onBack,
   onTestConnector,
@@ -39,7 +39,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
     <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {buttonType === 'back' ? (
+          {hasConnectorTypeSelected ? (
             <EuiButtonEmpty onClick={onBack} data-test-subj="create-connector-flyout-back-btn">
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
@@ -59,45 +59,47 @@ const FlyoutFooterComponent: React.FC<Props> = ({
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <>
-              {onTestConnector && (
+        {hasConnectorTypeSelected ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <>
+                {onTestConnector && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="success"
+                      data-test-subj="create-connector-flyout-save-test-btn"
+                      type="submit"
+                      isLoading={isSaving}
+                      disabled={disabled}
+                      onClick={onTestConnector}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                        defaultMessage="Save & test"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    fill
                     color="success"
-                    data-test-subj="create-connector-flyout-save-test-btn"
+                    data-test-subj="create-connector-flyout-save-btn"
                     type="submit"
                     isLoading={isSaving}
                     disabled={disabled}
-                    onClick={onTestConnector}
+                    onClick={onSubmit}
                   >
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                      defaultMessage="Save & test"
+                      id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
+                      defaultMessage="Save"
                     />
                   </EuiButton>
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="success"
-                  data-test-subj="create-connector-flyout-save-btn"
-                  type="submit"
-                  isLoading={isSaving}
-                  disabled={disabled}
-                  onClick={onSubmit}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );

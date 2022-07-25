@@ -11,8 +11,7 @@ import type { Agent } from '../../types';
 
 import { errorsToResults, getAgentsByKuery, getAgentTags, processAgentsInBatches } from './crud';
 
-jest.mock('../../../common', () => ({
-  ...jest.requireActual('../../../common'),
+jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 

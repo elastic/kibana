@@ -30,10 +30,8 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
-  FLEET_APM_PACKAGE,
-  outputType,
-} from '../../common';
+} from '../../common/services';
+import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
 import type {
   DeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -47,7 +45,7 @@ import type {
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
   PackagePolicyPackage,
-} from '../../common';
+} from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
   IngestManagerError,

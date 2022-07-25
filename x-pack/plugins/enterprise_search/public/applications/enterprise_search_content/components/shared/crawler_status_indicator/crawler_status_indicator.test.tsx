@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { CrawlerDomain, CrawlerStatus } from '../../../../api/crawler/types';
+import { CrawlerDomain, CrawlerStatus } from '../../../api/crawler/types';
 
 import { CrawlerStatusIndicator } from './crawler_status_indicator';
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
