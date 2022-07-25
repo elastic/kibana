@@ -146,6 +146,7 @@ describe('The inventory metric threshold alert type', () => {
         shouldFire,
         shouldWarn,
         isNoData,
+        isError: false,
       },
     });
 
