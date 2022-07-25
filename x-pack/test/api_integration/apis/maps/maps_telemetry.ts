@@ -54,6 +54,11 @@ export default function ({ getService }: FtrProviderContext) {
         mvt: { min: 1, max: 1, total: 3, avg: 0.11538461538461539 },
       });
       expect(mapUsage.attributesPerMap).eql({
+        customIconsCount: {
+          avg: 0,
+          max: 0,
+          min: 0,
+        },
         dataSourcesCount: {
           avg: 1.1538461538461537,
           max: 5,

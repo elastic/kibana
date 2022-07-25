@@ -49,10 +49,10 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
