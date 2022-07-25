@@ -12,23 +12,24 @@ import type { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { FiltersEditorContextType } from './filters_editor_context';
-import { FilterGroup } from './filters_editor_filter_group';
-import { getConditionalOperationType } from './filters_editor_utils';
-import type { Path } from './filter_editors_types';
-import { PhraseValueInput } from '../../filter_bar/filter_editor/phrase_value_input';
-import { PhrasesValuesInput } from '../../filter_bar/filter_editor/phrases_values_input';
-import { RangeValueInput } from '../../filter_bar/filter_editor/range_value_input';
+import { FiltersEditorContextType } from '../filters_editor_context';
+import { FilterGroup } from '../filters_editor_filter_group';
+import { getConditionalOperationType } from '../filters_editor_utils';
+import type { Path } from '../filter_editors_types';
+import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
+import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
+import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
 import {
   getFilterableFields,
   getOperatorFromFilter,
   getOperatorOptions,
-} from '../../filter_bar/filter_editor/lib/filter_editor_utils';
+} from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import {
   GenericComboBox,
   GenericComboBoxProps,
-} from '../../filter_bar/filter_editor/generic_combo_box';
-import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
+} from '../../../filter_bar/filter_editor/generic_combo_box';
+import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
+import { FieldInput } from './filters_editor_filter_item_field_input';
 
 export interface FilterItemProps {
   path: Path;
@@ -53,6 +54,12 @@ export function FilterItem({
   function getSelectedOperator() {
     return getOperatorFromFilter(filter);
   }
+
+  const onHandleField = (field: DataViewField) => {
+    setSelectedField(field);
+    setSelectedOperator(undefined);
+    setSelectedParams(undefined);
+  };
 
   function renderFieldInput() {
     const fields = dataView ? getFilterableFields(dataView) : [];
@@ -220,7 +227,13 @@ export function FilterItem({
 
           <EuiFlexItem grow={3}>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>{renderFieldInput()}</EuiFlexItem>
+              <EuiFlexItem>
+                <FieldInput
+                  field={selectedField}
+                  dataView={dataView}
+                  onHandleField={onHandleField}
+                />
+              </EuiFlexItem>
               <EuiFlexItem>{renderOperatorInput()}</EuiFlexItem>
               <EuiFlexItem>{renderParamsEditor()}</EuiFlexItem>
             </EuiFlexGroup>
