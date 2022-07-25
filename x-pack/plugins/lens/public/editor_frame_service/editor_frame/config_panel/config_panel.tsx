@@ -14,7 +14,6 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
@@ -222,7 +221,6 @@ export function LayerPanels(
         onAddLayerClick={(layerType) => {
           const layerId = generateId();
           dispatchLens(addLayer({ layerId, layerType }));
-          trackUiEvent('layer_added');
           setNextFocusedLayerId(layerId);
         }}
       />
