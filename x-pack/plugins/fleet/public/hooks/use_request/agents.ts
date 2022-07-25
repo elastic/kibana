@@ -97,10 +97,12 @@ export function sendGetAgentStatus(
   });
 }
 
-export function sendGetAgentTags() {
+export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentTagsResponse>({
     method: 'get',
     path: agentRouteService.getListTagsPath(),
+    query,
+    ...options,
   });
 }
 
