@@ -434,6 +434,7 @@ describe('test advanced policy config overlap ', () => {
       },
     },
   } as unknown as PolicyConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defaultStubPolicyConfigResponse = {
     linux: {
       events: {
