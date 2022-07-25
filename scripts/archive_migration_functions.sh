@@ -31,6 +31,8 @@ intersection() {
   echo "${intersections[@]}"
 }
 
+alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
+
 is_zipped() {
   local archive=$1
 

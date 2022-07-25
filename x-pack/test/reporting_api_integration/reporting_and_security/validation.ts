@@ -37,13 +37,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('printablePdfV2', () => {
-      it('allows width and height to have decimal', async () => {
+      it.only('allows width and height to have decimal', async () => {
         const downloadReportPath = await reportingAPI.postJobJSON(
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541.5999755859375) }
         );
 
-        await retry.tryForTime(48000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')
