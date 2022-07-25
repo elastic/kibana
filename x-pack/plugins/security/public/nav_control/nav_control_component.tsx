@@ -21,7 +21,7 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { UserAvatarData } from '../../common';
+import type { UserProfileAvatarData } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, UserAvatar, useUserProfile } from '../components';
 
@@ -47,7 +47,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserAvatarData }>('avatar');
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
@@ -79,7 +79,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
@@ -93,17 +92,18 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     items.push(...userMenuLinkMenuItems);
   }
 
-  if (!isAnonymous) {
-    const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
+  const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
+
+  if (!isAnonymous && !hasCustomProfileLinks) {
     const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.editProfileLinkText"
-          defaultMessage="{profileOverridden, select, true{Preferences} other{Profile}}"
-          values={{ profileOverridden: hasCustomProfileLinks }}
+          defaultMessage="Edit profile"
         />
       ),
-      icon: <EuiIcon type={hasCustomProfileLinks ? 'controlsHorizontal' : 'user'} size="m" />,
+      icon: <EuiIcon type="user" size="m" />,
       href: editProfileUrl,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -112,11 +112,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     };
 
     // Set this as the first link if there is no user-defined profile link
-    if (!hasCustomProfileLinks) {
-      items.unshift(profileMenuItem);
-    } else {
-      items.push(profileMenuItem);
-    }
+    items.unshift(profileMenuItem);
   }
 
   items.push({
