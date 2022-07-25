@@ -6,4 +6,4 @@
  */
 
 export * from './manage_locations';
-// export * from './add_monitor_private_location';
+export * from './add_monitor_private_location';
