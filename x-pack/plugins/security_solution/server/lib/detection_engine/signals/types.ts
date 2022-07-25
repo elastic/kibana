@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  RuleType,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -22,7 +21,6 @@ import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import type { TermAggregationBucket } from '../../types';
 import type {
   BaseHit,
   RuleAlertAction,
@@ -45,24 +43,6 @@ import type {
   DetectionAlert,
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
-
-// used for gap detection code
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type unitType = 's' | 'm' | 'h';
-export const isValidUnit = (unitParam: string): unitParam is unitType =>
-  ['s', 'm', 'h'].includes(unitParam);
-
-export interface SignalsParams {
-  signalIds: string[] | undefined | null;
-  query: object | undefined | null;
-  status: Status;
-}
-
-export interface SignalsStatusParams {
-  signalIds: string[] | undefined | null;
-  query: object | undefined | null;
-  status: Status;
-}
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -169,9 +149,6 @@ export interface BulkResponse {
   items: BulkItem[];
 }
 
-export interface MGetResponse {
-  docs: GetResponse[];
-}
 export interface GetResponse {
   _index: string;
   _type: string;
@@ -189,7 +166,9 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 };
 export type WrappedEventHit = BaseHit<EventHit>;
 
-export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSearchResponse<
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+> = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
@@ -200,30 +179,6 @@ export type RuleExecutorOptions = AlertingRuleExecutorOptions<
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
->;
-
-// This returns true because by default a RuleAlertTypeDefinition is an AlertType
-// since we are only increasing the strictness of params.
-export const isAlertExecutor = (
-  obj: SignalRuleAlertTypeDefinition
-): obj is RuleType<
-  RuleParams,
-  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default'
-> => {
-  return true;
-};
-
-export type SignalRuleAlertTypeDefinition = RuleType<
-  RuleParams,
-  RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default'
 >;
 
 export interface Ancestor {
@@ -286,7 +241,8 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>
+  docs: Array<WrappedFieldsLatest<T>>,
+  maxAlerts?: number
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -344,15 +300,6 @@ export interface SearchAfterAndBulkCreateReturnType {
   warningMessages: string[];
 }
 
-export interface ThresholdAggregationBucket extends TermAggregationBucket {
-  max_timestamp: {
-    value_as_string: string;
-  };
-  cardinality_count: {
-    value: number;
-  };
-}
-
 export interface MultiAggBucket {
   cardinality?: Array<{
     field: string;
@@ -365,12 +312,6 @@ export interface MultiAggBucket {
   docCount: number;
   maxTimestamp: string;
   minTimestamp: string;
-}
-
-export interface ThresholdQueryBucket extends TermAggregationBucket {
-  lastSignalTimestamp: {
-    value_as_string: string;
-  };
 }
 
 export interface ThresholdAlertState extends RuleTypeState {
