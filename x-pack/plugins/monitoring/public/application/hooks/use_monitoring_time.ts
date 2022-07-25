@@ -6,7 +6,7 @@
  */
 import { useCallback, useState, useContext, useEffect } from 'react';
 import createContainer from 'constate';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Legacy } from '../../legacy_shims';
 import { GlobalStateContext } from '../contexts/global_state_context';
 
@@ -22,9 +22,6 @@ export const DEFAULT_TIMERANGE: TimeOptions = {
   interval: '>=10s',
 };
 
-const DEFAULT_REFRESH_INTERVAL_VALUE = 10000;
-const DEFAULT_REFRESH_INTERVAL_PAUSE = false;
-
 export const useMonitoringTime = () => {
   const { services } = useKibana<{ data: any }>();
   const state = useContext(GlobalStateContext);
@@ -35,8 +32,8 @@ export const useMonitoringTime = () => {
   };
 
   const { value, pause } = services.data?.query.timefilter.timefilter.getRefreshInterval();
-  const [refreshInterval, setRefreshInterval] = useState(value || DEFAULT_REFRESH_INTERVAL_VALUE);
-  const [isPaused, setIsPaused] = useState(pause || DEFAULT_REFRESH_INTERVAL_PAUSE);
+  const [refreshInterval, setRefreshInterval] = useState(value);
+  const [isPaused, setIsPaused] = useState(pause);
   const [currentTimerange, setTimeRange] = useState<TimeOptions>(defaultTimeRange);
   const [isDisabled, setIsDisabled] = useState(false);
 

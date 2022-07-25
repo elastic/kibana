@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HostMetadata } from '../../../../../common/endpoint/types';
-import { HostListQueryResult, HostQueryResult } from '../../../types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { HostMetadata } from '../../../../../common/endpoint/types';
+import type { HostListQueryResult, HostQueryResult } from '../../../types';
 
 // remove the top-level 'HostDetails' property if found, from previous schemas
 function stripHostDetails(host: HostMetadata | { HostDetails: HostMetadata }): HostMetadata {

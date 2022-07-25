@@ -8,7 +8,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -33,7 +33,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -58,7 +58,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -83,7 +83,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -110,7 +110,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -135,7 +135,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -160,7 +160,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -185,7 +185,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -210,7 +210,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -235,7 +235,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -260,7 +260,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -286,7 +286,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -314,7 +314,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -339,7 +339,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -364,7 +364,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"
@@ -389,7 +389,7 @@ exports[`Storyshots components/Shapes/ShapePicker default 1`] = `
     className="euiFlexItem"
   >
     <button
-      className="euiLink euiLink--primary"
+      className="euiLink emotion-euiLink-primary"
       disabled={false}
       onClick={[Function]}
       type="button"

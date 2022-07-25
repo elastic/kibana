@@ -184,7 +184,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_packages_response'
       operationId: list-all-packages
-    parameters: []
+    parameters:
+      - in: query
+        name: excludeInstallStatus
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to exclude the install status of each package. Enabling this
+          option will opt in to caching for the response via `cache-control`
+          headers. If you don't need up-to-date installation info for a package,
+          and are querying for a list of available packages, providing this flag
+          can improve performance substantially.
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -686,6 +697,34 @@ paths:
           name: kuery
           in: query
           required: false
+  /agent_status/data:
+    get:
+      summary: Agents - Get incoming data
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          data:
+                            type: boolean
+      operationId: get-agent-data
+      parameters:
+        - schema:
+            type: array
+          name: agentsId
+          in: query
+          required: true
   /agents:
     get:
       summary: Agents - List
@@ -698,6 +737,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_agents_response'
       operationId: get-agents
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/show_inactive'
+        - $ref: '#/components/parameters/show_upgradeable'
+        - $ref: '#/components/parameters/sort_field'
+        - $ref: '#/components/parameters/sort_order'
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -735,6 +782,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_upgrade_agents'
+  /agents/current_upgrades:
+    get:
+      summary: Agents - Current Bulk Upgrades
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        actionId:
+                          type: string
+                        complete:
+                          type: boolean
+                        nbAgents:
+                          type: number
+                        nbAgentsAck:
+                          type: number
+                        version:
+                          type: string
+                        startTime:
+                          type: string
+                      required:
+                        - actionId
+                        - complete
+                        - nbAgents
+                        - nbAgentsAck
+                        - version
+                        - startTime
+                required:
+                  - items
+      operationId: agents-current-upgrades
   /agents/{agentId}:
     parameters:
       - schema:
@@ -776,6 +862,19 @@ paths:
       operationId: update-agent
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_provided_metadata:
+                  type: object
+                tags:
+                  type: array
+                  items:
+                    type: string
     delete:
       summary: Agent - Delete
       tags: []
@@ -1023,6 +1122,67 @@ paths:
                         type: string
               required:
                 - agents
+  /agents/bulk_update_agent_tags:
+    post:
+      summary: Agents - Bulk update tags
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    error:
+                      type: string
+                  required:
+                    - success
+      operationId: bulk-update-agent-tags
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agents:
+                  oneOf:
+                    - type: string
+                      description: KQL query string, can be empty
+                    - type: array
+                      items:
+                        type: string
+                      description: list of agent IDs
+                tagsToAdd:
+                  type: array
+                  items:
+                    type: string
+                tagsToRemove:
+                  type: array
+                  items:
+                    type: string
+                batchSize:
+                  type: number
+              required:
+                - agents
+  /agents/tags:
+    get:
+      summary: Agent Tags - List
+      description: List all agent tags
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_agent_tags_response'
+      operationId: get-agent-tags
   /agent_policies:
     get:
       summary: Agent policies - List
@@ -1384,7 +1544,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_enrollment_api_keys_response'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -1571,6 +1736,8 @@ paths:
                       type: boolean
                     diff:
                       $ref: '#/components/schemas/upgrade_diff'
+                    agent_diff:
+                      $ref: '#/components/schemas/upgrade_agent_diff'
                   required:
                     - hasErrors
   /package_policies/{packagePolicyId}:
@@ -1774,6 +1941,135 @@ paths:
                   - item
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /agent_download_sources:
+    get:
+      summary: Agent Download Sources
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/download_sources'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+      operationId: get-download-sources
+    post:
+      summary: Agent Download Sources
+      description: Create a new agent download source
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                is_default:
+                  type: boolean
+                host:
+                  type: string
+              required:
+                - name
+                - host
+                - is_default
+      operationId: post-download-sources
+  /agent_download_sources/{sourceId}:
+    get:
+      summary: Agent Download Sources - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
+                required:
+                  - item
+      operationId: get-one-download-source
+    parameters:
+      - schema:
+          type: string
+        name: sourceId
+        in: path
+        required: true
+    delete:
+      summary: Agent Download Sources - Delete
+      operationId: delete-download-source
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+    put:
+      summary: Agent Download Sources - Update
+      operationId: update-download-source
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                is_default:
+                  type: boolean
+                host:
+                  type: string
+              required:
+                - name
+                - is_default
+                - host
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/download_sources'
+                required:
+                  - item
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
   /logstash_api_keys:
     post:
       summary: Generate Logstash API key
@@ -1820,7 +2116,7 @@ components:
       required: false
       schema:
         type: integer
-        default: 50
+        default: 20
     page_index:
       name: page
       in: query
@@ -1834,6 +2130,33 @@ components:
       required: false
       schema:
         type: string
+    show_inactive:
+      name: showInactive
+      in: query
+      required: false
+      schema:
+        type: boolean
+    show_upgradeable:
+      name: showUpgradeable
+      in: query
+      required: false
+      schema:
+        type: boolean
+    sort_field:
+      name: sortField
+      in: query
+      required: false
+      schema:
+        type: string
+    sort_order:
+      name: sortOrder
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
@@ -2182,8 +2505,6 @@ components:
           type: string
         path:
           type: string
-        removable:
-          type: boolean
       required:
         - name
         - title
@@ -2208,6 +2529,7 @@ components:
         - lens
         - ml-module
         - security-rule
+        - csp_rule_template
     elasticsearch_asset_type:
       title: Elasticsearch asset type
       type: string
@@ -2241,10 +2563,18 @@ components:
               - api_keys
               - fleet_admin_user
               - fleet_server
+        missing_optional_features:
+          type: array
+          items:
+            type: string
+            enum:
               - encrypted_saved_object_encryption_key_required
+        package_verification_key_id:
+          type: string
       required:
         - isReady
         - missing_requirements
+        - missing_optional_features
     agent_type:
       type: string
       title: Agent type
@@ -2338,6 +2668,10 @@ components:
           type: string
         source_uri:
           type: string
+        rollout_duration_seconds:
+          type: number
+        start_time:
+          type: string
         agents:
           oneOf:
             - type: array
@@ -2392,6 +2726,14 @@ components:
                     - info
                     - warning
                     - error
+    get_agent_tags_response:
+      title: Get Agent Tags response
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: string
     new_agent_policy:
       title: New agent policy
       type: object
@@ -2544,8 +2886,10 @@ components:
         package_version:
           type: string
         last_activity_ms:
-          type: string
+          type: number
         size_in_bytes:
+          type: number
+        size_in_bytes_formatted:
           type: string
         dashboard:
           type: array
@@ -2580,22 +2924,6 @@ components:
         - api_key
         - active
         - created_at
-    get_enrollment_api_keys_response:
-      title: Bulk install packages response
-      type: object
-      properties:
-        list:
-          type: array
-          deprecated: true
-          properties:
-            items:
-              $ref: '#/components/schemas/enrollment_api_key'
-        item:
-          type: array
-          items:
-            $ref: '#/components/schemas/enrollment_api_key'
-      required:
-        - item
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array
@@ -2620,6 +2948,80 @@ components:
                     type: array
                     items:
                       type: string
+    full_agent_policy_input_stream:
+      title: Full agent policy input stream
+      allOf:
+        - type: object
+          additionalProperties: true
+          properties:
+            id:
+              type: string
+            data_stream:
+              type: object
+              properties:
+                dataset:
+                  type: string
+                type:
+                  type: string
+              required:
+                - dataset
+                - type
+          required:
+            - id
+            - data_stream
+    full_agent_policy_input:
+      title: Full agent policy input
+      allOf:
+        - type: object
+          additionalProperties: true
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            revision:
+              type: number
+            type:
+              type: string
+            data_stream:
+              type: object
+              properties:
+                namespace:
+                  type: string
+              required:
+                - namespace
+            use_output:
+              type: string
+            meta:
+              type: object
+              additionalProperties: true
+              properties:
+                package:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                    - name
+                    - version
+            streams:
+              $ref: '#/components/schemas/full_agent_policy_input_stream'
+          required:
+            - id
+            - name
+            - revision
+            - type
+            - data_stream
+            - use_output
+    upgrade_agent_diff:
+      title: Package policy Upgrade dryrun
+      type: array
+      items:
+        type: array
+        items:
+          $ref: '#/components/schemas/full_agent_policy_input'
     update_package_policy:
       title: Update package policy
       type: object
@@ -2727,5 +3129,21 @@ components:
         - is_default
         - name
         - type
+    download_sources:
+      title: Download Source
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        name:
+          type: string
+        host:
+          type: string
+      required:
+        - is_default
+        - name
+        - host
 security:
   - basicAuth: []

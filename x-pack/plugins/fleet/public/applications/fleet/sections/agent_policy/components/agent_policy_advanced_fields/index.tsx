@@ -22,18 +22,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common';
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 
-import { policyHasFleetServer } from '../../../agents/services/has_fleet_server';
-
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
+import { policyHasFleetServer } from '../../../../services';
+
+import {
+  useOutputOptions,
+  useDownloadSourcesOptions,
+  DEFAULT_OUTPUT_VALUE,
+  DEFAULT_DOWNLOAD_SOURCE_VALUE,
+} from './hooks';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -56,7 +61,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     dataOutputOptions,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
-  } = useOutputOptions();
+  } = useOutputOptions(agentPolicy);
+  const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
+    useDownloadSourcesOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
@@ -309,6 +316,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -347,6 +355,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -356,6 +365,46 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               });
             }}
             options={monitoringOutputOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
+              defaultMessage="Agent Binary Download"
+              data-test-subj="agentPolicyForm.downloadSource.label"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
+            defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.download_source_id && validation.download_source_id
+              ? validation.download_source_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.download_source_id || DEFAULT_DOWNLOAD_SOURCE_VALUE}
+            fullWidth
+            isLoading={isLoadingDownloadSources}
+            onChange={(e) => {
+              updateAgentPolicy({
+                download_source_id: e !== DEFAULT_DOWNLOAD_SOURCE_VALUE ? e : null,
+              });
+            }}
+            options={dataDownloadSourceOptions}
+            data-test-subj="agentPolicyForm.downloadSource.select"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -382,6 +431,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 {(deleteAgentPolicyPrompt) => {
                   return (
                     <EuiButton
+                      data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
                       color="danger"
                       onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
                     >

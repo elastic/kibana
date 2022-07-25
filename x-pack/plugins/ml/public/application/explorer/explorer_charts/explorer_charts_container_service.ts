@@ -13,10 +13,10 @@
  */
 
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { SeriesConfigWithMetadata } from '../../services/anomaly_explorer_charts_service';
+import type { SeriesConfigWithMetadata } from '../../../../common/types/results';
 
 export interface ExplorerChartSeriesErrorMessages {
-  [key: string]: Set<JobId>;
+  [key: string]: JobId[];
 }
 export declare interface ExplorerChartsData {
   chartsPerRow: number;

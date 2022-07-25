@@ -39,17 +39,16 @@ RUNTIME_DEPS = [
   "@npm//json-stable-stringify",
   "@npm//lodash",
   "@npm//sinon",
-  "@npm//zlib",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-test:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//aggregate-error",
   "@npm//globby",
-  "@npm//zlib",
   "@npm//@types/chance",
   "@npm//@types/jest",
   "@npm//@types/json-stable-stringify",
@@ -79,6 +78,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

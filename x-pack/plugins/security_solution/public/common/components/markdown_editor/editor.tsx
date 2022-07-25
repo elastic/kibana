@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElementRef } from 'react';
 import React, {
   forwardRef,
   memo,
@@ -13,10 +14,9 @@ import React, {
   useRef,
   useState,
   useCallback,
-  ElementRef,
 } from 'react';
 import { EuiMarkdownEditor } from '@elastic/eui';
-import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
 

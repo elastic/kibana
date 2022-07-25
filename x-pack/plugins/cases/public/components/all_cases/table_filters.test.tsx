@@ -10,18 +10,19 @@ import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
+import userEvent from '@testing-library/user-event';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
 const onFilterChanged = jest.fn();
 const fetchReporters = jest.fn();
-const fetchTags = jest.fn();
+const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
 const props = {
@@ -35,9 +36,11 @@ const props = {
 };
 
 describe('CasesTableFilters ', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],
@@ -57,6 +60,19 @@ describe('CasesTableFilters ', () => {
     expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
   });
 
+  it('should render the case severity filter dropdown', () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    expect(result.getByTestId('case-severity-filter')).toBeTruthy();
+  });
+
+  it('should call onFilterChange when the severity filter changes', () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(result.getByTestId('case-severity-filter'));
+    userEvent.click(result.getByTestId('case-severity-filter-high'));
+
+    expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
+  });
+
   it('should call onFilterChange when selected tags change', () => {
     const wrapper = mount(
       <TestProviders>
@@ -64,7 +80,7 @@ describe('CasesTableFilters ', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="options-filter-popover-button-Tags"]`).last().simulate('click');
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="options-filter-popover-item-coke"]`).last().simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
@@ -80,7 +96,10 @@ describe('CasesTableFilters ', () => {
       .last()
       .simulate('click');
 
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper
+      .find(`[data-test-subj="options-filter-popover-item-casetester"]`)
+      .last()
+      .simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
   });
@@ -212,8 +231,53 @@ describe('CasesTableFilters ', () => {
       .last()
       .simulate('click');
 
-    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+    wrapper
+      .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+      .last()
+      .simulate('click');
 
     expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+  });
+
+  describe('create case button', () => {
+    it('should not render the create case button when displayCreateCaseButton and onCreateCasePressed are not passed', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters {...props} />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`).length).toBe(0);
+    });
+
+    it('should render the create case button when displayCreateCaseButton and onCreateCasePressed are passed', () => {
+      const onCreateCasePressed = jest.fn();
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            displayCreateCaseButton={true}
+            onCreateCasePressed={onCreateCasePressed}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`)).toBeTruthy();
+    });
+
+    it('should call the onCreateCasePressed when create case is clicked', () => {
+      const onCreateCasePressed = jest.fn();
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            displayCreateCaseButton={true}
+            onCreateCasePressed={onCreateCasePressed}
+          />
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`).first().simulate('click');
+      wrapper.update();
+      // NOTE: intentionally checking no arguments are passed
+      expect(onCreateCasePressed).toHaveBeenCalledWith();
+    });
   });
 });

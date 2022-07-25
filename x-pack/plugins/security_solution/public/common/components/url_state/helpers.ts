@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
-import * as H from 'history';
+import type * as H from 'history';
 
-import type { Filter, Query } from '@kbn/es-query';
-
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { inputsSelectors, State } from '../../store';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import type { State } from '../../store';
+import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { formatDate } from '../super_date_picker';
-import { NavTab } from '../navigation/types';
-import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
-import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
+import type { NavTab } from '../navigation/types';
+import type { UrlStateType } from './constants';
+import { CONSTANTS } from './constants';
+import type { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
@@ -48,7 +43,10 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
-export const getParamFromQueryString = (queryString: string, key: string) => {
+export const getParamFromQueryString = (
+  queryString: string,
+  key: string
+): string | undefined | null => {
   const parsedQueryString = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
@@ -94,13 +92,16 @@ export const replaceQueryStringInLocation = (
 export const getUrlType = (pageName: string): UrlStateType => {
   if (pageName === SecurityPageName.overview) {
     return 'overview';
+  }
+  if (pageName === SecurityPageName.landing) {
+    return 'get_started';
   } else if (pageName === SecurityPageName.hosts) {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
   } else if (pageName === SecurityPageName.alerts) {
     return 'alerts';
-  } else if (pageName === SecurityPageName.rules) {
+  } else if (pageName === SecurityPageName.rules || pageName === SecurityPageName.rulesCreate) {
     return 'rules';
   } else if (pageName === SecurityPageName.exceptions) {
     return 'exceptions';
@@ -119,17 +120,8 @@ export const getTitle = (pageName: string, navTabs: Record<string, NavTab>): str
 };
 
 export const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getSourcererScopes = sourcererSelectors.scopesSelector();
   const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
     const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
@@ -141,49 +133,8 @@ export const makeMapStateToProps = () => {
           }
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
-    let searchAttr: {
-      [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
-      [CONSTANTS.savedQuery]?: string;
-    } = {
-      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
-      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
-    };
-    const savedQuery = getGlobalSavedQuerySelector(state);
-    if (savedQuery != null && savedQuery.id !== '') {
-      searchAttr = {
-        [CONSTANTS.savedQuery]: savedQuery.id,
-      };
-    }
-    const sourcerer = getSourcererScopes(state);
-    const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererUrlState = activeScopes
-      .filter((scope) => scope === SourcererScopeName.default)
-      .reduce(
-        (acc, scope) => ({
-          ...acc,
-          [scope]: {
-            id: sourcerer[scope]?.selectedDataViewId,
-            selectedPatterns: sourcerer[scope]?.selectedPatterns,
-          },
-        }),
-        {}
-      );
-
     return {
       urlState: {
-        ...searchAttr,
-        [CONSTANTS.sourcerer]: selectedPatterns,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
-        },
         [CONSTANTS.timeline]: timeline,
       },
     };
@@ -192,31 +143,11 @@ export const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const updateTimerangeUrl = (
-  timeRange: UrlInputsModel,
-  isFirstPageLoad: boolean
-): UrlInputsModel => {
-  if (timeRange.global.timerange.kind === 'relative') {
-    timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
-    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
-  }
-  if (timeRange.timeline.timerange.kind === 'relative' && isFirstPageLoad) {
-    timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
-    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
-      roundUp: true,
-    });
-  }
-  return timeRange;
-};
-
 export const isQueryStateEmpty = (
   queryState: ValueUrlState | undefined | null,
   urlKey: KeyUrlState
 ): boolean =>
-  queryState == null ||
-  (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
-  (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
-  (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
+  queryState == null || (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');
 
 export const replaceStatesInLocation = (
   states: ReplaceStateInLocation[],

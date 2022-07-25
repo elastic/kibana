@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
-import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {
@@ -28,6 +26,7 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
+import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -53,7 +52,7 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides } = await this.config$.pipe(first()).toPromise();
+    const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
     this.register(getCoreSettings({ isDist: this.isDist }));
@@ -72,9 +71,9 @@ export class UiSettingsService
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
-    registerRoutes(http.createRouter(''));
+    registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;
 
     return {

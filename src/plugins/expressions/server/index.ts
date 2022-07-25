@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109902
-/* eslint-disable @kbn/eslint/no_export_all */
-
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
-export * from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsServerPlugin(initializerContext);
 }

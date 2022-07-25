@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { privilegesCheckRoute } from './privileges_check_route';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const initPrivilegesCheckRoutes = (router: IRouter, context: OsqueryAppContext) => {
   privilegesCheckRoute(router, context);

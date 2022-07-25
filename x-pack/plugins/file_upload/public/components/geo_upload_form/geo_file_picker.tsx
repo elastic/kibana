@@ -9,7 +9,6 @@ import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../../common/constants';
-import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 
@@ -134,11 +133,6 @@ export class GeoFilePicker extends Component<Props, State> {
         {i18n.translate('xpack.fileUpload.geoFilePicker.acceptedFormats', {
           defaultMessage: 'Formats accepted: {fileTypes}',
           values: { fileTypes: GEO_FILE_TYPES.join(', ') },
-        })}
-        <br />
-        {i18n.translate('xpack.fileUpload.geoFilePicker.maxSize', {
-          defaultMessage: 'Max size: {maxFileSize}',
-          values: { maxFileSize: getMaxBytesFormatted() },
         })}
       </span>
     );

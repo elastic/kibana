@@ -8,10 +8,9 @@
 import expect from '@kbn/expect';
 import { isEmpty, sortBy } from 'lodash';
 
+import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
-import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
@@ -314,33 +313,6 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for siem_auditbeat_auth with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_auditbeat',
-      indexPattern: { name: 'ft_module_siem_auditbeat', timeField: '@timestamp' },
-      module: 'siem_auditbeat_auth',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf11_',
-        indexPatternName: 'ft_module_siem_auditbeat',
-        startDatafeed: true,
-        end: 1566403650000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf11_suspicious_login_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
         'for siem_packetbeat with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
       indexPattern: { name: 'ft_module_siem_packetbeat', timeField: '@timestamp' },
@@ -404,159 +376,6 @@ export default ({ getService }: FtrProviderContext) => {
         jobs: [
           {
             jobId: 'pf13_high_latency_by_geo',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for auditbeat_process_hosts_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_auditbeat',
-      indexPattern: { name: 'ft_module_auditbeat', timeField: '@timestamp' },
-      module: 'auditbeat_process_hosts_ecs',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf14_',
-        indexPatternName: 'ft_module_auditbeat',
-        startDatafeed: true,
-        end: 1597847410000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf14_hosts_high_count_process_events_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf14_hosts_rare_process_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: ['ml_auditbeat_hosts_process_events_ecs'] as string[],
-        visualizations: [
-          'ml_auditbeat_hosts_process_event_rate_by_process_ecs',
-          'ml_auditbeat_hosts_process_event_rate_vis_ecs',
-          'ml_auditbeat_hosts_process_occurrence_ecs',
-        ] as string[],
-        dashboards: [
-          'ml_auditbeat_hosts_process_event_rate_ecs',
-          'ml_auditbeat_hosts_process_explorer_ecs',
-        ] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for security_linux with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_endpoint',
-      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
-      module: 'security_linux',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf15_',
-        indexPatternName: 'ft_logs-endpoint.events.*',
-        startDatafeed: true,
-        end: 1606858680000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf15_v2_rare_process_by_host_linux_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf15_v2_linux_rare_metadata_user',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf15_v2_linux_rare_metadata_process',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_user_name_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_process_all_hosts_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_network_port_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for security_windows with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_endpoint',
-      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
-      module: 'security_windows',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf16_',
-        indexPatternName: 'ft_logs-endpoint.events.*',
-        startDatafeed: true,
-        end: 1606858580000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf16_v2_rare_process_by_host_windows_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_anomalous_network_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_anomalous_path_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_anomalous_process_all_hosts_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_anomalous_process_creation',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_anomalous_user_name_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_rare_metadata_process',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf16_v2_windows_rare_metadata_user',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
@@ -726,110 +545,6 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for siem_winlogbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_winlogbeat',
-      indexPattern: { name: 'ft_module_siem_winlogbeat', timeField: '@timestamp' },
-      module: 'siem_winlogbeat',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf21_',
-        indexPatternName: 'ft_module_siem_winlogbeat',
-        startDatafeed: true,
-        end: 1595382280000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf21_rare_process_by_host_windows_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_network_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_path_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_process_all_hosts_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_process_creation',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_script',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_service',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_anomalous_user_name_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_rare_user_runas_event',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_rare_metadata_process',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-          {
-            jobId: 'pf21_windows_rare_metadata_user',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for siem_winlogbeat_auth with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_winlogbeat',
-      indexPattern: { name: 'ft_module_siem_winlogbeat', timeField: '@timestamp' },
-      module: 'siem_winlogbeat_auth',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf22_',
-        indexPatternName: 'ft_module_siem_winlogbeat',
-        startDatafeed: true,
-        end: 1566321950000,
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf22_windows_rare_user_type10_remote_login',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
         'for apache_data_stream with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache_data_stream',
       indexPattern: { name: 'ft_module_apache_data_stream', timeField: '@timestamp' },
@@ -965,12 +680,12 @@ export default ({ getService }: FtrProviderContext) => {
     rqBody: object,
     rspCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(rqBody)
-      .expect(rspCode);
+      .send(rqBody);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

@@ -14,3 +14,7 @@
 .dshDashboardEmptyScreen {
   margin-top: $euiSizeS;
 }
+
+.dashboardViewport--screenshotMode  .controlsWrapper--empty {
+  display:none
+}

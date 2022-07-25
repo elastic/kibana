@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkUsersStrategyResponse } from '../../../../common/search_strategy';
+import type { NetworkUsersStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockUsersData: NetworkUsersStrategyResponse = {
   edges: [

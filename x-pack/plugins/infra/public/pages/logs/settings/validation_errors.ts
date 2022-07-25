@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 export interface GenericValidationError {
   type: 'generic';
@@ -19,6 +19,11 @@ export interface ChildFormValidationError {
 
 export interface EmptyFieldValidationError {
   type: 'empty_field';
+  fieldName: string;
+}
+
+export interface IncludesSpacesValidationError {
+  type: 'includes_spaces';
   fieldName: string;
 }
 
@@ -55,6 +60,7 @@ export type FormValidationError =
   | GenericValidationError
   | ChildFormValidationError
   | EmptyFieldValidationError
+  | IncludesSpacesValidationError
   | EmptyColumnListValidationError
   | MissingTimestampFieldValidationError
   | MissingMessageFieldValidationError
@@ -64,6 +70,9 @@ export type FormValidationError =
 
 export const validateStringNotEmpty = (fieldName: string, value: string): FormValidationError[] =>
   value === '' ? [{ type: 'empty_field', fieldName }] : [];
+
+export const validateStringNoSpaces = (fieldName: string, value: string): FormValidationError[] =>
+  value.includes(' ') ? [{ type: 'includes_spaces', fieldName }] : [];
 
 export const validateColumnListNotEmpty = (columns: unknown[]): FormValidationError[] =>
   columns.length <= 0 ? [{ type: 'empty_column_list' }] : [];

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IEsSearchResponse,
-  ISearchRequestParams,
-} from '../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,

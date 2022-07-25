@@ -104,7 +104,10 @@ export const item: GetInfoResponse['item'] = {
       index_pattern: [],
       lens: [],
       ml_module: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
       security_rule: [],
+      csp_rule_template: [],
       tag: [],
     },
     elasticsearch: {
@@ -260,6 +263,5 @@ export const item: GetInfoResponse['item'] = {
     github: 'elastic/security-external-integrations',
   },
   latestVersion: '1.2.0',
-  removable: true,
   status: 'not_installed',
 };

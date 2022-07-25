@@ -10,7 +10,7 @@ import Chance from 'chance';
 import {
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_ORIGIN_FIELD,
-} from '../../../../plugins/upgrade_assistant/common/constants';
+} from '@kbn/upgrade-assistant-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const chance = new Chance();

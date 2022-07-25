@@ -9,14 +9,14 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs/operators';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 
@@ -229,7 +229,7 @@ describe('start', () => {
       const { chrome, service } = await start({ startDeps });
       const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
-      const availableApps = await applications$.pipe(take(1)).toPromise();
+      const availableApps = await Rx.firstValueFrom(applications$);
       [...availableApps.keys()].forEach((appId) => navigateToApp(appId));
       service.stop();
 

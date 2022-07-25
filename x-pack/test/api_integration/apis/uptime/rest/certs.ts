@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { CertType } from '../../../../../plugins/uptime/common/runtime_types';
-import { makeChecksWithStatus } from './helper/make_checks';
+import { CertType } from '@kbn/synthetics-plugin/common/runtime_types';
 import {
   processCertsResult,
   getCertsRequestBody,
-} from '../../../../../plugins/uptime/common/requests/get_certs_request_body';
+} from '@kbn/synthetics-plugin/common/requests/get_certs_request_body';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

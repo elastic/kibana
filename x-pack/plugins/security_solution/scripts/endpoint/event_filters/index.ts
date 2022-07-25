@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { run, RunFn, createFailError } from '@kbn/dev-utils';
+import type { RunFn } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type {
   CreateExceptionListItemSchema,
@@ -59,7 +61,7 @@ class EventFilterDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {

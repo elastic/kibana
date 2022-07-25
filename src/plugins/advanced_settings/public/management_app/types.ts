@@ -8,14 +8,14 @@
 
 import type { ReactElement } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UiSettingsType } from '../../../../core/public';
+import { UiSettingsType } from '@kbn/core/public';
 
 export interface FieldSetting {
   displayName: string;
   name: string;
   value: unknown;
   description?: string | ReactElement;
-  options?: string[];
+  options?: string[] | number[];
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
   type: UiSettingsType;

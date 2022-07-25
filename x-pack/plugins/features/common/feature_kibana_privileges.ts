@@ -23,6 +23,7 @@ export interface FeatureKibanaPrivileges {
   /**
    * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
    * @deprecated
+   * @removeBy 8.8.0
    */
   disabled?: boolean;
 
@@ -156,6 +157,26 @@ export interface FeatureKibanaPrivileges {
      */
     all?: readonly string[];
     /**
+     * List of case owners which users should have push access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    push: ['securitySolution']
+     *  }
+     * ```
+     */
+    push?: readonly string[];
+    /**
+     * List of case owners which users should have create access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    create: ['securitySolution']
+     *  }
+     * ```
+     */
+    create?: readonly string[];
+    /**
      * List of case owners which users should have read-only access to when granted this privilege.
      * @example
      * ```ts
@@ -165,6 +186,26 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     read?: readonly string[];
+    /**
+     * List of case owners which users should have update access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    update: ['securitySolution']
+     *  }
+     * ```
+     */
+    update?: readonly string[];
+    /**
+     * List of case owners which users should have delete access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    delete: ['securitySolution']
+     *  }
+     * ```
+     */
+    delete?: readonly string[];
   };
 
   /**

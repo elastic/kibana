@@ -19,11 +19,14 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
+  EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import { css } from '@emotion/react';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
@@ -69,6 +72,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   onChange,
   loading,
 }: DataVisualizerTableProps<T>) => {
+  const { euiTheme } = useEuiTheme();
+
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
 
@@ -224,15 +229,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         width: dimensions.docCount,
       },
       {
-        field: 'stats.cardinality',
+        field: 'cardinality',
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (cardinality: number | undefined) => (
-          <DistinctValues cardinality={cardinality} showIcon={dimensions.showIcon} />
+        render: (_: undefined, item: DataVisualizerTableItem) => (
+          <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
         ),
-
-        sortable: true,
+        sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
         width: dimensions.distinctValues,
@@ -279,14 +283,24 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         ),
         render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
+
+          if ('loading' in item && item.loading === true) {
+            return (
+              <EuiText textAlign="center">
+                <EuiLoadingSpinner size="s" />
+              </EuiText>
+            );
+          }
+
           if (
-            (item.type === JOB_FIELD_TYPES.KEYWORD || item.type === JOB_FIELD_TYPES.IP) &&
+            (item.type === SUPPORTED_FIELD_TYPES.KEYWORD ||
+              item.type === SUPPORTED_FIELD_TYPES.IP) &&
             item.stats?.topValues !== undefined
           ) {
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === JOB_FIELD_TYPES.NUMBER) {
+          if (item.type === SUPPORTED_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               // If the cardinality is only low, show the top values instead of a distribution chart
               return item.stats?.distribution?.percentiles.length <= 2 ? (
@@ -299,7 +313,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             }
           }
 
-          if (item.type === JOB_FIELD_TYPES.BOOLEAN) {
+          if (item.type === SUPPORTED_FIELD_TYPES.BOOLEAN) {
             return <BooleanContentPreview config={item} />;
           }
 
@@ -352,6 +366,18 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}
+            css={css`
+              thead {
+                position: sticky;
+                inset-block-start: 0;
+                z-index: 1;
+                background-color: ${euiTheme.colors.emptyShade};
+                box-shadow: inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color};
+              }
+              .euiTableRow > .euiTableRowCel {
+                border-top: 0px;
+              }
+            `}
           />
         </div>
       )}

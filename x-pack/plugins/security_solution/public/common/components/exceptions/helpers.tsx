@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiText, EuiAvatar } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 
-import {
-  comment,
-  osType,
+import type {
   CommentsArray,
   Comment,
   CreateComment,
@@ -21,24 +20,28 @@ import {
   EntryNested,
   OsTypeArray,
   ExceptionListType,
-  ListOperatorTypeEnum as OperatorTypeEnum,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  comment,
+  osType,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
 
+import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import {
   getOperatorType,
   getNewExceptionItem,
   addIdToEntries,
-  ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
 import * as i18n from './translations';
-import { AlertData, Flattened } from './types';
+import type { AlertData, Flattened } from './types';
 
-import { Ecs } from '../../../../common/ecs';
-import { CodeSignature } from '../../../../common/ecs/file';
+import type { Ecs } from '../../../../common/ecs';
+import type { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiIcon } from '@elastic/eui';
 
-import { SourceIcon } from './';
+import { SourceIcon } from '.';
 
 describe('SourceIcon', () => {
   it('renders', () => {

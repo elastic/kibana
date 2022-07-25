@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
-import type { IAggType } from 'src/plugins/data/public';
-import type { Datatable, RenderMode } from 'src/plugins/expressions';
+import { IUiSettingsClient } from '@kbn/core/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import type { IAggType } from '@kbn/data-plugin/public';
+import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import {
   LENS_EDIT_SORT_ACTION,
@@ -50,6 +51,7 @@ export type DatatableRenderProps = DatatableProps & {
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   interactive: boolean;
+  renderComplete: () => void;
 
   /**
    * A boolean for each table row, which is true if the row active

@@ -9,7 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { OnRangeSelected } from '../../../events';
+import type { OnRangeSelected } from '../../../events';
 
 import { Ranges } from './ranges';
 

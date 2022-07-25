@@ -1,0 +1,239 @@
+{
+  "id": "@kbn/shared-ux-page-analytics-no-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPage",
+        "description": [
+          "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
+        ],
+        "signature": [
+          "({ onDataViewCreated }: ",
+          "AnalyticsNoDataPageProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/analytics_no_data_page.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onDataViewCreated }",
+            "description": [],
+            "signature": [
+              "AnalyticsNoDataPageProps"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/analytics_no_data_page.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPage",
+        "description": [
+          "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
+        ],
+        "signature": [
+          "({ kibanaGuideDocLink, onDataViewCreated }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/analytics_no_data_page.component.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ kibanaGuideDocLink, onDataViewCreated }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/analytics_no_data_page.component.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPageKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPageKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "AnalyticsNoDataPageKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "AnalyticsNoDataPageKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.AnalyticsNoDataPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AnalyticsNoDataPageProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "AnalyticsNoDataPageServices",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "AnalyticsNoDataPageServices",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.getMockServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getMockServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          "AnalyticsNoDataPageServices"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.getStoryArgTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryArgTypes",
+        "description": [],
+        "signature": [
+          "() => { canAccessFleet: { control: string; defaultValue: boolean; }; category: { control: { type: string; }; defaultValue: string; }; title: { control: { type: string; }; defaultValue: string; }; description: { control: { type: string; }; defaultValue: string; }; button: { control: { type: string; }; defaultValue: string; }; canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; kibanaGuideDocLink: { control: string; defaultValue: string; }; }"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-common.getStoryServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryServices",
+        "description": [],
+        "signature": [
+          "(params: ",
+          "Params",
+          ") => ",
+          "AnalyticsNoDataPageServices"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.getStoryServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

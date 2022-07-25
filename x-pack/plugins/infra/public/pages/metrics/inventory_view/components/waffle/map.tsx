@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';

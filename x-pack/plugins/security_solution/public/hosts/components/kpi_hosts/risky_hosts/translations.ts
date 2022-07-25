@@ -34,7 +34,7 @@ export const RISKY_HOSTS_TITLE = i18n.translate(
 export const INSPECT_RISKY_HOSTS = i18n.translate(
   'xpack.securitySolution.kpiHosts.riskyHosts.inspectTitle',
   {
-    defaultMessage: 'KPI Risky Hosts',
+    defaultMessage: 'Risky Hosts',
   }
 );
 

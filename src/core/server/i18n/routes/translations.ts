@@ -9,7 +9,7 @@
 import { createHash } from 'crypto';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
+import type { IRouter } from '@kbn/core-http-server';
 
 interface TranslationCache {
   translations: string;

@@ -15,7 +15,7 @@ import {
   readTelemetryFile,
   MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
-import { usageCollectionPluginMock } from '../../../../usage_collection/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const mockUsageCollector = () => {
   return usageCollectionPluginMock.createSetupContract();

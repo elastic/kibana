@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { userAPIClientMock } from '../../index.mock';
 import { ConfirmDeleteUsers } from './confirm_delete_users';

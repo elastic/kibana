@@ -15,24 +15,34 @@ const OWN_BAZEL_BUILD_FILE = Fs.readFileSync(Path.resolve(__dirname, '../BUILD.b
 
 describe('hasBuildRule()', () => {
   it('returns true if there is a rule with the name "build"', () => {
-    const pkg = new BazelPackage('foo', {}, OWN_BAZEL_BUILD_FILE);
+    const pkg = new BazelPackage('foo', { name: 'foo' }, OWN_BAZEL_BUILD_FILE);
     expect(pkg.hasBuildRule()).toBe(true);
   });
 
   it('returns false if there is no rule with name "build"', () => {
-    const pkg = new BazelPackage('foo', {}, ``);
+    const pkg = new BazelPackage('foo', { name: 'foo' }, ``);
+    expect(pkg.hasBuildRule()).toBe(false);
+  });
+
+  it('returns false if there is no BUILD.bazel file', () => {
+    const pkg = new BazelPackage('foo', { name: 'foo' });
     expect(pkg.hasBuildRule()).toBe(false);
   });
 });
 
 describe('hasBuildTypesRule()', () => {
   it('returns true if there is a rule with the name "build_types"', () => {
-    const pkg = new BazelPackage('foo', {}, OWN_BAZEL_BUILD_FILE);
+    const pkg = new BazelPackage('foo', { name: 'foo' }, OWN_BAZEL_BUILD_FILE);
     expect(pkg.hasBuildTypesRule()).toBe(true);
   });
 
   it('returns false if there is no rule with name "build_types"', () => {
-    const pkg = new BazelPackage('foo', {}, ``);
+    const pkg = new BazelPackage('foo', { name: 'foo' }, ``);
+    expect(pkg.hasBuildTypesRule()).toBe(false);
+  });
+
+  it('returns false if there is no BUILD.bazel file', () => {
+    const pkg = new BazelPackage('foo', { name: 'foo' });
     expect(pkg.hasBuildTypesRule()).toBe(false);
   });
 });

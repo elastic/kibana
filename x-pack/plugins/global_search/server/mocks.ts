@@ -6,6 +6,7 @@
  */
 
 import { of } from 'rxjs';
+import { coreMock } from '@kbn/core/server/mocks';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
@@ -14,7 +15,6 @@ import {
 } from './types';
 import { searchServiceMock } from './services/search_service.mock';
 import { contextMock } from './services/context.mock';
-import { coreMock } from '../../../../src/core/server/mocks';
 
 const createSetupMock = (): jest.Mocked<GlobalSearchPluginSetup> => {
   const searchMock = searchServiceMock.createSetupContract();
@@ -52,7 +52,10 @@ const createRequestHandlerContextMock = (): jest.Mocked<GlobalSearchRequestHandl
 
   handlerContextMock.find.mockReturnValue(of([]));
 
-  return { core: coreMock.createRequestHandlerContext(), globalSearch: handlerContextMock };
+  return coreMock.createCustomRequestHandlerContext({
+    core: coreMock.createRequestHandlerContext(),
+    globalSearch: handlerContextMock,
+  });
 };
 
 export const globalSearchPluginMock = {

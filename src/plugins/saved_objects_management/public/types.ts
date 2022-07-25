@@ -13,4 +13,5 @@ export type {
   SavedObjectRelation,
   SavedObjectInvalidRelation,
   SavedObjectGetRelationshipsResponse,
+  SavedObjectManagementTypeInfo,
 } from '../common';

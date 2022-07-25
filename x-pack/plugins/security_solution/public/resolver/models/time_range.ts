@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeRange } from '../types';
+import type { TimeRange } from '../types';
 
 /**
  * This is the maximum millisecond value that can be used with a Date object. If you use a number greater than this it

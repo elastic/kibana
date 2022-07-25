@@ -9,7 +9,7 @@
 import { DependencyList, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorGetUrlParams, LocatorPublic } from '../../../common/url_service';
+import { LocatorGetUrlParams, LocatorPublic } from '..';
 
 export const useLocatorUrl = <P extends SerializableRecord>(
   locator: LocatorPublic<P> | null | undefined,

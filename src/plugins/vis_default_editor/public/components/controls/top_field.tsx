@@ -9,12 +9,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 import { AggParamEditorProps } from '../agg_param_props';
 
-function TopFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
+function TopFieldParamEditor(props: AggParamEditorProps<DataViewField>) {
   const compatibleAggs = getCompatibleAggs(props.agg);
   let customError;
 

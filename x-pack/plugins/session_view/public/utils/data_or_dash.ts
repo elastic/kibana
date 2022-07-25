@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DASH } from '../constants';
+
 /**
  * Returns a dash ('-') if data is undefined, and empty string, or a NaN.
  *
@@ -15,7 +17,7 @@
  */
 export const dataOrDash = (data: string | number | undefined): string | number => {
   if (data === undefined || data === '' || (typeof data === 'number' && isNaN(data))) {
-    return '-';
+    return DASH;
   }
 
   return data;

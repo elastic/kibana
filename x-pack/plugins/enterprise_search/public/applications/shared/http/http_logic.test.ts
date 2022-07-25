@@ -7,7 +7,7 @@
 
 import { resetContext } from 'kea';
 
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { HttpLogic, HttpValues, mountHttpLogic } from './http_logic';
 

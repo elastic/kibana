@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
 import { packagePolicyService, settingsService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';

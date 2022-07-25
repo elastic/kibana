@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
-import { SessionViewServices } from './types';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { SessionViewServices, SessionViewDeps } from './types';
 import { getSessionViewLazy } from './methods';
 
 export class SessionViewPlugin implements Plugin {
@@ -14,7 +14,7 @@ export class SessionViewPlugin implements Plugin {
 
   public start(core: CoreStart) {
     return {
-      getSessionView: (sessionEntityId: string) => getSessionViewLazy(sessionEntityId),
+      getSessionView: (sessionViewDeps: SessionViewDeps) => getSessionViewLazy(sessionViewDeps),
     };
   }
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom } from '@kbn/std';
-import { of } from 'rxjs';
+import { of, firstValueFrom } from 'rxjs';
 import { createNavigationRegistry } from './navigation_registry';
 
 describe('Navigation registry', () => {

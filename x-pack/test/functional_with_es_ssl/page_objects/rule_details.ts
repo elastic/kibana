@@ -21,6 +21,9 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async getRuleType() {
       return await testSubjects.getVisibleText('ruleTypeLabel');
     },
+    async getAPIKeyOwner() {
+      return await testSubjects.getVisibleText('apiKeyOwnerLabel');
+    },
     async getActionsLabels() {
       return {
         connectorType: await testSubjects.getVisibleText('actionTypeLabel'),

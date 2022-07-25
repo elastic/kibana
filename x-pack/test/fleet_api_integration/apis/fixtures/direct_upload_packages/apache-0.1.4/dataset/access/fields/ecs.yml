@@ -1,0 +1,187 @@
+- name: message
+  level: core
+  type: text
+  description: |-
+    For log events the message field contains the log message, optimized for viewing in a log viewer.
+    For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event.
+    If multiple messages exist, they can be combined into one message.
+- name: http
+  title: HTTP
+  group: 2
+  type: group
+  fields:
+  - name: request.method
+    level: extended
+    type: keyword
+    description: |-
+      HTTP request method.
+      Prior to ECS 1.6.0 the following guidance was provided:
+      "The field value must be normalized to lowercase for querying."
+      As of ECS 1.6.0, the guidance is deprecated because the original case of the method may be useful in anomaly detection.  Original case will be mandated in ECS 2.0.0
+    ignore_above: 1024
+  - name: request.referrer
+    level: extended
+    type: keyword
+    description: Referrer for this HTTP request.
+    ignore_above: 1024
+  - name: response.body.bytes
+    level: extended
+    type: long
+    format: bytes
+    description: Size in bytes of the response body.
+  - name: response.status_code
+    level: extended
+    type: long
+    format: string
+    description: HTTP response status code.
+  - name: version
+    level: extended
+    type: keyword
+    description: HTTP version.
+    ignore_above: 1024
+- name: log
+  title: Log
+  group: 2
+  type: group
+  fields:
+  - name: level
+    level: core
+    type: keyword
+    description: |-
+      Original log level of the log event.
+      If the source of the event provides a log level or textual severity, this is the one that goes in `log.level`. If your source doesn't specify one, you may put your event transport's severity here (e.g. Syslog severity).
+      Some examples are `warn`, `err`, `i`, `informational`.
+    ignore_above: 1024
+- name: process
+  title: Process
+  group: 2
+  type: group
+  fields:
+  - name: pid
+    level: core
+    type: long
+    format: string
+    description: Process id.
+  - name: thread.id
+    level: extended
+    type: long
+    format: string
+    description: Thread ID.
+- name: source
+  title: Source
+  group: 2
+  type: group
+  fields:
+  - name: address
+    level: extended
+    type: keyword
+    description: |-
+      Some event source addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field.
+      Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.
+    ignore_above: 1024
+  - name: geo.city_name
+    level: core
+    type: keyword
+    description: City name.
+    ignore_above: 1024
+  - name: geo.continent_name
+    level: core
+    type: keyword
+    description: Name of the continent.
+    ignore_above: 1024
+  - name: geo.country_iso_code
+    level: core
+    type: keyword
+    description: Country ISO code.
+    ignore_above: 1024
+  - name: geo.location
+    level: core
+    type: geo_point
+    description: Longitude and latitude.
+  - name: geo.region_iso_code
+    level: core
+    type: keyword
+    description: Region ISO code.
+    ignore_above: 1024
+  - name: geo.region_name
+    level: core
+    type: keyword
+    description: Region name.
+    ignore_above: 1024
+- name: url
+  title: URL
+  group: 2
+  type: group
+  fields:
+  - name: original
+    level: extended
+    type: keyword
+    description: |-
+      Unmodified original url as seen in the event source.
+      Note that in network monitoring, the observed URL may be a full URL, whereas in access logs, the URL is often just represented as a path.
+      This field is meant to represent the URL as it was observed, complete or not.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+- name: user
+  title: User
+  group: 2
+  type: group
+  fields:
+  - name: name
+    level: core
+    type: keyword
+    description: Short name or login of the user.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+- name: user_agent
+  title: User agent
+  group: 2
+  type: group
+  fields:
+  - name: device.name
+    level: extended
+    type: keyword
+    description: Name of the device.
+    ignore_above: 1024
+  - name: name
+    level: extended
+    type: keyword
+    description: Name of the user agent.
+    ignore_above: 1024
+  - name: original
+    level: extended
+    type: keyword
+    description: Unparsed user_agent string.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+  - name: os.name
+    level: extended
+    type: keyword
+    description: Operating system name, without the version.
+    ignore_above: 1024
+    multi_fields:
+    - name: text
+      type: text
+      norms: false
+      default_field: false
+  - name: os.version
+    level: extended
+    type: keyword
+    ignore_above: 1024
+    description: Operating system version as a raw string.
+  - name: version
+    level: extended
+    type: keyword
+    ignore_above: 1024
+    description: Version of the user agent.

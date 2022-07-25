@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { Maybe } from '../../../typings/common';
-import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
 import { APMPluginStartDependencies } from '../../types';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 

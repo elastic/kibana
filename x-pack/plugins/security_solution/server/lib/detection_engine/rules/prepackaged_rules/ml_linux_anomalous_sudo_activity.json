@@ -10,7 +10,9 @@
   "from": "now-45m",
   "interval": "15m",
   "license": "Elastic License v2",
-  "machine_learning_job_id": "linux_rare_sudo_user",
+  "machine_learning_job_id": [
+    "v3_linux_rare_sudo_user"
+  ],
   "name": "Unusual Sudo Activity",
   "risk_score": 21,
   "rule_id": "1e9fc667-9ff1-4b33-9f40-fefca8537eb0",
@@ -55,5 +57,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

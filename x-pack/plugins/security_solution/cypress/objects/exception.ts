@@ -43,9 +43,9 @@ export const getExceptionList = (): ExceptionList => ({
 });
 
 export const getException = (): Exception => ({
-  field: 'host.name',
+  field: 'agent.name',
   operator: 'is',
-  values: ['suricata-iowa'],
+  values: ['foo'],
 });
 
 export const expectedExportedExceptionList = (

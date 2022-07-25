@@ -7,8 +7,7 @@
 
 import { PositionedElement, ElementPosition } from '../../../types';
 import { multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
-
-export const isGroupId = (id: string) => id.startsWith('group');
+import { isGroupId } from '../../lib/workpad';
 
 const headerData = (id: string) =>
   isGroupId(id)

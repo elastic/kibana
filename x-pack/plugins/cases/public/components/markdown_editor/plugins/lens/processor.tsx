@@ -8,8 +8,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
@@ -50,6 +50,9 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
         attributes={attributes}
         renderMode="view"
         disableTriggers
+        executionContext={{
+          type: 'cases',
+        }}
       />
       <LensChartTooltipFix />
     </Container>

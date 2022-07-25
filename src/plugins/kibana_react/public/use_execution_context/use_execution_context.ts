@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext, CoreStart } from 'kibana/public';
+import type { KibanaExecutionContext, CoreStart } from '@kbn/core/public';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 
 /**
@@ -15,14 +15,14 @@ import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
  * @param context
  */
 export function useExecutionContext(
-  executionContext: CoreStart['executionContext'],
+  executionContext: CoreStart['executionContext'] | undefined,
   context: KibanaExecutionContext
 ) {
   useDeepCompareEffect(() => {
-    executionContext.set(context);
+    executionContext?.set(context);
 
     return () => {
-      executionContext.clear();
+      executionContext?.clear();
     };
   }, [context]);
 }

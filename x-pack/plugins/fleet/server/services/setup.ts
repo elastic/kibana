@@ -6,31 +6,41 @@
  */
 
 import { compact } from 'lodash';
+import pMap from 'p-map';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import { AUTO_UPDATE_PACKAGES } from '../../common';
-import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import type { PreconfigurationError } from '../../common/constants';
+import type {
+  DefaultPackagesInstallationError,
+  BundledPackage,
+  Installation,
+} from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { ensurePreconfiguredOutputs } from './preconfiguration/index';
+import {
+  ensurePreconfiguredOutputs,
+  getPreconfiguredOutputFromConfig,
+} from './preconfiguration/outputs';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
-import { getInstallations, installPackage } from './epm/packages';
+import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
+import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { getBundledPackages } from './epm/packages';
+import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -53,22 +63,26 @@ async function createSetupSideEffects(
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  const {
-    agentPolicies: policiesOrUndefined,
-    packages: packagesOrUndefined,
-    outputs: outputsOrUndefined,
-  } = appContextService.getConfig() ?? {};
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
 
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
   logger.debug('Setting up Fleet outputs');
+
   await Promise.all([
-    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
+    ensurePreconfiguredOutputs(
+      soClient,
+      esClient,
+      getPreconfiguredOutputFromConfig(appContextService.getConfig())
+    ),
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
@@ -103,6 +117,7 @@ async function createSetupSideEffects(
       policies,
       packages,
       defaultOutput,
+      defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
 
@@ -111,6 +126,9 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
+
+  logger.debug('Upgrade Fleet package install versions');
+  await upgradePackageInstallVersion({ soClient, esClient, logger });
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
@@ -139,36 +157,42 @@ export async function ensureFleetGlobalEsAssets(
   // Ensure Global Fleet ES assets are installed
   logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplate(esClient, logger),
+    ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
   ]);
-
-  if (globalAssetsRes.some((asset) => asset.isCreated)) {
+  const assetResults = globalAssetsRes.flat();
+  if (assetResults.some((asset) => asset.isCreated)) {
     // Update existing index template
-    const packages = await getInstallations(soClient);
-
-    await Promise.all(
-      packages.saved_objects.map(async ({ attributes: installation }) => {
+    const installedPackages = await getInstallations(soClient);
+    const bundledPackages = await getBundledPackages();
+    const findMatchingBundledPkg = (pkg: Installation) =>
+      bundledPackages.find(
+        (bundledPkg: BundledPackage) =>
+          bundledPkg.name === pkg.name && bundledPkg.version === pkg.version
+      );
+    await pMap(
+      installedPackages.saved_objects,
+      async ({ attributes: installation }) => {
         if (installation.install_source !== 'registry') {
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
-          );
-          return;
+          const matchingBundledPackage = findMatchingBundledPkg(installation);
+          if (!matchingBundledPackage) {
+            logger.error(
+              `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
+            );
+            return;
+          }
         }
-        await installPackage({
-          installSource: installation.install_source,
-          savedObjectsClient: soClient,
-          pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
+        await reinstallPackageForInstallation({
+          soClient,
           esClient,
-          spaceId: DEFAULT_SPACE_ID,
-          // Force install the package will update the index template and the datastream write indices
-          force: true,
+          installation,
         }).catch((err) => {
           logger.error(
             `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );
         });
-      })
+      },
+      { concurrency: 10 }
     );
   }
 }

@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '../..';
 import {
   INSTRUCTION_VARIANT,
   InstructionsSchema,
-} from '../../../../../../src/plugins/home/server';
+} from '@kbn/home-plugin/server';
+import { APMConfig } from '../..';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -22,6 +22,7 @@ import {
   createPhpAgentInstructions,
   createRackAgentInstructions,
   createRailsAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
@@ -79,6 +80,10 @@ export function onPremInstructions({
           {
             id: INSTRUCTION_VARIANT.PHP,
             instructions: createPhpAgentInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
+            instructions: createOpenTelemetryAgentInstructions(),
           },
         ],
         statusCheck: {

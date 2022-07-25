@@ -10,6 +10,9 @@ import { Ext } from '../file';
 export interface ProcessEcs {
   Ext?: Ext;
   entity_id?: string[];
+  entry_leader?: ProcessSessionData;
+  session_leader?: ProcessSessionData;
+  group_leader?: ProcessSessionData;
   exit_code?: number[];
   hash?: ProcessHashData;
   parent?: ProcessParentData;
@@ -21,6 +24,12 @@ export interface ProcessEcs {
   title?: string[];
   thread?: Thread;
   working_directory?: string[];
+}
+
+export interface ProcessSessionData {
+  entity_id?: string[];
+  pid?: string[];
+  name?: string[];
 }
 
 export interface ProcessHashData {

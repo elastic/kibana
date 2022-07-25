@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import {
   getLogger,
   getMetadataRequestHandler,

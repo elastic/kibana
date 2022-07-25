@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { Assign } from '@kbn/utility-types';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { NumberFormatArgInput, Props as ComponentProps } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
-import { FORMATS_UI_SETTINGS } from '../../../../../../../src/plugins/field_formats/common';
 
 const { NumberFormat: strings } = ArgumentStrings;
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { PROCESSOR_EVENT } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../plugins/apm/common/processor_event';
+import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

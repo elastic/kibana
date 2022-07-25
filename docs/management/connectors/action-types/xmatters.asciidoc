@@ -1,0 +1,119 @@
+[[xmatters-action-type]]
+=== xMatters connector and action
+++++
+<titleabbrev>xMatters</titleabbrev>
+++++
+
+The xMatters connector uses the https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Workflow for Elastic] to send actionable alerts to on-call xMatters resources.
+
+[float]
+[[xmatters-connector-configuration]]
+==== Connector configuration
+
+xMatters connectors have the following configuration properties:
+
+Name:: The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+Authentication Type:: The type of authentication used in the request made to xMatters.
+URL:: The request URL for the Elastic Alerts trigger in xMatters. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Username:: Username for HTTP Basic Authentication.
+Password:: Password for HTTP Basic Authentication.
+
+[float]
+[[xmatters-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-xmatters-configuration]]
+==== Preconfigured connector type
+
+Connector using Basic Authentication
+[source,text]
+--
+ my-xmatters:
+   name: preconfigured-xmatters-connector-type
+   actionTypeId: .xmatters
+   config:
+     configUrl: https://test.host
+     usesBasic: true
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
+--
+
+Connector using URL Authentication
+[source,text]
+--
+ my-xmatters:
+   name: preconfigured-xmatters-connector-type
+   actionTypeId: .xmatters
+   config:
+     usesBasic: false
+   secrets:
+     secretsUrl: https://test.host?apiKey=1234-abcd
+--
+
+Config defines information for the connector type:
+
+`configUrl`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is true.
+
+`usesBasic`:: A boolean that corresponds to *Authentication Type*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+
+Secrets defines sensitive information for the connector type:
+
+`user`:: A string that corresponds to *User*. Required if `usesBasic` is set to `true`.
+
+`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `usesBasic` is set to `true`.
+
+`secretsUrl`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is false, indicating the API key is included in the URL.
+
+[float]
+[[define-xmatters-ui]]
+==== Define connector in Stack Management
+
+Define xMatters connector properties. Choose between basic and URL authentication for the requests:
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector-basic.png[xMatters connector with basic authentication]
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector-url.png[xMatters connector with url authentication]
+
+Test xMatters rule parameters:
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-params-test.png[xMatters params test]
+
+[float]
+[[xmatters-action-configuration]]
+==== Action configuration
+
+xMatters rules have the following properties:
+
+Severity::                                                     Severity of the rule.
+Tags:: Comma-separated list of tags for the rule as provided by the user in Elastic.
+
+[float]
+[[xmatters-benefits]]
+==== Configure xMatters
+
+By integrating with xMatters, you can:
+
+. Leverage schedules, rotations, escalations, and device preferences to quickly engage the right resources.
+. Allow resolvers to take immediate action with customizable notification responses, including incident creation.
+. Reduce manual tasks so teams can streamline their resources and focus.
+
+[float]
+[[xmatters-connector-prerequisites]]
+==== Prerequisites
+To use the Elastic xMatters connector either install the Elastic workflow template, or add the Elastic Alerts trigger to one of your existing xMatters flows. Once the workflow or trigger is in your xMatters instance, configure Elastic to send alerts to xMatters.
+
+. In xMatters, double-click the Elastic trigger to open the settings menu.
+. Choose the authentication method and set your authenticating user.
+. Copy the initiation URL.
+. In Elastic, open the xMatters connector.
+. Set the authentication method, then paste the initiation URL.
+
+Note: If you use basic authentication, specify the Web / App Login ID in the user credentials for the connector. This value can be found in the Edit Profile modal in xMatters for each user.
+For detailed configuration instructions, see https://help.xmatters.com/ondemand/#cshid=ElasticTrigger[xMatters online help]

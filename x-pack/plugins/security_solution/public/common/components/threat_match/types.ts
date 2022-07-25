@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
-import { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { ThreatMap, ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export interface FormattedEntry {
   id: string;

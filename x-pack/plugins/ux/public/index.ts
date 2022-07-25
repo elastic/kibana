@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '../../../../src/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import { UxPlugin, UxPluginSetup, UxPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = () =>

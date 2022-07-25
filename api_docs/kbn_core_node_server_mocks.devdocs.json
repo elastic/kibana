@@ -1,0 +1,73 @@
+{
+  "id": "@kbn/core-node-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-node-server-mocks",
+        "id": "def-server.nodeServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "nodeServiceMock",
+        "description": [],
+        "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-mocks",
+            "id": "def-server.nodeServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<NodeServiceContract>"
+            ],
+            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server-mocks",
+            "id": "def-server.nodeServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalNodeServicePreboot",
+              ">"
+            ],
+            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

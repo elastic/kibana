@@ -12,9 +12,10 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router, useLocation } from 'react-router-dom';
 import qs from 'query-string';
-import { DatePicker } from './';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { DatePicker } from '.';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
+import { DatePickerContextProvider } from '../../../context/date_picker_context';
 
 let history: MemoryHistory;
 
@@ -69,7 +70,13 @@ function mountDatePicker(initialParams: {
           data: {
             query: {
               timefilter: {
-                timefilter: { setTime: setTimeSpy, getTime: getTimeSpy },
+                timefilter: {
+                  setTime: setTimeSpy,
+                  getTime: getTimeSpy,
+                  getTimeDefaults: jest.fn().mockReturnValue({}),
+                  getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+                  getRefreshInterval: jest.fn().mockReturnValue({}),
+                },
               },
             },
           },
@@ -79,7 +86,9 @@ function mountDatePicker(initialParams: {
           },
         }}
       >
-        <DatePickerWrapper />
+        <DatePickerContextProvider>
+          <DatePickerWrapper />
+        </DatePickerContextProvider>
       </KibanaContextProvider>
     </Router>
   );
@@ -106,7 +115,8 @@ describe('DatePicker', () => {
       rangeTo: 'now',
     });
 
-    expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
+    // It updates the URL when it doesn't contain the range.
+    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
 
     wrapper.find(EuiSuperDatePicker).props().onTimeChange({
       start: 'now-90m',
@@ -114,7 +124,7 @@ describe('DatePicker', () => {
       isInvalid: false,
       isQuickSelection: true,
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
+    expect(mockHistoryPush).toHaveBeenCalledTimes(2);
     expect(mockHistoryPush).toHaveBeenLastCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=now-90m&rangeTo=now-60m',
@@ -152,17 +162,6 @@ describe('DatePicker', () => {
   });
 
   describe('if both `rangeTo` and `rangeFrom` is set', () => {
-    it('calls setTime ', async () => {
-      const { setTimeSpy } = mountDatePicker({
-        rangeTo: 'now-20m',
-        rangeFrom: 'now-22m',
-      });
-      expect(setTimeSpy).toHaveBeenCalledWith({
-        to: 'now-20m',
-        from: 'now-22m',
-      });
-    });
-
     it('does not update the url', () => {
       expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
     });

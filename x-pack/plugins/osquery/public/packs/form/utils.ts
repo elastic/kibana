@@ -17,6 +17,7 @@ export const convertPackQueriesToSO = (queries) =>
         id: key,
         ...pick(value, ['query', 'interval', 'platform', 'version', 'ecs_mapping']),
       });
+
       return acc;
     },
     []
@@ -28,6 +29,7 @@ export const convertSOQueriesToPack = (queries) =>
     queries,
     (acc, { id: queryId, ...query }) => {
       acc[queryId] = query;
+
       return acc;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

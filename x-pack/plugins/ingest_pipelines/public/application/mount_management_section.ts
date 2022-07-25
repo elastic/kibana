@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { StartDependencies } from '../types';
 import {
@@ -26,7 +26,9 @@ export async function mountManagementSection(
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
+    application,
     i18n: { Context: I18nContext },
+    executionContext,
   } = coreStart;
 
   documentationService.setup(docLinks);
@@ -43,6 +45,8 @@ export async function mountManagementSection(
     uiSettings: coreStart.uiSettings,
     share: depsStart.share,
     fileUpload: depsStart.fileUpload,
+    application,
+    executionContext,
   };
 
   return renderApp(element, I18nContext, services, { http }, { theme$ });

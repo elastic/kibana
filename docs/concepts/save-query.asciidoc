@@ -11,10 +11,6 @@ Save this query, and you can embed the search results in dashboards,
 use them as a foundation for building a visualization,
 and share them in a link or CVS form.
 
-[role="screenshot"]
-image:concepts/images/saved-query.png["Example of the saved query management popover with a list of saved queries"]
-
-
 Saved queries are different than <<save-open-search,saved searches>>,
 which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
 {data-source}&mdash;in addition to the query.
@@ -28,18 +24,14 @@ For more information, see <<xpack-security-authorization, Granting access to Kib
 
 ==== Save a query
 
-. Once you’ve built a query worth saving, click the save query icon image:concepts/images/save-icon.png["save query icon"].
-. In the popover, click *Save current query*.
-. Enter a unique name to identify the query and an optional description that will appear in a tooltip in the saved query popover.
+. Once you’ve built a query worth saving, click the save query icon image:concepts/images/saved-query-icon.png[save query icon, width=24px].
+. In the menu, select the item to save the query.
+. Enter a unique name.
 . Choose whether to include or exclude filters and a time range.
 By default, filters are automatically included, but the time filter is not.
-+
-[role="screenshot"]
-image:concepts/images/saved-query-popup.png["Example of the saved query management popover with a list of saved queries", width=50%]
-
-. Click *Save*.
-. To load a saved query, select it in the *Saved query* popover.
+. Save the query.
+. To load a saved query, select it in the *Saved query* menu.
 +
 The query text, filters, and time range are updated and your data refreshed.
 If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
-. To clear, modify, and delete saved queries, use the *Saved query* popover.
+. To add filters and clear saved queries, use the *Saved query* menu.

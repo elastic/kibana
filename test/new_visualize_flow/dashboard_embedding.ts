@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing

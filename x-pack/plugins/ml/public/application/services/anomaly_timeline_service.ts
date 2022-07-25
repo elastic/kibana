@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import {
-  TimefilterContract,
-  TimeRange,
-  UI_SETTINGS,
-} from '../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,
@@ -27,7 +25,6 @@ import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants
 import { MlResultsService } from './results_service';
 import { EntityField } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { isPopulatedObject } from '../../../common';
 
 /**
  * Service for retrieving anomaly swim lanes data.
@@ -186,7 +183,7 @@ export class AnomalyTimelineService {
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
     swimLaneSeverity?: number
-  ): Promise<SwimlaneData | undefined> {
+  ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
     if (timefilterBounds === undefined) {
@@ -262,7 +259,7 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number,
+    bucketInterval: TimeBucketsInterval,
     selectionInfluencers: EntityField[],
     influencersFilterQuery: InfluencersFilterQuery
   ) {
@@ -300,7 +297,7 @@ export class AnomalyTimelineService {
         selectedJobIds,
         earliestMs,
         latestMs,
-        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asMilliseconds(),
+        bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
         swimlaneLimit
@@ -353,7 +350,7 @@ export class AnomalyTimelineService {
     bounds: any,
     viewBySwimlaneFieldName: string,
     interval: number
-  ): OverallSwimlaneData {
+  ): ViewBySwimLaneData {
     // Processes the scores for the 'view by' swim lane.
     // Sorts the lanes according to the supplied array of lane
     // values in the order in which they should be displayed,

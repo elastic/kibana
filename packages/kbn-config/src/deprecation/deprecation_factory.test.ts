@@ -7,13 +7,13 @@
  */
 
 import { DeprecatedConfigDetails } from './types';
-import { configDeprecationsMock } from './deprecations.mock';
+import { createMockedContext } from '../internal_mocks';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
   const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =
     configDeprecationFactory;
-  const context = configDeprecationsMock.createContext();
+  const context = createMockedContext();
 
   const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
 

@@ -15,7 +15,7 @@ import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { getDefaultControlColumn } from '../control_columns';
 
-import { DataDrivenColumns } from '.';
+import { DataDrivenColumns, getMappedNonEcsValue } from '.';
 
 describe('Columns', () => {
   const headersSansTimestamp = defaultHeaders.filter((h) => h.id !== '@timestamp');
@@ -55,5 +55,40 @@ describe('Columns', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  describe('getMappedNonEcsValue', () => {
+    const existingField = 'Descarte';
+    const existingValue = ['IThinkThereforeIAm'];
+
+    test('should return the value if the fieldName is found', () => {
+      const result = getMappedNonEcsValue({
+        data: [{ field: existingField, value: existingValue }],
+        fieldName: existingField,
+      });
+
+      expect(result).toBe(existingValue);
+    });
+
+    test('should return undefined if the value cannot be found in the array', () => {
+      const result = getMappedNonEcsValue({
+        data: [{ field: existingField, value: existingValue }],
+        fieldName: 'nonExistent',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when data is an empty array', () => {
+      const result = getMappedNonEcsValue({ data: [], fieldName: existingField });
+
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when data is undefined', () => {
+      const result = getMappedNonEcsValue({ data: undefined, fieldName: existingField });
+
+      expect(result).toBeUndefined();
+    });
   });
 });

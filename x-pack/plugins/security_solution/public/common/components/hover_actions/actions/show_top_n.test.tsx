@@ -7,8 +7,31 @@
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
+
+jest.mock('../../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cases: {
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('show topN button', () => {
   const defaultProps = {

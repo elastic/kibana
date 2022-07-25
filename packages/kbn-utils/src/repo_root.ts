@@ -7,12 +7,12 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import loadJsonFile from 'load-json-file';
 
-const readKibanaPkgJson = (dir: string) => {
+const readKibanaPkgJson = (path: string) => {
   try {
-    const path = Path.resolve(dir, 'package.json');
     const json = loadJsonFile.sync(path);
     if (json && typeof json === 'object' && 'name' in json && json.name === 'kibana') {
       return json;
@@ -34,10 +34,14 @@ const findKibanaPackageJson = () => {
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {
-    const kibanaPkgJson = readKibanaPkgJson(cursor);
+    const packageJsonPath = Path.resolve(cursor, 'package.json');
+    const kibanaPkgJson = readKibanaPkgJson(packageJsonPath);
     if (kibanaPkgJson) {
       return {
-        kibanaDir: cursor,
+        // when this script is run by ESLint in IDEs it doesn't use --preserve-symlinks, so we have to
+        // use `Fs.realpathSync()` to resolve the package.json path to the actual file in the repo rather
+        // than the sym-linked version in the bazel-out dir
+        kibanaDir: Path.dirname(Fs.realpathSync(packageJsonPath)),
         kibanaPkgJson: kibanaPkgJson as {
           name: string;
           branch: string;

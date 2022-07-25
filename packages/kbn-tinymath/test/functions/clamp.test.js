@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { clamp } = require('../../src/functions/clamp.js');
+const { clamp } = require('../../src/functions/clamp');
 
 describe('Clamp', () => {
   it('numbers', () => {

@@ -34,19 +34,14 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(
-            reporting,
-            jobLogger,
-            job,
+          return generatePdfObservable(reporting, job, locatorParams, {
+            format: 'pdf',
             title,
-            locatorParams,
-            {
-              browserTimezone,
-              headers,
-              layout,
-            },
-            logo
-          );
+            logo,
+            browserTimezone,
+            headers,
+            layout,
+          });
         }),
         tap(({ buffer }) => {
           apmGeneratePdf?.end();
@@ -69,6 +64,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

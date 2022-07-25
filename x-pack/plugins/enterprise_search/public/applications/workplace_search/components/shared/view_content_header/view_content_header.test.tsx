@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFlexGroup } from '@elastic/eui';
 
-import { ViewContentHeader } from './';
+import { ViewContentHeader } from '.';
 
 const props = {
   title: 'Header',

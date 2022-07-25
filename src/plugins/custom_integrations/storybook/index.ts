@@ -9,4 +9,4 @@
 export {
   getCustomIntegrationsContextDecorator as getStorybookContextDecorator,
   getCustomIntegrationsContextProvider as getStorybookContextProvider,
-} from '../storybook/decorator';
+} from './decorator';

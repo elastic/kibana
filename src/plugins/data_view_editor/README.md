@@ -1,6 +1,6 @@
 # Data view editor
 
-Create data views from within Kibana apps. 
+Create data views from within Kibana apps.
 
 ## How to use
 
@@ -10,11 +10,11 @@ You will then receive in the start contract of the dataViewEditor plugin the fol
 
 ### `userPermissions.editDataView(): boolean`
 
-Convenience method that uses the `core.application.capabilities` api to determine whether the user can create or edit the data view. 
+Convenience method that uses the `core.application.capabilities` api to determine whether the user can create or edit the data view.
 
 ### `openEditor(options: DataViewEditorProps): CloseEditor`
 
-Use this method to display the data view editor to create an index pattern.  
+Use this method to display the data view editor to create a data view.
 
 #### `options`
 
@@ -34,6 +34,10 @@ The default index pattern type can be optionally specified as `rollup`.
 
 The editor can require a timestamp field on the index pattern.
 
+`editData: DataView` (optional)
+
+Data View object passed to edit an existing Data View.
+
 ### IndexPatternEditorComponent
 
 This the React component interface equivalent to `openEditor`. It takes the same arguments -
@@ -44,5 +48,6 @@ This the React component interface equivalent to `openEditor`. It takes the same
   onCancel={...}
   defaultTypeIsRollup={false}
   requireTimestampField={false}
+  editData={...}
 />
 ```

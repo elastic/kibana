@@ -12,7 +12,16 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type KibanaClusterMetricOptions = Pick<
   MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units' | 'metricAgg'
+  | 'field'
+  | 'label'
+  | 'description'
+  | 'format'
+  | 'units'
+  | 'metricAgg'
+  | 'derivative'
+  | 'derivativeNormalizedUnits'
+  | 'isNotSupportedInInternalCollection'
+  | 'technicalPreview'
 > &
   Partial<Pick<MetricOptions, 'title'>>;
 
@@ -33,11 +42,73 @@ export class KibanaClusterMetric extends ClusterMetric {
   }
 }
 
-type KibanaEventsRateClusterMetricOptions = Pick<
-  MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units'
-> &
-  Partial<Pick<MetricOptions, 'title'>>;
+export class KibanaClusterRuleMetric extends ClusterMetric {
+  constructor(opts: KibanaClusterMetricOptions) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaClusterRuleMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'cluster_uuid',
+      timestampField: 'timestamp', // This will alias to @timestamp
+    };
+  }
+}
+
+export class KibanaInstanceRuleMetric extends Metric {
+  constructor(opts: KibanaClusterMetricOptions) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaInstanceRuleMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_stats.kibana.uuid', // This field does not exist in the MB document but the alias exists
+      timestampField: 'timestamp', // This will alias to @timestamp
+    };
+  }
+}
+
+export class KibanaClusterActionMetric extends ClusterMetric {
+  constructor(opts: KibanaClusterMetricOptions) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaClusterActionMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'cluster_uuid',
+      timestampField: 'timestamp', // This will alias to @timestamp
+    };
+  }
+}
+
+export class KibanaInstanceActionMetric extends Metric {
+  constructor(opts: KibanaClusterMetricOptions) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaInstanceActionMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_stats.kibana.uuid', // This field does not exist in the MB document but the alias exists
+      timestampField: 'timestamp', // This will alias to @timestamp
+    };
+  }
+}
 
 export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
   constructor(opts: KibanaEventsRateClusterMetricOptions) {
@@ -76,6 +147,12 @@ export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
     };
   }
 }
+
+type KibanaEventsRateClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
 
 type KibanaMetricOptions = Pick<
   MetricOptions,

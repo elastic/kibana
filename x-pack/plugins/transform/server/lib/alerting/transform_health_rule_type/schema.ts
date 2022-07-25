@@ -17,6 +17,11 @@ export const transformHealthRuleParams = schema.object({
           enabled: schema.boolean({ defaultValue: true }),
         })
       ),
+      errorMessages: schema.nullable(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        })
+      ),
     })
   ),
 });

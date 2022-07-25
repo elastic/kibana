@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { IRouter } from 'kibana/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter } from '@kbn/core/server';
 import { ActionsRequestHandlerContext } from '../../types';
 import { ILicenseState } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
@@ -35,7 +35,7 @@ export const createActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const action = req.body;
         trackLegacyRouteUsage('create', usageCounter);
         return res.ok({

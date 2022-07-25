@@ -21,7 +21,7 @@ import './_index.scss';
 import { Dictionary } from '../../../../common/types/common';
 import { useUrlState } from '../../util/url_state';
 // @ts-ignore
-import { IdBadges } from './id_badges/index';
+import { IdBadges } from './id_badges';
 import {
   BADGE_LIMIT,
   JobSelectorFlyoutContent,
@@ -76,7 +76,7 @@ export function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   return map;
 }
 
-interface JobSelectorProps {
+export interface JobSelectorProps {
   dateFormatTz: string;
   singleSelection: boolean;
   timeseriesOnly: boolean;

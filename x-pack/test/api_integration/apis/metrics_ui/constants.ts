@@ -27,6 +27,9 @@ export const DATES = {
       min: new Date('2022-01-18T19:57:47.534Z').getTime(),
       max: new Date('2022-01-18T20:02:50.043Z').getTime(),
     },
+    rx: {
+      max: new Date('2022-06-21T17:02:00.00Z').getTime(),
+    },
     logs_and_metrics: {
       min: 1562786660845,
       max: 1562786716965,

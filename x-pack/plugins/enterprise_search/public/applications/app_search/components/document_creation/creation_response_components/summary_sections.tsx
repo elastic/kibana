@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocumentCreationLogic } from '../';
+import { DocumentCreationLogic } from '..';
 
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';
 import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';

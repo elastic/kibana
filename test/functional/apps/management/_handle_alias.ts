@@ -56,23 +56,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.createIndexPattern('alias2*', 'date');
     });
 
-    it('should be able to discover and verify no of hits for alias2', async function () {
-      const expectedHitCount = '5';
-      const fromTime = 'Nov 12, 2016 @ 05:00:00.000';
-      const toTime = 'Nov 19, 2016 @ 05:00:00.000';
-
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('alias2*');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
-      await retry.try(async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+    describe('discover verify hits', async () => {
+      before(async () => {
+        const from = 'Nov 12, 2016 @ 05:00:00.000';
+        const to = 'Nov 19, 2016 @ 05:00:00.000';
+        await PageObjects.common.setTime({ from, to });
       });
-    });
 
-    after(async () => {
-      await security.testUser.restoreDefaults();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/alias');
+      it('should be able to discover and verify no of hits for alias2', async function () {
+        const expectedHitCount = '5';
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('alias2*');
+
+        await retry.waitForWithTimeout('expected hit count to be 5', 30000, async () => {
+          return (await PageObjects.discover.getHitCount()) === expectedHitCount;
+        });
+      });
+
+      after(async () => {
+        await PageObjects.common.unsetTime();
+        await security.testUser.restoreDefaults();
+        await esArchiver.unload('test/functional/fixtures/es_archiver/alias');
+      });
     });
   });
 }

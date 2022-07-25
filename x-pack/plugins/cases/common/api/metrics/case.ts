@@ -7,7 +7,10 @@
 
 import * as rt from 'io-ts';
 
-export type CaseMetricsResponse = rt.TypeOf<typeof CaseMetricsResponseRt>;
+export type SingleCaseMetricsRequest = rt.TypeOf<typeof SingleCaseMetricsRequestRt>;
+export type SingleCaseMetricsResponse = rt.TypeOf<typeof SingleCaseMetricsResponseRt>;
+export type CasesMetricsRequest = rt.TypeOf<typeof CasesMetricsRequestRt>;
+export type CasesMetricsResponse = rt.TypeOf<typeof CasesMetricsResponseRt>;
 export type AlertHostsMetrics = rt.TypeOf<typeof AlertHostsMetricsRt>;
 export type AlertUsersMetrics = rt.TypeOf<typeof AlertUsersMetricsRt>;
 export type StatusInfo = rt.TypeOf<typeof StatusInfoRt>;
@@ -69,7 +72,43 @@ const AlertUsersMetricsRt = rt.type({
   ),
 });
 
-export const CaseMetricsResponseRt = rt.partial(
+export const SingleCaseMetricsRequestRt = rt.type({
+  /**
+   * The ID of the case.
+   */
+  caseId: rt.string,
+  /**
+   * The metrics to retrieve.
+   */
+  features: rt.array(rt.string),
+});
+
+export const CasesMetricsRequestRt = rt.intersection([
+  rt.type({
+    /**
+     * The metrics to retrieve.
+     */
+    features: rt.array(rt.string),
+  }),
+  rt.partial({
+    /**
+     * A KQL date. If used all cases created after (gte) the from date will be returned
+     */
+    from: rt.string,
+    /**
+     * A KQL date. If used all cases created before (lte) the to date will be returned.
+     */
+    to: rt.string,
+    /**
+     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+     * that the user has access to.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  }),
+]);
+
+export const SingleCaseMetricsResponseRt = rt.partial(
   rt.type({
     alerts: rt.partial(
       rt.type({
@@ -140,5 +179,14 @@ export const CaseMetricsResponseRt = rt.partial(
        */
       statusInfo: StatusInfoRt,
     }),
+  }).props
+);
+
+export const CasesMetricsResponseRt = rt.partial(
+  rt.type({
+    /**
+     * The average resolve time of all cases in seconds
+     */
+    mttr: rt.union([rt.number, rt.null]),
   }).props
 );

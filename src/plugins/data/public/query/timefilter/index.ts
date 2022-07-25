@@ -14,6 +14,4 @@ export type { TimefilterContract, AutoRefreshDoneFn } from './timefilter';
 export { Timefilter } from './timefilter';
 export type { TimeHistoryContract } from './time_history';
 export { TimeHistory } from './time_history';
-export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
-export { extractTimeFilter, extractTimeRange } from './lib/extract_time_filter';
 export { validateTimeRange } from './lib/validate_timerange';

@@ -18,7 +18,8 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { State, createStore } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
@@ -34,6 +35,19 @@ describe('NetworkTopNFlow Table Component', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
+  const defaultProps = {
+    data: mockData.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
+    id: 'dns',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
+    totalCount: mockData.totalCount,
+    type: networkModel.NetworkType.page,
+  };
+
   beforeEach(() => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
@@ -42,17 +56,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('it renders the default NetworkTopNFlow table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkDnsTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="dns"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkDnsTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -64,17 +68,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <NetworkDnsTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="dns"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkDnsTable {...defaultProps} />
         </TestProviders>
       );
 

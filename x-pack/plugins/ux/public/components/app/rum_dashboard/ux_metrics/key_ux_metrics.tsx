@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { UXMetrics } from '@kbn/observability-plugin/public';
+import { useLongTaskMetricsQuery } from '../../../../hooks/use_long_task_metrics_query';
 import {
   DATA_UNDEFINED_LABEL,
   FCP_LABEL,
@@ -21,9 +23,6 @@ import {
   TBT_LABEL,
   TBT_TOOLTIP,
 } from './translations';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUxQuery } from '../hooks/use_ux_query';
-import { UXMetrics } from '../../../../../../observability/public';
 
 export function formatToSec(
   value?: number | string,
@@ -50,23 +49,8 @@ function formatTitle(unit: string, value?: number | null) {
 }
 
 export function KeyUXMetrics({ data, loading }: Props) {
-  const uxQuery = useUxQuery();
-
-  const { data: longTaskData, status } = useFetcher(
-    (callApmApi) => {
-      if (uxQuery) {
-        return callApmApi('GET /internal/apm/ux/long-task-metrics', {
-          params: {
-            query: {
-              ...uxQuery,
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    [uxQuery]
-  );
+  const { data: longTaskData, loading: loadingLongTask } =
+    useLongTaskMetricsQuery();
 
   // Note: FCP value is in ms unit
   return (
@@ -99,6 +83,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
+          data-test-subj="uxLongTaskCount"
           titleSize="s"
           title={
             longTaskData?.noOfLongTasks !== undefined
@@ -114,11 +99,12 @@ export function KeyUXMetrics({ data, loading }: Props) {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loadingLongTask}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
+          data-test-subj="uxLongestTask"
           titleSize="s"
           title={formatTitle('ms', longTaskData?.longestLongTask)}
           description={
@@ -130,11 +116,12 @@ export function KeyUXMetrics({ data, loading }: Props) {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loadingLongTask}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
+          data-test-subj="uxSumLongTask"
           titleSize="s"
           title={formatTitle('ms', longTaskData?.sumOfLongTasks)}
           description={
@@ -146,7 +133,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loadingLongTask}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

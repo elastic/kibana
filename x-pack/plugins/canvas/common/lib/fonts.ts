@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../../../../src/plugins/expressions/common/fonts';
+export * from '@kbn/expressions-plugin/common/fonts';

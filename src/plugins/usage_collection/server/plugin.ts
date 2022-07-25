@@ -15,7 +15,7 @@ import type {
   Plugin,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import type { ConfigType } from './config';
 import { CollectorSet } from './collector';
 import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';

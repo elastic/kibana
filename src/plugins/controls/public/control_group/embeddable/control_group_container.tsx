@@ -11,36 +11,57 @@ import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subscription } from 'rxjs';
-import { distinctUntilChanged, debounceTime, catchError, switchMap, map } from 'rxjs/operators';
-import { EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
-
+import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import {
-  ControlGroupInput,
-  ControlGroupOutput,
-  ControlPanelState,
-  CONTROL_GROUP_TYPE,
-} from '../types';
+  distinctUntilChanged,
+  debounceTime,
+  catchError,
+  switchMap,
+  map,
+  skip,
+  mapTo,
+} from 'rxjs/operators';
+
 import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
   SolutionToolbarPopover,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  ControlGroupInput,
+  ControlGroupOutput,
+  ControlPanelState,
+  ControlsPanels,
+  CONTROL_GROUP_TYPE,
+} from '../types';
+import {
+  cachedChildEmbeddableOrder,
+  ControlGroupChainingSystems,
+  controlOrdersAreEqual,
+} from './control_group_chaining_system';
 import { pluginServices } from '../../services';
-import { DataView } from '../../../../data_views/public';
-import { DEFAULT_CONTROL_WIDTH } from '../editor/editor_constants';
+import { ControlGroupStrings } from '../control_group_strings';
+import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { EditControlGroup } from '../editor/edit_control_group';
-import { ControlGroupStrings } from '../control_group_strings';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
 >(LazyReduxEmbeddableWrapper);
+
+let flyoutRef: OverlayRef | undefined;
+export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
+  flyoutRef = newRef;
+};
 
 export class ControlGroupContainer extends Container<
   ControlInput,
@@ -48,25 +69,30 @@ export class ControlGroupContainer extends Container<
   ControlGroupOutput
 > {
   public readonly type = CONTROL_GROUP_TYPE;
+
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
+  private recalculateFilters$: Subject<null>;
 
-  public untilReady = () => {
-    const panelsLoading = () =>
-      Object.values(this.getOutput().embeddableLoaded).some((loaded) => !loaded);
-    if (panelsLoading()) {
-      return new Promise<void>((resolve, reject) => {
-        const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-          if (this.destroyed) reject();
-          if (!panelsLoading()) {
-            subscription.unsubscribe();
-            resolve();
-          }
-        });
-      });
-    }
-    return Promise.resolve();
+  private relevantDataViewId?: string;
+  private lastUsedDataViewId?: string;
+
+  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
+    this.lastUsedDataViewId = lastUsedDataViewId;
   };
+
+  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
+    this.relevantDataViewId = newRelevantDataViewId;
+  };
+
+  public getMostRelevantDataViewId = () => {
+    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
+  public closeAllFlyouts() {
+    flyoutRef?.close();
+    flyoutRef = undefined;
+  }
 
   /**
    * Returns a button that allows controls to be created externally using the embeddable
@@ -79,33 +105,34 @@ export class ControlGroupContainer extends Container<
     buttonType: CreateControlButtonTypes,
     closePopover?: () => void
   ) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <CreateControlButton
-        buttonType={buttonType}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-        closePopover={closePopover}
-      />
+      <ControlsServicesProvider>
+        <CreateControlButton
+          buttonType={buttonType}
+          defaultControlWidth={this.getInput().defaultControlWidth}
+          defaultControlGrow={this.getInput().defaultControlGrow}
+          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+          updateDefaultGrow={(defaultControlGrow: boolean) =>
+            this.updateInput({ defaultControlGrow })
+          }
+          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          closePopover={closePopover}
+          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+        />
+      </ControlsServicesProvider>
     );
   };
 
   private getEditControlGroupButton = (closePopover: () => void) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <EditControlGroup
-        controlStyle={this.getInput().controlStyle}
-        panels={this.getInput().panels}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        setControlStyle={(controlStyle) => this.updateInput({ controlStyle })}
-        setDefaultControlWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        setAllControlWidths={(defaultControlWidth) => {
-          Object.keys(this.getInput().panels).forEach(
-            (panelId) => (this.getInput().panels[panelId].width = defaultControlWidth)
-          );
-        }}
-        removeEmbeddable={(id) => this.removeEmbeddable(id)}
-        closePopover={closePopover}
-      />
+      <ControlsServicesProvider>
+        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
+      </ControlsServicesProvider>
     );
   };
 
@@ -121,13 +148,12 @@ export class ControlGroupContainer extends Container<
         iconType="arrowDown"
         iconSide="right"
         panelPaddingSize="none"
-        data-test-subj="dashboardControlsMenuButton"
+        data-test-subj="dashboard-controls-menu-button"
       >
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
-              <EuiHorizontalRule margin="none" />,
               this.getEditControlGroupButton(closePopover),
             ]}
           />
@@ -141,51 +167,106 @@ export class ControlGroupContainer extends Container<
       initialInput,
       { embeddableLoaded: {} },
       pluginServices.getServices().controls.getControlFactory,
-      parent
+      parent,
+      ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
-    // when all children are ready start recalculating filters when any child's output changes
+    this.recalculateFilters$ = new Subject();
+
+    // when all children are ready setup subscriptions
     this.untilReady().then(() => {
-      this.recalculateOutput();
-
-      const anyChildChangePipe = pipe(
-        map(() => this.getChildIds()),
-        distinctUntilChanged(deepEqual),
-
-        // children may change, so make sure we subscribe/unsubscribe with switchMap
-        switchMap((newChildIds: string[]) =>
-          merge(
-            ...newChildIds.map((childId) =>
-              this.getChild(childId)
-                .getOutput$()
-                // Embeddables often throw errors into their output streams.
-                .pipe(catchError(() => EMPTY))
-            )
-          )
-        )
-      );
-
-      this.subscriptions.add(
-        merge(this.getOutput$(), this.getOutput$().pipe(anyChildChangePipe))
-          .pipe(debounceTime(10))
-          .subscribe(this.recalculateOutput)
-      );
+      this.recalculateDataViews();
+      this.recalculateFilters();
+      this.setupSubscriptions();
     });
   }
+
+  private setupSubscriptions = () => {
+    /**
+     * refresh control order cache and make all panels refreshInputFromParent whenever panel orders change
+     */
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          skip(1),
+          distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
+        )
+        .subscribe((input) => {
+          this.recalculateDataViews();
+          this.recalculateFilters();
+          const childOrderCache = cachedChildEmbeddableOrder(input.panels);
+          childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
+        })
+    );
+
+    /**
+     * Create a pipe that outputs the child's ID, any time any child's output changes.
+     */
+    const anyChildChangePipe = pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                mapTo(childId)
+              )
+          )
+        )
+      )
+    );
+
+    /**
+     * run OnChildOutputChanged when any child's output has changed
+     */
+    this.subscriptions.add(
+      this.getOutput$()
+        .pipe(anyChildChangePipe)
+        .subscribe((childOutputChangedId) => {
+          this.recalculateDataViews();
+          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+            childOutputChangedId,
+            childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
+            getChild: (id) => this.getChild(id),
+            recalculateFilters$: this.recalculateFilters$,
+          });
+        })
+    );
+
+    /**
+     * debounce output recalculation
+     */
+    this.subscriptions.add(
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+    );
+  };
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
 
-  private recalculateOutput = () => {
+  private recalculateFilters = () => {
     const allFilters: Filter[] = [];
-    const allDataViews: DataView[] = [];
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+    });
+    this.updateOutput({ filters: uniqFilters(allFilters) });
+  };
+
+  private recalculateDataViews = () => {
+    const allDataViews: DataView[] = [];
+    Object.values(this.children).map((child) => {
+      const childOutput = child.getOutput() as ControlOutput;
       allDataViews.push(...(childOutput.dataViews ?? []));
     });
-    this.updateOutput({ filters: uniqFilters(allFilters), dataViews: uniqBy(allDataViews, 'id') });
+    this.updateOutput({ dataViews: uniqBy(allDataViews, 'id') });
   };
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
@@ -193,46 +274,102 @@ export class ControlGroupContainer extends Container<
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    const highestOrder = Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
-      if (panel.order > highestSoFar) highestSoFar = panel.order;
-      return highestSoFar;
-    }, 0);
+    let nextOrder = 0;
+    if (Object.keys(this.getInput().panels).length > 0) {
+      nextOrder =
+        Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
+          if (panel.order > highestSoFar) highestSoFar = panel.order;
+          return highestSoFar;
+        }, 0) + 1;
+    }
     return {
-      order: highestOrder + 1,
-      width: this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH,
+      order: nextOrder,
+      width: this.getInput().defaultControlWidth,
+      grow: this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
 
+  protected onRemoveEmbeddable(idToRemove: string) {
+    const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
+    const childOrderCache = cachedChildEmbeddableOrder(this.getInput().panels);
+    const removedOrder = childOrderCache.IdsToOrder[idToRemove];
+    for (let i = removedOrder + 1; i < childOrderCache.idsInOrder.length; i++) {
+      const currentOrder = newPanels[childOrderCache.idsInOrder[i]].order;
+      newPanels[childOrderCache.idsInOrder[i]] = {
+        ...newPanels[childOrderCache.idsInOrder[i]],
+        order: currentOrder - 1,
+      };
+    }
+    return newPanels;
+  }
+
   protected getInheritedInput(id: string): ControlInput {
-    const { filters, query, ignoreParentSettings, timeRange } = this.getInput();
+    const { filters, query, ignoreParentSettings, timeRange, chainingSystem, panels } =
+      this.getInput();
+
+    const precedingFilters = ControlGroupChainingSystems[chainingSystem].getPrecedingFilters({
+      id,
+      childOrder: cachedChildEmbeddableOrder(panels),
+      getChild: (getChildId: string) => this.getChild<ControlEmbeddable>(getChildId),
+    });
+    const allFilters = [
+      ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
+      ...(precedingFilters ?? []),
+    ];
     return {
-      filters: ignoreParentSettings?.ignoreFilters ? undefined : filters,
+      ignoreParentSettings,
+      filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
       id,
     };
   }
 
-  public destroy() {
-    super.destroy();
-    this.subscriptions.unsubscribe();
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
-  }
+  public untilReady = () => {
+    const panelsLoading = () =>
+      Object.keys(this.getInput().panels).some(
+        (panelId) => !this.getOutput().embeddableLoaded[panelId]
+      );
+    if (panelsLoading()) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
 
   public render(dom: HTMLElement) {
     if (this.domNode) {
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <PresentationUtilProvider>
-        <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
-          <ControlGroup />
-        </ControlGroupReduxWrapper>
-      </PresentationUtilProvider>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <ControlsServicesProvider>
+          <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
+            <ControlGroup />
+          </ControlGroupReduxWrapper>
+        </ControlsServicesProvider>
+      </KibanaThemeProvider>,
       dom
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    this.closeAllFlyouts();
+    this.subscriptions.unsubscribe();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 }

@@ -40,7 +40,8 @@ describe('Significant Terms Agg', () => {
           ],
           {
             typesRegistry: mockAggTypesRegistry(),
-          }
+          },
+          jest.fn()
         );
       };
 

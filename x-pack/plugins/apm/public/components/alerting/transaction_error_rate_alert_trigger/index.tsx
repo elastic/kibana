@@ -7,9 +7,9 @@
 
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';

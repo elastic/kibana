@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { getAlertType as getEsQueryAlertType } from './es_query';
 import { Config } from '../../common';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
 export function registerAlertTypes({
   ruleTypeRegistry,
   config,
+  alerting,
 }: {
   ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
   config: Config;
+  alerting: AlertingSetup;
 }) {
   ruleTypeRegistry.register(getGeoContainmentAlertType());
   ruleTypeRegistry.register(getThresholdAlertType());
-  ruleTypeRegistry.register(getEsQueryAlertType());
+  ruleTypeRegistry.register(getEsQueryAlertType(alerting));
 }

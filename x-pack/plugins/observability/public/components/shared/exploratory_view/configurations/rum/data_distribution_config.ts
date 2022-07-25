@@ -74,10 +74,21 @@ export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfi
       },
       LABEL_FIELDS_FILTER,
     ],
-    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      SERVICE_NAME,
+    ],
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
-      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
+      {
+        label: PAGE_LOAD_TIME_LABEL,
+        id: TRANSACTION_DURATION,
+        field: TRANSACTION_DURATION,
+        showPercentileAnnotations: true,
+      },
       {
         label: BACKEND_TIME_LABEL,
         id: TRANSACTION_TIME_TO_FIRST_BYTE,

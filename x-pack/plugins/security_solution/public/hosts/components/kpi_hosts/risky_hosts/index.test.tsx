@@ -9,9 +9,9 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { RiskyHosts } from './';
+import { RiskyHosts } from '.';
 import { TestProviders } from '../../../../common/mock';
-import { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
+import type { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
 
 describe('RiskyHosts', () => {
   const defaultProps = {
@@ -36,7 +36,7 @@ describe('RiskyHosts', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('hostsKpiLoader')).toBeInTheDocument();
+    expect(getByTestId('KpiLoader')).toBeInTheDocument();
   });
 
   test('it displays 0 risky hosts when initializing', () => {

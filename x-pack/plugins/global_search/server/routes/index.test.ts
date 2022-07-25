@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../src/core/server/mocks';
-import { registerRoutes } from './index';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { registerRoutes } from '.';
 
 describe('registerRoutes', () => {
   it('foo', () => {

@@ -13,9 +13,9 @@ import {
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { addDataProvider, closeTimeline, createNewTimeline } from '../../tasks/timeline';
+import { addDataProvider } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../tasks/common';
@@ -23,14 +23,10 @@ import { cleanKibana, scrollToBottom } from '../../tasks/common';
 describe('timeline data providers', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
     scrollToBottom();
-  });
-
-  afterEach(() => {
-    createNewTimeline();
-    closeTimeline();
   });
 
   it('displays the data provider action menu when Enter is pressed', (done) => {

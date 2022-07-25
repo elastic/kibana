@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ServiceGroup,
   SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-  MAX_NUMBER_OF_SERVICES_IN_GROUP,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../common/service_groups';
 
 export async function getServiceGroups({
@@ -21,7 +21,7 @@ export async function getServiceGroups({
   const result = await savedObjectsClient.find<ServiceGroup>({
     type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
     page: 1,
-    perPage: MAX_NUMBER_OF_SERVICES_IN_GROUP,
+    perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
   });
   return result.saved_objects.map(
     ({ id, attributes, updated_at: upatedAt }) => ({

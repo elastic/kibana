@@ -6,17 +6,17 @@
  */
 
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -30,6 +30,7 @@ import {
   getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getFailedTransactionRate({
   environment,
@@ -42,6 +43,7 @@ export async function getFailedTransactionRate({
   start,
   end,
   numBuckets,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -53,11 +55,18 @@ export async function getFailedTransactionRate({
   start: number;
   end: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -69,7 +78,7 @@ export async function getFailedTransactionRate({
     { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -89,13 +98,13 @@ export async function getFailedTransactionRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
               numBuckets,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             outcomes,

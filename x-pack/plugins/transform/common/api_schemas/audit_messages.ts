@@ -7,4 +7,7 @@
 
 import { TransformMessage } from '../types/messages';
 
-export type GetTransformsAuditMessagesResponseSchema = TransformMessage[];
+export interface GetTransformsAuditMessagesResponseSchema {
+  messages: TransformMessage[];
+  total: number;
+}

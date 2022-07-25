@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { UiCounterMetricType } from '@kbn/analytics';
-import { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ChartsPluginSetup } from '../../../../charts/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 
@@ -28,5 +27,4 @@ export interface Dimensions {
 export interface PieTypeProps {
   showElasticChartsOptions?: boolean;
   palettes?: ChartsPluginSetup['palettes'];
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 
 import { CANVAS_APP } from './lib/constants';
 

@@ -22,7 +22,7 @@ export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
     async (context, request, response) => {
       const { featureName, lastUsed } = request.body;
 
-      context.licensing.featureUsage.notifyUsage(featureName, lastUsed);
+      (await context.licensing).featureUsage.notifyUsage(featureName, lastUsed);
 
       return response.ok({
         body: {

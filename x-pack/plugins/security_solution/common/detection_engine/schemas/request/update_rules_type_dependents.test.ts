@@ -6,7 +6,7 @@
  */
 
 import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
-import { UpdateRulesSchema } from './rule_schemas';
+import type { UpdateRulesSchema } from './rule_schemas';
 import { updateRuleValidateTypeDependents } from './update_rules_type_dependents';
 
 describe('update_rules_type_dependents', () => {

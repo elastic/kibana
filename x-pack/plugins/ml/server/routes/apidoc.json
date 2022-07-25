@@ -55,6 +55,8 @@
     "AnomalySearch",
     "GetCategorizerStats",
     "GetCategoryStoppedPartitions",
+    "GetAnomalyChartsData",
+    "GetAnomalyRecords",
 
     "Modules",
     "DataRecognizer",
@@ -148,17 +150,17 @@
     "GetCardinalityOfFields",
     "GetTimeFieldRange",
 
-    "JobSavedObjects",
+    "MLSavedObjects",
     "SavedObjectsStatus",
-    "SyncJobSavedObjects",
-    "InitializeJobSavedObjects",
+    "SyncMLSavedObjects",
+    "InitializeMLSavedObjects",
     "SyncCheck",
     "UpdateJobsSpaces",
-    "updateTrainedModelsSpaces",
-    "RemoveJobsFromCurrentSpace",
+    "UpdateTrainedModelsSpaces",
+    "RemoveMLSpaceAwareItemsFromCurrentSpace",
     "JobsSpaces",
     "TrainedModelsSpaces",
-    "CanDeleteJob",
+    "CanDeleteMLSpaceAwareItems",
 
     "TrainedModels",
     "GetTrainedModel",
@@ -170,8 +172,12 @@
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "InferTrainedModelDeployment",
 
     "Alerting",
-    "PreviewAlert"
+    "PreviewAlert",
+
+    "Management",
+    "ManagementList"
   ]
 }

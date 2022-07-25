@@ -86,6 +86,7 @@ describe('cloneDescriptor', () => {
       const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -123,6 +124,7 @@ describe('cloneDescriptor', () => {
       const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;

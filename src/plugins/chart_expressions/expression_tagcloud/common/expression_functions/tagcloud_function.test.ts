@@ -8,10 +8,11 @@
 
 import { tagcloudFunction } from './tagcloud_function';
 
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ScaleOptions, Orientation } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
 
@@ -76,12 +77,12 @@ describe('interpreter/functions#tagcloud', () => {
   };
 
   it('returns an object with the correct structure for number accessors', () => {
-    const actual = fn(context, { ...visConfig, ...numberAccessors } as Arguments, undefined);
+    const actual = fn(context, { ...visConfig, ...numberAccessors } as Arguments);
     expect(actual).toMatchSnapshot();
   });
 
   it('returns an object with the correct structure for string accessors', () => {
-    const actual = fn(context, { ...visConfig, ...stringAccessors } as Arguments, undefined);
+    const actual = fn(context, { ...visConfig, ...stringAccessors } as Arguments);
     expect(actual).toMatchSnapshot();
   });
 
@@ -93,10 +94,13 @@ describe('interpreter/functions#tagcloud', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
-    };
-    await fn(context, { ...visConfig, ...numberAccessors } as Arguments, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, { ...visConfig, ...numberAccessors } as Arguments, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });

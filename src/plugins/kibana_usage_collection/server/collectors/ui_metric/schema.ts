@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UIMetricUsage } from './telemetry_ui_metric_collector';
 
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {
@@ -64,6 +64,7 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   'securitySolutionUI:administration': commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   * @removeBy 9.0.0
    */
   siem: commonSchema,
   space_selector: commonSchema,

@@ -7,7 +7,7 @@
 
 import { Observable, defer, isObservable, of } from 'rxjs';
 import { map, concatMap } from 'rxjs/operators';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

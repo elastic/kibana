@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { PersistedLog } from '../persisted_log';
 import { UI_SETTINGS } from '../../../common';
 

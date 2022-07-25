@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../../lists/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 
 export const getListClient = ({
   lists,

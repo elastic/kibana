@@ -18,15 +18,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { createFormatter } from '../../../../../../../../common/formatters';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
 import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
 import { Color } from '../../../../../../../../common/color_palette';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
 import { Process } from './types';
 

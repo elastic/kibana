@@ -9,7 +9,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
@@ -18,9 +18,10 @@ import { DiscoverServices } from '../../build_services';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { themeServiceMock } from '../../../../../core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -28,6 +29,7 @@ const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
 describe('ContextApp test', () => {
   const services = {
     data: {
+      ...dataPluginMock.createStartContract(),
       search: {
         searchSource: {
           createEmpty: jest.fn(),
@@ -70,7 +72,8 @@ describe('ContextApp test', () => {
   const topNavProps = {
     appName: 'context',
     showSearchBar: true,
-    showQueryBar: false,
+    showQueryBar: true,
+    showQueryInput: false,
     showFilterBar: true,
     showSaveQuery: false,
     showDatePicker: false,

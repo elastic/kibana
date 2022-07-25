@@ -10,9 +10,11 @@ With *Lens*, you can:
 
 * Create area, line, and bar charts with layers to display multiple indices and chart types.
 * Change the aggregation function to change the data in the visualization.
+* Create custom tables.
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare the data in two time intervals, such as month over month.
-* Create custom tables.
+* Add annotations and reference lines.
+
 
 ++++
 <script type="text/javascript" async 
@@ -38,7 +40,7 @@ If you already know the visualization type you want to use, and how you want to 
 
 Choose the visualization type. 
 
-. Before you drag fields to the workspace, open the *Chart type* dropdown, then select the visualization type.  
+. Before you drag fields to the workspace, open the *Visualization type* dropdown, then select the visualization you want to use.  
 
 . To view more visualizations that *Lens* automatically created for the fields, click *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
 
@@ -48,7 +50,7 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
-. To visualize more than one {data-source}, click *Add layer > Add visualization layer*, then select the {data-source}.
+. To visualize more than one {data-source}, click *Add layer > Visualization*, then select the {data-source}.
 
 Edit and delete.
 
@@ -56,20 +58,22 @@ Edit and delete.
 
 . To delete a field, close the configuration options, then click *X* next to the field.
 
+TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+
 [float]
 [[change-the-fields]]
 ==== Change the fields list
 
 Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
-* To create a visualization with fields in a different {data-source}, open the *Data view* dropdown, then select the {data-source}. 
+* To create a visualization with fields in a different {data-source}, open the {data-source} dropdown, then select the {data-source}. 
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, open the action menu (*...*) next to the *Data view* dropdown, then select *Add field to {data-source}*.
+* To add fields, open the {data-source} dropdown, then select *Add a field to this {data-source}*.
 +
 [role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
+image:images/lens_dataViewDropDown_8.3.png[Dropdown menu located next to {data-source} field with items for adding and managing fields]
 +
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
@@ -79,7 +83,7 @@ For more information about adding fields to {data-sources} and examples, refer t
 
 Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
 
-. From the *Chart type* dropdown, select *Table*. 
+. From the *Visualization type* dropdown, select *Table*. 
 
 . Drag the fields you want to visualize to the workspace. 
 
@@ -87,9 +91,9 @@ Tables are highly customizable, and provide you with text alignment, value forma
 +
 All columns that belong to the same layer pane group are sorted in the table.
 
-. To change the display options, click a *Metrics* field, then configure the following options:
+. To change the display options, click a *Metrics* field in the layer pane, then configure the following options:
 
-* *Display name* &mdash; Specifies the field display name. 
+* *Name* &mdash; Specifies the field display name. 
 
 * *Value format* &mdash; Specifies how the field value displays in the table. 
 
@@ -106,9 +110,6 @@ All columns that belong to the same layer pane group are sorted in the table.
 ==== Create visualizations with keyboard navigation
 
 To use a keyboard instead of a mouse, use the *Lens* fully accessible and continuously improved drag system.
-
-[role="screenshot"]
-image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
 
 . Select the field in the fields list or layer pane. Most fields have an inner and outer select state. The inner state opens a panel with detailed information or options. 
 The outer state allows you to drag the field. Tab through the fields until you get the outer state on the field.
@@ -179,6 +180,31 @@ Compare your real-time data set to the results that are offset by a time increme
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
+[[add-annotations]]
+==== Add annotations
+
+preview::[]
+
+Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add text and icons to annotations and customize the appearance, such as the line format and color. 
+
+[role="screenshot"]
+image::images/lens_annotations_8.2.0.png[Lens annotations]
+
+. In the layer pane, click *Add layer > Annotations*.
+
+. To open the annotation options, click *Event*.
+
+. Specify the *Annotation date*.
+
+. To display the annotation as a time range, select *Apply as range*, then specify the *From* and *To* time range.
+
+. Enter the annotation *Name*.
+
+. Change the *Appearance* options for how you want the annotation to display.
+
+. Click *Close*.
+
+[float]
 [[add-reference-lines]]
 ==== Add reference lines
 
@@ -189,7 +215,7 @@ For example, to track the number of bytes in the 75th percentile, add a shaded *
 [role="screenshot"]
 image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
 
-. In the layer pane, click *Add layer > Add reference layer*.
+. In the layer pane, click *Add layer > Reference lines*.
 
 . Click the reference line value, then specify the reference line you want to use:
 
@@ -260,6 +286,16 @@ The following component menus are available:
 * *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
 
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
+
+[float]
+[[explore-lens-data-in-discover]]
+=== Explore the data in Discover
+
+When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
+
+To get started, click *Explore data in Discover* in the toolbar.
+
+For more information about exploring your data with *Discover*, check out <<discover,Discover>>.
 
 [float]
 [[view-data-and-requests]]
@@ -457,6 +493,22 @@ You can display icons with <<managing-data-views, field formatters>> in data tab
 ====
 
 [discrete]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+.*How do I inspect {es} queries in visualizations?*
+[%collapsible]
+====
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
+====
+
+[discrete]
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How do I isolate a single series in a chart?*
+[%collapsible]
+====
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically deselected.
+====
+
+[discrete]
 [[is-it-possible-to-use-saved-serches-in-lens]]
 .*How do I visualize saved searches?*
 [%collapsible]
@@ -486,20 +538,4 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
-====
-
-[discrete]
-[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
-.*How do I inspect {es} queries in visualizations?*
-[%collapsible]
-====
-You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
-====
-
-[discrete]
-[[how-to-isolate-a-single-series-in-a-chart]]
-.*How do I isolate a single series in a chart?*
-[%collapsible]
-====
-For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
 ====

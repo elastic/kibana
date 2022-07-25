@@ -22,7 +22,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             class="euiFlexItem"
           >
             <div
-              class="euiText euiText--medium euiText--constrainedWidth"
+              class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
                 test
@@ -46,7 +46,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       </div>
     </header>
     <div
-      class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-plain"
       role="main"
     >
       <div
@@ -112,25 +112,7 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 `;
 
 exports[`KibanaPageTemplate render noDataContent 1`] = `
-<WithSolutionNavBarprops => {
-  const {
-    className,
-    noDataConfig,
-    ...rest
-  } = props;
-
-  if (!noDataConfig) {
-    return null;
-  }
-
-  const template = _util.NO_DATA_PAGE_TEMPLATE_PROPS.template;
-  const classes = (0, _util.getClasses)(template, className);
-  return /*#__PURE__*/_react.default.createElement(_eui.EuiPageTemplate, (0, _extends2.default)({
-    "data-test-subj": props['data-test-subj'],
-    template: template,
-    className: classes
-  }, rest, _util.NO_DATA_PAGE_TEMPLATE_PROPS), /*#__PURE__*/_react.default.createElement(_no_data_page.NoDataPage, noDataConfig));
-}
+<WithSolutionNavBar(NoDataConfigPage)
   noDataConfig={
     Object {
       "actions": Object {
@@ -212,7 +194,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
     class="euiPageSideBar euiPageSideBar--sticky kbnPageTemplate__pageSideBar"
   />
   <div
-    class="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPanel euiPanel--plain euiPageBody euiPageBody--borderRadiusNone emotion-euiPanel-grow-none-plain-hasShadow"
   >
     <div
       class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
@@ -231,7 +213,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
               class="euiFlexItem"
             >
               <div
-                class="euiText euiText--medium euiText--constrainedWidth"
+                class="euiText emotion-euiText-constrainedWidth-m"
               >
                 <p>
                   test
@@ -255,7 +237,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         </div>
       </header>
       <div
-        class="euiPanel euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--borderRadiusNone"
+        class="euiPanel euiPanel--transparent euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-transparent"
         role="main"
       >
         <div

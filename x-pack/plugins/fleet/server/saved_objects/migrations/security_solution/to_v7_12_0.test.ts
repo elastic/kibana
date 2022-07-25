@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../../common';
 

@@ -62,6 +62,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        isDeprecated: false,
         isMissingSecrets: false,
         name: 'an action created before test.not-enabled was disabled',
       });
@@ -90,6 +91,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         config: {},
         id: 'uuid-actionId',
         isPreconfigured: false,
+        isDeprecated: false,
         isMissingSecrets: false,
         name: 'an action created before test.not-enabled was disabled',
       });

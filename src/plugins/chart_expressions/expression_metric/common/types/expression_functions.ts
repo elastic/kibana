@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
+import { LayoutDirection } from '@elastic/charts';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-  Style,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorMode, CustomPaletteState, PaletteOutput } from '../../../../charts/common';
-import { VisParams, visType, LabelPositionType } from './expression_renderers';
+} from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 
 export interface MetricArguments {
-  percentageMode: boolean;
-  colorMode: ColorMode;
-  showLabels: boolean;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
+  subtitle?: string;
+  extraText?: string;
+  progressMax?: ExpressionValueVisDimension | string;
+  progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
-  font: Style;
-  labelFont: Style;
-  labelPosition: LabelPositionType;
-  metric: Array<ExpressionValueVisDimension | string>;
-  bucket?: ExpressionValueVisDimension | string;
-  colorFullBackground: boolean;
-  autoScale?: boolean;
+  maxCols: number;
+  minTiles?: number;
 }
 
 export type MetricInput = Datatable;

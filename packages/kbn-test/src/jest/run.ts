@@ -21,7 +21,8 @@ import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { map } from 'lodash';
 
@@ -31,7 +32,7 @@ import { map } from 'lodash';
 
 // Patch node 16 types to be compatible with jest 26
 // https://github.com/facebook/jest/issues/11640#issuecomment-893867514
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-empty-interface,no-console */
 declare global {
   namespace NodeJS {
     interface Global {}

@@ -205,6 +205,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={5}
   type="page"

@@ -30,8 +30,8 @@ Please make sure you have signed the [Contributor License Agreement](http://www.
 
 Read <<kibana-localization-best-practices>> for details on our localization practices.
 
-Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
-We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
+Note that we cannot support accepting contributions to the translations from any source other than the translators we have engaged in doing the work.
+We are yet to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once Kibana supports external contributions. Still, for the time being, we cannot incorporate suggestions.
 
 [discrete]
 [[kibana-release-notes-process]]
@@ -73,7 +73,7 @@ To make sure that your PR is included in the Release Notes, add the right label.
   * `release_note:fix` — Fixes for bugs that existed in the previous release. 
   * `release_note:deprecation` — Deprecates functionality that existed in previous releases.
   * `release_note:breaking` — Breaking changes that weren't present in previous releases.
-  * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `master`.
+  * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `main`.
 
 
 include::development-github.asciidoc[leveloffset=+1]

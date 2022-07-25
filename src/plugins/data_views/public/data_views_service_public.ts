@@ -9,16 +9,39 @@
 import { DataViewsService } from '.';
 
 import { DataViewsServiceDeps } from '../common/data_views/data_views';
+import { HasDataService } from '../common';
 
-interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
+/**
+ * Data Views public service dependencies
+ * @public
+ */
+export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
+  /**
+   * Get can user save data view - sync version
+   */
   getCanSaveSync: () => boolean;
+  /**
+   * Has data service
+   */
+  hasData: HasDataService;
 }
 
+/**
+ * Data Views public service
+ * @public
+ */
 export class DataViewsServicePublic extends DataViewsService {
   public getCanSaveSync: () => boolean;
+  public hasData: HasDataService;
+
+  /**
+   * Constructor
+   * @param deps Service dependencies
+   */
 
   constructor(deps: DataViewsServicePublicDeps) {
     super(deps);
     this.getCanSaveSync = deps.getCanSaveSync;
+    this.hasData = deps.hasData;
   }
 }

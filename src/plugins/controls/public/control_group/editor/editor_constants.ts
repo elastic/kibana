@@ -6,18 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ControlStyle, ControlWidth } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
 
-export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
-export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
-
 export const CONTROL_WIDTH_OPTIONS = [
-  {
-    id: `auto`,
-    'data-test-subj': 'control-editor-width-auto',
-    label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
-  },
   {
     id: `small`,
     'data-test-subj': 'control-editor-width-small',
@@ -38,10 +29,12 @@ export const CONTROL_WIDTH_OPTIONS = [
 export const CONTROL_LAYOUT_OPTIONS = [
   {
     id: `oneLine`,
-    label: ControlGroupStrings.management.controlStyle.getSingleLineTitle(),
+    'data-test-subj': 'control-editor-layout-oneLine',
+    label: ControlGroupStrings.management.labelPosition.getInlineTitle(),
   },
   {
     id: `twoLine`,
-    label: ControlGroupStrings.management.controlStyle.getTwoLineTitle(),
+    'data-test-subj': 'control-editor-layout-twoLine',
+    label: ControlGroupStrings.management.labelPosition.getAboveTitle(),
   },
 ];

@@ -9,6 +9,7 @@ export const ADD_AGENT_BUTTON = 'addAgentButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
 export const CREATE_POLICY_BUTTON = 'createPolicyBtn';
 export const AGENT_FLYOUT_CLOSE_BUTTON = 'euiFlyoutCloseButton';
+export const AGENT_POLICY_CODE_BLOCK = 'agentPolicyCodeBlock';
 
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
@@ -22,3 +23,8 @@ export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivileg
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
+
+export const ADD_AGENT_FLYOUT = {
+  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
+  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+};

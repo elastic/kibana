@@ -16,7 +16,7 @@ import React from 'react';
 import { groupBy } from 'lodash';
 
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import * as i18n from './translations';
 import { EnrichmentIcon } from './enrichment_icon';
 import { EnrichmentAccordionGroup } from './enrichment_accordion_group';

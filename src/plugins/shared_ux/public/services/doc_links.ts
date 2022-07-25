@@ -5,6 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export interface SharedUXDocLinksService {
-  dataViewsDocsLink: string;
-}
+
+import { SharedUxDocLinksService } from '@kbn/shared-ux-services';
+
+import { KibanaPluginServiceFactory } from './types';
+import { SharedUXPluginStartDeps } from '../types';
+
+export type DocLinksServiceFactory = KibanaPluginServiceFactory<
+  SharedUxDocLinksService,
+  SharedUXPluginStartDeps
+>;
+
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUXEditorsService`.
+ */
+export const docLinksServiceFactory: DocLinksServiceFactory = ({ coreStart }) => ({
+  dataViewsDocLink: coreStart.docLinks.links.indexPatterns?.introduction,
+});

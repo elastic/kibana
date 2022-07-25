@@ -8,7 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import {
+  Vis,
+  VIS_EVENT_TO_TRIGGER,
+  VisGroups,
+  VisParams,
+  VisTypeDefinition,
+} from '@kbn/visualizations-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
@@ -17,17 +25,9 @@ import {
 } from '../common/index_patterns_utils';
 import { TSVB_DEFAULT_COLOR } from '../common/constants';
 import { toExpressionAst } from './to_ast';
-import {
-  Vis,
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisParams,
-  VisTypeDefinition,
-} from '../../../visualizations/public';
-import { getDataStart } from './services';
+import { getDataViewsStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
-import { RequestAdapter } from '../../../inspector/public';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -55,9 +55,9 @@ export const withReplacedIds = (
 async function withDefaultIndexPattern(
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
 ): Promise<Vis<TimeseriesVisParams>> {
-  const { indexPatterns } = getDataStart();
+  const dataViews = getDataViewsStart();
 
-  const defaultIndex = await indexPatterns.getDefault();
+  const defaultIndex = await dataViews.getDefault();
   if (!defaultIndex || !defaultIndex.id || vis.params.index_pattern) return vis;
   vis.params.index_pattern = {
     id: defaultIndex.id,
@@ -71,7 +71,7 @@ async function resolveIndexPattern(
 ) {
   if (!indexPatternValue) return;
   if (isStringTypeIndexPattern(indexPatternValue)) {
-    return await indexPatterns.find(indexPatternValue);
+    return await indexPatterns.find(indexPatternValue, 1);
   }
 
   if (indexPatternValue.id) {
@@ -79,16 +79,16 @@ async function resolveIndexPattern(
   }
 }
 
-async function getUsedIndexPatterns(params: VisParams): Promise<IndexPattern[]> {
-  const { indexPatterns } = getDataStart();
+async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
+  const dataViews = getDataViewsStart();
 
-  const defaultIndex = await indexPatterns.getDefault();
-  const resolvedIndexPatterns: IndexPattern[] = [];
+  const defaultIndex = await dataViews.getDefault();
+  const resolvedIndexPatterns: DataView[] = [];
   const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
   (
     await Promise.all(
       indexPatternValues.map((indexPatternValue) =>
-        resolveIndexPattern(indexPatternValue, indexPatterns)
+        resolveIndexPattern(indexPatternValue, dataViews)
       )
     )
   ).forEach((patterns) => patterns && resolvedIndexPatterns.push(...patterns));

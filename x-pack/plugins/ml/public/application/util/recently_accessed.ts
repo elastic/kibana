@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ChromeRecentlyAccessed } from 'kibana/public';
+import type { ChromeRecentlyAccessed } from '@kbn/core/public';
 import { getRecentlyAccessed } from './dependency_cache';
 
 export function addItemToRecentlyAccessed(

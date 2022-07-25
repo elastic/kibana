@@ -6,10 +6,10 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import url from 'url';
-import { InfraAppId } from '../../../../../infra/public';
+import { InfraAppId } from '@kbn/infra-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery } from './url_helpers';
 

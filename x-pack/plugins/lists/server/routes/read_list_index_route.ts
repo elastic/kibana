@@ -29,7 +29,7 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const listIndexExists = await lists.getListIndexExists();
         const listItemIndexExists = await lists.getListItemIndexExists();
 

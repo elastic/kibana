@@ -8,8 +8,9 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
-import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import type { PolicySelectionItem } from '../policies_selector';
+import { PoliciesSelector } from '../policies_selector';
+import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export interface SearchExceptionsProps {
@@ -102,8 +103,8 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
         ) : null}
 
         {!hideRefreshButton ? (
-          <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
-            <EuiButton iconType="refresh">
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="refresh" onClick={handleOnSearch} data-test-subj="searchButton">
               {i18n.translate('xpack.securitySolution.management.search.button', {
                 defaultMessage: 'Refresh',
               })}

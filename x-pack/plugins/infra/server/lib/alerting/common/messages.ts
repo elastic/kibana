@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
-} from '../../../../../observability/common/utils/formatters/duration';
+} from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
@@ -204,5 +204,13 @@ export const thresholdActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
   }
 );

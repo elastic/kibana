@@ -12,9 +12,9 @@ import {
   EuiContextMenuItemIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactoryDefinition } from '../../../../../../../src/plugins/embeddable/public';
-import { BaseVisType, VisTypeAlias } from '../../../../../../../src/plugins/visualizations/public';
-import { SolutionToolbarPopover } from '../../../../../../../src/plugins/presentation_util/public';
+import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 
 const strings = {
   getEditorMenuButtonLabel: () =>

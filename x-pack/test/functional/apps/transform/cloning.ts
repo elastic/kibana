@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isLatestTransform,
   isPivotTransform,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
-import { getLatestTransformConfig } from './index';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from '.';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -21,6 +21,11 @@ interface TestData {
   transformDescription: string;
   destinationIndex: string;
   expected: any;
+}
+
+function getNumFailureRetriesStr(value: number | null | undefined) {
+  if (value === null || value === undefined) return '';
+  return value.toString();
 }
 
 function getTransformConfig(): TransformPivotConfig {
@@ -38,6 +43,7 @@ function getTransformConfig(): TransformPivotConfig {
     retention_policy: { time: { field: 'order_date', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 0,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -76,6 +82,7 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
     retention_policy: { time: { field: 'order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 5,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -161,6 +168,9 @@ export default function ({ getService }: FtrProviderContext) {
           retentionPolicySwitchEnabled: true,
           retentionPolicyField: 'order_date',
           retentionPolicyMaxAge: '1d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithPivot.settings?.num_failure_retries
+          ),
         },
       },
       {
@@ -193,6 +203,9 @@ export default function ({ getService }: FtrProviderContext) {
           retentionPolicySwitchEnabled: true,
           retentionPolicyField: 'order_date',
           retentionPolicyMaxAge: '3d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithRuntimeMapping.settings?.num_failure_retries
+          ),
         },
       },
       {
@@ -333,8 +346,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('should display the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
@@ -366,9 +379,22 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformMaxPageSearchSizeValue(
             testData.originalConfig.settings!.max_page_search_size!
           );
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.wizard.assertNumFailureRetriesValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should load the create step');
           await transform.wizard.advanceToCreateStep();
+
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.testExecution.logTestStep('displays the summary details');
+            await transform.wizard.openTransformAdvancedSettingsSummaryAccordion();
+            await transform.wizard.assertTransformNumFailureRetriesSummaryValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should display the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();

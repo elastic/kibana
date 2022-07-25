@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchBarFilter } from '../objects/filter';
+import type { SearchBarFilter } from '../objects/filter';
 
 import {
   GLOBAL_SEARCH_BAR_ADD_FILTER,

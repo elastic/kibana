@@ -8,15 +8,15 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
 import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
-import {
+import type {
   Immutable,
   PolicyConfig,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { ImmutableReducer } from '../../../../../../common/store';
-import { AppAction } from '../../../../../../common/store/actions';
-import { PolicyDetailsState } from '../../../types';
+import type { ImmutableReducer } from '../../../../../../common/store';
+import type { AppAction } from '../../../../../../common/store/actions';
+import type { PolicyDetailsState } from '../../../types';
 import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../../common/routing';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
 
@@ -165,6 +165,29 @@ export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppActi
             ...policyConfig.windows,
             antivirus_registration: {
               enabled: action.payload.enabled,
+            },
+          },
+        }),
+      };
+    } else {
+      return state;
+    }
+  }
+
+  if (action.type === 'userChangedCredentialHardening') {
+    if (state.policyItem) {
+      const policyConfig = fullPolicy(state);
+
+      return {
+        ...state,
+        policyItem: updatePolicyConfigInPolicyData(state.policyItem, {
+          ...policyConfig,
+          windows: {
+            ...policyConfig.windows,
+            attack_surface_reduction: {
+              credential_hardening: {
+                enabled: action.payload.enabled,
+              },
             },
           },
         }),

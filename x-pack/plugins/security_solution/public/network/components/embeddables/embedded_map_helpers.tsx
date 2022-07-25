@@ -7,28 +7,28 @@
 
 import uuid from 'uuid';
 import React from 'react';
-import { OutPortal, PortalNode } from 'react-reverse-portal';
+import type { PortalNode } from 'react-reverse-portal';
+import { OutPortal } from 'react-reverse-portal';
 import minimatch from 'minimatch';
 import type { Filter, Query } from '@kbn/es-query';
-import { IndexPatternMapping } from './types';
-import { getLayerList } from './map_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
 import type {
   RenderTooltipContentParams,
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../plugins/maps/public';
+} from '@kbn/maps-plugin/public';
+import type {
+  EmbeddableStart,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import type { IndexPatternMapping } from './types';
+import { getLayerList } from './map_config';
 import * as i18n from './translations';
 
-import {
-  EmbeddableStart,
-  isErrorEmbeddable,
-  EmbeddableOutput,
-  ViewMode,
-  ErrorEmbeddable,
-} from '../../../../../../../src/plugins/embeddable/public';
-import { IndexPatternSavedObject } from '../../../common/hooks/types';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { IndexPatternSavedObject } from '../../../common/hooks/types';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 /**
  * Creates MapEmbeddable with provided initial configuration

@@ -7,11 +7,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-auditbeat"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -38,16 +38,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-groupauditbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatSocket"
       >
@@ -67,28 +62,30 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-auditbeatSocket"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={12}
-            isGroupStat={false}
-            isLoading={false}
-            max={12}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={12}
+              isGroupStat={false}
+              isLoading={false}
+              max={12}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-filebeat"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -115,16 +112,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-groupfilebeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatCisco"
       >
@@ -144,19 +136,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatCisco"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={999}
-            isGroupStat={false}
-            isLoading={false}
-            max={70860}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={999}
+              isGroupStat={false}
+              isLoading={false}
+              max={70860}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatNetflow"
       >
@@ -176,19 +171,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatNetflow"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={7777}
-            isGroupStat={false}
-            isLoading={false}
-            max={70860}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={7777}
+              isGroupStat={false}
+              isLoading={false}
+              max={70860}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatPanw"
       >
@@ -208,19 +206,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatPanw"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={66}
-            isGroupStat={false}
-            isLoading={false}
-            max={70860}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={66}
+              isGroupStat={false}
+              isLoading={false}
+              max={70860}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatSuricata"
       >
@@ -240,19 +241,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatSuricata"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={60015}
-            isGroupStat={false}
-            isLoading={false}
-            max={70860}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={60015}
+              isGroupStat={false}
+              isLoading={false}
+              max={70860}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatZeek"
       >
@@ -272,28 +276,30 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatZeek"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={2003}
-            isGroupStat={false}
-            isLoading={false}
-            max={70860}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={2003}
+              isGroupStat={false}
+              isLoading={false}
+              max={70860}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-packetbeat"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -320,16 +326,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="network-stat-accordion-grouppacketbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatDNS"
       >
@@ -349,19 +350,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatDNS"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={10277307}
-            isGroupStat={false}
-            isLoading={false}
-            max={13677323}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={10277307}
+              isGroupStat={false}
+              isLoading={false}
+              max={13677323}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatFlow"
       >
@@ -381,19 +385,22 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatFlow"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={16}
-            isGroupStat={false}
-            isLoading={false}
-            max={13677323}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={16}
+              isGroupStat={false}
+              isLoading={false}
+              max={13677323}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatTLS"
       >
@@ -413,19 +420,21 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatTLS"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={3400000}
-            isGroupStat={false}
-            isLoading={false}
-            max={13677323}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={3400000}
+              isGroupStat={false}
+              isLoading={false}
+              max={13677323}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
 </styled.div>
 `;

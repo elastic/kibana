@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 

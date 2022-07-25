@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ActionsMenu } from './actions_menu';
 import React from 'react';
@@ -82,6 +80,11 @@ describe('When using the Endpoint Details Actions Menu', () => {
     };
   });
 
+  it('should not show the actions log link', async () => {
+    await render();
+    expect(renderResult.queryByTestId('actionsLink')).toBeNull();
+  });
+
   describe('and endpoint host is NOT isolated', () => {
     beforeEach(() => setEndpointMetadataResponse());
 
@@ -140,7 +143,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     afterEach(() => licenseServiceMock.isPlatinumPlus.mockReturnValue(true));
 
-    it('should not show the `isoalte` action', async () => {
+    it('should not show the `isolate` action', async () => {
       setEndpointMetadataResponse();
       await render();
       expect(renderResult.queryByTestId('isolateLink')).toBeNull();

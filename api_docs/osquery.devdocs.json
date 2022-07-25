@@ -42,6 +42,44 @@
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.isOsqueryAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isOsqueryAvailable",
+          "description": [],
+          "signature": [
+            "(props: { agentId: string; }) => boolean"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "children": [
+                {
+                  "parentPluginId": "osquery",
+                  "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1.agentId",
+                  "type": "string",
+                  "tags": [],
+                  "label": "agentId",
+                  "description": [],
+                  "path": "x-pack/plugins/osquery/public/types.ts",
+                  "deprecated": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

@@ -8,10 +8,10 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 
 import { useCasesContext } from '../components/cases_context/use_cases_context';
-import { getCasesStatus } from './api';
 import * as i18n from './translations';
 import { CasesStatus } from './types';
-import { useToasts } from '../common/lib/kibana';
+import { useHttp, useToasts } from '../common/lib/kibana';
+import { getCasesStatus } from '../api';
 
 interface CasesStatusState extends CasesStatus {
   isLoading: boolean;
@@ -19,9 +19,9 @@ interface CasesStatusState extends CasesStatus {
 }
 
 const initialData: CasesStatusState = {
-  countClosedCases: null,
-  countInProgressCases: null,
-  countOpenCases: null,
+  countClosedCases: 0,
+  countInProgressCases: 0,
+  countOpenCases: 0,
   isLoading: true,
   isError: false,
 };
@@ -31,6 +31,7 @@ export interface UseGetCasesStatus extends CasesStatusState {
 }
 
 export const useGetCasesStatus = (): UseGetCasesStatus => {
+  const http = useHttp();
   const { owner } = useCasesContext();
   const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
   const toasts = useToasts();
@@ -47,7 +48,11 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
         isLoading: true,
       });
 
-      const response = await getCasesStatus(abortCtrlRef.current.signal, owner);
+      const response = await getCasesStatus({
+        http,
+        signal: abortCtrlRef.current.signal,
+        query: { owner },
+      });
 
       if (!isCancelledRef.current) {
         setCasesStatusState({

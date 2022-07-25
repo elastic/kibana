@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { AlertServices } from '../../../../../alerting/server';
+import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
+import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';
@@ -24,7 +23,7 @@ import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
  */
 interface LegacyGetRuleActionsSavedObject {
   ruleAlertId: string;
-  savedObjectsClient: AlertServices['savedObjectsClient'];
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
   logger: Logger;
 }
 

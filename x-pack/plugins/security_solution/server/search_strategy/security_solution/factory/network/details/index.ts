@@ -7,19 +7,20 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
+import type {
   NetworkDetailsStrategyResponse,
   NetworkQueries,
   NetworkDetailsRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 
-import { getNetworkDetailsAgg, getNetworkDetailsHostAgg } from './helpers';
+import { getNetworkDetailsAgg } from './helpers';
 import { buildNetworkDetailsQuery } from './query.details_network.dsl';
+import { unflattenObject } from '../../../../helpers/format_response_object_values';
 
 export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
   buildDsl: (options: NetworkDetailsRequestOptions) => buildNetworkDetailsQuery(options),
@@ -31,16 +32,22 @@ export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
       dsl: [inspectStringifyObject(buildNetworkDetailsQuery(options))],
     };
 
+    const hostDetailsHit = getOr({}, 'aggregations.host', response.rawResponse);
+    const hostFields = unflattenObject(
+      getOr({}, `results.hits.hits[0].fields`, { ...hostDetailsHit })
+    );
+
     return {
       ...response,
       inspect,
       networkDetails: {
-        ...getNetworkDetailsAgg('source', getOr({}, 'aggregations.source', response.rawResponse)),
-        ...getNetworkDetailsAgg(
-          'destination',
-          getOr({}, 'aggregations.destination', response.rawResponse)
-        ),
-        ...getNetworkDetailsHostAgg(getOr({}, 'aggregations.host', response.rawResponse)),
+        ...hostFields,
+        ...getNetworkDetailsAgg('source', {
+          ...getOr({}, 'aggregations.source', response.rawResponse),
+        }),
+        ...getNetworkDetailsAgg('destination', {
+          ...getOr({}, 'aggregations.destination', response.rawResponse),
+        }),
       },
     };
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessEcs } from '../process';
+import type { ProcessEcs } from '../process';
 
 export interface Target {
   process: ProcessEcs;

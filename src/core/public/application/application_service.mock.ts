@@ -11,7 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { themeServiceMock } from '../theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { scopedHistoryMock } from './scoped_history.mock';
 import {
   ApplicationSetup,

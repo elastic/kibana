@@ -10,12 +10,12 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { CountryFlag } from '../source_destination/country_flag';
-import {
+import type {
   AutonomousSystemItem,
-  FlowTargetSourceDest,
   NetworkTopNFlowEdges,
   TopNetworkTablesEcsField,
 } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import {
   DragEffects,
@@ -24,7 +24,7 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { Columns } from '../../../common/components/paginated_table';
+import type { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -81,6 +81,8 @@ export const getNetworkTopNFlowColumns = (
                 kqlQuery: '',
                 queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
               }}
+              isAggregatable={true}
+              fieldType={'ip'}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>
@@ -104,6 +106,8 @@ export const getNetworkTopNFlowColumns = (
                   kqlQuery: '',
                   queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
                 }}
+                isAggregatable={true}
+                fieldType={'geo_point'}
                 render={(dataProvider, _, snapshot) =>
                   snapshot.isDragging ? (
                     <DragEffects>
@@ -141,6 +145,8 @@ export const getNetworkTopNFlowColumns = (
           attrName: domainAttr,
           idPrefix: id,
           displayCount: 1,
+          isAggregatable: true,
+          fieldType: 'keyword',
         });
       } else {
         return getEmptyTagValue();
@@ -162,6 +168,8 @@ export const getNetworkTopNFlowColumns = (
                 rowItem: as.name,
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
+                isAggregatable: true,
+                fieldType: 'keyword',
               })}
 
             {as.number && (
@@ -171,6 +179,8 @@ export const getNetworkTopNFlowColumns = (
                   rowItem: `${as.number}`,
                   attrName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
+                  isAggregatable: true,
+                  fieldType: 'keyword',
                 })}
               </>
             )}

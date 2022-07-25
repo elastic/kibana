@@ -8,22 +8,12 @@
 import { handleActions, combineActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
-import { getId } from '../../lib/get_id';
+import { setAssetValue, removeAsset, setAssets, resetAssets, setAsset } from '../actions/assets';
 
 const { set, assign, del } = immutable;
 
 export const assetsReducer = handleActions(
   {
-    [createAsset]: (assetState, { payload }) => {
-      const asset = {
-        id: getId('asset'),
-        '@created': new Date().toISOString(),
-        ...payload,
-      };
-      return set(assetState, asset.id, asset);
-    },
-
     [setAssetValue]: (assetState, { payload }) => {
       const { id, value } = payload;
       const asset = get(assetState, [id]);
@@ -32,7 +22,10 @@ export const assetsReducer = handleActions(
       }
       return assign(assetState, id, { value });
     },
-
+    [setAsset]: (assetState, { payload }) => {
+      const { asset } = payload;
+      return set(assetState, asset.id, asset);
+    },
     [removeAsset]: (assetState, { payload: assetId }) => {
       return del(assetState, assetId);
     },

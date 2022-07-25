@@ -6,10 +6,9 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import {
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import { ChartTimeRange } from '../header/last_updated';
 import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
@@ -18,8 +17,7 @@ import type {
   UrlFilter,
   URLReportDefinition,
 } from '../types';
-import { convertToShortUrl } from '../configurations/utils';
-import { OperationType, SeriesType } from '../../../../../../lens/public';
+import { convertToShortUrl } from '../configurations/exploratory_view_url';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 import { trackTelemetryOnApply } from '../utils/telemetry';
 
@@ -35,6 +33,8 @@ export interface SeriesContextValue {
   setReportType: (reportType: ReportViewType) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
   reportType: ReportViewType;
+  chartTimeRangeContext?: ChartTimeRange;
+  setChartTimeRangeContext: React.Dispatch<React.SetStateAction<ChartTimeRange | undefined>>;
 }
 export const UrlStorageContext = createContext<SeriesContextValue>({} as SeriesContextValue);
 
@@ -58,6 +58,8 @@ export function UrlStorageContextProvider({
   );
 
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
+
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
 
   const [reportType, setReportType] = useState<ReportViewType>(
     () => ((storage as IKbnUrlStateStorage).get(reportTypeKey) ?? '') as ReportViewType
@@ -138,6 +140,8 @@ export function UrlStorageContextProvider({
     setLastRefresh,
     setReportType,
     reportType,
+    chartTimeRangeContext,
+    setChartTimeRangeContext,
     firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
@@ -148,7 +152,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, ...restSeries } = newValue;
+  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, spa, ...restSeries } = newValue;
   return {
     operationType: op,
     seriesType: st,
@@ -161,6 +165,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     hidden: h,
     name: n,
     color: c,
+    showPercentileAnnotations: spa,
     ...restSeries,
   };
 }
@@ -176,6 +181,7 @@ interface ShortUrlSeries {
   [URL_KEYS.HIDDEN]?: boolean;
   [URL_KEYS.NAME]: string;
   [URL_KEYS.COLOR]?: string;
+  [URL_KEYS.SHOW_PERCENTILE_ANNOTATIONS]?: boolean;
   time?: {
     to: string;
     from: string;

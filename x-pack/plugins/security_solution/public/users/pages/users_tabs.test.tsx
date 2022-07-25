@@ -14,6 +14,8 @@ import { TestProviders } from '../../common/mock';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/components/search_bar', () => ({
@@ -22,7 +24,31 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
 
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ui: {
+            getCasesContext: jest.fn().mockReturnValue(mockCasesContext),
+          },
+        },
+      },
+    }),
+  };
+});
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {
@@ -46,7 +72,7 @@ const mockHistory = {
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Users - rendering', () => {
-  test('it renders the Setup Instructions text when no index is available', async () => {
+  test('it renders getting started page when no index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
@@ -58,7 +84,8 @@ describe('Users - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
   test('it should render tab navigation', async () => {

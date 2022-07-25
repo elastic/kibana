@@ -113,6 +113,7 @@ function GraphWorkspace(options) {
   this.undoLog = [];
   this.redoLog = [];
   this.selectedNodes = [];
+  this.selectedEdges = [];
 
   if (!options) {
     this.options = {};
@@ -227,6 +228,25 @@ function GraphWorkspace(options) {
       self.selectedNodes.push(node);
     }
   };
+
+  this.addEdgeToSelection = function (edge) {
+    edge.isSelected = true;
+    self.selectedEdges.push(edge);
+  };
+
+  this.removeEdgeFromSelection = function (edge) {
+    edge.isSelected = false;
+    self.selectedEdges = self.selectedEdges.filter((e) => e !== edge);
+  };
+
+  this.clearEdgeSelection = function () {
+    for (const edge of self.selectedEdges) {
+      edge.isSelected = false;
+    }
+    self.selectedEdges = [];
+  };
+
+  this.getEdgeSelection = () => [...self.selectedEdges];
 
   this.deleteSelection = function () {
     let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
@@ -382,6 +402,7 @@ function GraphWorkspace(options) {
     this.edgesMap = {};
     this.blocklistedNodes = [];
     this.selectedNodes = [];
+    this.selectedEdges = [];
     this.lastResponse = null;
   };
 

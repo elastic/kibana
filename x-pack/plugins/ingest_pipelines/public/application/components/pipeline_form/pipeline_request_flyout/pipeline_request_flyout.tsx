@@ -5,86 +5,63 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import {
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useState, useEffect, FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { Pipeline } from '../../../../../common/types';
+import { useFormContext, ViewApiRequestFlyout, useKibana } from '../../../../shared_imports';
+
+import { ReadProcessorsFunction } from '../types';
 
 interface Props {
-  pipeline: Pipeline;
   closeFlyout: () => void;
+  readProcessors: ReadProcessorsFunction;
 }
 
-export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
+export const PipelineRequestFlyout: FunctionComponent<Props> = ({
   closeFlyout,
-  pipeline,
+  readProcessors,
 }) => {
+  const { services } = useKibana();
+  const form = useFormContext();
+  const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
+  const pipeline = { ...formData, ...readProcessors() };
+
+  useEffect(() => {
+    const subscription = form.subscribe(async ({ isValid, validate, data }) => {
+      const isFormValid = isValid ?? (await validate());
+      if (isFormValid) {
+        setFormData(data.format() as Pipeline);
+      }
+    });
+
+    return subscription.unsubscribe;
+  }, [form]);
+
   const { name, ...pipelineBody } = pipeline;
   const endpoint = `PUT _ingest/pipeline/${name || '<pipelineName>'}`;
-  const payload = JSON.stringify(pipelineBody, null, 2);
-  const request = `${endpoint}\n${payload}`;
-  // Hack so that copied-to-clipboard value updates as content changes
-  // Related issue: https://github.com/elastic/eui/issues/3321
-  const uuid = useRef(0);
-  uuid.current++;
+  const request = `${endpoint}\n${JSON.stringify(pipelineBody, null, 2)}`;
+
+  const title = name
+    ? i18n.translate('xpack.ingestPipelines.requestFlyout.namedTitle', {
+        defaultMessage: "Request for '{name}'",
+        values: { name },
+      })
+    : i18n.translate('xpack.ingestPipelines.requestFlyout.unnamedTitle', {
+        defaultMessage: 'Request',
+      });
 
   return (
-    <EuiFlyout maxWidth={550} onClose={closeFlyout} data-test-subj="requestFlyout">
-      <EuiFlyoutHeader>
-        <EuiTitle>
-          <h2 data-test-subj="title">
-            {name ? (
-              <FormattedMessage
-                id="xpack.ingestPipelines.requestFlyout.namedTitle"
-                defaultMessage="Request for '{name}'"
-                values={{ name }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ingestPipelines.requestFlyout.unnamedTitle"
-                defaultMessage="Request"
-              />
-            )}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.requestFlyout.descriptionText"
-              defaultMessage="This Elasticsearch request will create or update the pipeline."
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer />
-        <EuiCodeBlock language="json" isCopyable key={uuid.current}>
-          {request}
-        </EuiCodeBlock>
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-          <FormattedMessage
-            id="xpack.ingestPipelines.requestFlyout.closeButtonLabel"
-            defaultMessage="Close"
-          />
-        </EuiButtonEmpty>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+    <ViewApiRequestFlyout
+      title={title}
+      description={i18n.translate('xpack.ingestPipelines.requestFlyout.descriptionText', {
+        defaultMessage: 'This Elasticsearch request will create or update the pipeline.',
+      })}
+      request={request}
+      closeFlyout={closeFlyout}
+      flyoutProps={{ maxWidth: 550 }}
+      application={services.application}
+      urlService={services.share.url}
+    />
   );
 };

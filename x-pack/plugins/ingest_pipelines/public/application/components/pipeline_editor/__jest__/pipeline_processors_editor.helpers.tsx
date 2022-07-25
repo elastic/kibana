@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { Props } from '../';
+import { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 jest.mock('@elastic/eui', () => {
@@ -31,8 +31,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -178,7 +178,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),

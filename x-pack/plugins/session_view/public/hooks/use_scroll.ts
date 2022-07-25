@@ -7,9 +7,9 @@
 
 import { useEffect } from 'react';
 import _ from 'lodash';
+import { DEBOUNCE_TIMEOUT } from '../../common/constants';
 
 const SCROLL_END_BUFFER_HEIGHT = 20;
-const DEBOUNCE_TIMEOUT = 500;
 
 function getScrollPosition(div: HTMLElement) {
   if (div) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
 import type { AgentPolicyCreateState } from '../../applications/fleet/sections/agents/components';
 import {
@@ -14,45 +14,74 @@ import {
 } from '../../applications/fleet/sections/agents/components';
 import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
 import type { AgentPolicy } from '../../types';
-import { incrementPolicyName } from '../../services';
+import { incrementPolicyName, policyHasFleetServer } from '../../services';
 
-import { EnrollmentStepAgentPolicy } from '.';
+import { AgentPolicySelection } from '.';
 
 interface Props {
   agentPolicies: AgentPolicy[];
+  selectedPolicyId?: string;
+  setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
-  onAgentPolicyChange: (key?: string, policy?: AgentPolicy) => void;
   withKeySelection: boolean;
   selectedApiKeyId?: string;
   onKeyChange?: (key?: string) => void;
   isFleetServerPolicy?: boolean;
-  policyId?: string;
+  refreshAgentPolicies: () => void;
 }
 
 export const SelectCreateAgentPolicy: React.FC<Props> = ({
   agentPolicies,
   excludeFleetServer,
-  onAgentPolicyChange,
+  setSelectedPolicyId,
+  selectedPolicyId,
   withKeySelection,
   selectedApiKeyId,
   onKeyChange,
   isFleetServerPolicy,
-  policyId,
+  refreshAgentPolicies,
 }) => {
-  const [showCreatePolicy, setShowCreatePolicy] = useState(agentPolicies.length === 0);
+  const regularAgentPolicies = useMemo(() => {
+    return agentPolicies.filter(
+      (policy) =>
+        policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+    );
+  }, [agentPolicies, excludeFleetServer]);
+
+  useEffect(() => {
+    // Select default value if policy has no fleet server
+    if (
+      regularAgentPolicies.length === 1 &&
+      !selectedPolicyId &&
+      excludeFleetServer !== false &&
+      !policyHasFleetServer(regularAgentPolicies[0])
+    ) {
+      setSelectedPolicyId(regularAgentPolicies[0].id);
+    }
+  }, [regularAgentPolicies, selectedPolicyId, setSelectedPolicyId, excludeFleetServer]);
+
+  const onAgentPolicyChange = useCallback(
+    async (key?: string, policy?: AgentPolicy) => {
+      if (policy) {
+        refreshAgentPolicies();
+      }
+    },
+    [refreshAgentPolicies]
+  );
+  const [showCreatePolicy, setShowCreatePolicy] = useState(regularAgentPolicies.length === 0);
 
   const [createState, setCreateState] = useState<AgentPolicyCreateState>({
     status: CREATE_STATUS.INITIAL,
   });
 
-  const [newName, setNewName] = useState(incrementPolicyName(agentPolicies, isFleetServerPolicy));
-
-  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<string | undefined>(policyId);
+  const [newName, setNewName] = useState(
+    incrementPolicyName(regularAgentPolicies, isFleetServerPolicy)
+  );
 
   useEffect(() => {
-    setShowCreatePolicy(agentPolicies.length === 0);
-    setNewName(incrementPolicyName(agentPolicies, isFleetServerPolicy));
-  }, [agentPolicies, isFleetServerPolicy]);
+    setShowCreatePolicy(regularAgentPolicies.length === 0 && !selectedPolicyId);
+    setNewName(incrementPolicyName(regularAgentPolicies, isFleetServerPolicy));
+  }, [regularAgentPolicies, isFleetServerPolicy, selectedPolicyId]);
 
   const onAgentPolicyCreated = useCallback(
     async (policy: AgentPolicy | null, errorMessage?: JSX.Element) => {
@@ -65,9 +94,9 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
       if (onAgentPolicyChange) {
         onAgentPolicyChange(policy.id, policy!);
       }
-      setSelectedAgentPolicy(policy.id);
+      setSelectedPolicyId(policy.id);
     },
-    [onAgentPolicyChange]
+    [setSelectedPolicyId, onAgentPolicyChange]
   );
 
   const onClickCreatePolicy = () => {
@@ -87,15 +116,15 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
           agentPolicyName={newName}
         />
       ) : (
-        <EnrollmentStepAgentPolicy
-          agentPolicies={agentPolicies}
+        <AgentPolicySelection
+          agentPolicies={regularAgentPolicies}
           withKeySelection={withKeySelection}
           selectedApiKeyId={selectedApiKeyId}
           onKeyChange={onKeyChange}
-          onAgentPolicyChange={onAgentPolicyChange}
           excludeFleetServer={excludeFleetServer}
           onClickCreatePolicy={onClickCreatePolicy}
-          selectedAgentPolicy={selectedAgentPolicy}
+          selectedPolicyId={selectedPolicyId}
+          setSelectedPolicyId={setSelectedPolicyId}
           isFleetServerPolicy={isFleetServerPolicy}
         />
       )}

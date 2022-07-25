@@ -75,9 +75,11 @@
     },
     "kibana": {
       "status": "green",
+      "some_status_is_stale": true,
       "requests_total": 914,
       "concurrent_connections": 646,
       "response_time_max": 2873,
+      "rules": { "cluster": null, "instance": null },
       "memory_size": 196005888,
       "memory_limit": 1501560832,
       "count": 1

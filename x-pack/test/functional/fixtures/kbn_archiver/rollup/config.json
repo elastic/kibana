@@ -1,0 +1,35 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "lens_rolled_up_data",
+    "type": "rollup",
+    "typeMeta": "{\"params\":{\"rollup_index\":\"lens_rolled_up_data\"},\"aggs\":{\"date_histogram\":{\"@timestamp\":{\"agg\":\"date_histogram\",\"fixed_interval\":\"60m\",\"time_zone\":\"UTC\"}},\"sum\":{\"bytes\":{\"agg\":\"sum\"}},\"max\":{\"bytes\":{\"agg\":\"max\"}},\"terms\":{\"geo.src\":{\"agg\":\"terms\"}}}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "lens-rolled-up-data",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2020-08-19T08:39:09.998Z",
+  "version": "WzUsMl0="
+}
+
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "lens_regular_data"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "lens-regular-data",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2020-08-19T08:39:09.998Z",
+  "version": "WzYsMl0="
+}

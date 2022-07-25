@@ -4,31 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
-import { ENVIRONMENT_ALL } from '../../../../../../../common/environment_filter_values';
+import {
+  getOptionLabel,
+  ALL_OPTION,
+} from '../../../../../../../common/agent_configuration/all_option';
 
 interface Props {
   title: string;
-  field: string;
+  fieldName: string;
   description: string;
   fieldLabel: string;
   value?: string;
   allowAll?: boolean;
   onChange: (value?: string) => void;
+  dataTestSubj?: string;
 }
 
 export function FormRowSuggestionsSelect({
   title,
-  field,
+  fieldName,
   description,
   fieldLabel,
   value,
   allowAll = true,
   onChange,
+  dataTestSubj,
 }: Props) {
   return (
     <EuiDescribedFormGroup
@@ -38,15 +43,18 @@ export function FormRowSuggestionsSelect({
     >
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
-          allOption={allowAll ? ENVIRONMENT_ALL : undefined}
-          defaultValue={value}
-          field={field}
+          customOptions={allowAll ? [ALL_OPTION] : undefined}
+          defaultValue={value ? getOptionLabel(value) : undefined}
+          fieldName={fieldName}
           onChange={onChange}
           isClearable={false}
           placeholder={i18n.translate(
             'xpack.apm.agentConfig.servicePage.service.placeholder',
             { defaultMessage: 'Select Option' }
           )}
+          dataTestSubj={dataTestSubj}
+          start={moment().subtract(24, 'h').toISOString()}
+          end={moment().toISOString()}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

@@ -9,7 +9,7 @@
 import chalk from 'chalk';
 import crypto from 'crypto';
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 

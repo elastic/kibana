@@ -10,17 +10,18 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
-} from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/main/scroll_to_top_on_path_change';
+} from '@kbn/observability-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -37,6 +38,10 @@ import { RedirectWithDefaultDateRange } from '../shared/redirect_with_default_da
 import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
+import { RedirectWithOffset } from '../shared/redirect_with_offset';
+import { RedirectDependenciesToDependenciesInventory } from './home/redirect_dependencies_to_dependencies_inventory';
+
+const storage = new Storage(localStorage);
 
 export function ApmAppRoot({
   apmPluginContextValue,
@@ -57,32 +62,38 @@ export function ApmAppRoot({
       role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
+        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
-                <RedirectWithDefaultEnvironment>
-                  <RedirectWithDefaultDateRange>
-                    <TrackPageview>
-                      <BreadcrumbsContextProvider>
-                        <UrlParamsProvider>
-                          <LicenseProvider>
-                            <AnomalyDetectionJobsContextProvider>
-                              <InspectorContextProvider>
-                                <ApmThemeProvider>
-                                  <MountApmHeaderActionMenu />
+                <RedirectDependenciesToDependenciesInventory>
+                  <RedirectWithDefaultEnvironment>
+                    <RedirectWithDefaultDateRange>
+                      <RedirectWithOffset>
+                        <TrackPageview>
+                          <BreadcrumbsContextProvider>
+                            <UrlParamsProvider>
+                              <LicenseProvider>
+                                <AnomalyDetectionJobsContextProvider>
+                                  <InspectorContextProvider>
+                                    <ApmThemeProvider>
+                                      <MountApmHeaderActionMenu />
 
-                                  <Route component={ScrollToTopOnPathChange} />
-                                  <RouteRenderer />
-                                </ApmThemeProvider>
-                              </InspectorContextProvider>
-                            </AnomalyDetectionJobsContextProvider>
-                          </LicenseProvider>
-                        </UrlParamsProvider>
-                      </BreadcrumbsContextProvider>
-                    </TrackPageview>
-                  </RedirectWithDefaultDateRange>
-                </RedirectWithDefaultEnvironment>
+                                      <Route
+                                        component={ScrollToTopOnPathChange}
+                                      />
+                                      <RouteRenderer />
+                                    </ApmThemeProvider>
+                                  </InspectorContextProvider>
+                                </AnomalyDetectionJobsContextProvider>
+                              </LicenseProvider>
+                            </UrlParamsProvider>
+                          </BreadcrumbsContextProvider>
+                        </TrackPageview>
+                      </RedirectWithOffset>
+                    </RedirectWithDefaultDateRange>
+                  </RedirectWithDefaultEnvironment>
+                </RedirectDependenciesToDependenciesInventory>
               </RouterProvider>
             </TimeRangeIdContextProvider>
           </i18nCore.Context>

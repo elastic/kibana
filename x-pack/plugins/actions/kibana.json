@@ -9,6 +9,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "actions"],
   "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
-  "optionalPlugins": ["usageCollection", "spaces", "security"],
-  "ui": false
+  "optionalPlugins": ["usageCollection", "spaces", "security", "monitoringCollection"],
+  "extraPublicDirs": ["common"],
+  "ui": true
 }

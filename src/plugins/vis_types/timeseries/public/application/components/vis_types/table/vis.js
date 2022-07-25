@@ -10,7 +10,7 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '../../../../../../../kibana_react/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
@@ -21,7 +21,7 @@ import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 import {
   createCachedFieldValueFormatter,
@@ -29,6 +29,7 @@ import {
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
+import { RenderCounter } from '../../render_counter';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -245,7 +246,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern } = this.props;
+    const { visData, model, indexPattern, initialRender } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -257,6 +258,7 @@ class TableVis extends Component {
       indexPattern,
       fields,
       this.fieldFormatsService,
+      undefined,
       model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
@@ -268,7 +270,7 @@ class TableVis extends Component {
     }
 
     return (
-      <>
+      <RenderCounter initialRender={initialRender}>
         <RedirectAppLinks
           application={getCoreStart().application}
           className="tvbVis"
@@ -285,7 +287,7 @@ class TableVis extends Component {
             handleClose={this.closeExternalUrlErrorModal}
           />
         )}
-      </>
+      </RenderCounter>
     );
   }
 }

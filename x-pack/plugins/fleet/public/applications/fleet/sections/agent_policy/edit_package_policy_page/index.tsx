@@ -6,10 +6,12 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { pick } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
 import {
   EuiButtonEmpty,
   EuiBottomBar,
@@ -47,26 +49,28 @@ import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
 } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../components';
+import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
+import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
 import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
 import type {
   PackagePolicyFormState,
   EditPackagePolicyFrom,
 } from '../create_package_policy_page/types';
-import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
-import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+} from '../create_package_policy_page/components';
 import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
-import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
+import { useHistoryBlock } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -332,7 +336,14 @@ export const EditPackagePolicyForm = memo<{
   // Update package policy method
   const updatePackagePolicy = useCallback(
     (updatedFields: Partial<UpdatePackagePolicy>) => {
-      setIsEdited(true);
+      const isDeepEqual = deepEqual(
+        JSON.parse(JSON.stringify(updatedFields)),
+        JSON.parse(JSON.stringify(pick(packagePolicy, Object.keys(updatedFields))))
+      );
+      if (!isDeepEqual) {
+        setIsEdited(true);
+      }
+
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
@@ -405,6 +416,8 @@ export const EditPackagePolicyForm = memo<{
     return result;
   };
 
+  useHistoryBlock(isEdited);
+
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
@@ -417,6 +430,7 @@ export const EditPackagePolicyForm = memo<{
 
     const { error } = await savePackagePolicy();
     if (!error) {
+      setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
@@ -566,7 +580,7 @@ export const EditPackagePolicyForm = memo<{
   );
 
   return (
-    <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
@@ -680,7 +694,7 @@ export const EditPackagePolicyForm = memo<{
           </>
         )}
       </EuiErrorBoundary>
-    </CreatePackagePolicyPageLayout>
+    </CreatePackagePolicySinglePageLayout>
   );
 });
 
@@ -784,11 +798,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>

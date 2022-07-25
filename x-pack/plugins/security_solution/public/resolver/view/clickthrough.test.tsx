@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -13,9 +13,9 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
+import type { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../common/endpoint/types';
 
 let simulator: Simulator;
 let databaseDocumentID: string;

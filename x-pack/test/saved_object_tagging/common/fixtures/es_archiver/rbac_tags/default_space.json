@@ -1,0 +1,23 @@
+{
+  "id": "default-space-tag-1",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-1",
+    "description": "Tag 1 in default space",
+    "color": "#FF00FF"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "id": "default-space-tag-2",
+  "type": "tag",
+  "attributes": {
+    "name": "tag-2",
+    "description": "Tag 2 in default space",
+    "color": "#77CC11"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}

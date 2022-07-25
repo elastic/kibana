@@ -4,7 +4,7 @@ slug: /form-lib/core/use-form-is-modified
 title: useFormIsModified()
 summary: Know when your form has been modified by the user
 tags: ['forms', 'kibana', 'dev']
-date: 2021-06-15
+date: 2022-03-18
 ---
 
 **Returns:** `boolean`
@@ -49,3 +49,5 @@ const ChildComponent = () => {
 **Type:** `string[]`  
 
 If there are certain fields that you want to discard when checking if the form has been modified you can provide an array of field paths to the `discard` option.
+
+This is useful if you add some fields to the form that are only used internally to control the UI (e.g. toggles) that shouldn't affect the `isModified` state.

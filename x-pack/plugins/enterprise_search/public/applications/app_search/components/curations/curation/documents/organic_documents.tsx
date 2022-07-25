@@ -10,13 +10,13 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import { EuiLoadingContent, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LeafIcon } from '../../../../../shared/icons';
 
 import { DataPanel } from '../../../data_panel';
-import { Result } from '../../../result/types';
 
 import { PROMOTE_DOCUMENT_ACTION, HIDE_DOCUMENT_ACTION } from '../../constants';
 import { CurationLogic } from '../curation_logic';
@@ -47,7 +47,7 @@ export const OrganicDocuments: React.FC = () => {
     >
       {hasDocuments ? (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {documents.map((document: Result, index) => (
+          {documents.map((document: SearchResult, index) => (
             <EuiFlexItem key={index}>
               <CurationResult
                 result={document}

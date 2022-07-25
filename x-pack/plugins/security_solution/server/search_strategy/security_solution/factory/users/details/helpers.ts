@@ -7,7 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has } from 'lodash/fp';
-import {
+import type {
   UserAggEsItem,
   UserBuckets,
   UserItem,

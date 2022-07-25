@@ -8,7 +8,7 @@
 import React from 'react';
 import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
-import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
+import { mockBrowserFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
 import { ColumnHeaderOptions, TimelineId } from '../../common/types';
@@ -95,7 +95,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
-  docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',
   filterStatus: 'open',
@@ -123,6 +122,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
     {
       columnId: '@timestamp',
       columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],
@@ -134,7 +134,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
   appId: '',
-  browserFields: mockBrowserFields,
   events: mockTimelineData,
   leadingControlColumns: [],
   onChangePage: () => null,

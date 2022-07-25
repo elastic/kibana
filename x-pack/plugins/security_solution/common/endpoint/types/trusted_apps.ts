@@ -5,36 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ConditionEntryField,
   OperatingSystem,
   TrustedAppEntryTypes,
 } from '@kbn/securitysolution-utils';
-import {
-  DeleteTrustedAppsRequestSchema,
-  GetOneTrustedAppRequestSchema,
-  GetTrustedAppsRequestSchema,
-  PostTrustedAppCreateRequestSchema,
-  PutTrustedAppUpdateRequestSchema,
-  GetTrustedAppsSummaryRequestSchema,
-} from '../schema/trusted_apps';
-
-/** API request params for deleting Trusted App entry */
-export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
-
-export type GetOneTrustedAppRequestParams = TypeOf<typeof GetOneTrustedAppRequestSchema.params>;
-
-export interface GetOneTrustedAppResponse {
-  data: TrustedApp;
-}
-
-/** API request params for retrieving a list of Trusted Apps */
-export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
-
-/** API request params for retrieving summary of Trusted Apps */
-export type GetTrustedAppsSummaryRequest = TypeOf<typeof GetTrustedAppsSummaryRequestSchema.query>;
-
+import type { PutTrustedAppUpdateRequestSchema } from '../schema/trusted_apps';
+import type { ConditionEntry } from './exception_list_items';
 export interface GetTrustedAppsListResponse {
   per_page: number;
   page: number;
@@ -42,50 +20,26 @@ export interface GetTrustedAppsListResponse {
   data: TrustedApp[];
 }
 
-/*
- * API Request body for creating a new Trusted App entry
- * As this is an inferred type and the schema type doesn't match at all with the
- * NewTrustedApp type it needs and overwrite from the MacosLinux/Windows custom types
- */
-export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body> &
-  (MacosLinuxConditionEntries | WindowsConditionEntries);
-
-export interface PostTrustedAppCreateResponse {
-  data: TrustedApp;
-}
-
 /** API request params for updating a Trusted App */
 export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
-
-/** API Request body for Updating a new Trusted App entry */
-export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body> &
-  (MacosLinuxConditionEntries | WindowsConditionEntries);
-
-export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
-
-export interface GetTrustedAppsSummaryResponse {
-  total: number;
-  windows: number;
-  macos: number;
-  linux: number;
-}
 
 export enum OperatorFieldIds {
   is = 'is',
   matches = 'matches',
 }
 
-export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
+export interface TrustedAppConditionEntry<T extends ConditionEntryField = ConditionEntryField>
+  extends ConditionEntry {
   field: T;
   type: TrustedAppEntryTypes;
   operator: 'included';
   value: string;
 }
 
-export type MacosLinuxConditionEntry = ConditionEntry<
+export type MacosLinuxConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH
 >;
-export type WindowsConditionEntry = ConditionEntry<
+export type WindowsConditionEntry = TrustedAppConditionEntry<
   ConditionEntryField.HASH | ConditionEntryField.PATH | ConditionEntryField.SIGNER
 >;
 
@@ -117,11 +71,6 @@ export type NewTrustedApp = {
   description?: string;
   effectScope: EffectScope;
 } & (MacosLinuxConditionEntries | WindowsConditionEntries);
-
-/** An Update to a Trusted App Entry */
-export type UpdateTrustedApp = NewTrustedApp & {
-  version?: string;
-};
 
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {

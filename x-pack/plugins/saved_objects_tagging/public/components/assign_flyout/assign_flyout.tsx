@@ -8,7 +8,7 @@
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { AssignableObject } from '../../../common/assignments';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';

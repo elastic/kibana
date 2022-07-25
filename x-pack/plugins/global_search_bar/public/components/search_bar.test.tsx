@@ -9,9 +9,9 @@ import React from 'react';
 import { act, render, screen, fireEvent } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { applicationServiceMock } from '../../../../../src/core/public/mocks';
-import { globalSearchPluginMock } from '../../../global_search/public/mocks';
-import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
+import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import { SearchBar } from './search_bar';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 

@@ -11,7 +11,7 @@ import { setupEnvironment, pageHelpers, nextTick, TestBed, getRandomString } fro
 import { RepositoryForm } from '../../public/application/components/repository_form';
 import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
-import { REPOSITORY_EDIT } from './helpers/constant';
+import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
@@ -19,19 +19,15 @@ const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 describe('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;
   let testBedRepositoryAdd: TestBed<RepositoryAddTestSubjects>;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetRepositoryResponse({
+      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_EDIT.name, {
         repository: REPOSITORY_EDIT,
         snapshots: { count: 0 },
       });
-      testBed = await setup();
+      testBed = await setup(httpSetup);
 
       await act(async () => {
         await nextTick();
@@ -54,7 +50,7 @@ describe('<RepositoryEdit />', () => {
     test('should use the same Form component as the "<RepositoryAdd />" section', async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(['fs', 'url']);
 
-      testBedRepositoryAdd = await setupRepositoryAdd();
+      testBedRepositoryAdd = await setupRepositoryAdd(httpSetup);
 
       const formEdit = testBed.component.find(RepositoryForm);
       const formAdd = testBedRepositoryAdd.component.find(RepositoryForm);
@@ -66,11 +62,11 @@ describe('<RepositoryEdit />', () => {
 
   describe('should populate the correct values', () => {
     const mountComponentWithMock = async (repository: any) => {
-      httpRequestsMockHelpers.setGetRepositoryResponse({
+      httpRequestsMockHelpers.setGetRepositoryResponse(REPOSITORY_NAME, {
         repository: { name: getRandomString(), ...repository },
         snapshots: { count: 0 },
       });
-      testBed = await setup();
+      testBed = await setup(httpSetup);
 
       await act(async () => {
         await nextTick();

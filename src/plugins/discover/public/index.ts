@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverPlugin } from './plugin';
 
 export type { SavedSearch } from './services/saved_searches';

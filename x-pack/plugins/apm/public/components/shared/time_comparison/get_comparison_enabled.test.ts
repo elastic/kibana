@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { getComparisonEnabled } from './get_comparison_enabled';
 
 describe('getComparisonEnabled', () => {

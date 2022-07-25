@@ -11,11 +11,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FindActionResult } from '@kbn/actions-plugin/server/types';
+import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -32,15 +31,12 @@ import {
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../actions/server/types';
-import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
@@ -226,10 +222,9 @@ function isConnectorSupported(
   actionTypes: Record<string, ActionType>
 ): boolean {
   return (
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense &&
-    action.config != null &&
-    !action.isPreconfigured
+    (actionTypes[action.actionTypeId]?.supportedFeatureIds ?? []).includes(
+      CasesConnectorFeatureId
+    ) && actionTypes[action.actionTypeId]?.enabledInLicense
   );
 }
 
@@ -295,11 +290,13 @@ async function update(
           mappings = await casesClientInternal.configuration.updateMappings({
             connector,
             mappingId: resMappings[0].id,
+            refresh: false,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
             connector,
             owner: configuration.attributes.owner,
+            refresh: false,
           });
         }
       }
@@ -381,7 +378,11 @@ async function create(
 
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
-        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+        caseConfigureService.delete({
+          unsecuredSavedObjectsClient,
+          configurationId: c.id,
+          refresh: false,
+        });
 
       // Ensuring we don't too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
@@ -403,6 +404,7 @@ async function create(
       mappings = await casesClientInternal.configuration.createMappings({
         connector: configuration.connector,
         owner: configuration.owner,
+        refresh: false,
       });
     } catch (e) {
       error = e.isBoom

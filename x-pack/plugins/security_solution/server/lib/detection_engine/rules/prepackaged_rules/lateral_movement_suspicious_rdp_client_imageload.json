@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious RDP ActiveX Client Loaded",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "library where dll.name : \"mstscax.dll\" and\n   /* depending on noise in your env add here extra paths  */\n  process.executable :\n    (\n    \"C:\\\\Windows\\\\*\",\n    \"C:\\\\Users\\\\Public\\\\*\",\n    \"C:\\\\Users\\\\Default\\\\*\",\n    \"C:\\\\Intel\\\\*\",\n    \"C:\\\\PerfLogs\\\\*\",\n    \"C:\\\\ProgramData\\\\*\",\n    \"\\\\Device\\\\Mup\\\\*\",\n    \"\\\\\\\\*\"\n    ) and\n    /* add here FPs */\n  not process.executable : (\"C:\\\\Windows\\\\System32\\\\mstsc.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\mstsc.exe\")\n",
   "references": [
     "https://posts.specterops.io/revisiting-remote-desktop-lateral-movement-8fb905cb46c3"
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

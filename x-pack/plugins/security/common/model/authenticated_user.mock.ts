@@ -23,6 +23,7 @@ export function mockAuthenticatedUser(user: MockAuthenticatedUserProps = {}) {
     lookup_realm: { name: 'native1', type: 'native' },
     authentication_provider: { type: 'basic', name: 'basic1' },
     authentication_type: 'realm',
+    elastic_cloud_user: false,
     metadata: { _reserved: false },
     ...user,
   };

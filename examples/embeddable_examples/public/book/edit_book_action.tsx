@@ -7,16 +7,17 @@
  */
 
 import React from 'react';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
-import { createAction } from '../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   ViewMode,
   SavedObjectEmbeddableInput,
   EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -24,8 +25,7 @@ import {
   BookByValueInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
+import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];

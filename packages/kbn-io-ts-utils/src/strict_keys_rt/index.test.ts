@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { isRight, isLeft } from 'fp-ts/lib/Either';
-import { strictKeysRt } from './';
+import { strictKeysRt } from '.';
 import { jsonRt } from '../json_rt';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 

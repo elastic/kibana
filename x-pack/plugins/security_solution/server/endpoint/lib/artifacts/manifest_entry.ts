@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InternalArtifactSchema } from '../../schemas/artifacts';
-import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
-import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
+import { relativeDownloadUrlFromArtifact } from '@kbn/fleet-plugin/server';
+import type { InternalArtifactSchema } from '../../schemas/artifacts';
+import type { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
+import type { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 import { getArtifactId } from './common';
-import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
 
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;

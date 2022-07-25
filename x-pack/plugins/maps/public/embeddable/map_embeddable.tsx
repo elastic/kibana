@@ -14,8 +14,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters } from '@kbn/es-query';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
@@ -23,36 +23,37 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  TimeRange,
-  Query,
-} from '../../../../../src/plugins/data/public';
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  disableScrollZoom,
   setReadOnly,
+  updateLayerById,
+  setGotoWithCenter,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  setOnMapMove,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getLayerList,
+  getGoto,
   getMapCenter,
   getMapBuffer,
   getMapExtent,
   getMapReady,
+  getMapSettings,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -81,6 +82,8 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
 
 import {
   MapByValueInput,
@@ -109,7 +112,6 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
-  private _prevFilterByMapExtent: boolean;
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
   private _prevTimeRange?: TimeRange;
@@ -141,8 +143,10 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
-    this._prevFilterByMapExtent =
-      this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
   }
 
   private async _initializeSaveMap() {
@@ -173,19 +177,23 @@ export class MapEmbeddable
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
+
     store.dispatch(setReadOnly(true));
-    store.dispatch(disableScrollZoom());
     store.dispatch(
       setMapSettings({
+        keydownScrollZoom: true,
         showTimesliderToggleButton: false,
       })
     );
+
+    // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
+    store.dispatch(setOnMapMove(this._propogateMapMovement));
 
     this._dispatchSetQuery({
       forceRefresh: false,
     });
 
-    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
+    this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
   }
@@ -195,7 +203,7 @@ export class MapEmbeddable
       ? this._savedMap.getAttributes().title
       : '';
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
@@ -269,18 +277,6 @@ export class MapEmbeddable
 
   onUpdate() {
     if (
-      this.input.filterByMapExtent !== undefined &&
-      this._prevFilterByMapExtent !== this.input.filterByMapExtent
-    ) {
-      this._prevFilterByMapExtent = this.input.filterByMapExtent;
-      if (this.input.filterByMapExtent) {
-        this.setMapExtentFilter();
-      } else {
-        this.clearMapExtentFilter();
-      }
-    }
-
-    if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
       !compareFilters(this._getFilters(), this._prevFilters) ||
@@ -306,6 +302,51 @@ export class MapEmbeddable
       );
     }
   }
+
+  _getIsMovementSynchronized = () => {
+    return this.input.isMovementSynchronized === undefined
+      ? true
+      : this.input.isMovementSynchronized;
+  };
+
+  _getIsFilterByMapExtent = () => {
+    return this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+  };
+
+  _gotoSynchronizedLocation() {
+    const syncedLocation = mapEmbeddablesSingleton.getLocation();
+    if (syncedLocation) {
+      // set map to synchronized view
+      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
+      return;
+    }
+
+    if (!getMapReady(this._savedMap.getStore().getState())) {
+      // Initialize synchronized view to map's goto
+      // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
+      const goto = getGoto(this._savedMap.getStore().getState());
+      if (goto && goto.center) {
+        mapEmbeddablesSingleton.setLocation(
+          this.input.id,
+          goto.center.lat,
+          goto.center.lon,
+          goto.center.zoom
+        );
+        return;
+      }
+    }
+
+    // Initialize synchronized view to map's view
+    const center = getMapCenter(this._savedMap.getStore().getState());
+    const zoom = getMapZoom(this._savedMap.getStore().getState());
+    mapEmbeddablesSingleton.setLocation(this.input.id, center.lat, center.lon, zoom);
+  }
+
+  _propogateMapMovement = (lat: number, lon: number, zoom: number) => {
+    if (this._getIsMovementSynchronized()) {
+      mapEmbeddablesSingleton.setLocation(this.input.id, lat, lon, zoom);
+    }
+  };
 
   _getFilters() {
     return this.input.filters
@@ -369,6 +410,47 @@ export class MapEmbeddable
       return;
     }
 
+    mapEmbeddablesSingleton.register(this.input.id, {
+      getTitle: () => {
+        const output = this.getOutput();
+        if (output.title) {
+          return output.title;
+        }
+
+        if (output.defaultTitle) {
+          return output.defaultTitle;
+        }
+
+        return this.input.id;
+      },
+      onLocationChange: this._mapSyncHandler,
+      getIsMovementSynchronized: this._getIsMovementSynchronized,
+      setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
+        this.updateInput({ isMovementSynchronized });
+        if (isMovementSynchronized) {
+          this._gotoSynchronizedLocation();
+        } else if (!isMovementSynchronized && this._savedMap.getAutoFitToBounds()) {
+          // restore autoFitToBounds when isMovementSynchronized disabled
+          this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
+        }
+      },
+      getIsFilterByMapExtent: this._getIsFilterByMapExtent,
+      setIsFilterByMapExtent: (isFilterByMapExtent: boolean) => {
+        this.updateInput({ filterByMapExtent: isFilterByMapExtent });
+        if (isFilterByMapExtent) {
+          this._setMapExtentFilter();
+        } else {
+          this._clearMapExtentFilter();
+        }
+      },
+      getGeoFieldNames: () => {
+        return getGeoFieldNames(this._savedMap.getStore().getState());
+      },
+    });
+    if (this._getIsMovementSynchronized()) {
+      this._gotoSynchronizedLocation();
+    }
+
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const content =
@@ -387,7 +469,9 @@ export class MapEmbeddable
       ) : (
         <MapContainer
           onSingleValueTrigger={this.onSingleValueTrigger}
-          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          addFilters={
+            this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters
+          }
           getFilterActions={this.getFilterActions}
           getActionContext={this.getActionContext}
           renderTooltipContent={this._renderTooltipContent}
@@ -417,6 +501,10 @@ export class MapEmbeddable
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {
@@ -484,14 +572,21 @@ export class MapEmbeddable
     } as ActionExecutionContext;
   };
 
-  setMapExtentFilter() {
-    const state = this._savedMap.getStore().getState();
-    const mapExtent = getMapExtent(state);
-    const geoFieldNames = getGeoFieldNames(state);
-    const center = getMapCenter(state);
-    const zoom = getMapZoom(state);
+  // Timing bug for dashboard with multiple maps with synchronized movement and filter by map extent enabled
+  // When moving map with filterByMapExtent:false, previous map extent filter(s) does not get removed
+  // Cuased by syncDashboardContainerInput applyContainerChangesToState.
+  //   1) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  //   2) applyContainerChangesToState then re-adds stale input.filters (which contains previous map extent filter)
+  // Add debounce to fix timing issue.
+  //   1) applyContainerChangesToState now runs first and does its thing
+  //   2) _setMapExtentFilter executes ACTION_GLOBAL_APPLY_FILTER action,
+  //      removing previous map extent filter and adding new map extent filter
+  _setMapExtentFilter = _.debounce(() => {
+    const mapExtent = getMapExtent(this._savedMap.getStore().getState());
+    const geoFieldNames = mapEmbeddablesSingleton.getGeoFieldNames();
 
-    if (center === undefined || mapExtent === undefined || geoFieldNames.length === 0) {
+    if (mapExtent === undefined || geoFieldNames.length === 0) {
       return;
     }
 
@@ -500,12 +595,8 @@ export class MapEmbeddable
     const mapExtentFilter = createExtentFilter(mapExtent, geoFieldNames);
     mapExtentFilter.meta.controlledBy = this._controlledBy;
     mapExtentFilter.meta.alias = i18n.translate('xpack.maps.embeddable.boundsFilterLabel', {
-      defaultMessage: 'Map bounds at center: {lat}, {lon}, zoom: {zoom}',
-      values: {
-        lat: center.lat,
-        lon: center.lon,
-        zoom,
-      },
+      defaultMessage: '{geoFieldsLabel} within map bounds',
+      values: { geoFieldsLabel: getGeoFieldsLabel(geoFieldNames) },
     });
 
     const executeContext = {
@@ -518,9 +609,9 @@ export class MapEmbeddable
       throw new Error('Unable to apply map extent filter, could not locate action');
     }
     action.execute(executeContext);
-  }
+  }, 100);
 
-  clearMapExtentFilter() {
+  _clearMapExtentFilter() {
     this._prevMapExtent = undefined;
     const executeContext = {
       ...this.getActionContext(),
@@ -536,6 +627,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    mapEmbeddablesSingleton.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -556,6 +648,15 @@ export class MapEmbeddable
     });
   }
 
+  _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
+    // auto fit to bounds is not compatable with map synchronization
+    // auto fit to bounds may cause map location to never stablize and bound back and forth between bounds on different maps
+    if (getMapSettings(this._savedMap.getStore().getState()).autoFitToDataBounds) {
+      this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
+    }
+    this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
+  };
+
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
@@ -571,8 +672,8 @@ export class MapEmbeddable
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
-    if (this.input.filterByMapExtent && !_.isEqual(this._prevMapExtent, mapExtent)) {
-      this.setMapExtentFilter();
+    if (this._getIsFilterByMapExtent() && !_.isEqual(this._prevMapExtent, mapExtent)) {
+      this._setMapExtentFilter();
     }
 
     const center = getMapCenter(this._savedMap.getStore().getState());
@@ -615,6 +716,40 @@ export class MapEmbeddable
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
       });
+    }
+
+    if (areLayersLoaded(this._savedMap.getStore().getState())) {
+      const layers = getLayerList(this._savedMap.getStore().getState());
+      const isLoading =
+        layers.length === 0 ||
+        layers.some((layer) => {
+          return layer.isLayerLoading();
+        });
+      const firstLayerWithError = layers.find((layer) => {
+        return layer.hasErrors();
+      });
+      const output = this.getOutput();
+      if (
+        output.loading !== isLoading ||
+        firstLayerWithError?.getErrors() !== output.error?.message
+      ) {
+        /**
+         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * For more details please contact the maps team.
+         */
+        this.updateOutput({
+          ...output,
+          loading: isLoading,
+          rendered: !isLoading && firstLayerWithError === undefined,
+          error: firstLayerWithError
+            ? {
+                name: 'EmbeddableError',
+                message: firstLayerWithError.getErrors(),
+              }
+            : undefined,
+        });
+      }
     }
   }
 }

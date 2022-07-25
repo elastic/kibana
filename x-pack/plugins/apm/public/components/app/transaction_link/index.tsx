@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -21,7 +21,7 @@ const CentralizedContainer = euiStyled.div`
 export function TransactionLink() {
   const {
     path: { transactionId },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, waterfallItemId },
   } = useApmParams('/link-to/transaction/{transactionId}');
 
   const { data = { transaction: null }, status } = useFetcher(
@@ -46,6 +46,7 @@ export function TransactionLink() {
             transaction: data.transaction,
             rangeFrom,
             rangeTo,
+            waterfallItemId,
           })}
         />
       );

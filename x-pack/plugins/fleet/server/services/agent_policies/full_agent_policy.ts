@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 
 import type {
@@ -17,16 +17,19 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
-import {
-  storedPackagePoliciesToAgentPermissions,
-  DEFAULT_CLUSTER_PERMISSIONS,
-} from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
+import { dataTypes, outputType } from '../../../common/constants';
+import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
+import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from '.';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_CLUSTER_PERMISSIONS,
+} from './package_policies_to_agent_permissions';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -74,6 +77,9 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
+
+  const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
+
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -86,28 +92,27 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: storedPackagePoliciesToAgentInputs(
+    inputs: await storedPackagePoliciesToAgentInputs(
+      soClient,
       agentPolicy.package_policies as PackagePolicy[],
       getOutputIdForAgentPolicy(dataOutput)
     ),
     revision: agentPolicy.revision,
-    ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
-      ? {
-          agent: {
-            monitoring: {
+    agent: {
+      download: {
+        source_uri: sourceUri,
+      },
+      monitoring:
+        agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
+          ? {
               namespace: agentPolicy.namespace,
               use_output: getOutputIdForAgentPolicy(monitoringOutput),
               enabled: true,
               logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-            },
-          },
-        }
-      : {
-          agent: {
-            monitoring: { enabled: false, logs: false, metrics: false },
-          },
-        }),
+            }
+          : { enabled: false, logs: false, metrics: false },
+    },
   };
 
   const dataPermissions =
@@ -177,7 +182,7 @@ export function transformOutputToFullPolicyOutput(
     ...configJs,
     type,
     hosts,
-    ca_sha256,
+    ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };

@@ -32,7 +32,6 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
   >
     <EuiContextMenuPanel
       data-test-subj="rules-details-menu-panel"
-      hasFocus={true}
       items={
         Array [
           <EuiContextMenuItem

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { fireEvent, render, screen } from '@testing-library/react';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import React from 'react';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../utils/test_helpers';
-import TutorialConfigAgent from './';
+import TutorialConfigAgent from '.';
 
 const policyElasticAgentOnCloudAgent = {
   id: 'policy-elastic-agent-on-cloud',

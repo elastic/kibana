@@ -6,8 +6,6 @@
  */
 
 // @ts-ignore
-import { StringOptions } from '@kbn/config-schema/target_types/types';
-// @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';

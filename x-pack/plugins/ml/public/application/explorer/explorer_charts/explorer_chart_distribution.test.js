@@ -17,9 +17,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
-import { chartLimits } from '../../util/chart_utils';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+
 const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsTheme(),
@@ -83,7 +83,8 @@ describe('ExplorerChart', () => {
     );
 
     // test if the loading indicator is shown
-    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(1);
+    // Added span because class appears twice with classNames and Emotion
+    expect(wrapper.find('.ml-loading-indicator span.euiLoadingChart')).toHaveLength(1);
   });
 
   // For the following tests the directive needs to be rendered in the actual DOM,
@@ -96,7 +97,6 @@ describe('ExplorerChart', () => {
     const config = {
       ...seriesConfig,
       chartData,
-      chartLimits: chartLimits(chartData),
     };
 
     const mockTooltipService = {

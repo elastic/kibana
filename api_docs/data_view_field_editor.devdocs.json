@@ -127,7 +127,7 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(newParams?: {}) => void"
+              "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
@@ -140,7 +140,7 @@
                 "label": "newParams",
                 "description": [],
                 "signature": [
-                  "{}"
+                  "Partial<{ type?: string | undefined; } & P>"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
@@ -170,6 +170,117 @@
     ],
     "functions": [],
     "interfaces": [
+      {
+        "parentPluginId": "dataViewFieldEditor",
+        "id": "def-public.Field",
+        "type": "Interface",
+        "tags": [],
+        "label": "Field",
+        "description": [
+          "\nThe data model for the field editor"
+        ],
+        "path": "src/plugins/data_view_field_editor/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nname / path used for the field"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nES type"
+            ],
+            "signature": [
+              "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.script",
+            "type": "Object",
+            "tags": [],
+            "label": "script",
+            "description": [
+              "\nsource of the runtime field script"
+            ],
+            "signature": [
+              "{ source: string; } | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.customLabel",
+            "type": "string",
+            "tags": [],
+            "label": "customLabel",
+            "description": [
+              "\ncustom label for display"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.popularity",
+            "type": "number",
+            "tags": [],
+            "label": "popularity",
+            "description": [
+              "\ncustom popularity"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.Field.format",
+            "type": "Object",
+            "tags": [],
+            "label": "format",
+            "description": [
+              "\nconfiguration of the field format"
+            ],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              "SerializableRecord",
+              "> | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dataViewFieldEditor",
         "id": "def-public.FormatEditorProps",
@@ -242,7 +353,9 @@
             "label": "onChange",
             "description": [],
             "signature": [
-              "(newParams: { [key: string]: any; }) => void"
+              "(newParams: ",
+              "SerializableRecord",
+              ") => void"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
@@ -254,23 +367,12 @@
                 "tags": [],
                 "label": "newParams",
                 "description": [],
+                "signature": [
+                  "SerializableRecord"
+                ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "dataViewFieldEditor",
-                    "id": "def-public.FormatEditorProps.onChange.$1.Unnamed",
-                    "type": "IndexSignature",
-                    "tags": [],
-                    "label": "[key: string]: any",
-                    "description": [],
-                    "signature": [
-                      "[key: string]:  any"
-                    ],
-                    "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-                    "deprecated": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -390,7 +492,9 @@
         "type": "Interface",
         "tags": [],
         "label": "OpenFieldEditorOptions",
-        "description": [],
+        "description": [
+          "\nOptions for opening the field editor"
+        ],
         "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
         "deprecated": false,
         "children": [
@@ -400,7 +504,9 @@
             "type": "Object",
             "tags": [],
             "label": "ctx",
-            "description": [],
+            "description": [
+              "\ncontext containing the data view the field belongs to"
+            ],
             "signature": [
               "{ dataView: ",
               {
@@ -421,7 +527,9 @@
             "type": "Function",
             "tags": [],
             "label": "onSave",
-            "description": [],
+            "description": [
+              "\naction to take after field is saved"
+            ],
             "signature": [
               "((field: ",
               {
@@ -465,9 +573,33 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "\nfield to edit, for existing field"
+            ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewFieldEditor",
+            "id": "def-public.OpenFieldEditorOptions.fieldToCreate",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldToCreate",
+            "description": [
+              "\npre-selectable options for new field creation"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.Field",
+                "text": "Field"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false
@@ -536,7 +668,9 @@
       "type": "Interface",
       "tags": [],
       "label": "PluginSetup",
-      "description": [],
+      "description": [
+        "\nPublic setup contract of data view field editor"
+      ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "children": [
@@ -556,7 +690,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any>) => void; }"
+            "<{}>) => void; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false
@@ -571,7 +705,9 @@
       "type": "Interface",
       "tags": [],
       "label": "PluginStart",
-      "description": [],
+      "description": [
+        "\nPublic start contract of data view field editor"
+      ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
       "children": [
@@ -581,7 +717,9 @@
           "type": "Function",
           "tags": [],
           "label": "openEditor",
-          "description": [],
+          "description": [
+            "\nmethod to open the data view field editor fly-out"
+          ],
           "signature": [
             "(options: ",
             {
@@ -679,7 +817,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any>[]; getById: (id: string) => ",
+            "<{}>[]; getById: <P>(id: string) => ",
             {
               "pluginId": "dataViewFieldEditor",
               "scope": "public",
@@ -687,7 +825,7 @@
               "section": "def-public.FieldFormatEditorFactory",
               "text": "FieldFormatEditorFactory"
             },
-            "<any> | undefined; }"
+            "<P> | undefined; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false

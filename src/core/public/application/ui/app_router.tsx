@@ -12,8 +12,8 @@ import { History } from 'history';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '../../types';
-import { CoreTheme } from '../../theme';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';

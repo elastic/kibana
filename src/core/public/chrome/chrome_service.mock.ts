@@ -8,8 +8,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from '.';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {

@@ -14,7 +14,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { HostItem } from '../../../../../common/search_strategy';
+import type { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
@@ -64,7 +64,7 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const { docValueFields, selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useSourcererDataView();
 
   const [loading, { hostDetails: hostOverview }] = useHostDetails({
     endDate: to,
@@ -82,7 +82,6 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData }) => (
         <HostOverview
           contextID={contextID}
-          docValueFields={docValueFields}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}

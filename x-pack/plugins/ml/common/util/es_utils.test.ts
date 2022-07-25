@@ -52,7 +52,26 @@ describe('Util: isValidIndexName()', () => {
     expect(isValidIndexName('a'.repeat(255))).toBe(true);
     expect(isValidIndexName('a'.repeat(256))).toBe(false);
     // multi-byte character test
-    // because jest doesn't have TextEncoder this will still be true
+    // this test relies on TextEncoder being mocked here 'packages/kbn-test/src/jest/setup/polyfills.jsdom.js'
+    expect(isValidIndexName('あ'.repeat(255))).toBe(false);
+  });
+});
+
+describe('Util isValidIndexName() with no TextEncoder avaialble', () => {
+  const TextEncoder = global.TextEncoder;
+
+  beforeAll(() => {
+    // @ts-ignore The operand of a 'delete' operator must be optional
+    delete global.TextEncoder;
+  });
+
+  afterAll(() => {
+    global.TextEncoder = TextEncoder;
+  });
+  // this test is in it's own describe block to prevent ordering issues as it deletes with global scope
+  test('Multi-byte characters should not count extra towards character limit', () => {
+    // @ts-ignore The operand of a 'delete' operator must be optional
+    delete global.TextEncoder;
     expect(isValidIndexName('あ'.repeat(255))).toBe(true);
   });
 });

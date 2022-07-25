@@ -1,0 +1,18 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "indices-stats*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "35796250-bb09-11ec-a8e4-a9868e049a39",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-04-13T09:07:56.793Z",
+  "version": "WzQwLDFd"
+}

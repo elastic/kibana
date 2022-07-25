@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Secure File Deletion via SDelete Utility",
-  "note": "## Triage and analysis\n\nVerify process details such as command line and hash to confirm this activity legitimacy.",
+  "note": "## Triage and analysis\n\nVerify process details such as command line and hash to confirm this activity legitimacy.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"change\" and file.name : \"*AAA.AAA\"\n",
   "risk_score": 21,
   "rule_id": "5aee924b-6ceb-4633-980e-1bde8cdb40c5",
@@ -50,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

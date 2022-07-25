@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
+import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { shallow } from 'enzyme';
-
+import React, { PureComponent } from 'react';
 import { FieldFormatEditor } from './field_format_editor';
-import type { FieldFormat } from '../../../../../../field_formats/common';
 
 class TestEditor extends PureComponent {
   render() {
@@ -21,12 +21,11 @@ class TestEditor extends PureComponent {
   }
 }
 
-const formatEditors = {
-  byFormatId: {
-    ip: TestEditor,
-    number: TestEditor,
-  },
-  getById: jest.fn(() => () => Promise.resolve(TestEditor)),
+const formatEditors: FormatEditorServiceStart['fieldFormatEditors'] = {
+  getById: jest.fn(
+    () => () => Promise.resolve(TestEditor)
+  ) as unknown as FormatEditorServiceStart['fieldFormatEditors']['getById'],
+  getAll: jest.fn(),
 };
 
 describe('FieldFormatEditor', () => {

@@ -10,6 +10,7 @@ import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   SCALING_TYPES,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -21,9 +22,11 @@ import {
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
+  JoinDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
-import { GeoJsonVectorLayer } from '../../vector_layer';
+import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';
@@ -37,12 +40,14 @@ function createChoroplethLayerDescriptor({
   rightIndexPatternId,
   rightIndexPatternTitle,
   rightTermField,
+  layerType,
 }: {
   sourceDescriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
   leftField: string;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string;
   rightTermField: string;
+  layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
 }) {
   const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
   const joinId = uuid();
@@ -51,55 +56,69 @@ function createChoroplethLayerDescriptor({
     aggFieldName: '',
     rightSourceId: joinId,
   });
-  return GeoJsonVectorLayer.createDescriptor({
-    joins: [
-      {
-        leftField,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId: rightIndexPatternId,
-          indexPatternTitle: rightIndexPatternTitle,
-          term: rightTermField,
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-          applyForceRefresh: true,
+
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
+    [VECTOR_STYLES.FILL_COLOR]: {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
+        field: {
+          name: joinKey,
+          origin: FIELD_ORIGIN.JOIN,
+        },
+        color: 'Yellow to Red',
+        type: COLOR_MAP_TYPE.ORDINAL,
+      },
+    },
+    [VECTOR_STYLES.LINE_COLOR]: {
+      type: STYLE_TYPE.STATIC,
+      options: {
+        color: '#3d3d3d',
+      },
+    },
+  };
+  // Styling label by join metric with MVT is not supported
+  if (layerType === LAYER_TYPE.GEOJSON_VECTOR) {
+    styleProperties[VECTOR_STYLES.LABEL_TEXT] = {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+        field: {
+          name: joinKey,
+          origin: FIELD_ORIGIN.JOIN,
         },
       },
-    ],
-    sourceDescriptor,
-    style: VectorStyle.createDescriptor({
-      [VECTOR_STYLES.FILL_COLOR]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
-          field: {
-            name: joinKey,
-            origin: FIELD_ORIGIN.JOIN,
-          },
-          color: 'Yellow to Red',
-          type: COLOR_MAP_TYPE.ORDINAL,
-        },
+    };
+  }
+
+  const joins = [
+    {
+      leftField,
+      right: {
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
+        id: joinId,
+        indexPatternId: rightIndexPatternId,
+        indexPatternTitle: rightIndexPatternTitle,
+        term: rightTermField,
+        metrics: [metricsDescriptor],
+        applyGlobalQuery: true,
+        applyGlobalTime: true,
+        applyForceRefresh: true,
       },
-      [VECTOR_STYLES.LINE_COLOR]: {
-        type: STYLE_TYPE.STATIC,
-        options: {
-          color: '#3d3d3d',
-        },
-      },
-      [VECTOR_STYLES.LABEL_TEXT]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
-          field: {
-            name: joinKey,
-            origin: FIELD_ORIGIN.JOIN,
-          },
-        },
-      },
-    }),
-  });
+    } as JoinDescriptor,
+  ];
+
+  return layerType === LAYER_TYPE.MVT_VECTOR
+    ? MvtVectorLayer.createDescriptor({
+        joins,
+        sourceDescriptor,
+        style: VectorStyle.createDescriptor(styleProperties),
+      })
+    : GeoJsonVectorLayer.createDescriptor({
+        joins,
+        sourceDescriptor,
+        style: VectorStyle.createDescriptor(styleProperties),
+      });
 }
 
 export function createEmsChoroplethLayerDescriptor({
@@ -124,6 +143,7 @@ export function createEmsChoroplethLayerDescriptor({
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
+    layerType: LAYER_TYPE.GEOJSON_VECTOR,
   });
 }
 
@@ -146,7 +166,7 @@ export function createEsChoroplethLayerDescriptor({
     sourceDescriptor: ESSearchSource.createDescriptor({
       indexPatternId: leftIndexPatternId,
       geoField: leftGeoField,
-      scalingType: SCALING_TYPES.LIMIT,
+      scalingType: SCALING_TYPES.MVT,
       tooltipProperties: [leftJoinField],
       applyGlobalQuery: false,
       applyGlobalTime: false,
@@ -156,5 +176,6 @@ export function createEsChoroplethLayerDescriptor({
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
+    layerType: LAYER_TYPE.MVT_VECTOR,
   });
 }

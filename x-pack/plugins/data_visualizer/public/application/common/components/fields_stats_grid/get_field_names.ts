@@ -6,10 +6,10 @@
  */
 
 import { difference } from 'lodash';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
-import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { JobFieldType } from '../../../../../common/types';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 
@@ -44,11 +44,11 @@ export function getSupportedFieldType(type: string): JobFieldType {
     case ES_FIELD_TYPES.LONG:
     case ES_FIELD_TYPES.SHORT:
     case ES_FIELD_TYPES.UNSIGNED_LONG:
-      return JOB_FIELD_TYPES.NUMBER;
+      return SUPPORTED_FIELD_TYPES.NUMBER;
 
     case ES_FIELD_TYPES.DATE:
     case ES_FIELD_TYPES.DATE_NANOS:
-      return JOB_FIELD_TYPES.DATE;
+      return SUPPORTED_FIELD_TYPES.DATE;
 
     default:
       return type as JobFieldType;

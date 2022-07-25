@@ -4,23 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Filter, isFilters, isFilterPinned } from '@kbn/es-query';
-import type { KibanaLocation } from 'src/plugins/share/public';
-import {
-  DashboardAppLocatorParams,
-  cleanEmptyKeys,
-} from '../../../../../../../src/plugins/dashboard/public';
-import { setStateToKbnUrl } from '../../../../../../../src/plugins/kibana_utils/public';
-import {
-  ApplyGlobalFilterActionContext,
-  APPLY_FILTER_TRIGGER,
-  isQuery,
-  isTimeRange,
-  Query,
-  TimeRange,
-  extractTimeRange,
-} from '../../../../../../../src/plugins/data/public';
-import { IEmbeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
+import { type Filter, isFilters, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
+import { DashboardAppLocatorParams, cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { APPLY_FILTER_TRIGGER, isQuery, isTimeRange } from '@kbn/data-plugin/public';
+import { extractTimeRange } from '@kbn/es-query';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
@@ -28,7 +20,6 @@ import {
 } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
-import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;

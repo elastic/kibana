@@ -57,6 +57,8 @@ describe('registerTransactionDurationAlertType', () => {
       interval: `5m`,
       reason:
         'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
     });
   });
 });

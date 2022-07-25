@@ -71,8 +71,9 @@ export async function generateData({
     timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
+          .containerId('instance-a')
           .transaction(transaction.name)
           .timestamp(timestamp)
           .defaults({
@@ -94,12 +95,11 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
           .transaction(transaction.name)
           .timestamp(timestamp)
@@ -122,7 +122,6 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
   ];
 

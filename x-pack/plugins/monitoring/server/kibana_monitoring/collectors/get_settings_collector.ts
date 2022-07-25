@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { Collector, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { Logger } from '@kbn/core/server';
+import { Collector, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';

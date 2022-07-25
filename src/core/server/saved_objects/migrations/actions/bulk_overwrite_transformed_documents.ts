@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
@@ -18,11 +18,7 @@ import {
 } from './catch_retryable_es_client_errors';
 import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type {
-  TargetIndexHadWriteBlock,
-  RequestEntityTooLargeException,
-  IndexNotFound,
-} from './index';
+import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException, IndexNotFound } from '.';
 
 /**
  * Given a document and index, creates a valid body for the Bulk API.

@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { CommentsResponse } from '../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CommentsResponse } from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
   postCaseReq,

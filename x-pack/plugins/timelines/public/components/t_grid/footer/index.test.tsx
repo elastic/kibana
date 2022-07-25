@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
 
-import { FooterComponent, PagingControlComponent } from './index';
+import { FooterComponent, PagingControlComponent } from '.';
 
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();

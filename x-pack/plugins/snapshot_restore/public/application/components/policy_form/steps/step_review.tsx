@@ -23,8 +23,9 @@ import {
 } from '@elastic/eui';
 import { serializePolicy } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
-import { StepProps } from './';
+import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
+import { PolicyFeatureStatesSummary } from '../../summaries';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -32,9 +33,10 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
 }) => {
   const { i18n } = useServices();
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
+  const { indices, includeGlobalState, featureStates, ignoreUnavailable, partial } = config || {
     indices: undefined,
     includeGlobalState: undefined,
+    featureStates: [],
     ignoreUnavailable: undefined,
     partial: undefined,
   };
@@ -131,7 +133,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xxl" />
 
       {/* Snapshot settings summary */}
       <EuiTitle size="s">
@@ -189,29 +191,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialIndicesLabel"
-                defaultMessage="Allow partial indices"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {partial ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialTrueLabel"
-                  defaultMessage="Yes"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialFalseLabel"
-                  defaultMessage="No"
-                />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateLabel"
                 defaultMessage="Include global state"
               />
@@ -226,6 +205,37 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateTrueLabel"
                   defaultMessage="Yes"
+                />
+              )}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        <PolicyFeatureStatesSummary
+          includeGlobalState={includeGlobalState}
+          featureStates={featureStates}
+        />
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialIndicesLabel"
+                defaultMessage="Allow partial indices"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {partial ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialTrueLabel"
+                  defaultMessage="Yes"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialFalseLabel"
+                  defaultMessage="No"
                 />
               )}
             </EuiDescriptionListDescription>

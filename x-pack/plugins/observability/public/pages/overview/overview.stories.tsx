@@ -7,15 +7,16 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
-import React from 'react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
-import { OverviewPage } from './';
+import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
@@ -23,10 +24,6 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import {
-  createKibanaReactContext,
-  KibanaPageTemplate,
-} from '../../../../../../src/plugins/kibana_react/public';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
@@ -41,7 +38,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
+  wrapper: (storyFn, context) => {
     unregisterAll();
     const KibanaReactContext = createKibanaReactContext({
       application: {
@@ -49,6 +46,16 @@ const withCore = makeDecorator({
         capabilities: { navLinks: { integrations: true } },
         currentAppId$: {
           subscribe: () => {},
+        },
+      },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              setTime: () => {},
+              getTime: () => ({}),
+            },
+          },
         },
       },
       http: {
@@ -75,32 +82,11 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
-              config: {
-                unsafe: {
-                  alertingExperience: { enabled: true },
-                  cases: { enabled: true },
-                  overviewNext: { enabled: false },
-                  rules: { enabled: false },
-                },
-              },
-              core: options as CoreStart,
-              plugins: {
-                data: {
-                  query: {
-                    timefilter: {
-                      timefilter: {
-                        setTime: () => {},
-                        getTime: () => ({}),
-                      },
-                    },
-                  },
-                },
-              } as unknown as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}
           >
-            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+            <HasDataContextProvider>{storyFn(context) as ReactNode}</HasDataContextProvider>
           </PluginContext.Provider>
         </KibanaReactContext.Provider>
       </MemoryRouter>
@@ -229,7 +215,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -242,28 +228,22 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: false, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return <OverviewPage routeParams={{ query: {} }} />;
+    return <OverviewPage />;
   })
   .add('Single Panel', () => {
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add('Logs and Metrics', () => {
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -271,13 +251,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'metric-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Logs, Metrics, and Alerts',
@@ -285,7 +259,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -293,13 +267,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'metric-*' }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -309,7 +277,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -322,13 +290,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: sampleAPMIndices }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -341,7 +303,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -354,13 +316,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Logs, Metrics, APM, Uptime, and Alerts',
@@ -373,7 +329,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -386,13 +342,7 @@ storiesOf('app/Overview', module)
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
 
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -407,7 +357,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -419,13 +369,7 @@ storiesOf('app/Overview', module)
         fetchData: fetchUptimeData,
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithNewsFeed }
   )
@@ -438,7 +382,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => emptyLogsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -451,13 +395,7 @@ storiesOf('app/Overview', module)
       hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   })
   .add(
     'Fetch Data with Error',
@@ -474,7 +412,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching Logs data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -490,13 +428,7 @@ storiesOf('app/Overview', module)
         },
         hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreAlertsThrowsError }
   )
@@ -535,13 +467,7 @@ storiesOf('app/Overview', module)
           throw new Error('Error has data');
         },
       });
-      return (
-        <OverviewPage
-          routeParams={{
-            query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-          }}
-        />
-      );
+      return <OverviewPage />;
     },
     { core: coreWithAlerts }
   )
@@ -579,11 +505,5 @@ storiesOf('app/Overview', module)
       },
     });
 
-    return (
-      <OverviewPage
-        routeParams={{
-          query: { rangeFrom: '2020-06-27T22:00:00.000Z', rangeTo: '2020-06-30T21:59:59.999Z' },
-        }}
-      />
-    );
+    return <OverviewPage />;
   });

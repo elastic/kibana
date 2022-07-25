@@ -7,12 +7,14 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import { IndexMapping } from '../mappings';
-import { SavedObjectsMigrationVersion } from '../../../types';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { Logger } from '@kbn/logging';
+import type { IndexMapping } from '../mappings';
+import type { SavedObjectsMigrationVersion } from '../../../types';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { InitState } from './state';
-import { excludeUnusedTypesQuery } from '../migrations/core';
+import type { InitState } from './state';
+import { excludeUnusedTypesQuery } from './core';
 
 /**
  * Construct the initial state for the model
@@ -25,6 +27,8 @@ export const createInitialState = ({
   indexPrefix,
   migrationsConfig,
   typeRegistry,
+  docLinks,
+  logger,
 }: {
   kibanaVersion: string;
   targetMappings: IndexMapping;
@@ -33,6 +37,8 @@ export const createInitialState = ({
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+  logger: Logger;
 }): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
@@ -64,6 +70,26 @@ export const createInitialState = ({
       .filter((type) => !!type.excludeOnUpgrade)
       .map((type) => [type.name, type.excludeOnUpgrade!])
   );
+  // short key to access savedObjects entries directly from docLinks
+  const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
+
+  if (
+    migrationsConfig.discardUnknownObjects &&
+    migrationsConfig.discardUnknownObjects !== kibanaVersion
+  ) {
+    logger.warn(
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
+    );
+  }
+
+  if (
+    migrationsConfig.discardCorruptObjects &&
+    migrationsConfig.discardCorruptObjects !== kibanaVersion
+  ) {
+    logger.warn(
+      'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
+    );
+  }
 
   return {
     controlState: 'INIT',
@@ -83,9 +109,12 @@ export const createInitialState = ({
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
+    discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
+    discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
-    unusedTypesQuery: excludeUnusedTypesQuery,
+    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
+    migrationDocLinks,
   };
 };

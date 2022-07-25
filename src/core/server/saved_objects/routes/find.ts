@@ -7,15 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerFindRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   const referenceSchema = schema.object({
     type: schema.string(),
     id: schema.string(),
@@ -73,8 +76,8 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
           });
         }
       }
-
-      const result = await context.core.savedObjects.client.find({
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,
         type: Array.isArray(query.type) ? query.type : [query.type],

@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public';
+import { CoreStart, AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 
 /**
  * A factory function for creating a service.

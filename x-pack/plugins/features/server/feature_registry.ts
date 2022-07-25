@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { ILicense } from '../../licensing/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import {
   KibanaFeatureConfig,
   KibanaFeature,

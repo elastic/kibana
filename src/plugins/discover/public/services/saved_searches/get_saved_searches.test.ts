@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsStart } from 'kibana/public';
-import type { DataPublicPluginStart } from '../../../../data/public';
+import type { SavedObjectsStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
 
@@ -105,6 +105,7 @@ describe('getSavedSearch', () => {
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "rowHeight": undefined,
+        "rowsPerPage": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],
@@ -112,6 +113,7 @@ describe('getSavedSearch', () => {
           "destroy": [MockFunction],
           "fetch": [MockFunction],
           "fetch$": [MockFunction],
+          "getActiveIndexFilter": [MockFunction],
           "getField": [MockFunction],
           "getFields": [MockFunction],
           "getId": [MockFunction],
@@ -121,14 +123,17 @@ describe('getSavedSearch', () => {
           "getSerializedFields": [MockFunction],
           "history": Array [],
           "onRequestStart": [MockFunction],
+          "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],
           "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
+          "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
+          "aliasPurpose": undefined,
           "aliasTargetId": undefined,
           "errorJSON": undefined,
           "outcome": "exactMatch",

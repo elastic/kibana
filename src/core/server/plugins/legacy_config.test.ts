@@ -8,10 +8,10 @@
 
 import { take } from 'rxjs/operators';
 import { ConfigService, Env } from '@kbn/config';
-import { getEnvOptions, rawConfigServiceMock } from '../config/mocks';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';

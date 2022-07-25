@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../../http';
 import { catchAndReturnBoomErrors } from '../utils';
+import type { InternalSavedObjectRouter } from '../../internal_types';
 import { deleteUnknownTypeObjects } from '../../deprecations';
 
 interface RouteDependencies {
@@ -16,7 +16,7 @@ interface RouteDependencies {
 }
 
 export const registerDeleteUnknownTypesRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   { kibanaIndex, kibanaVersion }: RouteDependencies
 ) => {
   router.post(
@@ -25,9 +25,10 @@ export const registerDeleteUnknownTypesRoute = (
       validate: false,
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      const { elasticsearch, savedObjects } = await context.core;
       await deleteUnknownTypeObjects({
-        esClient: context.core.elasticsearch.client,
-        typeRegistry: context.core.savedObjects.typeRegistry,
+        esClient: elasticsearch.client,
+        typeRegistry: savedObjects.typeRegistry,
         kibanaIndex,
         kibanaVersion,
       });

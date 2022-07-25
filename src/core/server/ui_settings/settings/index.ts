@@ -14,6 +14,7 @@ import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
+import { getAnnouncementsSettings } from './announcements';
 
 interface GetCoreSettingsOptions {
   isDist?: boolean;
@@ -24,6 +25,7 @@ export const getCoreSettings = (
 ): Record<string, UiSettingsParams> => {
   return {
     ...getAccessibilitySettings(),
+    ...getAnnouncementsSettings(),
     ...getDateFormatSettings(),
     ...getMiscUiSettings(),
     ...getNavigationSettings(),

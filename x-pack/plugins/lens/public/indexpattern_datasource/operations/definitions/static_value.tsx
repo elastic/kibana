@@ -7,11 +7,16 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { OperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn, GenericIndexPatternColumn } from './column_types';
+import { OperationDefinition } from '.';
+import {
+  ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  ValueFormatConfig,
+} from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
+import { getColumnOrder } from '../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -37,12 +42,7 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
   operationType: 'static_value';
   params: {
     value?: string;
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 
@@ -133,19 +133,27 @@ export const staticValueOperation: OperationDefinition<
   isTransferable: (column) => {
     return true;
   },
-  createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
-    const currentColumn = layer.columns[sourceId] as StaticValueIndexPatternColumn;
+  createCopy(layers, source, target) {
+    const currentColumn = layers[source.layerId].columns[
+      source.columnId
+    ] as StaticValueIndexPatternColumn;
+    const targetLayer = layers[target.layerId];
+    const columns = {
+      ...targetLayer.columns,
+      [target.columnId]: { ...currentColumn },
+    };
     return {
-      ...layer,
-      columns: {
-        ...layer.columns,
-        [targetId]: { ...currentColumn },
+      ...layers,
+      [target.layerId]: {
+        ...targetLayer,
+        columns,
+        columnOrder: getColumnOrder({ ...targetLayer, columns }),
       },
     };
   },
 
   paramEditor: function StaticValueEditor({
-    updateLayer,
+    paramEditorUpdater,
     currentColumn,
     columnId,
     activeData,
@@ -160,7 +168,7 @@ export const staticValueOperation: OperationDefinition<
         }
         // Because of upstream specific UX flows, we need fresh layer state here
         // so need to use the updater pattern
-        updateLayer((newLayer) => {
+        paramEditorUpdater((newLayer) => {
           const newColumn = newLayer.columns[columnId] as StaticValueIndexPatternColumn;
           return {
             ...newLayer,
@@ -178,7 +186,7 @@ export const staticValueOperation: OperationDefinition<
           };
         });
       },
-      [columnId, updateLayer, currentColumn?.params?.value]
+      [columnId, paramEditorUpdater, currentColumn?.params?.value]
     );
 
     // Pick the data from the current activeData (to be used when the current operation is not static_value)
@@ -208,9 +216,10 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
+        <EuiFormLabel>{paramEditorCustomProps?.labels?.[0] || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed
           value={inputValue ?? ''}

@@ -37,6 +37,16 @@ const CAPITALIZATION_MAP = {
       { defaultMessage: 'API' }
     ),
   },
+  [LogRetentionOptions.Audit]: {
+    capitalized: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.logRetention.type.audit.title.capitalized',
+      { defaultMessage: 'Audit' }
+    ),
+    lowercase: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.logRetention.type.audit.title.lowercase',
+      { defaultMessage: 'audit' }
+    ),
+  },
   [LogRetentionOptions.Crawler]: {
     capitalized: i18n.translate(
       'xpack.enterpriseSearch.appSearch.logRetention.type.crawler.title.capitalized',

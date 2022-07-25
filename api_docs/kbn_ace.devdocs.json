@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.addToRules",
+        "id": "def-common.addToRules",
         "type": "Function",
         "tags": [],
         "label": "addToRules",
@@ -26,7 +34,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.addToRules.$1",
+            "id": "def-common.addToRules.$1",
             "type": "Any",
             "tags": [],
             "label": "otherRules",
@@ -40,7 +48,7 @@
           },
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.addToRules.$2",
+            "id": "def-common.addToRules.$2",
             "type": "Any",
             "tags": [],
             "label": "embedUnder",
@@ -58,7 +66,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.ElasticsearchSqlHighlightRules",
+        "id": "def-common.ElasticsearchSqlHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "ElasticsearchSqlHighlightRules",
@@ -74,7 +82,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.installXJsonMode",
+        "id": "def-common.installXJsonMode",
         "type": "Function",
         "tags": [],
         "label": "installXJsonMode",
@@ -89,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.installXJsonMode.$1",
+            "id": "def-common.installXJsonMode.$1",
             "type": "Object",
             "tags": [],
             "label": "editor",
@@ -107,7 +115,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.ScriptHighlightRules",
+        "id": "def-common.ScriptHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "ScriptHighlightRules",
@@ -120,7 +128,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.ScriptHighlightRules.$1",
+            "id": "def-common.ScriptHighlightRules.$1",
             "type": "Any",
             "tags": [],
             "label": "this",
@@ -138,7 +146,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.XJsonHighlightRules",
+        "id": "def-common.XJsonHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "XJsonHighlightRules",
@@ -151,7 +159,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.XJsonHighlightRules.$1",
+            "id": "def-common.XJsonHighlightRules.$1",
             "type": "Any",
             "tags": [],
             "label": "this",
@@ -173,7 +181,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.XJsonMode",
+        "id": "def-common.XJsonMode",
         "type": "Any",
         "tags": [],
         "label": "XJsonMode",
@@ -186,14 +194,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

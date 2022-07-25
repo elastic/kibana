@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery, termQuery } from '../../../../../observability/server';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';

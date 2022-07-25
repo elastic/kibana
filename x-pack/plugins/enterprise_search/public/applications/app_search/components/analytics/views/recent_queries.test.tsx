@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { RecentQueriesTable } from '../components';
 
-import { RecentQueries } from './';
+import { RecentQueries } from '.';
 
 describe('RecentQueries', () => {
   it('renders', () => {

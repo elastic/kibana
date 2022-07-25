@@ -7,12 +7,14 @@
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
+import type {
   Direction,
-  FlowTargetSourceDest,
-  NetworkTopTablesFields,
   NetworkTopCountriesRequestOptions,
   SortField,
+} from '../../../../../../common/search_strategy';
+import {
+  FlowTargetSourceDest,
+  NetworkTopTablesFields,
 } from '../../../../../../common/search_strategy';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({

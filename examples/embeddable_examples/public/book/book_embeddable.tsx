@@ -17,7 +17,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   AttributeService,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
 

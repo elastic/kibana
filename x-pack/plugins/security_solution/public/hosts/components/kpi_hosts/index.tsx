@@ -8,10 +8,9 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
-import { HostsKpiProps } from './types';
+import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
@@ -60,17 +59,6 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
             />
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <HostsKpiAuthentications
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
             <HostsKpiUniqueIps
               filterQuery={filterQuery}
               from={from}
@@ -90,32 +78,23 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
 export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <HostsKpiAuthentications
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <HostsKpiUniqueIps
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
+  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
+    return (
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <HostsKpiUniqueIps
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            narrowDateRange={narrowDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 );
 
 HostsDetailsKpiComponent.displayName = 'HostsDetailsKpiComponent';

@@ -30,7 +30,11 @@ export const SourceAdded: React.FC = () => {
   const state = JSON.parse(params.state);
   const isOrganization = state.context !== 'account';
   const { setChromeIsVisible } = useValues(KibanaLogic);
-  const { saveSourceParams } = useActions(AddSourceLogic);
+  const addSourceLogic = AddSourceLogic({
+    serviceType: state.service_type,
+    initialStep: 'configure',
+  });
+  const { saveSourceParams } = useActions(addSourceLogic);
 
   // We don't want the personal dashboard to flash the Kibana chrome, so we hide it.
   setChromeIsVisible(isOrganization);

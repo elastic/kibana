@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
 
 export class SessionNotificationsPlugin implements Plugin {

@@ -20,8 +20,8 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectFinderUi } from '../../../../../../saved_objects/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 

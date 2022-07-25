@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { KeyValueFilterList } from './';
+import { KeyValueFilterList } from '.';
 import {
   expectTextsInDocument,
   renderWithTheme,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpServiceSetup } from 'kibana/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export function registerRoutes(http: HttpServiceSetup) {
@@ -33,7 +33,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       }
 
       if (keyId) {
-        const client = context.core.savedObjects.getClient();
+        const client = (await context.core).savedObjects.getClient();
         await client.delete('test-deprecations-plugin', keyId, {
           refresh: true,
         });

@@ -16,9 +16,9 @@ export const setup = (
   format: IFieldFormat,
   convert: TextContextTypeConvert = asPrettyString
 ): TextContextTypeConvert => {
-  const recurse: TextContextTypeConvert = (value) => {
+  const recurse: TextContextTypeConvert = (value, options) => {
     if (!value || !isFunction(value.map)) {
-      return convert.call(format, value);
+      return convert.call(format, value, options);
     }
 
     // format a list of values. In text contexts we just use JSON encoding

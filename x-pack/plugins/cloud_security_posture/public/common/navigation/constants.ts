@@ -5,17 +5,65 @@
  * 2.0.
  */
 
-import * as TEXT from './translations';
+import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
-import type { CspPage, CspNavigationItem } from './types';
+import type { CspPage, CspPageNavigationItem } from './types';
 
-export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
-  dashboard: { name: TEXT.DASHBOARD, path: '/dashboard' },
-  findings: { name: TEXT.FINDINGS, path: '/findings' },
-  rules: { name: 'Rules', path: '/rules', disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks },
-  benchmarks: {
-    name: TEXT.MY_BENCHMARKS,
-    path: '/benchmarks',
+const NAV_ITEMS_NAMES = {
+  DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
+    defaultMessage: 'Dashboard',
+  }),
+  FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
+    defaultMessage: 'Findings',
+  }),
+  BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
+    defaultMessage: 'My Benchmarks',
+  }),
+  RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
+    defaultMessage: 'Rules',
+  }),
+};
+
+/** The base path for all cloud security posture pages. */
+export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
+
+export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
+  dashboard: {
+    name: NAV_ITEMS_NAMES.DASHBOARD,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
+    id: 'cloud_security_posture-dashboard',
+  },
+  findings: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings`,
+    id: 'cloud_security_posture-findings',
+  },
+  rules: {
+    name: NAV_ITEMS_NAMES.RULES,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
+    id: 'cloud_security_posture-rules',
+  },
+  benchmarks: {
+    name: NAV_ITEMS_NAMES.BENCHMARKS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks`,
+    exact: true,
+    disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
+    id: 'cloud_security_posture-benchmarks',
+  },
+};
+
+export const findingsNavigation = {
+  findings_default: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/default`,
+  },
+  findings_by_resource: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource`,
+  },
+  resource_findings: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
   },
 };

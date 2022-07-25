@@ -230,7 +230,7 @@ export class AnomaliesTableInternal extends Component {
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
         <EuiInMemoryTable
-          className="ml-anomalies-table eui-textOverflowWrap"
+          className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
           pagination={pagination}

@@ -6,7 +6,7 @@
  */
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
-import { SecuritySubPlugins } from '../../app/types';
+import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
 import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';

@@ -9,9 +9,9 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { ExtendedBoundsOutput, KibanaTimerangeOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggDateHistogramFnName = 'aggDateHistogram';
 
@@ -116,6 +116,13 @@ export const aggDateHistogram = (): FunctionDefinition => ({
       help: i18n.translate('data.search.aggs.buckets.dateHistogram.extendedBounds.help', {
         defaultMessage:
           'With extended_bounds setting, you now can "force" the histogram aggregation to start building buckets on a specific min value and also keep on building buckets up to a max value ',
+      }),
+    },
+    extendToTimeRange: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.dateHistogram.extendToTimeRange.help', {
+        defaultMessage:
+          'Auto-sets the extended bounds to the currently applied time range. Is ignored if extended_bounds is set',
       }),
     },
     json: {

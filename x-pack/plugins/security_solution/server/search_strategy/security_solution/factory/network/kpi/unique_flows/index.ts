@@ -7,14 +7,14 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   NetworkKpiQueries,
   NetworkKpiUniqueFlowsStrategyResponse,
   NetworkKpiUniqueFlowsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildUniqueFlowsQuery } from './query.network_kpi_unique_flows.dsl';
 
 export const networkKpiUniqueFlows: SecuritySolutionFactory<NetworkKpiQueries.uniqueFlows> = {

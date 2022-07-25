@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../../../src/plugins/data/server';
-import { InfraSources } from '../../lib/sources';
+} from '@kbn/data-plugin/server';
+import type { LogViewsServiceStart } from '../log_views/types';
 
 export interface LogEntriesServiceSetupDeps {
   data: DataPluginSetup;
-  sources: InfraSources;
 }
 
-export interface LogEntriesServiceStartDeps {
+export interface LogEntriesServicePluginsStartDeps {
   data: DataPluginStart;
+}
+
+export interface LogEntriesServicePluginSelfDeps {
+  logViews: LogViewsServiceStart;
 }

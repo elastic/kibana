@@ -10,9 +10,9 @@ import {
   SavedObjectsType,
   SavedObjectTypeRegistry,
   Capabilities,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { mapToResult, mapToResults } from './map_object_to_result';
-import { SavedObjectReference } from 'src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 
 const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   return {
@@ -153,6 +153,7 @@ describe('mapToResults', () => {
         management: {
           defaultSearchField: 'excerpt',
           getInAppUrl: (obj) => ({ path: `/type-c/${obj.id}`, uiCapabilitiesPath: 'test.typeC' }),
+          getTitle: (obj) => `${obj.attributes.title} ${obj.attributes.name}`,
         },
       })
     );
@@ -204,6 +205,7 @@ describe('mapToResults', () => {
         {
           excerpt: 'titleC',
           title: 'foo',
+          name: 'name',
         },
         [
           { name: 'tag A', type: 'tag', id: '1' },
@@ -235,7 +237,7 @@ describe('mapToResults', () => {
       },
       {
         id: 'resultC',
-        title: 'titleC',
+        title: 'foo name',
         type: 'typeC',
         url: '/type-c/resultC',
         score: 42,

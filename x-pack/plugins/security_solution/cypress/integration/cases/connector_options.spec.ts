@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   getCase1,
   getConnectorIds,
@@ -28,8 +28,11 @@ import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../screens/case_deta
 import { cleanKibana } from '../../tasks/common';
 
 describe('Cases connector incident fields', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
     cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
     cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
       const response =
@@ -59,7 +62,7 @@ describe('Cases connector incident fields', () => {
   });
 
   it('Correct incident fields show when connector is changed', () => {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(getCase1());
     fillJiraConnectorOptions(getJiraConnectorOptions());

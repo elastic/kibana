@@ -9,7 +9,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { TraceLink } from './';
+import { TraceLink } from '.';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -122,7 +122,7 @@ describe('TraceLink', () => {
       const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now'
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId='
       );
     });
   });

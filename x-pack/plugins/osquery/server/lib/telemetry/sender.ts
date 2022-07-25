@@ -9,19 +9,20 @@ import axios from 'axios';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
+} from '@kbn/task-manager-plugin/server';
+import type { TelemetryReceiver } from './receiver';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { OsqueryTelemetryTask, OsqueryTelemetryTaskConfig } from './task';
+import type { OsqueryTelemetryTaskConfig } from './task';
+import { OsqueryTelemetryTask } from './task';
 
 const usageLabelPrefix: string[] = ['osquery_telemetry', 'sender'];
 
@@ -59,6 +60,7 @@ export class TelemetryEventsSender {
         (config: OsqueryTelemetryTaskConfig) => {
           const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
           task.register(taskManager);
+
           return task;
         }
       );
@@ -128,6 +130,7 @@ export class TelemetryEventsSender {
 
   public async isTelemetryOptedIn() {
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+
     return this.isOptedIn === true;
   }
 
@@ -148,6 +151,7 @@ export class TelemetryEventsSender {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
         this.isSending = false;
+
         return;
       }
 
@@ -183,6 +187,7 @@ export class TelemetryEventsSender {
     } catch (err) {
       this.queue = [];
     }
+
     this.isSending = false;
   }
 
@@ -229,6 +234,7 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
+
     return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
@@ -242,6 +248,7 @@ export class TelemetryEventsSender {
     } else {
       url.pathname = `/v3-dev/send/${channel}`;
     }
+
     return url.toString();
   }
 
@@ -261,11 +268,12 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Cluster-Name': clusterName,
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
+          ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
+        timeout: 5000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),

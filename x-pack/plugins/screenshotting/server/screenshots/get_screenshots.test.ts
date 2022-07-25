@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
+import { ConfigType } from '../config';
+import { Layout } from '../layouts';
+import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getScreenshots } from './get_screenshots';
 
 describe('getScreenshots', () => {
@@ -21,19 +25,22 @@ describe('getScreenshots', () => {
     {
       attributes: { description: 'description2', title: 'title2' },
       position: {
-        boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
-        scroll: { x: 100, y: 100 },
+        boundingClientRect: { top: 200, left: 10, height: 10, width: 100 },
+        scroll: { x: 100, y: 300 },
       },
     },
   ];
   let browser: ReturnType<typeof createMockBrowserDriver>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
+  let config = {} as ConfigType;
+  let layout: Layout;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    logger = { info: jest.fn() } as unknown as jest.Mocked<Logger>;
-
+    config = { capture: { zoom: 2 } } as ConfigType;
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
+    layout = createMockLayout();
   });
 
   afterEach(() => {
@@ -41,8 +48,9 @@ describe('getScreenshots', () => {
   });
 
   it('should return screenshots', async () => {
-    await expect(getScreenshots(browser, logger, elementsPositionAndAttributes)).resolves
-      .toMatchInlineSnapshot(`
+    await expect(
+      getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout })
+    ).resolves.toMatchInlineSnapshot(`
             Array [
               Object {
                 "data": Object {
@@ -87,24 +95,26 @@ describe('getScreenshots', () => {
   });
 
   it('should forward elements positions', async () => {
-    await getScreenshots(browser, logger, elementsPositionAndAttributes);
+    await getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout });
 
     expect(browser.screenshot).toHaveBeenCalledTimes(2);
-    expect(browser.screenshot).toHaveBeenNthCalledWith(
-      1,
-      elementsPositionAndAttributes[0].position
-    );
-    expect(browser.screenshot).toHaveBeenNthCalledWith(
-      2,
-      elementsPositionAndAttributes[1].position
-    );
+    expect(browser.screenshot).toHaveBeenNthCalledWith(1, {
+      elementPosition: elementsPositionAndAttributes[0].position,
+      layout,
+      error: undefined,
+    });
+    expect(browser.screenshot).toHaveBeenNthCalledWith(2, {
+      elementPosition: elementsPositionAndAttributes[1].position,
+      layout,
+      error: undefined,
+    });
   });
 
   it('should reject when the taken screenshot is empty', async () => {
     browser.screenshot.mockResolvedValue(Buffer.from(''));
 
     await expect(
-      getScreenshots(browser, logger, elementsPositionAndAttributes)
+      getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout })
     ).rejects.toBeInstanceOf(Error);
   });
 });

@@ -10,7 +10,8 @@ import chalk from 'chalk';
 import Listr from 'listr';
 import { resolve } from 'path';
 
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 
@@ -37,32 +38,37 @@ run(
     }
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    const list = new Listr([
-      {
-        title: 'Merging .i18nrc.json files',
-        task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
-      },
-      {
-        title: 'Extracting Default Messages',
-        task: ({ config }) =>
-          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
-      },
-      {
-        title: 'Writing to file',
-        enabled: (ctx) => outputDir && ctx.messages.size,
-        task: async (ctx) => {
-          const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
-            key1.localeCompare(key2)
-          );
-          await writeFileAsync(
-            resolve(outputDir, 'en.json'),
-            outputFormat === 'json5'
-              ? serializeToJson5(sortedMessages)
-              : serializeToJson(sortedMessages)
-          );
+    const list = new Listr(
+      [
+        {
+          title: 'Merging .i18nrc.json files',
+          task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
-      },
-    ]);
+        {
+          title: 'Extracting Default Messages',
+          task: ({ config }) =>
+            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+        },
+        {
+          title: 'Writing to file',
+          enabled: (ctx) => outputDir && ctx.messages.size,
+          task: async (ctx) => {
+            const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
+              key1.localeCompare(key2)
+            );
+            await writeFileAsync(
+              resolve(outputDir, 'en.json'),
+              outputFormat === 'json5'
+                ? serializeToJson5(sortedMessages)
+                : serializeToJson(sortedMessages)
+            );
+          },
+        },
+      ],
+      {
+        renderer: process.env.CI ? 'verbose' : 'default',
+      }
+    );
 
     try {
       const reporter = new ErrorReporter();

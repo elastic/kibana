@@ -17,6 +17,8 @@ const isPageNameWithEmptyView = (currentName: string) => {
     SecurityPageName.network,
     SecurityPageName.timelines,
     SecurityPageName.overview,
+    SecurityPageName.users,
+    SecurityPageName.kubernetes,
   ];
   return pageNamesWithEmptyView.includes(currentName);
 };
@@ -25,7 +27,8 @@ export const useShowPagesWithEmptyView = () => {
   const [{ pageName }] = useRouteSpy();
   const { indicesExist } = useSourcererDataView();
 
-  const shouldShowEmptyState = isPageNameWithEmptyView(pageName) && !indicesExist;
+  const shouldShowEmptyState =
+    (isPageNameWithEmptyView(pageName) && !indicesExist) || pageName === SecurityPageName.landing;
 
   const [showEmptyState, setShowEmptyState] = useState(shouldShowEmptyState);
 

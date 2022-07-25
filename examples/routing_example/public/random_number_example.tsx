@@ -9,16 +9,15 @@
 import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
-import { HttpFetchError } from '../../../src/core/public';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
-import { isError } from './is_error';
 
 interface Props {
   fetchRandomNumber: Services['fetchRandomNumber'];
 }
 
 export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
-  const [error, setError] = useState<HttpFetchError | undefined>(undefined);
+  const [error, setError] = useState<IHttpFetchError | undefined>(undefined);
   const [randomNumber, setRandomNumber] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -27,7 +26,7 @@ export function RandomNumberRouteExample({ fetchRandomNumber }: Props) {
     setIsFetching(true);
     const response = await fetchRandomNumber();
 
-    if (isError(response)) {
+    if (isHttpFetchError(response)) {
       setError(response);
     } else {
       setRandomNumber(response);

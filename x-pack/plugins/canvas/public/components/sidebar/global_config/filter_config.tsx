@@ -7,8 +7,6 @@
 
 import React, { FC } from 'react';
 import { WorkpadFilters } from '../../workpad_filters';
-// @ts-expect-error unconverted component
-import { SidebarSection } from '../sidebar_section';
 
 export const FilterConfig: FC = () => {
   return <WorkpadFilters />;

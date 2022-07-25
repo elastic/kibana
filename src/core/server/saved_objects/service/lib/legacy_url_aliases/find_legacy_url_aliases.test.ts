@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
@@ -51,7 +51,8 @@ describe('findLegacyUrlAliases', () => {
     });
   }
 
-  const obj1 = { type: 'obj-type', id: 'id-1' };
+  // Include KQL special characters in the object type/ID to implicitly assert that the kuery node builder handles it gracefully
+  const obj1 = { type: 'obj-type:"', id: 'id-1:"' };
   const obj2 = { type: 'obj-type', id: 'id-2' };
   const obj3 = { type: 'obj-type', id: 'id-3' };
 

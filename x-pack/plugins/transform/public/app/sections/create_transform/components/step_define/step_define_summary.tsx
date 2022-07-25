@@ -56,14 +56,14 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotQuery = getPivotQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
-    searchItems.indexPattern.title,
+    searchItems.dataView.title,
     pivotQuery,
     partialPreviewRequest,
     runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
-    searchItems.indexPattern.title,
+    searchItems.dataView.title,
     pivotQuery,
     validationStatus,
     partialPreviewRequest,
@@ -92,7 +92,7 @@ export const StepDefineSummary: FC<Props> = ({
                 defaultMessage: 'Data view',
               })}
             >
-              <span>{searchItems.indexPattern.title}</span>
+              <span>{searchItems.dataView.title}</span>
             </EuiFormRow>
             {typeof searchString === 'string' && (
               <EuiFormRow

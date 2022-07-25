@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { docLinksServiceMock } from '../../doc_links/doc_links_service.mock';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { notificationServiceMock } from '../../notifications/notifications_service.mock';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
+import { notificationServiceMock } from '../../notifications/notifications_service.mock';
 import { setupPublicBaseUrlConfigWarning } from './public_base_url';
 
 describe('publicBaseUrl warning', () => {

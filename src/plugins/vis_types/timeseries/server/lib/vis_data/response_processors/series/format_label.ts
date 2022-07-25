@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   createCachedFieldValueFormatter,
@@ -13,7 +14,6 @@ import {
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
-import type { FieldFormatsRegistry } from '../../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { BaseMeta } from '../../request_processors/types';
@@ -26,7 +26,8 @@ export function formatLabel(
   meta: BaseMeta,
   extractFields: ReturnType<typeof createFieldsFetcher>,
   fieldFormatService: FieldFormatsRegistry,
-  cachedIndexPatternFetcher: CachedIndexPatternFetcher
+  cachedIndexPatternFetcher: CachedIndexPatternFetcher,
+  timezone: string
 ) {
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
     const { terms_field: termsField, split_mode: splitMode } = series;
@@ -54,7 +55,8 @@ export function formatLabel(
       const formatField = createCachedFieldValueFormatter(
         fetchedIndex?.indexPattern,
         fields,
-        fieldFormatService
+        fieldFormatService,
+        { timezone }
       );
 
       results
@@ -66,7 +68,6 @@ export function formatLabel(
 
           if (formatted) {
             item.label = formatted;
-            item.labelFormatted = formatted;
           }
         });
     }

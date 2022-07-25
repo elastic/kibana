@@ -12,9 +12,9 @@ import {
   InjectDeps,
   injectPanelsReferences,
 } from './embeddable_references';
-import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
+import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import { SavedDashboardPanel } from '../types';
-import { EmbeddableStateWithType } from '../../../embeddable/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
 const deps: InjectDeps & ExtractDeps = {

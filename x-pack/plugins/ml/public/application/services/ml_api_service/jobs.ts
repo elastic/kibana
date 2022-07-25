@@ -6,7 +6,9 @@
  */
 
 import { Observable } from 'rxjs';
+import { useMemo } from 'react';
 import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 import type { Dictionary } from '../../../../common/types/common';
 import type {
@@ -20,6 +22,7 @@ import type {
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,
@@ -83,7 +86,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   },
 
   groups() {
-    return httpService.http<any>({
+    return httpService.http<Group[]>({
       path: `${ML_BASE_PATH}/jobs/groups`,
       method: 'GET',
     });
@@ -395,3 +398,17 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 });
+
+export type JobsApiService = ReturnType<typeof jobsApiProvider>;
+
+/**
+ * Hooks for accessing {@link JobsApiService} in React components.
+ */
+export function useJobsApiService(): JobsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => jobsApiProvider(httpService), [httpService]);
+}

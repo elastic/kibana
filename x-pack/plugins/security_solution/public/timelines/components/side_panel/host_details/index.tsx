@@ -35,7 +35,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
       overflow-x: hidden;
       overflow-y: scroll;
       margin-bottom: 64px; // account for firefox, which doesn't seem to respect the bottom padding
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 0px`};
+      padding: ${({ theme }) => `${theme.eui.euiSizeXS} ${theme.eui.euiSizeM} 0px`};
     }
   }
 `;

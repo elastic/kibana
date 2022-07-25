@@ -11,8 +11,8 @@ import { EuiBadge, EuiBasicTableColumn, EuiInMemoryTable, EuiTextColor } from '@
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
-import { SingleUserRoleMapping } from '../../shared/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { SingleUserRoleMapping } from '../types';
 
 import {
   INVITATION_PENDING_LABEL,
@@ -27,7 +27,7 @@ import {
   ENGINES_LABEL,
 } from './constants';
 
-import { UsersAndRolesRowActions } from './';
+import { UsersAndRolesRowActions } from '.';
 
 interface AccessItem {
   name: string;
@@ -152,7 +152,7 @@ export const UsersTable: React.FC<Props> = ({
   };
 
   const pagination = {
-    hidePerPageOptions: true,
+    showPerPageOptions: false,
     pageSize: 10,
   };
 

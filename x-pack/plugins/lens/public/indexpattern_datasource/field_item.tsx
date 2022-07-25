@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
@@ -37,23 +37,17 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FieldButton } from '@kbn/react-field';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiHighlight } from '@elastic/eui';
-import { Filter, buildEsQuery } from '@kbn/es-query';
-import {
-  Query,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-  getEsQueryConfig,
-} from '../../../../../src/plugins/data/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { Filter, buildEsQuery, Query } from '@kbn/es-query';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { BucketedAggregation, DOCUMENT_FIELD_NAME, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
-import { LensFieldIcon } from './lens_field_icon';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
 
@@ -192,7 +186,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   function togglePopover() {
     setOpen(!infoIsOpen);
     if (!infoIsOpen) {
-      trackUiEvent('indexpattern_field_info_click');
       fetchData();
     }
   }
@@ -339,7 +332,7 @@ function FieldPanelHeader({
         dropOntoWorkspace={dropOntoWorkspace}
         field={draggableField}
       />
-      {editField && (
+      {editField && field.name !== DOCUMENT_FIELD_NAME && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
@@ -437,7 +430,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   let formatter: { convert: (data: unknown) => string };
   if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
-    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id as string);
     if (FormatType) {
       formatter = new FormatType(
         indexPattern.fieldFormatMap[field.name].params,
@@ -472,6 +465,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         </EuiText>
       </>
     );
+  } else if (field.type === 'murmur3') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+            defaultMessage: `Summary information is not available for murmur3 fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
     return (
       <>
@@ -491,15 +496,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-            defaultMessage:
-              'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
-          })}
+          {isUsingSampling
+            ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+              })
+            : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+              })}
         </EuiText>
       </>
     );

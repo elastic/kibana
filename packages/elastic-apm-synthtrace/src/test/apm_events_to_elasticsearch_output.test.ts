@@ -11,6 +11,7 @@ import { StreamProcessor } from '../lib/stream_processor';
 
 describe('output apm events to elasticsearch', () => {
   let event: ApmFields;
+  const streamProcessor = new StreamProcessor({ processors: [], version: '8.0.0' });
 
   beforeEach(() => {
     event = {
@@ -22,12 +23,12 @@ describe('output apm events to elasticsearch', () => {
   });
 
   it('properly formats @timestamp', () => {
-    const doc = StreamProcessor.toDocument(event);
+    const doc = streamProcessor.toDocument(event);
     expect(doc['@timestamp']).toEqual('2020-12-31T23:00:00.000Z');
   });
 
   it('formats a nested object', () => {
-    const doc = StreamProcessor.toDocument(event);
+    const doc = streamProcessor.toDocument(event);
 
     expect(doc.processor).toEqual({
       event: 'transaction',
@@ -36,7 +37,7 @@ describe('output apm events to elasticsearch', () => {
   });
 
   it('formats all fields consistently', () => {
-    const doc = StreamProcessor.toDocument(event);
+    const doc = streamProcessor.toDocument(event);
 
     expect(doc).toMatchInlineSnapshot(`
       Object {

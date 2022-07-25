@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
-import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { UiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';

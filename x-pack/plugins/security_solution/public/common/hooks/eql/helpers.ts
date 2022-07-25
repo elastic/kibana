@@ -6,17 +6,15 @@
  */
 
 import moment from 'moment';
-import { Unit } from '@elastic/datemath';
-import { inputsModel } from '../../../common/store';
+import type { Unit } from '@kbn/datemath';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { inputsModel } from '../../store';
 
-import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
-import { InspectResponse } from '../../../types';
-import { EqlPreviewResponse, Source } from './types';
-import { BaseHit, EqlSearchResponse } from '../../../../common/detection_engine/types';
+import type { InspectResponse } from '../../../types';
+import type { EqlPreviewResponse, Source } from './types';
+import type { BaseHit, EqlSearchResponse } from '../../../../common/detection_engine/types';
 
 type EqlAggBuckets = Record<string, { timestamp: string; total: number }>;
-
-export const EQL_QUERY_EVENT_SIZE = 100;
 
 /**
  * Calculates which 2 min bucket segment, event should be sorted into

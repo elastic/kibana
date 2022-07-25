@@ -7,18 +7,23 @@
 
 import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { DropResult, DragDropContext } from 'react-beautiful-dnd';
+import type { DropResult } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { BeforeCapture } from './drag_drop_context';
-import { BrowserFields } from '../../containers/source';
+import {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from '@kbn/timelines-plugin/public';
+import type { BeforeCapture } from './drag_drop_context';
+import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
 import {
   ADDED_TO_TIMELINE_MESSAGE,
@@ -37,10 +42,6 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from '../../../../../timelines/public';
 import { alertsHeaders } from '../alerts_viewer/default_headers';
 
 // @ts-expect-error

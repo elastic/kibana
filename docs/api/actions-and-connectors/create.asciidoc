@@ -1,5 +1,5 @@
 [[create-connector-api]]
-=== Create connector API
+== Create connector API
 ++++
 <titleabbrev>Create connector</titleabbrev>
 ++++
@@ -7,56 +7,125 @@
 Creates a connector.
 
 [[create-connector-api-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/actions/connector`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[create-connector-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided
+  in the URL, the default space is used.
 
+[role="child_attributes"]
 [[create-connector-api-request-body]]
-==== Request body
-
-`name`::
-  (Required, string) The display name for the connector.
-
-`connector_type_id`::
-  (Required, string) The connector type ID for the connector.
+=== {api-request-body-title}
 
 `config`::
-  (Required, object) The configuration for the connector. Configuration properties vary depending on
-  the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The configuration for the connector. Configuration properties
+vary depending on the connector type. For example:
++
+--
+// tag::connector-config[]
+.Index connectors
+[%collapsible%open]
+====
+`executionTimeField`::
+(Optional, string) Specifies a field that will contain the time the alert
+condition was detected. The default value is `null`.
+
+`index`::
+(Required, string) The {es} index to be written to.
+
+`refresh`::
+(Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
+request. The default value is `false`.
+
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
+====
+
+.{jira} connectors
+[%collapsible%open]
+====
+
+`apiUrl`::
+(Required, string) The {jira} instance URL.
+
+`projectKey`::
+(Required, string) The {jira} project key.
+
+For more information, refer to
+{kibana-ref}/jira-action-type.html[{jira} connector and action].
+====
+
+This object is not required for server log connectors.
+
+For more configuration properties, refer to <<action-types>>.
+// end::connector-config[]  
+--
+
+`connector_type_id`::
+(Required, string) The connector type ID for the connector. For example,
+`.index`, `.jira`, or `.server-log`.
+
+`name`::
+(Required, string) The display name for the connector.
 
 `secrets`::
-  (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
-  depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The secrets configuration for the connector. Secrets
+configuration properties vary depending on the connector type. For information
+about the secrets configuration properties, refer to <<action-types>>.
 +
+--
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
+--
++
+--
+// tag::connector-secrets[]
+.{jira} connectors
+[%collapsible%open]
+====
+`apiToken`::
+(Required, string) The {jira} API authentication token for HTTP basic
+authentication.
+
+`email`::
+(Required, string) The account email for HTTP Basic authentication.
+====
+
+This object is not required for index or server log connectors.
+// end::connector-secrets[]  
+--
 
 [[create-connector-api-request-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[create-connector-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/actions/connector
 {
   "name": "my-connector",
   "connector_type_id": ".index",
   "config": {
     "index": "test-index"
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -74,6 +143,7 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------

@@ -6,8 +6,8 @@
  */
 
 import { ActionConnectorWithoutId } from '../../../types';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { createActionConnector } from './index';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { createActionConnector } from '.';
 
 const http = httpServiceMock.createStartContract();
 
@@ -18,6 +18,7 @@ describe('createActionConnector', () => {
     const apiResponse = {
       connector_type_id: 'test',
       is_preconfigured: false,
+      is_deprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -25,14 +26,22 @@ describe('createActionConnector', () => {
     };
     http.post.mockResolvedValueOnce(apiResponse);
 
-    const connector: ActionConnectorWithoutId<{}, {}> = {
+    const connector: Pick<
+      ActionConnectorWithoutId,
+      'actionTypeId' | 'name' | 'config' | 'secrets'
+    > = {
       actionTypeId: 'test',
-      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},
     };
-    const resolvedValue = { ...connector, id: '123' };
+    const resolvedValue = {
+      ...connector,
+      id: '123',
+      isDeprecated: false,
+      isPreconfigured: false,
+      isMissingSecrets: undefined,
+    };
 
     const result = await createActionConnector({ http, connector });
     expect(result).toEqual(resolvedValue);
@@ -40,7 +49,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/connector",
         Object {
-          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\",\\"is_preconfigured\\":false}",
+          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\"}",
         },
       ]
     `);

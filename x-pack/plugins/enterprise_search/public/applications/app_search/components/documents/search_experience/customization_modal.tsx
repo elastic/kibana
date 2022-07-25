@@ -52,14 +52,20 @@ export const CustomizationModal: React.FC<Props> = ({
     sortFields.map(fieldNameToComboBoxOption)
   );
 
-  const engineSchema = engine.schema || {};
+  const schema = engine.advancedSchema || {};
   const selectableFilterFields = useMemo(
-    () => Object.keys(engineSchema).map(fieldNameToComboBoxOption),
-    [engineSchema]
+    () =>
+      Object.keys(schema)
+        .filter((fieldName) => schema[fieldName].capabilities.filter)
+        .map(fieldNameToComboBoxOption),
+    [schema]
   );
   const selectableSortFields = useMemo(
-    () => Object.keys(engineSchema).map(fieldNameToComboBoxOption),
-    [engineSchema]
+    () =>
+      Object.keys(schema)
+        .filter((fieldName) => schema[fieldName].capabilities.sort)
+        .map(fieldNameToComboBoxOption),
+    [schema]
   );
 
   return (

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LoggerFactory } from 'kibana/server';
+import type { LoggerFactory } from '@kbn/core/server';
 
-import { ConfigType } from '../config';
-import { EndpointAppContextService } from './endpoint_app_context_services';
-import { HostMetadata } from '../../common/endpoint/types';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ConfigType } from '../config';
+import type { EndpointAppContextService } from './endpoint_app_context_services';
+import type { HostMetadata } from '../../common/endpoint/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 /**
  * The context for Endpoint apps.

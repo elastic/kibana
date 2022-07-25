@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Columns } from '../../paginated_table';
-import { AnomaliesByHost, Anomaly } from '../types';
+import type { Columns } from '../../paginated_table';
+import type { AnomaliesByHost, Anomaly } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { HostDetailsLink } from '../../links';
@@ -38,6 +38,8 @@ export const getAnomaliesHostTableColumns = (
           anomaliesByHost.anomaly
         )}-hostName`,
         render: (item) => <HostDetailsLink hostName={item} />,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

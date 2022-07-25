@@ -32,7 +32,7 @@ describe('Errors table', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('errors table is populated', () => {

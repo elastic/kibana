@@ -54,7 +54,7 @@ export const QUERY_PREVIEW_LABEL = i18n.translate(
 export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
   {
-    defaultMessage: 'Select a timeframe of data to preview query results',
+    defaultMessage: 'Select a timeframe of data to preview query results.',
   }
 );
 
@@ -65,39 +65,10 @@ export const QUERY_GRAPH_COUNT = i18n.translate(
   }
 );
 
-export const THRESHOLD_QUERY_GRAPH_COUNT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryThresholdGraphCountLabel',
-  {
-    defaultMessage: 'Cumulative Threshold Count',
-  }
-);
-
 export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewTitle',
   {
-    defaultMessage: 'Hits',
-  }
-);
-
-export const QUERY_PREVIEW_TITLE = (hits: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle', {
-    values: { hits },
-    defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
-  });
-
-export const QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE = (buckets: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphThresholdWithFieldTitle',
-    {
-      values: { buckets },
-      defaultMessage: '{buckets} {buckets, plural, =1 {unique hit} other {unique hits}}',
-    }
-  );
-
-export const QUERY_PREVIEW_INSPECT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewInspectTitle',
-  {
-    defaultMessage: 'query preview',
+    defaultMessage: 'Rule Preview',
   }
 );
 
@@ -109,13 +80,6 @@ export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_NO_HITS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryNoHits',
-  {
-    defaultMessage: 'No hits were found.',
-  }
-);
-
 export const QUERY_PREVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
   {
@@ -124,40 +88,25 @@ export const QUERY_PREVIEW_ERROR = i18n.translate(
 );
 
 export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewDisclaimer',
   {
     defaultMessage:
       'Note: This preview excludes effects of rule exceptions and timestamp overrides.',
   }
 );
 
-export const QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
+export const PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.histogramDisclaimer',
   {
     defaultMessage:
-      'Note: This preview excludes effects of rule exceptions and timestamp overrides, and is limited to 100 results.',
+      'Note: Alerts with multiple event.category values will be counted more than once.',
   }
 );
 
-export const QUERY_PREVIEW_SUBTITLE_LOADING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
+export const ML_PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.mlHistogramDisclaimer',
   {
-    defaultMessage: '...loading',
-  }
-);
-
-export const QUERY_PREVIEW_EQL_SEQUENCE_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceTitle',
-  {
-    defaultMessage: 'No histogram available',
-  }
-);
-
-export const QUERY_PREVIEW_EQL_SEQUENCE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceDescription',
-  {
-    defaultMessage:
-      'No histogram is available at this time for EQL sequence queries. You can use the inspect in the top right corner to view query details.',
+    defaultMessage: 'Note: Alerts with multiple host.name values will be counted more than once.',
   }
 );
 
@@ -174,3 +123,30 @@ export const QUERY_PREVIEW_SEE_ALL_WARNINGS = i18n.translate(
     defaultMessage: 'See all warnings',
   }
 );
+
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const VIEW_DETAILS_FOR_ROW = ({
+  ariaRowindex,
+  columnValues,
+}: {
+  ariaRowindex: number;
+  columnValues: string;
+}) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel', {
+    values: { ariaRowindex, columnValues },
+    defaultMessage:
+      'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+  });

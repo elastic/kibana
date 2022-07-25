@@ -6,7 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { nodeBuilder } from '@kbn/es-query';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 
 import {
   ActionConnector,
@@ -17,11 +18,18 @@ import {
   CasesConfigureAttributes,
   ActionTypes,
   OWNER_FIELD,
+  CommentType,
+  CommentRequestAlertType,
 } from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes } from './utils';
+import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
 import { createCaseError } from '../../common/error';
-import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../common/utils';
+import {
+  createAlertUpdateRequest,
+  flattenCaseSavedObject,
+  getAlertInfoFromComments,
+} from '../../common/utils';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
@@ -39,6 +47,30 @@ function shouldCloseByPush(
     configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing'
   );
 }
+
+const changeAlertsStatusToClose = async (
+  caseId: string,
+  caseService: CasesClientArgs['caseService'],
+  alertsService: CasesClientArgs['alertsService']
+) => {
+  const alertAttachments = (await caseService.getAllCaseComments({
+    id: [caseId],
+    options: {
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+    },
+  })) as SavedObjectsFindResponse<CommentRequestAlertType>;
+
+  const alerts = alertAttachments.saved_objects
+    .map((attachment) =>
+      createAlertUpdateRequest({
+        comment: attachment.attributes,
+        status: CaseStatuses.closed,
+      })
+    )
+    .flat();
+
+  await alertsService.updateAlertsStatus(alerts);
+};
 
 /**
  * Parameters for pushing a case to an external system
@@ -71,6 +103,7 @@ export const push = async (
     caseService,
     caseConfigureService,
     userActionService,
+    alertsService,
     actionsClient,
     user,
     logger,
@@ -193,11 +226,18 @@ export const push = async (
                 closed_by: { email, full_name, username },
               }
             : {}),
+          ...(shouldMarkAsClosed
+            ? getDurationInSeconds({
+                closedAt: pushedDate,
+                createdAt: theCase.created_at,
+              })
+            : {}),
           external_service: externalService,
           updated_at: pushedDate,
           updated_by: { username, full_name, email },
         },
         version: myCase.version,
+        refresh: false,
       }),
 
       attachmentService.bulkUpdate({
@@ -212,6 +252,7 @@ export const push = async (
             },
             version: comment.version,
           })),
+        refresh: false,
       }),
     ]);
 
@@ -223,7 +264,12 @@ export const push = async (
         user,
         caseId,
         owner: myCase.attributes.owner,
+        refresh: false,
       });
+
+      if (myCase.attributes.settings.syncAlerts) {
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+      }
     }
 
     await userActionService.createUserAction({

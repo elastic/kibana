@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiText,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +30,7 @@ import { SourceDataItem } from '../../../../types';
 
 import { staticCustomSourceData } from '../../source_data';
 
+import { BYOSourcePrompt } from './byo_source_prompt';
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
@@ -43,8 +45,13 @@ interface AvailableSourcesListProps {
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const getSourceCard = ({ name, serviceType, accountContextOnly }: SourceDataItem) => {
-    const addPath = getAddPath(serviceType);
+  const getSourceCard = ({
+    accountContextOnly,
+    baseServiceType,
+    name,
+    serviceType,
+  }: SourceDataItem) => {
+    const addPath = getAddPath(serviceType, baseServiceType);
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
     const connectButton = () => {
@@ -61,15 +68,30 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
               }
             )}
           >
-            <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
-              Connect
-            </EuiButtonEmptyTo>
+            <EuiButtonEmpty disabled>
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+                {
+                  defaultMessage: 'Connect',
+                }
+              )}
+            </EuiButtonEmpty>
           </EuiToolTip>
         );
       } else {
         return (
-          <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
-            Connect
+          <EuiButtonEmptyTo
+            to={
+              getSourcesPath(addPath, true) +
+              (serviceType === 'custom' || serviceType === 'external' ? '' : '/intro')
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+              {
+                defaultMessage: 'Connect',
+              }
+            )}
           </EuiButtonEmptyTo>
         );
       }
@@ -79,7 +101,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       <>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
-            <SourceIcon serviceType={serviceType} name={name} size="l" />
+            <SourceIcon serviceType={baseServiceType || serviceType} name={name} size="l" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="m">{name}</EuiText>
@@ -144,6 +166,8 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       </EuiText>
       <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}
+      <EuiSpacer size="xl" />
+      <BYOSourcePrompt />
     </>
   );
 };

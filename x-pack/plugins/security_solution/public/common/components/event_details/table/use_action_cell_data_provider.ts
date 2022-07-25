@@ -27,8 +27,9 @@ import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/ren
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
 import { PORT_NAMES } from '../../../../network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
-import { BrowserField } from '../../../containers/source';
-import { DataProvider, IS_OPERATOR } from '../../../../../common/types';
+import type { BrowserField } from '../../../containers/source';
+import type { DataProvider } from '../../../../../common/types';
+import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
   contextId?: string;
@@ -42,7 +43,12 @@ export interface UseActionCellDataProvider {
   values: string[] | null | undefined;
 }
 
-const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
+export interface ActionCellValuesAndDataProvider {
+  values: string[];
+  dataProviders: DataProvider[];
+}
+
+export const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),
@@ -66,42 +72,38 @@ export const useActionCellDataProvider = ({
   isObjectArray,
   linkValue,
   values,
-}: UseActionCellDataProvider): {
-  stringValues: string[];
-  dataProvider: DataProvider[];
-} | null => {
+}: UseActionCellDataProvider): ActionCellValuesAndDataProvider | null => {
   const cellData = useMemo(() => {
     if (values === null || values === undefined) return null;
     const arrayValues = Array.isArray(values) ? values : [values];
-    return arrayValues.reduce<{
-      stringValues: string[];
-      dataProvider: DataProvider[];
-    }>(
+    return arrayValues.reduce<ActionCellValuesAndDataProvider>(
       (memo, value, index) => {
         let id: string = '';
         let valueAsString: string = isString(value) ? value : `${values}`;
         const appendedUniqueId = `${contextId}-${eventId}-${field}-${index}-${value}`;
         if (fieldFromBrowserField == null) {
-          memo.stringValues.push(valueAsString);
+          memo.values.push(valueAsString);
           return memo;
         }
 
         if (isObjectArray || fieldType === GEO_FIELD_TYPE || [MESSAGE_FIELD_NAME].includes(field)) {
-          memo.stringValues.push(valueAsString);
+          memo.values.push(valueAsString);
           return memo;
         } else if (fieldType === IP_FIELD_TYPE) {
           id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
           if (isString(value) && !isEmpty(value)) {
+            let addresses = value;
             try {
-              const addresses = JSON.parse(value);
-              if (isArray(addresses)) {
-                valueAsString = addresses.join(',');
-                addresses.forEach((ip) => memo.dataProvider.push(getDataProvider(field, id, ip)));
-              }
+              addresses = JSON.parse(value);
             } catch (_) {
               // Default to keeping the existing string value
             }
-            memo.stringValues.push(valueAsString);
+            if (isArray(addresses)) {
+              valueAsString = addresses.join(',');
+              addresses.forEach((ip) => memo.dataProviders.push(getDataProvider(field, id, ip)));
+            }
+            memo.dataProviders.push(getDataProvider(field, id, addresses));
+            memo.values.push(valueAsString);
             return memo;
           }
         } else if (PORT_NAMES.some((portName) => field === portName)) {
@@ -134,11 +136,11 @@ export const useActionCellDataProvider = ({
         } else {
           id = `event-details-value-default-draggable-${appendedUniqueId}`;
         }
-        memo.stringValues.push(valueAsString);
-        memo.dataProvider.push(getDataProvider(field, id, value));
+        memo.values.push(valueAsString);
+        memo.dataProviders.push(getDataProvider(field, id, value));
         return memo;
       },
-      { stringValues: [], dataProvider: [] }
+      { values: [], dataProviders: [] }
     );
   }, [
     contextId,

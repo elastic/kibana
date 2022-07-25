@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { getErrorMessage } from '../../../../elasticsearch';
+import type { getErrorMessage } from '@kbn/core-elasticsearch-client-server-internal';
 
 export const mockGetEsErrorMessage = jest.fn() as jest.MockedFunction<typeof getErrorMessage>;
 
-jest.mock('../../../../elasticsearch', () => {
+jest.mock('@kbn/core-elasticsearch-client-server-internal', () => {
   return { getErrorMessage: mockGetEsErrorMessage };
 });
 
-// Mock these functions to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
-jest.mock('@kbn/es-query', () => {
-  return { nodeTypes: { function: { buildNode: jest.fn() } } };
-});
+// Mock this function to return empty results, as this simplifies test cases and we don't need to exercise alternate code paths for these
 jest.mock('../search_dsl', () => {
   return { getSearchDsl: jest.fn() };
 });

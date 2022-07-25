@@ -17,16 +17,15 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../../../common/mock';
-import { RuleDetailsPage } from './index';
-import { createStore, State } from '../../../../../common/store';
+import { RuleDetailsPage } from '.';
+import type { State } from '../../../../../common/store';
+import { createStore } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
-
-import { useKibana } from '../../../../../common/lib/kibana';
 
 import { fillEmptySeverityMappings } from '../helpers';
 
@@ -64,7 +63,15 @@ jest.mock('../../../../containers/detection_engine/rules/use_rule_with_fallback'
     useRuleWithFallback: jest.fn(),
   };
 });
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer', () => {
+  const actual = jest.requireActual('../../../../../common/containers/sourcerer');
+  return {
+    ...actual,
+    useSourcererDataView: jest
+      .fn()
+      .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
+  };
+});
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -80,13 +87,55 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     useParams: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }),
   };
 });
 
-jest.mock('../../../../../common/lib/kibana');
-
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        storage: {
+          get: jest.fn().mockReturnValue(true),
+        },
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
+          capabilities: {
+            actions: {
+              delete: true,
+              save: true,
+              show: true,
+            },
+          },
+        },
+        data: {
+          dataViews: {
+            getIdsWithTitle: () => [],
+          },
+          search: {
+            search: () => ({
+              subscribe: () => ({
+                unsubscribe: jest.fn(),
+              }),
+            }),
+          },
+        },
+        spaces: {
+          ui: {
+            components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
+            redirectLegacyUrl: mockRedirectLegacyUrl,
+          },
+        },
+      },
+    }),
+  };
+});
 
 const state: State = {
   ...mockGlobalState,
@@ -141,16 +190,8 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   async function setup() {
-    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spaces = {
-      ui: {
-        // @ts-expect-error
-        components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
-        redirectLegacyUrl: mockRedirectLegacyUrl,
-      },
-    };
+    mockRedirectLegacyUrl.mockReset();
+    mockGetLegacyUrlConflict.mockReset();
   }
 
   it('renders correctly with no outcome property on rule', async () => {
@@ -166,6 +207,7 @@ describe('RuleDetailsPageComponent', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -189,6 +231,7 @@ describe('RuleDetailsPageComponent', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
       expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -199,7 +242,7 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: { ...mockRule, outcome: 'aliasMatch' },
+      rule: { ...mockRule, outcome: 'aliasMatch', alias_purpose: 'savedObjectConversion' },
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -210,7 +253,12 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+        path: 'rules/id/myfakeruleid',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'rule',
+      });
+      expect(mockGetLegacyUrlConflict).not.toHaveBeenCalled();
     });
   });
 
@@ -221,7 +269,12 @@ describe('RuleDetailsPageComponent', () => {
       loading: false,
       isExistingRule: true,
       refresh: jest.fn(),
-      rule: { ...mockRule, outcome: 'conflict', alias_target_id: 'aliased_rule_id' },
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+      },
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -232,7 +285,7 @@ describe('RuleDetailsPageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(`rules/id/myfakeruleid`, `rule`);
+      expect(mockRedirectLegacyUrl).not.toHaveBeenCalled();
       expect(mockGetLegacyUrlConflict).toHaveBeenCalledWith({
         currentObjectId: 'myfakeruleid',
         objectNoun: 'rule',

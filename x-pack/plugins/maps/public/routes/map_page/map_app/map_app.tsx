@@ -9,15 +9,17 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { Adapters } from 'src/plugins/embeddable/public';
+import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
+import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, DataView } from 'src/plugins/data/common';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
   getData,
   getExecutionContext,
   getCoreChrome,
+  getIndexPatternService,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
@@ -32,11 +34,6 @@ import {
   startGlobalStateSyncing,
   MapsGlobalState,
 } from '../url_state';
-import {
-  SavedQuery,
-  QueryStateChange,
-  QueryState,
-} from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
@@ -204,7 +201,17 @@ export class MapApp extends React.Component<Props, State> {
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    let indexPatterns: DataView[] = [];
+    if (nextIndexPatternIds.length === 0) {
+      // Use default data view to always show filter bar when filters are present
+      // Example scenario, global state has pinned filters and new map is created
+      const defaultDataView = await getIndexPatternService().getDefaultDataView();
+      if (defaultDataView) {
+        indexPatterns = [defaultDataView];
+      }
+    } else {
+      indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    }
     if (this._isMounted) {
       this.setState({ indexPatterns });
     }
@@ -266,6 +273,7 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
+        hasSaveAndReturnConfig: this.props.savedMap.hasSaveAndReturnConfig(),
         serializedMapState,
         globalState,
       }),
@@ -348,9 +356,13 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = `${getEditPath(newObjectId)}${this.props.history.location.hash}`;
-      await spaces.ui.redirectLegacyUrl(newPath, getMapEmbeddableDisplayName());
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: getMapEmbeddableDisplayName(),
+      });
       return;
     }
 

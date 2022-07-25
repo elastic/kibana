@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { ChartPlaceHolder } from './chart_place_holder';
-import { ChartSeriesData } from './common';
+import type { ChartSeriesData } from './common';
 
 describe('ChartPlaceHolder', () => {
   let shallowWrapper: ShallowWrapper;

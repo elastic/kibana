@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource } from '../../../data/common';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { SavedObjectsClientContract } from '../../../../core/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   findListItems,
   getSavedVisualization,
@@ -36,7 +36,7 @@ const mockParseSearchSourceJSON = jest.fn();
 const mockInjectSearchSourceReferences = jest.fn();
 const mockExtractSearchSourceReferences = jest.fn((...args) => [{}, []]);
 
-jest.mock('../../../../plugins/data/public', () => ({
+jest.mock('@kbn/data-plugin/public', () => ({
   extractSearchSourceReferences: jest.fn((...args) => mockExtractSearchSourceReferences(...args)),
   injectSearchSourceReferences: jest.fn((...args) => mockInjectSearchSourceReferences(...args)),
   parseSearchSourceJSON: jest.fn((...args) => mockParseSearchSourceJSON(...args)),

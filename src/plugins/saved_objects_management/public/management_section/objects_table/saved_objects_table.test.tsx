@@ -26,9 +26,9 @@ import {
   notificationServiceMock,
   savedObjectsServiceMock,
   applicationServiceMock,
-} from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
+} from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';

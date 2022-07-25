@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment';
 
 const RulesSchema = schema.object({
   allow: schema.boolean(),
@@ -65,6 +66,23 @@ export const ConfigSchema = schema.object({
           schema.maybe(schema.never())
         ),
       }),
+    }),
+  }),
+  capture: schema.object({
+    timeouts: schema.object({
+      openUrl: schema.oneOf([schema.number(), schema.duration()], {
+        defaultValue: moment.duration({ minutes: 1 }),
+      }),
+      waitForElements: schema.oneOf([schema.number(), schema.duration()], {
+        defaultValue: moment.duration({ seconds: 30 }),
+      }),
+      renderComplete: schema.oneOf([schema.number(), schema.duration()], {
+        defaultValue: moment.duration({ seconds: 30 }),
+      }),
+    }),
+    zoom: schema.number({ defaultValue: 2 }),
+    loadDelay: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration({ seconds: 3 }),
     }),
   }),
   poolSize: schema.number({ defaultValue: 1, min: 1 }),

@@ -8,10 +8,10 @@
 import { EuiModal } from '@elastic/eui';
 import React from 'react';
 
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 
 import * as i18n from '../translations';
-import { ActionTimelineToShow } from '../types';
+import type { ActionTimelineToShow } from '../types';
 import { StatefulOpenTimeline } from '..';
 
 export interface OpenTimelineModalProps {

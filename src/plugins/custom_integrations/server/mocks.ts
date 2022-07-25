@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegrationsPluginSetup } from '../server';
+import { CustomIntegrationsPluginSetup } from '.';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsPluginSetup> {
   const mock: jest.Mocked<CustomIntegrationsPluginSetup> = {

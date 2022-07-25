@@ -17,7 +17,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
   phase: 'hot' | 'warm';

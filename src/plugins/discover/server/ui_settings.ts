@@ -9,11 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -30,6 +31,7 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '../common';
+import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup
@@ -59,11 +61,24 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
   },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
-      defaultMessage: 'Number of rows',
+      defaultMessage: 'Maximum rows per table',
     }),
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
-      defaultMessage: 'The number of rows to show in the table',
+      defaultMessage: 'Sets the maximum number of rows for the entire document table.',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
+  [SAMPLE_ROWS_PER_PAGE_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.sampleRowsPerPageTitle', {
+      defaultMessage: 'Rows per page',
+    }),
+    value: DEFAULT_ROWS_PER_PAGE,
+    options: ROWS_PER_PAGE_OPTIONS,
+    type: 'select',
+    description: i18n.translate('discover.advancedSettings.sampleRowsPerPageText', {
+      defaultMessage: 'Limits the number of rows per page in the document table.',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -167,8 +182,17 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     value: false,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -277,5 +301,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 });

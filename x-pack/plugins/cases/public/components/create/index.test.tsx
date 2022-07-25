@@ -11,8 +11,6 @@ import { act } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
@@ -29,6 +27,8 @@ import {
   useGetFieldsByIssueTypeResponse,
 } from './mock';
 import { CreateCase } from '.';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -41,7 +41,7 @@ jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
@@ -78,15 +78,15 @@ const defaultProps = {
 describe('CreateCase case', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useConnectorsMock.mockReturnValue(sampleConnectorData);
+    useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetTagsMock.mockImplementation(() => ({
-      tags: sampleTags,
-      fetchTags,
+      data: sampleTags,
+      refetch: fetchTags,
     }));
   });
 

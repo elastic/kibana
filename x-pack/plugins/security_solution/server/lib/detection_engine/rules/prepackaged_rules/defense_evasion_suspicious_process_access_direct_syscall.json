@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Process Access via Direct System Call",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.code == \"10\" and\n length(winlog.event_data.CallTrace) > 0 and\n \n /* Sysmon CallTrace starting with unknown memory module instead of ntdll which host Windows NT Syscalls */\n not winlog.event_data.CallTrace : (\"?:\\\\WINDOWS\\\\SYSTEM32\\\\ntdll.dll*\", \"?:\\\\WINDOWS\\\\SysWOW64\\\\ntdll.dll*\")\n",
   "references": [
     "https://twitter.com/SBousseaden/status/1278013896440324096",
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

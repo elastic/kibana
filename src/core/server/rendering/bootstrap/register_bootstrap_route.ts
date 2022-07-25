@@ -6,19 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
+import type { InternalRenderingRouter } from '../internal_types';
 import type { BootstrapRenderer } from './bootstrap_renderer';
 
 export const registerBootstrapRoute = ({
   router,
   renderer,
 }: {
-  router: IRouter;
+  router: InternalRenderingRouter;
   renderer: BootstrapRenderer;
 }) => {
   router.get(
     {
       path: '/bootstrap.js',
+      options: {
+        tags: ['api'],
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const uiSettingsClient = (await ctx.core).uiSettings.client;
+      const { body, etag } = await renderer({ uiSettingsClient, request: req });
+
+      return res.ok({
+        body,
+        headers: {
+          etag,
+          'content-type': 'application/javascript',
+          'cache-control': 'must-revalidate',
+        },
+      });
+    }
+  );
+  router.get(
+    {
+      path: '/bootstrap-anonymous.js',
       options: {
         authRequired: 'optional',
         tags: ['api'],
@@ -26,8 +48,12 @@ export const registerBootstrapRoute = ({
       validate: false,
     },
     async (ctx, req, res) => {
-      const uiSettingsClient = ctx.core.uiSettings.client;
-      const { body, etag } = await renderer({ uiSettingsClient, request: req });
+      const uiSettingsClient = (await ctx.core).uiSettings.client;
+      const { body, etag } = await renderer({
+        uiSettingsClient,
+        request: req,
+        isAnonymousPage: true,
+      });
 
       return res.ok({
         body,

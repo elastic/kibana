@@ -54,6 +54,7 @@ export interface OpsMetrics {
   /**
    * Process related metrics.
    * @deprecated use the processes field instead.
+   * @removeBy 8.8.0
    */
   process: OpsProcessMetrics;
   /** Process related metrics. Reports an array of objects for each kibana pid.*/

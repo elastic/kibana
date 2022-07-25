@@ -6,23 +6,21 @@
  */
 
 import type { ErrorType } from '../util/errors';
+
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 export type TrainedModelType = 'trained-model';
+export type MlSavedObjectType = JobType | TrainedModelType;
 
 export const ML_JOB_SAVED_OBJECT_TYPE = 'ml-job';
 export const ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model';
 export const ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module';
-export type MlSavedObjectType =
-  | typeof ML_JOB_SAVED_OBJECT_TYPE
-  | typeof ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
-  | typeof ML_MODULE_SAVED_OBJECT_TYPE;
 
 export interface SavedObjectResult {
-  [id: string]: { success: boolean; type: JobType | TrainedModelType; error?: ErrorType };
+  [id: string]: { success: boolean; type: MlSavedObjectType; error?: ErrorType };
 }
 
 export type SyncResult = {
-  [jobType in JobType | TrainedModelType]?: {
+  [jobType in MlSavedObjectType]?: {
     [id: string]: { success: boolean; error?: ErrorType };
   };
 };
@@ -34,8 +32,8 @@ export interface SyncSavedObjectResponse {
   datafeedsRemoved: SyncResult;
 }
 
-export interface CanDeleteJobResponse {
-  [jobId: string]: {
+export interface CanDeleteMLSpaceAwareItemsResponse {
+  [id: string]: {
     canDelete: boolean;
     canRemoveFromSpace: boolean;
   };
@@ -61,11 +59,11 @@ export interface SyncCheckResponse {
   result: boolean;
 }
 
-export interface DeleteJobCheckResponse {
-  [jobId: string]: DeleteJobPermission;
+export interface DeleteMLSpaceAwareItemsCheckResponse {
+  [jobId: string]: DeleteMLSpaceAwareItemsPermission;
 }
 
-export interface DeleteJobPermission {
+export interface DeleteMLSpaceAwareItemsPermission {
   canDelete: boolean;
   canRemoveFromSpace: boolean;
 }

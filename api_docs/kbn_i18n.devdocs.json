@@ -488,7 +488,7 @@
                 "section": "def-common.TranslateArguments",
                 "text": "TranslateArguments"
               },
-              ") => string"
+              ") => any"
             ],
             "path": "packages/kbn-i18n/src/index.ts",
             "deprecated": false,

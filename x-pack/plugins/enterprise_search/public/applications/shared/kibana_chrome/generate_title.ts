@@ -32,6 +32,9 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
 export const enterpriseSearchTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
 
+export const elasticsearchTitle = (page: Title = []) =>
+  generateTitle([...page, 'Getting started with Elasticsearch']);
+
 export const appSearchTitle = (page: Title = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RowRenderer } from '../../../../../../common/types';
+import type { RowRenderer } from '../../../../../../common/types';
 import { auditdRowRenderers } from './auditd/generic_row_renderer';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';
 import { netflowRowRenderer } from './netflow/netflow_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';

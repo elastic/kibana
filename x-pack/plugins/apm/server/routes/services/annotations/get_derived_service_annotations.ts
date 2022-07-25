@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

@@ -46,9 +46,6 @@ interface RoleMappingsActions extends RoleMappingsBaseActions {
   setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({ roleMappings }: { roleMappings: WSRoleMapping[] }): {
-    roleMappings: WSRoleMapping[];
-  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
   handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
@@ -322,10 +319,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/workplace_search/org/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post<{
-          roleMappings: WSRoleMapping[];
-        }>(route);
-        actions.setRoleMappings(response);
+        await http.post<{ roleMappings: WSRoleMapping[] }>(route);
+        actions.initializeRoleMappings();
       } catch (e) {
         flashAPIErrors(e);
       }

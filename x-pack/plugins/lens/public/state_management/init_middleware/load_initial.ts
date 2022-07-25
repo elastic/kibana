@@ -49,16 +49,17 @@ export const getPersisted = async ({
     const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = lensServices.http.basePath.prepend(
         `${getEditPath(newObjectId)}${history.location.search}`
       );
-      await spaces.ui.redirectLegacyUrl(
-        newPath,
-        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Lens visualization',
-        })
-      );
+        }),
+      });
     }
     doc = {
       ...initialInput,
@@ -185,7 +186,7 @@ export function loadInitial(
                 setState({
                   isSaveable: true,
                   sharingSavedObjectProps,
-                  filters,
+                  filters: data.query.filterManager.getFilters(),
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&

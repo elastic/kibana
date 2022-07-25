@@ -12,6 +12,6 @@ import { MouseEvent } from 'react';
  * ensure a wrapping tooltip is hidden on click.
  */
 export const blurButtonOnClick = (callback: Function) => (event: MouseEvent<HTMLButtonElement>) => {
-  (event.target as HTMLButtonElement).blur();
+  (event.currentTarget as HTMLButtonElement).blur();
   callback();
 };

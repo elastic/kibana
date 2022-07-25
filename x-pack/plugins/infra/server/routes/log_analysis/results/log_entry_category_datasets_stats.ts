@@ -36,10 +36,10 @@ export const initGetLogEntryCategoryDatasetsStatsRoute = ({ framework }: InfraBa
       } = request.body;
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { data: datasetStats, timing } = await getLatestLogEntriesCategoriesDatasetsStats(
-          requestContext,
+          { infra: await infraMlContext.infra },
           jobIds,
           startTime,
           endTime,

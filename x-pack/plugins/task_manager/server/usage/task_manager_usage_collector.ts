@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MonitoredHealth } from '../routes/health';
 import { TaskManagerUsage } from './types';
 

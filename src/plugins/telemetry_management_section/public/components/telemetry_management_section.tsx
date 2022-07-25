@@ -11,12 +11,11 @@ import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import type { DocLinksStart, ToastsStart } from 'src/core/public';
-import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
+import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { LazyField } from '../../../advanced_settings/public';
-import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -131,7 +130,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   isCustom: true,
                 }}
                 loading={processing}
-                dockLinks={this.props.docLinks}
+                docLinks={this.props.docLinks}
                 toasts={this.props.toasts}
                 handleChange={this.toggleOptIn}
                 enableSaving={this.props.enableSaving}
@@ -174,6 +173,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
   };
 
   renderDescription = () => {
+    const { docLinks } = this.props;
+
     const clusterDataLink = (
       <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
@@ -199,7 +200,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             See our {privacyStatementLink} for more details."
             values={{
               privacyStatementLink: (
-                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
                   <FormattedMessage
                     id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                     defaultMessage="Privacy Statement"

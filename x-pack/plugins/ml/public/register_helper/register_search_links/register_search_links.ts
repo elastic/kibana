@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 
-import { AppUpdater } from 'src/core/public';
+import { AppUpdater } from '@kbn/core/public';
 import { getDeepLinks } from './search_deep_links';
 
 export function registerSearchLinks(

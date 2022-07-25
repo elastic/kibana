@@ -7,13 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 import type { Filter } from '@kbn/es-query';
-import { APP_ID } from '../../../../common/constants';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import {
   displayErrorToast,
@@ -25,8 +25,9 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
+import { useKibana } from '../../../common/lib/kibana';
+import type { inputsModel, State } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -35,7 +36,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { updateAlertStatusAction } from './actions';
 import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
@@ -46,7 +47,7 @@ import {
 } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
-import {
+import type {
   SetEventsDeletedProps,
   SetEventsLoadingProps,
   UpdateAlertsStatusCallback,
@@ -104,7 +105,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const ACTION_BUTTON_COUNT = 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -306,14 +307,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  const additionalFiltersComponent = (
-    <AditionalFiltersAction
-      areEventsLoading={loadingEventIds.length > 0}
-      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-      showBuildingBlockAlerts={showBuildingBlockAlerts}
-      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-    />
+  const additionalFiltersComponent = useMemo(
+    () => (
+      <AditionalFiltersAction
+        areEventsLoading={loadingEventIds.length > 0}
+        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+        showBuildingBlockAlerts={showBuildingBlockAlerts}
+        onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+      />
+    ),
+    [
+      loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+    ]
   );
 
   const defaultFiltersMemo = useMemo(() => {
@@ -356,34 +366,29 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
-  const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = kibana.services.cases.ui.getCasesContext();
-
   if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 
   return (
-    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
-      <StatefulEventsViewer
-        additionalFilters={additionalFiltersComponent}
-        currentFilter={filterGroup}
-        defaultCellActions={defaultCellActions}
-        defaultModel={alertsDefaultModel}
-        end={to}
-        entityType="events"
-        hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
-        id={timelineId}
-        leadingControlColumns={leadingControlColumns}
-        onRuleChange={onRuleChange}
-        pageFilters={defaultFiltersMemo}
-        renderCellValue={RenderCellValue}
-        rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.detections}
-        start={from}
-        utilityBar={utilityBarCallback}
-      />
-    </CasesContext>
+    <StatefulEventsViewer
+      additionalFilters={additionalFiltersComponent}
+      currentFilter={filterGroup}
+      defaultCellActions={defaultCellActions}
+      defaultModel={alertsDefaultModel}
+      end={to}
+      entityType="events"
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
+      id={timelineId}
+      leadingControlColumns={leadingControlColumns}
+      onRuleChange={onRuleChange}
+      pageFilters={defaultFiltersMemo}
+      renderCellValue={RenderCellValue}
+      rowRenderers={defaultRowRenderers}
+      scopeId={SourcererScopeName.detections}
+      start={from}
+      utilityBar={utilityBarCallback}
+    />
   );
 };
 

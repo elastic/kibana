@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -23,7 +23,8 @@ export function initializeDeleteCustomElementRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      await context.core.savedObjects.client.delete(CUSTOM_ELEMENT_TYPE, request.params.id);
+      const soClient = (await context.core).savedObjects.client;
+      await soClient.delete(CUSTOM_ELEMENT_TYPE, request.params.id);
       return response.ok({ body: okResponse });
     })
   );

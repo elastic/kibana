@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AppDeepLink } from '../../../../../../src/core/public';
+import type { AppDeepLink } from '@kbn/core/public';
 import { DEFAULT_BASE_PATH, getCreateCasePath, getCasesConfigurePath } from './paths';
 
 export const CasesDeepLinkId = {

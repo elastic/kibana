@@ -7,19 +7,10 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from 'kibana/public';
-import { map, filter } from 'rxjs/operators';
+import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Tag, INDEX_PATTERN_TYPE } from '../types';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-import { MAX_SEARCH_SIZE } from '../constants';
-
-import {
-  DataPublicPluginStart,
-  IEsSearchResponse,
-  isErrorResponse,
-  isCompleteResponse,
-} from '../../../data/public';
 
 const aliasLabel = i18n.translate('indexPatternEditor.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('indexPatternEditor.dataStreamLabel', {
@@ -49,71 +40,6 @@ const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexNa
       ]
     : [];
 
-export const searchResponseToArray =
-  (getTags: (indexName: string) => Tag[], showAllIndices: boolean) =>
-  (response: IEsSearchResponse<any>) => {
-    const { rawResponse } = response;
-    if (!rawResponse.aggregations) {
-      return [];
-    } else {
-      // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-      return rawResponse.aggregations.indices.buckets
-        .map((bucket: { key: string }) => {
-          return bucket.key;
-        })
-        .filter((indexName: string) => {
-          if (showAllIndices) {
-            return true;
-          } else {
-            return !indexName.startsWith('.');
-          }
-        })
-        .map((indexName: string) => {
-          return {
-            name: indexName,
-            tags: getTags(indexName),
-            item: {},
-          };
-        });
-    }
-  };
-
-export const getIndicesViaSearch = async ({
-  pattern,
-  searchClient,
-  showAllIndices,
-  isRollupIndex,
-}: {
-  pattern: string;
-  searchClient: DataPublicPluginStart['search']['search'];
-  showAllIndices: boolean;
-  isRollupIndex: (indexName: string) => boolean;
-}): Promise<MatchedItem[]> =>
-  searchClient({
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: showAllIndices ? 'all' : 'open',
-      index: pattern,
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: MAX_SEARCH_SIZE,
-            },
-          },
-        },
-      },
-    },
-  })
-    .pipe(
-      filter((resp) => isCompleteResponse(resp) || isErrorResponse(resp)),
-      map(searchResponseToArray(getIndexTags(isRollupIndex), showAllIndices))
-    )
-    .toPromise()
-    .catch(() => []);
-
 export const getIndicesViaResolve = async ({
   http,
   pattern,
@@ -137,48 +63,18 @@ export const getIndicesViaResolve = async ({
       }
     });
 
-/**
- * Takes two MatchedItem[]s and returns a merged set, with the second set prrioritized over the first based on name
- *
- * @param matchedA
- * @param matchedB
- */
-
-export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
-  const mergedMatchedItems = matchedA.reduce((col, item) => {
-    col[item.name] = item;
-    return col;
-  }, {} as Record<string, MatchedItem>);
-
-  matchedB.reduce((col, item) => {
-    col[item.name] = item;
-    return col;
-  }, mergedMatchedItems);
-
-  return Object.values(mergedMatchedItems).sort((a, b) => {
-    if (a.name > b.name) return 1;
-    if (b.name > a.name) return -1;
-
-    return 0;
-  });
-};
-
 export async function getIndices({
   http,
   pattern: rawPattern = '',
   showAllIndices = false,
-  searchClient,
   isRollupIndex,
 }: {
   http: HttpStart;
   pattern: string;
   showAllIndices?: boolean;
-  searchClient: DataPublicPluginStart['search']['search'];
   isRollupIndex: (indexName: string) => boolean;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
-  const isCCS = pattern.indexOf(':') !== -1;
-  const requests: Array<Promise<MatchedItem[]>> = [];
 
   // Searching for `*:` fails for CCS environments. The search request
   // is worthless anyways as the we should only send a request
@@ -198,33 +94,12 @@ export async function getIndices({
     return [];
   }
 
-  const promiseResolve = getIndicesViaResolve({
+  return getIndicesViaResolve({
     http,
     pattern,
     showAllIndices,
     isRollupIndex,
   }).catch(() => []);
-  requests.push(promiseResolve);
-
-  if (isCCS) {
-    // CCS supports ±1 major version. We won't be able to expect resolve endpoint to exist until v9
-    const promiseSearch = getIndicesViaSearch({
-      pattern,
-      searchClient,
-      showAllIndices,
-      isRollupIndex,
-    }).catch(() => []);
-    requests.push(promiseSearch);
-  }
-
-  const responses = await Promise.all(requests);
-
-  if (responses.length === 2) {
-    const [resolveResponse, searchResponse] = responses;
-    return dedupeMatchedItems(searchResponse, resolveResponse);
-  } else {
-    return responses[0];
-  }
 }
 
 export const responseToItemArray = (

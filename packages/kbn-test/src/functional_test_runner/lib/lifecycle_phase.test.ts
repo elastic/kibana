@@ -26,7 +26,7 @@ describe('with randomness', () => {
   });
 
   it('calls handlers in random order', async () => {
-    const phase = new LifecyclePhase();
+    const phase = new LifecyclePhase(new Rx.Subscription());
     const order: string[] = [];
 
     phase.add(
@@ -69,7 +69,7 @@ describe('without randomness', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('calls all handlers and throws first error', async () => {
-    const phase = new LifecyclePhase();
+    const phase = new LifecyclePhase(new Rx.Subscription());
     const fn1 = jest.fn();
     phase.add(fn1);
 
@@ -88,7 +88,7 @@ describe('without randomness', () => {
   });
 
   it('triggers before$ just before calling handler and after$ once it resolves', async () => {
-    const phase = new LifecyclePhase();
+    const phase = new LifecyclePhase(new Rx.Subscription());
     const order: string[] = [];
 
     const beforeSub = jest.fn(() => order.push('before'));
@@ -116,7 +116,7 @@ describe('without randomness', () => {
   });
 
   it('completes before$ and after$ if phase is singular', async () => {
-    const phase = new LifecyclePhase({ singular: true });
+    const phase = new LifecyclePhase(new Rx.Subscription(), { singular: true });
 
     const beforeNotifs: Array<Rx.Notification<unknown>> = [];
     phase.before$.pipe(materialize()).subscribe((n) => beforeNotifs.push(n));
@@ -160,7 +160,7 @@ describe('without randomness', () => {
   });
 
   it('completes before$ subscribers after trigger of singular phase', async () => {
-    const phase = new LifecyclePhase({ singular: true });
+    const phase = new LifecyclePhase(new Rx.Subscription(), { singular: true });
     await phase.trigger();
 
     await expect(phase.before$.pipe(materialize(), toArray()).toPromise()).resolves
@@ -177,7 +177,7 @@ describe('without randomness', () => {
   });
 
   it('replays after$ event subscribers after trigger of singular phase', async () => {
-    const phase = new LifecyclePhase({ singular: true });
+    const phase = new LifecyclePhase(new Rx.Subscription(), { singular: true });
     await phase.trigger();
 
     await expect(phase.after$.pipe(materialize(), toArray()).toPromise()).resolves

@@ -17,10 +17,12 @@ import {
 import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
-import { layerTypes } from '../../../../common';
+import { LayerType, layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
 
@@ -46,6 +48,13 @@ afterEach(() => {
 
 describe('ConfigPanel', () => {
   const frame = createMockFramePublicAPI();
+
+  let uiActions: UiActionsStart;
+
+  beforeEach(() => {
+    uiActions = uiActionsPluginMock.createStartContract();
+  });
+
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>
@@ -107,6 +116,7 @@ describe('ConfigPanel', () => {
       core: coreMock.createStart(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      uiActions,
     };
   }
 
@@ -156,6 +166,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -179,6 +193,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -200,6 +218,10 @@ describe('ConfigPanel', () => {
         .instance();
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
@@ -231,14 +253,17 @@ describe('ConfigPanel', () => {
   });
 
   describe('initial default value', () => {
-    function clickToAddLayer(instance: ReactWrapper) {
+    function clickToAddLayer(
+      instance: ReactWrapper,
+      layerType: LayerType = layerTypes.REFERENCELINE
+    ) {
       act(() => {
         instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
       instance.update();
       act(() => {
         instance
-          .find(`[data-test-subj="lnsLayerAddButton-${layerTypes.REFERENCELINE}"]`)
+          .find(`[data-test-subj="lnsLayerAddButton-${layerType}"]`)
           .first()
           .simulate('click');
       });
@@ -288,8 +313,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'testGroup',
               columnId: 'myColumn',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -319,8 +342,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'testGroup',
               columnId: 'myColumn',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -335,9 +356,7 @@ describe('ConfigPanel', () => {
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith({}, 'newId', {
         columnId: 'myColumn',
-        dataType: 'number',
         groupId: 'testGroup',
-        label: 'Initial value',
         staticValue: 100,
       });
     });
@@ -354,8 +373,6 @@ describe('ConfigPanel', () => {
             {
               groupId: 'a',
               columnId: 'newId',
-              dataType: 'number',
-              label: 'Initial value',
               staticValue: 100,
             },
           ],
@@ -374,11 +391,66 @@ describe('ConfigPanel', () => {
         {
           groupId: 'a',
           columnId: 'newId',
-          dataType: 'number',
-          label: 'Initial value',
           staticValue: 100,
         }
       );
+    });
+
+    it('When visualization is `noDatasource` should not run datasource methods', async () => {
+      const datasourceMap = mockDatasourceMap();
+
+      const visualizationMap = mockVisualizationMap();
+      visualizationMap.testVis.setDimension = jest.fn();
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        {
+          type: layerTypes.DATA,
+          label: 'Data Layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              staticValue: 100,
+            },
+          ],
+        },
+        {
+          type: layerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+        {
+          type: layerTypes.ANNOTATIONS,
+          label: 'Annotations Layer',
+          noDatasource: true,
+          initialDimensions: [
+            {
+              groupId: 'a',
+              columnId: 'newId',
+              staticValue: 100,
+            },
+          ],
+        },
+      ]);
+
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ visualizationMap, datasourceMap });
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      await clickToAddLayer(instance, layerTypes.ANNOTATIONS);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+
+      expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
+        columnId: 'newId',
+        frame: {
+          activeData: undefined,
+          datasourceLayers: {
+            a: expect.anything(),
+          },
+          dateRange: expect.anything(),
+        },
+        groupId: 'a',
+        layerId: 'newId',
+        prevState: undefined,
+      });
+      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
     });
   });
 });

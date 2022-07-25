@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { RedirectTo } from './redirect_to';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { enableServiceGroups } from '../../../../observability/public';
 import { useFetcher, FETCH_STATUS } from '../../hooks/use_fetcher';
 
 export function ServiceGroupsRedirect({

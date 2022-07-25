@@ -15,6 +15,7 @@ import {
   FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
   FIELDS_BROWSER_CATEGORY_BADGE,
+  FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
@@ -29,8 +30,10 @@ import {
   removesMessageField,
   resetFields,
   toggleCategory,
+  activateViewSelected,
+  activateViewAll,
 } from '../../tasks/fields_browser';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
@@ -48,10 +51,13 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
+  before(() => {
+    cleanKibana();
+    login();
+  });
   context('Fields Browser rendering', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
@@ -63,6 +69,10 @@ describe('Fields Browser', () => {
 
     it('displays all categories (by default)', () => {
       cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
+    });
+
+    it('displays "view all" option by default', () => {
+      cy.get(FIELDS_BROWSER_VIEW_BUTTON).should('contain.text', 'View: all');
     });
 
     it('displays the expected count of categories that match the filter input', () => {
@@ -80,15 +90,13 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', '2');
     });
 
-    it('the `default ECS` category matches the default timeline header fields', () => {
-      const category = 'default ECS';
-      toggleCategory(category);
+    it('displays only the selected fields when "view selected" option is enabled', () => {
+      activateViewSelected();
       cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', `${defaultHeaders.length}`);
-
       defaultHeaders.forEach((header) => {
         cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked');
       });
-      toggleCategory(category);
+      activateViewAll();
     });
 
     it('creates the category badge when it is selected', () => {
@@ -119,8 +127,7 @@ describe('Fields Browser', () => {
 
   context('Editing the timeline', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

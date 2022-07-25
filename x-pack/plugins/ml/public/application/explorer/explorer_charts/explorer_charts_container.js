@@ -7,6 +7,7 @@
 import './_index.scss';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { escapeKuery } from '@kbn/es-query';
 
 import {
   EuiButtonEmpty,
@@ -15,7 +16,9 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import {
   getChartType,
@@ -27,15 +30,20 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
-import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -53,6 +61,20 @@ const textViewButton = i18n.translate(
 const mapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.mapsPluginMissingMessage', {
   defaultMessage: 'maps or embeddable start plugin not found',
 });
+const openInMapsPluginMessage = i18n.translate('xpack.ml.explorer.charts.openInMapsPluginMessage', {
+  defaultMessage: 'Open in Maps',
+});
+
+export function getEntitiesQuery(series) {
+  const queryString = series.entityFields
+    ?.map(({ fieldName, fieldValue }) => `${escapeKuery(fieldName)}:${escapeKuery(fieldValue)}`)
+    .join(' or ');
+  const query = {
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    query: queryString,
+  };
+  return { query, queryString };
+}
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
@@ -79,6 +101,29 @@ function ExplorerChartContainer({
   chartsService,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
+  const [mapsLink, setMapsLink] = useState('');
+
+  const {
+    services: {
+      data,
+      share,
+      application: { navigateToApp },
+    },
+  } = useMlKibana();
+
+  const getMapsLink = useCallback(async () => {
+    const { queryString, query } = getEntitiesQuery(series);
+    const initialLayers = getInitialAnomaliesLayers(series.jobId);
+
+    const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const location = await locator.getLocation({
+      initialLayers: initialLayers,
+      timeRange: data.query.timefilter.timefilter.getTime(),
+      ...(queryString !== undefined ? { query } : {}),
+    });
+
+    return location;
+  }, [series?.jobId]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -98,8 +143,33 @@ function ExplorerChartContainer({
     };
   }, [mlLocator, series]);
 
+  useEffect(
+    function getMapsPluginLink() {
+      let isCancelled = false;
+      if (series && getChartType(series) === CHART_TYPE.GEO_MAP) {
+        const generateLink = async () => {
+          try {
+            const mapsLink = await getMapsLink();
+            if (!isCancelled) {
+              setMapsLink(mapsLink?.path);
+            }
+          } catch (error) {
+            console.error(error);
+            setMapsLink('');
+          }
+        };
+        generateLink().catch(console.error);
+      }
+      return () => {
+        isCancelled = true;
+      };
+    },
+    [series]
+  );
+
   const chartRef = useRef(null);
 
+  const { euiTheme } = useEuiTheme();
   const chartTheme = chartsService.theme.useChartsTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -163,17 +233,19 @@ function ExplorerChartContainer({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div className="ml-explorer-chart-icons">
+          <div
+            css={css`
+              padding: ${euiTheme.size.xs};
+            `}
+          >
             {tooManyBuckets && (
-              <span className="ml-explorer-chart-icon">
-                <EuiIconTip
-                  content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
-                  position="top"
-                  size="s"
-                  type="alert"
-                  color="warning"
-                />
-              </span>
+              <EuiIconTip
+                content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
+                position="top"
+                size="s"
+                type="alert"
+                color="warning"
+              />
             )}
             {explorerSeriesLink && (
               <EuiToolTip position="top" content={textViewButton}>
@@ -191,6 +263,23 @@ function ExplorerChartContainer({
                 </EuiButtonEmpty>
               </EuiToolTip>
             )}
+            {chartType === CHART_TYPE.GEO_MAP && mapsLink ? (
+              <EuiToolTip position="top" content={openInMapsPluginMessage}>
+                <EuiButtonEmpty
+                  iconSide="right"
+                  iconType="logoMaps"
+                  size="xs"
+                  onClick={async () => {
+                    await navigateToApp(MAPS_APP_ID, { path: mapsLink });
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.explorer.charts.viewInMapsLabel"
+                    defaultMessage="View"
+                  />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            ) : null}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -307,7 +396,11 @@ export const ExplorerChartsContainerUI = ({
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
-      <EuiFlexGrid columns={chartsColumns} data-test-subj="mlExplorerChartsContainer">
+      <EuiFlexGrid
+        columns={chartsColumns}
+        gutterSize="m"
+        data-test-subj="mlExplorerChartsContainer"
+      >
         {seriesToUse.length > 0 &&
           seriesToUse.map((series) => (
             <EuiFlexItem

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { type Subject, ReplaySubject } from 'rxjs';
 import { ResourceInstaller } from './resource_installer';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -19,6 +20,17 @@ import {
 } from '../../common/assets';
 
 describe('resourceInstaller', () => {
+  let pluginStop$: Subject<void>;
+
+  beforeEach(() => {
+    pluginStop$ = new ReplaySubject(1);
+  });
+
+  afterEach(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
+  });
+
   describe('if write is disabled', () => {
     it('should not install common resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -29,6 +41,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        pluginStop$,
       });
       installer.installCommonResources();
       expect(getClusterClient).not.toHaveBeenCalled();
@@ -44,6 +57,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        pluginStop$,
       });
       const indexOptions = {
         feature: AlertConsumers.LOGS,
@@ -78,6 +92,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: getResourceNameMock,
         getClusterClient,
+        pluginStop$,
       });
 
       await installer.installCommonResources();
@@ -102,6 +117,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
+        pluginStop$,
       });
 
       const indexOptions = {

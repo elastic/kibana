@@ -9,12 +9,12 @@ import './field_list.scss';
 import { throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 import { DatasourceDataPanelProps } from '../types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<

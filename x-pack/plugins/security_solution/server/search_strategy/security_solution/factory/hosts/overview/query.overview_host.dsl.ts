@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildOverviewHostQuery = ({
   filterQuery,
@@ -290,6 +290,21 @@ export const buildOverviewHostQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [
+        'host.os.*',
+        'event.dataset',
+        'event.module',
+        'event.category',
+        'agent.type',
+        'winlog.channel',
+        'endgame.event_type_full',
+        'network.protocol',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   } as const;
 

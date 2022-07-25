@@ -9,12 +9,12 @@ import { getAppResultsMock } from './application.test.mocks';
 
 import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from 'src/core/public';
+import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from '@kbn/core/public';
 import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
-} from '../../../global_search/public';
-import { applicationServiceMock } from 'src/core/public/mocks';
+} from '@kbn/global-search-plugin/public';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { createApplicationResultProvider } from './application';
 
 const getTestScheduler = () =>

@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useQueryAlerts, ReturnQueryAlerts } from './use_query';
+import type { ReturnQueryAlerts } from './use_query';
+import { useQueryAlerts } from './use_query';
 import * as api from './api';
 import { mockAlertsQuery, alertsMock } from './mock';
 
@@ -127,6 +128,24 @@ describe('useQueryAlerts', () => {
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
       });
+    });
+  });
+
+  test('skip', async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    await act(async () => {
+      const localProps = { query: mockAlertsQuery, indexName, skip: false };
+      const { rerender, waitForNextUpdate } = renderHook<
+        [object, string],
+        ReturnQueryAlerts<unknown, unknown>
+      >(() => useQueryAlerts<unknown, unknown>(localProps));
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      localProps.skip = true;
+      act(() => rerender());
+      act(() => rerender());
+      expect(abortSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

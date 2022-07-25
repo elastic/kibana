@@ -7,9 +7,9 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { getBucketSize, getTimerange, overwrite } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
-import { UI_SETTINGS } from '../../../../../../../data/server';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 

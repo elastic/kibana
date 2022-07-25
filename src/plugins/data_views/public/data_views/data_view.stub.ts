@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { FieldFormatsStartCommon } from '../../../field_formats/common';
-import { getFieldFormatsRegistry } from '../../../field_formats/public/mocks';
+import { CoreSetup } from '@kbn/core/public';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import * as commonStubs from '../../common/stubs';
 import { DataView, DataViewSpec } from '../../common';
-import { coreMock } from '../../../../core/public/mocks';
 /**
  * Create a custom stub index pattern. Use it in your unit tests where an {@link DataView} expected.
  * @param spec - Serialized index pattern object

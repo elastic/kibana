@@ -15,8 +15,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { templateActionVariable } from '../lib';
-import { ActionVariable } from '../../../../alerting/common';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -48,7 +48,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {templateActionVariable(variable)}
           </EuiText>
           <EuiText size="m" color="subdued">
-            <div className="euiTextColor--subdued">{variable.description}</div>
+            <div>{variable.description}</div>
           </EuiText>
         </>
       </EuiContextMenuItem>

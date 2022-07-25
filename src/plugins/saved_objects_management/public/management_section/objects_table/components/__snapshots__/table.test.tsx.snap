@@ -131,7 +131,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -142,6 +142,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "name": "Title",
             "render": [Function],
             "sortable": false,
+          },
+          Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
           },
           Object {
             "actions": Array [
@@ -213,6 +220,14 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"
@@ -351,7 +366,7 @@ exports[`Table should render normally 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -362,6 +377,13 @@ exports[`Table should render normally 1`] = `
             "name": "Title",
             "render": [Function],
             "sortable": false,
+          },
+          Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
           },
           Object {
             "actions": Array [
@@ -433,6 +455,14 @@ exports[`Table should render normally 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"

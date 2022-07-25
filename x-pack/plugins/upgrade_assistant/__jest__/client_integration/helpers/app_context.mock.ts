@@ -14,13 +14,13 @@ import {
   httpServiceMock,
   coreMock,
   scopedHistoryMock,
-} from 'src/core/public/mocks';
-import { sharePluginMock } from 'src/plugins/share/public/mocks';
+} from '@kbn/core/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { cloudMock } from '../../../../../../x-pack/plugins/cloud/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };
@@ -88,7 +88,14 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
       notifications: notificationServiceMock.createStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       history: scopedHistoryMock.create(),
-      application: applicationServiceMock.createStartContract(),
+      application: {
+        ...applicationServiceMock.createStartContract(),
+        capabilities: {
+          spaces: {
+            manage: true,
+          },
+        },
+      },
     },
   },
   plugins: {

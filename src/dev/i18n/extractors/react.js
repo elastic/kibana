@@ -19,7 +19,7 @@ import {
   checkValuesProperty,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST

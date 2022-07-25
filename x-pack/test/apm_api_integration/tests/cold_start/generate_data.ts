@@ -39,7 +39,7 @@ export async function generateData({
     timerange(start, end)
       .interval('1m')
       .rate(coldStartRate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
           .transaction(coldStartTransaction.name)
           .defaults({
@@ -48,12 +48,11 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(coldStartTransaction.duration)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(warmStartRate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
           .transaction(warmStartTransaction.name)
           .defaults({
@@ -62,7 +61,6 @@ export async function generateData({
           .timestamp(timestamp)
           .duration(warmStartTransaction.duration)
           .success()
-          .serialize()
       ),
   ];
 

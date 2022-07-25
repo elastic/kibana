@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import type { CoreTheme } from 'src/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from './to_mount_point';
 
 describe('toMountPoint', () => {

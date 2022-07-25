@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsImportResponse } from 'src/core/public';
+import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
 import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 export async function importFile(

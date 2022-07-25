@@ -15,3 +15,4 @@ export * from './package_spec';
 export * from './enrollment_api_key';
 export * from './settings';
 export * from './preconfiguration';
+export * from './download_sources';

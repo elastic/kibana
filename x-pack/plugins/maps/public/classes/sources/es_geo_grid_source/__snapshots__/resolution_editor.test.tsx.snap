@@ -1,6 +1,158 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`render 1`] = `
+exports[`should render 3 tick slider when renderAs is HEX 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Resolution"
+    labelType="label"
+  >
+    <EuiRange
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      levels={Array []}
+      max={3}
+      min={1}
+      onChange={[Function]}
+      showInput={false}
+      showLabels={false}
+      showRange={false}
+      showTicks={true}
+      showValue={false}
+      step={1}
+      tickInterval={1}
+      ticks={
+        Array [
+          Object {
+            "label": "low",
+            "value": 1,
+          },
+          Object {
+            "label": "",
+            "value": 2,
+          },
+          Object {
+            "label": "high",
+            "value": 3,
+          },
+        ]
+      }
+      value={1}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render 4 tick slider when renderAs is GRID 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Resolution"
+    labelType="label"
+  >
+    <EuiRange
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      levels={Array []}
+      max={4}
+      min={1}
+      onChange={[Function]}
+      showInput={false}
+      showLabels={false}
+      showRange={false}
+      showTicks={true}
+      showValue={false}
+      step={1}
+      tickInterval={1}
+      ticks={
+        Array [
+          Object {
+            "label": "low",
+            "value": 1,
+          },
+          Object {
+            "label": "",
+            "value": 2,
+          },
+          Object {
+            "label": "",
+            "value": 3,
+          },
+          Object {
+            "label": "high",
+            "value": 4,
+          },
+        ]
+      }
+      value={1}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Resolution"
+    labelType="label"
+  >
+    <EuiRange
+      compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      levels={Array []}
+      max={4}
+      min={1}
+      onChange={[Function]}
+      showInput={false}
+      showLabels={false}
+      showRange={false}
+      showTicks={true}
+      showValue={false}
+      step={1}
+      tickInterval={1}
+      ticks={
+        Array [
+          Object {
+            "label": "low",
+            "value": 1,
+          },
+          Object {
+            "label": "",
+            "value": 2,
+          },
+          Object {
+            "label": "",
+            "value": 3,
+          },
+          Object {
+            "label": "high",
+            "value": 4,
+          },
+        ]
+      }
+      value={1}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render 4 tick slider when renderAs is POINT 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}

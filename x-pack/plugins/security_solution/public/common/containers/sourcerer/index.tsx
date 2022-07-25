@@ -10,29 +10,36 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import {
+import type {
   SelectedDataView,
   SourcererDataView,
-  SourcererScopeName,
+  SourcererUrlState,
 } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
   ALERTS_PATH,
-  CASES_PATH,
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
+  CASES_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import {
+  checkIfIndicesExist,
+  getScopePatternListSelection,
+  sortWithExcludesAtEnd,
+} from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { CONSTANTS } from '../../components/url_state/constants';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -42,6 +49,7 @@ export const useInitSourcerer = (
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(CONSTANTS.sourcerer);
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -84,6 +92,41 @@ export const useInitSourcerer = (
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
+  const onInitializeUrlParam = useCallback(
+    (initialState: SourcererUrlState | null) => {
+      // Initialize the store with value from UrlParam.
+      if (initialState != null) {
+        (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
+          if (
+            !(scope === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
+          ) {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: scope,
+                selectedDataViewId: initialState[scope]?.id ?? null,
+                selectedPatterns: initialState[scope]?.selectedPatterns ?? [],
+              })
+            );
+          }
+        });
+      } else {
+        // Initialize the UrlParam with values from the store.
+        // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
+        if (scopeDataViewId) {
+          updateUrlParam({
+            [SourcererScopeName.default]: {
+              id: scopeDataViewId,
+              selectedPatterns,
+            },
+          });
+        }
+      }
+    },
+    [dispatch, scopeDataViewId, scopeId, selectedPatterns, updateUrlParam]
+  );
+
+  useInitializeUrlParam<SourcererUrlState>(CONSTANTS.sourcerer, onInitializeUrlParam);
+
   /*
    * Note for future engineer:
    * we changed the logic to not fetch all the index fields for every data view on the loading of the app
@@ -100,15 +143,17 @@ export const useInitSourcerer = (
     activeDataViewIds.forEach((id) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
-        indexFieldsSearch(
-          id,
-          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
-          id === scopeDataViewId
-            ? selectedPatterns.length === 0 && missingPatterns.length === 0
-            : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
-            : false
-        );
+        indexFieldsSearch({
+          dataViewId: id,
+          scopeId:
+            id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          needToBeInit:
+            id === scopeDataViewId
+              ? selectedPatterns.length === 0 && missingPatterns.length === 0
+              : timelineDataViewId === id
+              ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+              : false,
+        });
       }
     });
   }, [
@@ -188,7 +233,7 @@ export const useInitSourcerer = (
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
-            indexFieldsSearch(response.defaultDataView.id);
+            indexFieldsSearch({ dataViewId: response.defaultDataView.id });
           }
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
@@ -289,9 +334,6 @@ export const useInitSourcerer = (
   ]);
 };
 
-const LOGS_WILDCARD_INDEX = 'logs-*';
-export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
@@ -315,12 +357,8 @@ export const useSourcererDataView = (
       sourcererScope,
     };
   });
-
   const selectedPatterns = useMemo(
-    () =>
-      scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...scopeSelectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-        : scopeSelectedPatterns,
+    () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
   );
 
@@ -384,7 +422,7 @@ export const useSourcererDataView = (
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter
-      selectedPatterns: selectedPatterns.sort(),
+      selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
@@ -392,11 +430,13 @@ export const useSourcererDataView = (
   );
 };
 
+const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
+
 export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
+    path: detectionsPaths,
     strict: false,
   }) == null
     ? SourcererScopeName.default
@@ -414,11 +454,5 @@ export const sourcererPaths = [
 export const showSourcererByPath = (pathname: string): boolean =>
   matchPath(pathname, {
     path: sourcererPaths,
-    strict: false,
-  }) != null;
-
-export const isAlertsOrRulesDetailsPage = (pathname: string): boolean =>
-  matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`],
     strict: false,
   }) != null;

@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Loader } from './index';
+import { Loader } from '.';
 
 describe('rendering', () => {
   test('renders correctly', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -17,16 +17,23 @@ import {
   EuiIconTip,
   htmlIdGenerator,
   EuiButtonGroup,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
-import type { DataType } from '../../../../types';
-import { OperationDefinition } from '../index';
-import { FieldBasedIndexPatternColumn } from '../column_types';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '../../../../../common';
+import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import type { DataType, OperationMetadata } from '../../../../types';
+import { OperationDefinition } from '..';
+import {
+  FieldBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IncompleteColumn,
+} from '../column_types';
 import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage } from '../helpers';
+import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
@@ -39,6 +46,7 @@ import {
   getMultiTermsScriptedFieldErrorMessage,
   getFieldsByValidationState,
   isSortableByColumn,
+  isPercentileRankSortable,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -46,6 +54,7 @@ import {
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
+import { IncludeExcludeRow } from './include_exclude_options';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -53,14 +62,18 @@ export function supportsRarityRanking(field?: IndexPatternField) {
     ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
   );
 }
-
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
   defaultMessage: 'Missing field',
 });
 
-function ofName(name?: string, count: number = 0, rare: boolean = false) {
+function ofName(
+  name?: string,
+  secondaryFieldsCount: number = 0,
+  rare: boolean = false,
+  termsSize: number = 0
+) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
@@ -69,19 +82,22 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
       },
     });
   }
-  if (count) {
+  if (secondaryFieldsCount) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
       defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
-        count,
+        count: secondaryFieldsCount,
       },
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top values of {name}',
+    defaultMessage:
+      'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
+      termsCount: termsSize,
+      numberOfTermsLabel: termsSize > 1 ? `${termsSize} ` : '',
     },
   });
 }
@@ -217,7 +233,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
+  toEsAggsFn: (
+    column,
+    columnId,
+    _indexPattern,
+    layer,
+    uiSettings,
+    orderedColumnIds,
+    operationDefinitionMap
+  ) => {
     if (column.params?.orderBy.type === 'rare') {
       return buildExpressionFunction<AggFunctionsMapping['aggRareTerms']>('aggRareTerms', {
         id: columnId,
@@ -227,35 +251,79 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+    let orderBy: string = '_key';
+
+    if (column.params?.orderBy.type === 'column') {
+      const orderColumn = layer.columns[column.params.orderBy.columnId];
+      orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
+      // percentile rank with non integer value should default to alphabetical order
+      if (!isPercentileRankSortable(orderColumn)) {
+        orderBy = '_key';
+      }
+    }
+
+    // To get more accurate results, we set shard_size to a minimum of 1000
+    // The other calculation matches the current Elasticsearch shard_size default,
+    // but they may diverge in the future
+    const shardSize = column.params.accuracyMode
+      ? Math.max(1000, column.params.size * 1.5 + 10)
+      : undefined;
+
+    const orderAggColumn = column.params.orderAgg;
+    let orderAgg;
+    if (orderAggColumn) {
+      orderBy = 'custom';
+      const def = operationDefinitionMap?.[orderAggColumn?.operationType];
+      if (def && 'toEsAggsFn' in def) {
+        orderAgg = [
+          {
+            type: 'expression' as const,
+            chain: [
+              def.toEsAggsFn(
+                orderAggColumn,
+                `${columnId}-orderAgg`,
+                _indexPattern,
+                layer,
+                uiSettings,
+                orderedColumnIds
+              ),
+            ],
+          },
+        ];
+      }
+    }
     if (column.params?.secondaryFields?.length) {
       return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
         id: columnId,
         enabled: true,
         schema: 'segment',
         fields: [column.sourceField, ...column.params.secondaryFields],
-        orderBy:
-          column.params.orderBy.type === 'alphabetical'
-            ? '_key'
-            : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+        orderBy,
         order: column.params.orderDirection,
+        orderAgg,
         size: column.params.size,
+        shardSize,
         otherBucket: Boolean(column.params.otherBucket),
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
         }),
       }).toAst();
     }
+
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+      orderBy,
       order: column.params.orderDirection,
+      orderAgg,
       size: column.params.size,
+      shardSize,
+      ...(column.params.include?.length && { include: column.params.include }),
+      ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+      includeIsRegex: Boolean(column.params.includeIsRegex),
+      excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -270,7 +338,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ofName(
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
-      column.params.orderBy.type === 'rare'
+      column.params.orderBy.type === 'rare',
+      column.params.size
     ),
   onFieldChange: (oldColumn, field, params) => {
     const newParams = {
@@ -285,6 +354,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
       newParams.orderBy = { type: 'alphabetical' };
     }
+
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -293,13 +363,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         : ofName(
             field.displayName,
             newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare'
+            newParams.orderBy.type === 'rare',
+            newParams.size
           ),
       sourceField: field.name,
       params: newParams,
     };
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
+  onOtherColumnChanged: (layer, thisColumnId) => {
     const columns = layer.columns;
     const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
     if (
@@ -344,11 +415,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       existingFields,
       operationSupportMatrix,
       updateLayer,
+      dimensionGroups,
+      groupId,
+      incompleteParams,
     } = props;
     const onFieldSelectChange = useCallback(
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
-        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
+        const [sourcefield, ...secondaryFields] = fields;
         const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
         const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
         const newParams = {
@@ -357,9 +431,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         if ('format' in newParams && newDataType !== 'number') {
           delete newParams.format;
         }
-        const mainField = indexPattern.getFieldByName(fields[0]);
+        const mainField = indexPattern.getFieldByName(sourcefield);
         if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
           newParams.orderBy = { type: 'alphabetical' };
+        }
+        // in single field mode, allow the automatic switch of the function to
+        // the most appropriate one
+        if (fields.length === 1) {
+          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const termsSupported = possibleOperations?.has('terms');
+          if (!termsSupported) {
+            const newFieldOp = possibleOperations?.values().next().value;
+            return updateLayer(
+              insertOrReplaceColumn({
+                layer,
+                columnId,
+                indexPattern,
+                op: newFieldOp,
+                field: mainField,
+                visualizationGroups: dimensionGroups,
+                targetGroup: groupId,
+                incompleteParams,
+              })
+            );
+          }
         }
         updateLayer({
           ...layer,
@@ -368,13 +463,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             [columnId]: {
               ...column,
               dataType: newDataType,
-              sourceField: fields[0],
+              sourceField: sourcefield,
               label: column.customLabel
                 ? column.label
                 : ofName(
-                    indexPattern.getFieldByName(fields[0])?.displayName,
+                    mainField?.displayName,
                     fields.length - 1,
-                    newParams.orderBy.type === 'rare'
+                    newParams.orderBy.type === 'rare',
+                    newParams.size
                   ),
               params: {
                 ...newParams,
@@ -388,7 +484,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           } as Record<string, TermsIndexPatternColumn>,
         });
       },
-      [columnId, indexPattern, layer, updateLayer]
+      [
+        columnId,
+        dimensionGroups,
+        groupId,
+        incompleteParams,
+        indexPattern,
+        layer,
+        operationSupportMatrix.operationByField,
+        updateLayer,
+      ]
     );
     const currentColumn = layer.columns[columnId];
 
@@ -438,7 +543,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       </EuiFormRow>
     );
   },
-  paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
+  paramEditor: function ParamEditor({
+    layer,
+    paramEditorUpdater,
+    currentColumn,
+    columnId,
+    indexPattern,
+    existingFields,
+    operationDefinitionMap,
+    ReferenceEditor,
+    paramEditorCustomProps,
+    activeData,
+    ...rest
+  }) {
+    const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
+      undefined
+    );
+
     const hasRestrictions = indexPattern.hasRestrictions;
 
     const SEPARATOR = '$$$';
@@ -455,6 +576,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }
       if (value === 'rare') {
         return { type: 'rare', maxDocCount: DEFAULT_MAX_DOC_COUNT };
+      }
+      if (value === 'custom') {
+        return { type: 'custom' };
       }
       const parts = value.split(SEPARATOR);
       return {
@@ -488,6 +612,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         }),
       });
     }
+    orderOptions.push({
+      value: toValue({ type: 'custom' }),
+      text: i18n.translate('xpack.lens.indexPattern.terms.orderCustomMetric', {
+        defaultMessage: 'Custom',
+      }),
+    });
+
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
+
+    const { euiTheme } = useEuiTheme();
 
     return (
       <>
@@ -495,14 +631,27 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           value={currentColumn.params.size}
           disabled={currentColumn.params.orderBy.type === 'rare'}
           onChange={(value) => {
-            updateLayer(
-              updateColumnParam({
-                layer,
-                columnId,
-                paramName: 'size',
-                value,
-              })
-            );
+            paramEditorUpdater({
+              ...layer,
+              columns: {
+                ...layer.columns,
+                [columnId]: {
+                  ...currentColumn,
+                  label: currentColumn.customLabel
+                    ? currentColumn.label
+                    : ofName(
+                        indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
+                        secondaryFieldsCount,
+                        currentColumn.params.orderBy.type === 'rare',
+                        value
+                      ),
+                  params: {
+                    ...currentColumn.params,
+                    size: value,
+                  },
+                },
+              } as Record<string, TermsIndexPatternColumn>,
+            });
           }}
         />
         {currentColumn.params.orderBy.type === 'rare' && (
@@ -513,7 +662,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             })}
             maxValue={MAXIMUM_MAX_DOC_COUNT}
             onChange={(value) => {
-              updateLayer(
+              paramEditorUpdater(
                 updateColumnParam({
                   layer,
                   columnId,
@@ -549,12 +698,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         >
           <EuiSelect
             compressed
+            fullWidth
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newOrderByValue = fromValue(e.target.value);
-              const updatedLayer = updateDefaultLabels(
+              let updatedLayer = updateDefaultLabels(
                 updateColumnParam({
                   layer,
                   columnId,
@@ -563,7 +713,33 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 }),
                 indexPattern
               );
-              updateLayer(
+              if (newOrderByValue.type === 'custom') {
+                const initialOperation = (
+                  operationDefinitionMap.count as OperationDefinition<
+                    GenericIndexPatternColumn,
+                    'field'
+                  >
+                ).buildColumn({
+                  layer,
+                  indexPattern,
+                  field: indexPattern.getFieldByName(DOCUMENT_FIELD_NAME)!,
+                });
+                updatedLayer = updateColumnParam({
+                  layer: updatedLayer,
+                  columnId,
+                  paramName: 'orderAgg',
+                  value: initialOperation,
+                });
+              } else {
+                updatedLayer = updateColumnParam({
+                  layer: updatedLayer,
+                  columnId,
+                  paramName: 'orderAgg',
+                  value: undefined,
+                });
+              }
+              setIncompleteColumn(undefined);
+              paramEditorUpdater(
                 updateColumnParam({
                   layer: updatedLayer,
                   columnId,
@@ -577,6 +753,113 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             })}
           />
         </EuiFormRow>
+        {currentColumn.params.orderAgg && ReferenceEditor && (
+          <>
+            <EuiSpacer size="s" />
+            <ReferenceEditor
+              operationDefinitionMap={operationDefinitionMap}
+              functionLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankFunction', {
+                defaultMessage: 'Rank function',
+              })}
+              fieldLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankField', {
+                defaultMessage: 'Rank field',
+              })}
+              isInline={true}
+              paramEditorCustomProps={{
+                ...paramEditorCustomProps,
+                isInline: true,
+                labels: getLabelForRankFunctions(currentColumn.params.orderAgg.operationType),
+              }}
+              layer={layer}
+              selectionStyle="full"
+              columnId={`${columnId}-orderAgg`}
+              currentIndexPattern={indexPattern}
+              paramEditorUpdater={(setter) => {
+                if (!isColumn(setter)) {
+                  throw new Error('Setter should always be a column when ran here.');
+                }
+                paramEditorUpdater(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'orderAgg',
+                    value: setter,
+                  })
+                );
+              }}
+              column={currentColumn.params.orderAgg}
+              incompleteColumn={incompleteColumn}
+              existingFields={existingFields}
+              onDeleteColumn={() => {
+                throw new Error('Should not be called');
+              }}
+              onChooseField={(choice) => {
+                const field = choice.field && indexPattern.getFieldByName(choice.field);
+                if (field) {
+                  const hypotethicalColumn = (
+                    operationDefinitionMap[choice.operationType] as OperationDefinition<
+                      GenericIndexPatternColumn,
+                      'field'
+                    >
+                  ).buildColumn({
+                    previousColumn: currentColumn.params.orderAgg,
+                    layer,
+                    indexPattern,
+                    field,
+                  });
+                  setIncompleteColumn(undefined);
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'orderAgg',
+                      value: hypotethicalColumn,
+                    })
+                  );
+                } else {
+                  setIncompleteColumn({
+                    sourceField: choice.field,
+                    operationType: choice.operationType,
+                  });
+                }
+              }}
+              onChooseFunction={(operationType: string, field?: IndexPatternField) => {
+                if (field) {
+                  const hypotethicalColumn = (
+                    operationDefinitionMap[operationType] as OperationDefinition<
+                      GenericIndexPatternColumn,
+                      'field'
+                    >
+                  ).buildColumn({
+                    previousColumn: currentColumn.params.orderAgg,
+                    layer,
+                    indexPattern,
+                    field,
+                  });
+                  setIncompleteColumn(undefined);
+
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'orderAgg',
+                      value: hypotethicalColumn,
+                    })
+                  );
+                } else {
+                  setIncompleteColumn({ operationType });
+                }
+              }}
+              validation={{
+                input: ['field', 'managedReference'],
+                validateMetadata: (meta: OperationMetadata) =>
+                  meta.dataType === 'number' && !meta.isBucketed,
+              }}
+              {...rest}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
             defaultMessage: 'Rank direction',
@@ -620,7 +903,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 idPrefix,
                 ''
               ) as TermsIndexPatternColumn['params']['orderDirection'];
-              updateLayer(
+              paramEditorUpdater(
                 updateColumnParam({
                   layer,
                   columnId,
@@ -636,9 +919,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             <EuiSpacer size="s" />
             <EuiAccordion
               id="lnsTermsAdvanced"
-              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                defaultMessage: 'Advanced',
-              })}
+              arrowProps={{ color: 'primary' }}
+              buttonContent={
+                <EuiText size="s" color={euiTheme.colors.primary}>
+                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                    defaultMessage: 'Advanced',
+                  })}
+                </EuiText>
+              }
               data-test-subj="indexPattern-terms-advanced"
             >
               <EuiSpacer size="m" />
@@ -651,7 +939,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 checked={Boolean(currentColumn.params.otherBucket)}
                 disabled={currentColumn.params.orderBy.type === 'rare'}
                 onChange={(e: EuiSwitchEvent) =>
-                  updateLayer(
+                  paramEditorUpdater(
                     updateColumnParam({
                       layer,
                       columnId,
@@ -675,7 +963,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
                 onChange={(e: EuiSwitchEvent) =>
-                  updateLayer(
+                  paramEditorUpdater(
                     updateColumnParam({
                       layer,
                       columnId,
@@ -685,6 +973,74 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <>
+                    {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
+                      defaultMessage: 'Enable accuracy mode',
+                    })}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeHelp', {
+                        defaultMessage: `Improves results for high-cardinality data, but increases the load on the Elasticsearch cluster.`,
+                      })}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </>
+                }
+                compressed
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                data-test-subj="indexPattern-accuracy-mode"
+                checked={Boolean(
+                  currentColumn.params.accuracyMode && currentColumn.params.orderBy.type !== 'rare'
+                )}
+                onChange={(e: EuiSwitchEvent) =>
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'accuracyMode',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              {(currentColumn.dataType === 'number' || currentColumn.dataType === 'string') &&
+                !currentColumn.params.secondaryFields?.length && (
+                  <>
+                    <IncludeExcludeRow
+                      include={currentColumn.params.include}
+                      exclude={currentColumn.params.exclude}
+                      includeIsRegex={Boolean(currentColumn.params.includeIsRegex)}
+                      excludeIsRegex={Boolean(currentColumn.params.excludeIsRegex)}
+                      tableRows={activeData?.[rest.layerId]?.rows}
+                      columnId={columnId}
+                      isNumberField={Boolean(currentColumn.dataType === 'number')}
+                      updateParams={(operation, operationValue, regex, regexValue) =>
+                        paramEditorUpdater({
+                          ...layer,
+                          columns: {
+                            ...layer.columns,
+                            [columnId]: {
+                              ...currentColumn,
+                              params: {
+                                ...currentColumn.params,
+                                [operation]: operationValue,
+                                [regex]: regexValue,
+                              },
+                            },
+                          } as Record<string, TermsIndexPatternColumn>,
+                        })
+                      }
+                    />
+                  </>
+                )}
             </EuiAccordion>
           </>
         )}
@@ -692,3 +1048,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     );
   },
 };
+function getLabelForRankFunctions(operationType: string) {
+  switch (operationType) {
+    case 'last_value':
+      return [
+        i18n.translate('xpack.lens.indexPattern.terms.lastValue.sortRankBy', {
+          defaultMessage: 'Sort rank by',
+        }),
+      ];
+    case 'percentile_rank':
+      return [
+        i18n.translate('xpack.lens.indexPattern.terms.percentile.', {
+          defaultMessage: 'Percentile ranks',
+        }),
+      ];
+    default:
+      return;
+  }
+}

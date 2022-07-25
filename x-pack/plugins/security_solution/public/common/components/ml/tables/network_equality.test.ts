@@ -6,7 +6,7 @@
  */
 
 import { networkEquality } from './network_equality';
-import { AnomaliesNetworkTableProps } from '../types';
+import type { AnomaliesNetworkTableProps } from '../types';
 import { NetworkType } from '../../../../network/store/model';
 import { FlowTarget } from '../../../../../common/search_strategy';
 

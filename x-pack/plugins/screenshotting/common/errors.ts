@@ -6,9 +6,16 @@
  */
 
 /* eslint-disable max-classes-per-file */
+export class InvalidLayoutParametersError extends Error {}
+
+export class PdfWorkerOutOfMemoryError extends Error {}
 
 export class FailedToSpawnBrowserError extends Error {}
 
 export class BrowserClosedUnexpectedly extends Error {}
 
+export class DisallowedOutgoingUrl extends Error {}
+
 export class FailedToCaptureScreenshot extends Error {}
+
+export class InsufficientMemoryAvailableOnCloudError extends Error {}

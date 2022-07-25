@@ -8,13 +8,13 @@
 
 import { Transform } from 'stream';
 
-export function createFilterRecordsStream(type: string) {
+export function createFilterRecordsStream(fn: (record: any) => boolean) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
 
     transform(record, enc, callback) {
-      if (record && record.type === type) {
+      if (record && fn(record)) {
         callback(undefined, record);
       } else {
         callback();

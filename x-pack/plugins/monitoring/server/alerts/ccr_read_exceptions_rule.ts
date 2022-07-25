@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { SanitizedRule, RawAlertInstance } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -21,17 +24,14 @@ import {
   CommonAlertFilter,
   CCRReadExceptionsStats,
 } from '../../common/types/alerts';
-import { Alert } from '../../../alerting/server';
 import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { parseDuration } from '../../../alerting/common/parse_duration';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
 export class CCRReadExceptionsRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CCR_READ_EXCEPTIONS,
       name: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].label,

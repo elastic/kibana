@@ -6,11 +6,12 @@
  */
 
 import { ReactElement } from 'react';
-import { StyleDescriptor } from '../../../common/descriptor_types';
+import { CustomIcon, StyleDescriptor } from '../../../common/descriptor_types';
 
 export interface IStyle {
   getType(): string;
   renderEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
 }

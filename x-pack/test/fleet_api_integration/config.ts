@@ -7,15 +7,18 @@
 
 import path from 'path';
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import { defineDockerServersConfig } from '@kbn/test';
+import {
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
+  getKibanaCliLoggers,
+} from '@kbn/test';
 
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:b3dfc6a11ff7dce82ba8689ea9eeb54e353c6b4bfd2d28127b20ef72fd8883e9';
+  'docker.elastic.co/package-registry/distribution:93ffe45d8c4ae11365bc70b1038643121049b9fe';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
@@ -66,6 +69,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
+        '--xpack.cloudSecurityPosture.enabled=true',
+
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
+
+          // Enable debug fleet logs by default
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
       ],
     },
   };

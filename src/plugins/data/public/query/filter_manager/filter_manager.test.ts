@@ -8,14 +8,15 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { getFiltersArray } from './test_helpers/get_filters_array';
-import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
+import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN,
@@ -28,14 +28,17 @@ import {
   INDEX_PATTERNS_DETAILS,
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EDIT_EXCEPTION_BTN,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const enablesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
+  cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
@@ -69,13 +72,8 @@ export const openExceptionFlyoutFromRuleSettings = () => {
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  openExceptionFlyoutFromRuleSettings();
+  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
@@ -99,7 +97,15 @@ export const goToExceptionsTab = () => {
     .should('be.visible');
 };
 
+export const editException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click({ force: true });
+
+  cy.get(EDIT_EXCEPTION_BTN).click({ force: true });
+};
+
 export const removeException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 

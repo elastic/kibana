@@ -17,11 +17,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactory,
-} from '../../embeddable_examples/public';
+} from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
   helloWorldEmbeddableFactory: HelloWorldEmbeddableFactory;

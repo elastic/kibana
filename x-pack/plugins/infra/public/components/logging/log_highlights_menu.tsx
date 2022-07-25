@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {
@@ -169,7 +169,7 @@ const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   size: 'm',
   color: theme?.eui.euiColorAccent,
 }))`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 const LogHighlightsMenuContent = euiStyled.div`

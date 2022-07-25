@@ -8,11 +8,11 @@
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
-import {
+import type {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
@@ -97,7 +97,7 @@ export const isImportRegular = (
 };
 
 export const transformBulkError = (
-  ruleId: string,
+  ruleId: string | undefined,
   err: Error & { statusCode?: number }
 ): BulkError => {
   if (err instanceof CustomHttpRequestError) {

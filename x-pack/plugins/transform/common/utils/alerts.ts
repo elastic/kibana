@@ -12,5 +12,8 @@ export function getResultTestConfig(config: TransformHealthRuleTestsConfig) {
     notStarted: {
       enabled: config?.notStarted?.enabled ?? true,
     },
+    errorMessages: {
+      enabled: config?.errorMessages?.enabled ?? true,
+    },
   };
 }

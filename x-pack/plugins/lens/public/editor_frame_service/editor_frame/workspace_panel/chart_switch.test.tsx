@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   createMockVisualization,
   mockStoreDeps,
@@ -30,7 +31,6 @@ jest.mock('react-virtualized-auto-sizer', () => {
 
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { ChartSwitch } from './chart_switch';
-import { PaletteOutput } from 'src/plugins/charts/public';
 import { applyChanges } from '../../../state_management';
 
 describe('chart_switch', () => {

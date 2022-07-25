@@ -21,7 +21,7 @@ import {
   setStateToKbnUrl,
   getStateFromKbnUrl,
 } from './kbn_url_storage';
-import { ScopedHistory } from '../../../../../core/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {

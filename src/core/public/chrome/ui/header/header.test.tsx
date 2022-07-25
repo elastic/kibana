@@ -10,10 +10,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '../../../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
-import { ChromeBreadcrumbsAppendExtension } from '../../types';
+import type { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });

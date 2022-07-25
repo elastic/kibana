@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiTitleSize } from '@elastic/eui';
+import type { EuiTitleSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import uuid from 'uuid';
 
-import { Filter, buildEsQuery, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
@@ -45,6 +47,8 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { GROUP_BY_TOP_LABEL } from '../common/translations';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -57,25 +61,39 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
   margin-left: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
+const OptionsFlexItem = styled(EuiFlexItem)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
+
 interface AlertsHistogramPanelProps {
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartHeight?: number;
+  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   combinedQueries?: string;
-  defaultStackByOption?: AlertsStackByField;
+  defaultStackByOption?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
+  onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
   paddingSize?: 's' | 'm' | 'l' | 'none';
+  panelHeight?: number;
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
   signalIndexName: string | null;
+  showCountsInLegend?: boolean;
+  showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
+  stackByLabel?: string;
+  stackByWidth?: number;
   timelineId?: string;
-  title?: string;
+  title?: React.ReactNode;
   updateDateRange: UpdateDateRange;
   runtimeMappings?: MappingRuntimeFields;
 }
@@ -84,20 +102,28 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
+    alignHeader,
     chartHeight,
+    chartOptionsContextMenu,
     combinedQueries,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
     filters,
     headerChildren,
+    onFieldSelected,
     onlyField,
     paddingSize = 'm',
+    panelHeight = PANEL_HEIGHT,
     query,
     legendPosition = 'right',
     signalIndexName,
+    showCountsInLegend = false,
+    showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
+    stackByLabel,
+    stackByWidth,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
@@ -115,7 +141,33 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
+    const onSelect = useCallback(
+      (field: string) => {
+        setSelectedStackByOption(field);
+        if (onFieldSelected != null) {
+          onFieldSelected(field);
+        }
+      },
+      [onFieldSelected]
+    );
 
+    useEffect(() => {
+      setSelectedStackByOption(onlyField == null ? defaultStackByOption : onlyField);
+    }, [defaultStackByOption, onlyField]);
+
+    const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
+    const [querySkip, setQuerySkip] = useState(!toggleStatus);
+    useEffect(() => {
+      setQuerySkip(!toggleStatus);
+    }, [toggleStatus]);
+    const toggleQuery = useCallback(
+      (status: boolean) => {
+        setToggleStatus(status);
+        // toggle on = skipQuery false
+        setQuerySkip(!status);
+      },
+      [setQuerySkip, setToggleStatus]
+    );
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -132,6 +184,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
+      skip: querySkip,
     });
 
     const kibana = useKibana();
@@ -166,17 +219,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         showLegend && alertsData?.aggregations?.alertsByGrouping?.buckets != null
           ? alertsData.aggregations.alertsByGrouping.buckets.map((bucket, i) => ({
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+              count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
                 `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
               ),
               field: selectedStackByOption,
               timelineId,
-              value: bucket.key,
+              value: bucket?.key_as_string ?? bucket.key,
             }))
           : NO_LEGEND_DATA,
       [
         alertsData?.aggregations?.alertsByGrouping.buckets,
         selectedStackByOption,
+        showCountsInLegend,
         showLegend,
         timelineId,
       ]
@@ -270,52 +325,88 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     );
 
     return (
-      <InspectButtonContainer show={!isInitialLoading}>
+      <InspectButtonContainer show={!isInitialLoading && toggleStatus}>
         <KpiPanel
-          height={PANEL_HEIGHT}
+          height={panelHeight}
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
+          $toggleStatus={toggleStatus}
         >
           <HeaderSection
+            alignHeader={alignHeader}
             id={uniqueQueryId}
+            outerDirection="row"
             title={titleText}
             titleSize={titleSize}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
+            showInspectButton={chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
             hideSubtitle
           >
-            <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
                   <>
                     <StackByComboBox
+                      data-test-subj="stackByComboBox"
                       selected={selectedStackByOption}
-                      onSelect={setSelectedStackByOption}
+                      onSelect={onSelect}
+                      prepend={stackByLabel}
+                      width={stackByWidth}
                     />
+                    {showGroupByPlaceholder && (
+                      <>
+                        <EuiSpacer data-test-subj="placeholderSpacer" size="s" />
+                        <EuiToolTip
+                          data-test-subj="placeholderTooltip"
+                          content={i18n.NOT_AVAILABLE_TOOLTIP}
+                        >
+                          <StackByComboBox
+                            isDisabled={true}
+                            data-test-subj="stackByPlaceholder"
+                            onSelect={noop}
+                            prepend={GROUP_BY_TOP_LABEL}
+                            selected=""
+                            width={stackByWidth}
+                          />
+                        </EuiToolTip>
+                      </>
+                    )}
                   </>
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>
+              {chartOptionsContextMenu != null && (
+                <OptionsFlexItem grow={false}>
+                  {chartOptionsContextMenu(uniqueQueryId)}
+                </OptionsFlexItem>
+              )}
+
               {linkButton}
             </EuiFlexGroup>
           </HeaderSection>
 
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
-            <AlertsHistogram
-              chartHeight={chartHeight}
-              data={formattedAlertsData}
-              from={from}
-              legendItems={legendItems}
-              legendPosition={legendPosition}
-              loading={isLoadingAlerts}
-              to={to}
-              showLegend={showLegend}
-              updateDateRange={updateDateRange}
-            />
-          )}
+          {toggleStatus ? (
+            isInitialLoading ? (
+              <MatrixLoader />
+            ) : (
+              <AlertsHistogram
+                chartHeight={chartHeight}
+                data={formattedAlertsData}
+                from={from}
+                legendItems={legendItems}
+                legendPosition={legendPosition}
+                legendMinWidth={showCountsInLegend ? LEGEND_WITH_COUNTS_WIDTH : undefined}
+                loading={isLoadingAlerts}
+                to={to}
+                showLegend={showLegend}
+                updateDateRange={updateDateRange}
+              />
+            )
+          ) : null}
         </KpiPanel>
       </InspectButtonContainer>
     );

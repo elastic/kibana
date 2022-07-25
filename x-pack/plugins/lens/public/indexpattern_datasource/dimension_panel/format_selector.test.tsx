@@ -6,10 +6,19 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { FormatSelector } from './format_selector';
 import { act } from 'react-dom/test-utils';
 import { GenericIndexPatternColumn } from '../..';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const bytesColumn: GenericIndexPatternColumn = {
   label: 'Max of bytes',
@@ -62,5 +71,19 @@ describe('FormatSelector', () => {
         });
     });
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
+  });
+  it('updates the suffix', async () => {
+    const props = getDefaultProps();
+    const component = mount(<FormatSelector {...props} />);
+    await act(async () => {
+      component
+        .find('[data-test-subj="indexPattern-dimension-formatSuffix"]')
+        .last()
+        .prop('onChange')!({
+        currentTarget: { value: 'GB' },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+    component.update();
+    expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 });

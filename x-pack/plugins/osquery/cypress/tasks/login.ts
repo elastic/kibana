@@ -6,8 +6,9 @@
  */
 
 import * as yaml from 'js-yaml';
-import Url, { UrlObject } from 'url';
-import { ROLES } from '../test';
+import type { UrlObject } from 'url';
+import Url from 'url';
+import type { ROLES } from '../test';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -64,6 +65,7 @@ export const getUrlWithRoute = (role: ROLES, route: string) => {
     port: kibana.port,
   } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
   cy.log(`origin: ${theUrl}`);
+
   return theUrl;
 };
 
@@ -92,6 +94,7 @@ export const constructUrlWithUser = (user: User, route: string) => {
   const builtUrl = new URL(strUrl);
 
   cy.log(`origin: ${builtUrl.href}`);
+
   return builtUrl.href;
 };
 

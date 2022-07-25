@@ -44,7 +44,7 @@ Notify::      This value limits how often actions are repeated when an alert rem
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [NOTE]
 ==============================================
-Since actions are executed per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify **Every time alert is active**:
+Since actions are triggered per alert, a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify **Every time alert is active**:
 
 * Minute 1: server X123 > 0.9. *One email* is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, one for X123 and one for Y456.
@@ -140,17 +140,21 @@ Actions are not required on rules. You can run a rule without actions to underst
 
 [float]
 [[controlling-rules]]
-=== Mute and disable rules
+=== Snooze and disable rules
 
-The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking menu button to open the actions menu. Muting means that the rule checks continue to run on a schedule, but that alert will not trigger any action.
-
-[role="screenshot"]
-image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
-
-You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button:
+The rule listing enables you to quickly snooze, disable or enable, and delete individual rules using the colored dropdown.
 
 [role="screenshot"]
-image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
+image:images/individual-snooze-disable.png[The rule status dropdown enables you to snooze or disable an individual rule]
+
+When you snooze a rule, the rule checks continue to run on a schedule but the alert will not trigger any actions. You can snooze for a specified period of time or indefinitely.
+
+[role="screenshot"]
+image:images/snooze-panel.png[The snooze panel allows you to set the length of a rule's snooze period]
+
+When a rule is in a `snoozed` state, you can cancel or change the duration of this state. You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. 
+
+TIP: In this context, "Mute" refers to an indefinite snooze. preview:[]
 
 [float]
 === Rule status
@@ -159,8 +163,8 @@ A rule can have one of the following statuses:
 
 `active`:: The conditions for the rule have been met, and the associated actions should be invoked.
 `ok`:: The conditions for the rule have not been met, and the associated actions are not invoked.
-`error`:: An error was encountered during rule execution.
-`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
+`error`:: An error was encountered by the rule.
+`pending`:: The rule has not yet run.  The rule was either just created, or enabled after being disabled.
 `unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
 
 [float]

@@ -11,8 +11,9 @@ import { addElement, removeElements, setMultiplePositions } from '../../state/ac
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
+import { isGroupId } from '../../lib/workpad';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
-import { isGroupId, elementToShape } from './positioning_utils';
+import { elementToShape } from './positioning_utils';
 export * from './positioning_utils';
 
 const shapeToElement = (shape) => ({

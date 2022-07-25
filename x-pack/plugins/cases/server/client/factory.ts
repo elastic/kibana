@@ -10,8 +10,11 @@ import {
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
-} from 'kibana/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
+} from '@kbn/core/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
@@ -23,12 +26,11 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
+import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup?: SecurityPluginSetup;
@@ -37,6 +39,8 @@ interface CasesClientFactoryArgs {
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
 }
 
 /**
@@ -98,7 +102,11 @@ export class CasesClientFactory {
       excludedWrappers: ['security'],
     });
 
-    const attachmentService = new AttachmentService(this.logger);
+    const attachmentService = new AttachmentService(
+      this.logger,
+      this.options.persistableStateAttachmentTypeRegistry
+    );
+
     const caseService = new CasesService({
       log: this.logger,
       authentication: this.options?.securityPluginStart?.authc,
@@ -115,12 +123,17 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(this.logger),
+      userActionService: new CaseUserActionService(
+        this.logger,
+        this.options.persistableStateAttachmentTypeRegistry
+      ),
       attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
     });
   }
 }

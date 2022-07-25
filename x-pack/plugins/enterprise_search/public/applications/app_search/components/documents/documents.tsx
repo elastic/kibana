@@ -21,16 +21,22 @@ import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {
-  const { isMetaEngine, hasNoDocuments } = useValues(EngineLogic);
+  const {
+    isMetaEngine,
+    isElasticsearchEngine,
+    hasNoDocuments,
+    engine: { elasticsearchIndexName },
+  } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
+  const showDocumentCreationButton =
+    myRole.canManageEngineDocuments && !isMetaEngine && !isElasticsearchEngine;
 
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE])}
       pageHeader={{
         pageTitle: DOCUMENTS_TITLE,
-        rightSideItems:
-          myRole.canManageEngineDocuments && !isMetaEngine ? [<DocumentCreationButton />] : [],
+        rightSideItems: showDocumentCreationButton ? [<DocumentCreationButton />] : [],
       }}
       isEmptyState={hasNoDocuments}
       emptyState={<EmptyState />}
@@ -52,6 +58,32 @@ export const Documents: React.FC = () => {
                 defaultMessage:
                   'Meta Engines have many Source Engines. Visit your Source Engines to alter their documents.',
               })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      {isElasticsearchEngine && (
+        <>
+          <EuiCallOut
+            data-test-subj="ElasticsearchEnginesCallout"
+            iconType="iInCircle"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.elasticsearchEngineCallout.title',
+              {
+                defaultMessage: "This engine's data is managed by Elasticsearch.",
+              }
+            )}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documents.elasticsearchEngineCallout',
+                {
+                  defaultMessage:
+                    "The engine is attached to {elasticsearchIndexName}. You can modify this index's data in Kibana.",
+                  values: { elasticsearchIndexName },
+                }
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer />

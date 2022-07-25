@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { getDataStart } from '../../../../services';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { getDataViewsStart } from '../../../../services';
 
 import { SwitchModePopover } from './switch_mode_popover';
 
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
-import type { IndexPatternsService } from '../../../../../../../data/public';
 
 /** @internal **/
-type IdsWithTitle = Awaited<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
+type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
 
 /** @internal **/
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];
 
 const toComboBoxOptions = (options: IdsWithTitle) =>
-  options.map(({ title, id }) => ({ label: title, id }));
+  options.map(({ name, title, id }) => ({ label: name ? name : title, id }));
 
 export const ComboBoxSelect = ({
   fetchedIndex,
@@ -55,7 +56,7 @@ export const ComboBoxSelect = ({
         options = [
           {
             id: indexPattern.id,
-            label: indexPattern.title,
+            label: indexPattern.getName(),
           },
         ];
       }
@@ -65,20 +66,29 @@ export const ComboBoxSelect = ({
 
   useEffect(() => {
     async function fetchIndexes() {
-      setAvailableIndexes(await getDataStart().indexPatterns.getIdsWithTitle());
+      setAvailableIndexes(await getDataViewsStart().getIdsWithTitle());
     }
 
     fetchIndexes();
   }, []);
 
+  const isInvalid = Boolean(fetchedIndex.missedIndex);
+
   return (
     <EuiComboBox
       singleSelection={{ asPlainText: true }}
+      isInvalid={isInvalid}
       onChange={onComboBoxChange}
       options={toComboBoxOptions(availableIndexes)}
       selectedOptions={selectedOptions}
       isDisabled={disabled}
-      placeholder={placeholder}
+      placeholder={
+        isInvalid
+          ? i18n.translate('visTypeTimeseries.indexPatternSelect.noDataView', {
+              defaultMessage: 'Data view not found',
+            })
+          : placeholder
+      }
       data-test-subj={dataTestSubj}
       {...(allowSwitchMode && {
         append: (

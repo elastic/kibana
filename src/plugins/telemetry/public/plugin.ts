@@ -15,23 +15,19 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
-} from 'src/core/public';
+  DocLinksStart,
+} from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-
+import { of } from 'rxjs';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
   TelemetrySavedObject,
 } from '../common/telemetry_config/types';
-import {
-  getTelemetryAllowChangingOptInStatus,
-  getTelemetryOptIn,
-  getTelemetrySendUsageFrom,
-} from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
-import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
@@ -67,6 +63,11 @@ export interface TelemetryPluginSetup {
 /**
  * Public's start exposed APIs by the telemetry plugin
  */
+export interface TelemetryConstants {
+  /** Elastic's privacy statement url **/
+  getPrivacyStatementUrl: () => string;
+}
+
 export interface TelemetryPluginStart {
   /** {@link TelemetryServicePublicApis} **/
   telemetryService: TelemetryServicePublicApis;
@@ -76,10 +77,7 @@ export interface TelemetryPluginStart {
     setOptedInNoticeSeen: () => Promise<void>;
   };
   /** Set of publicly exposed telemetry constants **/
-  telemetryConstants: {
-    /** Elastic's privacy statement url **/
-    getPrivacyStatementUrl: () => string;
-  };
+  telemetryConstants: TelemetryConstants;
 }
 
 interface TelemetryPluginSetupDependencies {
@@ -91,8 +89,6 @@ interface TelemetryPluginSetupDependencies {
  * Public-exposed configuration
  */
 export interface TelemetryPluginConfig {
-  /** Is the plugin enabled? **/
-  enabled: boolean;
   /** The banner is expected to be shown when needed **/
   banner: boolean;
   /** Does the cluster allow changing the opt-in/out status via the UI? **/
@@ -107,6 +103,16 @@ export interface TelemetryPluginConfig {
   telemetryNotifyUserAboutOptInDefault?: boolean;
   /** Does the user have enough privileges to change the settings? **/
   userCanChangeSettings?: boolean;
+  /** Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud */
+  hidePrivacyStatement?: boolean;
+  /** Extra labels to add to the telemetry context */
+  labels: Record<string, unknown>;
+}
+
+function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
+  };
 }
 
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
@@ -116,6 +122,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
   private canUserChangeSettings: boolean = true;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -123,7 +130,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications }: CoreSetup,
+    { analytics, http, notifications, getStartServices }: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
@@ -136,9 +143,37 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       currentKibanaVersion,
     });
 
-    this.telemetrySender = new TelemetrySender(this.telemetryService);
+    let telemetryConstants: TelemetryConstants;
 
-    if (home) {
+    getStartServices().then(([{ docLinks }]) => {
+      telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerContextProvider({
+      name: 'telemetry labels',
+      context$: of({ labels: this.config.labels }),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
+    });
+
+    analytics.registerShipper(ElasticV3BrowserShipper, {
+      channelName: 'kibana-browser',
+      version: currentKibanaVersion,
+      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+    });
+
+    this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
+      await this.refreshConfig();
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+    });
+
+    if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
           this.telemetryNotifications?.setOptedInNoticeSeen();
@@ -146,7 +181,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       });
 
       home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
-        renderWelcomeTelemetryNotice(this.telemetryService!, http.basePath.prepend)
+        renderWelcomeTelemetryNotice(
+          this.telemetryService!,
+          http.basePath.prepend,
+          telemetryConstants
+        )
       );
     }
 
@@ -155,20 +194,31 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
+  public start({
+    analytics,
+    http,
+    overlays,
+    application,
+    savedObjects,
+    docLinks,
+  }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
 
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
+    const telemetryConstants = getTelemetryConstants(docLinks);
 
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
       telemetryService: this.telemetryService,
+      telemetryConstants,
     });
     this.telemetryNotifications = telemetryNotifications;
+
+    this.savedObjectsClient = savedObjects.client;
 
     application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
@@ -176,12 +226,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return;
       }
 
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
-      this.telemetryService!.config = updatedConfig;
+      // Refresh and get telemetry config
+      const updatedConfig = await this.refreshConfig();
 
-      const telemetryBanner = updatedConfig.banner;
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+
+      const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
@@ -195,9 +245,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryNotifications: {
         setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
       },
-      telemetryConstants: {
-        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
-      },
+      telemetryConstants,
     };
   }
 
@@ -215,6 +263,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),
     };
+  }
+
+  private async refreshConfig(): Promise<TelemetryPluginConfig | undefined> {
+    if (this.savedObjectsClient && this.telemetryService) {
+      // Update the telemetry config based as a mix of the config files and saved objects
+      const telemetrySavedObject = await this.getTelemetrySavedObject(this.savedObjectsClient);
+      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+      this.telemetryService.config = updatedConfig;
+      return updatedConfig;
+    }
   }
 
   /**
@@ -269,6 +327,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
 
     const currentKibanaVersion = this.currentKibanaVersion;
+
+    const { getTelemetryAllowChangingOptInStatus, getTelemetryOptIn, getTelemetrySendUsageFrom } =
+      await import('../common/telemetry_config');
 
     const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
       configTelemetryAllowChangingOptInStatus,

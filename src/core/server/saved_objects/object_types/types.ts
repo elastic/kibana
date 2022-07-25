@@ -52,4 +52,11 @@ export interface LegacyUrlAlias {
    * `SavedObjectsClient.collectMultiNamespaceReferences()`.
    */
   disabled?: boolean;
+  /**
+   * The reason this alias was created.
+   *
+   * Currently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if it was
+   * created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
+   */
+  purpose?: 'savedObjectConversion' | 'savedObjectImport';
 }

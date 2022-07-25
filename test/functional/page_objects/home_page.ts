@@ -13,7 +13,6 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -29,9 +28,8 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const sampleDataCardInnerHTML = await sampleDataCard.getAttribute('innerHTML');
-    this.log.debug(sampleDataCardInnerHTML);
-    return sampleDataCardInnerHTML.includes('removeSampleDataSet');
+    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+    return deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -44,6 +42,11 @@ export class HomePageObject extends FtrService {
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
     return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+  }
+
+  async goToSampleDataPage() {
+    await this.testSubjects.click('addSampleData');
+    await this.doesSampleDataSetExist('ecommerce');
   }
 
   async addSampleDataSet(id: string) {
@@ -65,6 +68,7 @@ export class HomePageObject extends FtrService {
     // where it appears the click just didn't work.
     await this.common.sleep(1010);
     await this.testSubjects.click(`removeSampleDataSet${id}`);
+    await this.common.sleep(1010);
     await this._waitForSampleDataLoadingAction(id);
   }
 
@@ -78,9 +82,39 @@ export class HomePageObject extends FtrService {
     });
   }
 
+  async launchSampleDiscover(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Discover');
+  }
+
   async launchSampleDashboard(id: string) {
     await this.launchSampleDataSet(id);
     await this.find.clickByLinkText('Dashboard');
+  }
+
+  async launchSampleCanvas(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Canvas');
+  }
+
+  async launchSampleMap(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Map');
+  }
+
+  async launchSampleLogs(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Logs');
+  }
+
+  async launchSampleGraph(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Graph');
+  }
+
+  async launchSampleML(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('ML jobs');
   }
 
   async launchSampleDataSet(id: string) {
@@ -104,6 +138,7 @@ export class HomePageObject extends FtrService {
   async clickOnConsole() {
     await this.clickSynopsis('console');
   }
+
   async clickOnLogo() {
     await this.testSubjects.click('logo');
   }

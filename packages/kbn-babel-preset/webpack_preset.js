@@ -8,7 +8,7 @@
 
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
-module.exports = () => {
+module.exports = (_, options = {}) => {
   return {
     presets: [
       [
@@ -22,7 +22,7 @@ module.exports = () => {
           bugfixes: true,
         },
       ],
-      require('./common_preset'),
+      [require('./common_preset'), options],
     ],
     env: {
       production: {
@@ -55,7 +55,7 @@ module.exports = () => {
           [
             require.resolve('@emotion/babel-preset-css-prop'),
             {
-              labelFormat: '[local]',
+              labelFormat: '[filename]--[local]',
             },
           ],
         ],

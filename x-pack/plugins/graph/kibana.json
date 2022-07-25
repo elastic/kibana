@@ -20,9 +20,9 @@
     "graph"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "kibanaUtils",
-    "kibanaReact",
-    "home"
+    "kibanaReact"
   ],
   "owner": {
     "name": "Data Discovery",

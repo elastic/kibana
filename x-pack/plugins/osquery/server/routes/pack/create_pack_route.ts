@@ -9,23 +9,24 @@ import moment from 'moment-timezone';
 import { has, mapKeys, set, unset, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PackagePolicy,
-} from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+} from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
+import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
-      path: '/internal/osquery/packs',
+      path: '/api/osquery/packs',
       validate: {
         body: schema.object(
           {
@@ -60,8 +61,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
@@ -103,7 +105,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }))
         : [];
 
-      const packSO = await savedObjectsClient.create(
+      const packSO = await savedObjectsClient.create<PackSavedObjectAttributes>(
         packSavedObjectType,
         {
           name,
@@ -135,9 +137,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!has(draft, 'inputs[0].streams')) {
                     set(draft, 'inputs[0].streams', []);
                   }
+
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries,
+                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
                   });
+
                   return draft;
                 })
               );
@@ -146,10 +150,13 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      // @ts-expect-error update types
-      packSO.attributes.queries = queries;
+      set(packSO, 'attributes.queries', queries);
 
-      return response.ok({ body: packSO });
+      return response.ok({
+        body: {
+          data: packSO,
+        },
+      });
     }
   );
 };

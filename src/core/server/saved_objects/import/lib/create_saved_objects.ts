@@ -18,6 +18,7 @@ export interface CreateSavedObjectsParams<T> {
   importStateMap: ImportStateMap;
   namespace?: string;
   overwrite?: boolean;
+  refresh?: boolean | 'wait_for';
 }
 export interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
@@ -35,6 +36,7 @@ export const createSavedObjects = async <T>({
   importStateMap,
   namespace,
   overwrite,
+  refresh,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -54,8 +56,8 @@ export const createSavedObjects = async <T>({
     new Map<string, SavedObject<T>>()
   );
 
-  // filter out the 'version' field of each object, if it exists
-  const objectsToCreate = filteredObjects.map(({ version, ...object }) => {
+  // filter out the 'version' field of each object, if it exists, and set the originId appropriately
+  const objectsToCreate = filteredObjects.map(({ version, originId, ...object }) => {
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;
@@ -70,15 +72,18 @@ export const createSavedObjects = async <T>({
     const importStateValue = importStateMap.get(`${object.type}:${object.id}`);
     if (importStateValue?.destinationId) {
       objectIdMap.set(`${object.type}:${importStateValue.destinationId}`, object);
-      const originId = importStateValue.omitOriginId ? undefined : object.originId ?? object.id;
       return {
         ...object,
         id: importStateValue.destinationId,
-        originId,
         ...(references && { references }),
+        // Do not set originId, not even to undefined, if omitOriginId is true.
+        // When omitOriginId is true, we are trying to create a brand new object without setting the originId at all.
+        // Semantically, setting `originId: undefined` is used to clear out an existing object's originId when overwriting it
+        // (and if you attempt to do that on a non-multi-namespace object type, it will result in a 400 Bad Request error).
+        ...(!importStateValue.omitOriginId && { originId: originId ?? object.id }),
       };
     }
-    return { ...object, ...(references && { references }) };
+    return { ...object, ...(references && { references }), ...(originId && { originId }) };
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
@@ -87,6 +92,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
+      refresh,
     });
     expectedResults = bulkCreateResponse.saved_objects;
   }

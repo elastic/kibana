@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   createOrUpdateIndex,
   Mappings,
-} from '../../../../../observability/server';
+} from '@kbn/observability-plugin/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 

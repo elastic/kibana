@@ -51,7 +51,7 @@ const mockClusterBuckets: ClusterBucket[] = [
 ];
 
 describe('getClustersFromAggs', () => {
-  it('should return value matching CloudPostureStats["clusters"]', async () => {
+  it('should return value matching ComplianceDashboardData["clusters"]', async () => {
     const clusters = getClustersFromAggs(mockClusterBuckets);
     expect(clusters).toEqual([
       {
@@ -66,7 +66,7 @@ describe('getClustersFromAggs', () => {
           totalPassed: 6,
           postureScore: 50.0,
         },
-        resourcesTypes: [
+        groupedFindingsEvaluation: [
           {
             name: 'foo_type',
             totalFindings: 6,

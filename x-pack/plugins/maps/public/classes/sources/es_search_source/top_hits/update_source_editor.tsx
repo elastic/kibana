@@ -9,14 +9,14 @@ import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
-import { SortDirection } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
@@ -38,8 +38,8 @@ interface Props {
 interface State {
   loadError?: string;
   sourceFields: IField[];
-  termFields: IndexPatternField[];
-  sortFields: IndexPatternField[];
+  termFields: DataViewField[];
+  sortFields: DataViewField[];
 }
 
 export class TopHitsUpdateSourceEditor extends Component<Props, State> {

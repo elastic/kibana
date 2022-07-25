@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { HttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
+  /** The page number for the list. Must be 1 based. */
   page?: number;
   pageSize?: number;
   filter?: string;
   includedPolicies?: string;
   show?: 'create' | 'edit';
   itemId?: string;
-  sortField?: string;
-  sortOrder?: string;
 }
 
 export interface ArtifactFormComponentProps {
@@ -28,7 +28,10 @@ export interface ArtifactFormComponentProps {
   /** signals that the form should be made disabled (ex. while an update/create api call is in flight) */
   disabled: boolean;
   /** Error will be set if the submission of the form to the api results in an API error. Form can use it to provide feedback to the user */
-  error: HttpFetchError | undefined;
+  error: IHttpFetchError | undefined;
+
+  policies: PolicyData[];
+  policiesIsLoading: boolean;
 
   /** reports the state of the form data and the current updated item */
   onChange(formStatus: ArtifactFormComponentOnChangeCallbackProps): void;

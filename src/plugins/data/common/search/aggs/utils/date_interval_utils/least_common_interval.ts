@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { leastCommonMultiple } from './least_common_multiple';
 import { parseEsInterval } from './parse_es_interval';
 

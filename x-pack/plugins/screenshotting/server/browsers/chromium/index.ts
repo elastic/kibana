@@ -12,6 +12,11 @@ export const getChromiumDisconnectedError = () =>
     'Browser was closed unexpectedly! Check the server logs for more info.'
   );
 
+export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
+  new errors.DisallowedOutgoingUrl(
+    `Received disallowed outgoing URL [${interceptedUrl}]! Check the server logs for more info.`
+  );
+
 export { HeadlessChromiumDriver } from './driver';
 export type { Context } from './driver';
 export { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from './driver_factory';

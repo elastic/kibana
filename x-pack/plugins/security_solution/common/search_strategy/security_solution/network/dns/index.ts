@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
@@ -28,7 +28,6 @@ export interface NetworkDnsStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -43,12 +42,6 @@ export interface NetworkDnsItem {
   dnsName?: Maybe<string>;
   queryCount?: Maybe<number>;
   uniqueDomains?: Maybe<number>;
-}
-
-export interface MatrixOverOrdinalHistogramData {
-  x: string;
-  y: number;
-  g: string;
 }
 
 export interface NetworkDnsBuckets {

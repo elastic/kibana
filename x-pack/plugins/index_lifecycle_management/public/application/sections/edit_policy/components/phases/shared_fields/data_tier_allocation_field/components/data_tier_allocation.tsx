@@ -121,9 +121,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
             <>
               <strong>{i18nTexts.allocationOptions[phase].default.input}</strong>
               <EuiText size="s" color="subdued">
-                <p className="euiTextColor--subdued">
-                  {i18nTexts.allocationOptions[phase].default.helpText}
-                </p>
+                <p>{i18nTexts.allocationOptions[phase].default.helpText}</p>
               </EuiText>
             </>
           ),
@@ -136,9 +134,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
         <>
           <strong>{i18nTexts.allocationOptions[phase].custom.inputDisplay}</strong>
           <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
-              {i18nTexts.allocationOptions[phase].custom.helpText}
-            </p>
+            <p>{i18nTexts.allocationOptions[phase].custom.helpText}</p>
           </EuiText>
         </>
       ),
@@ -151,9 +147,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
         <>
           <strong>{i18nTexts.allocationOptions[phase].none.inputDisplay}</strong>
           <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
-              {i18nTexts.allocationOptions[phase].none.helpText}
-            </p>
+            <p>{i18nTexts.allocationOptions[phase].none.helpText}</p>
           </EuiText>
         </>
       ),

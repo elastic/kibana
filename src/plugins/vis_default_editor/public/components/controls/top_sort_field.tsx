@@ -9,11 +9,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FieldParamEditor } from './field';
 import { AggParamEditorProps } from '../agg_param_props';
 
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
+function TopSortFieldParamEditor(props: AggParamEditorProps<DataViewField>) {
   const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
     defaultMessage: 'Sort on',
   });

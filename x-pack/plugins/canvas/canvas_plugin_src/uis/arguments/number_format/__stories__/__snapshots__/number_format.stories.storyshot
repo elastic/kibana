@@ -9,7 +9,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="NumberFormatExample3"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -57,13 +57,15 @@ Array [
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -92,7 +94,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="NumberFormatExample1"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -140,13 +142,15 @@ Array [
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -174,7 +178,7 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
     className="euiFormControlLayout__childrenWrapper"
   >
     <select
-      className="euiSelect euiSelect--compressed"
+      className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
       id="NumberFormatExample2"
       onChange={[Function]}
       onMouseUp={[Function]}
@@ -222,7 +226,9 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
           className="euiFormControlLayoutCustomIcon__icon"
           data-euiicon-type="arrowDown"
           size="s"
-        />
+        >
+          
+        </span>
       </span>
     </div>
   </div>

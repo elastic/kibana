@@ -11,18 +11,14 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
-import fancyLog from 'fancy-log';
-import chalk from 'chalk';
 import vfs from 'vinyl-fs';
 
 import { generateNoticeFromSource } from '../../src/dev/notice';
-import { gitInfo } from './helpers/git_info';
-import { PKG_NAME } from './helpers/pkg';
-import { BUILD_VERSION } from './helpers/build_version';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -31,24 +27,21 @@ const BUILD_DIR = resolve(XPACK_DIR, 'build');
 const PLUGIN_BUILD_DIR = resolve(BUILD_DIR, 'plugin/kibana/x-pack');
 
 async function cleanBuildTask() {
-  fancyLog('Deleting', BUILD_DIR);
+  const log = new ToolingLog();
+  log.info('Deleting', BUILD_DIR);
   await del(BUILD_DIR);
 
-  fancyLog('[canvas] Deleting Shareable Runtime');
+  log.info('[canvas] Deleting Shareable Runtime');
   await del(resolve(XPACK_DIR, 'plugins/canvas/shareable_runtime/build'));
 }
 
-async function reportTask() {
-  const info = await gitInfo();
+async function copySource() {
+  // get bazel packages inside x-pack
+  const xpackBazelPackages = (await discoverBazelPackages())
+    .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith('x-pack/'))
+    .map((pkg) => `${pkg.normalizedRepoRelativeDir.replace('x-pack/', '')}/**`);
 
-  fancyLog('Package Name', chalk.yellow(PKG_NAME));
-  fancyLog('Version', chalk.yellow(BUILD_VERSION));
-  fancyLog('Build Number', chalk.yellow(`${info.number}`));
-  fancyLog('Build SHA', chalk.yellow(info.sha));
-}
-
-async function copySourceAndBabelify() {
-  // copy source files and apply some babel transformations in the process
+  // copy source files
   await asyncPipeline(
     vfs.src(
       [
@@ -68,27 +61,29 @@ async function copySourceAndBabelify() {
         buffer: true,
         nodir: true,
         ignore: [
-          '**/*.{md,asciidoc}',
+          '**/*.{md,mdx,asciidoc}',
           '**/jest.config.js',
+          '**/jest.config.dev.js',
+          '**/jest_setup.js',
+          '**/jest.integration.config.js',
+          '**/*.stories.js',
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
           '**/public/**/*.{js,ts,tsx,json,scss}',
-          '**/{__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress}/**',
+          '**/{test,__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress,fixtures}/**',
           'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
           'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
+          'plugins/apm/ftr_e2e/**',
+          'plugins/apm/scripts/**',
+          'plugins/lists/server/scripts/**',
+          ...xpackBazelPackages,
         ],
         allowEmpty: true,
       }
     ),
-
-    transformFileStream(async (file) => {
-      if (['.js', '.ts', '.tsx'].includes(file.extname)) {
-        await transformFileWithBabel(file);
-      }
-    }),
 
     vfs.dest(PLUGIN_BUILD_DIR)
   );
@@ -125,8 +120,7 @@ async function generateNoticeText() {
 
 export const buildTask = gulp.series(
   cleanBuildTask,
-  reportTask,
   buildCanvasShareableRuntime,
-  copySourceAndBabelify,
+  copySource,
   generateNoticeText
 );

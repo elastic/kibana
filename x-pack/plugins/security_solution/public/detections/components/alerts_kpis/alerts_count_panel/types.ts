@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { GenericBuckets } from '../../../../../common/search_strategy';
+import type { RawBucket } from '../../../../common/components/alerts_treemap/types';
 
 export interface AlertsCountAggregation {
-  alertsByGroupingCount: {
-    buckets: GenericBuckets[];
+  stackByField0: {
+    buckets: RawBucket[];
+    doc_count_error_upper_bound?: number;
+    sum_other_doc_count?: number;
   };
 }

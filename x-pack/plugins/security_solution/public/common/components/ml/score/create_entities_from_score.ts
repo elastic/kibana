@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 
 export const createEntityFromRecord = (entity: Record<string, string>): string =>
   createEntity(Object.keys(entity)[0], Object.values(entity)[0]);

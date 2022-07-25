@@ -44,60 +44,59 @@ export const CaseView = React.memo(
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
-    const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
-      useGetCase(caseId);
+
+    const { data, isLoading, isError, refetch } = useGetCase(caseId);
 
     useEffect(() => {
-      if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
-        const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
-          window.location.search
-        }${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
+      if (spacesApi && data?.outcome === 'aliasMatch' && data.aliasTargetId != null) {
+        const newPath = `${basePath}${generateCaseViewPath({ detailName: data.aliasTargetId })}`;
+        spacesApi.ui.redirectLegacyUrl({
+          path: `${newPath}${window.location.search}${window.location.hash}`,
+          aliasPurpose: data.aliasPurpose,
+          objectNoun: i18n.CASE,
+        });
       }
-    }, [resolveOutcome, resolveAliasId, basePath, spacesApi]);
+    }, [basePath, data, spacesApi]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
-      if (data && spacesApi && resolveOutcome === 'conflict' && resolveAliasId != null) {
+      if (data && spacesApi && data.outcome === 'conflict' && data.aliasTargetId != null) {
         // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
         // callout with a warning for the user, and provide a way for them to navigate to the other object.
         const otherObjectPath = `${basePath}${generateCaseViewPath({
-          detailName: resolveAliasId,
+          detailName: data.aliasTargetId,
         })}${window.location.search}${window.location.hash}`;
 
         return spacesApi.ui.components.getLegacyUrlConflict({
           objectNoun: i18n.CASE,
-          currentObjectId: data.id,
-          otherObjectId: resolveAliasId,
+          currentObjectId: data.case.id,
+          otherObjectId: data.aliasTargetId,
           otherObjectPath,
         });
       }
       return null;
-    }, [data, resolveAliasId, resolveOutcome, basePath, spacesApi]);
+    }, [basePath, data, spacesApi]);
 
     return isError ? (
       <DoesNotExist caseId={caseId} />
     ) : isLoading ? (
       <CaseViewLoading />
-    ) : (
-      data && (
-        <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-          {getLegacyUrlConflictCallout()}
-          <CaseViewPage
-            caseData={data}
-            caseId={caseId}
-            fetchCase={fetchCase}
-            onComponentInitialized={onComponentInitialized}
-            actionsNavigation={actionsNavigation}
-            ruleDetailsNavigation={ruleDetailsNavigation}
-            showAlertDetails={showAlertDetails}
-            updateCase={updateCase}
-            useFetchAlertData={useFetchAlertData}
-            refreshRef={refreshRef}
-          />
-        </CasesTimelineIntegrationProvider>
-      )
-    );
+    ) : data ? (
+      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+        {getLegacyUrlConflictCallout()}
+        <CaseViewPage
+          caseData={data.case}
+          caseId={caseId}
+          fetchCase={refetch}
+          onComponentInitialized={onComponentInitialized}
+          actionsNavigation={actionsNavigation}
+          ruleDetailsNavigation={ruleDetailsNavigation}
+          showAlertDetails={showAlertDetails}
+          useFetchAlertData={useFetchAlertData}
+          refreshRef={refreshRef}
+        />
+      </CasesTimelineIntegrationProvider>
+    ) : null;
   }
 );
 

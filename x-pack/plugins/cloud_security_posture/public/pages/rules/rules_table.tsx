@@ -7,16 +7,17 @@
 import React, { useMemo } from 'react';
 import {
   Criteria,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSwitch,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 import type { RuleSavedObject } from './use_csp_rules';
 
 type RulesTableProps = Pick<
@@ -26,14 +27,18 @@ type RulesTableProps = Pick<
   toggleRule(rule: RuleSavedObject): void;
   setSelectedRules(rules: RuleSavedObject[]): void;
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
+  setSelectedRuleId(id: string | null): void;
+  selectedRuleId: string | null;
   // ForwardRef makes this ref not available in parent callbacks
   tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
+  canUpdate: boolean;
 };
 
 export const RulesTable = ({
   toggleRule,
   setSelectedRules,
   setPagination,
+  setSelectedRuleId,
   perPage: pageSize,
   rules_page: items,
   page,
@@ -41,15 +46,20 @@ export const RulesTable = ({
   total,
   loading,
   error,
+  selectedRuleId,
+  canUpdate,
 }: RulesTableProps) => {
-  const columns = useMemo(() => getColumns({ toggleRule }), [toggleRule]);
+  const { euiTheme } = useEuiTheme();
+  const columns = useMemo(
+    () => getColumns({ toggleRule, setSelectedRuleId, canUpdate }),
+    [setSelectedRuleId, toggleRule, canUpdate]
+  );
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
-    pageSizeOptions: [1, 5, 10, 25],
-    hidePerPageOptions: false,
+    pageSizeOptions: [10, 25, 100],
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -61,6 +71,17 @@ export const RulesTable = ({
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
+
+  const rowProps = (row: RuleSavedObject) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspRulesTableRowItemTestId(row.id),
+    style: { background: row.id === selectedRuleId ? euiTheme.colors.highlight : undefined },
+    onClick: (e: MouseEvent) => {
+      const tag = (e.target as HTMLDivElement).tagName;
+      // Ignore checkbox and switch toggle columns
+      if (tag === 'BUTTON' || tag === 'INPUT') return;
+      setSelectedRuleId(row.id);
+    },
+  });
 
   return (
     <EuiBasicTable
@@ -75,61 +96,79 @@ export const RulesTable = ({
       isSelectable={true}
       selection={selection}
       itemId={(v) => v.id}
+      rowProps={rowProps}
     />
   );
 };
 
-const ruleNameRenderer = (name: string) => (
-  <EuiLink className="eui-textTruncate" title={name}>
-    {name}
-  </EuiLink>
-);
-
-const timestampRenderer = (timestamp: string) =>
-  moment.duration(moment().diff(timestamp)).humanize();
-
-interface GetColumnProps {
+interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId' | 'canUpdate'> {
   toggleRule: (rule: RuleSavedObject) => void;
 }
 
-const createRuleEnabledSwitchRenderer =
-  ({ toggleRule }: GetColumnProps) =>
-  (value: boolean, rule: RuleSavedObject) =>
-    (
-      <EuiSwitch
-        showLabel={false}
-        label={value ? TEXT.DISABLE : TEXT.ENABLE}
-        checked={value}
-        onChange={() => toggleRule(rule)}
-        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
-      />
-    );
-
 const getColumns = ({
   toggleRule,
+  setSelectedRuleId,
+  canUpdate,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
-    field: 'attributes.name',
-    name: TEXT.RULE_NAME,
+    field: 'attributes.metadata.name',
+    name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
+      defaultMessage: 'Name',
+    }),
     width: '60%',
     truncateText: true,
-    render: ruleNameRenderer,
+    render: (name, rule) => (
+      <EuiButtonEmpty
+        className="eui-textTruncate"
+        title={name}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          setSelectedRuleId(rule.id);
+        }}
+        data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+      >
+        {name}
+      </EuiButtonEmpty>
+    ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.metadata.section',
+    name: i18n.translate('xpack.csp.rules.rulesTable.cisSectionColumnLabel', {
+      defaultMessage: 'CIS Section',
+    }),
     width: '15%',
   },
   {
     field: 'updatedAt',
-    name: TEXT.UPDATED_AT,
+    name: i18n.translate('xpack.csp.rules.rulesTable.lastModifiedColumnLabel', {
+      defaultMessage: 'Last Modified',
+    }),
     width: '15%',
-    render: timestampRenderer,
+    render: (timestamp) => moment(timestamp).fromNow(),
   },
   {
     field: 'attributes.enabled',
-    name: TEXT.ENABLED,
-    render: createRuleEnabledSwitchRenderer({ toggleRule }),
+    name: i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+      defaultMessage: 'Enabled',
+    }),
+    render: (enabled, rule) => (
+      <EuiSwitch
+        disabled={!canUpdate}
+        showLabel={false}
+        label={
+          enabled
+            ? i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.disableSwitchLabel', {
+                defaultMessage: 'Disable',
+              })
+            : i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.enableSwitchLabel', {
+                defaultMessage: 'Enable',
+              })
+        }
+        checked={enabled}
+        onChange={() => toggleRule(rule)}
+        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+      />
+    ),
     width: '10%',
   },
 ];

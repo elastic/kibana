@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ChartContainer } from './';
+import { ChartContainer } from '.';
 
 describe('chart container', () => {
   it('shows loading indicator', () => {

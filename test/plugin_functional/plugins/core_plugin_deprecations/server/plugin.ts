@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, GetDeprecationsContext, DeprecationsDetails } from 'kibana/server';
+import type {
+  Plugin,
+  CoreSetup,
+  GetDeprecationsContext,
+  DeprecationsDetails,
+} from '@kbn/core/server';
 import { registerRoutes } from './routes';
 async function getDeprecations({
   savedObjectsClient,

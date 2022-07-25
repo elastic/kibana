@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SetupPlugins } from '../../../types';
+import type { SetupPlugins } from '../../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };

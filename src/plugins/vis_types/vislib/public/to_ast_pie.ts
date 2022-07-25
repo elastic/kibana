@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { getVisSchemas, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 import { PieVisParams } from './pie';
 import { vislibPieName, VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -32,7 +31,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     }
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypePie]);
+  const ast = buildExpression([visTypePie]);
 
   return ast.toAst();
 };

@@ -10,11 +10,16 @@ export function MonitoringKibanaOverviewProvider({ getService }) {
   const retry = getService('retry');
 
   const SUBJ_OVERVIEW_PAGE = 'kibanaOverviewPage';
+  const SUBJ_KBN_INSTANCES = 'kibanaInstancesPage';
 
   return new (class KibanaOverview {
     async isOnOverview() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_OVERVIEW_PAGE));
       return pageId !== null;
+    }
+
+    async clickInstanceTab() {
+      return testSubjects.click(SUBJ_KBN_INSTANCES);
     }
   })();
 }

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,

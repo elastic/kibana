@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { CallOutMessage, CallOutPersistentSwitcher } from '../../../../common/components/callouts';
+import type { CallOutMessage } from '../../../../common/components/callouts';
+import { CallOutPersistentSwitcher } from '../../../../common/components/callouts';
 import { useUserData } from '../../user_info';
 
 import * as i18n from './translations';

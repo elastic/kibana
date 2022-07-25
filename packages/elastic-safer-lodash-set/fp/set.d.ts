@@ -5,5 +5,5 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-import { set } from './index';
+import { set } from '.';
 export = set;

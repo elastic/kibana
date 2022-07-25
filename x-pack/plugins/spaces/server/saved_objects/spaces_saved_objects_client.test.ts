@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 
-import type { SavedObject, SavedObjectsType } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';

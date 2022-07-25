@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import type { Role, RoleIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';
@@ -25,9 +25,10 @@ export class RolesAPIClient {
     await this.http.delete(`/api/security/role/${encodeURIComponent(roleName)}`);
   }
 
-  public async saveRole({ role }: { role: Role }) {
+  public async saveRole({ role, createOnly = false }: { role: Role; createOnly?: boolean }) {
     await this.http.put(`/api/security/role/${encodeURIComponent(role.name)}`, {
       body: JSON.stringify(this.transformRoleForSave(copyRole(role))),
+      query: { createOnly },
     });
   }
 

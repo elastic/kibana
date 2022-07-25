@@ -15,19 +15,18 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
 import { SectionLoading } from '../../components/section_loading';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
-  actionTypes?: ActionType[];
+  featureId?: string;
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
-  actionTypes,
+  featureId,
   setHasActionsUpgradeableByTrial,
   actionTypeRegistry,
 }: Props) => {
@@ -41,21 +40,10 @@ export const ActionTypeMenu = ({
   useEffect(() => {
     (async () => {
       try {
-        /**
-         * Hidden action types will be hidden only on Alerts & Actions.
-         * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
-         * can use the hidden action types. For example, Cases or Detections of Security Solution.
-         *
-         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-         *  */
-        let availableActionTypes = actionTypes;
-        if (!availableActionTypes) {
-          setLoadingActionTypes(true);
-          availableActionTypes = (await loadActionTypes({ http })).filter(
-            (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
-          );
-          setLoadingActionTypes(false);
-        }
+        setLoadingActionTypes(true);
+        const availableActionTypes = await loadActionTypes({ http, featureId });
+        setLoadingActionTypes(false);
+
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;

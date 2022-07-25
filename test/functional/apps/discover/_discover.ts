@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime} (interval: Auto - 3 hours)`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
@@ -95,8 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
-          'doc table to contain the right search result',
-          1000,
+          'table to contain the right search result',
+          3000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);

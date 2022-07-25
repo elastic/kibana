@@ -35,10 +35,10 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
       } = request.body;
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { datasets, timing } = await getLogEntryAnomaliesDatasets(
-          requestContext,
+          { infra: await infraMlContext.infra },
           sourceId,
           startTime,
           endTime

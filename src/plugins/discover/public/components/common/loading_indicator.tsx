@@ -5,14 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
 import React from 'react';
 
-export const LoadingIndicator = () => {
+interface Props {
+  type?: 'spinner' | 'elastic';
+}
+
+export const LoadingIndicator = ({ type = 'spinner' }: Props) => {
   return (
-    <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="l" />
+        {type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingElastic size="xxl" />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

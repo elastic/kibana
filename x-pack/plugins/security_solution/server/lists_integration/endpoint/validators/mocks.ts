@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { BaseValidator } from './base_validator';
-import { ExceptionItemLikeOptions } from '../types';
-import { listMock } from '../../../../../lists/server/mocks';
+import type { ExceptionItemLikeOptions } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
 
 /**

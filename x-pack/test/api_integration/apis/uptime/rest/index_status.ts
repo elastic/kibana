@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('docCount query', () => {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/136412
+  describe.skip('docCount query', () => {
     const supertest = getService('supertest');
 
     it(`will fetch the index's count`, async () => {

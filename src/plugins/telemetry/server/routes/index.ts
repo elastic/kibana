@@ -7,8 +7,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IRouter, Logger, SavedObjectsClient } from 'kibana/server';
-import type { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import type { IRouter, Logger, SavedObjectsClient } from '@kbn/core/server';
+import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
 import { registerTelemetryUsageStatsRoutes, SecurityGetter } from './telemetry_usage_stats';
 import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';

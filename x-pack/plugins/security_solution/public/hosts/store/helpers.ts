@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RiskSeverity } from '../../../common/search_strategy';
+import type { RiskSeverity } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
-import { HostsModel, HostsTableType, Queries, HostsType } from './model';
+import type { HostsModel, Queries } from './model';
+import { HostsTableType, HostsType } from './model';
 
 export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries => ({
   ...state.page.queries,

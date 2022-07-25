@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
+import type { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
 
 import {
@@ -13,13 +13,15 @@ import {
   getExistingPrepackagedTimelines,
   getAllTimeline,
   resolveTimelineOrNull,
+  updatePartialSavedTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
-import {
+import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObject,
+  SavedTimeline,
 } from '../../../../../common/types/timeline';
 import {
   mockResolvedSavedObject,
@@ -27,7 +29,8 @@ import {
   mockResolveTimelineResponse,
 } from '../../__mocks__/resolve_timeline';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../../src/plugins/data_views/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
@@ -358,6 +361,62 @@ describe('saved_object', () => {
       const { attributes } = convertSavedObjectToSavedTimelineMock.mock.calls[0][0];
       expect(attributes.dataViewId).toEqual('also-boo');
       expect(attributes.savedQueryId).toEqual('boo');
+    });
+  });
+
+  describe('updatePartialSavedTimeline', () => {
+    let mockSOClientGet: jest.Mock;
+    let mockSOClientUpdate: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    const patchTimelineRequest: SavedTimeline = {
+      savedQueryId: null,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockSOClientUpdate = jest.fn(() => ({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {},
+      }));
+
+      mockSOClientGet = jest.fn(async () => ({
+        ...mockResolvedSavedObject.saved_object,
+        references: [
+          {
+            id: 'boo',
+            name: SAVED_QUERY_ID_REF_NAME,
+            type: SAVED_QUERY_TYPE,
+          },
+        ],
+      }));
+
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                get: mockSOClientGet,
+                update: mockSOClientUpdate,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    it('does not remove savedQueryId when it is null in the patch request', async () => {
+      const resp = (await updatePartialSavedTimeline(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c',
+        patchTimelineRequest
+      )) as SavedObjectsUpdateResponse<SavedTimeline>;
+
+      expect(resp.attributes.savedQueryId).toBeNull();
     });
   });
 });

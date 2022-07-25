@@ -38,3 +38,40 @@ test('Should encode shape into URI safe string and decode back to original shape
   );
   expect(decodeMvtResponseBody(encodedSearchRequest)).toEqual(searchRequest);
 });
+
+test(`Should handle '%' character`, () => {
+  const runtimeFieldScript = `if (doc['price'].size() != 0){
+  String tmp=dissect('$%{price}').extract(doc["price"].value)?.price;
+
+  tmp = tmp.replace(',','');
+
+  def pn = Double.parseDouble( tmp );
+
+  if (pn != null) emit(pn);
+}
+else { 
+  emit(0)
+}`;
+  const searchRequest = {
+    size: 10000,
+    _source: false,
+    runtime_mappings: {
+      price_as_number: {
+        type: 'keyword',
+        script: {
+          source: runtimeFieldScript,
+        },
+      },
+    },
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+  };
+  const encodedSearchRequest = encodeMvtResponseBody(searchRequest);
+  expect(decodeMvtResponseBody(encodedSearchRequest)).toEqual(searchRequest);
+});

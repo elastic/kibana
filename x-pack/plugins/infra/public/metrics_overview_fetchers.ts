@@ -13,13 +13,13 @@
  * 2.0.
  */
 
-import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
+import { FetchDataParams, MetricsFetchDataResponse } from '@kbn/observability-plugin/public';
 import { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
-import { InfraClientCoreSetup } from './types';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import { InfraClientStartServicesAccessor } from './types';
 
 export const createMetricsHasData =
-  (getStartServices: InfraClientCoreSetup['getStartServices']) => async () => {
+  (getStartServices: InfraClientStartServicesAccessor) => async () => {
     const [coreServices] = await getStartServices();
     const { http } = coreServices;
     const results = await http.get<{
@@ -30,7 +30,7 @@ export const createMetricsHasData =
   };
 
 export const createMetricsFetchData =
-  (getStartServices: InfraClientCoreSetup['getStartServices']) =>
+  (getStartServices: InfraClientStartServicesAccessor) =>
   async ({ absoluteTime, intervalString }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
     const [coreServices] = await getStartServices();
     const { http } = coreServices;

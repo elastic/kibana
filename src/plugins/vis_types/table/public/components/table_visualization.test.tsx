@@ -12,8 +12,8 @@ jest.mock('../utils', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { coreMock } from '../../../../../core/public/mocks';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
 import { TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
@@ -33,6 +33,7 @@ describe('TableVisualizationComponent', () => {
     },
     tables: [],
   };
+  const renderComplete = jest.fn();
   const visConfig = {} as unknown as TableVisConfig;
 
   it('should render the basic table', () => {
@@ -42,6 +43,7 @@ describe('TableVisualizationComponent', () => {
         handlers={handlers}
         visData={visData}
         visConfig={visConfig}
+        renderComplete={renderComplete}
       />
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);
@@ -58,6 +60,7 @@ describe('TableVisualizationComponent', () => {
           tables: [],
         }}
         visConfig={visConfig}
+        renderComplete={renderComplete}
       />
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);

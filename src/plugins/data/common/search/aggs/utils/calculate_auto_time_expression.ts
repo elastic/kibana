@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment';
-import { UI_SETTINGS } from '../../../../common/constants';
-import { TimeRange } from '../../../../common/query';
+import { UI_SETTINGS } from '../../../constants';
+import { TimeRange } from '../../../query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';

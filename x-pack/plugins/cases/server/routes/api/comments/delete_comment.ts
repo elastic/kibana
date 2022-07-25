@@ -22,7 +22,8 @@ export const deleteCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       await client.attachments.delete({
         attachmentID: request.params.comment_id,
         caseID: request.params.case_id,

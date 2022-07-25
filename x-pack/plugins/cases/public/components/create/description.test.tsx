@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import userEvent, { specialChars } from '@testing-library/user-event';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { Description } from './description';
 import { schema, FormProps } from './schema';
+import { createAppMockRenderer, AppMockRenderer } from '../../common/mock';
 
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 describe('Description', () => {
   let globalForm: FormHook;
+  let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -33,32 +35,33 @@ describe('Description', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   it('it renders', async () => {
-    const wrapper = mount(
+    const result = appMockRender.render(
       <MockHookWrapperComponent>
         <Description isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
+    expect(result.getByTestId('caseDescription')).toBeInTheDocument();
   });
 
   it('it changes the description', async () => {
-    const wrapper = mount(
+    const result = appMockRender.render(
       <MockHookWrapperComponent>
         <Description isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="caseDescription"] textarea`)
-        .first()
-        .simulate('change', { target: { value: 'My new description' } });
-    });
+    userEvent.type(
+      result.getByRole('textbox'),
+      `${specialChars.selectAll}${specialChars.delete}My new description`
+    );
 
-    expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    await waitFor(() => {
+      expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    });
   });
 });

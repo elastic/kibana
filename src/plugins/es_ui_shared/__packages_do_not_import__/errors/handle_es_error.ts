@@ -7,7 +7,8 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {

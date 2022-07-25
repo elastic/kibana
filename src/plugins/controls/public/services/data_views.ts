@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsPublicPluginStart } from '../../../data_views/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface ControlsDataViewsService {
   get: DataViewsPublicPluginStart['get'];

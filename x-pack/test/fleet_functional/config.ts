@@ -6,12 +6,14 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),
@@ -29,7 +31,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
+
+          // Enable debug fleet logs by default
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
+      ],
     },
     layout: {
       fixedHeaderHeight: 200,

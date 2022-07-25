@@ -65,4 +65,14 @@ export const apmActionVariables = {
     ),
     name: 'reason' as const,
   },
+  viewInAppUrl: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.viewInAppUrl',
+      {
+        defaultMessage:
+          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+      }
+    ),
+    name: 'viewInAppUrl' as const,
+  },
 };

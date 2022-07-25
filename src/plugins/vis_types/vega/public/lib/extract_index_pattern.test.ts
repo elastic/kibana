@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { extractIndexPatternsFromSpec } from './extract_index_pattern';
-import { setData } from '../services';
+import { setDataViews } from '../services';
 
 import type { VegaSpec } from '../data_model/types';
 
 const getMockedSpec = (mockedObj: any) => mockedObj as unknown as VegaSpec;
 
 describe('extractIndexPatternsFromSpec', () => {
-  const dataStart = dataPluginMock.createStartContract();
+  const dataViewsStart = dataViewPluginMocks.createStartContract();
 
   beforeAll(() => {
-    setData(dataStart);
+    setDataViews(dataViewsStart);
   });
 
   test('should not throw errors if no index is specified', async () => {

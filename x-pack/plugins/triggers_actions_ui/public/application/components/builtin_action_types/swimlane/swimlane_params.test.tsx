@@ -36,6 +36,7 @@ describe('SwimlaneParamsFields renders', () => {
     actionTypeId: '.test',
     name: 'Test',
     isPreconfigured: false,
+    isDeprecated: false,
   };
 
   const defaultProps = {

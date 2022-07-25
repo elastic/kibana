@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import * as H from 'history';
+import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
-import { SpyRouteProps } from './types';
+import type { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
 import { SecurityPageName } from '../../../../common/constants';
 
 export const SpyRouteComponent = memo<
-  SpyRouteProps & { location: H.Location; pageName: string | undefined }
+  SpyRouteProps & { location: H.Location; pageName: SecurityPageName | undefined }
 >(
   ({
     location: { pathname, search },

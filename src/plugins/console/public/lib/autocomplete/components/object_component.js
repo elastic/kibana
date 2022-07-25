@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { SharedComponent } from './index';
+import { SharedComponent } from '.';
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if

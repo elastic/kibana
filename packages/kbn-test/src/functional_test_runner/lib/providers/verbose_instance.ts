@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 function printArgs(args: any[]): string {
   return args

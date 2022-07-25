@@ -8,14 +8,14 @@
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getUsageCollection } from '../kibana_services';
-import { APP_ID } from '../../common/constants';
-
 import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
   VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
+
 import {
   getVisualizeCapabilities,
   getIndexPatternService,

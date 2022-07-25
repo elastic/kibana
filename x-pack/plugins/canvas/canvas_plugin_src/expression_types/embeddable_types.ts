@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../plugins/maps/common';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../src/plugins/visualizations/common/constants';
-import { LENS_EMBEDDABLE_TYPE } from '../../../../plugins/lens/common/constants';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/plugins/discover/common';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-plugin/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/common/constants';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/common';
 
 export const EmbeddableTypes: {
   lens: string;

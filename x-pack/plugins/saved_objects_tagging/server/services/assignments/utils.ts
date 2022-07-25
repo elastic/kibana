@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsType } from 'kibana/server';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { AssignableObject } from '../../../common/assignments';
 import { tagSavedObjectTypeName } from '../../../common';
 

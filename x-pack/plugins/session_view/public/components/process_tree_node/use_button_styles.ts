@@ -6,47 +6,91 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 export const useButtonStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, font, size } = euiTheme;
+    const { border, colors, size, font } = euiTheme;
 
     const button: CSSObject = {
-      background: transparentize(theme.euiColorVis6, 0.04),
-      border: `${border.width.thin} solid ${transparentize(theme.euiColorVis6, 0.48)}`,
       lineHeight: '18px',
       height: '20px',
-      fontSize: '11px',
-      fontFamily: font.familyCode,
-      borderRadius: border.radius.medium,
-      color: colors.text,
-      marginLeft: size.s,
+      fontSize: size.m,
+      fontFamily: font.family,
+      fontWeight: font.weight.medium,
+      borderRadius: border.radius.small,
+      marginLeft: size.xs,
+      marginRight: size.xs,
       minWidth: 0,
+      padding: `${size.s} ${size.xxs}`,
+      color: euiVars.euiColorVis6_asText,
+      background: transparentize(euiVars.euiColorVis6, 0.04),
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis6, 0.48)}`,
+      '&& > span': {
+        padding: `0px ${size.xxs}`,
+        svg: {
+          transition: `transform ${euiTheme.animation.extraFast}`,
+        },
+      },
+      '&&:hover, &&:focus': {
+        background: transparentize(euiVars.euiColorVis6, 0.12),
+        textDecoration: 'none',
+      },
+      '&.isExpanded > span svg': {
+        transform: `rotate(180deg)`,
+      },
+      '&.isExpanded': {
+        color: colors.ghost,
+        background: euiVars.euiColorVis6,
+        '&:hover, &:focus': {
+          background: euiVars.euiColorVis6,
+        },
+      },
     };
 
     const buttonArrow: CSSObject = {
-      marginLeft: size.s,
+      marginLeft: size.xs,
     };
 
     const alertButton: CSSObject = {
       ...button,
-      background: transparentize(colors.dangerText, 0.04),
-      border: `${border.width.thin} solid ${transparentize(colors.dangerText, 0.48)}`,
+      color: euiVars.euiColorDanger,
+      background: transparentize(euiVars.euiColorDanger, 0.04),
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorDanger, 0.48)}`,
+      '&&:hover, &&:focus': {
+        background: transparentize(euiVars.euiColorDanger, 0.12),
+        textDecoration: 'none',
+      },
+      '&.isExpanded': {
+        color: colors.ghost,
+        background: euiVars.euiColorDanger,
+        '&:hover, &:focus': {
+          background: `${euiVars.euiColorDanger}`,
+        },
+      },
     };
 
     const userChangedButton: CSSObject = {
       ...button,
-      background: transparentize(theme.euiColorVis1, 0.04),
-      border: `${border.width.thin} solid ${transparentize(theme.euiColorVis1, 0.48)}`,
+      cursor: 'default',
+      color: euiVars.euiColorGhost,
+      background: euiVars.euiColorVis3,
+      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis3, 0.48)}`,
+      '&&:hover, &&:focus': {
+        color: euiVars.euiColorGhost,
+        background: euiVars.euiColorVis3,
+        textDecoration: 'none',
+        transform: 'none',
+        animation: 'none',
+      },
     };
 
-    const getExpandedIcon = (expanded: boolean) => {
-      return expanded ? 'arrowUp' : 'arrowDown';
+    const buttonSize: CSSObject = {
+      padding: `0px ${euiTheme.size.xs}`,
     };
 
     return {
@@ -54,9 +98,9 @@ export const useButtonStyles = () => {
       button,
       alertButton,
       userChangedButton,
-      getExpandedIcon,
+      buttonSize,
     };
-  }, [euiTheme]);
+  }, [euiTheme, euiVars]);
 
   return cached;
 };

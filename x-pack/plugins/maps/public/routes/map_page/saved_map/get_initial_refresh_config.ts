@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryState } from 'src/plugins/data/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import { SerializedMapState } from './types';
 
 export function getInitialRefreshConfig({
@@ -15,7 +15,7 @@ export function getInitialRefreshConfig({
   globalState = {},
 }: {
   serializedMapState?: SerializedMapState;
-  globalState: QueryState;
+  globalState: GlobalQueryStateFromUrl;
 }) {
   const uiSettings = getUiSettings();
 

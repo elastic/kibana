@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { TrialCallout } from './';
+import { TrialCallout } from '.';
 
 describe('TrialCallout', () => {
   it('renders when non-platinum or on trial', () => {

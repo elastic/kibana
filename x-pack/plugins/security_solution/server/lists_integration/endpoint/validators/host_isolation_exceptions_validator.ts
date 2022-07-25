@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
-import { EndpointArtifactExceptionValidationError } from './errors';
-import { ExceptionItemLikeOptions } from '../types';
-
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
+} from '@kbn/lists-plugin/server';
+import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
+import { EndpointArtifactExceptionValidationError } from './errors';
+import type { ExceptionItemLikeOptions } from '../types';
+
 import { isValidIPv4OrCIDR } from '../../../../common/endpoint/utils/is_valid_ip';
 
 function validateIp(value: string) {

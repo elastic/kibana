@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 let isActive = false;
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type {
   ApplicationStart,
   Capabilities,
@@ -17,15 +18,14 @@ import type {
   DocLinksStart,
   ThemeServiceStart,
   ExecutionContextSetup,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -34,6 +34,9 @@ export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getFieldsFormats, setFieldFormats] =
+  createGetterSetter<FieldFormatsStart>('Field Formats');
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
@@ -49,11 +52,6 @@ export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('Doc
 export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContract>('TimeFilter');
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
-
-export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
-  'UsageCollection',
-  false
-);
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 

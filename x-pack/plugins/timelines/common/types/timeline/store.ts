@@ -34,6 +34,7 @@ export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTimeline {
   columnId: string;
   columnType: string;
+  esTypes?: string[];
   sortDirection: SortDirection;
 }
 

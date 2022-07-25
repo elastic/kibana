@@ -1,11 +1,12 @@
 Vagrant.configure("2") do |config|
-  config.vm.synced_folder '../../target/', '/packages'
-
+  config.vm.synced_folder '../../target/', '/packages', SharedFoldersEnableSymlinksCreate: false
+  config.vm.boot_timeout = 600
   config.vm.define "deb" do |deb|
     deb.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
+      vb.cpus = 2
     end
-    deb.vm.box = 'elastic/debian-9-x86_64'
+    deb.vm.box = 'ubuntu/jammy64'
     deb.vm.provision "ansible" do |ansible|
       ansible.playbook = "deb.yml"
     end
@@ -14,9 +15,10 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "rpm" do |rpm|
     rpm.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
+      vb.cpus = 2
     end
-    rpm.vm.box = 'elastic/centos-7-x86_64'
+    rpm.vm.box = 'almalinux/9'
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "rpm.yml"
     end
@@ -25,9 +27,10 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "docker" do |docker|
     docker.vm.provider :virtualbox do |vb|
-      vb.memory = 2048
+      vb.memory = 4096
+      vb.cpus = 2
     end
-    docker.vm.box = 'elastic/ubuntu-18.04-x86_64'
+    docker.vm.box = 'ubuntu/jammy64'
     docker.vm.provision "ansible" do |ansible|
       ansible.playbook = "docker.yml"
     end

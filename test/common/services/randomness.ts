@@ -7,7 +7,7 @@
  */
 
 import Chance from 'chance';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { FtrService } from '../ftr_provider_context';
 

@@ -7,9 +7,9 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuleParams, TransactionDurationAlertTrigger } from '.';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },

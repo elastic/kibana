@@ -76,7 +76,11 @@ describe('ExpressionRow', () => {
     };
     const { wrapper, update } = await setup(expression as MetricExpression);
     await update();
-    const [valueMatch] = wrapper.html().match('<span class="euiExpression__value">50</span>') ?? [];
+    const [valueMatch] =
+      wrapper
+        .html()
+        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">50</span>') ??
+      [];
     expect(valueMatch).toBeTruthy();
   });
 
@@ -91,7 +95,10 @@ describe('ExpressionRow', () => {
     };
     const { wrapper } = await setup(expression as MetricExpression);
     const [valueMatch] =
-      wrapper.html().match('<span class="euiExpression__value">0.5</span>') ?? [];
+      wrapper
+        .html()
+        .match('<span class="euiExpression__value css-xlzuv8-euiExpression__value">0.5</span>') ??
+      [];
     expect(valueMatch).toBeTruthy();
   });
 

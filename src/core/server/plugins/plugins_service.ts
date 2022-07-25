@@ -7,13 +7,16 @@
  */
 
 import Path from 'path';
-import { Observable } from 'rxjs';
-import { filter, first, map, tap, toArray } from 'rxjs/operators';
-import { getFlattenedObject, pick } from '@kbn/std';
+import { firstValueFrom, Observable } from 'rxjs';
+import { filter, map, tap, toArray } from 'rxjs/operators';
+import { getFlattenedObject } from '@kbn/std';
 
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginName } from '@kbn/core-base-common';
+import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
+import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import {
@@ -21,14 +24,12 @@ import {
   InternalPluginInfo,
   PluginConfigDescriptor,
   PluginDependencies,
-  PluginName,
   PluginType,
 } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { IConfigService } from '../config';
-import { InternalEnvironmentServicePreboot } from '../environment';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -84,6 +85,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 /** @internal */
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
+  node: InternalNodeServicePreboot;
 }
 
 /** @internal */
@@ -109,11 +111,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
-  public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
-    const config = await this.config$.pipe(first()).toPromise();
+  public async discover({
+    environment,
+    node,
+  }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
+    const config = await firstValueFrom(this.config$);
 
-    const { error$, plugin$ } = discover(config, this.coreContext, {
-      uuid: environment.instanceUuid,
+    const { error$, plugin$ } = discover({
+      config,
+      coreContext: this.coreContext,
+      instanceInfo: {
+        uuid: environment.instanceUuid,
+      },
+      nodeInfo: {
+        roles: node.roles,
+      },
     });
 
     await this.handleDiscoveryErrors(error$);
@@ -150,7 +162,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async preboot(deps: PluginsServicePrebootSetupDeps) {
     this.log.debug('Prebooting plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
@@ -164,7 +176,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async setup(deps: PluginsServiceSetupDeps) {
     this.log.debug('Setting up plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
@@ -185,7 +197,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (!config.initialize) {
       this.log.info(
         'Skipping `start` for `standard` plugins since plugin initialization is disabled.'
@@ -228,16 +240,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
-            this.configService.atPath(plugin.configPath).pipe(
-              map((config: any) =>
-                pick(
-                  config || {},
-                  Object.entries(configDescriptor.exposeToBrowser!)
-                    .filter(([_, exposed]) => exposed)
-                    .map(([key, _]) => key)
-                )
-              )
-            ),
+            this.configService
+              .atPath(plugin.configPath)
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );
@@ -252,13 +257,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginDiscoveryErrorType.InvalidManifest,
     ];
 
-    const errors = await error$
-      .pipe(
+    const errors = await firstValueFrom(
+      error$.pipe(
         filter((error) => errorTypesToReport.includes(error.type)),
         tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
-      .toPromise();
+    );
     if (errors.length > 0) {
       throw new Error(
         `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
@@ -271,7 +276,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
     // Register config descriptors and deprecations
     for (const plugin of plugins) {

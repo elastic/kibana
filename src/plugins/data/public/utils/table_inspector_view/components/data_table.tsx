@@ -20,11 +20,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { IUiSettingsClient } from '@kbn/core/public';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewRow, DataViewColumn } from '../types';
-import { IUiSettingsClient } from '../../../../../../core/public';
-import { Datatable, DatatableColumn } from '../../../../../expressions/public';
-import { FieldFormatsStart } from '../../../../../field_formats/public';
-import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];

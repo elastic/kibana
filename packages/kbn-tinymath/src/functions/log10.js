@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { log } = require('./log.js');
+const { log } = require('./log');
 
 /**
  * Calculates the logarithm base 10 of a number. For arrays, the function will be applied index-wise to each element.

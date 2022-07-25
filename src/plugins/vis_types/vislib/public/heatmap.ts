@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { RangeValues } from '../../../vis_default_editor/public';
-import { heatmapVisType } from '../../heatmap/public';
+import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
+import { heatmapVisType } from '@kbn/vis-type-heatmap-plugin/public';
 
-import { ColorSchemaParams } from '../../../charts/public';
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { ValueAxis } from '../../xy/public';
+import { ColorSchemaParams } from '@kbn/charts-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { ValueAxis } from '@kbn/vis-type-xy-plugin/public';
 
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams } from './types';

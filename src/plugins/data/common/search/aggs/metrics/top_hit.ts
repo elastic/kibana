@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { aggTopHitFnName } from './top_hit_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 
 export interface AggParamsTopHit extends BaseAggParams {

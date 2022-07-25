@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RequestHandler } from 'src/core/server';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -110,7 +110,11 @@ describe('UPDATE remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -187,7 +191,11 @@ describe('UPDATE remote clusters', () => {
         proxySocketConnections: 18,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -234,7 +242,11 @@ describe('UPDATE remote clusters', () => {
         mode: 'sniff',
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({
@@ -265,7 +277,11 @@ describe('UPDATE remote clusters', () => {
         mode: 'sniff',
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(400);
       expect(response.payload).toEqual({

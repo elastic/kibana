@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Style } from 'src/plugins/expressions/public';
+import { Style } from '@kbn/expressions-plugin/public';
 
 export interface Arguments {
   markdown: string;

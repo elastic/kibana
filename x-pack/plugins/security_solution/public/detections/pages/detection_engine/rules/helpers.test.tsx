@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import type { GetStepsData } from './helpers';
 import {
-  GetStepsData,
   getDefineStepsData,
   getScheduleStepsData,
   getStepsData,
@@ -24,8 +24,8 @@ import {
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { Rule } from '../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
@@ -35,8 +35,6 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
-  // https://github.com/elastic/kibana/issues/120236
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -83,6 +81,8 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: ['host.name'],
           value: '50',
@@ -99,12 +99,19 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -123,6 +130,7 @@ describe('rule helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
+        timestampOverrideFallbackDisabled: false,
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -133,6 +141,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -216,6 +225,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -228,12 +239,19 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
@@ -256,8 +274,10 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -270,12 +290,19 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
@@ -390,6 +417,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -399,7 +427,11 @@ describe('rule helpers', () => {
       const { note, ...mockRuleWithoutNote } = { ...mockRuleWithEverything('test-id') };
       const result: AboutStepRuleDetails = getModifiedAboutDetailsData(mockRuleWithoutNote);
 
-      const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
+      const aboutRuleDetailsData = {
+        note: '',
+        description: mockRuleWithoutNote.description,
+        setup: '',
+      };
 
       expect(result).toEqual(aboutRuleDetailsData);
     });
@@ -482,9 +514,9 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const rulesInstalled = null;
-      const rulesNotInstalled = null;
-      const rulesNotUpdated = null;
+      const rulesInstalled = undefined;
+      const rulesNotInstalled = undefined;
+      const rulesNotUpdated = undefined;
       const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
@@ -549,9 +581,9 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const timelinesInstalled = null;
-      const timelinesNotInstalled = null;
-      const timelinesNotUpdated = null;
+      const timelinesInstalled = undefined;
+      const timelinesNotInstalled = undefined;
+      const timelinesNotUpdated = undefined;
       const result: string = getPrePackagedTimelineStatus(
         timelinesInstalled,
         timelinesNotInstalled,

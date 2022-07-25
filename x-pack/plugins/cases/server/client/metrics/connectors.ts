@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
+import { SingleCaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { BaseHandler } from './base_handler';
-import { BaseHandlerCommonOptions } from './types';
+import { SingleCaseBaseHandler } from './single_case_base_handler';
+import { SingleCaseBaseHandlerCommonOptions } from './types';
 
-export class Connectors extends BaseHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class Connectors extends SingleCaseBaseHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(options, ['connectors']);
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
+  public async compute(): Promise<SingleCaseMetricsResponse> {
     const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
       this.options.clientArgs;
-
-    const { caseId } = this.options;
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getUserActionMetrics
@@ -28,7 +26,7 @@ export class Connectors extends BaseHandler {
 
     const uniqueConnectors = await userActionService.getUniqueConnectors({
       unsecuredSavedObjectsClient,
-      caseId,
+      caseId: this.caseId,
       filter: authorizationFilter,
     });
 
@@ -38,7 +36,7 @@ export class Connectors extends BaseHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve total connectors metrics for case id: ${caseId}: ${error}`,
+        message: `Failed to retrieve total connectors metrics for case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });

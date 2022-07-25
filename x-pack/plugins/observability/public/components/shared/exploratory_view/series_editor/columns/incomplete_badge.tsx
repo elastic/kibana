@@ -36,7 +36,7 @@ export function IncompleteBadge({ seriesConfig, series }: Props) {
             labels?.[
               typeof definitionFields[0] === 'string'
                 ? definitionFields[0]
-                : definitionFields[0].field
+                : definitionFields[0]?.field
             ],
         },
       })

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -14,7 +15,6 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -36,7 +36,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
-    it(`${testData.suiteTitle} displays index details`, async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/137016
+    it.skip(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
 
@@ -153,8 +154,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('index based', function () {
-    this.tags(['mlqa']);
+  // Failing: See https://github.com/elastic/kibana/issues/137032
+  // Failing: See https://github.com/elastic/kibana/issues/118472
+  describe.skip('index based', function () {
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
@@ -254,7 +257,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         const lensMetricField = testData.expected.metricFields![0];
 
         if (lensMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensMetricField.fieldName,
+            'legacyMtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
@@ -262,7 +268,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
 
         if (lensNonMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensNonMetricField.fieldName,
+            'legacyMtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
       });

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
-  indexPattern: IIndexPattern | string | undefined,
+  indexPattern: DataView | string | undefined,
   defaultSortOptions: SortOptions = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
@@ -27,7 +27,7 @@ export function normalizeSortRequest(
  */
 function normalize(
   sortable: EsQuerySortValue,
-  indexPattern: IIndexPattern | string | undefined,
+  indexPattern: DataView | string | undefined,
   defaultSortOptions: any
 ) {
   const [[sortField, sortOrder]] = Object.entries(sortable);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Command } from '@kbn/dev-utils';
+import { Command } from '@kbn/dev-cli-runner';
 
 import { Render } from './lib/render';
 

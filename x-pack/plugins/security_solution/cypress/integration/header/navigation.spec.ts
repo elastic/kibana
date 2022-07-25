@@ -17,9 +17,11 @@ import {
   TIMELINES,
   RULES,
   EXCEPTIONS,
+  USERS,
+  DETECTION_RESPONSE,
 } from '../../screens/security_header';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
@@ -35,6 +37,11 @@ import {
   TIMELINES_URL,
   EXCEPTIONS_URL,
   DETECTIONS_RULE_MANAGEMENT_URL,
+  USERS_URL,
+  DASHBOARDS_URL,
+  DETECTION_RESPONSE_URL,
+  EXPLORE_URL,
+  MANAGE_URL,
 } from '../../urls/navigation';
 import {
   openKibanaNavigation,
@@ -43,23 +50,29 @@ import {
 import {
   CASES_PAGE,
   ALERTS_PAGE,
-  HOSTS_PAGE,
-  ENDPOINTS_PAGE,
-  NETWORK_PAGE,
-  OVERVIEW_PAGE,
+  EXPLORE_PAGE,
+  MANAGE_PAGE,
+  DASHBOARDS_PAGE,
   TIMELINES_PAGE,
 } from '../../screens/kibana_navigation';
-import { cleanKibana } from '../../tasks/common';
+
+before(() => {
+  login();
+});
 
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
   it('navigates to the Overview page', () => {
     navigateFromHeaderTo(OVERVIEW);
     cy.url().should('include', OVERVIEW_URL);
+  });
+
+  it('navigates to the Detection & Response page', () => {
+    navigateFromHeaderTo(DETECTION_RESPONSE);
+    cy.url().should('include', DETECTION_RESPONSE_URL);
   });
 
   it('navigates to the Alerts page', () => {
@@ -75,6 +88,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
     cy.url().should('include', NETWORK_URL);
+  });
+
+  it('navigates to the Users page', () => {
+    navigateFromHeaderTo(USERS);
+    cy.url().should('include', USERS_URL);
   });
 
   it('navigates to the Rules page', () => {
@@ -113,29 +131,19 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
 describe('Kibana navigation to all pages in the Security app ', () => {
   before(() => {
-    loginAndWaitForPage(KIBANA_HOME);
+    visit(KIBANA_HOME);
   });
   beforeEach(() => {
     openKibanaNavigation();
   });
-  it('navigates to the Overview page', () => {
-    navigateFromKibanaCollapsibleTo(OVERVIEW_PAGE);
-    cy.url().should('include', OVERVIEW_URL);
+  it('navigates to the Dashboards page', () => {
+    navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
+    cy.url().should('include', DASHBOARDS_URL);
   });
 
   it('navigates to the Alerts page', () => {
     navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
     cy.url().should('include', ALERTS_URL);
-  });
-
-  it('navigates to the Hosts page', () => {
-    navigateFromKibanaCollapsibleTo(HOSTS_PAGE);
-    cy.url().should('include', HOSTS_URL);
-  });
-
-  it('navigates to the Network page', () => {
-    navigateFromKibanaCollapsibleTo(NETWORK_PAGE);
-    cy.url().should('include', NETWORK_URL);
   });
 
   it('navigates to the Timelines page', () => {
@@ -148,8 +156,13 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Endpoints page', () => {
-    navigateFromKibanaCollapsibleTo(ENDPOINTS_PAGE);
-    cy.url().should('include', ENDPOINTS_URL);
+  it('navigates to the Explore page', () => {
+    navigateFromKibanaCollapsibleTo(EXPLORE_PAGE);
+    cy.url().should('include', EXPLORE_URL);
+  });
+
+  it('navigates to the Manage page', () => {
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
+    cy.url().should('include', MANAGE_URL);
   });
 });

@@ -13,7 +13,7 @@ import {
   isJobFailed,
   isJobStarted,
 } from '../../../../../common/machine_learning/helpers';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,

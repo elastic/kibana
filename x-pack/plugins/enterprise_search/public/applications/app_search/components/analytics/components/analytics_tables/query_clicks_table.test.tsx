@@ -15,14 +15,13 @@ import { EuiBasicTable, EuiLink, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 
-import { QueryClicksTable } from './';
+import { QueryClicksTable } from '.';
 
 describe('QueryClicksTable', () => {
   const items = [
     {
       key: 'some-document',
       document: {
-        engine: 'some-engine',
         id: 'some-document',
       },
       tags: ['tagA'],
@@ -31,7 +30,6 @@ describe('QueryClicksTable', () => {
     {
       key: 'another-document',
       document: {
-        engine: 'another-engine',
         id: 'another-document',
       },
       tags: ['tagB'],
@@ -57,7 +55,7 @@ describe('QueryClicksTable', () => {
       '/app/enterprise_search/engines/some-engine/documents/some-document'
     );
     expect(wrapper.find(EuiLink).last().prop('href')).toEqual(
-      '/app/enterprise_search/engines/another-engine/documents/another-document'
+      '/app/enterprise_search/engines/some-engine/documents/another-document'
     );
     // deleted-document should not have a link
 

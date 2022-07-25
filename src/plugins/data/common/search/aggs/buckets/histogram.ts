@@ -8,9 +8,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
-import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
 import { AggTypesDependencies } from '../agg_types';
@@ -47,6 +47,7 @@ export interface AggParamsHistogram extends BaseAggParams {
   min_doc_count?: boolean;
   has_extended_bounds?: boolean;
   extended_bounds?: ExtendedBounds;
+  autoExtendBounds?: boolean;
 }
 
 export const getHistogramBucketAgg = ({
@@ -95,6 +96,14 @@ export const getHistogramBucketAgg = ({
          */
         name: 'intervalBase',
         default: null,
+        write: () => {},
+      },
+      {
+        /*
+         * Set to true to extend bounds to the domain of the data. This makes sure each interval bucket within these bounds will create a separate table row
+         */
+        name: 'autoExtendBounds',
+        default: false,
         write: () => {},
       },
       {
@@ -202,6 +211,8 @@ export const getHistogramBucketAgg = ({
 
           if (aggConfig.params.has_extended_bounds && (min || min === 0) && (max || max === 0)) {
             output.params.extended_bounds = { min, max };
+          } else if (aggConfig.params.autoExtendBounds && aggConfig.getAutoBounds()) {
+            output.params.extended_bounds = aggConfig.getAutoBounds();
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,

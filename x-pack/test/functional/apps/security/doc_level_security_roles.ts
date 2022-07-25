@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
+      await security.testUser.setRoles(['cluster_security_manager', 'kibana_admin']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
     });
@@ -82,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
       await security.user.delete('userEast');
       await security.role.delete('myroleEast');
+      await security.testUser.restoreDefaults();
     });
   });
 }

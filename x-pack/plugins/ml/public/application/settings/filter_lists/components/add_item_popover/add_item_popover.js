@@ -103,9 +103,11 @@ export class AddItemPopover extends Component {
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
+          initialFocus="#filter_list_add_item_input_row"
         >
           <EuiForm>
             <EuiFormRow
+              id="filter_list_add_item_input_row"
               label={
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"

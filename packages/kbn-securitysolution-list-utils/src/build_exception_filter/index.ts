@@ -20,13 +20,15 @@ import {
   entriesMatchAny,
   entriesNested,
   OsTypeArray,
+  entriesMatchWildcard,
+  EntryMatchWildcard,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { hasLargeValueList } from '../has_large_value_list';
 
-type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
+type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryMatchWildcard;
 interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
   entries: NonListEntry[];
 }
@@ -141,10 +143,12 @@ export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
+  alias = null,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
+  alias: string | null;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
@@ -154,7 +158,7 @@ export const buildExceptionFilter = ({
 
   const exceptionFilter: Filter = {
     meta: {
-      alias: null,
+      alias,
       disabled: false,
       negate: excludeExceptions,
     },
@@ -195,7 +199,7 @@ export const buildExceptionFilter = ({
 
     return {
       meta: {
-        alias: null,
+        alias,
         disabled: false,
         negate: excludeExceptions,
       },
@@ -288,6 +292,25 @@ export const buildMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
   }
 };
 
+export const buildMatchWildcardClause = (entry: EntryMatchWildcard): BooleanFilter => {
+  const { field, operator, value } = entry;
+  const wildcardClause = {
+    bool: {
+      filter: {
+        wildcard: {
+          [field]: value,
+        },
+      },
+    },
+  };
+
+  if (operator === 'excluded') {
+    return buildExclusionClause(wildcardClause);
+  } else {
+    return wildcardClause;
+  }
+};
+
 export const buildExistsClause = (entry: EntryExists): BooleanFilter => {
   const { field, operator } = entry;
   const existsClause = {
@@ -350,15 +373,15 @@ export const createInnerAndClauses = (
   entry: NonListEntry,
   parent?: string
 ): BooleanFilter | NestedFilter => {
+  const field = parent != null ? `${parent}.${entry.field}` : entry.field;
   if (entriesExists.is(entry)) {
-    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildExistsClause({ ...entry, field });
   } else if (entriesMatch.is(entry)) {
-    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildMatchClause({ ...entry, field });
   } else if (entriesMatchAny.is(entry)) {
-    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
     return buildMatchAnyClause({ ...entry, field });
+  } else if (entriesMatchWildcard.is(entry)) {
+    return buildMatchWildcardClause({ ...entry, field });
   } else if (entriesNested.is(entry)) {
     return buildNestedClause(entry);
   } else {

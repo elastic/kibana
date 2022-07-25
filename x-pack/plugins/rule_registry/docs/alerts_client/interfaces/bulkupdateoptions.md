@@ -6,7 +6,7 @@
 
 | Name | Type |
 | :------ | :------ |
-| `Params` | `Params`: `AlertTypeParams` |
+| `Params` | `Params`: `RuleTypeParams` |
 
 ## Table of contents
 

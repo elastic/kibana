@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CanvasServices, services } from '../';
+import { CanvasServices, services } from '..';
 import { searchService } from './search';
 
 export const stubs: CanvasServices = {

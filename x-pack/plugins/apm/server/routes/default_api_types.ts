@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 
 export { environmentRt } from '../../common/environment_rt';
 
@@ -15,11 +15,7 @@ export const rangeRt = t.type({
   end: isoToEpochRt,
 });
 
-export const offsetRt = t.partial({ offset: t.string });
-
-export const comparisonRangeRt = t.partial({
-  comparisonStart: isoToEpochRt,
-  comparisonEnd: isoToEpochRt,
+export const probabilityRt = t.type({
+  probability: toNumberRt,
 });
-
 export const kueryRt = t.type({ kuery: t.string });

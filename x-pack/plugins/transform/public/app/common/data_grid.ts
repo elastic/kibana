@@ -15,8 +15,8 @@ export const getPivotPreviewDevConsoleStatement = (request: PostTransformsPrevie
   return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
 };
 
-export const getIndexDevConsoleStatement = (query: PivotQuery, indexPatternTitle: string) => {
-  return `GET ${indexPatternTitle}/_search\n${JSON.stringify(
+export const getIndexDevConsoleStatement = (query: PivotQuery, dataViewTitle: string) => {
+  return `GET ${dataViewTitle}/_search\n${JSON.stringify(
     {
       query,
     },

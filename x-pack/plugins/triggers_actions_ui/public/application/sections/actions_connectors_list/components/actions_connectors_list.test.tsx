@@ -6,23 +6,20 @@
  */
 
 import * as React from 'react';
+import { uniq } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import ActionsConnectorsList from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-import {
-  ActionConnector,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../../types';
+import { ActionConnector, GenericValidationResult } from '../../../../types';
 import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -43,10 +40,12 @@ describe('actions_connectors_list component empty', () => {
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -87,10 +86,10 @@ describe('actions_connectors_list component empty', () => {
     ).toHaveLength(1);
   });
 
-  test('if click create button should render ConnectorAddFlyout', async () => {
+  test('if click create button should render CreateConnectorFlyout', async () => {
     await setup();
     wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
-    expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="create-connector-flyout"]').exists()).toBeTruthy();
   });
 });
 
@@ -105,6 +104,7 @@ describe('actions_connectors_list component with items', () => {
           actionTypeId: 'test',
           description: 'My test',
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
           config: {},
         },
@@ -114,6 +114,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My test 2',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -123,6 +124,7 @@ describe('actions_connectors_list component with items', () => {
           isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -131,6 +133,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My invalid connector type',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
       ]
@@ -140,11 +143,13 @@ describe('actions_connectors_list component with items', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
         enabled: true,
+        supportedFeatureIds: ['alerting', 'cases'],
       },
     ]);
 
@@ -164,9 +169,6 @@ describe('actions_connectors_list component with items', () => {
       id: 'test',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -200,6 +202,13 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(4);
+
+    const featureIdsBadges = wrapper.find(
+      'EuiBadge[data-test-subj="connectorsTableCell-featureIds"]'
+    );
+    expect(featureIdsBadges).toHaveLength(5);
+
+    expect(uniq(featureIdsBadges.map((badge) => badge.text()))).toEqual(['Alerting', 'Cases']);
   });
 
   it('renders table with preconfigured connectors', async () => {
@@ -237,6 +246,7 @@ describe('actions_connectors_list component with items', () => {
         secrets: {},
         description: `My test ${index}`,
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
         config: {},
       }))
@@ -258,12 +268,10 @@ describe('actions_connectors_list component with items', () => {
     `);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', async () => {
+  test('if select item for edit should render EditConnectorFlyout', async () => {
     await setup();
-    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
-
-    const edit = await wrapper.find('ConnectorEditFlyout');
-    expect(edit).toHaveLength(1);
+    await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
+    expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
   });
 });
 
@@ -276,10 +284,12 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -339,10 +349,12 @@ describe('actions_connectors_list with show only capability', () => {
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -410,6 +422,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -417,6 +430,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 
@@ -472,6 +486,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         description: 'My test',
         referencedByCount: 1,
         config: { usesTableApi: true },
+        isDeprecated: true,
       },
       {
         id: '2',
@@ -479,6 +494,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: { usesTableApi: true },
+        isDeprecated: true,
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([
@@ -488,6 +504,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -495,6 +512,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { FieldsType } from '../types';
+import type { FieldsType } from '../types';
 
 /**
  * Returns true if we match a "type" object which could be a geo-point when we are parsing field

@@ -15,12 +15,7 @@ import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { LensAppServices } from '../app_plugin/types';
 
-import {
-  makeConfigureStore,
-  LensAppState,
-  LensState,
-  LensStoreDeps,
-} from '../state_management/index';
+import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
@@ -106,6 +101,26 @@ export const mountWithProvider = async (
     attachTo?: HTMLElement;
   }
 ) => {
+  const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
+
+  let instance: ReactWrapper = {} as ReactWrapper;
+
+  await act(async () => {
+    instance = mount(mountArgs.component, mountArgs.options);
+  });
+  return { instance, lensStore, deps };
+};
+
+export const getMountWithProviderParams = (
+  component: React.ReactElement,
+  store?: MountStoreProps,
+  options?: {
+    wrappingComponent?: React.FC<{
+      children: React.ReactNode;
+    }>;
+    attachTo?: HTMLElement;
+  }
+) => {
   const { store: lensStore, deps } = makeLensStore(store || {});
 
   let wrappingComponent: React.FC<{
@@ -114,7 +129,7 @@ export const mountWithProvider = async (
 
   let restOptions: {
     attachTo?: HTMLElement | undefined;
-  };
+  } = {};
   if (options) {
     const { wrappingComponent: _wrappingComponent, ...rest } = options;
     restOptions = rest;
@@ -128,13 +143,13 @@ export const mountWithProvider = async (
     }
   }
 
-  let instance: ReactWrapper = {} as ReactWrapper;
-
-  await act(async () => {
-    instance = mount(component, {
+  const mountArgs = {
+    component,
+    options: {
       wrappingComponent,
       ...restOptions,
-    } as unknown as ReactWrapper);
-  });
-  return { instance, lensStore, deps };
+    } as unknown as ReactWrapper,
+  };
+
+  return { mountArgs, lensStore, deps };
 };

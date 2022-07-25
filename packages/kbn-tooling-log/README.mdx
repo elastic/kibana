@@ -1,0 +1,24 @@
+---
+id: kibDevDocsToolingLog
+slug: /kibana-dev-docs/tooling-log
+title: "@kbn/tooling-log"
+description: Standard logger used by lots of tooling in the Kibana repository.
+tags: ['kibana', 'dev', 'contributor', 'operations', 'logging']
+---
+
+The Kibana ToolingLog is a basic logger used by just about all tooling in the Kibana respository that gives us a single indented logging interface to manage.
+
+In the Functional Test Runner, or in the vast majority of CLIs/scripts, a log instance is created for you and should be reused so that the level/output/indent level are synced across uses.
+
+To get the `ToolingLog` instance in the Functional Test Runner use `getService('log')`.
+
+To get the `ToolingLog` instance in CLIs, it's passed to the function at the root of the CLI:
+```ts
+import { run } from '@kbn/dev-utils'
+run(async ({ flags, log }) => {
+  log.info('hello')
+  await ...
+});
+```
+
+API Reference: <DocLink id="kibKbnToolingLogPluginApi" />

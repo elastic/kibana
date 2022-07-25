@@ -7,12 +7,12 @@
  */
 
 import React, { useState } from 'react';
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
-import { DashboardContainerInput, DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { HELLO_WORLD_EMBEDDABLE } from '../../../embeddable_examples/public/hello_world';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput, DashboardStart } from '@kbn/dashboard-plugin/public';
+import { HELLO_WORLD_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/hello_world';
+import { TODO_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/todo';
+import { TODO_REF_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public/todo/todo_ref_embeddable';
 import { InputEditor } from './input_editor';
-import { TODO_EMBEDDABLE } from '../../../embeddable_examples/public/todo';
-import { TODO_REF_EMBEDDABLE } from '../../../embeddable_examples/public/todo/todo_ref_embeddable';
 
 const initialInput: DashboardContainerInput = {
   viewMode: ViewMode.VIEW,

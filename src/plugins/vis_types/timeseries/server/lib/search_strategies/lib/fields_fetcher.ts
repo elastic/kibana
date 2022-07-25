@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import type { SearchStrategy, SearchCapabilities } from '../index';
-import type { IndexPatternsService } from '../../../../../../data/common';
+import type { SearchStrategy, SearchCapabilities } from '..';
 import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 import type { IndexPatternValue } from '../../../../common/types';
 
 export interface FieldsFetcherServices {
-  indexPatternsService: IndexPatternsService;
+  indexPatternsService: DataViewsService;
   cachedIndexPatternFetcher: CachedIndexPatternFetcher;
   searchStrategy: SearchStrategy;
   capabilities: SearchCapabilities;

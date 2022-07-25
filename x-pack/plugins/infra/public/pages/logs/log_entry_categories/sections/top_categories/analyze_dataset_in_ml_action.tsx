@@ -9,11 +9,11 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { shouldHandleLinkEvent } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
-import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { shouldHandleLinkEvent } from '../../../../../../../observability/public';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   categorizationJobId: string;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup, UsageCollectorOptions } from 'src/plugins/usage_collection/server';
-import { HttpServiceSetup, CspConfig } from '../../../../../core/server';
+import { UsageCollectionSetup, UsageCollectorOptions } from '@kbn/usage-collection-plugin/server';
+import { HttpServiceSetup, CspConfig } from '@kbn/core/server';
 
 interface Usage {
   strict: boolean;

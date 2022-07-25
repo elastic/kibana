@@ -8,8 +8,8 @@
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stacktrace } from '.';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 const Accordion = euiStyled(EuiAccordion)`
@@ -18,7 +18,7 @@ const Accordion = euiStyled(EuiAccordion)`
 `;
 
 const CausedByContainer = euiStyled('h5')`
-  padding: ${({ theme }) => theme.eui.spacerSizes.s} 0;
+  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
 const CausedByHeading = euiStyled('span')`
@@ -30,7 +30,7 @@ const CausedByHeading = euiStyled('span')`
 `;
 
 const FramesContainer = euiStyled('div')`
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 function CausedBy({ message }: { message: string }) {

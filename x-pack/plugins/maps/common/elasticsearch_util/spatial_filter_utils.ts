@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Feature, Geometry, Polygon, Position } from 'geojson';
+import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
 import { FilterMeta, FILTERS } from '@kbn/es-query';
@@ -89,6 +89,7 @@ export function createExtentFilter(mapExtent: MapExtent, geoFieldNames: string[]
   }
 
   const meta: FilterMeta = {
+    type: SPATIAL_FILTER_TYPE,
     alias: null,
     disabled: false,
     negate: false,
@@ -97,7 +98,7 @@ export function createExtentFilter(mapExtent: MapExtent, geoFieldNames: string[]
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
 
-export function createSpatialFilterWithGeometry({
+export function buildGeoShapeFilter({
   preIndexedShape,
   geometry,
   geometryLabel,
@@ -105,7 +106,7 @@ export function createSpatialFilterWithGeometry({
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
   preIndexedShape?: PreIndexedShape | null;
-  geometry?: Polygon;
+  geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
   relation?: ES_SPATIAL_RELATIONS;
@@ -142,6 +143,38 @@ export function createSpatialFilterWithGeometry({
   // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
   // @ts-expect-error
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
+}
+
+export function buildGeoGridFilter({
+  geoFieldNames,
+  gridId,
+  isHex,
+}: {
+  geoFieldNames: string[];
+  gridId: string;
+  isHex: boolean;
+}): GeoFilter {
+  return createMultiGeoFieldFilter(
+    geoFieldNames,
+    {
+      type: SPATIAL_FILTER_TYPE,
+      negate: false,
+      key: geoFieldNames.length === 1 ? geoFieldNames[0] : undefined,
+      alias: i18n.translate('xpack.maps.common.esSpatialRelation.clusterFilterLabel', {
+        defaultMessage: 'intersects cluster {gridId}',
+        values: { gridId },
+      }),
+      disabled: false,
+    } as FilterMeta,
+    (geoFieldName: string) => {
+      const payload = isHex ? { geohex: gridId } : { geotile: gridId };
+      return {
+        geo_grid: {
+          [geoFieldName]: payload,
+        },
+      };
+    }
+  );
 }
 
 export function createDistanceFilterWithMeta({

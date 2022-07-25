@@ -8,6 +8,7 @@
 
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
+import { setImmediate } from 'timers/promises';
 
 import {
   clientProviderInstanceMock,
@@ -17,22 +18,21 @@ import {
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
-import { RawPackageInfo } from '@kbn/config';
+import { RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '@kbn/config-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
-import { mockCoreContext } from '../core_context.mock';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/mocks';
 import { configServiceMock } from '../mocks';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
@@ -79,6 +79,7 @@ describe('SavedObjectsService', () => {
     return {
       pluginsInitialized,
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
+      docLinks: docLinksServiceMock.createStartContract(),
     };
   };
 
@@ -280,7 +281,7 @@ describe('SavedObjectsService', () => {
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -305,10 +306,9 @@ describe('SavedObjectsService', () => {
         warningNodes: [],
         kibanaVersion: '8.0.0',
       });
-      setImmediate(() => {
-        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
-      });
+
+      await setImmediate();
+      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {

@@ -6,10 +6,10 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useCallback, useMemo, useEffect } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 import type { Query } from '@kbn/es-query';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -25,12 +25,12 @@ import {
 } from '../../../containers/logs/log_flyout';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useLogStreamContext } from '../../../containers/logs/log_stream';
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
@@ -38,7 +38,7 @@ import { PageViewLogInContext } from './page_view_log_in_context';
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { resolvedSourceConfiguration, sourceConfiguration, sourceId } = useLogSourceContext();
+  const { resolvedLogView, logView, logViewId } = useLogViewContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     surroundingLogsId,
@@ -216,14 +216,12 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={setFilter}
-          sourceId={sourceId}
+          sourceId={logViewId}
         />
       ) : null}
-      <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
+      <PageContent key={`${logViewId}-${logView?.version}`}>
         <ScrollableLogTextStreamView
-          columnConfigurations={
-            (resolvedSourceConfiguration && resolvedSourceConfiguration.columns) || []
-          }
+          columnConfigurations={(resolvedLogView && resolvedLogView.columns) || []}
           hasMoreAfterEnd={hasMoreAfterEnd}
           hasMoreBeforeStart={hasMoreBeforeStart}
           isLoadingMore={isLoadingMore}

@@ -9,12 +9,12 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   IScopedClusterClient,
-} from 'kibana/server';
-import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Module } from '../../../common/types/modules';
-import { DataRecognizer } from '../data_recognizer';
+import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -34,7 +34,7 @@ describe('ML - data recognizer', () => {
       bulkCreate: jest.fn(),
     } as unknown as SavedObjectsClientContract,
     { find: jest.fn() } as unknown as DataViewsService,
-    {} as JobSavedObjectService,
+    {} as MLSavedObjectService,
     { headers: { authorization: '' } } as unknown as KibanaRequest
   );
 

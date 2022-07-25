@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
+import type {
+  AgentClient,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
-import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import type { ESLicense, ESClusterInfo } from './types';
-import { OsqueryAppContextService } from '../osquery_app_context_services';
+import type { OsqueryAppContextService } from '../osquery_app_context_services';
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
+  private packagePolicyService?: PackagePolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private soClient?: SavedObjectsClientContract;
   private clusterInfo?: ESClusterInfo;
@@ -30,12 +37,13 @@ export class TelemetryReceiver {
     this.logger = logger.get('telemetry_events');
   }
 
-  public async start(core?: CoreStart, osqueryContextService?: OsqueryAppContextService) {
+  public async start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
     this.agentClient = osqueryContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = osqueryContextService?.getAgentPolicyService();
-    this.esClient = core?.elasticsearch.client.asInternalUser;
+    this.packagePolicyService = osqueryContextService?.getPackagePolicyService();
+    this.esClient = core.elasticsearch.client.asInternalUser;
     this.soClient =
-      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+      core.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
   }
 
@@ -44,7 +52,7 @@ export class TelemetryReceiver {
   }
 
   public async fetchPacks() {
-    return await this.soClient?.find({
+    return this.soClient?.find({
       type: packSavedObjectType,
       page: 1,
       perPage: this.max_records,
@@ -54,7 +62,7 @@ export class TelemetryReceiver {
   }
 
   public async fetchSavedQueries() {
-    return await this.soClient?.find({
+    return this.soClient?.find({
       type: savedQuerySavedObjectType,
       page: 1,
       perPage: this.max_records,
@@ -63,8 +71,20 @@ export class TelemetryReceiver {
     });
   }
 
+  public async fetchConfigs() {
+    if (this.soClient) {
+      return this.packagePolicyService?.list(this.soClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+        perPage: 1000,
+        page: 1,
+      });
+    }
+
+    throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
+  }
+
   public async fetchFleetAgents() {
-    if (this.esClient === undefined || this.esClient === null) {
+    if (this.esClient === undefined || this.soClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
     }
 
@@ -100,17 +120,18 @@ export class TelemetryReceiver {
     }
 
     try {
-      const ret = (await this.esClient.transport.request({
+      const ret = await this.esClient.transport.request<{ license: ESLicense }>({
         method: 'GET',
         path: '/_license',
         querystring: {
           local: true,
         },
-      })) as { license: ESLicense };
+      });
 
-      return (await ret).license;
+      return ret.license;
     } catch (err) {
       this.logger.debug(`failed retrieving license: ${err}`);
+
       return undefined;
     }
   }

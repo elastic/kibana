@@ -30,7 +30,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const api = useApi();
-  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
 
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
@@ -40,7 +40,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const fetchOptions = useCallback(
     debounce(async (searchValue: string) => {
       const esSearchRequest = {
-        index: indexPattern!.title,
+        index: dataView!.title,
         body: {
           ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           query: {

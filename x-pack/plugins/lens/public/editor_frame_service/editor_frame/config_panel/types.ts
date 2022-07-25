@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import {
   Visualization,
   FramePublicAPI,
@@ -18,6 +20,7 @@ export interface ConfigPanelWrapperProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
+  uiActions: UiActionsStart;
 }
 
 export interface LayerPanelProps {
@@ -29,7 +32,6 @@ export interface LayerPanelProps {
 }
 
 export interface LayerDatasourceDropProps {
-  layerId: string;
   state: unknown;
   setState: (newState: unknown) => void;
 }

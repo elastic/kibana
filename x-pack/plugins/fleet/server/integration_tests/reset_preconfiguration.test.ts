@@ -7,7 +7,7 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';

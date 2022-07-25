@@ -8,10 +8,10 @@
 
 // @ts-ignore
 import React from 'react';
-import type { UiComponent } from 'src/plugins/kibana_utils/public';
+import type { UiComponent } from '@kbn/kibana-utils-plugin/public';
+import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionContext as Context, ActionDefinition, ActionMenuItemProps } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
-import { uiToReactComponent } from '../../../kibana_react/public';
 
 /**
  * @internal

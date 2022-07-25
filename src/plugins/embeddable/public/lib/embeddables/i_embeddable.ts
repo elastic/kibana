@@ -7,20 +7,19 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
+export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
@@ -85,6 +84,14 @@ export interface IEmbeddable<
    * If this embeddable has encountered a fatal error, that error will be stored here
    **/
   fatalError?: Error;
+
+  /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -163,6 +170,13 @@ export interface IEmbeddable<
   render(domNode: HTMLElement | Element): void;
 
   /**
+   * Renders a custom embeddable error at the given node.
+   * @param domNode
+   * @returns A callback that will be called on error destroy.
+   */
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
+
+  /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
    * if the embeddable takes relative time as input (e.g. now to now-15)
    */
@@ -189,4 +203,6 @@ export interface IEmbeddable<
    * Used to diff explicit embeddable input
    */
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

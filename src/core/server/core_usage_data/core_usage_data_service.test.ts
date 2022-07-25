@@ -8,22 +8,23 @@
 
 import type { ConfigPath } from '@kbn/config';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { TestScheduler } from 'rxjs/testing';
 
-import { configServiceMock } from '../config/mocks';
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
-import { mockCoreContext } from '../core_context.mock';
-import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
-import { config as RawHttpConfig } from '../http/http_config';
-import { config as RawLoggingConfig } from '../logging/logging_config';
+import { configServiceMock } from '@kbn/config-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { config as RawLoggingConfig } from '@kbn/core-logging-server-internal';
+import { config as RawElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
+import { config as RawHttpConfig } from '@kbn/core-http-server-internal';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
-import { httpServiceMock } from '../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';

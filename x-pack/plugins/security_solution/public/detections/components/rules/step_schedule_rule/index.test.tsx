@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
-import { StepScheduleRule } from './index';
+import { StepScheduleRule } from '.';
 
 describe('StepScheduleRule', () => {
   it('renders correctly', () => {

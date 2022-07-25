@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { fatalErrors, toasts } from './notification';
 
 interface CommonErrorBody extends ResponseErrorBody {

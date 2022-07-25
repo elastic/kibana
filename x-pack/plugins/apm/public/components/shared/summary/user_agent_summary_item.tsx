@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
 
 type UserAgentSummaryItemProps = UserAgent;

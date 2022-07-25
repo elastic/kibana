@@ -6,36 +6,20 @@
  */
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import {
-  ConditionEntry,
-  EffectScope,
-  GlobalEffectScope,
+import type {
+  TrustedAppConditionEntry,
   MacosLinuxConditionEntry,
-  MaybeImmutable,
-  PolicyEffectScope,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
 
 export const isWindowsTrustedAppCondition = (
-  condition: ConditionEntry
+  condition: TrustedAppConditionEntry
 ): condition is WindowsConditionEntry => {
   return condition.field === ConditionEntryField.SIGNER || true;
 };
 
 export const isMacosLinuxTrustedAppCondition = (
-  condition: ConditionEntry
+  condition: TrustedAppConditionEntry
 ): condition is MacosLinuxConditionEntry => {
   return condition.field !== ConditionEntryField.SIGNER;
-};
-
-export const isGlobalEffectScope = (
-  effectedScope: MaybeImmutable<EffectScope>
-): effectedScope is GlobalEffectScope => {
-  return effectedScope.type === 'global';
-};
-
-export const isPolicyEffectScope = (
-  effectedScope: MaybeImmutable<EffectScope>
-): effectedScope is PolicyEffectScope => {
-  return effectedScope.type === 'policy';
 };

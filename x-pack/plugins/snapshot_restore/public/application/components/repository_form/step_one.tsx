@@ -31,7 +31,7 @@ import { SectionError, Error } from '../../../shared_imports';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionLoading, RepositoryTypeLogo } from '../';
+import { SectionLoading, RepositoryTypeLogo } from '..';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 

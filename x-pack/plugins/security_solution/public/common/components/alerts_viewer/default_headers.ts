@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 export const alertsHeaders: ColumnHeaderOptions[] = [

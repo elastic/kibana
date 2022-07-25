@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 
 export function extractReferences({
   attributes,

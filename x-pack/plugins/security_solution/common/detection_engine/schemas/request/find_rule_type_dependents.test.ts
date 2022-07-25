@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindRulesSchema } from './find_rules_schema';
+import type { FindRulesSchema } from './find_rules_schema';
 import { findRuleValidateTypeDependents } from './find_rules_type_dependents';
 
 describe('find_rules_type_dependents', () => {

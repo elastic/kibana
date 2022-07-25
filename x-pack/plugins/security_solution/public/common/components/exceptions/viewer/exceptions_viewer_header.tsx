@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -14,13 +15,12 @@ import {
   EuiButton,
   EuiFilterGroup,
   EuiFilterButton,
-  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
-import { Filter } from '../types';
+import type { Filter } from '../types';
 
 interface ExceptionsViewerHeaderProps {
   isInitLoading: boolean;

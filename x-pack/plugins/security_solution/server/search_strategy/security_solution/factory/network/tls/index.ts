@@ -7,10 +7,10 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   NetworkTlsStrategyResponse,
   NetworkQueries,
   NetworkTlsRequestOptions,
@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 
 import { getNetworkTlsEdges } from './helpers';
 import { buildNetworkTlsQuery } from './query.tls_network.dsl';

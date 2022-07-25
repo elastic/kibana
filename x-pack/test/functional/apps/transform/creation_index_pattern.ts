@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -14,15 +14,14 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from './index';
+} from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/126812
-  describe.skip('creation_index_pattern', function () {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -36,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
+    const DEFAULT_NUM_FAILURE_RETRIES = '5';
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
         type: 'pivot',
@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: true,
+        numFailureRetries: '7',
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
@@ -251,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           discoverQueryHits: '7,270',
+          numFailureRetries: '7',
         },
       } as PivotTransformTestData,
       {
@@ -289,6 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: false,
+        numFailureRetries: '-1',
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -336,6 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           discoverQueryHits: '10',
+          numFailureRetries: '-1',
         },
       } as PivotTransformTestData,
       {
@@ -361,6 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: false,
+        numFailureRetries: '0',
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
           pivotAdvancedEditorValue: {
@@ -394,6 +399,7 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           discoverQueryHits: '2',
+          numFailureRetries: '0',
         },
       } as PivotTransformTestData,
       {
@@ -417,7 +423,9 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        destinationDataViewTimeField: 'order_date',
         discoverAdjustSuperDatePicker: true,
+        numFailureRetries: '101',
         expected: {
           latestPreview: {
             column: 0,
@@ -443,6 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           discoverQueryHits: '10',
+          numFailureRetries: 'error',
         },
       } as LatestTransformTestData,
     ];
@@ -589,15 +598,52 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
+
+          if (testData.destinationDataViewTimeField) {
+            await transform.testExecution.logTestStep('sets the data view time field');
+            await transform.wizard.assertDataViewTimeFieldInputExists();
+            await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
+          }
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
 
+          await transform.testExecution.logTestStep(
+            'should display the advanced settings and show pre-filled configuration'
+          );
+          await transform.wizard.openTransformAdvancedSettingsAccordion();
+          if (
+            testData.numFailureRetries !== undefined &&
+            testData.expected.numFailureRetries !== undefined
+          ) {
+            await transform.wizard.assertNumFailureRetriesValue('');
+            await transform.wizard.setTransformNumFailureRetriesValue(
+              testData.numFailureRetries.toString(),
+              testData.expected.numFailureRetries
+            );
+            // If num failure input is expected to give an error, sets it back to a valid
+            // so that we can continue creating the transform
+            if (testData.expected.numFailureRetries === 'error') {
+              await transform.wizard.setTransformNumFailureRetriesValue(
+                DEFAULT_NUM_FAILURE_RETRIES,
+                DEFAULT_NUM_FAILURE_RETRIES
+              );
+            }
+          }
+
           await transform.testExecution.logTestStep('loads the create step');
           await transform.wizard.advanceToCreateStep();
+
+          await transform.testExecution.logTestStep('displays the summary details');
+          await transform.wizard.openTransformAdvancedSettingsSummaryAccordion();
+          await transform.wizard.assertTransformNumFailureRetriesSummaryValue(
+            testData.expected.numFailureRetries === 'error'
+              ? DEFAULT_NUM_FAILURE_RETRIES
+              : testData.expected.numFailureRetries
+          );
 
           await transform.testExecution.logTestStep('displays the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();

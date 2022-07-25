@@ -85,7 +85,7 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
           );
 
           return {
-            type: 'datatable',
+            ...input,
             rows,
             columns,
           } as Datatable;

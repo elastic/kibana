@@ -8,10 +8,13 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { SwimlaneActionConnector } from './types';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
+import { ConnectorFormTestProvider } from '../test_utils';
+import { waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_application');
@@ -29,10 +32,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
 
   test('all connector fields are rendered', async () => {
     const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
@@ -41,18 +40,20 @@ describe('SwimlaneActionConnectorFields renders', () => {
         connectorType: 'all',
         mappings,
       },
-    } as SwimlaneActionConnector;
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
 
     const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -65,69 +66,12 @@ describe('SwimlaneActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="swimlaneApiTokenInput"]').exists()).toBeTruthy();
   });
 
-  test('should display a message on create to remember credentials', () => {
-    const actionConnector = {
-      actionTypeId: '.swimlane',
-      secrets: {},
-      config: {},
-    } as SwimlaneActionConnector;
-
-    const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
-  });
-
-  test('should display a message on edit to re-enter credentials', () => {
-    const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
-      actionTypeId: '.swimlane',
-      name: 'swimlane',
-      config: {
-        apiUrl: 'http:\\test',
-        appId: '1234567asbd32',
-        connectorType: 'all',
-        mappings,
-      },
-    } as SwimlaneActionConnector;
-
-    const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
-    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
-  });
-
   test('renders the mappings correctly - connector type all', async () => {
     getApplication.mockResolvedValue({
       fields: applicationFields,
     });
 
     const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
@@ -136,18 +80,20 @@ describe('SwimlaneActionConnectorFields renders', () => {
         connectorType: 'all',
         mappings,
       },
-    } as SwimlaneActionConnector;
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
 
     const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -156,13 +102,15 @@ describe('SwimlaneActionConnectorFields renders', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="swimlaneAlertIdInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneAlertNameInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneSeverityInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseIdConfig"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseNameConfig"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCommentsConfig"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="swimlaneAlertIdInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneAlertNameInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneSeverityInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneCaseIdConfig"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneCaseNameConfig"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneCommentsConfig"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').exists()).toBeTruthy();
+    });
   });
 
   test('renders the mappings correctly - connector type cases', async () => {
@@ -171,10 +119,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
     });
 
     const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
@@ -183,18 +127,20 @@ describe('SwimlaneActionConnectorFields renders', () => {
         connectorType: 'cases',
         mappings,
       },
-    } as SwimlaneActionConnector;
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
 
     const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -203,6 +149,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
       wrapper.update();
     });
 
+    await waitFor(() => {});
     expect(wrapper.find('[data-test-subj="swimlaneAlertIdInput"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="swimlaneAlertNameInput"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="swimlaneSeverityInput"]').exists()).toBeFalsy();
@@ -218,10 +165,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
     });
 
     const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
@@ -230,18 +173,20 @@ describe('SwimlaneActionConnectorFields renders', () => {
         connectorType: 'alerts',
         mappings,
       },
-    } as SwimlaneActionConnector;
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
 
     const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -250,13 +195,15 @@ describe('SwimlaneActionConnectorFields renders', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="swimlaneAlertIdInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneAlertNameInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneSeverityInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseIdConfig"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="swimlaneCaseNameConfig"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="swimlaneCommentsConfig"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="swimlaneAlertIdInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneAlertNameInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneSeverityInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneCaseIdConfig"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="swimlaneCaseNameConfig"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="swimlaneCommentsConfig"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').exists()).toBeFalsy();
+    });
   });
 
   test('renders the correct options per field', async () => {
@@ -265,19 +212,19 @@ describe('SwimlaneActionConnectorFields renders', () => {
     });
 
     const actionConnector = {
-      secrets: {
-        apiToken: 'test',
-      },
-      id: 'test',
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
-        apiUrl: 'http:\\test',
+        apiUrl: 'http://test.com',
         appId: '1234567asbd32',
         connectorType: 'all',
         mappings,
       },
-    } as SwimlaneActionConnector;
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    };
 
     const textOptions = [
       { label: 'Alert Id (alert-id)', value: 'a6ide' },
@@ -291,16 +238,22 @@ describe('SwimlaneActionConnectorFields renders', () => {
     const commentOptions = [{ label: 'Comments (notes)', value: 'a6fdf' }];
 
     const wrapper = mountWithIntl(
-      <SwimlaneActionConnectorFields
-        action={actionConnector}
-        errors={{ connectorType: [], appId: [], apiUrl: [], mappings: [], apiToken: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-        setCallbacks={() => {}}
-        isEdit={false}
-      />
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <SwimlaneActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
+
+    await waitFor(async () => {
+      await nextTick();
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="swimlaneApiUrlInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneAppIdInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="swimlaneApiTokenInput"]').exists()).toBeTruthy();
+    });
 
     await act(async () => {
       wrapper.find('[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
@@ -329,5 +282,158 @@ describe('SwimlaneActionConnectorFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').first().prop('options')
     ).toEqual(textOptions);
+  });
+
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      getApplication.mockResolvedValue({
+        fields: applicationFields,
+      });
+    });
+
+    const getConnector = (connectorType: string = 'all') => ({
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http://test.com',
+        appId: '1234567asbd32',
+        connectorType: 'all',
+        mappings,
+      },
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    });
+
+    const getConnectorWithEmptyMappings = (connectorType: string = 'all') => {
+      const actionConnector = getConnector(connectorType);
+      return {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          connectorType,
+          mappings: {},
+        },
+      };
+    };
+
+    const tests: Array<[string, string]> = [
+      ['swimlaneApiUrlInput', 'not-valid'],
+      ['swimlaneAppIdInput', ''],
+      ['swimlaneApiTokenInput', ''],
+    ];
+
+    it.each([['cases'], ['alerts']])(
+      'connector validation succeeds when connector config is valid for connectorType=%p',
+      async (connectorType) => {
+        const connector = getConnector(connectorType);
+        const { getByTestId } = render(
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+            <SwimlaneActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+      }
+    );
+
+    it.each(tests)('validates correctly %p', async (field, value) => {
+      const connector = getConnector();
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <SwimlaneActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it('connector validation succeeds when when connectorType=all with empty mappings', async () => {
+      const connector = getConnectorWithEmptyMappings();
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <SwimlaneActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          ...connector,
+          config: {
+            ...connector.config,
+            mappings: {
+              alertIdConfig: null,
+              caseIdConfig: null,
+              caseNameConfig: null,
+              commentsConfig: null,
+              descriptionConfig: null,
+              ruleNameConfig: null,
+              severityConfig: null,
+            },
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it.each([['cases'], ['alerts']])(
+      'validates correctly when when connectorType=%p',
+      async (connectorType) => {
+        const connector = getConnectorWithEmptyMappings(connectorType);
+
+        const { getByTestId } = render(
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+            <SwimlaneActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      }
+    );
   });
 });

@@ -9,6 +9,7 @@
   "requiredPlugins": [
     "data",
     "dataViews",
+    "dataViewEditor",
     "embeddable",
     "controls",
     "inspector",
@@ -26,9 +27,10 @@
     "spaces",
     "savedObjectsTaggingOss",
     "screenshotMode",
-    "usageCollection"
+    "usageCollection",
+    "taskManager"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
 }

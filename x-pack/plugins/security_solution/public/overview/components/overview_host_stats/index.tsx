@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { HostsOverviewStrategyResponse } from '../../../../common/search_strategy';
-import { FormattedStat, StatGroup } from '../types';
+import type { HostsOverviewStrategyResponse } from '../../../../common/search_strategy';
+import type { FormattedStat, StatGroup } from '../types';
 import { StatValue } from '../stat_value';
 
 interface OverviewHostProps {
@@ -245,8 +245,20 @@ const hostStatGroups: StatGroup[] = [
   },
 ];
 
-const Title = styled.div`
+const MoveItLeftTitle = styled.div`
   margin-left: 24px;
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    max-width: 40px;
+  }
+`;
+const MoveItLeft = styled.div`
+  margin-left: 24px;
+`;
+
+const NoMarginTopFlexItem = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    margin-top: -10px !important;
+  }
 `;
 
 const AccordionContent = styled.div`
@@ -256,7 +268,6 @@ const AccordionContent = styled.div`
 const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading }) => {
   const allHostStats = getOverviewHostStats(data);
   const allHostStatsCount = allHostStats.reduce((total, stat) => total + stat.count, 0);
-
   return (
     <HostStatsContainer data-test-subj="overview-hosts-stats">
       {hostStatGroups.map((statGroup, i) => {
@@ -269,38 +280,40 @@ const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading
             <EuiAccordion
               id={`host-stat-accordion-group${statGroup.groupId}`}
               buttonContent={
-                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
                     <EuiText>{statGroup.name}</EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
+                  <NoMarginTopFlexItem grow={false}>
                     <StatValue
                       count={statsForGroupCount}
                       isGroupStat={true}
                       isLoading={loading}
                       max={allHostStatsCount}
                     />
-                  </EuiFlexItem>
+                  </NoMarginTopFlexItem>
                 </EuiFlexGroup>
               }
               buttonContentClassName="accordion-button"
             >
               <AccordionContent>
                 {statsForGroup.map((stat) => (
-                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                  <EuiFlexGroup key={stat.id} gutterSize="s" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">
-                        <Title>{stat.title}</Title>
+                        <MoveItLeftTitle>{stat.title}</MoveItLeftTitle>
                       </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem data-test-subj={`host-stat-${stat.id}`} grow={false}>
-                      <StatValue
-                        count={stat.count}
-                        isGroupStat={false}
-                        isLoading={loading}
-                        max={statsForGroupCount}
-                      />
-                    </EuiFlexItem>
+                    <NoMarginTopFlexItem data-test-subj={`host-stat-${stat.id}`} grow={false}>
+                      <MoveItLeft>
+                        <StatValue
+                          count={stat.count}
+                          isGroupStat={false}
+                          isLoading={loading}
+                          max={statsForGroupCount}
+                        />
+                      </MoveItLeft>
+                    </NoMarginTopFlexItem>
                   </EuiFlexGroup>
                 ))}
               </AccordionContent>

@@ -18,7 +18,7 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     async registerRepositoryButton() {
       return await testSubjects.find('registerRepositoryButton');
     },
-    async navToRepositories() {
+    async navToRepositories(emptyList: boolean = true) {
       await testSubjects.click('repositories_tab');
       await retry.waitForWithTimeout(
         'Wait for register repository button to be on page',
@@ -27,6 +27,64 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
           return await testSubjects.isDisplayed('registerRepositoryButton');
         }
       );
+    },
+    async navToPolicies(emptyList: boolean = true) {
+      await testSubjects.click('policies_tab');
+      await retry.waitForWithTimeout(
+        'Wait for register repository button to be on page',
+        10000,
+        async () => {
+          return await testSubjects.isDisplayed('createPolicyButton');
+        }
+      );
+    },
+    async navToRestoreStatus(emptyList: boolean = true) {
+      await testSubjects.click('restore_status_tab');
+      await retry.waitForWithTimeout(
+        'Wait for register repository button to be on page',
+        10000,
+        async () => {
+          return await testSubjects.isDisplayed('noRestoredSnapshotsHeader');
+        }
+      );
+    },
+
+    async fillCreateNewPolicyPageOne(policyName: string, snapshotName: string) {
+      await testSubjects.click('createPolicyButton');
+      await testSubjects.setValue('nameInput', policyName);
+      await testSubjects.setValue('snapshotNameInput', snapshotName);
+      await testSubjects.click('nextButton');
+      await retry.waitFor('all indices to be visible', async () => {
+        return await testSubjects.isDisplayed('allIndicesToggle');
+      });
+    },
+
+    async fillCreateNewPolicyPageTwo() {
+      await testSubjects.click('nextButton');
+      await retry.waitFor('expire after value input to be visible', async () => {
+        return await testSubjects.isDisplayed('expireAfterValueInput');
+      });
+    },
+
+    async fillCreateNewPolicyPageThree() {
+      await testSubjects.click('nextButton');
+      await retry.waitFor('submit button to be visible', async () => {
+        return await testSubjects.isDisplayed('submitButton');
+      });
+    },
+
+    async submitNewPolicy() {
+      await testSubjects.click('submitButton');
+      await retry.waitFor('policy management button to be visible', async () => {
+        return await testSubjects.isDisplayed('policyActionMenuButton');
+      });
+    },
+
+    async closeFlyout() {
+      await testSubjects.click('srPolicyDetailsFlyoutCloseButton');
+      await retry.waitFor('policy table to be visible', async () => {
+        return await testSubjects.isDisplayed('policyLink');
+      });
     },
     async getRepoList() {
       const table = await testSubjects.find('repositoryTable');

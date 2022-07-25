@@ -14,7 +14,7 @@ import { FIELD_TYPES } from '../../shared_imports';
 
 import {
   createIdFieldValidations,
-  intervalFieldValidation,
+  intervalFieldValidations,
   queryFieldValidation,
 } from './validations';
 
@@ -46,7 +46,7 @@ export const createFormSchema = (ids: Set<string>) => ({
     label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
       defaultMessage: 'Interval (s)',
     }),
-    validations: [{ validator: intervalFieldValidation }],
+    validations: intervalFieldValidations,
   },
   platform: {
     type: FIELD_TYPES.TEXT,
@@ -71,8 +71,7 @@ export const createFormSchema = (ids: Set<string>) => ({
     validations: [],
   },
   ecs_mapping: {
-    defaultValue: {},
+    defaultValue: [],
     type: FIELD_TYPES.JSON,
-    validations: [],
   },
 });

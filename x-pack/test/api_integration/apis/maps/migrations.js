@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
@@ -77,7 +79,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.2.0');
+        expect(semver.gte(panels[0].version, '8.1.0')).to.be(true);
       });
     });
   });

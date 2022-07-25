@@ -8,15 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
-import type { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import type { SavedObjectMetaData, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 import {
   injectSearchSourceReferences,
   extractSearchSourceReferences,
   SerializedSearchSourceFields,
-} from '../../../data/public';
-import type { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+} from '@kbn/data-plugin/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 
 import {
   EmbeddableFactoryDefinition,
@@ -24,7 +24,9 @@ import {
   ErrorEmbeddable,
   IContainer,
   AttributeService,
-} from '../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { checkForDuplicateTitle } from '@kbn/saved-objects-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
@@ -53,8 +55,6 @@ import {
 } from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { checkForDuplicateTitle } from '../../../saved_objects/public';
-import type { StartServicesGetter } from '../../../kibana_utils/public';
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
-import { TimeRange } from '../../../../common';
+import dateMath from '@kbn/datemath';
+import { TimeRange } from '@kbn/es-query';
 
 export function validateTimeRange(time?: TimeRange): boolean {
   if (!time) return false;

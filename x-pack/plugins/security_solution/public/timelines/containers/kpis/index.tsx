@@ -10,17 +10,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { inputsModel } from '../../../common/store';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
-import {
+import type {
   DocValueFields,
-  TimelineEventsQueries,
   TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimerangeInput,
 } from '../../../../common/search_strategy';
-import { ESQuery } from '../../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { TimelineEventsQueries } from '../../../../common/search_strategy';
+import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 

@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -17,16 +19,14 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { Alert } from '../../../alerting/server';
 import { RULE_KIBANA_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 export class KibanaVersionMismatchRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_KIBANA_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_KIBANA_VERSION_MISMATCH].label,

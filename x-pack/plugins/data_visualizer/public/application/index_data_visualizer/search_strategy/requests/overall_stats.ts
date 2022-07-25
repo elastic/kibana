@@ -8,20 +8,20 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { AggCardinality } from '@kbn/ml-agg-utils';
+import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   buildBaseFilterCriteria,
-  buildSamplerAggregation,
   getSafeAggregationName,
-  getSamplerAggregationsResponsePath,
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
+import { Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   aggregatableFields: string[],
   samplerShardSize: number,
@@ -31,7 +31,7 @@ export const checkAggregatableFieldsExistRequest = (
   datafeedConfig?: estypes.MlDatafeed,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
@@ -81,7 +81,7 @@ export const checkAggregatableFieldsExistRequest = (
 
   return {
     index,
-    track_total_hits: true,
+    track_total_hits: false,
     size,
     body: searchBody,
   };
@@ -90,14 +90,29 @@ export const checkAggregatableFieldsExistRequest = (
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
+
+export type NonAggregatableFieldOverallStats = IKibanaSearchResponse;
+
+export function isAggregatableFieldOverallStats(
+  arg: unknown
+): arg is AggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
+export function isNonAggregatableFieldOverallStats(
+  arg: unknown
+): arg is NonAggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['rawResponse']);
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
   samplerShardSize: number,
+  totalCount: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
-    totalCount: 0,
     aggregatableExistsFields: [] as AggregatableField[],
     aggregatableNotExistsFields: [] as AggregatableField[],
   };
@@ -106,8 +121,6 @@ export const processAggregatableFieldsExistResponse = (
 
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
-    const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total;
-    stats.totalCount = totalCount as number;
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const sampleCount =
@@ -161,14 +174,13 @@ export const processAggregatableFieldsExistResponse = (
   });
 
   return stats as {
-    totalCount: number;
     aggregatableExistsFields: AggregatableField[];
     aggregatableNotExistsFields: AggregatableField[];
   };
 };
 
 export const checkNonAggregatableFieldExistsRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
@@ -176,7 +188,7 @@ export const checkNonAggregatableFieldExistsRequest = (
   latestMs: number | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 

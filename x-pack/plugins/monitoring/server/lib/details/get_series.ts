@@ -18,13 +18,16 @@ import {
   CALCULATE_DURATION_UNTIL,
   INDEX_PATTERN_TYPES,
   STANDALONE_CLUSTER_CLUSTER_UUID,
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 import type { Metric } from '../metrics/metrics';
 
-type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
+type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } } & {
+  indices?: { buckets: Array<{ [key: string]: any }> };
+};
 
 /**
  * Derivative metrics for the first two agg buckets are unusable. For the first bucket, there
@@ -84,7 +87,7 @@ function createMetricAggs(metric: Metric) {
             derivative: {
               buckets_path: 'metric_mb',
               gap_policy: 'skip',
-              unit: NORMALIZED_DERIVATIVE_UNIT,
+              ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
             },
           },
         }
@@ -94,7 +97,7 @@ function createMetricAggs(metric: Metric) {
         derivative: {
           buckets_path: 'metric',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT,
+          ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
         },
       },
       ...mbDerivative,
@@ -152,6 +155,11 @@ async function fetchSeries(
       },
       aggs: {
         ...dateHistogramSubAggs,
+        indices: {
+          terms: {
+            field: '_index',
+          },
+        },
       },
     },
   };
@@ -267,7 +275,12 @@ function handleSeries(
   timezone: string,
   response: ElasticsearchResponse
 ) {
-  const { derivative, calculation: customCalculation } = metric;
+  const {
+    derivative,
+    derivativeNormalizedUnits,
+    calculation: customCalculation,
+    isNotSupportedInInternalCollection,
+  } = metric;
 
   function getAggregatedData(buckets: SeriesBucket[]) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -277,20 +290,47 @@ function handleSeries(
       firstUsableBucketIndex,
       bucketSizeInSeconds * 1000
     );
+    let internalIndicesFound = false;
+    let mbIndicesFound = false;
     let data: Array<[string | number, number | null]> = [];
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
+      const key = derivative
+        ? derivativeNormalizedUnits
+          ? 'metric_deriv.normalized_value'
+          : 'metric_deriv.value'
+        : 'metric.value';
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
+      const usableBuckets = buckets.slice(firstUsableBucketIndex, lastUsableBucketIndex + 1); // take only the buckets we know are usable
 
-      data = buckets
-        .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
-        .map((bucket) => [
+      data = usableBuckets.map((bucket) => {
+        // map buckets to X/Y coords for Flot charting
+        if (bucket.indices) {
+          for (const indexBucket of bucket.indices.buckets) {
+            if (indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
+              mbIndicesFound = true;
+            } else {
+              internalIndicesFound = true;
+            }
+          }
+        }
+
+        return [
           formatUTCTimestampForTimezone(bucket.key, timezone),
           calculation(bucket, key, metric, bucketSizeInSeconds),
-        ]); // map buckets to X/Y coords for Flot charting
+        ];
+      });
     }
+
+    const indexSourceData = isNotSupportedInInternalCollection
+      ? {
+          indices_found: {
+            internal: internalIndicesFound,
+            metricbeat: mbIndicesFound,
+          },
+        }
+      : {};
 
     return {
       bucket_size: formatBucketSize(bucketSizeInSeconds),
@@ -299,6 +339,7 @@ function handleSeries(
         max: formatUTCTimestampForTimezone(max, timezone),
       },
       metric: metric.serialize(),
+      ...indexSourceData,
       data,
     };
   }

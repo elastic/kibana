@@ -6,3 +6,4 @@
  */
 
 export { HelpMenu } from './help_menu';
+export { HelpMenu as HelpMenuComponent } from './help_menu.component';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
-import { ISearchSource } from '../../../../../data/public';
-import { dataPluginMock } from '../../../../../data/public/mocks';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 describe('getChartAggConfigs', () => {
@@ -33,7 +33,9 @@ describe('getChartAggConfigs', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },
@@ -42,6 +44,7 @@ describe('getChartAggConfigs', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",

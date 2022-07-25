@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from '.';
 import { UI_SETTINGS } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 

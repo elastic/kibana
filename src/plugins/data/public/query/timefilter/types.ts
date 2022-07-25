@@ -8,7 +8,8 @@
 
 import { Moment } from 'moment';
 
-import { TimeRange, RefreshInterval } from '../../../common';
+import { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '../../../common';
 
 export interface TimefilterConfig {
   timeDefaults: TimeRange;

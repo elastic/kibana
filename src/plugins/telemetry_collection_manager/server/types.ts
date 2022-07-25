@@ -6,21 +6,39 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TelemetryCollectionManagerPlugin } from './plugin';
 
-export interface TelemetryCollectionManagerPluginSetup {
+/**
+ * Public contract coming from the setup method.
+ */
+export interface TelemetryCollectionManagerPluginSetup
+  extends TelemetryCollectionManagerPluginStart {
   setCollectionStrategy: <T extends BasicStatsPayload>(
     collectionConfig: CollectionStrategyConfig<T>
   ) => void;
-  getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
-  getStats: TelemetryCollectionManagerPlugin['getStats'];
 }
 
+/**
+ * Public contract coming from the start method.
+ */
 export interface TelemetryCollectionManagerPluginStart {
+  /**
+   * Fetches the minimum piece of data to report when Opting IN or OUT.
+   */
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
+  /**
+   * Fetches the Snapshot telemetry report.
+   */
   getStats: TelemetryCollectionManagerPlugin['getStats'];
+  /**
+   * Is it OK to fetch telemetry?
+   *
+   * It should be called before calling `getStats` or `getOptInStats` to validate that Kibana is in a healthy state
+   * to attempt to fetch the Telemetry report.
+   */
+  shouldGetTelemetry: () => Promise<boolean>;
 }
 
 export interface TelemetryOptInStats {

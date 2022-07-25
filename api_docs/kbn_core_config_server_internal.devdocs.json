@@ -1,0 +1,260 @@
+{
+  "id": "@kbn/core-config-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-server.coreDeprecationProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "coreDeprecationProvider",
+        "description": [],
+        "signature": [
+          "() => ",
+          "ConfigDeprecation",
+          "[]"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/deprecation/core_deprecations.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-server.ensureValidConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureValidConfiguration",
+        "description": [],
+        "signature": [
+          "(configService: ",
+          "ConfigService",
+          ", params: ",
+          "ConfigValidateParameters",
+          " | undefined) => Promise<void>"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-server.ensureValidConfiguration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configService",
+            "description": [],
+            "signature": [
+              "ConfigService"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-server.ensureValidConfiguration.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "ConfigValidateParameters",
+              " | undefined"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-server.getDeprecationsFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getDeprecationsFor",
+        "description": [],
+        "signature": [
+          "({ provider, settings, path, }: { provider: ",
+          "ConfigDeprecationProvider",
+          "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-server.getDeprecationsFor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  provider,\n  settings = {},\n  path,\n}",
+            "description": [],
+            "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-config-server-internal",
+                "id": "def-server.getDeprecationsFor.$1.provider",
+                "type": "Function",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  "ConfigDeprecationFactory",
+                  ") => ",
+                  "ConfigDeprecation",
+                  "[]"
+                ],
+                "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-config-server-internal",
+                    "id": "def-server.getDeprecationsFor.$1.provider.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "factory",
+                    "description": [],
+                    "signature": [
+                      "ConfigDeprecationFactory"
+                    ],
+                    "path": "node_modules/@types/kbn__config/index.d.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/core-config-server-internal",
+                "id": "def-server.getDeprecationsFor.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/core-config-server-internal",
+                "id": "def-server.getDeprecationsFor.$1.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-server.getDeprecationsForGlobalSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "getDeprecationsForGlobalSettings",
+        "description": [],
+        "signature": [
+          "({ provider, settings, }: { provider: ",
+          "ConfigDeprecationProvider",
+          "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-server.getDeprecationsForGlobalSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  provider,\n  settings = {},\n}",
+            "description": [],
+            "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-config-server-internal",
+                "id": "def-server.getDeprecationsForGlobalSettings.$1.provider",
+                "type": "Function",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  "ConfigDeprecationFactory",
+                  ") => ",
+                  "ConfigDeprecation",
+                  "[]"
+                ],
+                "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-config-server-internal",
+                    "id": "def-server.getDeprecationsForGlobalSettings.$1.provider.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "factory",
+                    "description": [],
+                    "signature": [
+                      "ConfigDeprecationFactory"
+                    ],
+                    "path": "node_modules/@types/kbn__config/index.d.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/core-config-server-internal",
+                "id": "def-server.getDeprecationsForGlobalSettings.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "packages/core/config/core-config-server-internal/src/test_utils.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

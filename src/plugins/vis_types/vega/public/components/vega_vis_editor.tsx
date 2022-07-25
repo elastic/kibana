@@ -14,8 +14,8 @@ import React, { useCallback, useState } from 'react';
 import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { CodeEditor, HJsonLang } from '../../../../kibana_react/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { CodeEditor, HJsonLang } from '@kbn/kibana-react-plugin/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

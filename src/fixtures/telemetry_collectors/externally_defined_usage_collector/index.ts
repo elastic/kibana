@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerCollector(collectorSet: UsageCollectionSetup) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
+import type { UserAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { fieldNameToAggField, formatUserItem } from './helpers';
 
 describe('helpers', () => {

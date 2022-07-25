@@ -14,7 +14,7 @@ import { createFilterTerms } from './create_filter/terms';
 import { aggRareTermsFnName } from './rare_terms_fn';
 import { BaseAggParams } from '../types';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 
 const termsTitle = i18n.translate('data.search.aggs.buckets.rareTermsTitle', {
   defaultMessage: 'Rare terms',

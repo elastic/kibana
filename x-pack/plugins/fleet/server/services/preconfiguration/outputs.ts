@@ -5,16 +5,38 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import type { PreconfiguredOutput, Output } from '../../../common';
-import { normalizeHostsForAgents } from '../../../common';
+import type { PreconfiguredOutput, Output } from '../../../common/types';
+import { normalizeHostsForAgents } from '../../../common/services';
+import type { FleetConfigType } from '../../config';
+import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 
 import { appContextService } from '../app_context';
+
+export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
+  const { outputs: outputsOrUndefined } = config;
+
+  const outputs: PreconfiguredOutput[] = (outputsOrUndefined || []).concat([
+    ...(config?.agents.elasticsearch.hosts
+      ? [
+          {
+            ...DEFAULT_OUTPUT,
+            id: DEFAULT_OUTPUT_ID,
+            hosts: config?.agents.elasticsearch.hosts,
+            ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            is_preconfigured: true,
+          } as PreconfiguredOutput,
+        ]
+      : []),
+  ]);
+
+  return outputs;
+}
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,

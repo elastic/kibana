@@ -46,6 +46,10 @@ describe('expression gauge utils', () => {
       expect(getMaxValue({ min: 0 }, localAccessors)).toEqual(100);
       expect(getMaxValue({}, localAccessors)).toEqual(100);
     });
+    it('returns correct value if isRespectRanges is true and color palette was provided', () => {
+      expect(getMaxValue({ metric: 10 }, accessors, { rangeMax: 5 }, true)).toEqual(10);
+      expect(getMaxValue({ metric: 2 }, accessors, { rangeMax: 5 }, true)).toEqual(5);
+    });
     it('returns correct value for multiple cases', () => {
       const localAccessors = { ...accessors, max: 'max' };
       expect(getMaxValue({ metric: 10 }, localAccessors)).toEqual(15);
@@ -75,6 +79,13 @@ describe('expression gauge utils', () => {
       expect(getMinValue({ metric: 0 }, localAccessors)).toEqual(-10);
       expect(getMinValue({ metric: -1000 }, localAccessors)).toEqual(-1010);
       expect(getMinValue({ max: 1000, metric: 1.5 }, localAccessors)).toEqual(0);
+    });
+    it('returns correct value if isRespectRanges is true and color palette was provided', () => {
+      const accessors = {
+        metric: 'metric',
+      };
+      expect(getMinValue({ metric: 10 }, accessors, { rangeMin: 5 }, true)).toEqual(5);
+      expect(getMinValue({ metric: 2 }, accessors, { rangeMin: 5 }, true)).toEqual(2);
     });
   });
   describe('getGoalValue', () => {

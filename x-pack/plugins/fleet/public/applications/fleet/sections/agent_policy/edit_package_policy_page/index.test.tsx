@@ -89,7 +89,6 @@ jest.mock('../../../hooks', () => {
               },
             ],
             latestVersion: version,
-            removable: true,
             keepPoliciesUpToDate: false,
             status: 'not_installed',
           },
@@ -132,6 +131,7 @@ jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
     useGetOnePackagePolicy: jest.fn(),
+    useConfirmForceInstall: jest.fn(),
   };
 });
 

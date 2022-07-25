@@ -7,8 +7,8 @@
 import { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
 import pLimit from 'p-limit';
-import { ElasticsearchClient } from '../../../../../../../src/core/server';
-import { JOB_STATE } from '../../../../../ml/common';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { Setup } from '../../../lib/helpers/setup_request';

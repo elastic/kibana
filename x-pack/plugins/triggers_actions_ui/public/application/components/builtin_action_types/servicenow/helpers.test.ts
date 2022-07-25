@@ -22,9 +22,14 @@ const deprecatedConnector: ActionConnector = {
   actionTypeId: '.servicenow',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: true,
 };
 
-const validConnector = { ...deprecatedConnector, config: { usesTableApi: false } };
+const validConnector = {
+  ...deprecatedConnector,
+  config: { usesTableApi: false },
+  isDeprecated: false,
+};
 
 describe('helpers', () => {
   describe('isRESTApiError', () => {
@@ -50,40 +55,40 @@ describe('helpers', () => {
       expect(isFieldInvalid('description', ['required'])).toBeTruthy();
     });
 
-    test('should return if false the field is not defined', async () => {
+    test('should return false if the field is not defined', async () => {
       expect(isFieldInvalid(undefined, ['required'])).toBeFalsy();
     });
 
-    test('should return if false the field is null', async () => {
-      expect(isFieldInvalid(null, ['required'])).toBeFalsy();
+    test('should return true if the field is null', async () => {
+      expect(isFieldInvalid(null, ['required'])).toBeTruthy();
     });
 
-    test('should return if false the error is not defined', async () => {
+    test('should return false if the error is not defined', async () => {
       // @ts-expect-error
       expect(isFieldInvalid('description', undefined)).toBeFalsy();
     });
 
-    test('should return if false the error is empty', async () => {
+    test('should return false if the error is empty', async () => {
       expect(isFieldInvalid('description', [])).toBeFalsy();
     });
   });
 
   describe('getConnectorDescriptiveTitle', () => {
-    it('adds deprecated to the connector name when the connector usesTableApi', () => {
+    it('adds deprecated to the connector name when the connector is deprectaed', () => {
       expect(getConnectorDescriptiveTitle(deprecatedConnector)).toEqual('Test (deprecated)');
     });
 
-    it('does not add deprecated when the connector has usesTableApi:false', () => {
+    it('does not add deprecated when the connector is not deprectaed', () => {
       expect(getConnectorDescriptiveTitle(validConnector)).toEqual('Test');
     });
   });
 
   describe('getSelectedConnectorIcon', () => {
-    it('returns undefined when the connector has usesTableApi:false', () => {
+    it('returns undefined when the connector is not deprectaed', () => {
       expect(getSelectedConnectorIcon(validConnector)).toBeUndefined();
     });
 
-    it('returns a component when the connector has usesTableApi:true', () => {
+    it('returns a component when the connector is deprectaed', () => {
       expect(getSelectedConnectorIcon(deprecatedConnector)).toBeDefined();
     });
   });

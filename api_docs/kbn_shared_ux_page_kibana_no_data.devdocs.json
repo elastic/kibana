@@ -1,0 +1,567 @@
+{
+  "id": "@kbn/shared-ux-page-kibana-no-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.getMockServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getMockServices",
+        "description": [
+          "\nReturns the Jest-compatible service abstractions for the `KibanaNoDataPage` Provider."
+        ],
+        "signature": [
+          "(params?: ",
+          "MockServicesFactoryParams",
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+            "section": "def-common.KibanaNoDataPageServices",
+            "text": "KibanaNoDataPageServices"
+          }
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.getMockServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "MockServicesFactoryParams",
+              " | undefined"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.getStoryArgTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryArgTypes",
+        "description": [
+          "\nReturns the Storybook arguments for `KibanaNoDataPage`, for its stories for and for\nconsuming component stories."
+        ],
+        "signature": [
+          "() => { canAccessFleet: { control: string; defaultValue: boolean; }; category: { control: { type: string; }; defaultValue: string; }; title: { control: { type: string; }; defaultValue: string; }; description: { control: { type: string; }; defaultValue: string; }; button: { control: { type: string; }; defaultValue: string; }; canCreateNewDataView: { control: string; defaultValue: boolean; }; dataViewsDocLink: { options: (string | undefined)[]; control: { type: string; }; }; solution: { control: string; defaultValue: string; }; logo: { control: { type: string; }; options: (string | undefined)[]; defaultValue: undefined; }; hasESData: { control: string; defaultValue: boolean; }; hasUserDataView: { control: string; defaultValue: boolean; }; }"
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.getStoryServices",
+        "type": "Function",
+        "tags": [],
+        "label": "getStoryServices",
+        "description": [
+          "\nReturns Storybook-compatible service abstractions for the `KibanaNoDataPage` Provider."
+        ],
+        "signature": [
+          "(params: ",
+          "StoryParams",
+          ") => ",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+            "section": "def-common.KibanaNoDataPageServices",
+            "text": "KibanaNoDataPageServices"
+          }
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.getStoryServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "StoryParams"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.KibanaNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaNoDataPage",
+        "description": [
+          "\nA page to display when Kibana has no data, prompting a person to add integrations or create a new data view."
+        ],
+        "signature": [
+          "({ onDataViewCreated, noDataConfig }: ",
+          "Props",
+          ") => JSX.Element | null"
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/kibana_no_data_page.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onDataViewCreated, noDataConfig }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/kibana_no_data_page.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.KibanaNoDataPageKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaNoDataPageKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+            "section": "def-common.KibanaNoDataPageKibanaDependencies",
+            "text": "KibanaNoDataPageKibanaDependencies"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+                "section": "def-common.KibanaNoDataPageKibanaDependencies",
+                "text": "KibanaNoDataPageKibanaDependencies"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.KibanaNoDataPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaNoDataPageProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+            "section": "def-common.KibanaNoDataPageServices",
+            "text": "KibanaNoDataPageServices"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageKibanaNoDataPluginApi",
+                "section": "def-common.KibanaNoDataPageServices",
+                "text": "KibanaNoDataPageServices"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.KibanaNoDataPageKibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaNoDataPageKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component and its dependencies."
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageKibanaDependencies.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "{ application: { capabilities: { navLinks: Record<string, boolean>; }; currentAppId$: ",
+              "Observable",
+              "<string | undefined>; navigateToUrl: (url: string) => Promise<void>; }; chrome: { setIsVisible: (isVisible: boolean) => void; }; docLinks: { links: { indexPatterns: { introduction: string; }; }; }; http: { basePath: { prepend: (url: string) => string; }; }; }"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageKibanaDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "{ hasData: { hasDataView: () => Promise<boolean>; hasESData: () => Promise<boolean>; hasUserDataView: () => Promise<boolean>; }; }"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageKibanaDependencies.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              "{ openEditor: (options: DataViewEditorOptions) => () => void; userPermissions: { editDataView: () => boolean; }; }"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+        "id": "def-common.KibanaNoDataPageServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaNoDataPageServices",
+        "description": [
+          "\nA list of Services that are consumed by this component.\n\nThis list is temporary, a stopgap as we migrate to a package-based architecture, where\nservices are not collected in a single package.  In order to make the transition, this\ninterface is intentionally \"flat\".\n\nExpect this list to dwindle to zero as `@kbn/shared-ux-components` are migrated to their\nown packages, (and `@kbn/shared-ux-services` is removed)."
+        ],
+        "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.hasESData",
+            "type": "Function",
+            "tags": [],
+            "label": "hasESData",
+            "description": [
+              "True if the cluster contains data, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.hasUserDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUserDataView",
+            "description": [
+              "True if Kibana instance contains user-created data view, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.addBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "addBasePath",
+            "description": [
+              "Append the server base path to a relative URL."
+            ],
+            "signature": [
+              "(url: string) => string"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "id": "def-common.KibanaNoDataPageServices.addBasePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.canAccessFleet",
+            "type": "boolean",
+            "tags": [],
+            "label": "canAccessFleet",
+            "description": [
+              "True if the user has permission to access Fleet, false otherwise."
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.canCreateNewDataView",
+            "type": "boolean",
+            "tags": [],
+            "label": "canCreateNewDataView",
+            "description": [
+              "True if the user has permission to create a new Data View, false otherwise."
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.currentAppId$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentAppId$",
+            "description": [
+              "Observable storing the active, current application ID."
+            ],
+            "signature": [
+              "Observable",
+              "<string | undefined>"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.dataViewsDocLink",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewsDocLink",
+            "description": [
+              "A link to information about Data Views in Kibana"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.hasDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "hasDataView",
+            "description": [
+              "True if Kibana instance contains any data view, including system-created ones."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.navigateToUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToUrl",
+            "description": [
+              "Use Kibana to navigate async to a different URL."
+            ],
+            "signature": [
+              "(url: string) => Promise<void>"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "id": "def-common.KibanaNoDataPageServices.navigateToUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.openDataViewEditor",
+            "type": "Function",
+            "tags": [],
+            "label": "openDataViewEditor",
+            "description": [
+              "A method to open the Data View Editor flow."
+            ],
+            "signature": [
+              "(options: DataViewEditorOptions) => () => void"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "id": "def-common.KibanaNoDataPageServices.openDataViewEditor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DataViewEditorOptions"
+                ],
+                "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+            "id": "def-common.KibanaNoDataPageServices.setIsFullscreen",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsFullscreen",
+            "description": [
+              "Set the Kibana chrome and browser to full screen mode."
+            ],
+            "signature": [
+              "(isFullscreen: boolean) => void"
+            ],
+            "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-kibana-no-data",
+                "id": "def-common.KibanaNoDataPageServices.setIsFullscreen.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFullscreen",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/shared-ux/page/kibana_no_data/src/services.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

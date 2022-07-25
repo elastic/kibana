@@ -14,7 +14,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import fastIsEqual from 'fast-deep-equal';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -27,37 +28,71 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCheckbox,
+  EuiForm,
+  EuiSwitch,
+  EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle, ControlWidth } from '../../types';
-import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { ControlStyle } from '../../types';
+import { ParentIgnoreSettings } from '../..';
+import { ControlGroupInput } from '..';
+import { getDefaultControlGroupInput } from '../../../common';
 
 interface EditControlGroupProps {
-  width: ControlWidth;
-  controlStyle: ControlStyle;
-  setAllWidths: boolean;
-  updateControlStyle: (controlStyle: ControlStyle) => void;
-  updateWidth: (newWidth: ControlWidth) => void;
-  updateAllControlWidths: (newWidth: ControlWidth) => void;
-  onCancel: () => void;
+  initialInput: ControlGroupInput;
+  controlCount: number;
+  updateInput: (input: Partial<ControlGroupInput>) => void;
+  onDeleteAll: () => void;
   onClose: () => void;
 }
 
+type EditorControlGroupInput = ControlGroupInput;
+
+const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
+  fastIsEqual(a, b);
+
 export const ControlGroupEditor = ({
-  width,
-  controlStyle,
-  setAllWidths,
-  updateControlStyle,
-  updateWidth,
-  updateAllControlWidths,
-  onCancel,
+  controlCount,
+  initialInput,
+  updateInput,
+  onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [currentControlStyle, setCurrentControlStyle] = useState(controlStyle);
-  const [currentWidth, setCurrentWidth] = useState(width);
-  const [applyToAll, setApplyToAll] = useState(setAllWidths);
+  const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
+    ...getDefaultControlGroupInput(),
+    ...initialInput,
+  });
+
+  const updateControlGroupEditorSetting = useCallback(
+    (newSettings: Partial<ControlGroupInput>) => {
+      setControlGroupEditorState({
+        ...controlGroupEditorState,
+        ...newSettings,
+      });
+    },
+    [controlGroupEditorState]
+  );
+
+  const updateIgnoreSetting = useCallback(
+    (newSettings: Partial<ParentIgnoreSettings>) => {
+      setControlGroupEditorState({
+        ...controlGroupEditorState,
+        ignoreParentSettings: {
+          ...(controlGroupEditorState.ignoreParentSettings ?? {}),
+          ...newSettings,
+        },
+      });
+    },
+    [controlGroupEditorState]
+  );
+
+  const applyChangesToInput = useCallback(() => {
+    const inputToApply = { ...controlGroupEditorState };
+    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
+  }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
     <>
@@ -66,51 +101,89 @@ export const ControlGroupEditor = ({
           <h2>{ControlGroupStrings.management.getFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFormRow label={ControlGroupStrings.management.getLayoutTitle()}>
-          <EuiButtonGroup
-            color="primary"
-            idSelected={currentControlStyle}
-            legend={ControlGroupStrings.management.controlStyle.getDesignSwitchLegend()}
-            options={CONTROL_LAYOUT_OPTIONS}
-            onChange={(newControlStyle: string) => {
-              setCurrentControlStyle(newControlStyle as ControlStyle);
-            }}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-          <EuiButtonGroup
-            color="primary"
-            idSelected={currentWidth}
-            legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-            options={CONTROL_WIDTH_OPTIONS}
-            onChange={(newWidth: string) => {
-              setCurrentWidth(newWidth as ControlWidth);
-            }}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiCheckbox
-          id="editControls_setAllSizesCheckbox"
-          label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-          checked={applyToAll}
-          onChange={(e) => {
-            setApplyToAll(e.target.checked);
-          }}
-        />
-        <EuiSpacer size="l" />
-
-        <EuiButtonEmpty
-          onClick={onCancel}
-          aria-label={'delete-all'}
-          iconType="trash"
-          color="danger"
-          flush="left"
-          size="s"
-        >
-          {ControlGroupStrings.management.getDeleteAllButtonTitle()}
-        </EuiButtonEmpty>
+      <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
+        <EuiForm>
+          <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
+            <EuiButtonGroup
+              color="primary"
+              options={CONTROL_LAYOUT_OPTIONS}
+              data-test-subj="control-group-layout-options"
+              idSelected={controlGroupEditorState.controlStyle}
+              legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
+              onChange={(newControlStyle: string) => {
+                // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
+                updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
+              }}
+            />
+          </EuiFormRow>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
+              <EuiSwitch
+                data-test-subj="control-group-validate-selections"
+                label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                showLabel={false}
+                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
+                onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h3>
+                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                </h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xs" />
+              <EuiSwitch
+                data-test-subj="control-group-chaining"
+                label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
+                showLabel={false}
+                checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
+                onChange={(e) =>
+                  updateControlGroupEditorSetting({
+                    chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
+                  })
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {controlCount > 0 && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <EuiSpacer size="m" />
+              <EuiButtonEmpty
+                onClick={onDeleteAll}
+                data-test-subj="delete-all-controls-button"
+                aria-label={'delete-all'}
+                iconType="trash"
+                color="danger"
+                flush="left"
+                size="s"
+              >
+                {ControlGroupStrings.management.getDeleteAllButtonTitle()}
+              </EuiButtonEmpty>
+            </>
+          )}
+        </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -130,16 +203,9 @@ export const ControlGroupEditor = ({
               aria-label={`save-group`}
               iconType="check"
               color="primary"
+              data-test-subj="control-group-editor-save"
               onClick={() => {
-                if (currentControlStyle && currentControlStyle !== controlStyle) {
-                  updateControlStyle(currentControlStyle);
-                }
-                if (currentWidth && currentWidth !== width) {
-                  updateWidth(currentWidth);
-                }
-                if (applyToAll) {
-                  updateAllControlWidths(currentWidth);
-                }
+                applyChangesToInput();
                 onClose();
               }}
             >

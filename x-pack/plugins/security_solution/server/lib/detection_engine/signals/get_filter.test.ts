@@ -6,18 +6,19 @@
  */
 
 import { getFilter } from './get_filter';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {
-  let servicesMock: AlertServicesMock;
+  let servicesMock: RuleExecutorServicesMock;
 
   beforeAll(() => {
     jest.resetAllMocks();
   });
 
   beforeEach(() => {
-    servicesMock = alertsMock.createAlertServices();
+    servicesMock = alertsMock.createRuleExecutorServices();
     servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
       id,
       type,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler } from '@kbn/core/public';
 import { last } from 'lodash';
 import {
   loadInitialState,
@@ -16,8 +16,9 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
-import { HttpFetchError } from '../../../../../src/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -27,6 +28,7 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 import { DateHistogramIndexPatternColumn } from './operations';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -214,7 +216,7 @@ function mockIndexPatternsService() {
         },
       ];
     }),
-  } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -228,7 +230,7 @@ describe('loader', () => {
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -301,7 +303,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -357,7 +359,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -589,7 +591,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -640,7 +641,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -695,7 +695,7 @@ describe('loader', () => {
               },
             ];
           }),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
       }
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -727,11 +727,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          {
-            name: 'indexpattern-datasource-current-indexpattern',
-            id: 'conflictId',
-            type: 'index-pattern',
-          },
           { name: 'indexpattern-datasource-layer-layerb', id: 'conflictId', type: 'index-pattern' },
         ],
         indexPatternsService: mockIndexPatternsServiceWithConflict(),
@@ -800,11 +795,6 @@ describe('loader', () => {
       expect(savedObjectReferences).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": "b",
-            "name": "indexpattern-datasource-current-indexpattern",
-            "type": "index-pattern",
-          },
-          Object {
             "id": "id-index-pattern-a",
             "name": "indexpattern-datasource-layer-a",
             "type": "index-pattern",
@@ -821,13 +811,6 @@ describe('loader', () => {
     it('should restore layers', () => {
       const { savedObjectReferences, state: persistedState } = extractReferences(state);
       expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
-    });
-
-    it('should restore current index pattern', () => {
-      const { savedObjectReferences, state: persistedState } = extractReferences(state);
-      expect(injectReferences(persistedState, savedObjectReferences).currentIndexPatternId).toEqual(
-        state.currentIndexPatternId
-      );
     });
   });
 
@@ -906,6 +889,12 @@ describe('loader', () => {
   });
 
   describe('changeLayerIndexPattern', () => {
+    let uiActions: UiActionsStart;
+
+    beforeEach(() => {
+      uiActions = uiActionsPluginMock.createStartContract();
+    });
+
     it('loads the index pattern and then changes the specified layer', async () => {
       const setState = jest.fn();
       const state: IndexPatternPrivateState = {
@@ -951,6 +940,7 @@ describe('loader', () => {
         indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
+        uiActions,
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -1025,6 +1015,7 @@ describe('loader', () => {
         },
         onError,
         storage,
+        uiActions,
       });
 
       expect(setState).not.toHaveBeenCalled();
@@ -1177,14 +1168,13 @@ describe('loader', () => {
       const setState = jest.fn();
       const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
-          reject(
-            new HttpFetchError(
-              'timeout',
-              'name',
-              {} as unknown as Request,
-              { status: 408 } as unknown as Response
-            )
+          const error = createHttpFetchError(
+            'timeout',
+            'error',
+            {} as Request,
+            { status: 408 } as Response
           );
+          reject(error);
         });
       }) as unknown as HttpHandler;
 

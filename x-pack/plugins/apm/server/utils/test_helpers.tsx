@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { APMConfig } from '../';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
+import { APMConfig } from '..';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
-import { UxUIFilters } from '../../common/ux_ui_filter';
 
 interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
-  uiFilters?: Record<string, string>;
   config?: Partial<APMConfig>;
 }
 
@@ -25,7 +23,6 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UxUIFilters;
   indices: ApmIndicesConfig;
 }
 
@@ -89,7 +86,6 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: options?.uiFilters ?? {},
     indices: {
       ...mockApmIndices,
       apmAgentConfigurationIndex: 'myIndex',

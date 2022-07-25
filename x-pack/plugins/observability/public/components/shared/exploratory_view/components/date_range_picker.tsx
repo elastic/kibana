@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import { Moment } from 'moment';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
 
@@ -94,7 +94,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
-          popoverPlacement="right"
+          popoverPlacement="rightCenter"
         />
       }
       endDateControl={
@@ -111,7 +111,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
           showTimeSelect
-          popoverPlacement="right"
+          popoverPlacement="rightCenter"
         />
       }
     />

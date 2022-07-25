@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
@@ -18,9 +19,10 @@ import {
   createSecuritySolutionStorageMock,
   mockIndexPattern,
 } from '../../mock';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 
-import { Props } from './top_n';
+import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -38,7 +40,9 @@ jest.mock('react-router-dom', () => {
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
-
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 const field = 'process.name';
 const value = 'nice';
 

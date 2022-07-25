@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SingleCaseMetricsResponse } from '../../../../../common/api';
 import { AggregationBuilder, AggregationResponse } from '../../types';
 
 type HostsAggregate = HostsAggregateResponse | undefined;
@@ -30,7 +31,7 @@ interface FieldAggregateBucket {
 const hostName = 'host.name';
 const hostId = 'host.id';
 
-export class AlertHosts implements AggregationBuilder {
+export class AlertHosts implements AggregationBuilder<SingleCaseMetricsResponse> {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
   build() {

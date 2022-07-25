@@ -27,7 +27,8 @@ const LiveQueriesComponent = () => {
   return (
     <Switch>
       <Route path={`${match.url}/new`}>
-        {permissions.runSavedQueries || permissions.writeLiveQueries ? (
+        {(permissions.runSavedQueries && permissions.readSavedQueries) ||
+        permissions.writeLiveQueries ? (
           <NewLiveQueryPage />
         ) : (
           <MissingPrivileges />

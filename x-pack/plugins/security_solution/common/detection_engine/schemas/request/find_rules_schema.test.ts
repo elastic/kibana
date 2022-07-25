@@ -8,7 +8,8 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { FindRulesSchema, findRulesSchema } from './find_rules_schema';
+import type { FindRulesSchema } from './find_rules_schema';
+import { findRulesSchema } from './find_rules_schema';
 
 describe('find_rules_schema', () => {
   test('empty objects do validate', () => {

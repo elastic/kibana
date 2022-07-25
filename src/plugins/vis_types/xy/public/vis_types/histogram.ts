@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
+import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 import {
   ChartMode,
   AxisType,
@@ -25,7 +26,6 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
-import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const histogramVisTypeDefinition = {
@@ -37,6 +37,7 @@ export const histogramVisTypeDefinition = {
   description: i18n.translate('visTypeXy.histogram.histogramDescription', {
     defaultMessage: 'Present data in vertical bars on an axis.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
@@ -130,6 +131,7 @@ export const histogramVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -139,7 +141,13 @@ export const histogramVisTypeDefinition = {
           defaultMessage: 'Y-axis',
         }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

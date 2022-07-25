@@ -9,21 +9,14 @@ import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
-import { InnerJoin } from '../../../joins/inner_join';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { JoinState } from '../types';
 
 interface SourceResult {
   refreshed: boolean;
   featureCollection: FeatureCollection;
 }
 
-export interface JoinState {
-  dataHasChanged: boolean;
-  join: InnerJoin;
-  propertiesMap?: PropertiesMap;
-}
-
-export function performInnerJoins(
+export async function performInnerJoins(
   sourceResult: SourceResult,
   joinStates: JoinState[],
   updateSourceData: DataRequestContext['updateSourceData'],
@@ -85,9 +78,9 @@ export function performInnerJoins(
   }
 
   const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    return (
-      !joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined
-    );
+    const hasTerms =
+      joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
+    return !joinStatus.joinedWithAtLeastOneFeature && hasTerms;
   });
 
   if (joinStatusesWithoutAnyMatches.length) {
@@ -102,7 +95,11 @@ export function performInnerJoins(
     }
 
     const joinStatus = joinStatusesWithoutAnyMatches[0];
-    const leftFieldName = joinStatus.joinState.join.getLeftField().getName();
+    const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
+    const rightFieldName = await joinStatus.joinState.join
+      .getRightJoinSource()
+      .getTermField()
+      .getLabel();
     const reason =
       joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
@@ -114,10 +111,7 @@ export function performInnerJoins(
             values: {
               leftFieldName,
               leftFieldValues: prettyPrintArray(joinStatus.keys),
-              rightFieldName: joinStatus.joinState.join
-                .getRightJoinSource()
-                .getTermField()
-                .getName(),
+              rightFieldName,
               rightFieldValues: prettyPrintArray(
                 Array.from(joinStatus.joinState.propertiesMap!.keys())
               ),

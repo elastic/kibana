@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Maybe, RiskSeverity } from '../../..';
-import { HostEcs } from '../../../../ecs/host';
-import { UserEcs } from '../../../../ecs/user';
+import type { CommonFields, Maybe, RiskSeverity, SortField } from '../../..';
+import type { HostEcs } from '../../../../ecs/host';
+import type { UserEcs } from '../../../../ecs/user';
 
 export const enum UserRiskScoreFields {
   timestamp = '@timestamp',
@@ -30,9 +30,14 @@ export interface UserItem {
   firstSeen?: Maybe<string>;
 }
 
+export type SortableUsersFields = Exclude<UsersFields, typeof UsersFields.domain>;
+
+export type SortUsersField = SortField<SortableUsersFields>;
+
 export enum UsersFields {
   lastSeen = 'lastSeen',
-  hostName = 'userName',
+  name = 'name',
+  domain = 'domain',
 }
 
 export interface UserAggEsItem {
@@ -51,4 +56,23 @@ export interface UserBuckets {
     key: string;
     doc_count: number;
   }>;
+}
+
+export interface AllUsersAggEsItem {
+  key: string;
+  domain?: UsersDomainHitsItem;
+  lastSeen?: { value_as_string: string };
+}
+
+type UserFields = CommonFields &
+  Partial<{
+    [Property in keyof UserEcs as `user.${Property}`]: unknown[];
+  }>;
+
+interface UsersDomainHitsItem {
+  hits: {
+    hits: Array<{
+      fields: UserFields;
+    }>;
+  };
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-import { ColumnHeaderOptions } from '../../../../../common/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
 

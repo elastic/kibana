@@ -7,15 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerDeleteRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerDeleteRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.delete(
     {
       path: '/{type}/{id}',
@@ -32,7 +35,7 @@ export const registerDeleteRoute = (router: IRouter, { coreUsageData }: RouteDep
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
-      const { getClient } = context.core.savedObjects;
+      const { getClient } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});

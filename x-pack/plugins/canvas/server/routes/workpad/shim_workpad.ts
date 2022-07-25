@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { WorkpadAttributes } from './workpad_attributes';
 
 export function shimWorkpad(workpad: SavedObject<WorkpadAttributes>) {

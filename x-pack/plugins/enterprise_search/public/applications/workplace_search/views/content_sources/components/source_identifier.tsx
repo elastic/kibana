@@ -14,14 +14,11 @@ import {
   EuiCopy,
   EuiButtonIcon,
   EuiFieldText,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { i18n } from '@kbn/i18n';
 
-import { API_KEY_LABEL, COPY_TOOLTIP, COPIED_TOOLTIP } from '../../../constants';
-import { API_KEYS_PATH } from '../../../routes';
+import { COPY_TOOLTIP, COPIED_TOOLTIP } from '../../../constants';
 
 import { ID_LABEL } from '../constants';
 
@@ -50,24 +47,17 @@ export const SourceIdentifier: React.FC<Props> = ({ id }) => (
         </EuiCopy>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFieldText value={id} readOnly />
+        <EuiFieldText
+          value={id}
+          readOnly
+          aria-label={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sourceIdentifier.sourceIdentifierFieldLabel',
+            {
+              defaultMessage: 'Source Identifier',
+            }
+          )}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiText size="s">
-      <p>
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.sources.identifier.helpText"
-          defaultMessage="Use the Source Identifier with an {apiKeyLink} to sync documents for this custom source."
-          values={{
-            apiKeyLink: (
-              <EuiLinkTo target="_blank" to={API_KEYS_PATH}>
-                {API_KEY_LABEL}
-              </EuiLinkTo>
-            ),
-          }}
-        />
-      </p>
-    </EuiText>
   </>
 );

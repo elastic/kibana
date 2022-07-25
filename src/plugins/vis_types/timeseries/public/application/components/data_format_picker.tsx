@@ -46,7 +46,7 @@ const getDataFormatPickerOptions = (
         <>
           <span>{defaultOptionLabel}</span>
           <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
+            <p>
               {i18n.translate('visTypeTimeseries.dataFormatPicker.defaultLabelDescription', {
                 defaultMessage: 'Applies common formatting',
               })}

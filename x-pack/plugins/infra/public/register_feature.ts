@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  HomePublicPluginSetup,
-  FeatureCatalogueCategory,
-} from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({
@@ -24,7 +21,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     icon: 'metricsApp',
     path: `/app/metrics`,
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data',
   });
 
   homePlugin.featureCatalogue.register({
@@ -39,6 +36,6 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     icon: 'logsApp',
     path: `/app/logs`,
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data',
   });
 };

@@ -9,12 +9,9 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ImportSummary, ImportSummaryProps } from './import_summary';
 import { FailedImport } from '../../../lib';
-
-// @ts-expect-error
-import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;

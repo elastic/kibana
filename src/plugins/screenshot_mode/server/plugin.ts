@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from 'src/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModePluginSetup,

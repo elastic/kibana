@@ -15,3 +15,5 @@ export const UIM_COMPONENT_TEMPLATE_UPDATE = 'component_template_update';
 
 // privileges
 export const APP_CLUSTER_REQUIRED_PRIVILEGES = ['manage_index_templates'];
+
+export const MANAGED_BY_FLEET = 'fleet';

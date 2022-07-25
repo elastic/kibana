@@ -97,16 +97,18 @@ interface FormattedDateProps {
   className?: string;
   fieldName: string;
   value?: string | number | null;
+  dateFormat?: string;
 }
 export const FormattedDate = React.memo<FormattedDateProps>(
-  ({ value, fieldName, className = '' }): JSX.Element => {
+  ({ value, fieldName, className = '', dateFormat }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);
     }
+
     const maybeDate = getMaybeDate(value);
     return maybeDate.isValid() ? (
       <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
-        <PreferenceFormattedDate value={maybeDate.toDate()} />
+        <PreferenceFormattedDate value={maybeDate.toDate()} dateFormat={dateFormat} />
       </LocalizedDateTooltip>
     ) : (
       getOrEmptyTagFromValue(value)
@@ -172,30 +174,3 @@ export const FormattedRelativePreferenceDate = React.memo<FormattedRelativePrefe
   }
 );
 FormattedRelativePreferenceDate.displayName = 'FormattedRelativePreferenceDate';
-
-/**
- * Renders a preceding label according to under/over one hour
- */
-
-export const FormattedRelativePreferenceLabel = ({
-  value,
-  preferenceLabel,
-  relativeLabel,
-}: {
-  value?: string | number | null;
-  preferenceLabel?: string | null;
-  relativeLabel?: string | null;
-}) => {
-  if (value == null) {
-    return null;
-  }
-  const maybeDate = getMaybeDate(value);
-  if (!maybeDate.isValid()) {
-    return null;
-  }
-  return moment(maybeDate.toDate()).add(1, 'hours').isBefore(new Date()) ? (
-    <>{preferenceLabel}</>
-  ) : (
-    <>{relativeLabel}</>
-  );
-};

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, IScopedClusterClient } from 'kibana/server';
+import { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskInstance,
-} from '../../../task_manager/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from './util';
-import { jobSavedObjectServiceFactory } from './service';
+import { mlSavedObjectServiceFactory } from './service';
 import { syncSavedObjectsFactory } from './sync';
 
 const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
@@ -67,7 +67,7 @@ export class SavedObjectsSyncService {
                 throw new Error(error);
               }
 
-              const jobSavedObjectService = jobSavedObjectServiceFactory(
+              const mlSavedObjectService = mlSavedObjectServiceFactory(
                 savedObjectsClient,
                 savedObjectsClient,
                 spacesEnabled,
@@ -75,7 +75,7 @@ export class SavedObjectsSyncService {
                 client,
                 isMlReady
               );
-              const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+              const { initSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
               const { jobs, trainedModels } = await initSavedObjects(false);
               const count = jobs.length + trainedModels.length;
 

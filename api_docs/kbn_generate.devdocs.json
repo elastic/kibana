@@ -1,0 +1,46 @@
+{
+  "id": "@kbn/generate",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/generate",
+        "id": "def-server.runGenerateCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runGenerateCli",
+        "description": [
+          "\nRuns the generate CLI. Called by `node scripts/generate` and not intended for use outside of that script"
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-generate/src/cli.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

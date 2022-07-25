@@ -7,16 +7,14 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import type { FilterManager } from 'src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
 import { DataProviders } from '../data_providers';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 
 import * as i18n from './translations';
-import {
-  TimelineStatus,
-  TimelineStatusLiteralWithNull,
-} from '../../../../../common/types/timeline';
+import type { TimelineStatusLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 interface Props {
   filterManager: FilterManager;

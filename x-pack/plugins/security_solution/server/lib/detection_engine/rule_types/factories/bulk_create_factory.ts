@@ -8,19 +8,24 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
-import { Logger } from 'kibana/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
-import { BuildRuleMessage } from '../../signals/rule_messages';
+import type { Logger } from '@kbn/core/server';
+import type { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
+import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
-import { RefreshTypes } from '../../types';
-import { PersistenceAlertService } from '../../../../../../rule_registry/server';
+import type { RefreshTypes } from '../../types';
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
-export interface GenericBulkCreateResponse<T> {
+export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
   createdItemsCount: number;
-  createdItems: Array<T & { _id: string; _index: string }>;
+  createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
+  alertsWereTruncated: boolean;
 }
 
 export const bulkCreateFactory =
@@ -30,8 +35,9 @@ export const bulkCreateFactory =
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T extends Record<string, unknown>>(
-    wrappedDocs: Array<BaseHit<T>>
+  async <T extends BaseFieldsLatest>(
+    wrappedDocs: Array<WrappedFieldsLatest<T>>,
+    maxAlerts?: number
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
@@ -40,18 +46,20 @@ export const bulkCreateFactory =
         bulkCreateDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
+        alertsWereTruncated: false,
       };
     }
 
     const start = performance.now();
 
-    const { createdAlerts, errors } = await alertWithPersistence(
+    const { createdAlerts, errors, alertsWereTruncated } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
       })),
-      refreshForBulkCreate
+      refreshForBulkCreate,
+      maxAlerts
     );
 
     const end = performance.now();
@@ -72,6 +80,7 @@ export const bulkCreateFactory =
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
+        alertsWereTruncated,
       };
     } else {
       return {
@@ -80,6 +89,7 @@ export const bulkCreateFactory =
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
+        alertsWereTruncated,
       };
     }
   };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from 'kibana/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class CorePluginExecutionContext implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
@@ -20,10 +20,8 @@ export class CorePluginExecutionContext implements Plugin {
         },
       },
       async (context, request, response) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return response.ok({ body: headers || {} });
       }
     );

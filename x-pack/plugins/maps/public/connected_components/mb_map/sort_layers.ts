@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Map as MbMap, Layer as MbLayer } from '@kbn/mapbox-gl';
+import type { Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following
 // 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.
-// 2) Mapbox layer (MbLayer): Individual unit of rendering such as text, circles, polygons, or lines.
+// 2) Mapbox layer (LayerSpecification): Individual unit of rendering such as text, circles, polygons, or lines.
 
-export function getIsTextLayer(mbLayer: MbLayer) {
+export function getIsTextLayer(mbLayer: LayerSpecification) {
   if (mbLayer.type !== 'symbol') {
     return false;
   }
@@ -35,7 +35,7 @@ export function isGlDrawLayer(mbLayerId: string) {
 
 function doesMbLayerBelongToMapLayerAndClass(
   mapLayer: ILayer,
-  mbLayer: MbLayer,
+  mbLayer: LayerSpecification,
   layerClass: LAYER_CLASS
 ) {
   if (!mapLayer.ownsMbLayerId(mbLayer.id)) {
@@ -58,7 +58,7 @@ enum LAYER_CLASS {
 
 function moveMapLayer(
   mbMap: MbMap,
-  mbLayers: MbLayer[],
+  mbLayers: LayerSpecification[],
   mapLayer: ILayer,
   layerClass: LAYER_CLASS,
   beneathMbLayerId?: string
@@ -72,7 +72,11 @@ function moveMapLayer(
     });
 }
 
-function getBottomMbLayerId(mbLayers: MbLayer[], mapLayer: ILayer, layerClass: LAYER_CLASS) {
+function getBottomMbLayerId(
+  mbLayers: LayerSpecification[],
+  mapLayer: ILayer,
+  layerClass: LAYER_CLASS
+) {
   const bottomMbLayer = mbLayers.find((mbLayer) => {
     return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
   });

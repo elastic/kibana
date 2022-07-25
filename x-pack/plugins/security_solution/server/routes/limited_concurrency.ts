@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX } from '../../common/constants';
 
 class MaxCounter {

@@ -31,7 +31,7 @@ export function getSpanDestinationMetrics(events: ApmFields[]) {
 
     return {
       ...metricset.key,
-      ['metricset.name']: 'span_destination',
+      ['metricset.name']: 'service_destination',
       'span.destination.service.response_time.sum.us': sum,
       'span.destination.service.response_time.count': count,
     };

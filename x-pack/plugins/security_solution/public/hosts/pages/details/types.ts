@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HostsTableType } from '../../store/model';
-import { HostsQueryProps } from '../types';
-import { NavTab } from '../../../common/components/navigation/types';
-import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
-import { hostsModel } from '../../store';
-import { DocValueFields } from '../../../common/containers/source';
-
-interface HostDetailsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
+import type { ActionCreator } from 'typescript-fsa';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { HostsTableType } from '../../store/model';
+import type { HostsQueryProps } from '../types';
+import type { NavTab } from '../../../common/components/navigation/types';
+import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
@@ -30,18 +24,10 @@ interface HostBodyComponentDispatchProps {
   hostDetailsPagePath: string;
 }
 
-interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
-  setHostDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
 export interface HostDetailsProps {
   detailName: string;
   hostDetailsPagePath: string;
 }
-
-export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
-  HostDetailsComponentDispatchProps &
-  HostsQueryProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
   HostsTableType.uncommonProcesses &
@@ -58,7 +44,6 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;

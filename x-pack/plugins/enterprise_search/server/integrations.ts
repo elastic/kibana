@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { HttpServiceSetup } from 'src/core/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 
-import type { IntegrationCategory } from '../../../../src/plugins/custom_integrations/common';
-import type { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 interface WorkplaceSearchIntegration {
   id: string;
@@ -163,6 +163,21 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['productivity'],
   },
   {
+    id: 'network_drive',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveName', {
+      defaultMessage: 'Network Drive',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveDescription',
+      {
+        defaultMessage:
+          'Search over your files and folders stored on network drives with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'file_storage'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
+  },
+  {
     id: 'onedrive',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
       defaultMessage: 'OneDrive',
@@ -251,7 +266,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
     id: 'slack',
@@ -278,24 +293,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['communications'],
-  },
-  {
-    id: 'custom_api_source',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName',
-      {
-        defaultMessage: 'Custom API Source',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription',
-      {
-        defaultMessage:
-          'Search over anything by building your own integration with Workplace Search.',
-      }
-    ),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/custom',
   },
 ];
 

@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { Filter } from '@kbn/es-query';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
-import { FilterManager, Filter } from '../../../../../data/public';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
+discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
+discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
@@ -29,6 +33,7 @@ describe('Test Discover Context State', () => {
         get: <T>(key: string) =>
           (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
       } as IUiSettingsClient,
+      data: discoverServiceMock.data,
     });
     state.startSync();
   });
@@ -46,7 +51,11 @@ describe('Test Discover Context State', () => {
         "successorCount": 4,
       }
     `);
-    expect(state.globalState.getState()).toMatchInlineSnapshot(`null`);
+    expect(state.globalState.getState()).toMatchInlineSnapshot(`
+      Object {
+        "filters": Array [],
+      }
+    `);
     expect(state.startSync).toBeDefined();
     expect(state.stopSync).toBeDefined();
     expect(state.getFilters()).toStrictEqual([]);

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
 import { SetupInitializer } from '../../plugin';
-import { FORMATS_UI_SETTINGS } from '../../../../../../src/plugins/field_formats/common';
 
 const { Metric: strings } = ViewStrings;
 

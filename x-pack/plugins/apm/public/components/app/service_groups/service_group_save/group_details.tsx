@@ -141,7 +141,7 @@ export function GroupDetails({
                 { defaultMessage: 'Description' }
               )}
               labelAppend={
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued">
                   {i18n.translate(
                     'xpack.apm.serviceGroups.groupDetailsForm.description.optional',
                     { defaultMessage: 'Optional' }

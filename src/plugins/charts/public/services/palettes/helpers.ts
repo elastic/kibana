@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { checkIsMinContinuity, checkIsMaxContinuity } from '../../../common';
+import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';
 import type { CustomPaletteState } from '../..';
 
 function findColorSegment(

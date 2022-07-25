@@ -12,6 +12,7 @@ interface AdvancedPolicySchemaType {
   first_supported_version: string;
   last_supported_version?: string;
   documentation: string;
+  license?: string;
 }
 
 export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
@@ -870,6 +871,114 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.kernel.capture_mode',
+    first_supported_version: '8.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
+      {
+        defaultMessage:
+          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 100',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 50',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.remediation.enabled',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
+      {
+        defaultMessage:
+          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
+      }
+    ),
+    license: 'platinum',
+  },
+  {
+    key: 'linux.advanced.fanotify.ignore_unknown_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignore_unknown_filesystems',
+      {
+        defaultMessage:
+          'Whether fanotify should ignore unknown filesystems. When true, only CI tested filesystems will be marked by default; additional filesystems can be added or removed with "monitored_filesystems" and "ignored_filesystems", respectively. When false, only an internally curated list of filesystems will be ignored, all others will be marked; additional filesystems can be ignored via "ignored_filesystems". "monitored_filesystems" is ignored when "ignore_unknown_filesystems" is false. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.monitored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to monitor. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "jfs,ufs,ramfs". It is recommended to avoid network-backed filesystems. When "ignore_unknown_filesystems" is false, this option is ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option are monitored by fanotify unless overridden by entries in "ignored_filesystems" or internally known bad filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.ignored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
       }
     ),
   },

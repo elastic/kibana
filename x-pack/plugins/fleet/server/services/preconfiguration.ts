@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 
@@ -14,12 +14,13 @@ import type {
   AgentPolicy,
   Installation,
   Output,
+  DownloadSource,
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
-  PreconfigurationError,
   PackagePolicy,
-} from '../../common';
-import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
+} from '../../common/types';
+import type { PreconfigurationError } from '../../common/constants';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -45,6 +46,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output,
+  defaultDownloadSource: DownloadSource,
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
@@ -154,12 +156,20 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           preconfiguredAgentPolicy,
           policy
         );
+
+        const newFields = {
+          defaultDownloadSourceId: defaultDownloadSource.id,
+          ...fields,
+        };
         if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
             soClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
-            fields
+            newFields,
+            {
+              force: true,
+            }
           );
           return { created, policy: updatedPolicy };
         }
@@ -254,7 +264,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
+        await agentPolicyService.update(
+          soClient,
+          esClient,
+          policy!.id,
+          { is_managed: true },
+          {
+            force: true,
+          }
+        );
       }
     }
   }

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { AggTypes, TableVisParams } from '../common';
-import { buildExpressionFunction } from '../../../expressions/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 const mockSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],
@@ -32,11 +32,11 @@ const mockTableExpression = {
   toAst: jest.fn(),
 };
 
-jest.mock('../../../visualizations/public', () => ({
+jest.mock('@kbn/visualizations-plugin/public', () => ({
   getVisSchemas: () => mockSchemas,
 }));
 
-jest.mock('../../../expressions/public', () => ({
+jest.mock('@kbn/expressions-plugin/public', () => ({
   buildExpression: jest.fn(() => mockTableExpression),
   buildExpressionFunction: jest.fn(() => mockTableExpressionFunction),
 }));
@@ -58,13 +58,7 @@ describe('table vis toExpressionAst function', () => {
         showToolbar: false,
         totalFunc: AggTypes.SUM,
       },
-      data: {
-        indexPattern: { id: '123' },
-        aggs: {
-          getResponseAggs: () => [],
-          aggs: [],
-        },
-      },
+      data: {},
     } as any;
   });
 
@@ -75,53 +69,35 @@ describe('table vis toExpressionAst function', () => {
   it('should create table expression ast', () => {
     toExpressionAst(vis, {} as any);
 
-    expect((buildExpressionFunction as jest.Mock).mock.calls.length).toEqual(5);
-    expect((buildExpressionFunction as jest.Mock).mock.calls[0]).toEqual([
-      'indexPatternLoad',
-      { id: '123' },
-    ]);
-    expect((buildExpressionFunction as jest.Mock).mock.calls[1]).toEqual([
-      'esaggs',
-      {
-        index: expect.any(Object),
-        metricsAtAllLevels: false,
-        partialRows: true,
-        aggs: [],
-      },
-    ]);
+    expect(buildExpressionFunction).toHaveBeenCalledTimes(3);
     // prepare metrics dimensions
-    expect((buildExpressionFunction as jest.Mock).mock.calls[2]).toEqual([
-      'visdimension',
-      { accessor: 1 },
-    ]);
+    expect(buildExpressionFunction).nthCalledWith(1, 'visdimension', { accessor: 1 });
     // prepare buckets dimensions
-    expect((buildExpressionFunction as jest.Mock).mock.calls[3]).toEqual([
-      'visdimension',
-      { accessor: 0 },
-    ]);
+    expect(buildExpressionFunction).nthCalledWith(2, 'visdimension', { accessor: 0 });
     // prepare table expression function
-    expect((buildExpressionFunction as jest.Mock).mock.calls[4]).toEqual([
-      'kibana_table',
-      {
-        buckets: [mockTableExpression],
-        metrics: [mockTableExpression],
-        perPage: 20,
-        percentageCol: 'Count',
-        row: undefined,
-        showMetricsAtAllLevels: true,
-        showPartialRows: true,
-        showToolbar: false,
-        showTotal: true,
-        title: undefined,
-        totalFunc: 'sum',
-      },
-    ]);
+    expect(buildExpressionFunction).nthCalledWith(3, 'kibana_table', {
+      buckets: [mockTableExpression],
+      metrics: [mockTableExpression],
+      perPage: 20,
+      percentageCol: 'Count',
+      row: undefined,
+      showMetricsAtAllLevels: true,
+      showPartialRows: true,
+      showToolbar: false,
+      showTotal: true,
+      title: undefined,
+      totalFunc: 'sum',
+    });
   });
 
   it('should filter out invalid vis params', () => {
     // @ts-expect-error
     vis.params.sort = { columnIndex: null };
     toExpressionAst(vis, {} as any);
-    expect((buildExpressionFunction as jest.Mock).mock.calls[4][1].sort).toBeUndefined();
+    expect(buildExpressionFunction).nthCalledWith(
+      2,
+      expect.anything(),
+      expect.not.objectContaining({ sort: expect.anything() })
+    );
   });
 });

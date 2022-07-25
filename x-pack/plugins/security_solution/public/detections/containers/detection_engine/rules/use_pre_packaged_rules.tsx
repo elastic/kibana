@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
-
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { getPrePackagedRulesStatus, createPrepackagedRules } from './api';
-import * as i18n from './translations';
-
+import React, { useCallback, useMemo } from 'react';
 import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
 } from '../../../pages/detection_engine/rules/helpers';
-
-type Func = () => Promise<void>;
-export type CreatePreBuiltRules = () => Promise<boolean>;
-
-interface ReturnPrePackagedTimelines {
-  timelinesInstalled: number | null;
-  timelinesNotInstalled: number | null;
-  timelinesNotUpdated: number | null;
-}
+import * as i18n from './translations';
+import { useInstallPrePackagedRules } from './use_install_pre_packaged_rules';
+import type { PrePackagedRulesStatusResponse } from './use_pre_packaged_rules_status';
+import { usePrePackagedRulesStatus } from './use_pre_packaged_rules_status';
 
 type GetLoadPrebuiltRulesAndTemplatesButton = (args: {
   isDisabled: boolean;
@@ -44,20 +34,15 @@ type GetReloadPrebuiltRulesAndTemplatesButton = ({
 }) => React.ReactNode | null;
 
 interface ReturnPrePackagedRules {
-  createPrePackagedRules: null | CreatePreBuiltRules;
+  createPrePackagedRules: () => void;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: Func | null;
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
-  rulesNotInstalled: number | null;
-  rulesNotUpdated: number | null;
   getLoadPrebuiltRulesAndTemplatesButton: GetLoadPrebuiltRulesAndTemplatesButton;
   getReloadPrebuiltRulesAndTemplatesButton: GetReloadPrebuiltRulesAndTemplatesButton;
 }
 
 export type ReturnPrePackagedRulesAndTimelines = ReturnPrePackagedRules &
-  ReturnPrePackagedTimelines;
+  Partial<PrePackagedRulesStatusResponse>;
 
 interface UsePrePackagedRuleProps {
   canUserCRUD: boolean | null;
@@ -83,223 +68,61 @@ export const usePrePackagedRules = ({
   hasEncryptionKey,
   isSignalIndexExists,
 }: UsePrePackagedRuleProps): ReturnPrePackagedRulesAndTimelines => {
-  const [prepackagedDataStatus, setPrepackagedDataStatus] = useState<
-    Pick<
-      ReturnPrePackagedRulesAndTimelines,
-      | 'createPrePackagedRules'
-      | 'refetchPrePackagedRulesStatus'
-      | 'rulesCustomInstalled'
-      | 'rulesInstalled'
-      | 'rulesNotInstalled'
-      | 'rulesNotUpdated'
-      | 'timelinesInstalled'
-      | 'timelinesNotInstalled'
-      | 'timelinesNotUpdated'
-    >
-  >({
-    createPrePackagedRules: null,
-    refetchPrePackagedRulesStatus: null,
-    rulesCustomInstalled: null,
-    rulesInstalled: null,
-    rulesNotInstalled: null,
-    rulesNotUpdated: null,
-    timelinesInstalled: null,
-    timelinesNotInstalled: null,
-    timelinesNotUpdated: null,
-  });
+  const { data: prePackagedRulesStatus, isFetching } = usePrePackagedRulesStatus();
+  const { mutate: installPrePackagedRules, isLoading: loadingCreatePrePackagedRules } =
+    useInstallPrePackagedRules();
 
-  const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const { addError, addSuccess } = useAppToasts();
-
-  const getSuccessToastMessage = (result: {
-    rules_installed: number;
-    rules_updated: number;
-    timelines_installed: number;
-    timelines_updated: number;
-  }) => {
-    const {
-      rules_installed: rulesInstalled,
-      rules_updated: rulesUpdated,
-      timelines_installed: timelinesInstalled,
-      timelines_updated: timelinesUpdated,
-    } = result;
-    if (rulesInstalled === 0 && (timelinesInstalled > 0 || timelinesUpdated > 0)) {
-      return i18n.TIMELINE_PREPACKAGED_SUCCESS;
-    } else if ((rulesInstalled > 0 || rulesUpdated > 0) && timelinesInstalled === 0) {
-      return i18n.RULE_PREPACKAGED_SUCCESS;
-    } else {
-      return i18n.RULE_AND_TIMELINE_PREPACKAGED_SUCCESS;
+  const createPrePackagedRules = useCallback(() => {
+    if (
+      canUserCRUD &&
+      hasIndexWrite &&
+      isAuthenticated &&
+      hasEncryptionKey &&
+      isSignalIndexExists
+    ) {
+      installPrePackagedRules();
     }
-  };
-
-  useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-
-    const fetchPrePackagedRules = async () => {
-      try {
-        setLoading(true);
-        const prePackagedRuleStatusResponse = await getPrePackagedRulesStatus({
-          signal: abortCtrl.signal,
-        });
-        if (isSubscribed) {
-          setPrepackagedDataStatus({
-            createPrePackagedRules: createElasticRules,
-            refetchPrePackagedRulesStatus: fetchPrePackagedRules,
-            rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
-            rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
-            rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
-            rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
-            timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
-            timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
-            timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
-          });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setPrepackagedDataStatus({
-            createPrePackagedRules: null,
-            refetchPrePackagedRulesStatus: null,
-            rulesCustomInstalled: null,
-            rulesInstalled: null,
-            rulesNotInstalled: null,
-            rulesNotUpdated: null,
-            timelinesInstalled: null,
-            timelinesNotInstalled: null,
-            timelinesNotUpdated: null,
-          });
-
-          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
-        }
-      }
-      if (isSubscribed) {
-        setLoading(false);
-      }
-    };
-
-    const createElasticRules = async (): Promise<boolean> => {
-      return new Promise(async (resolve) => {
-        try {
-          if (
-            canUserCRUD &&
-            hasIndexWrite &&
-            isAuthenticated &&
-            hasEncryptionKey &&
-            isSignalIndexExists
-          ) {
-            setLoadingCreatePrePackagedRules(true);
-            const result = await createPrepackagedRules({
-              signal: abortCtrl.signal,
-            });
-
-            if (isSubscribed) {
-              let iterationTryOfFetchingPrePackagedCount = 0;
-              let timeoutId = -1;
-              const stopTimeOut = () => {
-                if (timeoutId !== -1) {
-                  window.clearTimeout(timeoutId);
-                }
-              };
-              const reFetch = () =>
-                window.setTimeout(async () => {
-                  iterationTryOfFetchingPrePackagedCount =
-                    iterationTryOfFetchingPrePackagedCount + 1;
-                  const prePackagedRuleStatusResponse = await getPrePackagedRulesStatus({
-                    signal: abortCtrl.signal,
-                  });
-                  if (
-                    isSubscribed &&
-                    ((prePackagedRuleStatusResponse.rules_not_installed === 0 &&
-                      prePackagedRuleStatusResponse.rules_not_updated === 0 &&
-                      prePackagedRuleStatusResponse.timelines_not_installed === 0 &&
-                      prePackagedRuleStatusResponse.timelines_not_updated === 0) ||
-                      iterationTryOfFetchingPrePackagedCount > 100)
-                  ) {
-                    setLoadingCreatePrePackagedRules(false);
-                    setPrepackagedDataStatus({
-                      createPrePackagedRules: createElasticRules,
-                      refetchPrePackagedRulesStatus: fetchPrePackagedRules,
-                      rulesCustomInstalled: prePackagedRuleStatusResponse.rules_custom_installed,
-                      rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
-                      rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
-                      rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
-                      timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
-                      timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
-                      timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
-                    });
-                    addSuccess(getSuccessToastMessage(result));
-                    stopTimeOut();
-                    resolve(true);
-                  } else {
-                    timeoutId = reFetch();
-                  }
-                }, 300);
-              timeoutId = reFetch();
-            }
-          } else {
-            resolve(false);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            setLoadingCreatePrePackagedRules(false);
-            addError(error, {
-              title: i18n.RULE_AND_TIMELINE_PREPACKAGED_FAILURE,
-            });
-            resolve(false);
-          }
-        }
-      });
-    };
-
-    fetchPrePackagedRules();
-
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
   }, [
     canUserCRUD,
-    hasIndexWrite,
-    isAuthenticated,
     hasEncryptionKey,
+    hasIndexWrite,
+    installPrePackagedRules,
+    isAuthenticated,
     isSignalIndexExists,
-    addError,
-    addSuccess,
   ]);
 
-  const prePackagedRuleStatus = useMemo(
+  const prePackagedAssetsStatus = useMemo(
     () =>
       getPrePackagedRuleStatus(
-        prepackagedDataStatus.rulesInstalled,
-        prepackagedDataStatus.rulesNotInstalled,
-        prepackagedDataStatus.rulesNotUpdated
+        prePackagedRulesStatus?.rulesInstalled,
+        prePackagedRulesStatus?.rulesNotInstalled,
+        prePackagedRulesStatus?.rulesNotUpdated
       ),
     [
-      prepackagedDataStatus.rulesInstalled,
-      prepackagedDataStatus.rulesNotInstalled,
-      prepackagedDataStatus.rulesNotUpdated,
+      prePackagedRulesStatus?.rulesInstalled,
+      prePackagedRulesStatus?.rulesNotInstalled,
+      prePackagedRulesStatus?.rulesNotUpdated,
     ]
   );
 
   const prePackagedTimelineStatus = useMemo(
     () =>
       getPrePackagedTimelineStatus(
-        prepackagedDataStatus.timelinesInstalled,
-        prepackagedDataStatus.timelinesNotInstalled,
-        prepackagedDataStatus.timelinesNotUpdated
+        prePackagedRulesStatus?.timelinesInstalled,
+        prePackagedRulesStatus?.timelinesNotInstalled,
+        prePackagedRulesStatus?.timelinesNotUpdated
       ),
     [
-      prepackagedDataStatus.timelinesInstalled,
-      prepackagedDataStatus.timelinesNotInstalled,
-      prepackagedDataStatus.timelinesNotUpdated,
+      prePackagedRulesStatus?.timelinesInstalled,
+      prePackagedRulesStatus?.timelinesNotInstalled,
+      prePackagedRulesStatus?.timelinesNotUpdated,
     ]
   );
   const getLoadPrebuiltRulesAndTemplatesButton = useCallback(
     ({ isDisabled, onClick, fill, 'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn' }) => {
-      return (prePackagedRuleStatus === 'ruleNotInstalled' ||
+      return (prePackagedAssetsStatus === 'ruleNotInstalled' ||
         prePackagedTimelineStatus === 'timelinesNotInstalled') &&
-        prePackagedRuleStatus !== 'someRuleUninstall' ? (
+        prePackagedAssetsStatus !== 'someRuleUninstall' ? (
         <EuiButton
           fill={fill}
           iconType="indexOpen"
@@ -308,21 +131,21 @@ export const usePrePackagedRules = ({
           onClick={onClick}
           data-test-subj={dataTestSubj}
         >
-          {prePackagedRuleStatus === 'ruleNotInstalled' &&
+          {prePackagedAssetsStatus === 'ruleNotInstalled' &&
             prePackagedTimelineStatus === 'timelinesNotInstalled' &&
             i18n.LOAD_PREPACKAGED_RULES_AND_TEMPLATES}
 
-          {prePackagedRuleStatus === 'ruleNotInstalled' &&
+          {prePackagedAssetsStatus === 'ruleNotInstalled' &&
             prePackagedTimelineStatus !== 'timelinesNotInstalled' &&
             i18n.LOAD_PREPACKAGED_RULES}
 
-          {prePackagedRuleStatus !== 'ruleNotInstalled' &&
+          {prePackagedAssetsStatus !== 'ruleNotInstalled' &&
             prePackagedTimelineStatus === 'timelinesNotInstalled' &&
             i18n.LOAD_PREPACKAGED_TIMELINE_TEMPLATES}
         </EuiButton>
       ) : null;
     },
-    [loadingCreatePrePackagedRules, prePackagedRuleStatus, prePackagedTimelineStatus]
+    [loadingCreatePrePackagedRules, prePackagedAssetsStatus, prePackagedTimelineStatus]
   );
 
   const getMissingRulesOrTimelinesButtonTitle = useCallback(
@@ -339,7 +162,7 @@ export const usePrePackagedRules = ({
 
   const getReloadPrebuiltRulesAndTemplatesButton = useCallback(
     ({ isDisabled, onClick, fill = false }) => {
-      return prePackagedRuleStatus === 'someRuleUninstall' ||
+      return prePackagedAssetsStatus === 'someRuleUninstall' ||
         prePackagedTimelineStatus === 'someTimelineUninstall' ? (
         <EuiButton
           fill={fill}
@@ -350,8 +173,8 @@ export const usePrePackagedRules = ({
           data-test-subj="reloadPrebuiltRulesBtn"
         >
           {getMissingRulesOrTimelinesButtonTitle(
-            prepackagedDataStatus.rulesNotInstalled ?? 0,
-            prepackagedDataStatus.timelinesNotInstalled ?? 0
+            prePackagedRulesStatus?.rulesNotInstalled ?? 0,
+            prePackagedRulesStatus?.timelinesNotInstalled ?? 0
           )}
         </EuiButton>
       ) : null;
@@ -359,18 +182,19 @@ export const usePrePackagedRules = ({
     [
       getMissingRulesOrTimelinesButtonTitle,
       loadingCreatePrePackagedRules,
-      prePackagedRuleStatus,
+      prePackagedAssetsStatus,
+      prePackagedRulesStatus?.rulesNotInstalled,
+      prePackagedRulesStatus?.timelinesNotInstalled,
       prePackagedTimelineStatus,
-      prepackagedDataStatus.rulesNotInstalled,
-      prepackagedDataStatus.timelinesNotInstalled,
     ]
   );
 
   return {
-    loading,
+    loading: isFetching,
     loadingCreatePrePackagedRules,
-    ...prepackagedDataStatus,
+    createPrePackagedRules,
     getLoadPrebuiltRulesAndTemplatesButton,
     getReloadPrebuiltRulesAndTemplatesButton,
+    ...prePackagedRulesStatus,
   };
 };

@@ -11,7 +11,7 @@ import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import { decryptJobHeaders, getFullUrls, generatePngObservable } from '../../common';
+import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
@@ -37,7 +37,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
             headers,
             urls: [url],
             browserTimezone: job.browserTimezone,
-            layout: job.layout,
+            layout: {
+              ...job.layout,
+              id: 'preserve_layout',
+            },
           });
         }),
         tap(({ buffer }) => stream.write(buffer)),
@@ -51,6 +54,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       );
 
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

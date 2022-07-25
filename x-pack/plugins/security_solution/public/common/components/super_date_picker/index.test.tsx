@@ -18,7 +18,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../mock';
 import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
-import { createStore, State } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
@@ -137,6 +138,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
@@ -152,6 +154,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
@@ -185,6 +188,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
       });
@@ -218,6 +222,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
 

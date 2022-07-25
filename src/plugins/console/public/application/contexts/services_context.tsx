@@ -8,9 +8,9 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { Observable } from 'rxjs';
-import { NotificationsSetup, CoreTheme, DocLinksStart } from 'kibana/public';
+import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from '@kbn/core/public';
 
-import { History, Settings, Storage } from '../../services';
+import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
 import { EsHostService } from '../lib';
@@ -23,6 +23,8 @@ interface ContextServices {
   objectStorageClient: ObjectStorageClient;
   trackUiMetric: MetricsTracker;
   esHostService: EsHostService;
+  http: HttpSetup;
+  autocompleteInfo: AutocompleteInfo;
 }
 
 export interface ContextValue {

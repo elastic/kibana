@@ -34,5 +34,13 @@ describe('HeaderRow', () => {
     const wrapper = shallow(<HeaderRow columns={columns} leftAction={<div>Left Action</div>} />);
     const cells = wrapper.find(Cell);
     expect(cells.length).toBe(3);
+    expect(cells.at(0).html()).toContain('Left Action');
+  });
+
+  it('will add space for row identifiers', () => {
+    const wrapper = shallow(<HeaderRow columns={columns} spacingForRowIdentifier />);
+    const cells = wrapper.find(Cell);
+    expect(cells.length).toBe(3);
+    expect(cells.at(0).children()).toHaveLength(0);
   });
 });

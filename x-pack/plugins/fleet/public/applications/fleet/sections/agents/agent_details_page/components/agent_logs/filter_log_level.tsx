@@ -8,6 +8,7 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -28,7 +29,7 @@ export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
   onToggleLevel: (level: string) => void;
 }> = memo(({ selectedLevels, onToggleLevel }) => {
-  const { data } = useStartServices();
+  const { unifiedSearch } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [levelValues, setLevelValues] = useState<string[]>([]);
@@ -40,12 +41,12 @@ export const LogLevelFilter: React.FunctionComponent<{
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values: string[] = await data.autocomplete.getValueSuggestions({
+        const values: string[] = await unifiedSearch.autocomplete.getValueSuggestions({
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [LOG_LEVEL_FIELD],
-          },
-          field: LOG_LEVEL_FIELD,
+          } as DataView,
+          field: LOG_LEVEL_FIELD as DataViewField,
           query: '',
         });
         setLevelValues(sortLogLevels(values));
@@ -55,7 +56,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [data.autocomplete]);
+  }, [unifiedSearch.autocomplete]);
 
   const noLogsFound = (
     <div className="euiFilterSelect__note">

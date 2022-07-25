@@ -23,7 +23,8 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
+import type { Props as StatefulTimelineOwnProps } from '.';
+import { StatefulTimeline } from '.';
 import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
@@ -31,15 +32,23 @@ import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
 
-jest.mock('../../containers/index', () => ({
+jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
 jest.mock('./tabs_content');
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
+jest.mock('../../../common/components/url_state/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');

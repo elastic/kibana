@@ -13,19 +13,15 @@ import {
   EuiText,
   EuiCodeBlock,
   EuiTabbedContent,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
+import { Markdown, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
 } from './agent_instructions_mappings';
-import {
-  Markdown,
-  useKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
 import type {
@@ -33,8 +29,9 @@ import type {
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
 } from '../apm_policy_form/typings';
-import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
+import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_config_instructions';
 import { renderMustache } from './render_mustache';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 function AccordionButtonContent({
   agentName,
@@ -83,26 +80,6 @@ function InstructionsContent({ markdown }: { markdown: string }) {
       openLinksInNewTab={true}
       whiteListedRules={['backticks', 'emphasis', 'link', 'list']}
     />
-  );
-}
-
-function TutorialConfigAgent({
-  variantId,
-  apmServerUrl,
-  secretToken,
-}: {
-  variantId: string;
-  apmServerUrl?: string;
-  secretToken?: string;
-}) {
-  const commandBlock = getCommands({
-    variantId,
-    policyDetails: { apmServerUrl, secretToken },
-  });
-  return (
-    <EuiCodeBlock isCopyable language="bash">
-      {commandBlock}
-    </EuiCodeBlock>
   );
 }
 
@@ -173,14 +150,14 @@ export function AgentInstructionsAccordion({
               </>
             )}
             {customComponentName === 'TutorialConfigAgent' && (
-              <TutorialConfigAgent
+              <AgentConfigInstructions
                 variantId={variantId}
                 apmServerUrl={apmServerUrl}
                 secretToken={secretToken}
               />
             )}
             {customComponentName === 'TutorialConfigAgentRumScript' && (
-              <TutorialConfigAgent
+              <AgentConfigInstructions
                 variantId="js_script"
                 apmServerUrl={apmServerUrl}
                 secretToken={secretToken}
@@ -243,19 +220,7 @@ export function AgentInstructionsAccordion({
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBetaBadge
-                        label={i18n.translate(
-                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label',
-                          { defaultMessage: 'BETA' }
-                        )}
-                        tooltipContent={i18n.translate(
-                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent',
-                          {
-                            defaultMessage:
-                              'Auto-attachment for Java is not GA. Please help us by reporting any bugs.',
-                          }
-                        )}
-                      />
+                      <TechnicalPreviewBadge />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),

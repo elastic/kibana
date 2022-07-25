@@ -16,6 +16,10 @@ describe('config validation', () => {
           "enabled": false,
           "request_capacity": 10,
         },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -62,6 +66,10 @@ describe('config validation', () => {
           "enabled": false,
           "request_capacity": 10,
         },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
+        },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
@@ -105,6 +113,10 @@ describe('config validation', () => {
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
+        },
+        "event_loop_delay": Object {
+          "monitor": true,
+          "warn_threshold": 5000,
         },
         "max_attempts": 3,
         "max_poll_inactivity_cycles": 10,

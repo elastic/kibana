@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, EmbeddableInput, IContainer } from '../../../../src/plugins/embeddable/public';
+import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 
 export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
 

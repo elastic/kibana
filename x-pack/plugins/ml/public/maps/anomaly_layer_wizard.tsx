@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LAYER_WIZARD_CATEGORY } from '../../../maps/common';
-import type { LayerWizard } from '../../../maps/public';
+import { LAYER_WIZARD_CATEGORY } from '@kbn/maps-plugin/common';
+import type { LayerWizard } from '@kbn/maps-plugin/public';
 
 export const anomalyLayerWizard: Partial<LayerWizard> = {
   categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS, LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

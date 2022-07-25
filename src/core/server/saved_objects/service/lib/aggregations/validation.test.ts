@@ -94,6 +94,28 @@ describe('validateAndConvertAggregations', () => {
     });
   });
 
+  it('validates multi_terms aggregations', () => {
+    expect(
+      validateAndConvertAggregations(
+        ['foo'],
+        {
+          aggName: {
+            multi_terms: {
+              terms: [{ field: 'foo.attributes.description' }, { field: 'foo.attributes.bytes' }],
+            },
+          },
+        },
+        mockMappings
+      )
+    ).toEqual({
+      aggName: {
+        multi_terms: {
+          terms: [{ field: 'foo.description' }, { field: 'foo.bytes' }],
+        },
+      },
+    });
+  });
+
   it('validates a nested field in simple aggregations', () => {
     expect(
       validateAndConvertAggregations(

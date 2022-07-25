@@ -10,7 +10,9 @@
   "from": "now-45m",
   "interval": "15m",
   "license": "Elastic License v2",
-  "machine_learning_job_id": "linux_network_connection_discovery",
+  "machine_learning_job_id": [
+    "v3_linux_network_connection_discovery"
+  ],
   "name": "Unusual Linux Network Connection Discovery",
   "risk_score": 21,
   "rule_id": "c28c4d8c-f014-40ef-88b6-79a1d67cd499",
@@ -40,5 +42,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ResolverState } from '../types';
+import type { ResolverState } from '../types';
 import { createStore } from 'redux';
-import { ResolverAction } from './actions';
+import type { ResolverAction } from './actions';
 import { resolverReducer } from './reducer';
 import * as selectors from './selectors';
 import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
 } from '../mocks/resolver_tree';
-import { ResolverNode } from '../../../common/endpoint/types';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
-import { endpointSourceSchema } from './../mocks/tree_schema';
+import { endpointSourceSchema } from '../mocks/tree_schema';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];

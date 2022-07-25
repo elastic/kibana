@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../mock';
 
-import { Subtitle } from './index';
+import { Subtitle } from '.';
 
 describe('Subtitle', () => {
   test('it renders', () => {

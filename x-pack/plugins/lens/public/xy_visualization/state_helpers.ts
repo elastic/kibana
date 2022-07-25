@@ -7,9 +7,15 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
-import { visualizationTypes } from './types';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import {
+  visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  SeriesType,
+  YConfig,
+} from './types';
+import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -46,6 +52,9 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
+  if (isAnnotationsLayer(layer)) {
+    return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
+  }
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }
@@ -54,7 +63,10 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (
+  layer: XYDataLayerConfig | XYReferenceLineLayerConfig,
+  datasource: DatasourcePublicAPI
+) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
     .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
@@ -68,7 +80,7 @@ export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: Datasource
 };
 
 export function hasHistogramSeries(
-  layers: ValidLayer[] = [],
+  layers: XYDataLayerConfig[] = [],
   datasourceLayers?: FramePublicAPI['datasourceLayers']
 ) {
   if (!datasourceLayers) {
@@ -76,7 +88,11 @@ export function hasHistogramSeries(
   }
   const validLayers = layers.filter(({ accessors }) => accessors.length);
 
-  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+  return validLayers.some(({ layerId, xAccessor }: XYDataLayerConfig) => {
+    if (!xAccessor) {
+      return false;
+    }
+
     const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
     return (
       xAxisOperation &&

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import loadFunctions from '../load_functions.js';
+import loadFunctions from '../load_functions';
 const fitFunctions = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
 import { offsetTime, preprocessOffset } from '../offset_time';

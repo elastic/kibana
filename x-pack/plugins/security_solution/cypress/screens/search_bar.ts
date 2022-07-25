@@ -28,3 +28,7 @@ export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
+
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM_AT = (value: number) => `#popoverFor_filter${value}`;
+
+export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';

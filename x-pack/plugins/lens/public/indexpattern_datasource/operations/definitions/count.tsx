@@ -6,35 +6,79 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiSwitch } from '@elastic/eui';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { TimeScaleUnit } from '../../../../common/expressions';
+import { OperationDefinition, ParamEditorProps } from '.';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField } from '../../types';
 import {
   getInvalidFieldMessage,
   getFilter,
-  isColumnFormatted,
   combineErrorMessages,
+  getFormatFromPreviousColumn,
+  isColumnOfType,
 } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn &
-  FieldBasedIndexPatternColumn & {
-    operationType: 'count';
-  };
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+  'murmur3',
+]);
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
+function ofName(
+  field: IndexPatternField | undefined,
+  timeShift: string | undefined,
+  timeScale: string | undefined
+) {
+  return adjustTimeScaleLabelSuffix(
+    field?.type !== 'document'
+      ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
+          defaultMessage: 'Value count of {name}',
+          values: {
+            name: field?.displayName || '-',
+          },
+        })
+      : countLabel,
+    undefined,
+    timeScale as TimeScaleUnit,
+    undefined,
+    timeShift
+  );
+}
+
+export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
+  operationType: 'count';
+  params?: {
+    emptyAsNull?: boolean;
+    format?: ValueFormatConfig;
+  };
+};
+
+const SCALE = 'ratio';
+const IS_BUCKETED = false;
+
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
   type: 'count',
-  priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
@@ -44,45 +88,31 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
+  allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: adjustTimeScaleLabelSuffix(
-        field.displayName,
-        undefined,
-        oldColumn.timeScale,
-        undefined,
-        oldColumn.timeShift
-      ),
+      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift),
       sourceField: field.name,
     };
   },
-  getPossibleOperationForField: (field: IndexPatternField) => {
-    if (field.type === 'document') {
-      return {
-        dataType: 'number',
-        isBucketed: false,
-        scale: 'ratio',
-      };
+  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+    if (
+      type === 'document' ||
+      (aggregatable &&
+        (!aggregationRestrictions || aggregationRestrictions.value_count) &&
+        supportedTypes.has(type))
+    ) {
+      return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getDefaultLabel: (column) =>
-    adjustTimeScaleLabelSuffix(
-      countLabel,
-      undefined,
-      column.timeScale,
-      undefined,
-      column.timeShift
-    ),
+  getDefaultLabel: (column, indexPattern) => {
+    const field = indexPattern.getFieldByName(column.sourceField);
+    return ofName(field, column.timeShift, column.timeScale);
+  },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: adjustTimeScaleLabelSuffix(
-        countLabel,
-        undefined,
-        previousColumn?.timeScale,
-        undefined,
-        previousColumn?.timeShift
-      ),
+      label: ofName(field, previousColumn?.timeShift, previousColumn?.timeScale),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
@@ -91,46 +121,105 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      params:
-        previousColumn?.dataType === 'number' &&
-        isColumnFormatted(previousColumn) &&
-        previousColumn.params
-          ? { format: previousColumn.params.format }
-          : undefined,
+      params: {
+        ...getFormatFromPreviousColumn(previousColumn),
+        emptyAsNull:
+          previousColumn && isColumnOfType<CountIndexPatternColumn>('count', previousColumn)
+            ? previousColumn.params?.emptyAsNull
+            : !columnParams?.usedInMath,
+      },
     };
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
-    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
-      layer,
-      thisColumnId,
-      changedColumnId
-    ),
-  toEsAggsFn: (column, columnId) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
-      id: columnId,
-      enabled: true,
-      schema: 'metric',
-      // time shift is added to wrapping aggFilteredMetric if filter is set
-      timeShift: column.filter ? undefined : column.timeShift,
-    }).toAst();
+  getAdvancedOptions: ({
+    layer,
+    columnId,
+    currentColumn,
+    paramEditorUpdater,
+  }: ParamEditorProps<CountIndexPatternColumn>) => {
+    return [
+      {
+        dataTestSubj: 'hide-zero-values',
+        inlineElement: (
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+              defaultMessage: 'Hide zero values',
+            })}
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
+        ),
+      },
+    ];
   },
-  isTransferable: () => {
-    return true;
+  onOtherColumnChanged: (layer, thisColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(layer, thisColumnId),
+  toEsAggsFn: (column, columnId, indexPattern) => {
+    const field = indexPattern.getFieldByName(column.sourceField);
+    if (field?.type === 'document') {
+      return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
+        emptyAsNull: column.params?.emptyAsNull,
+      }).toAst();
+    } else {
+      return buildExpressionFunction<AggFunctionsMapping['aggValueCount']>('aggValueCount', {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        field: column.sourceField,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
+        emptyAsNull: column.params?.emptyAsNull,
+      }).toAst();
+    }
+  },
+  isTransferable: (column, newIndexPattern) => {
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
+
+    return Boolean(
+      newField &&
+        (newField.type === 'document' ||
+          (supportedTypes.has(newField.type) &&
+            newField.aggregatable &&
+            (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)))
+    );
   },
   timeScalingMode: 'optional',
   filterable: true,
   documentation: {
     section: 'elasticsearch',
-    signature: '',
+    signature: i18n.translate('xpack.lens.indexPattern.count.signature', {
+      defaultMessage: '[field: string]',
+    }),
     description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
       defaultMessage: `
-Calculates the number of documents.
+The total number of documents. When you provide a field as the first argument, the total number of field values is counted. Use the count function for fields that have multiple values in a single document.
 
-Example: Calculate the number of documents:
-\`count()\`
+#### Examples
 
-Example: Calculate the number of documents matching a certain filter:
-\`count(kql='price > 500')\`
+To calculate the total number of documents, use \`count()\`.
+
+To calculate the number of products in all orders, use \`count(products.id)\`.
+
+To calculate the number of documents that match a specific filter, use \`count(kql='price > 500')\`.
       `,
     }),
   },

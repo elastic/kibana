@@ -8,7 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -20,6 +20,11 @@ export interface WaitForIndexStatusYellowParams {
   client: ElasticsearchClient;
   index: string;
   timeout?: string;
+}
+
+export interface IndexNotYellowTimeout {
+  type: 'index_not_yellow_timeout';
+  message: string;
 }
 /**
  * A yellow index status means the index's primary shard is allocated and the
@@ -37,7 +42,10 @@ export const waitForIndexStatusYellow =
     client,
     index,
     timeout = DEFAULT_TIMEOUT,
-  }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
+  }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<
+    RetryableEsClientError | IndexNotYellowTimeout,
+    {}
+  > =>
   () => {
     return client.cluster
       .health(
@@ -47,14 +55,14 @@ export const waitForIndexStatusYellow =
           timeout,
         },
         // Don't reject on status code 408 so that we can handle the timeout
-        // explicitly and provide more context in the error message
+        // explicitly with a custom response type and provide more context in the error message
         { ignore: [408] }
       )
       .then((res) => {
         if (res.timed_out === true) {
           return Either.left({
-            type: 'retryable_es_client_error' as const,
-            message: `Timeout waiting for the status of the [${index}] index to become 'yellow'`,
+            type: 'index_not_yellow_timeout' as const,
+            message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become 'yellow'`,
           });
         }
         return Either.right({});

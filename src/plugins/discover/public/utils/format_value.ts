@@ -7,8 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../data/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type {
+  FieldFormatsContentType,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
+} from '@kbn/field-formats-plugin/common/types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -16,8 +22,11 @@ import { DataView, DataViewField, KBN_FIELD_TYPES } from '../../../data/common';
  *
  * @param value The value to format
  * @param hit The actual search hit (required to get highlight information from)
+ * @param fieldFormats Field formatters
  * @param dataView The data view if available
  * @param field The field that value was from if available
+ * @param contentType Type of a converter
+ * @param options Options for the converter
  * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
  */
 export function formatFieldValue(
@@ -25,16 +34,25 @@ export function formatFieldValue(
   hit: estypes.SearchHit,
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
-  field?: DataViewField
+  field?: DataViewField,
+  contentType?: FieldFormatsContentType,
+  options?: HtmlContextTypeOptions | TextContextTypeOptions
 ): string {
+  const usedContentType = contentType ?? 'html';
+  const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
+    hit,
+    field,
+    ...options,
+  };
+
   if (!dataView || !field) {
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
     return fieldFormats
       .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, 'html', { hit, field });
+      .convert(value, usedContentType, converterOptions);
   }
 
   // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, 'html', { hit, field });
+  return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
 }

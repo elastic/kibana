@@ -18,35 +18,40 @@ import {
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
-} from 'kibana/public';
+  NotificationsStart,
+  ApplicationStart,
+} from '@kbn/core/public';
 import {
   FilterManager,
   TimefilterContract,
   DataViewsContract,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
+} from '@kbn/data-plugin/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { Storage } from '../../kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import { DiscoverStartPlugins } from './plugin';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
-import { UrlForwardingStart } from '../../url_forwarding/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
-import { FieldFormatsStart } from '../../field_formats/public';
-import { EmbeddableStart } from '../../embeddable/public';
-
-import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
-import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
+import { DiscoverStartPlugins } from './plugin';
 
 export interface HistoryLocationState {
   referrer: string;
 }
 
 export interface DiscoverServices {
+  application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
@@ -66,6 +71,7 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
+  notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -73,17 +79,21 @@ export interface DiscoverServices {
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  locator: DiscoverAppLocator;
 }
 
 export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  locator: DiscoverAppLocator
 ): DiscoverServices {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
 
   return {
+    application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
@@ -95,7 +105,7 @@ export const buildServices = memoize(function (
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
-    indexPatterns: plugins.data.indexPatterns,
+    indexPatterns: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
@@ -105,6 +115,7 @@ export const buildServices = memoize(function (
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
@@ -112,5 +123,7 @@ export const buildServices = memoize(function (
     http: core.http,
     spaces: plugins.spaces,
     dataViewEditor: plugins.dataViewEditor,
+    triggersActionsUi: plugins.triggersActionsUi,
+    locator,
   };
 });

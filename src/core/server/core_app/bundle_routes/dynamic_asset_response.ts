@@ -11,8 +11,8 @@ import { resolve, extname } from 'path';
 import mime from 'mime-types';
 import agent from 'elastic-apm-node';
 
+import type { RequestHandler } from '@kbn/core-http-server';
 import { fstat, close } from './fs';
-import { RequestHandler } from '../../http';
 import { IFileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 import { selectCompressedFile } from './select_compressed_file';

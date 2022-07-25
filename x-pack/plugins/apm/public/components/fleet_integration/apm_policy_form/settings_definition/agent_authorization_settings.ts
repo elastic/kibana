@@ -10,11 +10,7 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OPTIONAL_LABEL } from '../settings_form/utils';
 import { SettingsRow } from '../typings';
 
-export function getAgentAuthorizationSettings({
-  isCloudPolicy,
-}: {
-  isCloudPolicy: boolean;
-}): SettingsRow[] {
+export function getAgentAuthorizationSettings(): SettingsRow[] {
   return [
     {
       type: 'boolean',

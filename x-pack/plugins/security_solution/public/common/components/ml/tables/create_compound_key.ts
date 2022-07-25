@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 
 export const createCompoundAnomalyKey = (anomaly: Anomaly): string =>
   `${anomaly.entityName}-${anomaly.entityValue}-${anomaly.severity}-${anomaly.jobId}`;

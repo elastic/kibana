@@ -27,14 +27,14 @@ describe('SitemapsTable', () => {
     { id: '2', url: 'http://www.example.com/whatever/sitemaps.xml' },
   ];
   const domain = {
+    crawlRules: [],
     createdOn: '2018-01-01T00:00:00.000Z',
+    deduplicationEnabled: true,
+    entryPoints: [],
     documentCount: 10,
     id: '6113e1407a2f2e6f42489794',
     url: 'https://www.elastic.co',
-    crawlRules: [],
-    entryPoints: [],
     sitemaps,
-    deduplicationEnabled: true,
     deduplicationFields: ['title'],
     availableDeduplicationFields: ['title', 'description'],
   };

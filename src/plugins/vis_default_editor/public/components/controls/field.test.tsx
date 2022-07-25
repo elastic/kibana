@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { IAggConfig, IndexPatternField, AggParam } from 'src/plugins/data/public';
+import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { EditorVisState } from '../sidebar/state/reducers';
@@ -29,11 +30,11 @@ describe('FieldParamEditor component', () => {
   let setTouched: jest.Mock;
   let onChange: jest.Mock;
   let defaultProps: FieldParamEditorProps;
-  let indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
-  let field: IndexPatternField;
+  let indexedFields: ComboBoxGroupedOptions<DataViewField>;
+  let field: DataViewField;
   let option: {
     label: string;
-    target: IndexPatternField;
+    target: DataViewField;
   };
 
   beforeEach(() => {
@@ -42,7 +43,7 @@ describe('FieldParamEditor component', () => {
     setTouched = jest.fn();
     onChange = jest.fn();
 
-    field = { displayName: 'bytes', type: 'bytes' } as IndexPatternField;
+    field = { displayName: 'bytes', type: 'bytes' } as DataViewField;
     option = { label: 'bytes', target: field };
     indexedFields = [
       {

@@ -6,25 +6,27 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import {
-  ColumnHeaderOptions,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
   TimelineId,
 } from '../../../../common/types/timeline';
 
+import type {
+  DataProvider,
+  DataProvidersAnd,
+} from '../../components/timeline/data_providers/data_provider';
 import {
   IS_OPERATOR,
-  DataProvider,
   DataProviderType,
-  DataProvidersAnd,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+} from '../../components/timeline/data_providers/data_provider';
+import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   RESIZED_COLUMN_MIN_WITH,
-} from '../../../timelines/components/timeline/body/constants';
+} from '../../components/timeline/body/constants';
 import { defaultHeaders } from '../../../common/mock';
 
 import {
@@ -48,13 +50,13 @@ import {
   upsertTimelineColumn,
   updateGraphEventId,
 } from './helpers';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
-import { TimelineById } from './types';
+import type { TimelineById } from './types';
 import { Direction } from '../../../../common/search_strategy';
-import type { FilterManager } from '../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/components/url_state/normalize_time_range');
 jest.mock('../../../common/utils/default_date_settings', () => {
   const actual = jest.requireActual('../../../common/utils/default_date_settings');
   return {
@@ -123,12 +125,14 @@ const basicTimeline: TimelineModel = {
   savedObjectId: null,
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: true,
   showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -957,6 +961,7 @@ describe('Timeline', () => {
           {
             columnId: 'some column',
             columnType: 'text',
+            esTypes: ['keyword'],
             sortDirection: Direction.desc,
           },
         ],
@@ -969,7 +974,12 @@ describe('Timeline', () => {
 
     test('should update the sort attribute', () => {
       expect(update.foo.sort).toEqual([
-        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+        {
+          columnId: 'some column',
+          columnType: 'text',
+          esTypes: ['keyword'],
+          sortDirection: Direction.desc,
+        },
       ]);
     });
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStream } from 'antlr4ts';
+import type { Token } from 'antlr4ts';
 import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
 
 /*
@@ -15,19 +15,16 @@ import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
  * Based on the Java implementation: https://github.com/elastic/elasticsearch/blob/feab123ba400b150f3dcd04dd27cf57474b70d5a/modules/lang-painless/src/main/java/org/elasticsearch/painless/antlr/EnhancedPainlessLexer.java#L73
  */
 export class PainlessLexerEnhanced extends PainlessLexer {
-  constructor(input: CharStream) {
-    super(input);
+  private lastToken?: Token;
+
+  nextToken(): Token {
+    this.lastToken = super.nextToken();
+
+    return this.lastToken;
   }
 
   isSlashRegex(): boolean {
-    const lastToken = super.nextToken();
-
-    if (lastToken == null) {
-      return true;
-    }
-
-    // @ts-ignore
-    switch (lastToken._type) {
+    switch (this.lastToken?.type) {
       case PainlessLexer.RBRACE:
       case PainlessLexer.RP:
       case PainlessLexer.OCTAL:

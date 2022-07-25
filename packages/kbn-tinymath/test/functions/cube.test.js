@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { cube } = require('../../src/functions/cube.js');
+const { cube } = require('../../src/functions/cube');
 
 describe('Cube', () => {
   it('numbers', () => {

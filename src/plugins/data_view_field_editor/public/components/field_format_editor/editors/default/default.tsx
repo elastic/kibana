@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent, ReactText } from 'react';
+import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-
-import type { FieldFormatsContentType } from 'src/plugins/field_formats/common';
+import React, { PureComponent, ReactText } from 'react';
 import type { Sample, SampleInput } from '../../types';
 import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';
@@ -80,7 +79,7 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
     return output;
   }
 
-  onChange = (newParams = {}) => {
+  onChange = (newParams = {} as Partial<FormatEditorProps<P>['formatParams']>) => {
     const { onChange, formatParams } = this.props;
 
     onChange({

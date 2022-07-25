@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'doc_table:legacy': false,
   };
   const testSubjects = getService('testSubjects');
 

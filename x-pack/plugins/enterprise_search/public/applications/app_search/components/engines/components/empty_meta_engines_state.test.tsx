@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 
-import { EmptyMetaEnginesState } from './';
+import { EmptyMetaEnginesState } from '.';
 
 describe('EmptyMetaEnginesState', () => {
   it('renders', () => {

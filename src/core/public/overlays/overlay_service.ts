@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { I18nStart } from '../i18n';
-import { IUiSettingsClient } from '../ui_settings';
-import { ThemeServiceStart } from '../theme';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { OverlayBannersStart, OverlayBannersService } from './banners';
 import { FlyoutService, OverlayFlyoutStart } from './flyout';
 import { ModalService, OverlayModalStart } from './modal';

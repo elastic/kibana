@@ -13,7 +13,7 @@ import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
 
-import { NotFound } from './';
+import { NotFound } from '.';
 
 describe('NotFound', () => {
   it('renders the shared not found prompt', () => {

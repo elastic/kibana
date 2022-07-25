@@ -15,7 +15,8 @@ export const patchCaseRoute = createCasesRoute({
   path: CASES_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const cases = request.body as CasesPatchRequest;
 
       return response.ok({

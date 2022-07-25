@@ -11,14 +11,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { isTab, TimelineContext } from '../../../../../timelines/public';
+import { isTab, TimelineContext } from '@kbn/timelines-plugin/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { CellValueElementProps } from './cell_rendering';
+import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -74,9 +75,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     savedObjectId,
     timelineType,
     description,
+    sessionViewConfig,
   } = useDeepEqualSelector((state) =>
     pick(
-      ['indexNames', 'dataViewId', 'graphEventId', 'savedObjectId', 'timelineType', 'description'],
+      [
+        'indexNames',
+        'dataViewId',
+        'graphEventId',
+        'savedObjectId',
+        'timelineType',
+        'description',
+        'sessionViewConfig',
+      ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -193,6 +203,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
         <TabsContent
           graphEventId={graphEventId}
+          sessionViewConfig={sessionViewConfig}
           renderCellValue={renderCellValue}
           rowRenderers={rowRenderers}
           timelineId={timelineId}

@@ -6,27 +6,31 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import {
+import { useMemo } from 'react';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
+
+import type { CriteriaField } from '../results_service';
+import { basePath } from '.';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
 } from '../../../../common/types/results';
-import { HttpService } from '../http_service';
-import { basePath } from './index';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
-import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
-import { PartitionFieldsConfig } from '../../../../common/types/storage';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
-import { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import type { PartitionFieldsConfig } from '../../../../common/types/storage';
+import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { EntityField } from '../../../../common/util/anomaly_utils';
+import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { ExplorerChartsData } from '../../../../common/types/results';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
-    influencers: string[],
+    influencers: EntityField[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
@@ -162,4 +166,72 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  getAnomalyCharts$(
+    jobIds: string[],
+    influencers: EntityField[],
+    threshold: number,
+    earliestMs: number,
+    latestMs: number,
+    timeBounds: { min?: number; max?: number },
+    maxResults: number,
+    numberOfPoints: number,
+    influencersFilterQuery?: InfluencersFilterQuery
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      influencers,
+      threshold,
+      earliestMs,
+      latestMs,
+      maxResults,
+      influencersFilterQuery,
+      numberOfPoints,
+      timeBounds,
+    });
+    return httpService.http$<ExplorerChartsData>({
+      path: `${basePath()}/results/anomaly_charts`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnomalyRecords$(
+    jobIds: string[],
+    criteriaFields: CriteriaField[],
+    severity: number,
+    earliestMs: number | null,
+    latestMs: number | null,
+    interval: string,
+    functionDescription?: string
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      criteriaFields,
+      threshold: severity,
+      earliestMs,
+      latestMs,
+      interval,
+      functionDescription,
+    });
+    return httpService.http$<{ success: boolean; records: AnomalyRecordDoc[] }>({
+      path: `${basePath()}/results/anomaly_records`,
+      method: 'POST',
+      body,
+    });
+  },
 });
+
+export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
+
+/**
+ * Hooks for accessing {@link ResultsApiService} in React components.
+ */
+export function useResultsApiService(): ResultsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => resultsApiProvider(httpService), [httpService]);
+}

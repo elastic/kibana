@@ -341,23 +341,33 @@ export const mergedConfiguredSources = mergeServerAndStaticData(
 );
 
 export const sourceConfigData: SourceConfigData = {
-  serviceType: 'confluence_cloud',
-  name: 'Confluence',
+  serviceType: 'box',
+  name: 'Box',
   configured: true,
   needsPermissions: true,
   accountContextOnly: false,
   privateSourcesEnabled: false,
-  categories: ['wiki', 'atlassian', 'intranet'],
+  categories: [],
   configuredFields: {
-    clientId: 'CyztADsSECRETCSAUCEh1a',
-    clientSecret: 'GSjJxqSECRETCSAUCEksHk',
-    baseUrl: 'https://mine.atlassian.net',
-    privateKey: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
-    publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
-    consumerKey: 'elastic_enterprise_search_123',
-    apiKey: 'asdf1234',
-    url: 'https://www.elastic.co',
+    client_id: 'CyztADsSECRETCSAUCEh1a',
+    client_secret: 'GSjJxqSECRETCSAUCEksHk',
+    base_url: 'https://mine.atlassian.net',
+    private_key: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
+    public_key: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
+    consumer_key: 'elastic_enterprise_search_123',
+    external_connector_api_key: 'asdf1234',
+    external_connector_url: 'https://www.elastic.co',
   },
+};
+
+export const externalConfiguredConnector = {
+  serviceType: 'external',
+  name: 'External Connector',
+  configured: true,
+  needsPermissions: false,
+  accountContextOnly: true,
+  supportedByLicense: false,
+  privateSourcesEnabled: false,
 };
 
 export const oauthApplication = {

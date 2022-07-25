@@ -15,13 +15,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { includes, remove } from 'lodash';
 
-import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
+import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
-import { PluginServices } from '../../../../src/plugins/presentation_util/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
@@ -39,7 +36,6 @@ import {
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
-  pluginServices as canvasServices,
 } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
@@ -153,13 +149,12 @@ export const initializeCanvas = async (
         href: docLinks.links.canvas.guide,
       },
     ],
-    content: (domNode) => {
+    content: (domNode, { hideHelpMenu }) => {
       ReactDOM.render(
         <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <HelpMenu
-            functionRegistry={expressions.getFunctions()}
-            notifyService={canvasServices.getServices().notify}
-          />
+          <Provider store={canvasStore}>
+            <HelpMenu hideHelpMenu={hideHelpMenu} />
+          </Provider>
         </KibanaThemeProvider>,
         domNode
       );

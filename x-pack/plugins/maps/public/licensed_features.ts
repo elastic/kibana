@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ILicense, LicenseType } from '../../licensing/common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { APP_ID } from '../common/constants';
 
 export enum LICENSED_FEATURES {

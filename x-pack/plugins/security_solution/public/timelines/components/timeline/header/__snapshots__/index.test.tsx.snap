@@ -10,8 +10,8 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
       FilterManager {
         "extract": [Function],
         "fetch$": Subject {
-          "_isScalar": false,
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -35,8 +35,8 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
           "set": [MockFunction],
         },
         "updated$": Subject {
-          "_isScalar": false,
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],

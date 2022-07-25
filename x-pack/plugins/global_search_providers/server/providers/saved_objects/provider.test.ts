@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResult,
   SavedObjectsType,
   SavedObjectTypeRegistry,
-} from 'src/core/server';
-import { globalSearchPluginMock } from '../../../../global_search/server/mocks';
+} from '@kbn/core/server';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
 import {
   GlobalSearchResultProvider,
   GlobalSearchProviderFindOptions,
-} from '../../../../global_search/server';
+} from '@kbn/global-search-plugin/server';
 import { createSavedObjectsResultProvider } from './provider';
 
 const getTestScheduler = () =>

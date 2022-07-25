@@ -6,7 +6,7 @@
  */
 
 import { Ast } from '@kbn/interpreter';
-import { buildExpression } from '../../../../../src/plugins/expressions/public';
+import { buildExpression } from '@kbn/expressions-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
@@ -16,9 +16,9 @@ import {
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
 } from '../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { layerTypes } from '../../common';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -490,7 +490,13 @@ describe('Datatable Visualization', () => {
   describe('#toExpression', () => {
     const getDatatableExpressionArgs = (state: DatatableVisualizationState) =>
       buildExpression(
-        datatableVisualization.toExpression(state, frame.datasourceLayers) as Ast
+        datatableVisualization.toExpression(
+          state,
+          frame.datasourceLayers,
+
+          {},
+          { '1': { type: 'expression', chain: [] } }
+        ) as Ast
       ).findFunction('lens_datatable')[0].arguments;
 
     const defaultExpressionTableState = {
@@ -524,7 +530,9 @@ describe('Datatable Visualization', () => {
 
       const expression = datatableVisualization.toExpression(
         defaultExpressionTableState,
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
       ) as Ast;
 
       const tableArgs = buildExpression(expression).findFunction('lens_datatable');
@@ -573,7 +581,9 @@ describe('Datatable Visualization', () => {
 
       const expression = datatableVisualization.toExpression(
         defaultExpressionTableState,
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
       );
 
       expect(expression).toEqual(null);
@@ -651,6 +661,38 @@ describe('Datatable Visualization', () => {
           ...defaultExpressionTableState,
           rowHeight: 'custom',
         }).rowHeightLines
+      ).toEqual([2]);
+    });
+
+    it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
+      ).toEqual([1]);
+
+      // should fallback to single in case it's not set
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
+      ).toEqual(['single']);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
+          .headerRowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+          headerRowHeightLines: 5,
+        }).headerRowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+        }).headerRowHeightLines
       ).toEqual([2]);
     });
   });

@@ -12,7 +12,7 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/data_views/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },

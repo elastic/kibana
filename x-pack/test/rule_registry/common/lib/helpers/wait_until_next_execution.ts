@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Rule } from '@kbn/alerting-plugin/common';
 import { GetService } from '../../types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 import { BULK_INDEX_DELAY, MAX_POLLS } from '../../constants';
-import { Alert } from '../../../../../plugins/alerting/common';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
 import { User } from '../authentication/types';
 
 export async function waitUntilNextExecution(
   getService: GetService,
   user: User,
-  alert: Alert,
+  alert: Rule,
   spaceId: string,
   intervalInSeconds: number = 1,
   count: number = 0
-): Promise<Alert> {
+): Promise<Rule> {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
 
@@ -48,7 +48,7 @@ export async function waitUntilNextExecution(
     throw error;
   }
 
-  const nextAlert = body as Alert;
+  const nextAlert = body as Rule;
 
   if (nextAlert.executionStatus.lastExecutionDate !== alert.executionStatus.lastExecutionDate) {
     await new Promise((resolve) => {

@@ -6,8 +6,6 @@
  */
 
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';

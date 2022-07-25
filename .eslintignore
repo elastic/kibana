@@ -30,7 +30,7 @@ snapshots.js
 /x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
 
 # package overrides
-/packages/elastic-eslint-config-kibana
+/packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
 /packages/kbn-pm/dist

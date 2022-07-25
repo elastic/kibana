@@ -7,16 +7,20 @@
 
 import { TOASTER } from '../../screens/alerts_detection_rules';
 import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
-import { cleanKibana, reload } from '../../tasks/common';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Import rules', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
+    deleteAlertsAndRules();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {

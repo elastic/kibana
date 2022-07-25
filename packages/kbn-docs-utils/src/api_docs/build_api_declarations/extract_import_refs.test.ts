@@ -7,7 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
 import { ApiScope, PluginOrPackage, Reference } from '../types';

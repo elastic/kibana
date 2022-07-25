@@ -8,10 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
@@ -21,12 +21,13 @@ import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
+import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
@@ -357,14 +358,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         </Draggable>
       </div>
     );
-  },
-  (prevProps, nextProps) =>
-    prevProps.groupIndex === nextProps.groupIndex &&
-    prevProps.index === nextProps.index &&
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.group, nextProps.group) &&
-    deepEqual(prevProps.dataProvider, nextProps.dataProvider)
+  }
 );
 
 DataProvidersGroupItem.displayName = 'DataProvidersGroupItem';

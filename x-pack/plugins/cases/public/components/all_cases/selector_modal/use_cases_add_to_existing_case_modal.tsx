@@ -6,16 +6,23 @@
  */
 
 import { useCallback } from 'react';
+import { CaseStatuses, StatusAll } from '../../../../common';
 import { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import { CaseAttachments } from '../../../types';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
 
-export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps) => {
+type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    attachments: props.attachments,
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
     // in a follow up clean up
@@ -24,9 +31,13 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
         return props.onRowClick(theCase);
       }
     },
+    toastTitle: props.toastTitle,
+    toastContent: props.toastContent,
   });
+
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
+  const { createAttachments } = useCreateAttachments();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -39,39 +50,66 @@ export const useCasesAddToExistingCaseModal = (props: AllCasesSelectorModalProps
     });
   }, [dispatch]);
 
-  const openModal = useCallback(() => {
-    dispatch({
-      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
-      payload: {
-        ...props,
-        onRowClick: (theCase?: Case) => {
-          // when the case is undefined in the modal
-          // the user clicked "create new case"
-          if (theCase === undefined) {
+  const handleOnRowClick = useCallback(
+    async (theCase: Case | undefined, attachments: CaseAttachments) => {
+      // when the case is undefined in the modal
+      // the user clicked "create new case"
+      if (theCase === undefined) {
+        closeModal();
+        createNewCaseFlyout.open({ attachments });
+        return;
+      }
+
+      try {
+        // add attachments to the case
+        if (attachments !== undefined && attachments.length > 0) {
+          await createAttachments({
+            caseId: theCase.id,
+            data: attachments,
+            throwOnError: true,
+          });
+
+          casesToasts.showSuccessAttach({
+            theCase,
+            attachments,
+            title: props.toastTitle,
+            content: props.toastContent,
+          });
+        }
+      } catch (error) {
+        // error toast is handled
+        // inside the createAttachments method
+      }
+
+      if (props.onRowClick) {
+        props.onRowClick(theCase);
+      }
+    },
+    [casesToasts, closeModal, createNewCaseFlyout, createAttachments, props]
+  );
+
+  const openModal = useCallback(
+    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
+      dispatch({
+        type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
+        payload: {
+          ...props,
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          onRowClick: (theCase?: Case) => {
+            const caseAttachments = attachments ?? [];
+            handleOnRowClick(theCase, caseAttachments);
+          },
+          onClose: () => {
             closeModal();
-            createNewCaseFlyout.open();
-          } else {
-            casesToasts.showSuccessAttach(theCase);
-            if (props.onRowClick) {
-              props.onRowClick(theCase);
+            if (props.onClose) {
+              return props.onClose();
             }
-          }
+          },
         },
-        onClose: () => {
-          closeModal();
-          if (props.onClose) {
-            return props.onClose();
-          }
-        },
-        updateCase: async (...args) => {
-          closeModal();
-          if (props.updateCase) {
-            return props.updateCase(...args);
-          }
-        },
-      },
-    });
-  }, [casesToasts, closeModal, createNewCaseFlyout, dispatch, props]);
+      });
+    },
+    [closeModal, dispatch, handleOnRowClick, props]
+  );
   return {
     open: openModal,
     close: closeModal,

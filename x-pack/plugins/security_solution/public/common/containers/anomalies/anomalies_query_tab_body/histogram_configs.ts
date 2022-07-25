@@ -6,7 +6,7 @@
  */
 
 import * as i18n from './translations';
-import {
+import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../components/matrix_histogram/types';

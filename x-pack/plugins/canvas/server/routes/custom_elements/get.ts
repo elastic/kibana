@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { CustomElementAttributes } from './custom_element_attributes';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -23,7 +23,8 @@ export function initializeGetCustomElementRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const customElement = await context.core.savedObjects.client.get<CustomElementAttributes>(
+      const soClient = (await context.core).savedObjects.client;
+      const customElement = await soClient.get<CustomElementAttributes>(
         CUSTOM_ELEMENT_TYPE,
         request.params.id
       );

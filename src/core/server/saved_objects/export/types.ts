@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '../../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
@@ -28,7 +28,7 @@ export interface SavedObjectExportBaseOptions {
 }
 
 /**
- * Options for the {@link SavedObjectsExporter.exportByTypes | export by type API}
+ * Options for the {@link ISavedObjectsExporter.exportByTypes | export by type API}
  *
  * @public
  */
@@ -42,7 +42,7 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
 }
 
 /**
- * Options for the {@link SavedObjectsExporter.exportByObjects | export by objects API}
+ * Options for the {@link ISavedObjectsExporter.exportByObjects | export by objects API}
  *
  * @public
  */

@@ -10,15 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import type { SortField, NetworkTopNFlowEdges } from '../../../../common/search_strategy';
 import {
   Direction,
-  SortField,
   FlowTargetSourceDest,
-  NetworkTopNFlowEdges,
   NetworkTopTablesFields,
 } from '../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
 import * as i18n from './translations';
@@ -31,6 +31,7 @@ interface NetworkTopNFlowTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -57,6 +58,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -166,6 +168,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}

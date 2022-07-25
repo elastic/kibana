@@ -9,15 +9,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '../../../../src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Page } from './components/page';
 import { DocumentationPage } from './components/documentation';
 import { ViewAlertPage } from './components/view_alert';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../plugins/triggers_actions_ui/public';
 import { AlertingExamplePublicStartDeps } from './plugin';
 import { ViewPeopleInSpaceAlertPage } from './components/view_astros_alert';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export interface AlertingExampleComponentParams {
   http: CoreStart['http'];

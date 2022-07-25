@@ -5,40 +5,37 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
 
 import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import { Sort } from '../../../timelines/components/timeline/body/sort';
-import {
+import type { Sort } from '../../components/timeline/body/sort';
+import type {
   DataProvider,
   QueryOperator,
   QueryMatch,
+} from '../../components/timeline/data_providers/data_provider';
+import {
   DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import {
+} from '../../components/timeline/data_providers/data_provider';
+import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   TimelineTypeLiteral,
-  TimelineType,
   RowRendererId,
-  TimelineStatus,
-  TimelineId,
-  TimelineTabs,
   SerializedFilterQuery,
-  ToggleDetailPanel,
   TimelinePersistInput,
 } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
-import { KqlMode, TimelineModel } from './model';
-import { TimelineById } from './types';
+import type { KqlMode, TimelineModel } from './model';
+import type { TimelineById } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -48,8 +45,8 @@ import {
   RESIZED_COLUMN_MIN_WITH,
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
-import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -283,6 +280,26 @@ export const updateGraphEventId = ({
       ...(graphEventId === '' && id === TimelineId.active
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),
+    },
+  };
+};
+
+export const updateSessionViewConfig = ({
+  id,
+  sessionViewConfig,
+  timelineById,
+}: {
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewConfig,
     },
   };
 };
@@ -1210,104 +1227,6 @@ export const removeTimelineProvider = ({
   };
 };
 
-interface SetDeletedTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isDeleted: boolean;
-  timelineById: TimelineById;
-}
-
-export const setDeletedTimelineEvents = ({
-  id,
-  eventIds,
-  isDeleted,
-  timelineById,
-}: SetDeletedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const deletedEventIds = isDeleted
-    ? union(timeline.deletedEventIds, eventIds)
-    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  const selectedEventIds = Object.fromEntries(
-    Object.entries(timeline.selectedEventIds).filter(
-      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
-    )
-  );
-
-  const isSelectAllChecked =
-    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      deletedEventIds,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
-interface SetLoadingTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isLoading: boolean;
-  timelineById: TimelineById;
-}
-
-export const setLoadingTimelineEvents = ({
-  id,
-  eventIds,
-  isLoading,
-  timelineById,
-}: SetLoadingTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const loadingEventIds = isLoading
-    ? union(timeline.loadingEventIds, eventIds)
-    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      loadingEventIds,
-    },
-  };
-};
-
-interface SetSelectedTimelineEventsParams {
-  id: string;
-  eventIds: Record<string, TimelineNonEcsData[]>;
-  isSelectAllChecked: boolean;
-  isSelected: boolean;
-  timelineById: TimelineById;
-}
-
-export const setSelectedTimelineEvents = ({
-  id,
-  eventIds,
-  isSelectAllChecked = false,
-  isSelected,
-  timelineById,
-}: SetSelectedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const selectedEventIds = isSelected
-    ? { ...timeline.selectedEventIds, ...eventIds }
-    : omit(Object.keys(eventIds), timeline.selectedEventIds);
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
 interface UnPinTimelineEventParams {
   id: string;
   eventId: string;
@@ -1325,28 +1244,6 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
-    },
-  };
-};
-
-interface UpdateHighlightedDropAndProviderIdParams {
-  id: string;
-  providerId: string;
-  timelineById: TimelineById;
-}
-
-export const updateHighlightedDropAndProvider = ({
-  id,
-  providerId,
-  timelineById,
-}: UpdateHighlightedDropAndProviderIdParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      highlightedDropAndProviderId: providerId,
     },
   };
 };
@@ -1411,22 +1308,4 @@ export const updateExcludedRowRenderersIds = ({
       excludedRowRendererIds,
     },
   };
-};
-
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
-  const { tabType } = action;
-
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
-  const expandedTabType = tabType ?? TimelineTabs.query;
-
-  return action.panelView && panelViewOptions.has(action.panelView)
-    ? {
-        [expandedTabType]: {
-          params: action.params ? { ...action.params } : {},
-          panelView: action.panelView,
-        },
-      }
-    : {
-        [expandedTabType]: {},
-      };
 };

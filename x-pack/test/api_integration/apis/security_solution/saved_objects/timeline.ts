@@ -6,12 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { TimelineResult, TimelineType } from '@kbn/security-solution-plugin/common/types/timeline';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-import {
-  TimelineResult,
-  TimelineType,
-} from '../../../../../plugins/security_solution/common/types/timeline';
 
 import { createBasicTimeline } from './helpers';
 

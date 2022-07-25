@@ -10,8 +10,8 @@ import {
   KibanaRequest,
   RequestHandlerContext,
   RouteValidatorConfig,
-} from 'src/core/server';
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)
@@ -23,6 +23,7 @@ type PayloadType = 'params' | 'query' | 'body';
 interface IMockRouter {
   method: MethodType;
   path: string;
+  context?: jest.Mocked<RequestHandlerContext>;
 }
 interface IMockRouterRequest {
   body?: object;
@@ -35,13 +36,15 @@ export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
   public path: string;
+  public context: jest.Mocked<RequestHandlerContext>;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, path }: IMockRouter) {
+  constructor({ method, path, context = {} as jest.Mocked<RequestHandlerContext> }: IMockRouter) {
     this.createRouter();
     this.method = method;
     this.path = path;
+    this.context = context;
   }
 
   public createRouter = () => {
@@ -51,8 +54,7 @@ export class MockRouter {
   public callRoute = async (request: MockRouterRequest) => {
     const route = this.findRouteRegistration();
     const [, handler] = route;
-    const context = {} as jest.Mocked<RequestHandlerContext>;
-    await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
+    await handler(this.context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
 
   /**

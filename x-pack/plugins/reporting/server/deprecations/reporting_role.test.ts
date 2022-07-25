@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetDeprecationsContext, IScopedClusterClient } from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { GetDeprecationsContext, IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '..';
 import {
   createMockConfigSchema,

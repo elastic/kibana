@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../../visualizations/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   setDataActions,
   setFormatService,
@@ -19,7 +20,6 @@ import {
   setUISettings,
   setDocLinks,
   setPalettesService,
-  setTrackUiMetric,
   setActiveCursor,
 } from './services';
 
@@ -47,6 +47,7 @@ export interface VisTypeXyPluginStartDependencies {
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, VisTypeXyPluginStart>;
@@ -69,10 +70,14 @@ export class VisTypeXyPlugin
     setThemeService(charts.theme);
     setPalettesService(charts.palettes);
 
+    const getStartDeps = createStartServicesGetter<
+      VisTypeXyPluginStartDependencies,
+      VisTypeXyPluginStart
+    >(core.getStartServices);
+
     expressions.registerRenderer(
       getXYVisRenderer({
-        uiSettings: core.uiSettings,
-        theme: core.theme,
+        getStartDeps,
       })
     );
     expressions.registerFunction(expressionFunctions.visTypeXyVisFn);
@@ -85,9 +90,6 @@ export class VisTypeXyPlugin
     expressions.registerFunction(expressionFunctions.visScale);
 
     visTypesDefinitions.forEach(visualizations.createBaseVisualization);
-
-    setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
-
     return {};
   }
 

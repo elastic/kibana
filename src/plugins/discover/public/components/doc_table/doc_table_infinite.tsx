@@ -14,8 +14,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
-import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const FOOTER_PADDING = { padding: 0 };
 

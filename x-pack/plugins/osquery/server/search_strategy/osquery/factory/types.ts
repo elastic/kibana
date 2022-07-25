@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  IEsSearchResponse,
-  ISearchRequestParams,
-} from '../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
+import type {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,

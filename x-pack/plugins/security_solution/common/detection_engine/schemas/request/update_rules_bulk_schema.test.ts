@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { updateRulesBulkSchema, UpdateRulesBulkSchema } from './update_rules_bulk_schema';
+import type { UpdateRulesBulkSchema } from './update_rules_bulk_schema';
+import { updateRulesBulkSchema } from './update_rules_bulk_schema';
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
-import { UpdateRulesSchema } from './rule_schemas';
+import type { UpdateRulesSchema } from './rule_schemas';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests

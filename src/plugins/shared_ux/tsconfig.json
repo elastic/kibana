@@ -10,7 +10,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*",
     "../../../typings/**/*"
   ],
   "references": [

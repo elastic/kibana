@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
+import { DataView } from '@kbn/data-plugin/common';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
-import { DataView } from '../../../../../../../src/plugins/data/common';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
@@ -43,8 +42,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     };
   }
 
-  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(descriptor, inspectorAdapters);
+  constructor(descriptor: AbstractESAggSourceDescriptor) {
+    super(descriptor);
     this._metricFields = [];
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {

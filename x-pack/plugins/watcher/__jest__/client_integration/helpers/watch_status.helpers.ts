@@ -13,20 +13,22 @@ import {
   TestBed,
   AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
+
+import { registerRouter } from '../../../public/application/lib/navigation';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
-import { withAppContext } from './app_context.mock';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
+    onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/status`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/status`,
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(withAppContext(WatchStatus), testBedConfig);
 
 export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {
@@ -38,7 +40,8 @@ export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   };
 }
 
-export const setup = async (): Promise<WatchStatusTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(WatchStatus, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**

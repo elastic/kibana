@@ -19,17 +19,17 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ApplicationStart,
   DocLinksStart,
   NotificationsStart,
   ScopedHistory,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role, RoleMapping } from '../../../../common/model';
 import { DisabledBadge, EnabledBadge } from '../../badges';
 import {

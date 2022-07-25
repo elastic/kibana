@@ -19,7 +19,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -29,24 +29,47 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should delete a case in space1', async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      const body = await deleteCases({ supertest, caseIDs: [postedCase.id], auth: authSpace1 });
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
+      const body = await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [postedCase.id],
+        auth: authSpace1,
+      });
 
-      await getCase({ supertest, caseId: postedCase.id, expectedHttpCode: 404, auth: authSpace1 });
+      await getCase({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        expectedHttpCode: 404,
+        auth: authSpace1,
+      });
       expect(body).to.eql({});
     });
 
     it('should not delete a case in a different space', async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
       await deleteCases({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseIDs: [postedCase.id],
         auth: getAuthWithSuperUser('space2'),
         expectedHttpCode: 404,
       });
 
       // the case should still be there
-      const caseInfo = await getCase({ supertest, caseId: postedCase.id, auth: authSpace1 });
+      const caseInfo = await getCase({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
       expect(caseInfo.id).to.eql(postedCase.id);
     });
   });

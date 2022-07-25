@@ -268,7 +268,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
-                    <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+                    <EuiCodeBlock language="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
                   </EuiDescriptionListDescription>
                 </>
               )}

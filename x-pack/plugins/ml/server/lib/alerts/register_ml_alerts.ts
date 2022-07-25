@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { Logger } from '@kbn/core/server';
+import { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';

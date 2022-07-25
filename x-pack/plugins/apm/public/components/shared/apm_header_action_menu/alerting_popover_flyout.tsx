@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { IBasePath } from '../../../../../../../src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -30,7 +30,7 @@ const transactionErrorRateLabel = i18n.translate(
   { defaultMessage: 'Failed transaction rate' }
 );
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
-  defaultMessage: 'Error count',
+  defaultMessage: ' Create error count rule',
 });
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.createThresholdAlert',
@@ -41,11 +41,7 @@ const createAnomalyAlertAlertLabel = i18n.translate(
   { defaultMessage: 'Create anomaly rule' }
 );
 
-const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
-  'create_transaction_duration_panel';
-const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
-  'create_transaction_error_rate_panel';
-const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
+const CREATE_THRESHOLD_PANEL_ID = 'create_threshold_panel';
 
 interface Props {
   basePath: IBasePath;
@@ -73,6 +69,7 @@ export function AlertingPopoverAndFlyout({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
+      data-test-subj="apmAlertAndRulesHeaderLink"
     >
       {alertLabel}
     </EuiHeaderLink>
@@ -86,16 +83,29 @@ export function AlertingPopoverAndFlyout({
         ...(canSaveAlerts
           ? [
               {
-                name: transactionDurationLabel,
-                panel: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
+                name: createThresholdAlertLabel,
+                panel: CREATE_THRESHOLD_PANEL_ID,
+                'data-test-subj': 'apmAlertsMenuItemCreateThreshold',
               },
-              {
-                name: transactionErrorRateLabel,
-                panel: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
-              },
+              ...(canReadAnomalies
+                ? [
+                    {
+                      name: createAnomalyAlertAlertLabel,
+                      onClick: () => {
+                        setAlertType(AlertType.Anomaly);
+                        setPopoverOpen(false);
+                      },
+                      'data-test-subj': 'apmAlertsMenuItemCreateAnomaly',
+                    },
+                  ]
+                : []),
               {
                 name: errorCountLabel,
-                panel: CREATE_ERROR_COUNT_ALERT_PANEL_ID,
+                onClick: () => {
+                  setAlertType(AlertType.ErrorCount);
+                  setPopoverOpen(false);
+                },
+                'data-test-subj': 'apmAlertsMenuItemErrorCount',
               },
             ]
           : []),
@@ -108,22 +118,23 @@ export function AlertingPopoverAndFlyout({
                 ),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
+                'data-test-subj': 'apmAlertsMenuItemManageRules',
               },
             ]
           : []),
       ],
     },
 
-    // latency panel
+    // Threshold panel
     {
-      id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
-      title: transactionDurationLabel,
+      id: CREATE_THRESHOLD_PANEL_ID,
+      title: createThresholdAlertLabel,
       items: [
-        // threshold alerts
+        // Latency
         ...(includeTransactionDuration
           ? [
               {
-                name: createThresholdAlertLabel,
+                name: transactionDurationLabel,
                 onClick: () => {
                   setAlertType(AlertType.TransactionDuration);
                   setPopoverOpen(false);
@@ -131,47 +142,12 @@ export function AlertingPopoverAndFlyout({
               },
             ]
           : []),
-
-        // anomaly alerts
-        ...(canReadAnomalies
-          ? [
-              {
-                name: createAnomalyAlertAlertLabel,
-                onClick: () => {
-                  setAlertType(AlertType.TransactionDurationAnomaly);
-                  setPopoverOpen(false);
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-
-    // Failed transactions panel
-    {
-      id: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
-      title: transactionErrorRateLabel,
-      items: [
-        // threshold alerts
+        // Throughput *** TO BE ADDED ***
+        // Failed transactions rate
         {
-          name: createThresholdAlertLabel,
+          name: transactionErrorRateLabel,
           onClick: () => {
             setAlertType(AlertType.TransactionErrorRate);
-            setPopoverOpen(false);
-          },
-        },
-      ],
-    },
-
-    // error alerts panel
-    {
-      id: CREATE_ERROR_COUNT_ALERT_PANEL_ID,
-      title: errorCountLabel,
-      items: [
-        {
-          name: createThresholdAlertLabel,
-          onClick: () => {
-            setAlertType(AlertType.ErrorCount);
             setPopoverOpen(false);
           },
         },

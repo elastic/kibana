@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
@@ -23,12 +23,6 @@ jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
       metric: 'apm-*',
       apmAgentConfigurationIndex: 'apm-*',
     } as Awaited<ReturnType<typeof getApmIndices>>),
-}));
-
-jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
-  getDynamicDataView: async () => {
-    return;
-  },
 }));
 
 function getMockResources() {
@@ -108,7 +102,7 @@ describe('setupRequest', () => {
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
-        body: { foo: 'bar' },
+        body: { size: 10 },
       });
 
       expect(
@@ -117,7 +111,7 @@ describe('setupRequest', () => {
         {
           index: ['apm-*'],
           body: {
-            foo: 'bar',
+            size: 10,
             query: {
               bool: {
                 filter: [{ terms: { 'processor.event': ['transaction'] } }],
@@ -172,6 +166,7 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
+      body: { size: 10 },
     });
 
     const params =
@@ -193,6 +188,7 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
+      body: { size: 10 },
     });
 
     const params =

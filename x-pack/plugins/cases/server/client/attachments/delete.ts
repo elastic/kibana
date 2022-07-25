@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
-import { SavedObject } from 'kibana/public';
+import { SavedObject } from '@kbn/core/public';
 import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '../types';
@@ -79,6 +79,7 @@ export async function deleteAll(
       attachmentService.delete({
         unsecuredSavedObjectsClient,
         attachmentId: comment.id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -149,6 +150,7 @@ export async function deleteComment(
     await attachmentService.delete({
       unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
+      refresh: false,
     });
 
     await userActionService.createUserAction({

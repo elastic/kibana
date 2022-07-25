@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 import { getTooltipContent, StyledBadge, StyledButton } from './helpers';
-import { ModifiedTypes } from './use_pick_index_patterns';
+import type { ModifiedTypes } from './use_pick_index_patterns';
 
 interface Props {
   activePatterns?: string[];

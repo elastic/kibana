@@ -19,7 +19,7 @@ import {
 import { TimelineId } from '../../../../common/types/timeline';
 import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { TimelineModel } from '../../store/timeline/model';
+import type { TimelineModel } from '../../store/timeline/model';
 
 jest.mock('../../../common/lib/kibana');
 

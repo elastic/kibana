@@ -7,9 +7,8 @@
 
 import { isString } from 'lodash';
 
-import type { Capabilities as UICapabilities } from 'src/core/server';
-
-import { uiCapabilitiesRegex } from '../../../../features/server';
+import type { Capabilities as UICapabilities } from '@kbn/core/server';
+import { uiCapabilitiesRegex } from '@kbn/features-plugin/server';
 
 export class UIActions {
   private readonly prefix: string;

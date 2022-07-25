@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ResizeChecker } from '../../../../../../kibana_utils/public';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 
 export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
   const checker = new ResizeChecker(el);

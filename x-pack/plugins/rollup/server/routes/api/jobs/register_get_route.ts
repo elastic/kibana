@@ -19,7 +19,7 @@ export const registerGetRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
       try {
         const data = await clusterClient.asCurrentUser.rollup.getJobs({ id: '_all' });
         return response.ok({ body: data });

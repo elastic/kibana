@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
@@ -19,7 +20,6 @@ import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { useLinkProps } from '../../../../../observability/public';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 

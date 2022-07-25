@@ -15,7 +15,7 @@ import {
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
   convertEsError,
-} from '../../../../../src/plugins/data_views/server/fetcher/lib/errors';
+} from '@kbn/data-views-plugin/server/fetcher/lib/errors';
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 

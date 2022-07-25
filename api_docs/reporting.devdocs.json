@@ -26,7 +26,15 @@
               "\nA function that Reporting calls to get the sharing data from the application."
             ],
             "signature": [
-              "(forShareUrl?: boolean | undefined) => Omit<{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "(forShareUrl?: boolean | undefined) => Omit<{ layout?: { id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }, \"version\" | \"browserTimezone\">"
             ],
@@ -335,7 +343,15 @@
             "section": "def-common.BasePayload",
             "text": "BasePayload"
           },
-          " extends { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          " extends { layout?: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
@@ -523,7 +539,15 @@
         "label": "BaseParams",
         "description": [],
         "signature": [
-          "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "{ layout?: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
@@ -542,7 +566,15 @@
           "\nReport job parameters that an application must return from its\ngetSharingData function."
         ],
         "signature": [
-          "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "{ layout?: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; } & { locatorParams: ",
           {
@@ -570,7 +602,15 @@
         "label": "JobAppParamsPDF",
         "description": [],
         "signature": [
-          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "{ title: string; layout: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
         ],
@@ -587,7 +627,15 @@
         "label": "JobAppParamsPDFV2",
         "description": [],
         "signature": [
-          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "{ title: string; layout: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; }; objectType: string; locatorParams: ",
           {

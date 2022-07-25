@@ -6,11 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient, UseQueryOptions } from 'react-query';
+import type { UseQueryOptions } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRules } from './api';
 import * as i18n from './translations';
-import { FilterOptions, PaginationOptions, Rule, SortingOptions } from './types';
+import type { FilterOptions, PaginationOptions, Rule, SortingOptions } from './types';
 
 export interface FindRulesQueryArgs {
   filterOptions?: FilterOptions;

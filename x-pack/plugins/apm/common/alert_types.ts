@@ -11,10 +11,10 @@ import type {
   AsDuration,
   AsPercent,
   TimeUnitChar,
-} from '../../observability/common';
-import type { ActionGroup } from '../../alerting/common';
+} from '@kbn/observability-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
+import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
-import { formatDurationFromTimeUnitChar } from '../../observability/common';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
@@ -22,7 +22,7 @@ export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
   TransactionErrorRate = 'apm.transaction_error_rate',
   TransactionDuration = 'apm.transaction_duration',
-  TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
+  Anomaly = 'apm.anomaly',
 }
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
@@ -127,7 +127,7 @@ export function formatTransactionErrorRateReason({
   });
 }
 
-export function formatTransactionDurationAnomalyReason({
+export function formatAnomalyReason({
   serviceName,
   severityLevel,
   measured,
@@ -188,9 +188,9 @@ export const ALERT_TYPES_CONFIG: Record<
     producer: APM_SERVER_FEATURE_ID,
     isExportable: true,
   },
-  [AlertType.TransactionDurationAnomaly]: {
-    name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
-      defaultMessage: 'Latency anomaly',
+  [AlertType.Anomaly]: {
+    name: i18n.translate('xpack.apm.anomalyAlert.name', {
+      defaultMessage: 'Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,

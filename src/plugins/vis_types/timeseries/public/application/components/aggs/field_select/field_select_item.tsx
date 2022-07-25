@@ -60,6 +60,7 @@ export function FieldSelectItem({
           singleSelection={{ asPlainText: true }}
           isInvalid={isInvalid}
           fullWidth={true}
+          data-test-subj="fieldSelectItem"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -69,6 +70,7 @@ export function FieldSelectItem({
           disableDelete={disableDelete}
           disableAdd={disableAdd}
           responsive={false}
+          testSubj="fieldSelectItem"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

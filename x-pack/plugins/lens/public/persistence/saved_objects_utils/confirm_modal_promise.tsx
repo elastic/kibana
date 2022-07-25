@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import type { OverlayStart } from 'kibana/public';
+import type { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export function confirmModalPromise(
   message = '',

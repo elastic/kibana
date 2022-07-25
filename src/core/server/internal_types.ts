@@ -6,21 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
-import { InternalContextPreboot, ContextSetup } from './context';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import {
-  InternalElasticsearchServicePreboot,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-} from './elasticsearch';
-import {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
+import type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+} from '@kbn/core-execution-context-server-internal';
+import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
+import type {
+  InternalContextPreboot,
+  InternalContextSetup,
+} from '@kbn/core-http-context-server-internal';
+import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
-} from './http';
+} from '@kbn/core-http-server-internal';
+import type {
+  InternalElasticsearchServicePreboot,
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
@@ -30,24 +46,17 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
-import type {
-  InternalExecutionContextSetup,
-  InternalExecutionContextStart,
-} from './execution_context';
-import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 
 /** @internal */
 export interface InternalCorePreboot {
+  analytics: AnalyticsServicePreboot;
   context: InternalContextPreboot;
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
@@ -59,8 +68,9 @@ export interface InternalCorePreboot {
 
 /** @internal */
 export interface InternalCoreSetup {
+  analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
-  context: ContextSetup;
+  context: InternalContextSetup;
   docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
@@ -82,6 +92,7 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
   docLinks: DocLinksServiceStart;
@@ -92,19 +103,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

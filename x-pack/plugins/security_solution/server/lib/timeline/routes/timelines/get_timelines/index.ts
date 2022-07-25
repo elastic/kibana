@@ -13,8 +13,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
-import { ConfigType } from '../../../../..';
-import { SetupPlugins } from '../../../../../plugin';
+import type { ConfigType } from '../../../../..';
+import type { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 

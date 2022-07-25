@@ -140,6 +140,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
   endDate="2019-06-18T06:00:00.000Z"
   flowTarget="source"
   id="ipOverview"
+  indexPatterns={Array []}
   ip="10.10.10.10"
   isInDetailsSidePanel={false}
   isLoadingAnomaliesData={false}
@@ -291,6 +292,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
   endDate="2019-06-18T06:00:00.000Z"
   flowTarget="source"
   id="ipOverview"
+  indexPatterns={Array []}
   ip="10.10.10.10"
   isInDetailsSidePanel={true}
   isLoadingAnomaliesData={false}

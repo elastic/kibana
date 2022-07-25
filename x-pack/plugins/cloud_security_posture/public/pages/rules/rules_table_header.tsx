@@ -5,12 +5,20 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import useDebounce from 'react-use/lib/useDebounce';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 import { RulesBulkActionsMenu } from './rules_bulk_actions_menu';
 
 interface RulesTableToolbarProps {
@@ -24,6 +32,8 @@ interface RulesTableToolbarProps {
   selectedRulesCount: number;
   searchValue: string;
   isSearching: boolean;
+  lastModified: string | null;
+  canUpdate: boolean;
 }
 
 interface CounterProps {
@@ -33,6 +43,16 @@ interface CounterProps {
 interface ButtonProps {
   onClick(): void;
 }
+
+const LastModificationLabel = ({ lastModified }: { lastModified: string }) => (
+  <EuiText size="s">
+    <FormattedMessage
+      id="xpack.csp.rules.tableHeader.lastModificationLabel"
+      defaultMessage="Last modification to integration {timeAgo} "
+      values={{ timeAgo: moment(lastModified).fromNow() }}
+    />
+  </EuiText>
+);
 
 export const RulesTableHeader = ({
   search,
@@ -45,22 +65,29 @@ export const RulesTableHeader = ({
   selectedRulesCount,
   searchValue,
   isSearching,
+  lastModified,
+  canUpdate,
 }: RulesTableToolbarProps) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-    <Counters total={totalRulesCount} selected={selectedRulesCount} />
-    <SelectAllToggle
-      isSelectAll={selectedRulesCount === totalRulesCount}
-      clear={clearSelection}
-      select={selectAll}
-    />
-    <BulkMenu
-      bulkEnable={bulkEnable}
-      bulkDisable={bulkDisable}
-      selectedRulesCount={selectedRulesCount}
-    />
-    <RefreshButton onClick={refresh} />
-    <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
-  </EuiFlexGroup>
+  <div>
+    {lastModified && <LastModificationLabel lastModified={lastModified} />}
+    <EuiSpacer />
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
+      <Counters total={totalRulesCount} selected={selectedRulesCount} />
+      <SelectAllToggle
+        isSelectAll={selectedRulesCount === totalRulesCount}
+        clear={clearSelection}
+        select={selectAll}
+      />
+      <BulkMenu
+        canUpdate={canUpdate}
+        bulkEnable={bulkEnable}
+        bulkDisable={bulkDisable}
+        selectedRulesCount={selectedRulesCount}
+      />
+      <RefreshButton onClick={refresh} />
+      <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+    </EuiFlexGroup>
+  </div>
 );
 
 const Counters = ({ total, selected }: { total: number; selected: number }) => (
@@ -89,20 +116,24 @@ const BulkMenu = ({
   bulkEnable,
   bulkDisable,
   selectedRulesCount,
-}: Pick<RulesTableToolbarProps, 'bulkDisable' | 'bulkEnable' | 'selectedRulesCount'>) => (
+  canUpdate,
+}: Pick<
+  RulesTableToolbarProps,
+  'bulkDisable' | 'bulkEnable' | 'selectedRulesCount' | 'canUpdate'
+>) => (
   <EuiFlexItem grow={false}>
     <RulesBulkActionsMenu
       items={[
         {
           icon: 'eye',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <ActivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_ENABLE_BUTTON,
           onClick: bulkEnable,
         },
         {
           icon: 'eyeClosed',
-          disabled: !selectedRulesCount,
+          disabled: !selectedRulesCount || !canUpdate,
           children: <DeactivateRulesMenuItemText count={selectedRulesCount} />,
           'data-test-subj': TEST_SUBJECTS.CSP_RULES_TABLE_BULK_DISABLE_BUTTON,
           onClick: bulkDisable,
@@ -127,7 +158,9 @@ const SearchField = ({
     <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
       <EuiFieldSearch
         isLoading={isSearching}
-        placeholder={TEXT.SEARCH}
+        placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
+          defaultMessage: 'Search',
+        })}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         style={{ minWidth: 150 }}
@@ -209,7 +242,10 @@ const RefreshButton = ({ onClick }: ButtonProps) => (
       iconType={'refresh'}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_REFRESH_BUTTON}
     >
-      {TEXT.REFRESH}
+      <FormattedMessage
+        id="xpack.csp.rules.rulesTable.refreshButtonLabel"
+        defaultMessage="Refresh"
+      />
     </EuiButtonEmpty>
   </EuiFlexItem>
 );

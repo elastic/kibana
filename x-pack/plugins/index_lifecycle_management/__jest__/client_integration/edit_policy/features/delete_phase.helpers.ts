@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   createMinAgeActions,
   createSavePolicyAction,
@@ -17,8 +18,8 @@ type SetupReturn = ReturnType<typeof setupDeleteTestBed>;
 
 export type DeleteTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupDeleteTestBed = async () => {
-  const testBed = await initTestBed();
+export const setupDeleteTestBed = async (httpSetup: HttpSetup) => {
+  const testBed = await initTestBed(httpSetup);
   const { exists } = testBed;
 
   return {

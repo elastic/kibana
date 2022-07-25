@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Subject } from 'rxjs';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerOpsStatsCollector } from '.';
-import { OpsMetrics } from '../../../../../core/server';
-import { loggingSystemMock, metricsServiceMock } from '../../../../../core/server/mocks';
+import { OpsMetrics } from '@kbn/core/server';
+import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -47,7 +46,7 @@ describe('telemetry_ops_stats', () => {
   });
 
   test('should return something when there is a metric', async () => {
-    const opsMetrics = await metricsServiceSetupMock.getOpsMetrics$().pipe(take(1)).toPromise();
+    const opsMetrics = await firstValueFrom(metricsServiceSetupMock.getOpsMetrics$());
     metrics$.next(opsMetrics);
     expect(collector.isReady()).toBe(true);
     expect(await collector.fetch(mockedFetchContext)).toMatchSnapshot({

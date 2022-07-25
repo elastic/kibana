@@ -14,7 +14,7 @@ describe('encryption key configuration', () => {
   let encryptionConfig = null;
 
   beforeEach(() => {
-    jest.spyOn(fs, 'readFileSync').mockReturnValue('xpack.security.encryptionKey: foo');
+    jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('xpack.security.encryptionKey: foo');
     jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
     encryptionConfig = new EncryptionConfig();
   });

@@ -41,7 +41,11 @@ export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
       <EuiSpacer size="m" />
       <OutputsTable outputs={outputs} deleteOutput={deleteOutput} />
       <EuiSpacer size="s" />
-      <EuiButtonEmpty iconType="plusInCircle" href={getHref('settings_create_outputs')}>
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        href={getHref('settings_create_outputs')}
+        data-test-subj="addOutputBtn"
+      >
         <FormattedMessage
           id="xpack.fleet.settings.outputCreateButtonLabel"
           defaultMessage="Add output"

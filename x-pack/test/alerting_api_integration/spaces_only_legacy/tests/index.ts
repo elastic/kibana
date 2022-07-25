@@ -11,8 +11,6 @@ import { Spaces } from '../scenarios';
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration spaces only legacy configuration', function () {
-    this.tags('ciGroup12');
-
     loadTestFile(require.resolve('./actions/builtin_action_types/webhook'));
   });
 }

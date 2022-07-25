@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, PageInfoPaginated } from '../../common';
-import { RequestOptionsPaginated } from '../..';
-import { Agent } from '../../../shared_imports';
+import type { Inspect, Maybe } from '../../common';
+import type { RequestOptionsPaginated } from '../..';
+import type { Agent } from '../../../shared_imports';
 
 export interface AgentsStrategyResponse extends IEsSearchResponse {
   edges: Agent[];
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 

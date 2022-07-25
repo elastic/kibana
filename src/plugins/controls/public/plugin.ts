@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from './services';
 import {
   ControlsPluginSetup,
@@ -20,9 +21,24 @@ import {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddableInput,
 } from './control_types/options_list';
-import { ControlGroupContainerFactory, CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
+import {
+  RangeSliderEmbeddableFactory,
+  RangeSliderEmbeddableInput,
+} from './control_types/range_slider';
+import {
+  ControlGroupContainerFactory,
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  // TIME_SLIDER_CONTROL,
+} from '.';
+/*
+import {
+  TimesliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider';
+*/
 import { controlsService } from './services/kibana/controls';
-import { EmbeddableFactory } from '../../embeddable/public';
 
 export class ControlsPlugin
   implements
@@ -45,10 +61,11 @@ export class ControlsPlugin
     factoryDef: IEditableControlFactory<I>,
     factory: EmbeddableFactory
   ) {
-    (factory as IEditableControlFactory<I>).controlEditorComponent =
-      factoryDef.controlEditorComponent;
+    (factory as IEditableControlFactory<I>).controlEditorOptionsComponent =
+      factoryDef.controlEditorOptionsComponent ?? undefined;
     (factory as IEditableControlFactory<I>).presaveTransformFunction =
       factoryDef.presaveTransformFunction;
+    (factory as IEditableControlFactory<I>).isFieldCompatible = factoryDef.isFieldCompatible;
   }
 
   public setup(
@@ -56,6 +73,7 @@ export class ControlsPlugin
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
     const { registerControlType } = controlsService;
+    const { embeddable } = _setupPlugins;
 
     // register control group embeddable factory
     _coreSetup.getStartServices().then(([, deps]) => {
@@ -75,8 +93,35 @@ export class ControlsPlugin
         optionsListFactory
       );
       registerControlType(optionsListFactory);
+
+      // Register range slider
+      const rangeSliderFactoryDef = new RangeSliderEmbeddableFactory();
+      const rangeSliderFactory = embeddable.registerEmbeddableFactory(
+        RANGE_SLIDER_CONTROL,
+        rangeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<RangeSliderEmbeddableInput>(
+        rangeSliderFactoryDef,
+        rangeSliderFactory
+      );
+      registerControlType(rangeSliderFactory);
+
+      // Time Slider Control Factory Setup
+      /* Temporary disabling Time Slider
+      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        TIME_SLIDER_CONTROL,
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+      
+
+      registerControlType(timeSliderFactory);
+      */
     });
-    const { embeddable } = _setupPlugins;
 
     return {
       registerControlType,
@@ -87,6 +132,7 @@ export class ControlsPlugin
     this.startControlsKibanaServices(coreStart, startPlugins);
 
     const { getControlFactory, getControlTypes } = controlsService;
+
     return {
       getControlFactory,
       getControlTypes,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfluencerInput } from '../types';
+import type { InfluencerInput } from '../types';
 
 export const networkToInfluencers = (ip: string): InfluencerInput[] => {
   const influencers: InfluencerInput[] = [

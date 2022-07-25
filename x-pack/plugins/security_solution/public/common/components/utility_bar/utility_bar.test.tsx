@@ -16,7 +16,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from './index';
+} from '.';
 
 describe('UtilityBar', () => {
   test('it renders', () => {
@@ -86,7 +86,7 @@ describe('UtilityBar', () => {
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
     expect(siemUtilityBar).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -122,6 +122,6 @@ describe('UtilityBar', () => {
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
     expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 });

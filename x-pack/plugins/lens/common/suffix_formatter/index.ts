@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import {
-  FieldFormat,
-  FieldFormatInstanceType,
-} from '../../../../../src/plugins/field_formats/common';
+import { FieldFormat, FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
 import type { FormatFactory } from '../types';
 import type { TimeScaleUnit } from '../expressions/time_scale';
 
@@ -49,7 +46,7 @@ export function getSuffixFormatter(getFormatFactory: () => FormatFactory): Field
 
     textConvert = (val: unknown) => {
       const unit = this.param('unit') as TimeScaleUnit | undefined;
-      const suffix = unit ? unitSuffixes[unit] : undefined;
+      const suffix = unit ? unitSuffixes[unit] : this.param('suffixString');
       const nestedFormatter = this.param('id');
       const nestedParams = this.param('params');
 

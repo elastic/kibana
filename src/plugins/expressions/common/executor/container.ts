@@ -9,7 +9,7 @@
 import {
   StateContainer,
   createStateContainer,
-} from '../../../kibana_utils/common/state_containers';
+} from '@kbn/kibana-utils-plugin/common/state_containers';
 import { ExpressionFunction } from '../expression_functions';
 import { ExpressionType } from '../expression_types';
 

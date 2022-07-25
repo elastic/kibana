@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceStatusLevels } from '../../../../../src/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { getKibanaStats } from '.';
 
 describe('getKibanaStats', () => {
@@ -55,6 +55,24 @@ describe('getKibanaStats', () => {
       version: '8.0.0',
       snapshot: false,
       status: 'red',
+    });
+  });
+
+  it('should handle no status', async () => {
+    const getStatus = () => {
+      return undefined;
+    };
+    const stats = await getKibanaStats({ config, getStatus });
+    expect(stats).toStrictEqual({
+      uuid: config.uuid,
+      name: config.server.name,
+      index: config.kibanaIndex,
+      host: config.server.hostname,
+      locale: 'en',
+      transport_address: `${config.server.hostname}:${config.server.port}`,
+      version: '8.0.0',
+      snapshot: false,
+      status: 'unknown',
     });
   });
 });

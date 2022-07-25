@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { UsersQueryProps } from '../types';
-import { NavTab } from '../../../common/components/navigation/types';
+import type { ActionCreator } from 'typescript-fsa';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { UsersQueryProps } from '../types';
+import type { NavTab } from '../../../common/components/navigation/types';
 
-import { DocValueFields } from '../../../common/containers/source';
-
-import { UsersTableType } from '../../store/model';
-import { usersModel } from '../../store';
-
-interface UsersDetailsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
+import type { UsersTableType } from '../../store/model';
+import type { usersModel } from '../../store';
 
 interface UserBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
@@ -31,35 +24,28 @@ interface UserBodyComponentDispatchProps {
   usersDetailsPagePath: string;
 }
 
-interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
-  setUsersDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
 export interface UsersDetailsProps {
   detailName: string;
   usersDetailsPagePath: string;
 }
 
-export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
-  UsersDetailsComponentDispatchProps &
-  UsersQueryProps;
+export type KeyUsersDetailsNavTabWithoutMlPermission = UsersTableType.events &
+  UsersTableType.alerts;
 
-type KeyUsersDetailsNavTab = UsersTableType.anomalies;
+type KeyUsersDetailsNavTabWithMlPermission = KeyUsersDetailsNavTabWithoutMlPermission &
+  UsersTableType.anomalies;
+
+type KeyUsersDetailsNavTab =
+  | KeyUsersDetailsNavTabWithoutMlPermission
+  | KeyUsersDetailsNavTabWithMlPermission;
 
 export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
     indexPattern: DataViewBase;
     type: usersModel.UsersType;
   };
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;

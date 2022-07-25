@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { Services } from '../../types';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';

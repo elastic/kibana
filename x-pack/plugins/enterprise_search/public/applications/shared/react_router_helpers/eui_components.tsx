@@ -12,6 +12,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonEmptyProps,
+  EuiButtonIcon,
+  EuiButtonIconProps,
   EuiButtonProps,
   EuiLinkAnchorProps,
   EuiListGroupItem,
@@ -22,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { generateReactRouterProps, ReactRouterProps } from './';
+import { generateReactRouterProps, ReactRouterProps } from '.';
 
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
@@ -52,6 +54,16 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   ...rest
 }) => (
   <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
+
+type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;
+export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;

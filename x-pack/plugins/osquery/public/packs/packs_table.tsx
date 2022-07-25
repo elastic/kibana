@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiToolTip,
   EuiLoadingContent,
@@ -24,13 +24,15 @@ import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
-import { PackSavedObject } from './types';
+import type { PackSavedObject } from './types';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
+
+const EMPTY_ARRAY: PackSavedObject[] = [];
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
@@ -42,7 +44,7 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(
@@ -104,6 +106,7 @@ const PacksTableComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
         <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
@@ -184,8 +187,7 @@ const PacksTableComponent = () => {
 
   return (
     <EuiInMemoryTable<PackSavedObject>
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={data?.saved_objects ?? []}
+      items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
       pagination={true}
       sorting={sorting}

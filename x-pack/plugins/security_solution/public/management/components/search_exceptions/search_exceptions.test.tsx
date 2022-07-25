@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-import { SearchExceptions, SearchExceptionsProps } from '.';
+import type { SearchExceptionsProps } from '.';
+import { SearchExceptions } from '.';
 import { getEndpointPrivilegesInitialStateMock } from '../../../common/components/user_privileges/endpoint/mocks';
-import {
-  initialUserPrivilegesState,
-  UserPrivilegesState,
-} from '../../../common/components/user_privileges/user_privileges_context';
-import { EndpointPrivileges } from '../../../../common/endpoint/types';
+import type { UserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
 jest.mock('../../../common/components/user_privileges');
 

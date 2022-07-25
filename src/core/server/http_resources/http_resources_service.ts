@@ -6,22 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-
-import { CoreContext } from '../core_context';
-import {
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type {
   IRouter,
   RouteConfig,
-  InternalHttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
+} from '@kbn/core-http-server';
+import type {
+  InternalHttpServiceSetup,
   InternalHttpServicePreboot,
-} from '../http';
-
-import { Logger } from '../logging';
+} from '@kbn/core-http-server-internal';
+import { RequestHandlerContext } from '..';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-import { CoreService } from '../../types';
-
 import {
   InternalHttpResourcesSetup,
   HttpResources,
@@ -67,7 +65,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   stop() {}
 
-  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
+  private createRegistrar(
+    deps: SetupDeps | PrebootDeps,
+    router: IRouter<RequestHandlerContext>
+  ): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,
@@ -93,11 +94,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
-        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          includeUserSettings: true,
+        const { uiSettings } = await context.core;
+        const body = await deps.rendering.render(request, uiSettings.client, {
+          isAnonymousPage: false,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -107,11 +110,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
-        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          includeUserSettings: false,
+        const { uiSettings } = await context.core;
+        const body = await deps.rendering.render(request, uiSettings.client, {
+          isAnonymousPage: true,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({

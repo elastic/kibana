@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 
 import {
   toMountPoint,

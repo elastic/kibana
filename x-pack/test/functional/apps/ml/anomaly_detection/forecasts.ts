@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('forecasts', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     describe('with single metric job', function () {
       before(async () => {

@@ -7,13 +7,21 @@
 
 import { isArray, isEmpty, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiCodeBlock,
+  formatDate,
+  EuiIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useAllActions } from './use_all_actions';
 import { Direction } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 
 interface ActionTableResultsButtonProps {
   actionId: string;
@@ -28,6 +36,7 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -46,14 +55,24 @@ const ActionsTableComponent = () => {
     setPageSize(size);
   }, []);
 
-  const renderQueryColumn = useCallback(
-    (_, item) => (
+  const renderQueryColumn = useCallback((_, item) => {
+    if (item._source.pack_name) {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="package" />
+          </EuiFlexItem>
+          <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.data.query}
+        {item._source.queries[0].query}
       </EuiCodeBlock>
-    ),
-    []
-  );
+    );
+  }, []);
 
   const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
 
@@ -70,19 +89,48 @@ const ActionsTableComponent = () => {
   );
 
   const handlePlayClick = useCallback(
-    (item) =>
+    (item) => {
+      const packId = item._source.pack_id;
+
+      if (packId) {
+        return push('/live_queries/new', {
+          form: pickBy(
+            {
+              packId: item._source.pack_id,
+              agentSelection: {
+                agents: item._source.agent_ids,
+                allAgentsSelected: item._source.agent_all,
+                platformsSelected: item._source.agent_platforms,
+                policiesSelected: item._source.agent_policy_ids,
+              },
+            },
+            (value) => !isEmpty(value)
+          ),
+        });
+      }
+
       push('/live_queries/new', {
         form: pickBy(
           {
-            agentIds: item.fields.agents,
-            query: item._source.data.query,
-            ecs_mapping: item._source.data.ecs_mapping,
-            savedQueryId: item._source.data.saved_query_id,
+            query: item._source.queries[0].query,
+            ecs_mapping: item._source.queries[0].ecs_mapping,
+            savedQueryId: item._source.queries[0].saved_query_id,
+            agentSelection: {
+              agents: item._source.agent_ids,
+              allAgentsSelected: item._source.agent_all,
+              platformsSelected: item._source.agent_platforms,
+              policiesSelected: item._source.agent_policy_ids,
+            },
           },
           (value) => !isEmpty(value)
         ),
-      }),
+      });
+    },
     [push]
+  );
+  const isPlayButtonAvailable = useCallback(
+    () => permissions.runSavedQueries || permissions.writeLiveQueries,
+    [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
   const columns = useMemo(
@@ -128,6 +176,7 @@ const ActionsTableComponent = () => {
             type: 'icon',
             icon: 'play',
             onClick: handlePlayClick,
+            available: isPlayButtonAvailable,
           },
           {
             render: renderActionsColumn,
@@ -137,6 +186,7 @@ const ActionsTableComponent = () => {
     ],
     [
       handlePlayClick,
+      isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
@@ -149,10 +199,10 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.totalCount ?? 0,
+      totalItemCount: actionsData?.total ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
-    [actionsData?.totalCount, pageIndex, pageSize]
+    [actionsData?.total, pageIndex, pageSize]
   );
 
   return (

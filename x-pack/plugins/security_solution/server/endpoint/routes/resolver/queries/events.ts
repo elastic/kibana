@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
-import { JsonObject } from '@kbn/utility-types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JsonObject } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
-import { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import { PaginationBuilder } from '../utils/pagination';
+import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import type { PaginationBuilder } from '../utils/pagination';
 
 interface TimeRange {
   from: string;

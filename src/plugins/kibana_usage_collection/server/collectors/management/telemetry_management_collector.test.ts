@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, uiSettingsServiceMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import {
   registerManagementUsageCollector,
   createCollectorFetch,
 } from './telemetry_management_collector';
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

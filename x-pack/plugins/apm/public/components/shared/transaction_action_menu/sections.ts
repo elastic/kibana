@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
@@ -35,11 +35,12 @@ export const getSections = ({
   location,
   urlParams,
 }: {
-  transaction: Transaction;
+  transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   urlParams: ApmUrlParams;
 }) => {
+  if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;

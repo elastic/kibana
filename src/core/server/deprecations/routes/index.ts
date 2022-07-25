@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { InternalHttpServiceSetup } from '../../http';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { InternalDeprecationRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 
 export function registerRoutes({ http }: { http: InternalHttpServiceSetup }) {
-  const router = http.createRouter('/api/deprecations');
+  const router = http.createRouter<InternalDeprecationRequestHandlerContext>('/api/deprecations');
   registerGetRoute(router);
 }

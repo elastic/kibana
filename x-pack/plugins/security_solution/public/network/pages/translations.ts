@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const KQL_PLACEHOLDER = i18n.translate('xpack.securitySolution.network.kqlPlaceholder', {
-  defaultMessage: 'e.g. source.ip: "foo"',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.network.pageTitle', {
   defaultMessage: 'Network',
 });
@@ -26,13 +22,6 @@ export const NAVIGATION_DNS_TITLE = i18n.translate(
   'xpack.securitySolution.network.navigation.dnsTitle',
   {
     defaultMessage: 'DNS',
-  }
-);
-
-export const ERROR_FETCHING_DNS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigation.dns.histogram.errorFetchingDnsData',
-  {
-    defaultMessage: 'Failed to query DNS data',
   }
 );
 
@@ -63,9 +52,3 @@ export const NAVIGATION_ALERTS_TITLE = i18n.translate(
     defaultMessage: 'External alerts',
   }
 );
-
-export const DOMAINS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.securitySolution.network.dns.stackByUniqueSubdomain', {
-    values: { groupByField },
-    defaultMessage: 'Top domains by {groupByField}',
-  });

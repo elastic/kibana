@@ -19,16 +19,13 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
 
 export const UserNotification = React.memo(

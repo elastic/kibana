@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 import { DEFAULT_DATA_VIEW_ID, DEFAULT_PREVIEW_INDEX } from '../../common/constants';
 
 export class AppClient {

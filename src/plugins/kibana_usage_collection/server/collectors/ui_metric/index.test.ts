@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
-import { registerUiMetricUsageCollector } from './';
+import { registerUiMetricUsageCollector } from '.';
 
 const logger = loggingSystemMock.createLogger();
 

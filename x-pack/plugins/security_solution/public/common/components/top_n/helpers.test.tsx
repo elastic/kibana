@@ -28,11 +28,13 @@ const detectionAlertsTimelines = [TimelineId.detectionsPage, TimelineId.detectio
 const otherTimelines = [
   TimelineId.hostsPageEvents,
   TimelineId.hostsPageExternalAlerts,
+  TimelineId.hostsPageSessions,
   TimelineId.networkPageExternalAlerts,
   TimelineId.active,
   TimelineId.casePage,
   TimelineId.test,
   TimelineId.alternateTest,
+  TimelineId.kubernetesPageSessions,
 ];
 
 const othersWithoutActive = otherTimelines.filter((x) => x !== TimelineId.active);

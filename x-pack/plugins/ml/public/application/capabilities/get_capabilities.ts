@@ -24,18 +24,3 @@ export function getCapabilities(): Promise<MlCapabilitiesResponse> {
       });
   });
 }
-
-export function getManageMlCapabilities(): Promise<MlCapabilitiesResponse> {
-  return new Promise((resolve, reject) => {
-    ml.checkManageMLCapabilities()
-      .then((resp: MlCapabilitiesResponse) => {
-        if (resp.upgradeInProgress === true) {
-          setUpgradeInProgress(true);
-        }
-        resolve(resp);
-      })
-      .catch(() => {
-        reject();
-      });
-  });
-}

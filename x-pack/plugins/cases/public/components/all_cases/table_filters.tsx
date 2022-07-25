@@ -8,17 +8,20 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import { StatusAll, CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
-
 import * as i18n from './translations';
+import { SeverityFilter } from './severity_filter';
+import { useGetTags } from '../../containers/use_get_tags';
+import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
+import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -28,6 +31,8 @@ interface CasesTableFiltersProps {
   setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   availableSolutions: string[];
+  displayCreateCaseButton?: boolean;
+  onCreateCasePressed?: () => void;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -37,30 +42,23 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
   }
 `;
 
-/**
- * Collection of filters for filtering data within the CasesTable. Contains search bar,
- * and tag selection
- *
- * @param onFilterChanged change listener to be notified on filter changes
- */
-
-const defaultInitial = {
-  search: '',
-  reporters: [],
-  status: StatusAll,
-  tags: [],
-  owner: [],
-};
+const SeverityFilterWrapper = styled(EuiFlexItem)`
+  && {
+    flex-basis: 180px;
+  }
+`;
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   countInProgressCases,
   onFilterChanged,
-  initial = defaultInitial,
+  initial = DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
   hiddenStatuses,
   availableSolutions,
+  displayCreateCaseButton,
+  onCreateCasePressed,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
@@ -68,7 +66,7 @@ const CasesTableFiltersComponent = ({
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState(initial.owner);
-  const { tags, fetchTags } = useGetTags();
+  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 
   const refetch = useCallback(() => {
@@ -147,6 +145,13 @@ const CasesTableFiltersComponent = ({
     [onFilterChanged]
   );
 
+  const onSeverityChanged = useCallback(
+    (severity: CaseSeverityWithAll) => {
+      onFilterChanged({ severity });
+    },
+    [onFilterChanged]
+  );
+
   const stats = useMemo(
     () => ({
       [StatusAll]: null,
@@ -156,6 +161,12 @@ const CasesTableFiltersComponent = ({
     }),
     [countClosedCases, countInProgressCases, countOpenCases]
   );
+
+  const handleOnCreateCasePressed = useCallback(() => {
+    if (onCreateCasePressed) {
+      onCreateCasePressed();
+    }
+  }, [onCreateCasePressed]);
 
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -171,6 +182,14 @@ const CasesTableFiltersComponent = ({
               onSearch={handleOnSearch}
             />
           </EuiFlexItem>
+          <SeverityFilterWrapper grow={false} data-test-subj="severity-filter-wrapper">
+            <SeverityFilter
+              selectedSeverity={initial.severity}
+              onSeverityChange={onSeverityChanged}
+              isLoading={false}
+              isDisabled={false}
+            />
+          </SeverityFilterWrapper>
           <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
             <StatusFilter
               selectedStatus={initial.status}
@@ -207,6 +226,18 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {displayCreateCaseButton && onCreateCasePressed ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleOnCreateCasePressed}
+            iconType="plusInCircle"
+            data-test-subj="cases-table-add-case-filter-bar"
+          >
+            {i18n.CREATE_CASE_TITLE}
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

@@ -44,7 +44,7 @@ function Section({ section }) {
 
   return (
     <React.Fragment>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>{section.title}</h4>

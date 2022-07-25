@@ -8,7 +8,7 @@
 import { TestScheduler } from 'rxjs/testing';
 import { NEVER } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createPackageSearchProvider, toSearchResult } from './search_provider';
 import type { GetPackagesResponse } from './types';

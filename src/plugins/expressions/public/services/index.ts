@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart } from 'kibana/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { ExpressionsService, ExpressionRendererRegistry } from '../../common';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { ExpressionsService, ExpressionRendererRegistry } from '../../common';
 
 export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');

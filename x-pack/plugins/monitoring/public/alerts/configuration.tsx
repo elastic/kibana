@@ -9,10 +9,10 @@ import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
-import { BASE_ALERTING_API_PATH } from '../../../alerting/common';
 
 interface Props {
   alert: CommonAlert;

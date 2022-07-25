@@ -31,6 +31,7 @@ import { ISource } from '../../../sources/source';
 import { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
 import {
+  CustomIcon,
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
@@ -76,7 +77,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     }),
   ];
   clusterSourceDescriptor.id = documentSource.getId();
-  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+  return new ESGeoGridSource(clusterSourceDescriptor);
 }
 
 function getClusterStyleDescriptor(
@@ -171,6 +172,7 @@ export interface BlendedVectorLayerArguments {
   chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
+  customIcons: CustomIcon[];
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
@@ -207,6 +209,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       clusterStyleDescriptor,
       this._clusterSource,
       this,
+      options.customIcons,
       options.chartsPaletteServiceGetColor
     );
 
@@ -219,15 +222,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       }
     }
     this._isClustered = isClustered;
-  }
-
-  destroy() {
-    if (this._documentSource) {
-      this._documentSource.destroy();
-    }
-    if (this._clusterSource) {
-      this._clusterSource.destroy();
-    }
   }
 
   async getDisplayName(source?: ISource) {
@@ -295,7 +289,8 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
-      this.getCurrentStyle()
+      this.getCurrentStyle(),
+      syncContext.isFeatureEditorOpenForLayer
     );
     const source = this.getSource();
 

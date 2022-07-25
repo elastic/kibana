@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { times } from 'lodash';
-import { parseDuration } from '../../../../alerting/server';
-import { MAX_INTERVALS } from '../index';
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import { MAX_INTERVALS } from '..';
 
 // dates as numbers are epoch millis
 // dates as strings are ISO

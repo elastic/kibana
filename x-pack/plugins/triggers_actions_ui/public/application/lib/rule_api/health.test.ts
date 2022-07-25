@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { alertingFrameworkHealth } from './health';
 
 describe('alertingFrameworkHealth', () => {

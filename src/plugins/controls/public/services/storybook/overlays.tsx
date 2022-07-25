@@ -15,10 +15,10 @@ import {
   OverlayFlyoutOpenOptions,
   OverlayModalConfirmOptions,
   OverlayRef,
-} from '../../../../../core/public';
+} from '@kbn/core/public';
+import { MountWrapper } from '@kbn/core/public/utils';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsOverlaysService } from '../overlays';
-import { MountWrapper } from '../../../../../core/public/utils';
-import { PluginServiceFactory } from '../../../../presentation_util/public';
 
 type OverlaysServiceFactory = PluginServiceFactory<ControlsOverlaysService>;
 

@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
@@ -19,10 +23,10 @@ import {
   setFieldFormats,
   setCoreStart,
   setDataStart,
+  setDataViewsStart,
   setCharts,
+  setUsageCollectionStart,
 } from './services';
-import { DataPublicPluginStart } from '../../../data/public';
-import { ChartsPluginStart } from '../../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
@@ -34,7 +38,9 @@ export interface MetricsPluginSetupDependencies {
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /** @internal */
@@ -58,11 +64,18 @@ export class MetricsPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data, charts }: MetricsPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, charts, dataViews, usageCollection }: MetricsPluginStartDependencies
+  ) {
     setCharts(charts);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);
+    setDataViewsStart(dataViews);
     setCoreStart(core);
+    if (usageCollection) {
+      setUsageCollectionStart(usageCollection);
+    }
   }
 }

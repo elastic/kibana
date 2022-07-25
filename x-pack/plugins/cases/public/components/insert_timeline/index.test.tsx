@@ -17,7 +17,7 @@ import { getFormMock } from '../__mock__/form';
 import { InsertTimeline } from '.';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
-jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../timeline_context/use_timeline_context');
 
 const useFormMock = useForm as jest.Mock;

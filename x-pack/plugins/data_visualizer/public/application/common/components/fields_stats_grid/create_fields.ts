@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import { FileBasedFieldVisConfig } from '../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import { roundToDecimalPlace } from '../utils';
 
 export function createFields(results: FindFileStructureResponse) {
@@ -28,20 +28,20 @@ export function createFields(results: FindFileStructureResponse) {
       if (fieldStats[name] !== undefined) {
         const field: FileBasedFieldVisConfig = {
           fieldName: name,
-          type: JOB_FIELD_TYPES.UNKNOWN,
+          type: SUPPORTED_FIELD_TYPES.UNKNOWN,
         };
         const f = fieldStats[name];
         const m = mappings.properties[name];
 
         // sometimes the timestamp field is not in the mappings, and so our
         // collection of fields will be missing a time field with a type of date
-        if (name === timestampField && field.type === JOB_FIELD_TYPES.UNKNOWN) {
-          field.type = JOB_FIELD_TYPES.DATE;
+        if (name === timestampField && field.type === SUPPORTED_FIELD_TYPES.UNKNOWN) {
+          field.type = SUPPORTED_FIELD_TYPES.DATE;
         }
 
         if (m !== undefined) {
           field.type = getSupportedFieldType(m.type);
-          if (field.type === JOB_FIELD_TYPES.NUMBER) {
+          if (field.type === SUPPORTED_FIELD_TYPES.NUMBER) {
             numericFieldsCount += 1;
           }
           if (m.format !== undefined) {
@@ -71,7 +71,7 @@ export function createFields(results: FindFileStructureResponse) {
         }
 
         if (f.top_hits !== undefined) {
-          if (field.type === JOB_FIELD_TYPES.TEXT) {
+          if (field.type === SUPPORTED_FIELD_TYPES.TEXT) {
             _stats = {
               ..._stats,
               examples: f.top_hits.map((hit) => hit.value),
@@ -84,7 +84,7 @@ export function createFields(results: FindFileStructureResponse) {
           }
         }
 
-        if (field.type === JOB_FIELD_TYPES.DATE) {
+        if (field.type === SUPPORTED_FIELD_TYPES.DATE) {
           _stats = {
             ..._stats,
             earliest: f.earliest,
@@ -99,9 +99,9 @@ export function createFields(results: FindFileStructureResponse) {
         // this could be the message field for a semi-structured log file or a
         // field which the endpoint has not been able to work out any information for
         const type =
-          mappings.properties[name] && mappings.properties[name].type === JOB_FIELD_TYPES.TEXT
-            ? JOB_FIELD_TYPES.TEXT
-            : JOB_FIELD_TYPES.UNKNOWN;
+          mappings.properties[name] && mappings.properties[name].type === SUPPORTED_FIELD_TYPES.TEXT
+            ? SUPPORTED_FIELD_TYPES.TEXT
+            : SUPPORTED_FIELD_TYPES.UNKNOWN;
 
         return {
           fieldName: name,

@@ -6,17 +6,21 @@
  */
 
 import { chunk, mapValues } from 'lodash';
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-import { IEventLogReader } from '../event_log/event_log_reader';
-import { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
-import { IRuleExecutionLogForRoutes } from './client_interface';
+import type { IEventLogReader } from '../event_log/event_log_reader';
+import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
+import type {
+  GetAggregateExecutionEventsArgs,
+  IRuleExecutionLogForRoutes,
+} from './client_interface';
 
-import { ExtMeta } from '../utils/console_logging';
+import type { ExtMeta } from '../utils/console_logging';
 import { truncateList } from '../utils/normalization';
 
 const RULES_PER_CHUNK = 1000;
@@ -28,6 +32,47 @@ export const createClientForRoutes = (
   logger: Logger
 ): IRuleExecutionLogForRoutes => {
   return {
+    getAggregateExecutionEvents({
+      ruleId,
+      start,
+      end,
+      queryText,
+      statusFilters,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    }: GetAggregateExecutionEventsArgs): Promise<GetAggregateRuleExecutionEventsResponse> {
+      return withSecuritySpan(
+        'IRuleExecutionLogForRoutes.getAggregateExecutionEvents',
+        async () => {
+          try {
+            return await eventLog.getAggregateExecutionEvents({
+              ruleId,
+              start,
+              end,
+              queryText,
+              statusFilters,
+              page,
+              perPage,
+              sortField,
+              sortOrder,
+            });
+          } catch (e) {
+            const logMessage =
+              'Error getting last aggregation of execution failures from event log';
+            const logAttributes = `rule id: "${ruleId}"`;
+            const logReason = e instanceof Error ? e.message : String(e);
+            const logMeta: ExtMeta = {
+              rule: { id: ruleId },
+            };
+
+            logger.error<ExtMeta>(`${logMessage}; ${logAttributes}; ${logReason}`, logMeta);
+            throw e;
+          }
+        }
+      );
+    },
     /**
      * Get the current rule execution summary for each of the given rule IDs.
      * This method splits work into chunks so not to overwhelm Elasticsearch

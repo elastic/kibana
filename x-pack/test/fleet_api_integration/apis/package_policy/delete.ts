@@ -48,6 +48,7 @@ export default function (providerContext: FtrProviderContext) {
               name: 'Test policy',
               namespace: 'default',
               is_managed: false,
+              force: true,
             });
         }
       }
@@ -138,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
           name: agentPolicy.name,
           namespace: agentPolicy.namespace,
           is_managed: false,
+          force: true,
         })
         .expect(200);
     });

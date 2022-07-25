@@ -1,31 +1,46 @@
 
 # Massage and Ingest Code Coverage Json Summary and Send to ES 
 
-## Currently, we have 4 indexes 
+## Currently, we have 2 indexes 
 
 ### 2 for the Code Coverage Job
-https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/
+https://buildkite.com/elastic/kibana-code-coverage-main
 1. kibana_code_coverage
 2. kibana_total_code_coverage
 
-### 2 for the R & D Job
-https://kibana-ci.elastic.co/job/elastic+kibana+qa-research/
-1. qa_research_code_coverage
-2. qa_research_total_code_coverage
- 
 ## How it works 
 
-It starts with this jenkins pipeline file:
+It starts with buildkite
 
-.ci/Jenkinsfile_coverage#L60
+At the time of this writing, the code coverage job steps are:
+```yaml
+env:
+  CODE_COVERAGE: '1'
+  NODE_ENV: 'test'
+  DISABLE_MISSING_TEST_REPORT_ERRORS: 'true'
+steps:
+
+#  .. MYRIAD STEPS BEFORE CODE COVERAGE BEGINS ..
+    
+  - command: .buildkite/scripts/steps/code_coverage/ingest.sh
+    label: 'Merge and Ingest'
+    agents:
+      queue: n2-4
+    depends_on:
+      - jest
+      - oss-cigroup
+      - default-cigroup
+    timeout_in_minutes: 60
+    key: ingest
+          
+  - wait: ~
+    continue_on_failure: true
 
 ```
-src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
-```
 
-The ingestion system is hard coded to look for 3 coverage summary files...all json.
-
-From there, an event stream is created, that massages the data to an output format in json that is ingested.
+At the end of `.buildkite/scripts/steps/code_coverage/ingest.sh` is:
+`echo "--- Ingest results to Kibana stats cluster"`.
+The code that comes after that echo statement starts the process.
 
 ## Configuration
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
 import { EmbeddableFactoryProvider } from './types';
 import { defaultEmbeddableFactoryProvider } from './lib';

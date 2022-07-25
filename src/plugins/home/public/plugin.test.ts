@@ -8,9 +8,9 @@
 
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
-import { SharePluginSetup } from '../../share/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 const mockShare = {} as SharePluginSetup;

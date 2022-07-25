@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { DetailedPeerCertificate } from 'tls';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
@@ -42,7 +42,7 @@ interface CertificateChain {
 /**
  * List of protocols that can be renegotiated. Notably, TLSv1.3 is absent from this list, because it does not support renegotiation.
  */
-const RENEGOTIATABLE_PROTOCOLS = ['TLSv1', 'TLSv1.1', 'TLSv1.2'];
+const RENEGOTIABLE_PROTOCOLS = ['TLSv1', 'TLSv1.1', 'TLSv1.2'];
 
 /**
  * Checks whether current request can initiate new session.
@@ -133,7 +133,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         (authenticationResult.failed() &&
           Tokens.isAccessTokenExpiredError(authenticationResult.error));
       if (invalidAccessToken) {
-        authenticationResult = await this.authenticateViaPeerCertificate(request);
+        authenticationResult = await this.authenticateViaPeerCertificate(request, state);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
         // and force authenticator to clear the session.
@@ -147,7 +147,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     // to start a new session, and if so try to authenticate request using its peer certificate chain,
     // otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? await this.authenticateViaPeerCertificate(request)
+      ? await this.authenticateViaPeerCertificate(request, state)
       : authenticationResult;
   }
 
@@ -247,8 +247,12 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Tries to exchange peer certificate chain to access/refresh token pair.
    * @param request Request instance.
+   * @param [state] Optional state object associated with the provider.
    */
-  private async authenticateViaPeerCertificate(request: KibanaRequest) {
+  private async authenticateViaPeerCertificate(
+    request: KibanaRequest,
+    state?: ProviderState | null
+  ) {
     this.logger.debug('Trying to authenticate request via peer certificate chain.');
 
     // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
@@ -293,6 +297,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(result.authentication),
       {
+        // There is no need to re-activate user profile if client certificate hasn't changed.
+        userProfileGrant:
+          peerCertificate.fingerprint256 !== state?.peerCertificateFingerprint256
+            ? { type: 'accessToken', accessToken: result.access_token }
+            : undefined,
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', result.access_token).toString(),
         },
@@ -311,6 +320,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
    * (root/self-signed certificate) or when `issuerCertificate` isn't available (null or empty object). Automatically attempts to
    * renegotiate the TLS connection once if the peer certificate chain is incomplete.
    * @param request Request instance.
+   * @param isRenegotiated Indicates whether connection has been already renegotiated.
    */
   private async getCertificateChain(
     request: KibanaRequest,
@@ -332,13 +342,13 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         break;
       } else if (certificate.issuerCertificate === undefined) {
         const protocol = request.socket.getProtocol();
-        if (!isRenegotiated && protocol && RENEGOTIATABLE_PROTOCOLS.includes(protocol)) {
+        if (!isRenegotiated && protocol && RENEGOTIABLE_PROTOCOLS.includes(protocol)) {
           this.logger.debug(
             `Detected incomplete certificate chain with protocol '${protocol}', attempting to renegotiate connection.`
           );
           try {
             await request.socket.renegotiate({ requestCert: true, rejectUnauthorized: false });
-            return this.getCertificateChain(request, true);
+            return this.getCertificateChain(request, true /* isRenegotiated */);
           } catch (err) {
             this.logger.debug(`Failed to renegotiate connection: ${err}.`);
           }

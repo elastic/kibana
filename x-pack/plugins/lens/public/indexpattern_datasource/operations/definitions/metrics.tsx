@@ -6,30 +6,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import React from 'react';
+import { EuiSwitch } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
   combineErrorMessages,
+  isColumnOfType,
 } from './helpers';
 import {
-  FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   BaseIndexPatternColumn,
+  ValueFormatConfig,
 } from './column_types';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
-type MetricColumn<T> = FormattedIndexPatternColumn &
-  FieldBasedIndexPatternColumn & {
-    operationType: T;
+type MetricColumn<T> = FieldBasedIndexPatternColumn & {
+  operationType: T;
+  params?: {
+    emptyAsNull?: boolean;
+    format?: ValueFormatConfig;
   };
+};
 
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
@@ -37,6 +45,7 @@ const typeToFn: Record<string, string> = {
   average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
+  standard_deviation: 'aggStdDeviation',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -49,6 +58,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority,
   optionalTimeScaling,
   supportsDate,
+  hideZeroOption,
+  aggConfigParams,
+  documentationDescription,
 }: {
   type: T['operationType'];
   displayName: string;
@@ -57,6 +69,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   optionalTimeScaling?: boolean;
   description?: string;
   supportsDate?: boolean;
+  hideZeroOption?: boolean;
+  aggConfigParams?: Record<string, string | number | boolean>;
+  documentationDescription?: string;
 }) {
   const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
     const label = ofName(name);
@@ -71,6 +86,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
   return {
     type,
+    allowAsReference: true,
     priority,
     displayName,
     description,
@@ -98,9 +114,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    onOtherColumnChanged: (layer, thisColumnId) =>
       optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
+        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
@@ -115,7 +131,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
-        params: getFormatFromPreviousColumn(previousColumn),
+        params: {
+          ...getFormatFromPreviousColumn(previousColumn),
+          emptyAsNull:
+            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
+              ? previousColumn.params?.emptyAsNull
+              : !columnParams?.usedInMath,
+        },
       } as T;
     },
     onFieldChange: (oldColumn, field) => {
@@ -126,6 +148,43 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
+    getAdvancedOptions: ({
+      layer,
+      columnId,
+      currentColumn,
+      paramEditorUpdater,
+    }: ParamEditorProps<T>) => {
+      if (!hideZeroOption) return [];
+      return [
+        {
+          dataTestSubj: 'hide-zero-values',
+          inlineElement: (
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.hideZero', {
+                defaultMessage: 'Hide zero values',
+              })}
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                paramEditorUpdater(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
+          ),
+        },
+      ];
+    },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,
@@ -134,6 +193,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
+        emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+        ...aggConfigParams,
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
@@ -150,8 +211,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {
         defaultMessage: 'field: string',
       }),
-      description: i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
-        defaultMessage: `
+      description:
+        documentationDescription ||
+        i18n.translate('xpack.lens.indexPattern.metric.documentation.markdown', {
+          defaultMessage: `
 Returns the {metric} of a field. This function only works for number fields.
 
 Example: Get the {metric} of price:
@@ -160,17 +223,18 @@ Example: Get the {metric} of price:
 Example: Get the {metric} of price for orders from the UK:
 \`{metric}(price, kql='location:UK')\`
       `,
-        values: {
-          metric: type,
-        },
-      }),
+          values: {
+            metric: type,
+          },
+        }),
     },
     shiftable: true,
-  } as OperationDefinition<T, 'field'>;
+  } as OperationDefinition<T, 'field', {}, true>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
 export type AvgIndexPatternColumn = MetricColumn<'average'>;
+export type StandardDeviationIndexPatternColumn = MetricColumn<'standard_deviation'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -226,6 +290,41 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   }),
 });
 
+export const standardDeviationOperation = buildMetricOperation<StandardDeviationIndexPatternColumn>(
+  {
+    type: 'standard_deviation',
+    displayName: i18n.translate('xpack.lens.indexPattern.standardDeviation', {
+      defaultMessage: 'Standard deviation',
+    }),
+    ofName: (name) =>
+      i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
+        defaultMessage: 'Standard deviation of {name}',
+        values: { name },
+      }),
+    description: i18n.translate('xpack.lens.indexPattern.standardDeviation.description', {
+      defaultMessage:
+        'A single-value metric aggregation that computes the standard deviation of numeric values that are extracted from the aggregated documents',
+    }),
+    aggConfigParams: {
+      showBounds: false,
+    },
+    documentationDescription: i18n.translate(
+      'xpack.lens.indexPattern.standardDeviation.documentation.markdown',
+      {
+        defaultMessage: `
+Returns the amount of variation or dispersion of the field. The function works only for number fields.
+
+#### Examples
+
+To get the standard deviation of price, use \`standard_deviation(price)\`.
+
+To get the variance of price for orders from the UK, use \`square(standard_deviation(price, kql='location:UK'))\`.
+      `,
+      }
+    ),
+  }
+);
+
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: 'sum',
   priority: 1,
@@ -242,6 +341,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
     defaultMessage:
       'A single-value metrics aggregation that sums up numeric values that are extracted from the aggregated documents.',
   }),
+  hideZeroOption: true,
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({

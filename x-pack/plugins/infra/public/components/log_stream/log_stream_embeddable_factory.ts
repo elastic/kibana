@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
-import { InfraClientStartDeps } from '../../types';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { InfraClientStartServicesAccessor } from '../../types';
 import {
   LogStreamEmbeddable,
   LogStreamEmbeddableInput,
@@ -23,7 +19,7 @@ export class LogStreamEmbeddableFactoryDefinition
 {
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
-  constructor(private getStartServices: StartServicesAccessor<InfraClientStartDeps>) {}
+  constructor(private getStartServices: InfraClientStartServicesAccessor) {}
 
   public async isEditable() {
     const [{ application }] = await this.getStartServices();
@@ -31,8 +27,8 @@ export class LogStreamEmbeddableFactoryDefinition
   }
 
   public async create(initialInput: LogStreamEmbeddableInput, parent?: IContainer) {
-    const [core, plugins] = await this.getStartServices();
-    return new LogStreamEmbeddable(core, plugins, initialInput, parent);
+    const [core, plugins, pluginStart] = await this.getStartServices();
+    return new LogStreamEmbeddable(core, plugins, pluginStart, initialInput, parent);
   }
 
   public getDisplayName() {

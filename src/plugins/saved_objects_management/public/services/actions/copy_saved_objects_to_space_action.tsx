@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  CopyToSpaceFlyoutProps,
-  SpacesApiUi,
-} from '../../../../../../x-pack/plugins/spaces/public';
+import type { CopyToSpaceFlyoutProps, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementAction } from '../types';
 
@@ -33,7 +30,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
 
   public euiAction = {
     name: i18n.translate('savedObjectsManagement.copyToSpace.actionTitle', {
-      defaultMessage: 'Copy to space',
+      defaultMessage: 'Copy to spaces',
     }),
     description: i18n.translate('savedObjectsManagement.copyToSpace.actionDescription', {
       defaultMessage: 'Make a copy of this saved object in one or more spaces',

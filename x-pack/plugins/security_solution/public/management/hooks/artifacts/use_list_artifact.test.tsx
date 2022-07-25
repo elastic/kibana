@@ -6,15 +6,15 @@
  */
 
 import { useListArtifact } from './use_list_artifact';
-import { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   getFakeListId,
   getFakeListDefinition,
   getFakeHttpService,
   renderQuery,
-} from './test_utils';
+} from '../test_utils';
 
 describe('List artifact hook', () => {
   let result: ReturnType<typeof useListArtifact>;
@@ -25,6 +25,8 @@ describe('List artifact hook', () => {
         page: number;
         perPage: number;
         policies: string[];
+        sortField?: string;
+        sortOrder?: string;
       }
     | undefined;
 
@@ -73,8 +75,8 @@ describe('List artifact hook', () => {
         namespace_type: ['agnostic'],
         page: 2,
         per_page: 20,
-        sort_field: undefined,
-        sort_order: undefined,
+        sort_field: 'created_at',
+        sort_order: 'desc',
       },
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);

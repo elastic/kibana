@@ -94,6 +94,7 @@ export const ExpandableUserDetails = ({
               to: fromTo.to,
             });
           }}
+          indexPatterns={selectedPatterns}
         />
       )}
     </AnomalyTableProvider>

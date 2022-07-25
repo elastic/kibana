@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
-import type { SavedObjectsFindResult } from '../';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { SavedObjectsFindResult } from '..';
 import { savedObjectsRepositoryMock } from './repository.mock';
 
 import {

@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 
-import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
+import { getIndexListUri } from '@kbn/index-management-plugin/public';
 
 import {
   EuiButtonEmpty,

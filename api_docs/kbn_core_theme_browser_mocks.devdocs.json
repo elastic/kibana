@@ -1,0 +1,125 @@
+{
+  "id": "@kbn/core-theme-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser-mocks",
+        "id": "def-common.themeServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "themeServiceMock",
+        "description": [],
+        "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-theme-browser-mocks",
+            "id": "def-common.themeServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<ThemeServiceContract>"
+            ],
+            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser-mocks",
+            "id": "def-common.themeServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ThemeServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser-mocks",
+            "id": "def-common.themeServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ThemeServiceStart",
+              ">"
+            ],
+            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser-mocks",
+            "id": "def-common.themeServiceMock.createTheme",
+            "type": "Function",
+            "tags": [],
+            "label": "createTheme",
+            "description": [],
+            "signature": [
+              "() => ",
+              "CoreTheme"
+            ],
+            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser-mocks",
+            "id": "def-common.themeServiceMock.createTheme$",
+            "type": "Function",
+            "tags": [],
+            "label": "createTheme$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "CoreTheme",
+              ">"
+            ],
+            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

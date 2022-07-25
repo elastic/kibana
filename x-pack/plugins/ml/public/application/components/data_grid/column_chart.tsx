@@ -55,7 +55,10 @@ export const ColumnChart: FC<Props> = ({
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
-            <Settings theme={columnChartTheme} />
+            <Settings
+              // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+              theme={columnChartTheme}
+            />
             <BarSeries
               id="histogram"
               name="count"

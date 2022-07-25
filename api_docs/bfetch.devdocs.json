@@ -273,13 +273,7 @@
           "description": [],
           "signature": [
             "<BatchItemData extends object, BatchItemResult extends object>(path: string, handler: (request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "bfetch",
@@ -316,13 +310,7 @@
               "description": [],
               "signature": [
                 "(request: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>) => ",
                 {
                   "pluginId": "bfetch",
@@ -349,13 +337,7 @@
           "description": [],
           "signature": [
             "<Payload, Response>(path: string, params: (request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "bfetch",
@@ -392,13 +374,7 @@
               "description": [],
               "signature": [
                 "(request: ",
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>) => ",
                 {
                   "pluginId": "bfetch",

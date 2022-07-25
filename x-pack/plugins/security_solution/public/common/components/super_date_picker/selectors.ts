@@ -7,9 +7,9 @@
 
 import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
-import { State } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
-import { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
+import type { State } from '../../store';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
 
 export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
 

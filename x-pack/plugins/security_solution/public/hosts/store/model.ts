@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Direction } from '../../../common/search_strategy';
-import {
+import type { Direction } from '../../../common/search_strategy';
+import type {
   HostsFields,
   RiskScoreSortField,
   RiskSeverity,
@@ -25,6 +25,7 @@ export enum HostsTableType {
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
   risk = 'hostRisk',
+  sessions = 'sessions',
 }
 
 export interface BasicQueryPaginated {
@@ -50,6 +51,7 @@ export interface Queries {
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
   [HostsTableType.risk]: HostRiskScoreQuery;
+  [HostsTableType.sessions]: BasicQueryPaginated;
 }
 
 export interface GenericHostsModel {

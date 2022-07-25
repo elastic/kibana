@@ -9,8 +9,8 @@ import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InfraMetadata } from '../../../../../common/http_api';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {
@@ -169,13 +169,13 @@ border-top: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
 border-bottom: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
-padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
-margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+padding: ${(props) => props.theme.eui.euiSizeM} 0;
+margin-bottom: ${(props) => props.theme.eui.euiSizeM};
 display: flex;
 `;
 
 const Controls = euiStyled.div`
 flex-grow: 0;
-margin-right: ${(props) => props.theme.eui.paddingSizes.m};
+margin-right: ${(props) => props.theme.eui.euiSizeM};
 min-width: 0px;
 `;

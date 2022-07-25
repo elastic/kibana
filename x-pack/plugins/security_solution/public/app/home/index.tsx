@@ -8,9 +8,10 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
+
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
@@ -22,6 +23,11 @@ import {
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+import { ConsoleManager } from '../../management/components/console/components/console_manager';
+
+import { TourContextProvider } from '../../common/components/guided_onboarding';
+
+import { useUrlState } from '../../common/hooks/use_url_state';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -35,8 +41,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-
   useInitSourcerer(getScopeFromPath(pathname));
+  useUrlState();
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
@@ -48,14 +54,18 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
-      <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
-      <DragDropContextWrapper browserFields={browserFields}>
-        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-          {children}
-        </SecuritySolutionTemplateWrapper>
-      </DragDropContextWrapper>
-      <HelpMenu />
+      <ConsoleManager>
+        <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          <TourContextProvider>
+            <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+              {children}
+            </SecuritySolutionTemplateWrapper>
+          </TourContextProvider>
+        </DragDropContextWrapper>
+        <HelpMenu />
+      </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
 };

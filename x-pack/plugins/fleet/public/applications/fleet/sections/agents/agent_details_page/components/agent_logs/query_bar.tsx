@@ -8,8 +8,10 @@
 import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { FieldSpec } from '../../../../../../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { useStartServices } from '../../../../../hooks';
 
 import {
@@ -53,12 +55,12 @@ export const LogQueryBar: React.FunctionComponent<{
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
-          ? [
+          ? ([
               {
                 title: AGENT_LOG_INDEX_PATTERN,
                 fields: indexPatternFields,
               },
-            ]
+            ] as DataView[])
           : []
       }
       query={{

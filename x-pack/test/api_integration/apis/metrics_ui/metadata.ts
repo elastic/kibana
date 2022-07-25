@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   InfraMetadata,
   InfraMetadataRequest,
-} from '../../../../plugins/infra/common/http_api/metadata_api';
+} from '@kbn/infra-plugin/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';

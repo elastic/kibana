@@ -38,7 +38,7 @@ describe('Value labels Settings', () => {
   });
 
   it('should render the passed value if given', () => {
-    const component = shallow(<ValueLabelsSettings {...props} valueLabels="inside" />);
+    const component = shallow(<ValueLabelsSettings {...props} valueLabels="show" />);
     expect(
       component.find('[data-test-subj="lens-value-labels-visibility-btn"]').prop('idSelected')
     ).toEqual(`value_labels_inside`);

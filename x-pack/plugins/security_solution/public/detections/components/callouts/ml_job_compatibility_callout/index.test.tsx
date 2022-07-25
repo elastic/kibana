@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { MlJobCompatibilityCallout } from './index';
+import { MlJobCompatibilityCallout } from '.';
 
 jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs');
 
@@ -44,7 +44,7 @@ describe('MlJobCompatibilityCallout', () => {
   it('does not render if no affected jobs are installed', () => {
     (useInstalledSecurityJobs as jest.Mock).mockReturnValue({
       loading: false,
-      jobs: [{ id: 'windows_rare_user_type10_remote_login' }],
+      jobs: [{ id: 'high_count_network_denies' }],
     });
     const wrapper = mount(
       <TestProviders>

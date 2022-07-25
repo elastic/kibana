@@ -16,6 +16,6 @@ export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart
 
   return {
     diagnose,
-    getScreenshots: jest.fn((options) => getScreenshots(options)),
+    getScreenshots,
   };
 }

@@ -35,13 +35,6 @@ export const ALERTS_GRAPH_TITLE = i18n.translate(
   }
 );
 
-export const ALERTS_STACK_BY_MODULE = i18n.translate(
-  'xpack.securitySolution.alertsView.alertsStackByOptions.module',
-  {
-    defaultMessage: 'module',
-  }
-);
-
 export const SHOWING = i18n.translate('xpack.securitySolution.alertsView.showing', {
   defaultMessage: 'Showing',
 });
@@ -61,8 +54,4 @@ export const ERROR_FETCHING_ALERTS_DATA = i18n.translate(
 
 export const CATEGORY = i18n.translate('xpack.securitySolution.alertsView.categoryLabel', {
   defaultMessage: 'category',
-});
-
-export const MODULE = i18n.translate('xpack.securitySolution.alertsView.moduleLabel', {
-  defaultMessage: 'module',
 });

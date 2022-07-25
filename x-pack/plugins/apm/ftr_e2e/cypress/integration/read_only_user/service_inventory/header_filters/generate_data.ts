@@ -29,18 +29,16 @@ export function generateData({
   return range
     .interval('2m')
     .rate(1)
-    .spans((timestamp, index) => [
-      ...service1
+    .generator((timestamp) => [
+      service1
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)
         .duration(1000)
-        .success()
-        .serialize(),
-      ...opbeansNode
+        .success(),
+      opbeansNode
         .transaction('GET /banana 🍌')
         .timestamp(timestamp)
         .duration(500)
-        .success()
-        .serialize(),
+        .success(),
     ]);
 }

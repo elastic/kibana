@@ -9,21 +9,27 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EntSearchLogStream } from './';
+import { EntSearchLogStream } from '.';
+
+const fakeSourceId = 'fake-source-id';
 
 describe('EntSearchLogStream', () => {
   const mockDateNow = jest.spyOn(global.Date, 'now').mockReturnValue(160000000);
 
   describe('renders with default props', () => {
     /** As a result of the theme provider being added, we have to extract the child component to correctly assert */
-    const wrapper = shallow(shallow(<EntSearchLogStream />).prop('children'));
+    const wrapper = shallow(
+      shallow(
+        <EntSearchLogStream logView={{ type: 'log-view-reference', logViewId: 'default' }} />
+      ).prop('children')
+    );
 
     it('renders a LogStream (wrapped in React.Suspense) component', () => {
       expect(wrapper.type()).toEqual(React.Suspense);
     });
 
-    it('renders with the enterprise search log source ID', () => {
-      expect(wrapper.prop('sourceId')).toEqual('ent-search-logs');
+    it('renders with the empty sourceId', () => {
+      expect(wrapper.prop('sourceId')).toBeUndefined();
     });
 
     it('renders with a default last-24-hours timestamp if no timestamp is passed', () => {
@@ -35,18 +41,29 @@ describe('EntSearchLogStream', () => {
   describe('renders custom props', () => {
     it('overrides the default props', () => {
       const wrapper = shallow(
-        shallow(<EntSearchLogStream sourceId="test" startTimestamp={1} endTimestamp={2} />).prop(
-          'children'
-        )
+        shallow(
+          <EntSearchLogStream
+            logView={{ type: 'log-view-reference', logViewId: 'test' }}
+            startTimestamp={1}
+            endTimestamp={2}
+          />
+        ).prop('children')
       );
 
-      expect(wrapper.prop('sourceId')).toEqual('test');
+      expect(wrapper.prop('logView')).toEqual({ type: 'log-view-reference', logViewId: 'test' });
       expect(wrapper.prop('startTimestamp')).toEqual(1);
       expect(wrapper.prop('endTimestamp')).toEqual(2);
     });
 
     it('allows passing a custom hoursAgo that modifies the default start timestamp', () => {
-      const wrapper = shallow(shallow(<EntSearchLogStream hoursAgo={1} />).prop('children'));
+      const wrapper = shallow(
+        shallow(
+          <EntSearchLogStream
+            logView={{ type: 'log-view-reference', logViewId: fakeSourceId }}
+            hoursAgo={1}
+          />
+        ).prop('children')
+      );
 
       expect(wrapper.prop('startTimestamp')).toEqual(156400000);
       expect(wrapper.prop('endTimestamp')).toEqual(160000000);
@@ -56,6 +73,7 @@ describe('EntSearchLogStream', () => {
       const wrapper = shallow(
         shallow(
           <EntSearchLogStream
+            logView={{ type: 'log-view-reference', logViewId: fakeSourceId }}
             height={500}
             highlight="some-log-id"
             columns={[

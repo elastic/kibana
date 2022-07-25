@@ -9,15 +9,23 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   Actions,
   ActionTypes,
+  CaseSeverity,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
 } from '../../../common/api';
+import {
+  externalReferenceAttachmentES,
+  externalReferenceAttachmentSO,
+  getPersistableStateAttachmentTypeRegistry,
+  persistableStateAttachment,
+} from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const builderFactory = new BuilderFactory();
+  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const builderFactory = new BuilderFactory({ persistableStateAttachmentTypeRegistry });
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -184,6 +192,170 @@ describe('UserActionBuilder', () => {
     `);
   });
 
+  it('builds an external reference attachment (savedObject) user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.comment)!;
+    const userAction = builder.build({
+      action: Actions.update,
+      payload: {
+        attachment: externalReferenceAttachmentSO,
+      },
+      attachmentId: 'test-id',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "comment": Object {
+              "externalReferenceAttachmentTypeId": ".test",
+              "externalReferenceMetadata": null,
+              "externalReferenceStorage": Object {
+                "soType": "test-so",
+                "type": "savedObject",
+              },
+              "owner": "securitySolution",
+              "type": "externalReference",
+            },
+          },
+          "type": "comment",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "test-id",
+            "name": "associated-cases-comments",
+            "type": "cases-comments",
+          },
+          Object {
+            "id": "my-id",
+            "name": "externalReferenceId",
+            "type": "test-so",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds an external reference attachment (elasticSearchDoc) user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.comment)!;
+    const userAction = builder.build({
+      action: Actions.update,
+      payload: {
+        attachment: externalReferenceAttachmentES,
+      },
+      attachmentId: 'test-id',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "comment": Object {
+              "externalReferenceAttachmentTypeId": ".test",
+              "externalReferenceId": "my-id",
+              "externalReferenceMetadata": null,
+              "externalReferenceStorage": Object {
+                "type": "elasticSearchDoc",
+              },
+              "owner": "securitySolution",
+              "type": "externalReference",
+            },
+          },
+          "type": "comment",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "test-id",
+            "name": "associated-cases-comments",
+            "type": "cases-comments",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a persistable state attachment user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.comment)!;
+    const userAction = builder.build({
+      action: Actions.update,
+      payload: {
+        attachment: persistableStateAttachment,
+      },
+      attachmentId: 'test-id',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "comment": Object {
+              "owner": "securitySolutionFixture",
+              "persistableStateAttachmentState": Object {
+                "foo": "foo",
+              },
+              "persistableStateAttachmentTypeId": ".test",
+              "type": "persistableState",
+            },
+          },
+          "type": "comment",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "test-id",
+            "name": "associated-cases-comments",
+            "type": "cases-comments",
+          },
+          Object {
+            "id": "testRef",
+            "name": "myTestReference",
+            "type": "test-so",
+          },
+        ],
+      }
+    `);
+  });
+
   it('builds a description user action correctly', () => {
     const builder = builderFactory.getBuilder(ActionTypes.description)!;
     const userAction = builder.build({
@@ -340,6 +512,40 @@ describe('UserActionBuilder', () => {
     `);
   });
 
+  it('builds a severity user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.severity)!;
+    const userAction = builder.build({
+      payload: { severity: CaseSeverity.LOW },
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "severity": "low",
+          },
+          "type": "severity",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
   it('builds a settings user action correctly', () => {
     const builder = builderFactory.getBuilder(ActionTypes.settings)!;
     const userAction = builder.build({
@@ -413,6 +619,7 @@ describe('UserActionBuilder', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "sir",

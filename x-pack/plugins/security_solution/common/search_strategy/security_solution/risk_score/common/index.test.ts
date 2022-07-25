@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getHostRiskIndex, getUserRiskIndex } from './';
+import { getHostRiskIndex, getUserRiskIndex } from '.';
 
 describe('hosts risk search_strategy getHostRiskIndex', () => {
   it('should properly return host index if space is specified', () => {

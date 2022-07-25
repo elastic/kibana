@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
-import { LocatorPublic } from 'src/plugins/share/common';
-import type { SharePluginSetup } from 'src/plugins/share/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ManagementAppLocatorDefinition, ManagementAppLocatorParams } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 

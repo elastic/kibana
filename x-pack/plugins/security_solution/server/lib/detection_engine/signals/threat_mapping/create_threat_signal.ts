@@ -10,8 +10,8 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import { CreateThreatSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import type { CreateThreatSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
   alertId,
@@ -37,10 +37,14 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
+    entryKey: 'value',
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
@@ -85,11 +89,13 @@ export const createThreatSignal = async ({
       logger,
       pageSize: searchAfterSize,
       services,
-      signalsIndex: outputIndex,
       sortOrder: 'desc',
       trackTotalHits: false,
       tuple,
       wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     logger.debug(

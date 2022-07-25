@@ -18,3 +18,5 @@ export {
 } from './setup_environment';
 
 export type { TestSubjects } from './test_subjects';
+
+export * from './fixtures';

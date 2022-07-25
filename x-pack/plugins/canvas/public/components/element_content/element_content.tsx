@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { omitBy, isNil } from 'lodash';
-// @ts-expect-error Untyped library
-import Style from 'style-it';
+import { css } from '@emotion/react';
 
-import { ExpressionRenderer } from 'src/plugins/expressions';
+import { ExpressionRenderer } from '@kbn/expressions-plugin/common';
 import { getType } from '@kbn/interpreter';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
@@ -56,9 +55,9 @@ export const ElementContent = (props: Props) => {
 
   const containerStyle = omitBy(renderable.containerStyle, isNil);
 
-  return Style.it(
-    renderable.css,
+  return (
     <div
+      css={css(renderable.css)}
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
       style={{ ...containerStyle, width, height }}
@@ -74,7 +73,6 @@ export const ElementContent = (props: Props) => {
           renderFn={renderFunction.render}
           reuseNode={renderFunction.reuseDomNode}
           config={renderable.value}
-          css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           width={width}
           height={height}
           handlers={handlers}

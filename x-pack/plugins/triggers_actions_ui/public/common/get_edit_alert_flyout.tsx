@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
+import { ConnectorProvider } from '../application/context/connector_context';
 import { RuleEdit } from '../application/sections/rule_form';
-import type { RuleEditProps as AlertEditProps } from '../types';
+import type { ConnectorServices, RuleEditProps as AlertEditProps } from '../types';
 
-export const getEditAlertFlyoutLazy = (props: AlertEditProps) => {
-  return <RuleEdit {...props} />;
+export const getEditAlertFlyoutLazy = (
+  props: AlertEditProps & { connectorServices: ConnectorServices }
+) => {
+  return (
+    <ConnectorProvider value={{ services: props.connectorServices }}>
+      <RuleEdit {...props} />
+    </ConnectorProvider>
+  );
 };

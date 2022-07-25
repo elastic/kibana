@@ -6,19 +6,19 @@
  */
 
 import {
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../plugins/alerting/server';
+} from '@kbn/alerting-plugin/server';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 
 import { LifecycleAlertServices, LifecycleRuleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleExecutorMock =
   <
-    Params extends AlertTypeParams = never,
-    State extends AlertTypeState = never,
+    Params extends RuleTypeParams = never,
+    State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
     ActionGroupIds extends string = never

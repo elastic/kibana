@@ -25,7 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { search } from '../../../../../../../../src/plugins/data/public';
+import { search } from '@kbn/data-plugin/public';
 const { parseEsInterval } = search.aggs;
 
 import { documentationLinks } from '../../../services/documentation_links';

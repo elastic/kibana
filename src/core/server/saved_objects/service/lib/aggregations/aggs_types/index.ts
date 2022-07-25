@@ -8,8 +8,10 @@
 
 import { bucketAggsSchemas } from './bucket_aggs';
 import { metricsAggsSchemas } from './metrics_aggs';
+import { pipelineAggsSchemas } from './pipeline_aggs';
 
 export const aggregationSchemas = {
   ...metricsAggsSchemas,
   ...bucketAggsSchemas,
+  ...pipelineAggsSchemas,
 };

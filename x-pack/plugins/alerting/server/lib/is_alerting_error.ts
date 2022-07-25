@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isErrorWithReason } from './error_with_reason';
 
 export function isAlertSavedObjectNotFoundError(err: Error, ruleId: string) {

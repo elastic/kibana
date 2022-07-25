@@ -135,7 +135,7 @@ export const DomainsTable: React.FC = () => {
       columns={columns}
       pagination={{
         ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       }}
       onChange={handlePageChange(onPaginate)}
     />

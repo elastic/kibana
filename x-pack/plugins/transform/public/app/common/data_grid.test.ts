@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPreviewTransformRequestBody, SimpleQuery } from '../common';
+import { getPreviewTransformRequestBody, SimpleQuery } from '.';
 
 import { getIndexDevConsoleStatement, getPivotPreviewDevConsoleStatement } from './data_grid';
 

@@ -8,8 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
@@ -135,6 +135,7 @@ describe('KerberosAuthenticationProvider', () => {
           { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
           }
         )
@@ -170,6 +171,7 @@ describe('KerberosAuthenticationProvider', () => {
           {
             authHeaders: { authorization: 'Bearer some-token' },
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
           }
         )

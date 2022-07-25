@@ -7,11 +7,11 @@
 import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, formatDate, htmlIdGenerator } from '@elastic/eui';
+import { TimeRange } from '@kbn/data-plugin/common/query';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
 import { AppStateSelectedCells, getSelectionTimeRange } from '../explorer_utils';
-import { TimeRange } from '../../../../../../../src/plugins/data/common/query';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../services/anomaly_explorer_charts_service';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
@@ -29,7 +29,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
 
 export interface AddToDashboardControlProps {
   jobIds: string[];
-  selectedCells?: AppStateSelectedCells;
+  selectedCells?: AppStateSelectedCells | null;
   bounds?: TimeRangeBounds;
   interval?: number;
   onClose: (callback?: () => Promise<void>) => void;
@@ -50,8 +50,8 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
 
   const getEmbeddableInput = useCallback(() => {
     let timeRange: TimeRange | undefined;
-    if (selectedCells !== undefined && interval !== undefined && bounds !== undefined) {
-      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
+    if (!!selectedCells && interval !== undefined && bounds !== undefined) {
+      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, bounds);
       timeRange = {
         from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
         to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),

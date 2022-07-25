@@ -19,6 +19,8 @@ import {
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -27,7 +29,6 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
@@ -36,7 +37,6 @@ import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
-import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartTitle } from './chart_title';
 
 interface Props {

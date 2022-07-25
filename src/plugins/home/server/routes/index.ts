@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { registerHitsStatusRoute } from './fetch_es_hits_status';
 
 export const registerRoutes = (router: IRouter) => {

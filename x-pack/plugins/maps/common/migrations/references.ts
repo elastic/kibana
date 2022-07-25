@@ -7,7 +7,7 @@
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
-import { SavedObjectReference } from '../../../../../src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 

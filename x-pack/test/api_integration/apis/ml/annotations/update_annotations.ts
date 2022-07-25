@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
+import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
-import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -59,12 +59,12 @@ export default ({ getService }: FtrProviderContext) => {
         _id: originalAnnotation._id,
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationUpdateRequestBody)
-        .expect(200);
+        .send(annotationUpdateRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
@@ -90,12 +90,12 @@ export default ({ getService }: FtrProviderContext) => {
         _id: originalAnnotation._id,
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationUpdateRequestBody)
-        .expect(200);
+        .send(annotationUpdateRequestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
@@ -121,12 +121,12 @@ export default ({ getService }: FtrProviderContext) => {
         _id: originalAnnotation._id,
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationUpdateRequestBody)
-        .expect(403);
+        .send(annotationUpdateRequestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
@@ -150,12 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
         detector_index: 2,
         _id: originalAnnotation._id,
       };
-      await supertest
+      const { body, status } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationUpdateRequestBodyWithMissingFields)
-        .expect(200);
+        .send(annotationUpdateRequestBodyWithMissingFields);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
       if (updatedAnnotation) {

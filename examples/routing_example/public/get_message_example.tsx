@@ -16,8 +16,7 @@ import {
   EuiCallOut,
   EuiFormRow,
 } from '@elastic/eui';
-import { HttpFetchError } from '../../../src/core/public';
-import { isError } from './is_error';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
 
 interface Props {
@@ -25,7 +24,7 @@ interface Props {
 }
 
 export function GetMessageRouteExample({ getMessageById }: Props) {
-  const [error, setError] = useState<HttpFetchError | undefined>();
+  const [error, setError] = useState<IHttpFetchError | undefined>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [id, setId] = useState<string>('');
@@ -35,7 +34,7 @@ export function GetMessageRouteExample({ getMessageById }: Props) {
     setIsFetching(true);
     const response = await getMessageById(id);
 
-    if (isError(response)) {
+    if (isHttpFetchError(response)) {
       setError(response);
       setMessage('');
     } else {

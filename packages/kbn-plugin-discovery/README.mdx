@@ -1,0 +1,32 @@
+---
+id: kibDevDocsOpsPluginDiscovery
+slug: /kibana-dev-docs/ops/plugin-discovery
+title: "@kbn/plugin-discovery"
+description: A package with logic used to find plugins in the repository
+date: 2022-06-06
+tags: ['kibana', 'dev', 'contributor', 'operations', 'plugin', 'discovery']
+---
+
+At the moment plugins can live in a couple of different places and in the future will be able 
+to live anywhere in the repository. This is a package that holds custom logic useful to find and 
+parse those.
+
+## API
+
+### parseKibanaPlatformPlugin
+
+It returns a platform plugin for a given manifest path
+
+### getPluginSearchPaths
+
+It returns the paths where plugins will be searched for
+
+### simpleKibanaPlatformPluginDiscovery
+
+It finds and returns the new platform plugins 
+
+## NOTE:
+
+This code is needed in order to properly bootstrap the repository. As such, it can't have any NPM dependencies or require being built. This code is loaded directly into the node.js process that boostraps the repository from source while also being built into a package and exposed to the rest of the package system. Please consider this when making any changes to the source.
+
+The code is still type-checked as JS with JSDoc comments, and a single .ts file which provides interfaces to the JS validation and are publically available to package consumers.

@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex 1;
+  flex: 1;
 `;
 
 const MatrixLoaderComponent = () => (

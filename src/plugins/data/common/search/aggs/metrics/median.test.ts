@@ -41,7 +41,8 @@ describe('AggTypeMetricMedianProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 
@@ -132,7 +133,8 @@ describe('AggTypeMetricMedianProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
 
     expect(aggConfigs.toDsl()).toMatchSnapshot();

@@ -47,6 +47,8 @@ export const UserHostWorkingDir = React.memo<Props>(
             isDraggable={isDraggable}
             value={userName}
             iconType="user"
+            fieldType="keyword"
+            isAggregatable={true}
           />
         </TokensFlexItem>
 
@@ -66,6 +68,8 @@ export const UserHostWorkingDir = React.memo<Props>(
                 field={userDomainField}
                 isDraggable={isDraggable}
                 value={userDomain}
+                fieldType="keyword"
+                isAggregatable={true}
               />
             </TokensFlexItem>
           </>

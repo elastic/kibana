@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   risk_score_mapping,
   threat_query,
@@ -21,28 +22,42 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
+import type {
   SortOrder,
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../common/detection_engine/schemas/common';
+import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   author,
   building_block_type,
   license,
   rule_name_override,
+  data_view_id,
   timestamp_override,
+  timestamp_override_fallback_disabled,
+  timestamp_field,
+  event_category_override,
+  tiebreaker_field,
   threshold,
-  BulkAction,
-  BulkActionEditPayload,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../../common/detection_engine/schemas/common';
 
-import {
+import type {
   CreateRulesSchema,
   PatchRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 
+import type { BulkActionsDryRunErrCode } from '../../../../../common/constants';
+
 /**
- * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "record", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
@@ -100,11 +115,14 @@ export const RuleSchema = t.intersection([
     name: t.string,
     max_signals: t.number,
     references: t.array(t.string),
+    related_integrations: RelatedIntegrationArray,
+    required_fields: RequiredFieldArray,
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
     severity,
     severity_mapping,
+    setup: SetupGuide,
     tags: t.array(t.string),
     type,
     to: t.string,
@@ -115,16 +133,20 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
-    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    outcome: savedObjectResolveOutcome,
     alias_target_id: t.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
     index: t.array(t.string),
+    data_view_id,
     language: t.string,
     license,
     meta: MetaRule,
     machine_learning_job_id: t.array(t.string),
+    new_terms_fields: t.array(t.string),
+    history_window_start: t.string,
     output_index: t.string,
     query: t.string,
     rule_name_override,
@@ -139,6 +161,10 @@ export const RuleSchema = t.intersection([
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
+    timestamp_override_fallback_disabled,
+    timestamp_field,
+    event_category_override,
+    tiebreaker_field,
     note: t.string,
     exceptions_list: listArray,
     uuid: t.string,
@@ -151,19 +177,6 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
-
-export interface RuleError {
-  id?: string;
-  rule_id?: string;
-  error: { status_code: number; message: string };
-}
-
-export type BulkRuleResponse = Array<Rule | RuleError>;
-
-export interface RuleResponseBuckets {
-  rules: Rule[];
-  errors: RuleError[];
-}
 
 export interface PaginationOptions {
   page: number;
@@ -202,6 +215,7 @@ export interface FilterOptions {
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
+  excludeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {
@@ -216,24 +230,12 @@ export interface FetchRuleProps {
   signal: AbortSignal;
 }
 
-export interface EnableRulesProps {
-  ids: string[];
-  enabled: boolean;
-}
-
-export interface DeleteRulesProps {
-  ids: string[];
-}
-
-export interface DuplicateRulesProps {
-  rules: Rule[];
-}
-
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
   query?: string;
   ids?: string[];
   edit?: BulkActionEditPayload[];
+  isDryRun?: boolean;
 }
 
 export interface BulkActionSummary {
@@ -251,6 +253,7 @@ export interface BulkActionResult {
 export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
+  err_code?: BulkActionsDryRunErrCode;
   rules: Array<{ id: string; name?: string }>;
 }
 
@@ -313,6 +316,7 @@ export interface ExceptionsImportError {
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
+  rules_count?: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
   exceptions_success?: boolean;
   exceptions_success_count?: number;

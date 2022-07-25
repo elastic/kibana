@@ -13,7 +13,7 @@ import {
   CoreStart,
   Plugin,
   IUiSettingsClient,
-} from '../../../core/server';
+} from '@kbn/core/server';
 import { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
 import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';

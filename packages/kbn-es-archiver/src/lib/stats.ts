@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { cloneDeep } from 'lodash';
 
 export interface IndexStats {
@@ -84,6 +84,15 @@ export function createStats(name: string, log: ToolingLog) {
     }
 
     /**
+     * Record that a data stream was deleted
+     * @param index
+     */
+    public deletedDataStream(stream: string, template: string) {
+      getOrCreate(stream).deleted = true;
+      info('Deleted existing data stream %j with index template %j', stream, template);
+    }
+
+    /**
      * Record that an index was created
      * @param index
      */
@@ -92,6 +101,18 @@ export function createStats(name: string, log: ToolingLog) {
       info('Created index %j', index);
       Object.keys(metadata).forEach((key) => {
         debug('%j %s %j', index, key, metadata[key]);
+      });
+    }
+
+    /**
+     * Record that a data stream was created
+     * @param index
+     */
+    public createdDataStream(stream: string, template: string, metadata: Record<string, any> = {}) {
+      getOrCreate(stream).created = true;
+      info('Created data stream %j with index template %j', stream, template);
+      Object.keys(metadata).forEach((key) => {
+        debug('%j %s %j', stream, key, metadata[key]);
       });
     }
 

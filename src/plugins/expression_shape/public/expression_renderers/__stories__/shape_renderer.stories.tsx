@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { getShapeRenderer } from '../';
-import { Render } from '../../../../presentation_util/public/__stories__';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
 
 storiesOf('renderers/shape', module).add('default', () => {

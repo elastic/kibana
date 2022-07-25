@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { queryRulesBulkSchema, QueryRulesBulkSchema } from './query_rules_bulk_schema';
+import type { QueryRulesBulkSchema } from './query_rules_bulk_schema';
+import { queryRulesBulkSchema } from './query_rules_bulk_schema';
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 
 // only the basics of testing are here.

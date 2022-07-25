@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { NeedAdminForUpdateRulesCallOut } from './index';
+import { NeedAdminForUpdateRulesCallOut } from '.';
 import { TestProviders } from '../../../../common/mock';
 import * as userInfo from '../../user_info';
 

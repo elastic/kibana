@@ -8,14 +8,15 @@
 
 import { gaugeFunction } from './gauge_function';
 import { GaugeArguments, GaugeShapes } from '..';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
   GaugeCentralMajorModes,
   GaugeColorModes,
   GaugeLabelMajorModes,
   GaugeTicksPositions,
 } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#gauge', () => {
   const fn = functionWrapper(gaugeFunction());
@@ -36,79 +37,58 @@ describe('interpreter/functions#gauge', () => {
     min: 'col-1-2',
     metric: 'col-0-1',
   };
-  const checkArg = (
-    arg: keyof GaugeArguments,
-    options: Record<string, string>,
-    invalidValue: string
-  ) => {
+  const checkArg = (arg: keyof GaugeArguments, options: Record<string, string>) => {
     Object.values(options).forEach((option) => {
       it(`returns an object with the correct structure for the ${option} ${arg}`, () => {
-        const actual = fn(context, { ...args, [arg]: option }, undefined);
+        const actual = fn(context, { ...args, [arg]: option });
         expect(actual).toMatchSnapshot();
       });
     });
-
-    it(`throws error on wrong ${arg} type`, () => {
-      const actual = () => fn(context, { ...args, [arg]: invalidValue as any }, undefined);
-      expect(actual).toThrowErrorMatchingSnapshot();
-    });
   };
 
-  checkArg('shape', GaugeShapes, 'invalid_shape');
-  checkArg('colorMode', GaugeColorModes, 'invalid_color_mode');
-  checkArg('ticksPosition', GaugeTicksPositions, 'invalid_ticks_position');
-  checkArg('labelMajorMode', GaugeLabelMajorModes, 'invalid_label_major_mode');
+  checkArg('shape', GaugeShapes);
+  checkArg('colorMode', GaugeColorModes);
+  checkArg('ticksPosition', GaugeTicksPositions);
+  checkArg('labelMajorMode', GaugeLabelMajorModes);
 
   it(`returns an object with the correct structure for the circle if centralMajor and centralMajorMode are passed`, () => {
-    const actual = fn(
-      context,
-      {
-        ...args,
-        shape: GaugeShapes.CIRCLE,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      },
-      undefined
-    );
+    const actual = fn(context, {
+      ...args,
+      shape: GaugeShapes.CIRCLE,
+      centralMajor: 'Some label',
+      centralMajorMode: GaugeCentralMajorModes.CUSTOM,
+    });
     expect(actual).toMatchSnapshot();
   });
 
   it(`returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed`, () => {
-    const actual = fn(
-      context,
-      {
-        ...args,
-        shape: GaugeShapes.ARC,
-        centralMajor: 'Some label',
-        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-      },
-      undefined
-    );
+    const actual = fn(context, {
+      ...args,
+      shape: GaugeShapes.ARC,
+      centralMajor: 'Some label',
+      centralMajorMode: GaugeCentralMajorModes.CUSTOM,
+    });
     expect(actual).toMatchSnapshot();
   });
 
   it(`throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape`, () => {
     const actual = () =>
-      fn(
-        context,
-        { ...args, centralMajor: 'Some label', centralMajorMode: GaugeCentralMajorModes.CUSTOM },
-        undefined
-      );
+      fn(context, {
+        ...args,
+        centralMajor: 'Some label',
+        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
+      });
     expect(actual).toThrowErrorMatchingSnapshot();
   });
 
   it(`throws error if centralMajor or centralMajorMode are provided for the vertical shape`, () => {
     const actual = () =>
-      fn(
-        context,
-        {
-          ...args,
-          shape: GaugeShapes.VERTICAL_BULLET,
-          centralMajor: 'Some label',
-          centralMajorMode: GaugeCentralMajorModes.CUSTOM,
-        },
-        undefined
-      );
+      fn(context, {
+        ...args,
+        shape: GaugeShapes.VERTICAL_BULLET,
+        centralMajor: 'Some label',
+        centralMajorMode: GaugeCentralMajorModes.CUSTOM,
+      });
     expect(actual).toThrowErrorMatchingSnapshot();
   });
 
@@ -120,10 +100,13 @@ describe('interpreter/functions#gauge', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
-    };
-    await fn(context, args, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, args, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });

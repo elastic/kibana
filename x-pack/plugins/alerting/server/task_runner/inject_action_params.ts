@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertActionParams } from '../types';
+import { RuleActionParams } from '../types';
 
 export interface InjectActionParamsOpts {
   ruleId: string;
   spaceId: string | undefined;
   actionTypeId: string;
-  actionParams: AlertActionParams;
+  actionParams: RuleActionParams;
 }
 
 export function injectActionParams({

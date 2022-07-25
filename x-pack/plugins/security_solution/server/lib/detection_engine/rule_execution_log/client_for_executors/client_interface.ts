@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Duration } from 'moment';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import type { Duration } from 'moment';
+import type { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
 /**
  * Used from rule executors to log various information about the rule execution:

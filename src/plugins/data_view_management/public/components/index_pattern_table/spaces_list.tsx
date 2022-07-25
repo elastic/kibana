@@ -8,16 +8,14 @@
 
 import React, { FC, useState } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  SpacesPluginStart,
-  ShareToSpaceFlyoutProps,
-} from '../../../../../../x-pack/plugins/spaces/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data_views/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 
 interface Props {
   spacesApi: SpacesPluginStart;
+  capabilities: Capabilities | undefined;
   spaceIds: string[];
   id: string;
   title: string;
@@ -28,12 +26,18 @@ const noun = i18n.translate('indexPatternManagement.indexPatternTable.savedObjec
   defaultMessage: 'data view',
 });
 
-export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh }) => {
+export const SpacesList: FC<Props> = ({
+  spacesApi,
+  capabilities,
+  spaceIds,
+  id,
+  title,
+  refresh,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   function onClose() {
     setShowFlyout(false);
-    refresh();
   }
 
   const LazySpaceList = spacesApi.ui.components.getSpaceList;
@@ -47,18 +51,22 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
       title,
       noun,
     },
+    onUpdate: refresh,
     onClose,
   };
 
+  const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
+  const clickProperties = canAssignSpaces
+    ? { cursorStyle: 'pointer', listOnClick: () => setShowFlyout(true) }
+    : { cursorStyle: 'not-allowed' };
   return (
     <>
-      <EuiButtonEmpty
-        onClick={() => setShowFlyout(true)}
-        style={{ height: 'auto' }}
-        data-test-subj="manageSpacesButton"
-      >
-        <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
-      </EuiButtonEmpty>
+      <LazySpaceList
+        namespaces={spaceIds}
+        displayLimit={8}
+        behaviorContext="outside-space"
+        {...clickProperties}
+      />
       {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>
   );

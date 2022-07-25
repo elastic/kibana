@@ -7,10 +7,10 @@
 
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { EndpointArtifactClient } from './artifact_client';
-import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 
 describe('artifact_client', () => {
-  describe('ArtifactClient sanity checks', () => {
+  describe('ArtifactClient checks', () => {
     let fleetArtifactClient: ReturnType<typeof createArtifactsClientMock>;
     let artifactClient: EndpointArtifactClient;
 

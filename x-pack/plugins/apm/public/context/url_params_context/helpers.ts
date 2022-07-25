@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
-import { compact, pickBy } from 'lodash';
-import moment from 'moment';
+import datemath from '@kbn/datemath';
+import { pickBy } from 'lodash';
 import { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
@@ -19,25 +18,12 @@ function getParsedDate(rawDate?: string, options = {}) {
   }
 }
 
-export function getExactDate(rawDate: string) {
-  const isRelativeDate = rawDate.startsWith('now');
-  if (isRelativeDate) {
-    // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
-    const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
-    return getParsedDate(rawDateWithouRounding);
-  }
-  return getParsedDate(rawDate);
-}
-
 export function getDateRange({
   state = {},
   rangeFrom,
   rangeTo,
 }: {
-  state?: Pick<
-    UrlParams,
-    'rangeFrom' | 'rangeTo' | 'start' | 'end' | 'exactStart' | 'exactEnd'
-  >;
+  state?: Pick<UrlParams, 'rangeFrom' | 'rangeTo' | 'start' | 'end'>;
   rangeFrom?: string;
   rangeTo?: string;
 }) {
@@ -46,15 +32,10 @@ export function getDateRange({
     return {
       start: state.start,
       end: state.end,
-      exactStart: state.exactStart,
-      exactEnd: state.exactEnd,
     };
   }
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
-
-  const exactStart = rangeFrom ? getExactDate(rangeFrom) : undefined;
-  const exactEnd = rangeTo ? getExactDate(rangeTo) : undefined;
 
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
@@ -62,19 +43,12 @@ export function getDateRange({
     return {
       start: state.start,
       end: state.end,
-      exactStart: state.exactStart,
-      exactEnd: state.exactEnd,
     };
   }
 
-  // rounds down start to minute
-  const roundedStart = moment(start).startOf('minute');
-
   return {
-    start: roundedStart.toISOString(),
+    start: start.toISOString(),
     end: end.toISOString(),
-    exactStart: exactStart?.toISOString(),
-    exactEnd: exactEnd?.toISOString(),
   };
 }
 
@@ -93,10 +67,6 @@ export function toString(value?: string) {
 
 export function toBoolean(value?: string) {
   return value === 'true';
-}
-
-export function getPathAsArray(pathname: string = '') {
-  return compact(pathname.split('/'));
 }
 
 export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {

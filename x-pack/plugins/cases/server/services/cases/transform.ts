@@ -14,8 +14,8 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
 import {
   CONNECTOR_ID_REFERENCE_NAME,

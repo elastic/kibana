@@ -9,21 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-import { registerVisualizationsCollector } from './usage_collector';
-import { capabilitiesProvider } from './capabilities_provider';
-
-import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-} from '../../../core/server';
-import type { UsageCollectionSetup } from '../../usage_collection/server';
-import type { EmbeddableSetup } from '../../embeddable/server';
+} from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import { capabilitiesProvider } from './capabilities_provider';
+
+import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType } from './saved_objects';
 
@@ -39,7 +37,6 @@ export class VisualizationsPlugin
   public setup(
     core: CoreSetup,
     plugins: {
-      usageCollection?: UsageCollectionSetup;
       embeddable: EmbeddableSetup;
       data: DataPluginSetup;
     }
@@ -59,17 +56,12 @@ export class VisualizationsPlugin
         }),
         value: true,
         description: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsText', {
-          defaultMessage: `Allows users to create, view, and edit visualizations that are in technical preview.
-            If disabled, only visualizations that are considered production-ready are available to the user.`,
+          defaultMessage: `When enabled, allows you to create, view, and edit visualizations that are in technical preview. When disabled, only production-ready visualizations are available.`,
         }),
         category: ['visualization'],
         schema: schema.boolean(),
       },
     });
-
-    if (plugins.usageCollection) {
-      registerVisualizationsCollector(plugins.usageCollection);
-    }
 
     plugins.embeddable.registerEmbeddableFactory(
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()

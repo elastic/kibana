@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
-import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -38,13 +36,6 @@ export const drag = (subject: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-/** Drags the subject being dragged on the specified drop target, but does not drop it  */
-export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
-  cy.wrap(dropTarget).trigger('mousemove', 'center', {
-    button: primaryButton,
-  });
-};
-
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   const targetLocation = dropTarget[0].getBoundingClientRect();
@@ -66,21 +57,65 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  deleteAlertsAndRules();
+  deleteCases();
+  deleteTimelines();
+};
 
-  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
-    const rules: RuleEcs[] = response.body.data;
+export const cleanPackages = () => {
+  deletePolicies();
+  deletePackages();
+};
 
-    if (response.body.data.length > 0) {
-      rules.forEach((rule) => {
-        const jsonRule = rule;
+export const deletePolicies = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/agent_policies',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { id: string }) => {
+      cy.request({
+        method: 'POST',
+        url: `api/fleet/agent_policies/delete`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        body: {
+          agentPolicyId: item.id,
+        },
+      });
+    });
+  });
+};
+
+export const deletePackages = () => {
+  cy.request({
+    method: 'GET',
+    url: 'api/fleet/epm/packages',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  }).then((response) => {
+    response.body.items.forEach((item: { status: string; name: string; version: string }) => {
+      if (item.status === 'installed') {
         cy.request({
           method: 'DELETE',
-          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
-          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+          url: `api/fleet/epm/packages/${item.name}/${item.version}`,
+          headers: { 'kbn-xsrf': 'cypress-creds' },
         });
-      });
-    }
+      }
+    });
+  });
+};
+
+export const deleteAlertsAndRules = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+
+  cy.request({
+    method: 'POST',
+    url: '/api/detection_engine/rules/_bulk_action',
+    body: {
+      query: '',
+      action: 'delete',
+    },
+    failOnStatusCode: false,
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
@@ -90,22 +125,6 @@ export const cleanKibana = () => {
           {
             match: {
               type: 'alert',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  deleteCases();
-
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'siem-ui-timeline',
             },
           },
         ],
@@ -124,8 +143,23 @@ export const cleanKibana = () => {
       },
     }
   );
+};
 
-  esArchiverResetKibana();
+export const deleteTimelines = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
 };
 
 export const deleteCases = () => {

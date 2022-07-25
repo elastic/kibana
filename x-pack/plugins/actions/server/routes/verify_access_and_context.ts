@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { ILicenseState, isErrorThatHandlesItsOwnResponse, verifyApiAccess } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 

@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
-import { OverlayStart } from '../../../src/core/public';
-import { createAction } from '../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../src/plugins/kibana_react/public';
+import { OverlayStart } from '@kbn/core/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 

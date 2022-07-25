@@ -69,6 +69,9 @@ function setup({ include, exclude, esVersion }) {
         info(...args) {
           history.push(`info: ${format(...args)}`);
         },
+        debug(...args) {
+          history.push(`debg: ${format(...args)}`);
+        },
       },
       mocha,
       include,
@@ -221,7 +224,7 @@ it(`excludes tests which don't meet the esVersionRequirement`, async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 9.0.0",
+      "debg: Only running suites which are compatible with ES version 9.0.0",
       "suite: ",
       "suite: level 1",
       "suite: level 1 level 1a",

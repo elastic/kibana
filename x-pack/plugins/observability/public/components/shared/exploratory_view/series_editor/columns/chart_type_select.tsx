@@ -8,9 +8,9 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl, useFetcher } from '../../../../../index';
+import { SeriesUrl, useFetcher } from '../../../../..';
 import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 

@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
-import { FilterOptions } from './types';
+import { escapeKuery } from '../../../../common/lib/keury';
+import type { FilterOptions } from './types';
+
+const SEARCHABLE_RULE_PARAMS = [
+  'alert.attributes.name',
+  'alert.attributes.params.index',
+  'alert.attributes.params.threat.tactic.id',
+  'alert.attributes.params.threat.tactic.name',
+  'alert.attributes.params.threat.technique.id',
+  'alert.attributes.params.threat.technique.name',
+  'alert.attributes.params.threat.technique.subtechnique.id',
+  'alert.attributes.params.threat.technique.subtechnique.name',
+];
 
 /**
  * Convert rules filter options object to KQL query
@@ -15,27 +26,44 @@ import { FilterOptions } from './types';
  *
  * @returns KQL string
  */
-export const convertRulesFilterToKQL = (filterOptions: FilterOptions): string => {
-  const showCustomRuleFilter = filterOptions.showCustomRules
-    ? [`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`]
-    : [];
-  const showElasticRuleFilter = filterOptions.showElasticRules
-    ? [`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`]
-    : [];
-  const filtersWithoutTags = [
-    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...showCustomRuleFilter,
-    ...showElasticRuleFilter,
-  ].join(' AND ');
+export const convertRulesFilterToKQL = ({
+  showCustomRules,
+  showElasticRules,
+  filter,
+  tags,
+  excludeRuleTypes = [],
+}: FilterOptions): string => {
+  const filters: string[] = [];
 
-  const tags = filterOptions.tags
-    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
-    .join(' AND ');
+  if (showCustomRules && showElasticRules) {
+    // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
+  } else if (showElasticRules) {
+    filters.push('alert.attributes.params.immutable: true');
+  } else if (showCustomRules) {
+    filters.push('alert.attributes.params.immutable: false');
+  }
 
-  const filterString =
-    filtersWithoutTags !== '' && tags !== ''
-      ? `${filtersWithoutTags} AND (${tags})`
-      : filtersWithoutTags + tags;
+  if (tags.length > 0) {
+    filters.push(
+      `alert.attributes.tags:(${tags.map((tag) => `"${escapeKuery(tag)}"`).join(' AND ')})`
+    );
+  }
 
-  return filterString;
+  if (filter.length) {
+    const searchQuery = SEARCHABLE_RULE_PARAMS.map(
+      (param) => `${param}: "${escapeKuery(filter)}"`
+    ).join(' OR ');
+
+    filters.push(`(${searchQuery})`);
+  }
+
+  if (excludeRuleTypes.length) {
+    filters.push(
+      `NOT alert.attributes.params.type: (${excludeRuleTypes
+        .map((ruleType) => `"${escapeKuery(ruleType)}"`)
+        .join(' OR ')})`
+    );
+  }
+
+  return filters.join(' AND ');
 };

@@ -81,8 +81,8 @@ export function optionValueToThreshold(value: number) {
 
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
-export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] => {
-  return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+export const useTableSeverity = () => {
+  return usePageUrlState<TableSeverity>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 export const getSeverityOptions = () =>
@@ -102,7 +102,7 @@ export const getSeverityOptions = () =>
         </EuiHealth>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
               defaultMessage="score {value} and above"

@@ -19,8 +19,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import { getActionsColumnWidth } from '../../../../../../../timelines/public';
-import { mockCasesContract } from '../../../../../../../cases/public/mocks';
+import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -28,29 +28,44 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
   useDeepEqualSelector: jest.fn(),
 }));
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      data: {
-        search: jest.fn(),
-        query: jest.fn(),
-      },
-      application: {
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
+
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
         },
+        application: {
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
       },
-      cases: mockCasesContract(),
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalModule.useGetUserCasesPermissions,
+  };
+});
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);

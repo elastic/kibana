@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ruleRegistrySearchStrategyProvider } from './search_strategy';
+export { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';

@@ -87,7 +87,12 @@ function DragAndDropTextListComponent({
     [onMove]
   );
   return (
-    <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
+    <EuiFormRow
+      isInvalid={typeof error === 'string'}
+      error={error}
+      fullWidth
+      data-test-subj="droppableList"
+    >
       <>
         {/* Label and help text. Also wire up the htmlFor so the label points to the first text field. */}
         <EuiFlexGroup
@@ -158,6 +163,7 @@ function DragAndDropTextListComponent({
                                   <EuiFlexGroup gutterSize="none" alignItems="center">
                                     <EuiFlexItem>
                                       <EuiFieldText
+                                        data-test-subj={`input-${idx}`}
                                         id={idx === 0 ? firstItemId : undefined}
                                         isInvalid={isInvalid}
                                         value={field.value}
@@ -168,7 +174,10 @@ function DragAndDropTextListComponent({
                                     </EuiFlexItem>
                                     {typeof errorMessage === 'string' && (
                                       <EuiFlexItem grow={false}>
-                                        <div className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon">
+                                        <div
+                                          className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon"
+                                          data-test-subj="errorIcon"
+                                        >
                                           <EuiIconTip
                                             aria-label={errorMessage}
                                             content={errorMessage}
@@ -208,7 +217,7 @@ function DragAndDropTextListComponent({
               })}
             </EuiDroppable>
           </EuiDragDropContext>
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd}>
+          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

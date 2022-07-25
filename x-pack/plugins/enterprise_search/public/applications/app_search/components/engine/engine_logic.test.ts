@@ -18,7 +18,7 @@ import { ApiTokenTypes } from '../credentials/constants';
 
 import { EngineTypes } from './types';
 
-import { EngineLogic } from './';
+import { EngineLogic } from '.';
 
 describe('EngineLogic', () => {
   const { mount, unmount } = new LogicMounter(EngineLogic);
@@ -41,6 +41,19 @@ describe('EngineLogic', () => {
     isMeta: false,
     invalidBoosts: false,
     schema: { test: SchemaType.Text },
+    advancedSchema: {
+      test: {
+        type: SchemaType.Text,
+        capabilities: {
+          fulltext: true,
+          filter: true,
+          facet: true,
+          sort: true,
+          snippet: true,
+          boost: true,
+        },
+      },
+    },
     apiTokens: [],
     apiKey: 'some-key',
     adaptive_relevance_suggestions_active: true,
@@ -53,6 +66,7 @@ describe('EngineLogic', () => {
     hasNoDocuments: true,
     hasEmptySchema: true,
     isMetaEngine: false,
+    isElasticsearchEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
     hasSchemaConflicts: false,
@@ -379,6 +393,19 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           isMetaEngine: true,
+        });
+      });
+    });
+
+    describe('isElasticsearchEngine', () => {
+      it('should be set based on engine.type', () => {
+        const engine = { ...mockEngineData, type: EngineTypes.elasticsearch };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isElasticsearchEngine: true,
         });
       });
     });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { KibanaReactContextValue, useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataVisualizerStartDependencies } from '../plugin';
-import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 
 export type StartServices = CoreStart &
   DataVisualizerStartDependencies & {

@@ -9,8 +9,8 @@ import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { Workspace } from '../types';
 import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
@@ -120,13 +120,14 @@ export const WorkspaceRoute = ({
     savedObjectsClient,
     spaces,
     coreStart,
+    data,
   });
 
   if (!loaded) {
     return null;
   }
 
-  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
+  const { savedWorkspace, sharingSavedObjectProps } = loaded;
 
   return (
     <I18nProvider>
@@ -145,7 +146,6 @@ export const WorkspaceRoute = ({
             coreStart={coreStart}
             canEditDrillDownUrls={canEditDrillDownUrls}
             overlays={overlays}
-            indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
           />

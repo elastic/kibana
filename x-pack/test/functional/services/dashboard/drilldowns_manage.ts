@@ -18,21 +18,24 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
 
     async loadData() {
       log.debug('loadData');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+      );
     }
 
     async unloadData() {
       log.debug('unloadData');
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
+      await kibanaServer.savedObjects.cleanStandardList();
     }
 
     async expectsCreateDrilldownFlyoutOpen() {

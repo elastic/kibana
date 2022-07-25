@@ -7,7 +7,7 @@
  */
 
 import { getShardTimeout, getDefaultSearchParams } from './request_utils';
-import { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
+import { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
 
 describe('request utils', () => {
   describe('getShardTimeout', () => {

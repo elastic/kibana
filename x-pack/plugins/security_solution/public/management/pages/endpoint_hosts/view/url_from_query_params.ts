@@ -8,8 +8,8 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 
-import { EndpointIndexUIQueryParams } from '../types';
-import { AppLocation } from '../../../../../common/endpoint/types';
+import type { EndpointIndexUIQueryParams } from '../types';
+import type { AppLocation } from '../../../../../common/endpoint/types';
 
 export function urlFromQueryParams(queryParams: EndpointIndexUIQueryParams): Partial<AppLocation> {
   const search = querystring.stringify(queryParams as Record<string, string>);

@@ -26,14 +26,16 @@ export async function createEsDocuments(
   const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
   let testedValue = 0;
+  const promises: Array<Promise<unknown>> = [];
   times(intervals, (interval) => {
     const date = endDateMillis - interval * intervalMillis;
 
     // don't need await on these, wait at the end of the function
     times(groups, () => {
-      createEsDocument(es, date, testedValue++);
+      promises.push(createEsDocument(es, date, testedValue++));
     });
   });
+  await Promise.all(promises);
 
   const totalDocuments = intervals * groups;
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
@@ -51,6 +53,7 @@ async function createEsDocument(es: Client, epochMillis: number, testedValue: nu
   const response = await es.index({
     id: uuid(),
     index: ES_TEST_INDEX_NAME,
+    refresh: 'wait_for',
     body: document,
   });
 

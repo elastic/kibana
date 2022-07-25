@@ -7,32 +7,38 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useStore } from 'react-redux';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { tableHasFormulas } from '@kbn/data-plugin/common';
+import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StateSetter } from '../types';
 import {
   LensAppServices,
   LensTopNavActions,
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
   LensAppState,
   DispatchSetState,
+  updateDatasourceState,
 } from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 import {
-  combineQueryAndFilters,
-  getLayerMetaInfo,
-  getShowUnderlyingDataLabel,
-} from './show_underlying_data';
+  getIndexPatternsObjects,
+  getIndexPatternsIds,
+  getResolvedDateRange,
+  handleIndexPatternChange,
+  refreshIndexPatternsList,
+} from '../utils';
+import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -46,6 +52,7 @@ function getLensTopNavConfig(options: {
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -58,6 +65,7 @@ function getLensTopNavConfig(options: {
     savingToDashboardPermitted,
     tooltips,
     contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -98,13 +106,15 @@ function getLensTopNavConfig(options: {
   }
 
   if (showOpenInDiscover) {
+    const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
+      defaultMessage: 'Explore data in Discover',
+    });
+
     topNavMenu.push({
-      label: getShowUnderlyingDataLabel(),
+      label: exploreDataInDiscoverLabel,
       run: () => {},
       testId: 'lnsApp_openInDiscover',
-      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
-        defaultMessage: 'Open underlying data in Discover',
-      }),
+      description: exploreDataInDiscoverLabel,
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
       target: '_blank',
@@ -135,6 +145,17 @@ function getLensTopNavConfig(options: {
     }),
     disableButton: !enableExportToCSV,
     tooltip: tooltips.showExportWarning,
+  });
+
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.settings', {
+      defaultMessage: 'Settings',
+    }),
+    run: actions.openSettings,
+    testId: 'lnsApp_settingsButton',
+    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+      defaultMessage: 'Open the Lens settings menu',
+    }),
   });
 
   if (showCancel) {
@@ -171,7 +192,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -197,6 +218,7 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -207,6 +229,9 @@ export const LensTopNavMenu = ({
     attributeService,
     discover,
     dashboardFeatureFlag,
+    dataViewFieldEditor,
+    dataViewEditor,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -215,8 +240,12 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const {
     isSaveable,
@@ -229,6 +258,7 @@ export const LensTopNavMenu = ({
     visualization,
     filters,
   } = useLensSelector((state) => state.lens);
+
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
@@ -260,7 +290,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -273,8 +303,22 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
+
+  useEffect(() => {
+    if (indexPatterns.length > 0) {
+      setCurrentIndexPattern(indexPatterns[0]);
+    }
+  }, [indexPatterns]);
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editors when unmounting
+      closeFieldEditor.current?.();
+      closeDataViewEditor.current?.();
+    };
+  }, []);
 
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -322,16 +366,20 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
+      data.query.timefilter.timefilter.getTime(),
       application.capabilities
     );
   }, [
-    activeData,
     activeDatasourceId,
+    discover,
     datasourceMap,
     datasourceStates,
-    discover,
+    activeData,
+    data.query.timefilter.timefilter,
     application.capabilities,
   ]);
+
+  const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
@@ -348,6 +396,7 @@ export const LensTopNavMenu = ({
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      isSaveable,
       contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
@@ -401,7 +450,7 @@ export const LensTopNavMenu = ({
           }
         },
         saveAndReturn: () => {
-          if (savingToDashboardPermitted) {
+          if (isSaveable) {
             // disabling the validation on app leave because the document has been saved.
             onAppLeave((actions) => {
               return actions.default();
@@ -449,7 +498,8 @@ export const LensTopNavMenu = ({
             query,
             filters,
             meta,
-            indexPatterns
+            indexPatterns,
+            getEsQueryConfig(uiSettings)
           );
 
           return discover.locator!.getRedirectUrl({
@@ -460,6 +510,12 @@ export const LensTopNavMenu = ({
             columns: meta.columns,
           });
         },
+        openSettings: (anchorElement: HTMLElement) =>
+          toggleSettingsMenuOpen({
+            lensStore,
+            anchorElement,
+            theme$,
+          }),
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -492,6 +548,8 @@ export const LensTopNavMenu = ({
     filters,
     indexPatterns,
     data.query.timefilter.timefilter,
+    lensStore,
+    theme$,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -500,7 +558,6 @@ export const LensTopNavMenu = ({
       const currentRange = data.query.timefilter.timefilter.getTime();
       if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
         data.query.timefilter.timefilter.setTime(dateRange);
-        trackUiEvent('app_date_change');
       } else {
         // Query has changed, renew the session id.
         // recalculate resolvedDateRange (relevant for relative time range)
@@ -508,7 +565,6 @@ export const LensTopNavMenu = ({
           searchSessionId: data.search.session.start(),
           resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
         });
-        trackUiEvent('app_query_change');
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
@@ -548,6 +604,138 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
+  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
+    return (updater) => {
+      dispatch(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+        })
+      );
+    };
+  }, [activeDatasourceId, dispatch]);
+
+  const refreshFieldList = useCallback(async () => {
+    if (currentIndexPattern && currentIndexPattern.id) {
+      refreshIndexPatternsList({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        indexPatternId: currentIndexPattern.id,
+        setDatasourceState,
+      });
+    }
+    // start a new session so all charts are refreshed
+    data.search.session.start();
+  }, [
+    currentIndexPattern,
+    data.search.session,
+    datasourceMap,
+    datasourceStates,
+    setDatasourceState,
+  ]);
+
+  const editField = useMemo(
+    () =>
+      canEditDataView
+        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+            if (currentIndexPattern?.id) {
+              const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
+              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+                ctx: {
+                  dataView: indexPatternInstance,
+                },
+                fieldName,
+                onSave: async () => {
+                  refreshFieldList();
+                },
+              });
+            }
+          }
+        : undefined,
+    [
+      canEditDataView,
+      currentIndexPattern?.id,
+      data.dataViews,
+      dataViewFieldEditor,
+      refreshFieldList,
+    ]
+  );
+
+  const addField = useMemo(
+    () => (canEditDataView && editField ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
+  );
+
+  const createNewDataView = useMemo(
+    () =>
+      canEditDataView
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (dataView) => {
+                if (dataView.id) {
+                  handleIndexPatternChange({
+                    activeDatasources: Object.keys(datasourceStates).reduce(
+                      (acc, datasourceId) => ({
+                        ...acc,
+                        [datasourceId]: datasourceMap[datasourceId],
+                      }),
+                      {}
+                    ),
+                    datasourceStates,
+                    indexPatternId: dataView.id,
+                    setDatasourceState,
+                  });
+                  refreshFieldList();
+                }
+              },
+            });
+          }
+        : undefined,
+    [
+      dataViewEditor,
+      canEditDataView,
+      datasourceMap,
+      datasourceStates,
+      refreshFieldList,
+      setDatasourceState,
+    ]
+  );
+
+  const dataViewPickerProps = {
+    trigger: {
+      label: currentIndexPattern?.getName?.() || '',
+      'data-test-subj': 'lns-dataView-switch-link',
+      title: currentIndexPattern?.title || '',
+    },
+    currentDataViewId: currentIndexPattern?.id,
+    onAddField: addField,
+    onDataViewCreated: createNewDataView,
+    onChangeDataView: (newIndexPatternId: string) => {
+      const currentDataView = indexPatterns.find(
+        (indexPattern) => indexPattern.id === newIndexPatternId
+      );
+      setCurrentIndexPattern(currentDataView);
+      handleIndexPatternChange({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+        indexPatternId: newIndexPatternId,
+        setDatasourceState,
+      });
+    },
+  };
+
   return (
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -564,6 +752,7 @@ export const LensTopNavMenu = ({
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
+      dataViewPickerComponentProps={dataViewPickerProps}
       showDatePicker={
         indexPatterns.some((ip) => ip.isTimeBased()) ||
         Boolean(
@@ -579,6 +768,7 @@ export const LensTopNavMenu = ({
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
       appName={'lens'}
+      displayStyle="detached"
     />
   );
 };

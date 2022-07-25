@@ -7,28 +7,31 @@
 
 import { Logger } from '@kbn/logging';
 import {
-  AlertExecutorOptions,
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/server';
-import { WithoutReservedActionGroups } from '../../../alerting/common';
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
+import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
+import { AlertWithCommonFieldsLatest } from '../../common/schemas';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
     _id: string;
     _source: T;
   }>,
-  refresh: boolean | 'wait_for'
+  refresh: boolean | 'wait_for',
+  maxAlerts?: number
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export interface PersistenceAlertServiceResult<T> {
-  createdAlerts: Array<T & { _id: string; _index: string }>;
+  createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
+  alertsWereTruncated: boolean;
 }
 
 export interface PersistenceServices {
@@ -36,8 +39,8 @@ export interface PersistenceServices {
 }
 
 export type PersistenceAlertType<
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -45,7 +48,7 @@ export type PersistenceAlertType<
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -61,8 +64,8 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 >(

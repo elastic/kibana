@@ -98,12 +98,15 @@ describe('SourceEnginesLogic', () => {
 
         SourceEnginesLogic.actions.setIndexedEngines([
           { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
+          { name: 'source-engine-2', type: 'elasticsearch' },
         ] as EngineDetails[]);
 
         expect(SourceEnginesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          indexedEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          indexedEngines: [
+            { name: 'source-engine-1' },
+            { name: 'source-engine-2', type: 'elasticsearch' },
+          ],
           // Selectors
           indexedEngineNames: ['source-engine-1', 'source-engine-2'],
           selectableEngineNames: ['source-engine-1', 'source-engine-2'],

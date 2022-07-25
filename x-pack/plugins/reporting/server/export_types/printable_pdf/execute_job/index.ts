@@ -11,7 +11,7 @@ import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import { decryptJobHeaders, getFullUrls, getCustomLogo } from '../../common';
+import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
 import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
@@ -36,18 +36,15 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(
-            reporting,
-            jobLogger,
+          return generatePdfObservable(reporting, {
+            format: 'pdf',
             title,
-            {
-              urls,
-              browserTimezone,
-              headers,
-              layout,
-            },
-            logo
-          );
+            logo,
+            urls,
+            browserTimezone,
+            headers,
+            layout,
+          });
         }),
         tap(({ buffer }) => {
           apmGeneratePdf?.end();
@@ -69,6 +66,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

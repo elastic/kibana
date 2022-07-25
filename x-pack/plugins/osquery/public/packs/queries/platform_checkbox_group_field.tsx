@@ -7,16 +7,12 @@
 
 import { isEmpty, pickBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiCheckboxGroup,
-  EuiCheckboxGroupOption,
-} from '@elastic/eui';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiCheckboxGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { PlatformIcon } from './platforms/platform_icon';
 
 interface Props {
@@ -91,6 +87,7 @@ export const PlatformCheckBoxGroupField = ({
     () =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
         acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
   );
@@ -116,6 +113,7 @@ export const PlatformCheckBoxGroupField = ({
     setCheckboxIdToSelectedMap(() =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
         acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
     );

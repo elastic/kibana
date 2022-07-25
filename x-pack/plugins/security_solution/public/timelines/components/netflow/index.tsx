@@ -10,7 +10,7 @@ import React from 'react';
 
 import { Fingerprints } from './fingerprints';
 import { NetflowColumns } from './netflow_columns';
-import { NetflowProps } from './types';
+import type { NetflowProps } from './types';
 
 /**
  * Renders a visual representation of network traffic between hosts,

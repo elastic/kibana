@@ -42,7 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
 
       // click manage spaces on first entry
-      await (await testSubjects.findAll('manageSpacesButton', 10000))[0].click();
+      // first avatar is in header, so we want the second one
+      await (await testSubjects.findAll('space-avatar-default', 1000))[1].click();
 
       // select custom space
       await testSubjects.click('sts-space-selector-row-custom_space');

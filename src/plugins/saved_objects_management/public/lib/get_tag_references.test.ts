@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { taggingApiMock } from '../../../saved_objects_tagging_oss/public/mocks';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { getTagFindReferences } from './get_tag_references';
 
 const tagNameToRef = (name: string) => ({

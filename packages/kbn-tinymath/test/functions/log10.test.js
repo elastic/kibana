@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { log10 } = require('../../src/functions/log10.js');
+const { log10 } = require('../../src/functions/log10');
 
 describe('Log10', () => {
   it('numbers', () => {

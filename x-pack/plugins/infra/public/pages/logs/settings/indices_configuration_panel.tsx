@@ -8,13 +8,13 @@
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import {
   logIndexNameReferenceRT,
-  LogIndexPatternReference,
-  logIndexPatternReferenceRT,
+  LogDataViewReference,
+  logDataViewReferenceRT,
   LogIndexReference,
-} from '../../../../common/log_sources';
+} from '../../../../common/log_views';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
@@ -28,7 +28,7 @@ export const IndicesConfigurationPanel = React.memo<{
   const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
   const changeToIndexPatternType = useCallback(() => {
-    if (indicesFormElement.initialValue?.type === 'index_pattern') {
+    if (logDataViewReferenceRT.is(indicesFormElement.initialValue)) {
       indicesFormElement.updateValue(() => indicesFormElement.initialValue);
     } else {
       indicesFormElement.updateValue(() => undefined);
@@ -83,11 +83,11 @@ export const IndicesConfigurationPanel = React.memo<{
         }
         name="dataView"
         value="dataView"
-        checked={isIndexPatternFormElement(indicesFormElement)}
+        checked={isDataViewFormElement(indicesFormElement)}
         onChange={changeToIndexPatternType}
         disabled={isReadOnly}
       >
-        {isIndexPatternFormElement(indicesFormElement) && (
+        {isDataViewFormElement(indicesFormElement) && (
           <IndexPatternConfigurationPanel
             isLoading={isLoading}
             isReadOnly={isReadOnly}
@@ -127,9 +127,9 @@ export const IndicesConfigurationPanel = React.memo<{
   );
 });
 
-const isIndexPatternFormElement = isFormElementForType(
-  (value): value is LogIndexPatternReference | undefined =>
-    value == null || logIndexPatternReferenceRT.is(value)
+const isDataViewFormElement = isFormElementForType(
+  (value): value is LogDataViewReference | undefined =>
+    value == null || logDataViewReferenceRT.is(value)
 );
 
 const isIndexNamesFormElement = isFormElementForType(logIndexNameReferenceRT.is);

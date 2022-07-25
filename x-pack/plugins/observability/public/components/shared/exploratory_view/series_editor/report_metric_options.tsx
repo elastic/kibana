@@ -92,7 +92,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         {dataViewError.body?.error === 'Forbidden' ||
         dataViewError.name === 'DataViewInsufficientAccessError'
           ? NO_PERMISSIONS
-          : dataViewError.body.message}
+          : dataViewError.body?.message}
       </EuiText>
     );
   }
@@ -141,11 +141,11 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               iconOnClick={() => onChange(undefined)}
               iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
             >
-              {
-                seriesConfig?.metricOptions?.find(
-                  (option) => option.id === series.selectedMetricField
-                )?.label
-              }
+              {seriesConfig?.metricOptions?.find(
+                (option) =>
+                  option.id === series.selectedMetricField ||
+                  option.field === series.selectedMetricField
+              )?.label ?? series.selectedMetricField}
             </EuiBadge>
           </EuiToolTip>
         ) : (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,

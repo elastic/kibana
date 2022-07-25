@@ -6,7 +6,7 @@
  */
 
 import deepMerge from 'deepmerge';
-import type { Logger, LogMeta } from 'kibana/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import type { IReportingEventLogger } from './logger';
 
 /** @internal */

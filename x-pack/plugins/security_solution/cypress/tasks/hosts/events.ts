@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { drag, drop } from '../common';
 import {
   EVENTS_VIEWER_FIELDS_BUTTON,
-  EVENTS_VIEWER_PAGINATION,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
-import { DATAGRID_HEADERS } from '../../screens/timeline';
-import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -45,25 +41,4 @@ export const opensInspectQueryModal = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
-};
-
-export const dragAndDropColumn = ({
-  column,
-  newPosition,
-}: {
-  column: number;
-  newPosition: number;
-}) => {
-  cy.get(DATAGRID_HEADERS).first().should('exist');
-  cy.get(DATAGRID_HEADERS)
-    .eq(column)
-    .then((header) => drag(header));
-
-  cy.get(DATAGRID_HEADERS)
-    .eq(newPosition)
-    .then((targetPosition) => {
-      drop(targetPosition);
-    });
 };

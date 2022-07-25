@@ -15,14 +15,14 @@ import {
   ALERT_REASON,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { CellValueElementProps, TimelineNonEcsData } from '../../../../../../timelines/common';
+import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { SeverityBadge } from '../severity_badge';
-import { TopAlert } from '../../';
+import { TopAlert } from '../..';
 import { parseAlert } from '../parse_alert';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -46,11 +46,13 @@ export const getMappedNonEcsValue = ({
 
 export const getRenderCellValue = ({
   setFlyoutAlert,
+  observabilityRuleTypeRegistry,
 }: {
   setFlyoutAlert: (data: TopAlert) => void;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
-    const { observabilityRuleTypeRegistry } = usePluginContext();
+    if (!data) return null;
     const value = getMappedNonEcsValue({
       data,
       fieldName: columnId,

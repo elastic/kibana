@@ -21,7 +21,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -33,16 +33,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should delete a comment from space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
       const comment = await deleteComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         commentId: patchedCase.comments![0].id,
         auth: authSpace1,
@@ -52,16 +52,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not delete a comment from a different space', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
       await deleteComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         commentId: patchedCase.comments![0].id,
         expectedHttpCode: 404,

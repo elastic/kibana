@@ -7,8 +7,8 @@
 
 import './share_to_space_form.scss';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,6 +26,7 @@ interface Props {
   makeCopy: () => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
+  prohibitedSpaces: Set<string>;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
@@ -39,13 +40,14 @@ export const ShareToSpaceForm = (props: Props) => {
     makeCopy,
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
+    prohibitedSpaces,
   } = props;
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     onUpdate({ ...shareOptions, selectedSpaceIds });
 
   const createCopyCallout = showCreateCopyCallout ? (
-    <Fragment>
+    <EuiFlexItem grow={false}>
       <EuiCallOut
         size="s"
         title={
@@ -73,7 +75,7 @@ export const ShareToSpaceForm = (props: Props) => {
       </EuiCallOut>
 
       <EuiSpacer size="m" />
-    </Fragment>
+    </EuiFlexItem>
   ) : null;
 
   return (
@@ -88,6 +90,7 @@ export const ShareToSpaceForm = (props: Props) => {
         onChange={(selection) => setSelectedSpaceIds(selection)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+        prohibitedSpaces={prohibitedSpaces}
       />
     </>
   );

@@ -7,3 +7,14 @@
  */
 
 export * from '../../../common/types';
+
+export type DashboardLoadedEventStatus = 'done' | 'error';
+
+export interface DashboardLoadedEvent {
+  // Time from start to when data is loaded
+  timeToData: number;
+  // Time from start until render or error
+  timeToDone: number;
+  numOfPanels: number;
+  status: DashboardLoadedEventStatus;
+}

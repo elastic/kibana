@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SecuritySolutionFactory } from '../../types';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { SecuritySolutionFactory } from '../../types';
+import type {
   RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
   RiskQueries,
 } from '../../../../../../common/search_strategy';
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';

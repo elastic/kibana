@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { externalServiceITOMMock, itomEventParams } from './mocks';
 import { ExternalServiceITOM } from './types';
 import { apiITOM, prepareParams } from './api_itom';

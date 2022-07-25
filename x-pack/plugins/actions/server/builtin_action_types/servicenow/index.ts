@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
@@ -22,7 +23,6 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { createExternalService } from './service';
 import { api as commonAPI } from './api';
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
 import {
   ExecutorParams,
   ExecutorSubActionPushParams,
@@ -39,6 +39,7 @@ import {
   ExternalServiceApiITOM,
   ExternalServiceITOM,
   ServiceNowPublicConfigurationBaseType,
+  ExternalService,
 } from './types';
 import {
   ServiceNowITOMActionTypeId,
@@ -53,6 +54,13 @@ import { apiSIR } from './api_sir';
 import { throwIfSubActionIsNotSupported } from './utils';
 import { createExternalServiceITOM } from './service_itom';
 import { apiITOM } from './api_itom';
+import { createServiceWrapper } from './create_service_wrapper';
+import {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../../common';
 
 export {
   ServiceNowITSMActionTypeId,
@@ -90,6 +98,12 @@ export function getServiceNowITSMActionType(
     id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITSM,
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      CasesConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -97,6 +111,7 @@ export function getServiceNowITSMActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaITSM,
     },
     executor: curry(executor)({
@@ -117,6 +132,11 @@ export function getServiceNowSIRActionType(
     id: ServiceNowSIRActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_SIR,
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      CasesConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -124,6 +144,7 @@ export function getServiceNowSIRActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaSIR,
     },
     executor: curry(executor)({
@@ -144,6 +165,7 @@ export function getServiceNowITOMActionType(
     id: ServiceNowITOMActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.SERVICENOW_ITOM,
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: schema.object(ExternalIncidentServiceConfigurationBase, {
         validate: curry(validate.config)(configurationUtilities),
@@ -151,6 +173,7 @@ export function getServiceNowITOMActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaITOM,
     },
     executor: curry(executorITOM)({
@@ -184,20 +207,24 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets } = execOptions;
+  const { actionId, config, params, secrets, services } = execOptions;
   const { subAction, subActionParams } = params;
+  const connectorTokenClient = services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
-  const externalService = createService(
-    {
+  const externalService = createServiceWrapper<ExternalService>({
+    connectorId: actionId,
+    credentials: {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig
-  );
+    serviceConfig: externalServiceConfig,
+    connectorTokenClient,
+    createServiceFn: createService,
+  });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
   throwIfSubActionIsNotSupported({ api: apiAsRecord, subAction, supportedSubActions, logger });
@@ -260,18 +287,22 @@ async function executorITOM(
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
+  const connectorTokenClient = execOptions.services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
-  const externalService = createService(
-    {
+  const externalService = createServiceWrapper<ExternalServiceITOM>({
+    connectorId: actionId,
+    credentials: {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig
-  ) as ExternalServiceITOM;
+    serviceConfig: externalServiceConfig,
+    connectorTokenClient,
+    createServiceFn: createService,
+  });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
 

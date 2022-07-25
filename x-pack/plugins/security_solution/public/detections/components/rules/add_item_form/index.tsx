@@ -15,11 +15,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 
 import * as RuleI18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 interface AddItemProps {
   addText: string;

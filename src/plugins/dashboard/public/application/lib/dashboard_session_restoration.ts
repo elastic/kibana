@@ -7,12 +7,12 @@
  */
 
 import { History } from 'history';
+import { createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
 import { DashboardAppLocatorParams, DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getQueryParams } from '../../services/kibana_utils';
-import { createQueryParamObservable } from '../../../../kibana_utils/public';
 import {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,

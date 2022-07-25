@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Filter, RangeFilter } from '@kbn/es-query';
 import { ExploreDataChartAction } from './explore_data_chart_action';
 import { Params, PluginDeps } from './abstract_explore_data_action';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExploreDataChartActionContext } from './explore_data_chart_action';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
-} from '../../../../../../src/plugins/visualizations/public';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { Filter, RangeFilter } from '../../../../../../src/plugins/data/public';
-import { DiscoverAppLocator } from '../../../../../../src/plugins/discover/public';
-import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
+} from '@kbn/visualizations-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 

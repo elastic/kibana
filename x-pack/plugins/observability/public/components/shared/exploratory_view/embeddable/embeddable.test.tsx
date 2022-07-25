@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import Embeddable from './embeddable';
-import { LensPublicStart } from '../../../../../../lens/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
 import { AddToCaseAction } from '../header/add_to_case_action';

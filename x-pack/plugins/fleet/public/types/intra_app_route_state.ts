@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 /**
  * Supported query parameters for CreatePackagePolicyRouteState
@@ -56,6 +56,8 @@ export interface AgentDetailsReassignPolicyAction {
 export interface IntegrationsAppBrowseRouteState {
   /** The agent policy that we are browsing integrations for */
   forAgentPolicyId: string;
+  /** The integration tab the user navigated to details from */
+  fromIntegrations: 'installed' | 'updates_available' | undefined;
 }
 
 /**

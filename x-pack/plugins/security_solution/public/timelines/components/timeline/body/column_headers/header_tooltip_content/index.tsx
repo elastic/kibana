@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ColumnHeaderOptions } from '../../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import { getIconFromType } from '../../../../../../common/components/event_details/helpers';
 import * as i18n from '../translations';
 
@@ -29,6 +29,7 @@ P.displayName = 'P';
 const ToolTipTableMetadata = styled.span`
   margin-right: 5px;
   display: block;
+  font-weight: bold;
 `;
 ToolTipTableMetadata.displayName = 'ToolTipTableMetadata';
 
@@ -62,7 +63,11 @@ export const HeaderToolTipContent = React.memo<{ header: ColumnHeaderOptions }>(
       </ToolTipTableMetadata>
       <ToolTipTableValue>
         <IconType data-test-subj="type-icon" type={getIconFromType(header.type)} />
-        <span data-test-subj="type-value">{header.type}</span>
+        {header.esTypes?.map((esType) => (
+          <EuiBadge data-test-subj={`type-value-${esType}`} key={esType}>
+            {esType}
+          </EuiBadge>
+        ))}
       </ToolTipTableValue>
     </P>
     {!isEmpty(header.description) && (

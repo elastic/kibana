@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { MlPluginSetup } from '../../../../../ml/server';
-import { AnomalyResults, getAnomalies } from '../../machine_learning';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { AnomalyResults } from '../../machine_learning';
+import { getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({
   ml,

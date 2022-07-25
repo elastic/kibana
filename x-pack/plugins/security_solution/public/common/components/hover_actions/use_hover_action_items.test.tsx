@@ -6,9 +6,10 @@
  */
 import { useRef } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useHoverActionItems, UseHoverActionItemsProps } from './use_hover_action_items';
+import type { UseHoverActionItemsProps } from './use_hover_action_items';
+import { useHoverActionItems } from './use_hover_action_items';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { DataProvider } from '../../../../common/types/timeline';
+import type { DataProvider } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
@@ -22,6 +23,7 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'kibana.alert.rule.name',
     handleHoverActionClicked: jest.fn(),
+    hideAddToTimeline: false,
     hideTopN: false,
     isCaseView: false,
     isObjectArray: false,
@@ -272,6 +274,23 @@ describe('useHoverActionItems', () => {
       expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
         'hover-actions-show-top-n'
       );
+    });
+  });
+
+  test('when timeline button is disabled, it should not show', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideAddToTimeline: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((actionItem) => {
+        expect(actionItem.props['data-test-subj']).not.toEqual('hover-actions-add-timeline');
+      });
     });
   });
 });

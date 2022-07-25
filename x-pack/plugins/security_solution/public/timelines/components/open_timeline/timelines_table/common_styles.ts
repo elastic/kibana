@@ -7,6 +7,6 @@
 
 /**
  * The width of an action column, which must be wide enough to render a
- * two digit count without wrapping
+ * three digit count without wrapping
  */
-export const ACTION_COLUMN_WIDTH = '40px';
+export const ACTION_COLUMN_WIDTH = '45px';

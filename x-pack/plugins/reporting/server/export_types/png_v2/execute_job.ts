@@ -38,7 +38,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
           return generatePngObservable(reporting, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
-            layout: job.layout,
+            layout: { ...job.layout, id: 'preserve_layout' },
             urls: [[url, locatorParams]],
           });
         }),
@@ -53,6 +53,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
       );
 
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

@@ -16,7 +16,7 @@ import {
   EuiScreenReaderOnly,
   EuiPanel,
 } from '@elastic/eui';
-import { Stats } from '../../beats';
+import { Stats } from '..';
 import { formatMetric } from '../../../lib/format_number';
 import { EuiMonitoringTable } from '../../table';
 import { i18n } from '@kbn/i18n';

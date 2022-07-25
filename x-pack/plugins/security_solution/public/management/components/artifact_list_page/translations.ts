@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
 import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
-import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_artifact_delete_item';
+import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_item';
 
 export const artifactListPageLabels = Object.freeze({
   // ------------------------------
@@ -57,7 +57,7 @@ export const artifactListPageLabels = Object.freeze({
    *    values: { total },
    *  })
    */
-  getShowingCountLabel: (total: number) => {
+  getShowingCountLabel: (total: number): string => {
     return i18n.translate('xpack.securitySolution.artifactListPage.showingTotal', {
       defaultMessage: 'Showing {total, plural, one {# artifact} other {# artifacts}}',
       values: { total },

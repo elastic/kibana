@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { createStore, Dispatch, Store } from 'redux';
-import { EndpointState } from '../types';
+import type { Dispatch, Store } from 'redux';
+import { createStore } from 'redux';
+import type { EndpointState } from '../types';
 import { listData } from './selectors';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
-import { EndpointAction } from './action';
+import type { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createUninitialisedResourceState } from '../../../state';
@@ -43,22 +44,6 @@ describe('EndpointList store concerns', () => {
         loading: false,
         error: undefined,
         endpointDetails: {
-          activityLog: {
-            paging: {
-              disabled: false,
-              page: 1,
-              pageSize: 50,
-              startDate: 'now-1d',
-              endDate: 'now',
-              isInvalidDateRange: false,
-              autoRefreshOptions: {
-                enabled: false,
-                duration: DEFAULT_POLL_INTERVAL,
-              },
-              recentlyUsedDateRanges: [],
-            },
-            logData: { type: 'UninitialisedResourceState' },
-          },
           hostDetails: {
             details: undefined,
             detailsLoading: false,

@@ -8,18 +8,28 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { getIndexTemplate } from '..';
+
+const headers = {
+  headers: ES_CLIENT_HEADERS,
+};
 
 export function createGenerateIndexRecordsStream({
   client,
   stats,
   keepIndexNames,
+  log,
 }: {
   client: Client;
   stats: Stats;
   keepIndexNames?: boolean;
+  log: ToolingLog;
 }) {
+  const seenDatastreams = new Set();
+
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -32,6 +42,7 @@ export function createGenerateIndexRecordsStream({
               filter_path: [
                 '*.settings',
                 '*.mappings',
+                '*.data_stream',
                 // remove settings that aren't really settings
                 '-*.settings.index.creation_date',
                 '-*.settings.index.uuid',
@@ -44,37 +55,58 @@ export function createGenerateIndexRecordsStream({
               ],
             },
             {
-              headers: ES_CLIENT_HEADERS,
+              ...headers,
               meta: true,
             }
           )
         ).body;
 
-        for (const [index, { settings, mappings }] of Object.entries(resp)) {
-          const {
-            body: {
-              [index]: { aliases },
-            },
-          } = await client.indices.getAlias(
-            { index },
-            {
-              headers: ES_CLIENT_HEADERS,
-              meta: true,
-            }
-          );
+        for (const [index, { data_stream: dataStream, settings, mappings }] of Object.entries(
+          resp
+        )) {
+          if (dataStream) {
+            log.info(`${index} will be saved as data_stream ${dataStream}`);
 
-          stats.archivedIndex(index, { settings, mappings });
-          this.push({
-            type: 'index',
-            value: {
-              // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
-              // when it is loaded it can skip migration, if possible
-              index: index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : index,
-              settings,
-              mappings,
-              aliases,
-            },
-          });
+            if (seenDatastreams.has(dataStream)) {
+              log.info(`${dataStream} is already archived`);
+              continue;
+            }
+
+            const { data_streams: dataStreams } = await client.indices.getDataStream(
+              { name: dataStream },
+              headers
+            );
+            const template = await getIndexTemplate(client, dataStreams[0].template);
+
+            seenDatastreams.add(dataStream);
+            stats.archivedIndex(dataStream, { template });
+            this.push({
+              type: 'data_stream',
+              value: {
+                data_stream: dataStream,
+                template,
+              },
+            });
+          } else {
+            const {
+              body: {
+                [index]: { aliases },
+              },
+            } = await client.indices.getAlias({ index }, { ...headers, meta: true });
+
+            stats.archivedIndex(index, { settings, mappings });
+            this.push({
+              type: 'index',
+              value: {
+                // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
+                // when it is loaded it can skip migration, if possible
+                index: index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : index,
+                settings,
+                mappings,
+                aliases,
+              },
+            });
+          }
         }
 
         callback();

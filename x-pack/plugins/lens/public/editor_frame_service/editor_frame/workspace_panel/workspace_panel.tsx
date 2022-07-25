@@ -9,6 +9,7 @@ import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } 
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -20,15 +21,21 @@ import {
   EuiPageContentBody,
   EuiButton,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
-import type { CoreStart, ApplicationStart } from 'kibana/public';
-import type { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
-import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart, ApplicationStart } from '@kbn/core/public';
+import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
-} from '../../../../../../../src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -38,21 +45,20 @@ import {
   DatasourceMap,
   DatasourceFixAction,
   Suggestion,
+  DatasourceLayers,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
+import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import {
   getOriginalRequestErrorMessages,
   getUnknownVisualizationTypeError,
 } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
-import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -68,10 +74,16 @@ import {
   selectSearchSessionId,
   selectAutoApplyEnabled,
   selectTriggerApplyChanges,
+  selectDatasourceLayers,
+  applyChanges,
+  selectChangesApplied,
+  VisualizationState,
+  DatasourceStates,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -104,6 +116,13 @@ const dropProps = {
     },
   },
   order: [1, 0, 0, 0],
+};
+
+const executionContext: KibanaExecutionContext = {
+  type: 'application',
+  child: {
+    type: 'lens',
+  },
 };
 
 // Exported for testing purposes only.
@@ -141,7 +160,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -152,10 +173,69 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // const expressionToRender = useRef<null | undefined | string>();
   const initialRenderComplete = useRef<boolean>();
 
+  const renderDeps = useRef<{
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    visualization: VisualizationState;
+    visualizationMap: VisualizationMap;
+    datasourceLayers: DatasourceLayers;
+  }>();
+
+  renderDeps.current = {
+    datasourceMap,
+    datasourceStates,
+    visualization,
+    visualizationMap,
+    datasourceLayers,
+  };
+
+  const onRender$ = useCallback(() => {
+    if (renderDeps.current) {
+      const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
+        (acc, datasource) => [
+          ...acc,
+          ...(datasource.getRenderEventCounters?.(
+            renderDeps.current!.datasourceStates[datasource.id].state
+          ) ?? []),
+        ],
+        []
+      );
+      let visualizationEvents: string[] = [];
+      if (renderDeps.current.visualization.activeId) {
+        visualizationEvents =
+          renderDeps.current.visualizationMap[
+            renderDeps.current.visualization.activeId
+          ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
+      }
+
+      trackUiCounterEvents(['vis_editor', ...datasourceEvents, ...visualizationEvents]);
+    }
+  }, []);
+
+  const onData$ = useCallback(
+    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (renderDeps.current) {
+        const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
+
+        if (adapters && adapters.tables) {
+          dispatchLens(
+            onActiveDataChange(
+              Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                (acc, [key, value], index, tables) => ({
+                  ...acc,
+                  [tables.length === 1 ? defaultLayerId : key]: value,
+                }),
+                {}
+              )
+            )
+          );
+        }
+      }
+    },
+    [dispatchLens]
+  );
+
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
-
-  const { datasourceLayers } = framePublicAPI;
-
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
@@ -199,7 +279,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
-  const _expression = useMemo(() => {
+  // if the expression is undefined, it means we hit an error that should be displayed to the user
+  const unappliedExpression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
       try {
         const ast = buildExpression({
@@ -252,20 +333,23 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ]);
 
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(_expression)));
-  }, [_expression, dispatchLens]);
+    dispatchLens(setSaveable(Boolean(unappliedExpression)));
+  }, [unappliedExpression, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {
-      dispatchLens(setChangesApplied(_expression === localState.expressionToRender));
+      dispatchLens(setChangesApplied(unappliedExpression === localState.expressionToRender));
     }
   });
 
   useEffect(() => {
     if (shouldApplyExpression) {
-      setLocalState((s) => ({ ...s, expressionToRender: _expression }));
+      setLocalState((s) => ({
+        ...s,
+        expressionToRender: unappliedExpression,
+      }));
     }
-  }, [_expression, shouldApplyExpression]);
+  }, [unappliedExpression, shouldApplyExpression]);
 
   const expressionExists = Boolean(localState.expressionToRender);
   useEffect(() => {
@@ -288,7 +372,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -296,7 +380,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
           },
         });
       }
@@ -309,7 +393,28 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
     },
-    [plugins.uiActions, activeVisualization, dispatchLens]
+    [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
+  );
+
+  const hasCompatibleActions = useCallback(
+    async (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return false;
+      }
+      if (!isLensFilterEvent(event)) {
+        return false;
+      }
+      return (
+        (
+          await plugins.uiActions.getTriggerCompatibleActions(
+            VIS_EVENT_TO_TRIGGER[event.name],
+            event
+          )
+        ).length > 0
+      );
+    },
+    [plugins.uiActions]
   );
 
   useEffect(() => {
@@ -324,42 +429,50 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
-      trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
+      trackUiCounterEvents('drop_onto_workspace');
       switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
-  }, [suggestionForDraggedField, expressionExists, dispatchLens]);
+  }, [suggestionForDraggedField, dispatchLens]);
 
-  const renderEmptyWorkspace = () => {
+  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
+
+  const renderDragDropPrompt = () => {
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
         textAlign="center"
-        color="subdued"
-        data-test-subj="empty-workspace"
+        data-test-subj="workspace-drag-drop-prompt"
         size="s"
       >
-        <h2>
-          <strong>
-            {!expressionExists
-              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
-                  defaultMessage: 'Drop some fields here to start',
-                })
-              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
-                  defaultMessage: 'Drop field here',
-                })}
-          </strong>
-        </h2>
-        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        {!expressionExists && (
-          <>
-            <p>
-              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                defaultMessage: 'Lens is the recommended editor for creating visualizations',
-              })}
-            </p>
-            <p>
-              <small>
+        <div>
+          <DropIllustration
+            aria-hidden={true}
+            className={classNames(
+              'lnsWorkspacePanel__promptIllustration',
+              'lnsWorkspacePanel__dropIllustration'
+            )}
+          />
+          <h2>
+            <strong>
+              {!expressionExists
+                ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                    defaultMessage: 'Drop some fields here to start',
+                  })
+                : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                    defaultMessage: 'Drop field here',
+                  })}
+            </strong>
+          </h2>
+          {!expressionExists && (
+            <>
+              <EuiTextColor color="subdued" component="div">
+                <p>
+                  {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                    defaultMessage: 'Lens is the recommended editor for creating visualizations',
+                  })}
+                </p>
+              </EuiTextColor>
+              <p className="lnsWorkspacePanel__actions">
                 <EuiLink
                   href="https://www.elastic.co/products/kibana/feedback"
                   target="_blank"
@@ -369,36 +482,77 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
                     defaultMessage: 'Make requests and give feedback',
                   })}
                 </EuiLink>
-              </small>
-            </p>
-          </>
-        )}
+              </p>
+            </>
+          )}
+        </div>
+      </EuiText>
+    );
+  };
+
+  const renderApplyChangesPrompt = () => {
+    const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
+      defaultMessage: 'Apply changes',
+    });
+
+    return (
+      <EuiText
+        className={classNames('lnsWorkspacePanel__emptyContent')}
+        textAlign="center"
+        data-test-subj="workspace-apply-changes-prompt"
+        size="s"
+      >
+        <div>
+          <img
+            aria-hidden={true}
+            src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
+            alt={applyChangesString}
+            className="lnsWorkspacePanel__promptIllustration"
+          />
+          <h2>
+            <strong>
+              {i18n.translate('xpack.lens.editorFrame.applyChangesWorkspacePrompt', {
+                defaultMessage: 'Apply changes to render visualization',
+              })}
+            </strong>
+          </h2>
+          <p className="lnsWorkspacePanel__actions">
+            <EuiButtonEmpty
+              size="s"
+              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+              iconType="checkInCircleFilled"
+              onClick={() => dispatchLens(applyChanges())}
+              data-test-subj="lnsApplyChanges__workspace"
+            >
+              {applyChangesString}
+            </EuiButtonEmpty>
+          </p>
+        </div>
       </EuiText>
     );
   };
 
   const renderVisualization = () => {
-    if (localState.expressionToRender === null) {
-      return renderEmptyWorkspace();
-    }
     return (
       <VisualizationWrapper
         expression={localState.expressionToRender}
         framePublicAPI={framePublicAPI}
         lensInspector={lensInspector}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
         activeDatasourceId={activeDatasourceId}
+        onRender$={onRender$}
+        onData$={onData$}
       />
     );
   };
 
   const dragDropContext = useContext(DragContext);
-
-  const renderDragDrop = () => {
+  const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
       datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
@@ -409,9 +563,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           )
         : undefined;
 
-    return customWorkspaceRenderer ? (
-      customWorkspaceRenderer()
-    ) : (
+    if (customWorkspaceRenderer) {
+      return customWorkspaceRenderer();
+    }
+
+    const hasSomethingToRender = localState.expressionToRender !== null;
+
+    const renderWorkspaceContents = hasSomethingToRender
+      ? renderVisualization
+      : !changesApplied
+      ? renderApplyChangesPrompt
+      : renderDragDropPrompt;
+
+    return (
       <DragDrop
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
@@ -424,7 +588,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderVisualization()}
+          {renderWorkspaceContents()}
         </EuiPageContentBody>
       </DragDrop>
     );
@@ -440,7 +604,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
     >
-      {renderDragDrop()}
+      {renderWorkspace()}
     </WorkspacePanelWrapper>
   );
 });
@@ -450,16 +614,20 @@ export const VisualizationWrapper = ({
   framePublicAPI,
   lensInspector,
   onEvent,
+  hasCompatibleActions,
   setLocalState,
   localState,
   ExpressionRendererComponent,
   application,
   activeDatasourceId,
+  onRender$,
+  onData$,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
+  hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
@@ -473,6 +641,8 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
   activeDatasourceId: string | null;
+  onRender$: () => void;
+  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -489,15 +659,6 @@ export const VisualizationWrapper = ({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const dispatchLens = useLensDispatch();
-
-  const onData$ = useCallback(
-    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
-      if (adapters && adapters.tables) {
-        dispatchLens(onActiveDataChange({ ...adapters.tables.tables }));
-      }
-    },
-    [dispatchLens]
-  );
 
   function renderFixAction(
     validationError:
@@ -516,7 +677,6 @@ export const VisualizationWrapper = ({
           <EuiButton
             data-test-subj="errorFixAction"
             onClick={async () => {
-              trackUiEvent('error_fix_action');
               const newState = await validationError.fixAction?.newState({
                 ...framePublicAPI,
                 ...context,
@@ -681,8 +841,11 @@ export const VisualizationWrapper = ({
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
+        onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}
+        executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);

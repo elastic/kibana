@@ -8,12 +8,12 @@
 import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata } from '../../../../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../../../../common/endpoint/types';
+import type { EndpointIsolatedFormProps } from '../../../../../../common/components/endpoint/host_isolation';
 import {
-  EndpointIsolatedFormProps,
   EndpointIsolateForm,
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
@@ -28,7 +28,7 @@ import {
   uiQueryParams,
   getIsEndpointHostIsolated,
 } from '../../../store/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 
 /**
  * Component handles both isolate and un-isolate for a given endpoint

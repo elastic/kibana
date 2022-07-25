@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiPopover, PanelPaddingSize, EuiButtonEmpty } from '@elastic/eui';
+import type { PanelPaddingSize } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { LinkIcon, LinkIconProps } from '../link_icon';
+import type { LinkIconProps } from '../link_icon';
+import { LinkIcon } from '../link_icon';
 import { BarAction } from './styles';
 
 const LoadingButtonEmpty = styled(EuiButtonEmpty)`
@@ -57,8 +59,8 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSide={iconSide}
             iconSize={iconSize}
             iconType={iconType}
-            onClick={handleLinkIconClick}
             disabled={disabled}
+            onClick={handleLinkIconClick}
           >
             {children}
           </LinkIcon>
@@ -119,7 +121,6 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       <BarAction data-test-subj={dataTestSubj}>
         {popoverContent ? (
           <Popover
-            onClick={onClick}
             dataTestSubj={`${dataTestSubj}-popover`}
             disabled={disabled}
             color={color}
@@ -129,6 +130,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
             ownFocus={ownFocus}
             popoverPanelPaddingSize={popoverPanelPaddingSize}
             popoverContent={popoverContent}
+            onClick={onClick}
           >
             {children}
           </Popover>

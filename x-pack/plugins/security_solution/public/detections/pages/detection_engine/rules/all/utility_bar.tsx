@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiSwitch,
-  EuiSwitchEvent,
-  EuiContextMenuPanelDescriptor,
+  EuiTextColor,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   UtilityBar,
@@ -22,9 +24,8 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
-import { useRulesFeatureTourContextOptional } from './rules_feature_tour_context';
-
-import { OptionalEuiTourStep } from './optional_eui_tour_step';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useRulesTableContextOptional } from './rules_table/rules_table_context';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -58,8 +59,9 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    // use optional rulesFeatureTourContext as AllRulesUtilityBar can be used outside the context
-    const featureTour = useRulesFeatureTourContextOptional();
+    const { timelines } = useKibana().services;
+    const rulesTableContext = useRulesTableContextOptional();
+    const isAnyRuleSelected = numberSelectedItems > 0;
 
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -97,16 +99,30 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               checked={isAutoRefreshOn ?? false}
               onChange={handleAutoRefreshSwitch(closePopover)}
               compressed
+              disabled={isAnyRuleSelected}
               data-test-subj="refreshSettingsSwitch"
             />,
+            ...(isAnyRuleSelected
+              ? [
+                  <div key="refreshSettingsSelectionNote">
+                    <EuiSpacer size="s" />
+                    <EuiTextColor color="subdued" data-test-subj="refreshSettingsSelectionNote">
+                      <FormattedMessage
+                        id="xpack.securitySolution.detectionEngine.rules.refreshRulePopoverSelectionHelpText"
+                        defaultMessage="Note: Refresh is disabled while there is an active selection."
+                      />
+                    </EuiTextColor>
+                  </div>,
+                ]
+              : []),
           ]}
         />
       ),
-      [isAutoRefreshOn, handleAutoRefreshSwitch]
+      [isAutoRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
     return (
-      <UtilityBar>
+      <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
             {hasBulkActions ? (
@@ -140,24 +156,17 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 {canBulkEdit && (
-                  <OptionalEuiTourStep stepProps={featureTour?.steps?.bulkActionsStepProps}>
-                    <UtilityBarAction
-                      disabled={hasDisabledActions}
-                      inProgress={isBulkActionInProgress}
-                      dataTestSubj="bulkActions"
-                      iconSide="right"
-                      iconType="arrowDown"
-                      popoverPanelPaddingSize="none"
-                      popoverContent={handleGetBulkItemsPopoverContent}
-                      onClick={() => {
-                        if (featureTour?.steps?.bulkActionsStepProps?.isStepOpen) {
-                          featureTour?.finishTour();
-                        }
-                      }}
-                    >
-                      {i18n.BATCH_ACTIONS}
-                    </UtilityBarAction>
-                  </OptionalEuiTourStep>
+                  <UtilityBarAction
+                    disabled={hasDisabledActions}
+                    inProgress={isBulkActionInProgress}
+                    dataTestSubj="bulkActions"
+                    iconSide="right"
+                    iconType="arrowDown"
+                    popoverPanelPaddingSize="none"
+                    popoverContent={handleGetBulkItemsPopoverContent}
+                  >
+                    {i18n.BATCH_ACTIONS}
+                  </UtilityBarAction>
                 )}
 
                 <UtilityBarAction
@@ -193,6 +202,14 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             </UtilityBarGroup>
           )}
         </UtilityBarSection>
+        {rulesTableContext && (
+          <UtilityBarSection dataTestSubj="refreshRulesStatus">
+            {timelines.getLastUpdated({
+              showUpdating: rulesTableContext.state.isFetching,
+              updatedAt: rulesTableContext.state.lastUpdated,
+            })}
+          </UtilityBarSection>
+        )}
       </UtilityBar>
     );
   }

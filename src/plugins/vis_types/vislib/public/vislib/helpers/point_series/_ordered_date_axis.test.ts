@@ -9,7 +9,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 
-import type { DateHistogramParams } from '../../../../../../visualizations/public';
+import type { DateHistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { orderedDateAxis } from './_ordered_date_axis';
 import { OrderedChart } from './point_series';

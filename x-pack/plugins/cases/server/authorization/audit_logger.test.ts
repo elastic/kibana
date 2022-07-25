@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { auditLoggerMock } from '../../../../plugins/security/server/audit/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { Operations } from '.';
 import { AuthorizationAuditLogger } from './audit_logger';
 import { ReadOperations } from './types';

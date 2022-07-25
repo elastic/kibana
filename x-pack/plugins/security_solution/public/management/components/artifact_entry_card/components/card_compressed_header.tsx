@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { CardExpandButton } from './card_expand_button';
 import { TextValueDisplay } from './text_value_display';
 import { EffectScope } from './effect_scope';
 import { CardActionsFlexItem } from './card_actions_flex_item';
-import { ArtifactInfo } from '../types';
-import { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { ArtifactInfo } from '../types';
+import type { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
 import { DescriptionField } from './description_field';
@@ -78,8 +80,8 @@ CardCompressedHeader.displayName = 'CardCompressedHeader';
 const ButtonIconPlaceHolder = styled.div`
   display: inline-block;
   // Sizes below should match that of the Eui's Button Icon, so that it holds the same space.
-  width: ${({ theme }) => theme.eui.euiIconSizes.large};
-  height: ${({ theme }) => theme.eui.euiIconSizes.large};
+  width: ${({ theme }) => theme.eui.euiSizeL};
+  height: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`

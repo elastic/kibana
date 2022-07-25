@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   ALERTS_AS_DATA_FIND_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from '../../utils';
 
@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // This fails and should be investigated or removed if it no longer applies
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest, log);
         const { body } = await supertest
@@ -160,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest, log);
           const { body } = await supertest

@@ -7,17 +7,19 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceMap } from './get_service_map';
-import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
+import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -87,12 +89,14 @@ const serviceMapRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'serviceMaps',
     });
 
@@ -106,8 +110,11 @@ const serviceMapRoute = createApmServerRoute({
       },
     } = params;
 
-    const savedObjectsClient = context.core.savedObjects.client;
-    const [setup, serviceGroup] = await Promise.all([
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
         ? getServiceGroup({
@@ -115,6 +122,7 @@ const serviceMapRoute = createApmServerRoute({
             serviceGroupId,
           })
         : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
 
     const serviceNames = [
@@ -137,6 +145,7 @@ const serviceMapRoute = createApmServerRoute({
       logger,
       start,
       end,
+      maxNumberOfServices,
     });
   },
 });
@@ -163,7 +172,9 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
@@ -201,11 +212,11 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
   },
 });
 
-const serviceMapBackendNodeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/backend',
+const serviceMapDependencyNodeRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({ dependencyName: t.string }),
       environmentRt,
       rangeRt,
       offsetRt,
@@ -225,21 +236,22 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, environment, start, end, offset },
+      query: { dependencyName, environment, start, end, offset },
     } = params;
 
-    const commonProps = { environment, setup, backendName, start, end };
+    const commonProps = { environment, setup, dependencyName, start, end };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapBackendNodeInfo(commonProps),
+      getServiceMapDependencyNodeInfo(commonProps),
       offset
-        ? getServiceMapBackendNodeInfo({ ...commonProps, offset })
+        ? getServiceMapDependencyNodeInfo({ ...commonProps, offset })
         : undefined,
     ]);
 
@@ -250,5 +262,5 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
-  ...serviceMapBackendNodeRoute,
+  ...serviceMapDependencyNodeRoute,
 };

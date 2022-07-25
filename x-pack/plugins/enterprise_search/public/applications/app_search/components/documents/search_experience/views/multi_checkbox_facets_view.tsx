@@ -14,20 +14,16 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
+import type { FieldValue, FacetValue } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
-
-interface Option {
-  value: string;
-  selected: boolean;
-}
 
 interface Props {
   label: string;
-  options: Option[];
+  options: FacetValue[];
   showMore: boolean;
   onMoreClick(): void;
-  onRemove(id: string): void;
-  onSelect(id: string): void;
+  onRemove(value: FieldValue): void;
+  onSelect(value: FieldValue): void;
 }
 
 const getIndexFromId = (id: string) => parseInt(id.split('_')[1], 10);
@@ -42,7 +38,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
 }) => {
   const getId = htmlIdGenerator();
 
-  const optionToCheckBoxGroupOption = (option: Option, index: number) => ({
+  const optionToCheckBoxGroupOption = (option: FacetValue, index: number) => ({
     id: getId(String(index)),
     label:
       option.value ||
@@ -56,7 +52,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
 
   const optionToSelectedMapReducer = (
     selectedMap: { [name: string]: boolean },
-    option: Option,
+    option: FacetValue,
     index: number
   ) => {
     if (option.selected) {
@@ -72,10 +68,10 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
     const index = getIndexFromId(checkboxId);
     const option = options[index];
     if (option.selected) {
-      onRemove(option.value);
+      onRemove(option.value as FieldValue);
       return;
     }
-    onSelect(option.value);
+    onSelect(option.value as FieldValue);
   };
 
   return (

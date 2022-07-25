@@ -51,6 +51,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             saml_disable: { order: 3, realm: 'saml1', session: { idleTimeout: 0 } },
           },
         })}`,
+        // Exclude Uptime tasks to not interfere (additional ES load) with the session cleanup task.
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['UPTIME:*'])}`,
       ],
     },
 

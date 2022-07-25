@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiText, EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiAvatar, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 import { COMMENT_EVENT } from '../../../../common/components/exceptions/translations';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 

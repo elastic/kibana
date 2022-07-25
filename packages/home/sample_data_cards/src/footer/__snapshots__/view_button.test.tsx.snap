@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render popover when appLinks is not empty 1`] = `
+<div
+  class="euiPopover euiPopover--anchorDownCenter"
+  data-test-subj="launchSampleDataSetecommerce"
+  id="sampleDataLinksecommerce"
+>
+  <div
+    class="euiPopover__anchor"
+  >
+    <button
+      aria-label="View Sample eCommerce orders"
+      class="euiButton euiButton--primary"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+        <span
+          class="euiButton__text"
+        >
+          View data
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`should render popover with ordered appLinks 1`] = `
+<div
+  class="euiPopover euiPopover--anchorDownCenter"
+  data-test-subj="launchSampleDataSetecommerce"
+  id="sampleDataLinksecommerce"
+>
+  <div
+    class="euiPopover__anchor"
+  >
+    <button
+      aria-label="View Sample eCommerce orders"
+      class="euiButton euiButton--primary"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+        <span
+          class="euiButton__text"
+        >
+          View data
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`should render simple button when appLinks is empty 1`] = `
+<button
+  aria-label="View Sample eCommerce orders"
+  class="euiButton euiButton--primary"
+  data-test-subj="launchSampleDataSetecommerce"
+  type="button"
+>
+  <span
+    class="euiButtonContent euiButton__content"
+  >
+    <span
+      class="euiButton__text"
+    >
+      View data
+    </span>
+  </span>
+</button>
+`;

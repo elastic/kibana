@@ -14,21 +14,26 @@ import {
   Partition,
   Position,
   Settings,
-  RenderChangeListener,
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
-import type { PersistedState } from '../../../../visualizations/public';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
-} from '../../../../expressions/public';
-import type { FieldFormat } from '../../../../field_formats/common';
+} from '@kbn/expressions-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -55,7 +60,6 @@ import {
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
-import { VisTypePiePluginStartDependencies } from '../plugin';
 import {
   partitionVisWrapperStyle,
   partitionVisContainerStyle,
@@ -63,7 +67,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { FilterEvent } from '../types';
+import { FilterEvent, StartDeps } from '../types';
 
 declare global {
   interface Window {
@@ -82,14 +86,13 @@ export interface PartitionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
-  services: VisTypePiePluginStartDependencies;
+  services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   syncColors: boolean;
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { visData, visParams: preVisParams, visType, services, syncColors } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
@@ -127,11 +130,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   useEffect(() => {
     const legendShow = showLegendDefault();
     setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+  }, [showLegendDefault]);
 
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
       if (isRendered) {
         props.renderComplete();
       }
@@ -355,7 +357,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   return (
     <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
-        <VisualizationNoResults hasNegativeValues={hasNegative} chartType={visType} />
+        <VisualizationNoResults
+          hasNegativeValues={hasNegative}
+          chartType={visType}
+          renderComplete={onRenderChange}
+        />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendColorPickerWrapperContext.Provider
@@ -382,19 +388,25 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 splitRowAccessor={splitChartRowAccessor}
               />
               <Settings
+                noResults={
+                  <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
+                }
                 debugState={window._echDebugStateFlag ?? false}
                 showLegend={
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
+                legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={(args) => {
+                onElementClick={([elementEvent]) => {
+                  // this cast is safe because we are rendering a partition chart
+                  const [layerValues] = elementEvent as PartitionElementEvent;
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    layerValues,
                     bucketColumns,
                     visData,
                     splitChartDimension,

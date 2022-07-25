@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'src/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller } from './utils';
@@ -38,7 +38,7 @@ export function createInstallRoute(
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
 
-      const sampleDataInstaller = getSampleDataInstaller({
+      const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
         sampleDatasets,
         logger,

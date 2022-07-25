@@ -35,6 +35,7 @@ const searchErrorSelector = 'snapshotListSearchError';
 
 export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
   const testBed = await initTestBed(query);
+
   const { form, component, find, exists } = testBed;
 
   const setSearchText = async (value: string, advanceTime = true) => {

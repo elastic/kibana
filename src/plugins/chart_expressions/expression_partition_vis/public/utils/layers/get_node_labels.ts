@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FieldFormat, FormatFactory } from '../../../../../field_formats/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { BucketColumns } from '../../../common/types';
 import { getAvailableFormatter } from '../formatters';
 

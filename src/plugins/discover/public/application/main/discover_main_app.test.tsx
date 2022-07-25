@@ -9,12 +9,12 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
-import { SavedObject } from '../../../../../core/types';
-import { IndexPatternAttributes } from '../../../../data/common';
+import { SavedObject } from '@kbn/core/types';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -25,7 +25,7 @@ describe('DiscoverMainApp', () => {
   test('renders', () => {
     const indexPatternList = [indexPatternMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+    }) as unknown as Array<SavedObject<DataViewAttributes>>;
     const props = {
       indexPatternList,
       savedSearch: savedSearchMock,
@@ -42,8 +42,7 @@ describe('DiscoverMainApp', () => {
       </Router>
     );
 
-    expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
-      indexPatternMock.title
-    );
+    expect(component.find(DiscoverTopNav).exists()).toBe(true);
+    expect(component.find(DiscoverTopNav).prop('indexPattern')).toEqual(indexPatternMock);
   });
 });

@@ -20,7 +20,7 @@ import {
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { AppToast } from '.';
+import type { AppToast } from '.';
 import * as i18n from './translations';
 
 /**

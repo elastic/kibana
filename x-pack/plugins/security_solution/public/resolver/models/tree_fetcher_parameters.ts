@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TreeFetcherParameters } from '../types';
+import type { TreeFetcherParameters } from '../types';
 
 /**
  * Determine if two instances of `TreeFetcherParameters` are equivalent. Use this to determine if

@@ -71,7 +71,7 @@ const createMultiPartTestCases = () => {
         {
           id: CASES.ALIAS_DELETE_INCLUSIVE.id,
           existingNamespaces: [DEFAULT_SPACE_ID, SPACE_1_ID],
-          expectAliasDifference: -2, // one alias should have been deleted from space_1
+          expectAliasDifference: -1, // no aliases should have been deleted from space_1
         },
       ],
       spacesToAdd: [],
@@ -82,7 +82,7 @@ const createMultiPartTestCases = () => {
         {
           id: CASES.ALIAS_DELETE_INCLUSIVE.id,
           existingNamespaces: [DEFAULT_SPACE_ID],
-          expectAliasDifference: -2, // no aliases can exist in the default space, so no aliases were deleted
+          expectAliasDifference: -2, // one alias should have been deleted from the default space
         },
       ],
       spacesToAdd: [],

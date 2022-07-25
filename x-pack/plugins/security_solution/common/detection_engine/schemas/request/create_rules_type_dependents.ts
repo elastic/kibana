@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateRulesSchema } from './rule_schemas';
+import type { CreateRulesSchema } from './rule_schemas';
 
 export const validateTimelineId = (rule: CreateRulesSchema): string[] => {
   if (rule.timeline_id != null) {
@@ -34,22 +34,43 @@ export const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
 };
 
 export const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
-  let errors: string[] = [];
+  const errors: string[] = [];
   if (rule.type === 'threat_match') {
-    if (rule.concurrent_searches == null && rule.items_per_search != null) {
-      errors = ['when "items_per_search" exists, "concurrent_searches" must also exist', ...errors];
-    }
     if (rule.concurrent_searches != null && rule.items_per_search == null) {
-      errors = ['when "concurrent_searches" exists, "items_per_search" must also exist', ...errors];
+      errors.push('when "concurrent_searches" exists, "items_per_search" must also exist');
+    }
+    if (rule.concurrent_searches == null && rule.items_per_search != null) {
+      errors.push('when "items_per_search" exists, "concurrent_searches" must also exist');
     }
   }
   return errors;
 };
 
-export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): string[] => {
+export const validateThreshold = (rule: CreateRulesSchema): string[] => {
+  const errors: string[] = [];
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      errors.push('when "type" is "threshold", "threshold" is required');
+    } else {
+      if (
+        rule.threshold.cardinality?.length &&
+        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+      ) {
+        errors.push('Cardinality of a field that is being aggregated on is always 1');
+      }
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+        errors.push('Number of fields must be 3 or less');
+      }
+    }
+  }
+  return errors;
+};
+
+export const createRuleValidateTypeDependents = (rule: CreateRulesSchema): string[] => {
   return [
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    ...validateThreatMapping(schema),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreatMapping(rule),
+    ...validateThreshold(rule),
   ];
 };

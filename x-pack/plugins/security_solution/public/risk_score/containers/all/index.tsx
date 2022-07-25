@@ -10,29 +10,30 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import {
+import type {
   RiskScoreStrategyResponse,
-  getHostRiskIndex,
   HostsRiskScore,
   UsersRiskScore,
   RiskScoreSortField,
   RiskScoreRequestOptions,
+} from '../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
   RiskQueries,
   getUserRiskIndex,
 } from '../../../../common/search_strategy';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
+import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { inputsModel } from '../../../common/store';
+import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../common';
 
 export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {
@@ -104,7 +105,7 @@ export const useUserRiskScore = ({
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
-  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   return useRiskScore<UsersRiskScore[]>({
     timerange,
     onlyLatest,
@@ -112,7 +113,7 @@ export const useUserRiskScore = ({
     sort,
     skip,
     pagination,
-    featureEnabled: usersFeatureEnabled,
+    featureEnabled: riskyUsersFeatureEnabled,
     defaultIndex,
   });
 };
@@ -135,7 +136,6 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
 
   const [loading, setLoading] = useState<boolean>(featureEnabled);
   const [riskScoreRequest, setRiskScoreRequest] = useState<RiskScoreRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const [riskScoreResponse, setRiskScoreResponse] = useState<RiskScoreState<RiskScoreType>>({
@@ -247,16 +247,7 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
         return prevRequest;
       });
     }
-  }, [
-    filterQuery,
-    onlyLatest,
-    timerange,
-    cursorStart,
-    querySize,
-    sort,
-    getTransformChangesIfTheyExist,
-    defaultIndex,
-  ]);
+  }, [filterQuery, onlyLatest, timerange, cursorStart, querySize, sort, defaultIndex]);
 
   useEffect(() => {
     riskScoreSearch(riskScoreRequest);
@@ -265,6 +256,14 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
       abortCtrl.current.abort();
     };
   }, [riskScoreRequest, riskScoreSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, riskScoreResponse];
 };

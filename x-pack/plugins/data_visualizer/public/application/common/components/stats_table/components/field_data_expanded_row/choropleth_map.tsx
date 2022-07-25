@@ -16,8 +16,8 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VectorLayerDescriptor,
-} from '../../../../../../../../maps/common';
-import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
+} from '@kbn/maps-plugin/common';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
 import { ExpandedRowPanel } from './expanded_row_panel';

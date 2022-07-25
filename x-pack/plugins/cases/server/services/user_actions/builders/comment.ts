@@ -5,18 +5,40 @@
  * 2.0.
  */
 
-import { ActionTypes, Actions } from '../../../../common/api';
+import { uniqBy } from 'lodash';
+import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
+import { ActionTypes, Actions, CommentUserAction } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import { UserActionParameters, BuilderReturnValue } from '../types';
+import { getAttachmentSOExtractor } from '../../so_references';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): BuilderReturnValue {
-    return this.buildCommonUserAction({
+    const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
+    const { transformedFields, references: refsWithExternalRefId } =
+      soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
+        data: args.payload.attachment,
+      });
+
+    const { attributes: extractedAttributes, references: extractedReferences } =
+      extractPersistableStateReferencesFromSO(transformedFields, {
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      });
+
+    const commentUserAction = this.buildCommonUserAction({
       ...args,
       action: args.action ?? Actions.update,
       valueKey: 'comment',
-      value: args.payload.attachment,
+      value: { ...transformedFields, ...extractedAttributes },
       type: ActionTypes.comment,
     });
+
+    return {
+      ...commentUserAction,
+      references: uniqBy(
+        [...commentUserAction.references, ...refsWithExternalRefId, ...extractedReferences],
+        'id'
+      ),
+    };
   }
 }

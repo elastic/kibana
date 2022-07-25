@@ -6,11 +6,12 @@
  */
 
 import { isObject } from 'lodash';
+import { DOCUMENT_FIELD_NAME } from '../../../../../common';
 import {
   FieldBasedIndexPatternColumn,
   GenericOperationDefinition,
   GenericIndexPatternColumn,
-} from '../index';
+} from '..';
 import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import { unquotedStringRegex } from './util';
@@ -25,7 +26,7 @@ export function getSafeFieldName({
   operationType,
 }: FieldBasedIndexPatternColumn) {
   // return empty for the records field
-  if (!fieldName || operationType === 'count') {
+  if (!fieldName || (operationType === 'count' && fieldName === DOCUMENT_FIELD_NAME)) {
     return '';
   }
   if (unquotedStringRegex.test(fieldName)) {
@@ -55,6 +56,9 @@ export function generateFormula(
   } else {
     if (previousColumn && 'sourceField' in previousColumn && previousColumn.dataType === 'number') {
       previousFormula += `${previousColumn.operationType}(${getSafeFieldName(previousColumn)}`;
+    } else {
+      // couldn't find formula function to call, exit early because adding args is going to fail anyway
+      return '';
     }
   }
   const formulaNamedArgs = extractParamsForFormula(previousColumn, operationDefinitionMap);
@@ -63,7 +67,10 @@ export function generateFormula(
       ', ' + formulaNamedArgs.map(({ name, value }) => `${name}=${value}`).join(', ');
   }
   if (previousColumn.filter) {
-    if (previousColumn.operationType !== 'count') {
+    if (
+      previousColumn.operationType !== 'count' ||
+      ('sourceField' in previousColumn && previousColumn.sourceField !== DOCUMENT_FIELD_NAME)
+    ) {
       previousFormula += ', ';
     }
     previousFormula +=
@@ -71,7 +78,11 @@ export function generateFormula(
       `'${previousColumn.filter.query.replace(/'/g, `\\'`)}'`; // replace all
   }
   if (previousColumn.timeShift) {
-    if (previousColumn.operationType !== 'count' || previousColumn.filter) {
+    if (
+      previousColumn.operationType !== 'count' ||
+      ('sourceField' in previousColumn && previousColumn.sourceField !== DOCUMENT_FIELD_NAME) ||
+      previousColumn.filter
+    ) {
       previousFormula += ', ';
     }
     previousFormula += `shift='${previousColumn.timeShift}'`;

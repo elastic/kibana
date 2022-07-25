@@ -8,10 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { AddDeleteButtons } from '../../add_delete_buttons';
-import { SeriesConfig } from '../../series_config';
-import { Split } from '../../split';
-import { createTextHandler } from '../../lib/create_text_handler';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -19,10 +16,15 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { SeriesConfig } from '../../series_config';
+import { Split } from '../../split';
+import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -39,6 +41,8 @@ function MarkdownSeriesUi(props) {
     name,
     uiRestrictions,
   } = props;
+
+  const { euiTheme } = useEuiTheme();
 
   const defaults = { label: '', var_name: '' };
   const model = { ...defaults, ...props.model };
@@ -63,7 +67,7 @@ function MarkdownSeriesUi(props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div className="tvbAggRow tvbAggRow--split">
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

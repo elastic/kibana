@@ -74,6 +74,28 @@ Object {
 }
 `;
 
+exports[`reads yaml files from file system and parses to json, even if one is missing 1`] = `
+Object {
+  "abc": Object {
+    "def": "test",
+    "qwe": 1,
+    "zyx": Object {
+      "val": 1,
+    },
+  },
+  "bar": true,
+  "empty_arr": Array [],
+  "foo": 1,
+  "pom": Object {
+    "bom": 3,
+  },
+  "xyz": Array [
+    "1",
+    "2",
+  ],
+}
+`;
+
 exports[`returns a deep object 1`] = `
 Object {
   "pid": Object {

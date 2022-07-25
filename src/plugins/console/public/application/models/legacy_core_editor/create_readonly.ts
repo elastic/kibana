@@ -8,12 +8,11 @@
 
 import _ from 'lodash';
 import ace from 'brace';
-// @ts-ignore
-import * as OutputMode from './mode/output';
+import { Mode } from './mode/output';
 import smartResize from './smart_resize';
 
 export interface CustomAceEditor extends ace.Editor {
-  update: (text: string, mode?: unknown, cb?: () => void) => void;
+  update: (text: string, mode?: string | Mode, cb?: () => void) => void;
   append: (text: string, foldPrevious?: boolean, cb?: () => void) => void;
 }
 
@@ -24,19 +23,23 @@ export interface CustomAceEditor extends ace.Editor {
 export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
   const output: CustomAceEditor = ace.acequire('ace/ace').edit(element);
 
-  const outputMode = new OutputMode.Mode();
+  const outputMode = new Mode();
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: unknown, cb?: () => void) => {
+  output.update = (val, mode, cb) => {
     if (typeof mode === 'function') {
       cb = mode as () => void;
       mode = void 0;
     }
 
     const session = output.getSession();
+    const currentMode = val ? mode || outputMode : 'ace/mode/text';
 
-    session.setMode(val ? mode || outputMode : 'ace/mode/text');
+    // @ts-ignore
+    // ignore ts error here due to type definition mistake in brace for setMode(mode: string): void;
+    // this method accepts string or SyntaxMode which is an object. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L467
+    session.setMode(currentMode);
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);

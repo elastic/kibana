@@ -9,7 +9,7 @@
 import { mockPackage } from './env.test.mocks';
 
 import { Env, RawPackageInfo } from './env';
-import { getEnvOptions } from './__mocks__/env';
+import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';
 

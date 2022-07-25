@@ -8,9 +8,9 @@
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { useToasts } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { patchComment } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
 
 interface CommentUpdateState {
   isLoadingIds: string[];
@@ -55,13 +55,11 @@ interface UpdateComment {
   caseId: string;
   commentId: string;
   commentUpdate: string;
-  fetchUserActions: () => void;
-  updateCase: (newCase: Case) => void;
   version: string;
 }
 
 export interface UseUpdateComment extends CommentUpdateState {
-  patchComment: ({ caseId, commentId, commentUpdate, fetchUserActions }: UpdateComment) => void;
+  patchComment: ({ caseId, commentId, commentUpdate }: UpdateComment) => void;
 }
 
 export const useUpdateComment = (): UseUpdateComment => {
@@ -75,23 +73,17 @@ export const useUpdateComment = (): UseUpdateComment => {
   // this hook guarantees that there will be at least one value in the owner array, we'll
   // just use the first entry just in case there are more than one entry
   const owner = useCasesContext().owner[0];
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const dispatchUpdateComment = useCallback(
-    async ({
-      caseId,
-      commentId,
-      commentUpdate,
-      fetchUserActions,
-      updateCase,
-      version,
-    }: UpdateComment) => {
+    async ({ caseId, commentId, commentUpdate, version }: UpdateComment) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: commentId });
 
-        const response = await patchComment({
+        await patchComment({
           caseId,
           commentId,
           commentUpdate,
@@ -101,8 +93,7 @@ export const useUpdateComment = (): UseUpdateComment => {
         });
 
         if (!isCancelledRef.current) {
-          updateCase(response);
-          fetchUserActions();
+          refreshCaseViewPage();
           dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
         }
       } catch (error) {
@@ -117,8 +108,7 @@ export const useUpdateComment = (): UseUpdateComment => {
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [owner, refreshCaseViewPage, toasts]
   );
 
   useEffect(

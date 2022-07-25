@@ -12,19 +12,19 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
   const {
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    latestLoadSourceFailures,
-    loadSource,
-    resolvedSourceConfiguration,
-    sourceId,
-  } = useLogSourceContext();
+    latestLoadLogViewFailures,
+    load,
+    logViewId,
+    resolvedLogView,
+  } = useLogViewContext();
   const { space } = useActiveKibanaSpace();
 
   // This is a rather crude way of guarding the dependent providers against
@@ -35,23 +35,23 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
-  } else if (resolvedSourceConfiguration != null) {
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
+  } else if (resolvedLogView != null) {
     return (
       <LogFlyout.Provider>
         <LogEntryRateModuleProvider
-          indexPattern={resolvedSourceConfiguration.indices}
-          sourceId={sourceId}
+          indexPattern={resolvedLogView.indices}
+          sourceId={logViewId}
           spaceId={space.id}
-          timestampField={resolvedSourceConfiguration.timestampField}
-          runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
+          timestampField={resolvedLogView.timestampField}
+          runtimeMappings={resolvedLogView.runtimeMappings}
         >
           <LogEntryCategoriesModuleProvider
-            indexPattern={resolvedSourceConfiguration.indices}
-            sourceId={sourceId}
+            indexPattern={resolvedLogView.indices}
+            sourceId={logViewId}
             spaceId={space.id}
-            timestampField={resolvedSourceConfiguration.timestampField}
-            runtimeMappings={resolvedSourceConfiguration.runtimeMappings}
+            timestampField={resolvedLogView.timestampField}
+            runtimeMappings={resolvedLogView.runtimeMappings}
           >
             <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
           </LogEntryCategoriesModuleProvider>

@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { act } from '@testing-library/react';
-import { SideEffectSimulator } from '../types';
+import type { SideEffectSimulator } from '../types';
 
 /**
  * Create mock `SideEffectors` for `SideEffectContext.Provider`. The `control`

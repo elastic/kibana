@@ -8,11 +8,8 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { getAvailableShapes, Shape } from '@kbn/expression-shape-plugin/common';
 import { ShapePickerPopover } from '../shape_picker_popover';
-import {
-  getAvailableShapes,
-  Shape,
-} from '../../../../../../../src/plugins/expression_shape/common';
 
 class Interactive extends React.Component<{}, { value: string }> {
   public state = {

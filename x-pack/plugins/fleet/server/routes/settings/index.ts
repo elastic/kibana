@@ -15,7 +15,7 @@ import { settingsService, agentPolicyService, appContextService } from '../../se
 import type { FleetAuthzRouter } from '../security';
 
 export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = (await context.fleet).epm.internalSoClient;
 
   try {
     const settings = await settingsService.getSettings(soClient);
@@ -39,8 +39,8 @@ export const putSettingsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const soClient = (await context.fleet).epm.internalSoClient;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
 
   try {

@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { NetworkKpiHistogramData } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiHistogramData } from '../../../../../../../common/search_strategy/security_solution/network';
 
 export const getIpFilter = () => [
   {

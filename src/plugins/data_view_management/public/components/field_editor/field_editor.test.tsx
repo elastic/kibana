@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField, DataViewsContract } from 'src/plugins/data_views/public';
-import { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
+import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { FieldEditor, FieldEdiorProps } from './field_editor';
@@ -39,8 +39,8 @@ jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: () => ['red'],
 }));
 
-jest.mock('../../../../kibana_react/public', () => {
-  const original = jest.requireActual('../../../../kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -85,6 +85,7 @@ class Format {
   params() {}
 }
 
+// FIXME: which interface is this?
 const field = {
   scripted: true,
   type: 'number',
@@ -190,7 +191,7 @@ describe('FieldEditor', () => {
         add: jest.fn(),
       },
     };
-    indexPattern.fieldFormatMap = { test: field };
+    indexPattern.fieldFormatMap = { test: field } as {};
     (indexPattern.deleteFieldFormat as any) = jest.fn();
 
     const component = createComponentWithContext<FieldEdiorProps>(

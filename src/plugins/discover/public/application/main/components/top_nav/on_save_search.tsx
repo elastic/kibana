@@ -8,13 +8,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../../../saved_objects/public';
+import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
-import { DataView } from '../../../../../../data/common';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
+import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
   indexPattern,
@@ -88,13 +89,16 @@ export async function onSaveSearch({
   savedSearch,
   services,
   state,
+  onClose,
 }: {
   indexPattern: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onClose?: () => void;
 }) {
+  const { uiSettings } = services;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -109,8 +113,12 @@ export async function onSaveSearch({
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
+    const currentRowsPerPage = savedSearch.rowsPerPage;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
+    savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
+      ? currentRowsPerPage
+      : state.appStateContainer.getState().rowsPerPage;
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -127,6 +135,7 @@ export async function onSaveSearch({
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
       savedSearch.title = currentTitle;
+      savedSearch.rowsPerPage = currentRowsPerPage;
     } else {
       state.resetInitialAppState();
     }
@@ -134,17 +143,39 @@ export async function onSaveSearch({
   };
 
   const saveModal = (
-    <SavedObjectSaveModal
-      onSave={onSave}
-      onClose={() => {}}
+    <SaveSearchObjectModal
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
-      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'search',
-      })}
-      showDescription={true}
+      onSave={onSave}
+      onClose={onClose ?? (() => {})}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);
 }
+
+const SaveSearchObjectModal: React.FC<{
+  title: string;
+  showCopyOnSave: boolean;
+  description?: string;
+  onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
+  onClose: () => void;
+}> = ({ title, description, showCopyOnSave, onSave, onClose }) => {
+  const onModalSave = (params: OnSaveProps) => {
+    onSave(params);
+  };
+
+  return (
+    <SavedObjectSaveModal
+      title={title}
+      showCopyOnSave={showCopyOnSave}
+      description={description}
+      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
+        defaultMessage: 'search',
+      })}
+      showDescription={true}
+      onSave={onModalSave}
+      onClose={onClose}
+    />
+  );
+};

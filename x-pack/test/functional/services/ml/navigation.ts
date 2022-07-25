@@ -152,6 +152,14 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
     },
 
+    async navigateToSingleMetricViewer(jobId: string) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/timeseriesexplorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0))`
+      );
+    },
+
     async navigateToDataFrameAnalytics() {
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
@@ -185,7 +193,7 @@ export function MachineLearningNavigationProvider({
         // verify that the overall page is present
         await testSubjects.existOrFail('mlPageStackManagementJobsList');
         // verify that the default tab with the anomaly detection jobs list got loaded
-        await testSubjects.existOrFail('ml-jobs-list');
+        await testSubjects.existOrFail('mlSpacesManagementTable');
       });
     },
 
@@ -200,19 +208,19 @@ export function MachineLearningNavigationProvider({
 
     async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await testSubjects.click('mlStackManagementAnomalyDetectionTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('ml-jobs-list');
+        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
       });
     },
 
     async navigateToStackManagementJobsListPageAnalyticsTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
+      await testSubjects.click('mlStackManagementAnalyticsTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlAnalyticsJobList');
+        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded');
       });
     },
 

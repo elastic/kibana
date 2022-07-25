@@ -26,7 +26,8 @@ import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
-import { NetworkDetailsTableType, NetworkModel, NetworkTableType } from './model';
+import type { NetworkModel } from './model';
+import { NetworkDetailsTableType, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 

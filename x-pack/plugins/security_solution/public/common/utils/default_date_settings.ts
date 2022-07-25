@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 
@@ -18,7 +18,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
-import { Policy } from '../store/inputs/model';
+import type { Policy } from '../store/inputs/model';
 
 interface DefaultTimeRange {
   from?: string | null;

@@ -9,7 +9,7 @@ import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -76,8 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     return cookie;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/121482
-  describe.skip('Session Idle cleanup', () => {
+  describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');

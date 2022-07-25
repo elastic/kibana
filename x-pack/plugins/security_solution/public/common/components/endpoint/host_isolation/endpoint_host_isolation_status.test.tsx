@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EndpointHostIsolationStatus,
-  EndpointHostIsolationStatusProps,
-} from './endpoint_host_isolation_status';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../mock/endpoint';
+import type { EndpointHostIsolationStatusProps } from './endpoint_host_isolation_status';
+import { EndpointHostIsolationStatus } from './endpoint_host_isolation_status';
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
 
 describe('when using the EndpointHostIsolationStatus component', () => {
   let render: (
@@ -53,7 +52,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     const { getByTestId } = render(componentProps);
     expect(getByTestId('test').textContent).toBe(expectedLabel);
     // Validate that the text color is set to `subdued`
-    expect(getByTestId('test-pending').classList.contains('euiTextColor--subdued')).toBe(true);
+    expect(getByTestId('test-pending').classList.toString().includes('subdued')).toBe(true);
   });
 
   describe('and the disableIsolationUIPendingStatuses experimental feature flag is true', () => {

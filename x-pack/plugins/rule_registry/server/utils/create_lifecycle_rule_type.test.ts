@@ -18,6 +18,7 @@ import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -117,6 +118,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
+          searchSourceClient: {} as ISearchStartSearchSource,
         },
         spaceId: 'spaceId',
         state,
@@ -156,7 +158,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -176,7 +178,7 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(0);
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -198,10 +200,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(1);
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(1);
 
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[0][0].body!;
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[0][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 
@@ -300,9 +302,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
 
         // TODO mock the resolved value before calling alertWithLifecycle again
-        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
-          .getWriter()
-          .bulk.mock.calls[0][0].body?.concat()
+        const lastOpbeansNodeDoc = (
+          await helpers.ruleDataClientMock.getWriter()
+        ).bulk.mock.calls[0][0].body
+          ?.concat()
           .reverse()
           .find(
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
@@ -343,9 +346,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(2);
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 
@@ -381,9 +384,10 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
-        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
-          .getWriter()
-          .bulk.mock.calls[0][0].body?.concat()
+        const lastOpbeansNodeDoc = (
+          await helpers.ruleDataClientMock.getWriter()
+        ).bulk.mock.calls[0][0].body
+          ?.concat()
           .reverse()
           .find(
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
@@ -416,10 +420,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ]);
       });
 
-      it('writes the correct alerts', () => {
-        expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
+      it('writes the correct alerts', async () => {
+        expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(2);
 
-        const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
+        const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
 

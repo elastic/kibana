@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { cos } = require('../../src/functions/cos.js');
+const { cos } = require('../../src/functions/cos');
 
 describe('Cosine', () => {
   it('numbers', () => {

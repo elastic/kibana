@@ -65,6 +65,12 @@ export const translations = {
         defaultMessage: 'View rule details',
       }
     ),
+    viewAlertDetailsButtonText: i18n.translate(
+      'xpack.observability.alertsTable.viewAlertDetailsButtonText',
+      {
+        defaultMessage: 'View alert details',
+      }
+    ),
   },
   alertsFlyout: {
     statusLabel: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
@@ -72,6 +78,9 @@ export const translations = {
     }),
     lastUpdatedLabel: i18n.translate('xpack.observability.alertsFlyout.lastUpdatedLabel', {
       defaultMessage: 'Last updated',
+    }),
+    startedAtLabel: i18n.translate('xpack.observability.alertsFlyout.startedAtLabel', {
+      defaultMessage: 'Started at',
     }),
     durationLabel: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
       defaultMessage: 'Duration',

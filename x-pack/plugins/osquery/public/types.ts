@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '../../../../src/plugins/discover/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { FleetStart } from '../../fleet/public';
-import { LensPublicStart } from '../../lens/public';
-import { SecurityPluginStart } from '../../security/public';
-import { CoreStart } from '../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import {
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import { getLazyOsqueryAction } from './shared_components';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  isOsqueryAvailable: (props: { agentId: string }) => boolean;
 }
 
 export interface AppPluginStartDependencies {

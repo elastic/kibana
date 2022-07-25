@@ -7,11 +7,11 @@
 
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingCore } from '../../..';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';

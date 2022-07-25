@@ -10,8 +10,10 @@ import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
-import { KbnClient, KbnClientOptions } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClientOptions } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 

@@ -10,7 +10,6 @@ import { CtiQueries } from '../../../../../../common/search_strategy/security_so
 
 export const mockOptions = {
   defaultIndex: ['logs-ti_*', 'filebeat-8*'],
-  docValueFields: [],
   factoryQueryType: CtiQueries.dataSource,
   filterQuery: '',
   timerange: {

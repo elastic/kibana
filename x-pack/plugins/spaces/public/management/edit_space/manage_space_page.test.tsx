@@ -11,12 +11,12 @@ import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { KibanaFeature } from '../../../../features/public';
-import { featuresPluginMock } from '../../../../features/public/mocks';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';

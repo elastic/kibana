@@ -23,16 +23,28 @@ export const useObservable = <
   createObservableOnce: (inputValues: Observable<InputValues>) => OutputObservable,
   inputValues: InputValues
 ) => {
-  const [inputValues$] = useState(() => new BehaviorSubject<InputValues>(inputValues));
-  const [output$] = useState(() => createObservableOnce(inputValues$));
+  const [output$, next] = useBehaviorSubject(createObservableOnce, () => inputValues);
 
   useEffect(() => {
-    inputValues$.next(inputValues);
+    next(inputValues);
     // `inputValues` can't be statically analyzed
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, inputValues);
 
   return output$;
+};
+
+export const useBehaviorSubject = <
+  InputValue,
+  OutputValue,
+  OutputObservable extends Observable<OutputValue>
+>(
+  deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable,
+  createInitialValue: () => InputValue
+) => {
+  const [subject$] = useState(() => new BehaviorSubject<InputValue>(createInitialValue()));
+  const [output$] = useState(() => deriveObservableOnce(subject$));
+  return [output$, subject$.next.bind(subject$)] as const;
 };
 
 export const useObservableState = <State, InitialState>(

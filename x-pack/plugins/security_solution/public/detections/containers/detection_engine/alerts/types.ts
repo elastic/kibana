@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -33,6 +33,7 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
       value: number;
       relation: string;
     };
+    max_score?: number | null;
     hits: Hit[];
   };
 }

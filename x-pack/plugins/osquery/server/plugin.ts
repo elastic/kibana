@@ -6,30 +6,40 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsClient,
-  DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { createConfig } from './create_config';
-import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
+import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
-import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
-import { ConfigType } from './config';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
-import { PLUGIN_ID } from '../common';
+import type { OsqueryAppContext } from './lib/osquery_app_context_services';
+import { OsqueryAppContextService } from './lib/osquery_app_context_services';
+import type { ConfigType } from './config';
+import {
+  packSavedObjectType,
+  packAssetSavedObjectType,
+  savedQuerySavedObjectType,
+} from '../common/types';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeTransforms } from './create_transforms/create_transforms';
+import { createDataViews } from './create_data_views';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -41,7 +51,6 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,
-    excludeFromBasePrivileges: true,
     privileges: {
       all: {
         api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],
@@ -165,7 +174,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [packSavedObjectType],
+                  all: [packSavedObjectType, packAssetSavedObjectType],
                   read: [],
                 },
                 ui: ['writePacks', 'readPacks'],
@@ -211,7 +220,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     registerFeatures(plugins.features);
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,
@@ -231,12 +240,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
-    defineRoutes(router, osqueryContext);
-
-    core.getStartServices().then(([, depsStart]) => {
-      const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
+    core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
+      const osquerySearchStrategy = osquerySearchStrategyProvider(
+        depsStart.data,
+        elasticsearch.client
+      );
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+      defineRoutes(router, osqueryContext);
     });
 
     this.telemetryEventsSender.setup(
@@ -270,11 +281,39 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       this.telemetryReceiver
     );
 
-    if (registerIngestCallback) {
+    plugins.fleet?.fleetSetupCompleted().then(async () => {
+      const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+        OSQUERY_INTEGRATION_NAME
+      );
       const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
-      registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
-    }
+      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+        client,
+        core.elasticsearch.client.asInternalUser,
+        undefined,
+        true
+      );
+
+      // If package is installed we want to make sure all needed assets are installed
+      if (packageInfo) {
+        await this.initialize(core, dataViewsService);
+      }
+
+      if (registerIngestCallback) {
+        registerIngestCallback(
+          'packagePolicyPostCreate',
+          async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
+            if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+              await this.initialize(core, dataViewsService);
+            }
+
+            return packagePolicy;
+          }
+        );
+
+        registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
+      }
+    });
 
     return {};
   }
@@ -283,5 +322,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Stopped');
     this.telemetryEventsSender.stop();
     this.osqueryAppContextService.stop();
+  }
+
+  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
+    this.logger.debug('initialize');
+    await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    await createDataViews(dataViewsService);
   }
 }

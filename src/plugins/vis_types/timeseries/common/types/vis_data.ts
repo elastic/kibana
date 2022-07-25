@@ -47,11 +47,11 @@ export interface PanelSeries {
 export interface PanelData {
   id: string;
   label: string | string[];
-  labelFormatted?: string;
   data: PanelDataArray[];
   seriesId: string;
   splitByLabel: string;
   isSplitByTerms: boolean;
+  termsSplitKey?: string | string[];
   error?: string;
 }
 

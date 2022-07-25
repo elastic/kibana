@@ -11,15 +11,16 @@ import {
   Plugin,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
-import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
@@ -40,47 +41,83 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
-    if (config.unsafe.cases.enabled) {
-      plugins.features.registerKibanaFeature({
-        id: casesFeatureId,
-        name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
-          defaultMessage: 'Cases',
-        }),
-        order: 1100,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        app: [casesFeatureId, 'kibana'],
-        catalogue: [observabilityFeatureId],
-        cases: [observabilityFeatureId],
-        privileges: {
-          all: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              all: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+    const casesCapabilities = createUICapabilities();
+
+    plugins.features.registerKibanaFeature({
+      id: casesFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [casesFeatureId, 'kibana'],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
+      privileges: {
+        all: {
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            create: [observabilityFeatureId],
+            read: [observabilityFeatureId],
+            update: [observabilityFeatureId],
+            push: [observabilityFeatureId],
           },
-          read: {
-            app: [casesFeatureId, 'kibana'],
-            catalogue: [observabilityFeatureId],
-            cases: {
-              read: [observabilityFeatureId],
-            },
-            api: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          api: [],
+          savedObject: {
+            all: [],
+            read: [],
           },
+          ui: casesCapabilities.all,
         },
-      });
-    }
+        read: {
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            read: [observabilityFeatureId],
+          },
+          api: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: casesCapabilities.read,
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
+            defaultMessage: 'Delete',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: [],
+                  id: 'cases_delete',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
+                    {
+                      defaultMessage: 'Delete cases and comments',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    delete: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

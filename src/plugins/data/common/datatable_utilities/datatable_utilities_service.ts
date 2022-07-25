@@ -6,10 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewsContract, DataViewField } from 'src/plugins/data_views/common';
-import type { DatatableColumn } from 'src/plugins/expressions/common';
-import type { FieldFormatsStartCommon, FieldFormat } from 'src/plugins/field_formats/common';
-import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
+import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
+import type {
+  AggsCommonStart,
+  AggConfig,
+  AggParamsDateHistogram,
+  AggParamsHistogram,
+  CreateAggConfigParams,
+  IAggType,
+} from '../search';
+import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
+import type { TimeRange } from '../types';
+
+interface DateHistogramMeta {
+  interval?: string;
+  timeZone?: string;
+  timeRange?: TimeRange;
+}
 
 export class DatatableUtilitiesService {
   constructor(
@@ -46,6 +61,39 @@ export class DatatableUtilitiesService {
     return aggs[0];
   }
 
+  /**
+   * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.
+   * "auto" will get expanded to the actually used interval.
+   * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
+   * this function will return undefined.
+   */
+  getDateHistogramMeta(
+    column: DatatableColumn,
+    defaults: Partial<{
+      timeZone: string;
+    }> = {}
+  ): DateHistogramMeta | undefined {
+    if (column.meta.source !== 'esaggs') {
+      return;
+    }
+    if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) {
+      return;
+    }
+
+    const params = column.meta.sourceParams.params as AggParamsDateHistogram;
+
+    let interval: string | undefined;
+    if (params.used_interval && params.used_interval !== 'auto') {
+      interval = params.used_interval;
+    }
+
+    return {
+      interval,
+      timeZone: params.used_time_zone || defaults.timeZone,
+      timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+    };
+  }
+
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
     if (!column.meta.index) {
       return;
@@ -75,6 +123,37 @@ export class DatatableUtilitiesService {
     const params = column.meta.sourceParams?.params as { interval: string } | undefined;
 
     return params?.interval;
+  }
+
+  /**
+   * Helper function returning the used interval for data table column created by the histogramm agg type.
+   * "auto" will get expanded to the actually used interval.
+   * If the column is not a column created by a histogram aggregation of the esaggs data source,
+   * this function will return undefined.
+   */
+  getNumberHistogramInterval(column: DatatableColumn): number | undefined {
+    if (column.meta.source !== 'esaggs') {
+      return;
+    }
+    if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) {
+      return;
+    }
+
+    const params = column.meta.sourceParams.params as unknown as AggParamsHistogram;
+
+    if (!params.used_interval || typeof params.used_interval === 'string') {
+      return;
+    }
+
+    return params.used_interval;
+  }
+
+  getTotalCount(table: Datatable): number | undefined {
+    return table.meta?.statistics?.totalCount;
+  }
+
+  hasPrecisionError(column: DatatableColumn) {
+    return column.meta.sourceParams?.hasPrecisionError;
   }
 
   isFilterable(column: DatatableColumn): boolean {

@@ -6,7 +6,7 @@
  */
 
 import { getCreateRulesSchemaMock, getCreateThreatMatchRulesSchemaMock } from './rule_schemas.mock';
-import { CreateRulesSchema } from './rule_schemas';
+import type { CreateRulesSchema } from './rule_schemas';
 import { createRuleValidateTypeDependents } from './create_rules_type_dependents';
 
 describe('create_rules_type_dependents', () => {

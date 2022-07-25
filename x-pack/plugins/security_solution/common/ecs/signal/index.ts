@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleEcs } from '../rule';
+import type { RuleEcs } from '../rule';
 
 export interface SignalEcs {
   rule?: RuleEcs;
