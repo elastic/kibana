@@ -57,7 +57,10 @@ export function ProgressControls({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton size="s" onClick={onRefresh}>
-            <FormattedMessage id="xpack.aiops.rerunAnalysisButtonTitle" defaultMessage="Rerun analysis" />
+            <FormattedMessage
+              id="xpack.aiops.rerunAnalysisButtonTitle"
+              defaultMessage="Rerun analysis"
+            />
           </EuiButton>
         )}
         {isRunning && (
