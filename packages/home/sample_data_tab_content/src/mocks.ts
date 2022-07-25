@@ -35,6 +35,7 @@ export const getStoryServices = (params: Params) => {
       const data = getSampleDataCardMockDataSet(params);
       return [data, data, data];
     },
+    logClick: () => {},
     ...getSampleDataCardStoryServices(params),
   };
 

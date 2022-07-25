@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DEMO_ENV_DATA_TEST_SUBJ } from './constants';
+import { DATA_TEST_SUBJ_DEMO_ENV_BUTTON } from './constants';
 
 const title = i18n.translate('homePackages.demoEnvironmentPanel.welcomeTitle', {
   defaultMessage: 'Explore our live demo environment',
@@ -64,12 +64,18 @@ const useSVG: () => [string | null, boolean] = () => {
 
 export interface Props {
   demoUrl: string;
+  onClick?: () => void;
 }
 
-export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
+export const DemoEnvironmentPanel = ({ demoUrl, onClick: onClickProp = () => {} }: Props) => {
   const [imageSrc] = useSVG();
 
   const image = imageSrc ? <EuiImage alt={alt} size="l" src={imageSrc} /> : null;
+
+  const onClick = () => {
+    onClickProp();
+    window.open(demoUrl, '_blank');
+  };
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -82,9 +88,9 @@ export const DemoEnvironmentPanel = ({ demoUrl }: Props) => {
               fill
               iconSide="right"
               iconType="popout"
-              href={demoUrl}
+              onClick={onClick}
               target="_blank"
-              data-test-subj={DEMO_ENV_DATA_TEST_SUBJ}
+              data-test-subj={DATA_TEST_SUBJ_DEMO_ENV_BUTTON}
             >
               Start exploring
             </EuiButton>

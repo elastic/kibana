@@ -14,16 +14,25 @@ import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
 
 // TODO: clintandrewhall - pull from config.
-import { DEMO_ENV_URL } from './constants';
+import { URL_DEMO_ENV, METRIC_CLICK_DEMO_ENV_BUTTON } from './constants';
+import { useServices } from './services';
 
 const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sampleDataLabel', {
   defaultMessage: 'Other sample data sets',
 });
 
+/**
+ * Teh content for the Sample Data Tab in the `home` plugin.
+ */
 export const SampleDataTabContent = () => {
+  const { logClick } = useServices();
+  const onClick = () => {
+    logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
+  };
+
   return (
     <>
-      <DemoEnvironmentPanel demoUrl={DEMO_ENV_URL} />
+      <DemoEnvironmentPanel demoUrl={URL_DEMO_ENV} {...{ onClick }} />
       <EuiSpacer />
       <EuiAccordion
         id="sampleDataTab"

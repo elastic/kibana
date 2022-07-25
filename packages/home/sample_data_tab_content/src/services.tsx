@@ -16,7 +16,7 @@ import {
   SampleDataCardKibanaProvider,
 } from '@kbn/home-sample-data-card';
 
-import { SAMPLE_DATA_API } from './constants';
+import { URL_SAMPLE_DATA_API } from './constants';
 
 type UnmountCallback = () => void;
 type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -36,6 +36,7 @@ type NotifyFn = (notification: NotifyInput) => void;
 export interface Services {
   fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   notifyError: NotifyFn;
+  logClick: (metric: string) => void;
 }
 
 export type SampleDataTabContentServices = Services & SampleDataCardServices;
@@ -49,13 +50,14 @@ export const SampleDataTabContentProvider: FC<SampleDataTabContentServices> = ({
   children,
   ...services
 }) => {
-  const { fetchSampleDataSets, notifyError } = services;
+  const { fetchSampleDataSets, notifyError, logClick } = services;
 
   return (
     <Context.Provider
       value={{
         fetchSampleDataSets,
         notifyError,
+        logClick,
       }}
     >
       <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
@@ -74,6 +76,9 @@ interface KibanaDependencies {
       };
     };
   };
+  // TODO: clintandrewhall - This is using a type from the home plugin.  I'd prefer we
+  // use the type directly from Kibana instead.
+  trackUiMetric: (type: string, eventNames: string | string[], count?: number) => void;
 }
 
 export type SampleDataTabContentKibanaDependencies = KibanaDependencies &
@@ -86,11 +91,13 @@ export const SampleDataTabContentKibanaProvider: FC<SampleDataTabContentKibanaDe
   children,
   ...dependencies
 }) => {
-  const { http, notifications } = dependencies.coreStart;
+  const { coreStart, trackUiMetric } = dependencies;
+  const { http, notifications } = coreStart;
 
   const value: Services = {
-    fetchSampleDataSets: async () => (await http.get(SAMPLE_DATA_API)) as SampleDataSet[],
+    fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
     notifyError: (input) => notifications.toasts.addDanger(input),
+    logClick: (eventName) => trackUiMetric('click', eventName),
   };
 
   return (

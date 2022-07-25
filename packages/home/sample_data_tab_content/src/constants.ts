@@ -7,8 +7,17 @@
  */
 
 // Corresponds to src/plugins/home/server/services/sample_data/routes
-export const SAMPLE_DATA_API = '/api/sample_data';
-// TODO: clintandrewhall pull from config
-export const DEMO_ENV_URL = 'https://ela.st/demo';
+export const URL_SAMPLE_DATA_API = '/api/sample_data';
 
-export const DEMO_ENV_DATA_TEST_SUBJ = 'goToDemoEnvButton';
+// TODO: clintandrewhall pull from config
+export const URL_DEMO_ENV = 'https://ela.st/demo';
+
+/**
+ * Test Subject name for the Demo Environment button.
+ */
+export const DATA_TEST_SUBJ_DEMO_ENV_BUTTON = 'goToDemoEnvButton';
+
+/**
+ * Metric name for counting number of clicks of the Demo Environment button.
+ */
+export const METRIC_CLICK_DEMO_ENV_BUTTON = 'sample_data__demo_env_button';

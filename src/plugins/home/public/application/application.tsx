@@ -32,7 +32,7 @@ export const renderApp = async (
   history: ScopedHistory
 ) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const { featureCatalogue, chrome, dataViewsService: dataViews } = getServices();
+  const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
   const directories = featureCatalogue.get();
@@ -47,7 +47,7 @@ export const renderApp = async (
       <RedirectAppLinks application={coreStart.application}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
-            <SampleDataTabContentKibanaProvider {...{ coreStart, dataViews }}>
+            <SampleDataTabContentKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
               <HomeApp directories={directories} solutions={solutions} />
             </SampleDataTabContentKibanaProvider>
           </KibanaContextProvider>
