@@ -11,9 +11,7 @@ import { DETECTION_ENGINE_ALERTS_INDEX_URL } from '../../../../../common/constan
 
 import { buildSiemResponse } from '../utils';
 
-export const readAlertsIndexExistsRoute = (
-  router: SecuritySolutionPluginRouter,
-) => {
+export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_ALERTS_INDEX_URL,
