@@ -8,7 +8,7 @@
 import React from 'react';
 import Chance from 'chance';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
@@ -18,6 +18,7 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { toBeOrNotToBe } from '../../test/utils';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
@@ -167,15 +168,6 @@ const mockDashboardData = {
       postureScore: 90.1,
     },
   ],
-};
-
-const toBeOrNotToBe = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
-  be.forEach((testId) => {
-    expect(screen.getByTestId(testId)).toBeInTheDocument();
-  });
-  notToBe.forEach((testId) => {
-    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
-  });
 };
 
 describe('<ComplianceDashboard />', () => {

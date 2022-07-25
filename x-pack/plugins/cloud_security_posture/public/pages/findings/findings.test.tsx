@@ -24,8 +24,9 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
+import { toBeOrNotToBe } from '../../test/utils';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -33,15 +34,6 @@ jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
 jest.mock('./es_pit/use_findings_es_pit');
 const chance = new Chance();
-
-const toBeOrNotToBe = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
-  be.forEach((testId) => {
-    expect(screen.getByTestId(testId)).toBeInTheDocument();
-  });
-  notToBe.forEach((testId) => {
-    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
-  });
-};
 
 beforeEach(() => {
   jest.restoreAllMocks();
