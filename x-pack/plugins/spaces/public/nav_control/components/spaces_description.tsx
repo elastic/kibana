@@ -13,11 +13,12 @@ import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 
-import { getSpacesFeatureDescription } from '../../constants';
+import { getSpacesFeatureDescription, getSpacesLoadingMessage } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
   id: string;
+  isLoading: boolean;
   toggleSpaceSelector: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -33,7 +34,7 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
   return (
     <EuiContextMenuPanel {...panelProps}>
       <EuiText className="spcDescription__text">
-        <p>{getSpacesFeatureDescription()}</p>
+        <p>{props.isLoading ? getSpacesLoadingMessage() : getSpacesFeatureDescription()}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
         <ManageSpacesButton

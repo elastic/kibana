@@ -79,6 +79,7 @@ export class NavControlPopover extends Component<Props, State> {
       element = (
         <SpacesDescription
           id={popoutContentId}
+          isLoading={this.state.loading}
           toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
