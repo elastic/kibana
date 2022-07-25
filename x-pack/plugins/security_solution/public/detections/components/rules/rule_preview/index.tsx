@@ -247,7 +247,11 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       <EuiSpacer />
       {showAdvancedOptions && showInvocationCountWarning && (
         <>
-          <EuiCallOut color="warning" title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE} data-test-subj="previewInvocationCountWarning">
+          <EuiCallOut
+            color="warning"
+            title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE}
+            data-test-subj="previewInvocationCountWarning"
+          >
             {i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE}
           </EuiCallOut>
           <EuiSpacer />

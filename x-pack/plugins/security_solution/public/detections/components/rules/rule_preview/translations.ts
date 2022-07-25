@@ -75,16 +75,14 @@ export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
 export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningTitle',
   {
-    defaultMessage:
-      'Rule preview timeframe might cause timeout',
+    defaultMessage: 'Rule preview timeframe might cause timeout',
   }
 );
 
 export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarningMessage',
   {
-    defaultMessage:
-      `The timeframe and rule interval that you selected for previewing this rule might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if preview has timed out (this won't affect the actual rule run).`,
+    defaultMessage: `The timeframe and rule interval that you selected for previewing this rule might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if preview has timed out (this won't affect the actual rule run).`,
   }
 );
 
