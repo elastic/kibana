@@ -11,6 +11,6 @@ export const UPDATING = i18n.translate('xpack.triggersActionsUI.alertsTable.last
   defaultMessage: 'Updating...',
 });
 
-export const UPDATED = i18n.translate('xpack.triggersActionsUI.lastUpdated.updated', {
+export const UPDATED = i18n.translate('xpack.triggersActionsUI.alertsTable.lastUpdated.updated', {
   defaultMessage: 'Updated',
 });
