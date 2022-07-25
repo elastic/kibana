@@ -160,7 +160,6 @@ describe('Fleet preconfiguration reset', () => {
             perPage: 10000,
           });
 
-        expect(packagePolicies.total).toBe(3);
         expect(
           packagePolicies.saved_objects.find((so) => so.id === 'elastic-cloud-fleet-server')
         ).toBeDefined();

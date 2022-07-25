@@ -34,13 +34,13 @@ export class ServiceAPIClient {
   private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
-  private readonly config: ServiceConfig;
+  private readonly config?: ServiceConfig;
   private readonly kibanaVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
-    const { username, password } = config;
+    const { username, password } = config ?? {};
     this.username = username;
     this.kibanaVersion = server.kibanaVersion;
 
@@ -61,7 +61,7 @@ export class ServiceAPIClient {
     const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
     const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
 
-    const config = this.config;
+    const config = this.config ?? {};
 
     // If using basic-auth, ignore certificate configs
     if (this.authorization) return baseHttpsAgent;
@@ -171,9 +171,8 @@ export class ServiceAPIClient {
     const promises: Array<Observable<unknown>> = [];
 
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = allMonitors.filter(
-        ({ locations }) =>
-          !locations || locations.length === 0 || locations?.find((loc) => loc.id === id)
+      const locMonitors = allMonitors.filter(({ locations }) =>
+        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
         promises.push(

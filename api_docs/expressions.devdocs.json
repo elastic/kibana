@@ -7953,7 +7953,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -7961,11 +7961,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -11874,10 +11874,6 @@
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/application.tsx"
-            },
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
@@ -18378,7 +18374,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -18386,11 +18382,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -30181,7 +30177,7 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
@@ -30189,11 +30185,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/neq.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/pointseries/index.ts"
               },
               {
                 "plugin": "visTypeXy",
@@ -31066,10 +31062,6 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": true,
             "references": [
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/public/application.tsx"
-              },
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"

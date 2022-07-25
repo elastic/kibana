@@ -47,7 +47,6 @@ import {
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
@@ -358,11 +357,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
-      trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
       switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
-  }, [suggestionForDraggedField, expressionExists, dispatchLens]);
+  }, [suggestionForDraggedField, dispatchLens]);
 
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
 
@@ -625,7 +622,6 @@ export const VisualizationWrapper = ({
           <EuiButton
             data-test-subj="errorFixAction"
             onClick={async () => {
-              trackUiEvent('error_fix_action');
               const newState = await validationError.fixAction?.newState({
                 ...framePublicAPI,
                 ...context,

@@ -11,6 +11,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
   ConfigKey,
@@ -58,6 +59,7 @@ export class ProjectMonitorFormatter {
   public failedStaleMonitors: FailedMonitors = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
+  private syntheticsMonitorClient: SyntheticsMonitorClient;
 
   constructor({
     locations,
@@ -68,6 +70,7 @@ export class ProjectMonitorFormatter {
     spaceId,
     monitors,
     server,
+    syntheticsMonitorClient,
   }: {
     locations: Locations;
     keepStale: boolean;
@@ -77,6 +80,7 @@ export class ProjectMonitorFormatter {
     spaceId: string;
     monitors: ProjectBrowserMonitor[];
     server: UptimeServerSetup;
+    syntheticsMonitorClient: SyntheticsMonitorClient;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
@@ -84,6 +88,7 @@ export class ProjectMonitorFormatter {
     this.keepStale = keepStale;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+    this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
@@ -148,6 +153,7 @@ export class ProjectMonitorFormatter {
           server: this.server,
           monitor: normalizedMonitor,
           monitorSavedObject: newMonitor,
+          syntheticsMonitorClient: this.syntheticsMonitorClient,
         });
         this.createdMonitors.push(monitor.id);
       }
@@ -249,6 +255,7 @@ export class ProjectMonitorFormatter {
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
         server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
       });
     }
 
@@ -290,6 +297,7 @@ export class ProjectMonitorFormatter {
         savedObjectsClient: this.savedObjectsClient,
         server: this.server,
         monitorId,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
       });
       this.deletedMonitors.push(journeyId);
     } catch (e) {

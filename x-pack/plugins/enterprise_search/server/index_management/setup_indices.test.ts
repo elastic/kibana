@@ -72,7 +72,7 @@ describe('Setup Indices', () => {
       },
       indexed_document_count: { type: 'integer' },
       status: {
-        type: 'object',
+        type: 'keyword',
       },
       worker_hostname: { type: 'keyword' },
     },

@@ -127,6 +127,4 @@ export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   return 'raw';
 };
 
-export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
-
 export const NOTE_CONTENT_CLASS_NAME = 'note-content';

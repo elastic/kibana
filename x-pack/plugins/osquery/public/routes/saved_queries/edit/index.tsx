@@ -44,7 +44,7 @@ const EditSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
 
   const elasticPrebuiltQuery = useMemo(
-    () => savedQueryDetails?.attributes?.prebuilt,
+    () => !!savedQueryDetails?.attributes?.prebuilt,
     [savedQueryDetails]
   );
   const viewMode = useMemo(
@@ -129,6 +129,13 @@ const EditSavedQueryPageComponent = () => {
     [handleDeleteClick]
   );
 
+  const handleSubmit = useCallback(
+    async (payload) => {
+      await updateSavedQueryMutation.mutateAsync(payload);
+    },
+    [updateSavedQueryMutation]
+  );
+
   if (isLoading) return null;
 
   return (
@@ -140,7 +147,7 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          handleSubmit={updateSavedQueryMutation.mutateAsync}
+          handleSubmit={handleSubmit}
           viewMode={viewMode}
         />
       )}

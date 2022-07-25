@@ -13,14 +13,12 @@ import type { PackSavedObjectAttributes } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const readPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -43,11 +41,13 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
       return response.ok({
         body: {
-          ...rest,
-          ...attributes,
-          queries: convertSOQueriesToPack(attributes.queries),
-          policy_ids: policyIds,
-          read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          data: {
+            ...rest,
+            ...attributes,
+            queries: convertSOQueriesToPack(attributes.queries),
+            policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
+          },
         },
       });
     }
