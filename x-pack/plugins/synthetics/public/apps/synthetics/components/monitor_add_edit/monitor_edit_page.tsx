@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
@@ -37,5 +38,7 @@ export const MonitorEditPage: React.FC = () => {
       <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
       <MonitorDetailsLinkPortal id={data?.id} name={data?.attributes.name} />
     </MonitorForm>
-  ) : null;
+  ) : (
+    <EuiLoadingSpinner />
+  );
 };
