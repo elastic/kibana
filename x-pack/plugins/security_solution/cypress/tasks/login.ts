@@ -312,9 +312,15 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
+export const visit = (
+  url: string,
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
+  role?: ROLES
+) => {
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    `${
+      role ? getUrlWithRoute(role, url) : url
+    }?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
     {
       onBeforeLoad(win) {
         if (onBeforeLoadCallback) {

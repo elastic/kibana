@@ -130,6 +130,7 @@ export const useTransactionDistributionChartData = () => {
   });
 
   return {
+    totalDocCount: overallLatencyData.totalDocCount,
     chartData: transactionDistributionChartData,
     hasData,
     percentileThresholdValue: overallLatencyData.percentileThresholdValue,

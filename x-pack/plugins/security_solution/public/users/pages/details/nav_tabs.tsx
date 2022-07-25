@@ -40,12 +40,6 @@ export const navTabsUsersDetails = (
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
       disabled: false,
     },
-    [UsersTableType.alerts]: {
-      id: UsersTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.alerts),
-      disabled: false,
-    },
     [UsersTableType.risk]: {
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,

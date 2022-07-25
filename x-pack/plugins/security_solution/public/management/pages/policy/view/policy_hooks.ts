@@ -44,27 +44,6 @@ export function usePolicyDetailsSelector<TSelected>(
   );
 }
 
-export type NavigationCallback = (
-  ...args: Parameters<Parameters<typeof useCallback>[0]>
-) => Partial<PolicyDetailsArtifactsPageLocation>;
-
-export function usePolicyDetailsNavigateCallback() {
-  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
-  const history = useHistory();
-  const policyId = usePolicyDetailsSelector(policyIdFromParams);
-
-  return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
-      history.push(
-        getPolicyDetailsArtifactsListPath(policyId, {
-          ...location,
-          ...args,
-        })
-      ),
-    [history, location, policyId]
-  );
-}
-
 export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const history = useHistory();

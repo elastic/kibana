@@ -149,13 +149,6 @@ export interface BaseFields800 {
   [key: string]: SearchTypes;
 }
 
-// This type is used after the alert UUID is generated and stored in the _id and ALERT_UUID fields
-export interface WrappedFields800<T extends BaseFields800> {
-  _id: string;
-  _index: string;
-  _source: T & { [ALERT_UUID]: string };
-}
-
 export interface EqlBuildingBlockFields800 extends BaseFields800 {
   [ALERT_GROUP_ID]: string;
   [ALERT_GROUP_INDEX]: number;
