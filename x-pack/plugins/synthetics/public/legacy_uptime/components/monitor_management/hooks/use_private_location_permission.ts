@@ -20,7 +20,7 @@ export function usePrivateLocationPermissions(monitor?: BrowserFields) {
 
   const canUpdatePrivateMonitor = !(hasPrivateLocation && !canSaveIntegrations);
 
-  const readAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
+  const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
 
-  return { canUpdatePrivateMonitor, readAgentPolicies };
+  return { canUpdatePrivateMonitor, canReadAgentPolicies };
 }

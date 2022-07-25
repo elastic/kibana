@@ -14,7 +14,7 @@ import { usePrivateLocationPermissions } from '../hooks/use_private_location_per
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const PolicyName = ({ policyHostId }: { policyHostId: string }) => {
-  const { readAgentPolicies } = usePrivateLocationPermissions();
+  const { canReadAgentPolicies } = usePrivateLocationPermissions();
 
   const { basePath } = useUptimeSettingsContext();
 
@@ -25,7 +25,7 @@ export const PolicyName = ({ policyHostId }: { policyHostId: string }) => {
   return (
     <EuiText size="s">
       <p>
-        {readAgentPolicies && (
+        {canReadAgentPolicies && (
           <EuiTextColor color="subdued">
             {policy ? (
               <EuiLink href={`${basePath}/app/fleet/policies/${policyHostId}`}>

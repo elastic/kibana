@@ -39,7 +39,7 @@ export const AddLocationFlyout = ({
 }) => {
   const [formData, setFormData] = useState<Partial<PrivateLocation>>();
 
-  const { readAgentPolicies } = usePrivateLocationPermissions();
+  const { canReadAgentPolicies } = usePrivateLocationPermissions();
 
   const closeFlyout = () => {
     setIsOpen(false);
@@ -53,7 +53,7 @@ export const AddLocationFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {!readAgentPolicies && (
+        {!canReadAgentPolicies && (
           <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
             <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
           </EuiCallOut>
