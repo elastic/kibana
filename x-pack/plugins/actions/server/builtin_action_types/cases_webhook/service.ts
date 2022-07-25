@@ -88,7 +88,7 @@ export const createExternalService = (
       const getUrl = renderMustacheStringNoEscape(getIncidentUrl, {
         external: {
           system: {
-            id,
+            id: encodeURIComponent(id),
           },
         },
       });
@@ -166,8 +166,8 @@ export const createExternalService = (
       const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
         external: {
           system: {
-            id: externalId,
-            title: insertedIncident.title,
+            id: encodeURIComponent(externalId),
+            title: encodeURIComponent(insertedIncident.title),
           },
         },
       });
@@ -195,7 +195,7 @@ export const createExternalService = (
       const updateUrl = renderMustacheStringNoEscape(updateIncidentUrl, {
         external: {
           system: {
-            id: incidentId,
+            id: encodeURIComponent(incidentId),
           },
         },
       });
@@ -236,8 +236,8 @@ export const createExternalService = (
       const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
         external: {
           system: {
-            id: incidentId,
-            title: updatedIncident.title,
+            id: encodeURIComponent(incidentId),
+            title: encodeURIComponent(updatedIncident.title),
           },
         },
       });
@@ -265,7 +265,7 @@ export const createExternalService = (
       const commentUrl = renderMustacheStringNoEscape(createCommentUrl, {
         external: {
           system: {
-            id: incidentId,
+            id: encodeURIComponent(incidentId),
           },
         },
       });

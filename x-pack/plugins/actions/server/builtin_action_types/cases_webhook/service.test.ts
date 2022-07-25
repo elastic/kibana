@@ -42,7 +42,7 @@ const config: CasesWebhookPublicConfigurationType = {
   getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: { ['content-type']: 'application/json' },
-  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}',
+  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
@@ -664,7 +664,7 @@ describe('Cases webhook service', () => {
     test('getIncident- escapes url', async () => {
       await service.getIncident('../../malicious-app/malicious-endpoint/');
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;'
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
 
@@ -683,7 +683,7 @@ describe('Cases webhook service', () => {
 
       await service.updateIncident(incident);
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;'
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
     test('createComment- escapes url', async () => {
@@ -697,7 +697,7 @@ describe('Cases webhook service', () => {
 
       await service.createComment(commentReq);
       expect(requestMock.mock.calls[0][0].url).toEqual(
-        'https://siem-kibana.atlassian.net/rest/api/2/issue/..&#x2F;..&#x2F;malicious-app&#x2F;malicious-endpoint&#x2F;/comment'
+        'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F/comment'
       );
     });
   });
