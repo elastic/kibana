@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardExpect = getService('dashboardExpect');
 
   describe('create and add embeddables', () => {
     before(async () => {
@@ -193,23 +194,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-
       describe('adds metric and markdown by value to a new dashboard', () => {
         before(async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await PageObjects.dashboard.preserveCrossAppState();
           await PageObjects.dashboard.clickNewDashboard();
-
         });
 
         after(async () => {
-          //await kibanaServer.importExport.unload(
-            //'test/functional/fixtures/kbn_archiver/visualize_flow.json'
-          //);
-
-          //await kibanaServer.savedObjects.cleanStandardList();
+          // await kibanaServer.importExport.unload(
+          // 'test/functional/fixtures/kbn_archiver/visualize_flow.json'
+          // );
+          // await kibanaServer.savedObjects.cleanStandardList();
         });
-
 
         it('adding a metric visualization', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -232,12 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(2);
         });
-
-
       });
-
-
-
     });
   });
 }
