@@ -11,7 +11,7 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { stringEnum, unionWithNullType } from '../../utility_types';
 import type { NoteResult, NoteSavedObject } from './note';
 import { NoteSavedObjectToReturnRuntimeType } from './note';
-import type { PinnedEventSavedObject, PinnedEvent } from './pinned_event';
+import type { PinnedEvent } from './pinned_event';
 import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
@@ -200,7 +200,6 @@ export const TimelineStatusLiteralRt = runtimeTypes.union([
 
 const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
 
-export type TimelineStatusLiteral = runtimeTypes.TypeOf<typeof TimelineStatusLiteralRt>;
 export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
 >;
@@ -299,8 +298,6 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
-
-export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 /**
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
@@ -423,17 +420,6 @@ export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResp
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
 /**
- * All Timeline Saved object type with metadata
- */
-
-export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
-  total: runtimeTypes.number,
-  data: TimelineSavedToReturnObjectRuntimeType,
-});
-
-export type AllTimelineSavedObject = runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType>;
-
-/**
  * Import/export timelines
  */
 
@@ -454,16 +440,6 @@ export interface ExportTimelineNotFoundError {
   statusCode: number;
   message: string;
 }
-
-export interface BulkGetInput {
-  type: string;
-  id: string;
-}
-
-export type NotesAndPinnedEventsByTimelineId = Record<
-  string,
-  { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
->;
 
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
