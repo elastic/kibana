@@ -79,28 +79,30 @@ export function dataAccessLayerFactory(
       timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverPaginatedEvents> {
+      const commonFields = {
+        query: { afterEvent: after, limit: 25 },
+        body: {
+          timeRange: {
+            from: timeRange.from,
+            to: timeRange.to,
+          },
+          indexPatterns,
+        },
+      };
       if (category === 'alerts') {
         return context.services.http.post('/api/endpoint/resolver/events', {
-          query: { afterEvent: after, limit: 25 },
+          query: commonFields.query,
           body: JSON.stringify({
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            indexPatterns,
+            ...commonFields,
             entityType: 'alerts',
             eventID: entityID,
           }),
         });
       } else {
         return context.services.http.post('/api/endpoint/resolver/events', {
-          query: { afterEvent: after, limit: 25 },
+          query: commonFields.query,
           body: JSON.stringify({
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            indexPatterns,
+            ...commonFields,
             filter: JSON.stringify({
               bool: {
                 filter: [

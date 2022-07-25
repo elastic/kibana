@@ -7,6 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { JsonObject } from '@kbn/utility-types';
 import type { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import type { NodeID, TimeRange } from '../utils';
@@ -100,63 +101,33 @@ export class StatsQuery {
     index: string,
     includeHits: boolean
   ): { size: number; query: object; index: string; aggs: object; fields?: string[] } {
-    if (includeHits) {
-      return {
-        size: 5000,
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: this.timeRange.from,
-                    lte: this.timeRange.to,
-                    format: 'strict_date_optional_time',
-                  },
+    return {
+      size: includeHits ? 5000 : 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
+                  format: 'strict_date_optional_time',
                 },
               },
-              {
-                terms: { [this.schema.id]: nodes },
-              },
-            ],
-          },
+            },
+            {
+              terms: { [this.schema.id]: nodes },
+            },
+          ],
         },
-        index,
-        aggs: {
-          ids: {
-            terms: { field: this.schema.id },
-          },
+      },
+      index,
+      aggs: {
+        ids: {
+          terms: { field: this.schema.id },
         },
-      };
-    } else {
-      return {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: this.timeRange.from,
-                    lte: this.timeRange.to,
-                    format: 'strict_date_optional_time',
-                  },
-                },
-              },
-              {
-                terms: { [this.schema.id]: nodes },
-              },
-            ],
-          },
-        },
-        index,
-        aggs: {
-          ids: {
-            terms: { field: this.schema.id },
-          },
-        },
-      };
-    }
+      },
+    };
   }
 
   private static getEventStats(catAgg: CategoriesAgg): EventStats {
@@ -227,7 +198,7 @@ export class StatsQuery {
       ])
     );
     const alertIdsRaw: Array<string | undefined> = alertsBody.hits.hits.map((hit) => {
-      return hit._source && hit._source['kibana.alert.uuid'];
+      return hit._source && hit._source[ALERT_RULE_UUID];
     });
     const alertIds = alertIdsRaw.flatMap((id) => (!id ? [] : [id]));
 

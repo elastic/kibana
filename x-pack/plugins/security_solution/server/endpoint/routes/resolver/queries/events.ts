@@ -131,7 +131,7 @@ export class EventsQuery {
   }
 
   /**
-   * Will search ES using a filter for normal events associated with a process, an e
+   * Will search ES using a filter for normal events associated with a process, or an entity type and event id for alert events.
    *
    * @param client a client for searching ES
    * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results

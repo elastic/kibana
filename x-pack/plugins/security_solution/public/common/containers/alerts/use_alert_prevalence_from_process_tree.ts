@@ -42,13 +42,13 @@ interface TreeResponse {
   alertIds: string[];
 }
 
-function useAlertDocumentAnalyzerSchema(processEntityId: string) {
+function useAlertDocumentAnalyzerSchema(processEntityId: string, indices: string[]) {
   const http = useHttp();
   const query = useQuery<EntityResponse[]>(['getAlertPrevalenceSchema', processEntityId], () => {
     return http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
       query: {
         _id: processEntityId,
-        indices: ['.alerts-security.alerts-default', 'logs-*'],
+        indices,
       },
     });
   });
@@ -87,7 +87,7 @@ export function useAlertPrevalenceFromProcessTree(
 
   const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
 
-  const { loading, id, schema } = useAlertDocumentAnalyzerSchema(processEntityId);
+  const { loading, id, schema } = useAlertDocumentAnalyzerSchema(processEntityId, selectedPatterns);
   const query = useQuery<ProcessTreeAlertPrevalenceResponse>(
     ['getAlertPrevalenceFromProcessTree', id],
     () => {
