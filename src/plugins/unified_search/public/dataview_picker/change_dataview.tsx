@@ -249,7 +249,7 @@ export function ChangeDataView({
                         'unifiedSearch.query.queryBar.indexPattern.textBasedLangSwitchWarning',
                         {
                           defaultMessage:
-                            'The current text-based query will be cleared when switching to a data view. Ensure that you have saved this search to avoid losing your work.',
+                            "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
                         }
                       )}
                     >
