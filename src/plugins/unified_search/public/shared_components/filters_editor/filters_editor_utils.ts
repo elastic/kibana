@@ -28,7 +28,12 @@ export const getFilterDepth = (path: string) => {
   return path.split(PATH_SEPARATOR).length || 1;
 };
 
-export const getFilterByPath = (filters: Filter[], path: string) => {
+/** @internal **/
+const doForFilterByPath = (
+  filters: Filter[],
+  path: string,
+  action: (ref: Filter, parent: Filter[]) => void
+) => {
   const pathArray = path.split(PATH_SEPARATOR);
   let ref: Filter[] = filters;
   for (let i = 0, depth = getFilterDepth(path); i < depth; i++) {
@@ -36,17 +41,17 @@ export const getFilterByPath = (filters: Filter[], path: string) => {
     const f = ref[+pathArray[i]];
     if (conditionalOperationType) {
       if (i + 1 === depth) {
-        return f;
+        return action(f, ref);
       }
       ref = f.meta.params.filters;
     } else {
-      return f;
+      return action(f, ref);
     }
   }
 };
 
-export const doForFiltersGroup = (filters: Filter[], path: string) => {
-  // todo:
+export const getFilterByPath = (filters: Filter[], path: string) => {
+  return doForFilterByPath(filters, path, (f) => f);
 };
 
 export const addFilter = (
@@ -94,21 +99,21 @@ const goIntoFilersGroup = (
   }
 };
 
-export const addFilterGroupWithEmptyFilter = (
-  filters: Filter[],
-  payload: { path: string; dataViewId: string | undefined }
-) => {
-  const newFilterGroup: Filter = {
-    meta: {
-      params: {
-        conditionalType: 'or',
-        filters: [buildEmptyFilter(true, payload.dataViewId)],
-      },
-    },
-  };
-
-  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilterGroup);
-};
+// export const addFilterGroupWithEmptyFilter = (
+//   filters: Filter[],
+//   payload: { path: string; dataViewId: string | undefined }
+// ) => {
+//   const newFilterGroup: Filter = {
+//     meta: {
+//       params: {
+//         conditionalType: 'or',
+//         filters: [buildEmptyFilter(true, payload.dataViewId)],
+//       },
+//     },
+//   };
+//
+//   return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilterGroup);
+// };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
   return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path);
