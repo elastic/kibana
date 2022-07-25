@@ -65,8 +65,8 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
         setRuleAlertsAggs((oldState: LoadRuleAlertsAggs) => ({
           ...oldState,
           ruleAlertsAggs: {
-            active: active || 0,
-            recovered: recovered || 0,
+            active,
+            recovered,
           },
           alertsChartData,
           isLoadingRuleAlertsAggs: false,
