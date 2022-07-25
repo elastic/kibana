@@ -22,6 +22,8 @@ export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const DATA_VIEW_DETAILS = 'Data View';
+
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
 

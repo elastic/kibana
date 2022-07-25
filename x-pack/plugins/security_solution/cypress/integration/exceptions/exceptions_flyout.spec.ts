@@ -70,7 +70,7 @@ describe('Exceptions flyout', () => {
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
         ...getNewRule(),
-        index: ['exceptions-*'],
+        dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
         exceptionLists: [
           {
             id: response.body.id,

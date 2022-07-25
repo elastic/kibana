@@ -179,14 +179,14 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string) => {
+export const postDataView = (dataSource: string) => {
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
         fieldAttrs: '{}',
-        title: indexPattern,
+        title: dataSource,
         timeFieldName: '@timestamp',
         fields: '{}',
       },
