@@ -22,7 +22,7 @@ export const fetchMostRecentCrawlerRequestByConfigurationId = async (
     const crawlRequestResult = await client.asCurrentUser.search<CrawlRequest>({
       index: CRAWLER_CRAWL_REQUESTS_INDEX,
       query: { term: { configuration_oid: configurationId } },
-      // TODO sort by created_at desc
+      sort: 'created_at:desc',
     });
     const result = crawlRequestResult.hits.hits[0]?._source;
 
