@@ -22,7 +22,6 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
   }
 };
 
-
 export const getFilterDepth = (path: string) => {
   return path.split('.').length || 0 + 1;
 };
