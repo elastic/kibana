@@ -45,6 +45,7 @@ import { Filtering } from './filtering';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common';
 import {
   quickFunctionsName,
   staticValueOperationName,
@@ -62,6 +63,7 @@ import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import { FieldChoiceWithOperationType } from './field_select';
+import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;
@@ -449,7 +451,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: undefined,
+                // if document field can be used, default to it
+                field: possibleFields.has(DOCUMENT_FIELD_NAME) ? documentField : undefined,
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });

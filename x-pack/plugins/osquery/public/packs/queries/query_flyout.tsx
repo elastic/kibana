@@ -27,7 +27,7 @@ import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import type { UsePackQueryFormProps, PackFormData } from './use_pack_query_form';
+import type { UsePackQueryFormProps, PackQueryFormData } from './use_pack_query_form';
 import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
@@ -38,7 +38,7 @@ const CommonUseField = getUseField({ component: Field });
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
-  onSave: (payload: PackFormData) => Promise<void>;
+  onSave: (payload: PackQueryFormData) => Promise<void>;
   onClose: () => void;
 }
 
