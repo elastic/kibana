@@ -44,7 +44,7 @@ export interface UserProfileServiceStart {
    * @param params Get current user profile operation parameters.
    * @param params.request User request instance to get user profile for.
    * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
-   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.e.
+   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
    */
   getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
     params: UserProfileGetCurrentParams

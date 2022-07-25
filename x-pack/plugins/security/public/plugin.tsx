@@ -237,7 +237,7 @@ export interface SecurityPluginStart {
      * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
      * users authenticated via authenticating proxies, the `null` value is returned.
      * @param [params] Get current user profile operation parameters.
-     * @param params.dataPath BBy default `getCurrent()` returns user information, but does not return any user data. The
+     * @param params.dataPath By default `getCurrent()` returns user information, but does not return any user data. The
      * optional "dataPath" parameter can be used to return personal data for this user.
      */
     getCurrent<D extends UserProfileData>(
