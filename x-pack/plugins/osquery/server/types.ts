@@ -19,6 +19,7 @@ import type {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -38,6 +39,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   actions: ActionsPlugin['start'];
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;

@@ -12,6 +12,7 @@ const sampleActionType: ActionType = {
   id: 'test',
   name: 'test',
   minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
   async executor({ actionId }) {
     return { status: 'ok', actionId };
   },
