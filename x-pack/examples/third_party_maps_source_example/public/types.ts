@@ -8,10 +8,10 @@
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { MapsPluginSetup, MapsPluginStart } from '@kbn/maps-plugin/public/plugin';
 
-export interface MapCustomRasterSourcePluginSetup {
+export interface MapsCustomRasterSourcePluginSetup {
   developerExamples: DeveloperExamplesSetup;
   maps: MapsPluginSetup;
 }
-export interface MapCustomRasterSourcePluginStart {
+export interface MapsCustomRasterSourcePluginStart {
   maps: MapsPluginStart;
 }

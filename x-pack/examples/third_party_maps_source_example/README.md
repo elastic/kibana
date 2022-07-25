@@ -1,4 +1,4 @@
-# mapCustomRasterSource
+# Third party maps source example plugin
 
 An example plugin for a custom raster tile source in Maps. 
 

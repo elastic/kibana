@@ -9,5 +9,5 @@ import { DataFilters } from '../../../../common/descriptor_types';
 import { ISource } from '../source';
 
 export interface ITMSSource extends ISource {
-  getUrlTemplate(dataFilters?: DataFilters): Promise<string>;
+  getUrlTemplate(dataFilters: DataFilters): Promise<string>;
 }

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'mapCustomRasterSource';
-export const PLUGIN_NAME = 'mapCustomRasterSource';
+export const PLUGIN_ID = 'mapsCustomRasterSource';
+export const PLUGIN_NAME = 'Third party maps source example';

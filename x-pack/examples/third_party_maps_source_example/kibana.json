@@ -1,8 +1,8 @@
 {
-  "id": "mapCustomRasterSource",
+  "id": "mapsCustomRasterSource",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["map_custom_raster_source"],
+  "configPath": ["third_party_maps_source_example"],
   "owner": {
     "name": "kibana-gis",
     "githubTeam": "kibana-gis"

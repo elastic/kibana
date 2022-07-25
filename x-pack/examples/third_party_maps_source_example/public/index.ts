@@ -7,11 +7,11 @@
 
 import './index.scss';
 
-import { MapCustomRasterSourcePlugin } from './plugin';
+import { MapsCustomRasterSourcePlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
-  return new MapCustomRasterSourcePlugin();
+  return new MapsCustomRasterSourcePlugin();
 }
-export { MapCustomRasterSourcePluginSetup, MapCustomRasterSourcePluginStart } from './types';
+export type { MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart } from './types';
