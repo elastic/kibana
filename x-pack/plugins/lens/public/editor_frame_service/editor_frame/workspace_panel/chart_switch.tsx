@@ -30,7 +30,6 @@ import {
   Suggestion,
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   insertLayer,
   removeLayers,
@@ -123,8 +122,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
 
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
-
-    trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
       dispatchLens,

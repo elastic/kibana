@@ -12,7 +12,6 @@ import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
 import { State, visualizationTypes, SeriesType } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';
 import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
@@ -107,7 +106,6 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
               return;
             }
             const id = chosenType.value!;
-            trackUiEvent('xy_change_layer_display');
             props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
             setPopoverIsOpen(false);
           }}

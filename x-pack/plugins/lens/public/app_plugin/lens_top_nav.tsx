@@ -15,7 +15,6 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import type { StateSetter } from '../types';
 import {
   LensAppServices,
@@ -559,7 +558,6 @@ export const LensTopNavMenu = ({
       const currentRange = data.query.timefilter.timefilter.getTime();
       if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
         data.query.timefilter.timefilter.setTime(dateRange);
-        trackUiEvent('app_date_change');
       } else {
         // Query has changed, renew the session id.
         // recalculate resolvedDateRange (relevant for relative time range)
@@ -567,7 +565,6 @@ export const LensTopNavMenu = ({
           searchSessionId: data.search.session.start(),
           resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
         });
-        trackUiEvent('app_query_change');
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {

@@ -10,7 +10,6 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 import type { OperationType } from '../indexpattern';
 import type { OperationSupportMatrix } from './operation_support';
@@ -162,7 +161,6 @@ export function FieldSelect({
       options={memoizedFieldOptions as Array<FieldOption<FieldChoiceWithOperationType>>}
       onChoose={(choice) => {
         if (choice && choice.field !== selectedField) {
-          trackUiEvent('indexpattern_dimension_field_changed');
           onChoose(choice);
         }
       }}
