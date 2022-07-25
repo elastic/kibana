@@ -11,8 +11,8 @@ import { useActions } from 'kea';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CrawlCustomSettingsFlyoutLogic } from '../crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
-import { CrawlerLogic } from '../crawler_logic';
+import { CrawlCustomSettingsFlyoutLogic } from '../../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
+import { CrawlerLogic } from '../../search_index/crawler/crawler_logic';
 
 export const StartCrawlContextMenu: React.FC = () => {
   const { reApplyCrawlRules, startCrawl } = useActions(CrawlerLogic);

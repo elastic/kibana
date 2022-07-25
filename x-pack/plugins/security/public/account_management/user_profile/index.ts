@@ -8,3 +8,7 @@
 export { UserProfile } from './user_profile';
 
 export type { UserProfileProps, UserProfileFormValues } from './user_profile';
+export type {
+  UserProfileGetCurrentParams,
+  UserProfileBulkGetParams,
+} from './user_profile_api_client';
