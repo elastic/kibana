@@ -28,6 +28,7 @@ export interface NavGroupTab {
 export enum SecurityNavGroupKey {
   dashboards = 'dashboards',
   detect = 'detect',
+  findings = 'findings',
   explore = 'explore',
   investigate = 'investigate',
   manage = 'manage',
@@ -64,6 +65,10 @@ export const securityNavKeys = [
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
+  SecurityPageName.cloudSecurityPostureDashboard,
+  SecurityPageName.cloudSecurityPostureFindings,
+  SecurityPageName.cloudSecurityPostureBenchmarks,
+  SecurityPageName.cloudSecurityPostureRules,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 

@@ -15,7 +15,6 @@ import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCspIntegrationInfo } from './use_csp_integration';
-import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
@@ -40,7 +39,7 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
-export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
+export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
   const securitySolutionContext = useContext(SecuritySolutionContext);
@@ -110,13 +109,5 @@ export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<P
       <EuiSpacer />
       <RulesContainer />
     </CloudPosturePage>
-  );
-};
-
-export const Rules = (props: RouteComponentProps<PageUrlParams>) => {
-  return (
-    <CspPageTemplate>
-      <RulesNoPageTemplate {...props} />
-    </CspPageTemplate>
   );
 };

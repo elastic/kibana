@@ -42,4 +42,6 @@ export type UrlStateType =
   | 'rules'
   | 'timeline'
   | 'explore'
-  | 'dashboards';
+  | 'dashboards'
+  | 'cloud_posture'
+  | 'findings';

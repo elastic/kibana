@@ -37,10 +37,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Endpoint response actions console in various areas of the app
    */
   responseActionsConsoleEnabled: true,
-  /**
-   * Enables the cloud security posture navigation inside the security solution
-   */
-  cloudSecurityPostureNavigation: false,
 
   /**
    * Enables the insights module for related alerts by process ancestry

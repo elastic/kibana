@@ -88,6 +88,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               items: [
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
+                navTabs[SecurityPageName.cloudSecurityPostureDashboard],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
@@ -100,6 +101,10 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.rules],
                 navTabs[SecurityPageName.exceptions],
               ],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.findings],
+              items: [navTabs[SecurityPageName.cloudSecurityPostureFindings]],
             },
             {
               ...securityNavGroup[SecurityNavGroupKey.explore],
@@ -128,6 +133,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
           ]
