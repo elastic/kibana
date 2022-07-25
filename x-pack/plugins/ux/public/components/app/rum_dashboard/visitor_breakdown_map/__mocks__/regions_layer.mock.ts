@@ -68,6 +68,9 @@ export const mockLayerList = [
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        labelZoomRange: {
+          options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
+        },
         symbolizeAs: { options: { value: 'circle' } },
         labelBorderSize: { options: { size: 'SMALL' } },
       },
@@ -137,6 +140,9 @@ export const mockLayerList = [
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        labelZoomRange: {
+          options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
+        },
         symbolizeAs: { options: { value: 'circle' } },
         labelBorderSize: { options: { size: 'SMALL' } },
       },

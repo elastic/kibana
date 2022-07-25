@@ -17,9 +17,17 @@ import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { Rule } from '../../../../types';
+import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
+  loadActionErrorLog: jest.fn(),
+}));
+
+const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunction<
+  typeof loadActionErrorLog
+>;
 
 const mockLogResponse: any = {
   data: [
@@ -124,6 +132,19 @@ const mockRule: Rule = {
   },
 };
 
+const mockErrorLogResponse = {
+  totalErrors: 1,
+  errors: [
+    {
+      id: '66b9c04a-d5d3-4ed4-aa7c-94ddaca3ac1d',
+      timestamp: '2022-03-31T18:03:33.133Z',
+      type: 'alerting',
+      message:
+        "rule execution failure: .es-query:d87fcbd0-b11b-11ec-88f6-293354dba871: 'Mine' - x_content_parse_exception: [parsing_exception] Reason: unknown query [match_allxxxx] did you mean [match_all]?",
+    },
+  ],
+};
+
 const loadExecutionLogAggregationsMock = jest.fn();
 
 describe('rule_event_log_list', () => {
@@ -140,6 +161,7 @@ describe('rule_event_log_list', () => {
         ];
       }
     });
+    loadActionErrorLogMock.mockResolvedValue(mockErrorLogResponse);
     loadExecutionLogAggregationsMock.mockResolvedValue(mockLogResponse);
   });
 
@@ -217,16 +239,11 @@ describe('rule_event_log_list', () => {
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         id: mockRule.id,
-        sort: [
-          {
-            timestamp: {
-              order: 'asc',
-            },
-          },
-        ],
+        message: '',
         outcomeFilter: [],
         page: 0,
         perPage: 10,
+        sort: [{ timestamp: { order: 'desc' } }],
       })
     );
 
@@ -246,13 +263,7 @@ describe('rule_event_log_list', () => {
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         id: mockRule.id,
-        sort: [
-          {
-            timestamp: {
-              order: 'desc',
-            },
-          },
-        ],
+        sort: [{ timestamp: { order: 'desc' } }],
         outcomeFilter: [],
         page: 0,
         perPage: 10,
@@ -287,7 +298,7 @@ describe('rule_event_log_list', () => {
             timestamp: { order: 'desc' },
           },
           {
-            execution_duration: { order: 'asc' },
+            execution_duration: { order: 'desc' },
           },
         ],
         outcomeFilter: [],
@@ -501,7 +512,7 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual([...RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
+    ).toEqual(['timestamp', 'execution_duration', 'status', 'message', 'num_errored_actions']);
   });
 
   it('does not show the refine search prompt normally', async () => {
@@ -655,5 +666,52 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 81 - 85 of 85 log entries'
     );
+  });
+
+  it('renders errored action badges in message rows', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      data: [
+        {
+          id: uuid.v4(),
+          timestamp: '2022-03-20T07:40:44-07:00',
+          duration: 5000000,
+          status: 'success',
+          message: 'rule execution #1',
+          version: '8.2.0',
+          num_active_alerts: 2,
+          num_new_alerts: 4,
+          num_recovered_alerts: 3,
+          num_triggered_actions: 10,
+          num_succeeded_actions: 0,
+          num_errored_actions: 4,
+          total_search_duration: 1000000,
+          es_search_duration: 1400000,
+          schedule_delay: 2000000,
+          timed_out: false,
+        },
+      ],
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleActionErrorBadge"]').first().text()).toEqual('4');
+
+    // Click to open flyout
+    wrapper
+      .find('[data-test-subj="ruleEventLogDataGridErroredActionBadge"]')
+      .first()
+      .simulate('click');
+    expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
   });
 });
