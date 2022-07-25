@@ -34,8 +34,12 @@ export function runCheckOwnTestsRanCli() {
         .load(readFileSync(resolveRoot('src/dev/own_tests_ran/test_roots.yml'), 'utf8'))
         .general.forEach((x) => console.log(`\n### x: \n\t${x}`));
 
-      const res = await getPrChanges();
-      console.log(`\n### res: \n${JSON.stringify(res, null, 2)}`);
+      const xs = await getPrChanges();
+      console.log(`\n### xs: \n${JSON.stringify(xs, null, 2)}`);
+
+      const fileNames = xs.map((x) => x.filename);
+
+      console.log(`\n### fileNames: \n${JSON.stringify(fileNames, null, 2)}`);
     },
     {
       description: `
