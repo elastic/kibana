@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import type { FilesRouter } from './types';
 
-import { FindFilesHttpEndpoint, FILES_API_ROUTES } from '../../common/api_routes';
+import { FindFilesHttpEndpoint, FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 
 const method = 'post' as const;

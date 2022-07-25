@@ -5,43 +5,12 @@
  * 2.0.
  */
 
-import * as qs from 'query-string';
 import { PLUGIN_ID } from './constants';
 import type { FileJSON, FilesMetrics } from './types';
 
-const API_BASE_PATH = `/api/${PLUGIN_ID}`;
+export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
-const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
-
-export const FILE_KIND_API_ROUTES_SERVER = {
-  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
-  getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob`,
-  getDownloadRoute: (fileKind: string) =>
-    `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob/{fileName?}`,
-  getUpdateRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-  getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-  getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
-  getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
-};
-
-export const FILE_KIND_API_ROUTES_CLIENT = {
-  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
-  getUploadRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob`,
-  getDownloadRoute: (fileKind: string, id: string, fileName?: string) =>
-    `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob/${fileName ? fileName : ''}`,
-  getUpdateRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-  getDeleteRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-  getListRoute: (fileKind: string, page?: number, perPage?: number) => {
-    const qParams = qs.stringify({ page, perPage });
-    return `${FILES_API_BASE_PATH}/${fileKind}/list${qParams ? `?${qParams}` : ''}`;
-  },
-  getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
-};
-
-export const FILES_API_ROUTES = {
-  find: `${FILES_API_BASE_PATH}/find`,
-  metrics: `${FILES_API_BASE_PATH}/metrics`,
-};
+export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
