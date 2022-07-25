@@ -114,7 +114,7 @@ export const validateAndNormalizeUrl = (
     ensureUriAllowed(url, configurationUtilities);
     return normalizeURL(url);
   } catch (e) {
-    throw Error(`Invalid ${urlDesc}: ${url}. ${e}`);
+    throw Error(`Invalid ${urlDesc}: ${e}`);
   }
 };
 

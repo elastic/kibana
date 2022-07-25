@@ -627,7 +627,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message: 'an error occurred while running the action',
                 service_message:
-                  '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: httpshttp://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira. Error: Invalid protocol.  ',
+                  '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.  ',
               });
             });
           expect(proxyHaveBeenCalled).to.equal(false);
@@ -657,7 +657,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message: 'an error occurred while running the action',
                 service_message:
-                  '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: error rendering mustache template "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira/rest/api/2/issue/{{{external.system.id}}}e\\\\whoathisisbad4{}{{": Unclosed tag at 151. Error: Invalid URL.  ',
+                  '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: Error: Invalid URL.  ',
               });
             });
           expect(proxyHaveBeenCalled).to.equal(false);
@@ -724,7 +724,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message: 'an error occurred while running the action',
                 service_message:
-                  '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: error rendering mustache template "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira/rest/api/2/issue/{{{external.system.id}}}e\\\\whoathisisbad4{}{{": Unclosed tag at 151. Error: Invalid URL.  ',
+                  '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: Error: Invalid URL.  ',
               });
             });
           expect(proxyHaveBeenCalled).to.equal(true); // called for the create case successful call

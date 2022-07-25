@@ -507,7 +507,7 @@ describe('Cases webhook service', () => {
     });
     test('getIncident- throws for bad url', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: https://siem-kibana.atlassian.net/rest/api/2/issue/whack. Error: error configuring connector action: Uri not allowed.'
+        '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
     test('createIncident- throws for bad url', async () => {
@@ -523,7 +523,7 @@ describe('Cases webhook service', () => {
       };
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: https://siem-kibana.atlassian.net/rest/api/2/issue. Error: error configuring connector action: Uri not allowed.'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
     test('updateIncident- throws for bad url', async () => {
@@ -540,7 +540,7 @@ describe('Cases webhook service', () => {
       };
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: https://siem-kibana.atlassian.net/rest/api/2/issue/123. Error: error configuring connector action: Uri not allowed.'
+        '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
     test('createComment- throws for bad url', async () => {
@@ -552,7 +552,7 @@ describe('Cases webhook service', () => {
         },
       };
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Invalid Create comment URL: https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment. Error: error configuring connector action: Uri not allowed.'
+        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Invalid Create comment URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
   });
@@ -581,7 +581,7 @@ describe('Cases webhook service', () => {
     });
     test('getIncident- throws for bad protocol', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: ftp://bad.com. Error: Invalid protocol.'
+        '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: Error: Invalid protocol.'
       );
     });
     test('createIncident- throws for bad protocol', async () => {
@@ -597,7 +597,7 @@ describe('Cases webhook service', () => {
       };
 
       await expect(service.createIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: ftp://bad.com. Error: Invalid protocol.'
+        '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.'
       );
     });
     test('updateIncident- throws for bad protocol', async () => {
@@ -614,7 +614,7 @@ describe('Cases webhook service', () => {
       };
 
       await expect(service.updateIncident(incident)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: ftp://bad.com. Error: Invalid protocol.'
+        '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: Error: Invalid protocol.'
       );
     });
     test('createComment- throws for bad protocol', async () => {
@@ -626,7 +626,7 @@ describe('Cases webhook service', () => {
         },
       };
       await expect(service.createComment(commentReq)).rejects.toThrow(
-        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Invalid Create comment URL: ftp://bad.com. Error: Invalid protocol.'
+        '[Action][Webhook - Case Management]: Unable to create comment at case with id 1. Error: Invalid Create comment URL: Error: Invalid protocol.'
       );
     });
   });
