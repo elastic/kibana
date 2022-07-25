@@ -12,9 +12,11 @@ import { useDispatch } from 'react-redux';
 import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
 
 export const EmptyLocations = ({
+  inFlyout = true,
   setIsAddingNew,
   disabled,
 }: {
+  inFlyout?: boolean;
   disabled?: boolean;
   setIsAddingNew?: (val: boolean) => void;
 }) => {
@@ -24,7 +26,11 @@ export const EmptyLocations = ({
     <EuiEmptyPrompt
       hasBorder
       title={<h2>{ADD_FIRST_LOCATION}</h2>}
-      body={<p>{START_ADDING_LOCATIONS_DESCRIPTION}</p>}
+      body={
+        <p>
+          {!inFlyout ? FIRST_MONITOR : ''} {START_ADDING_LOCATIONS_DESCRIPTION}
+        </p>
+      }
       actions={
         <EuiButton
           disabled={disabled}
@@ -50,6 +56,10 @@ export const EmptyLocations = ({
     />
   );
 };
+
+const FIRST_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.firstLocationMonitor', {
+  defaultMessage: 'In order to create a monitor, you will need to add a location first.',
+});
 
 const ADD_FIRST_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.firstLocation', {
   defaultMessage: 'Add your first private location',
