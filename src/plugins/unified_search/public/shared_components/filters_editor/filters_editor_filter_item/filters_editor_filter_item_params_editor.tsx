@@ -33,7 +33,6 @@ export const ParamsEditor = ({
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
 }: ParamsEditorProps) => {
-  // debugger
   const onParamsChange = useCallback(
     (selectedParams: Filter['meta']['params']) => {
       onHandleParamsChange(selectedParams);

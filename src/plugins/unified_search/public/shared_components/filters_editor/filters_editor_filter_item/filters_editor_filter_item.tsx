@@ -39,44 +39,31 @@ export function FilterItem({
 }: FilterItemProps) {
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
+  const field: DataViewField | undefined = getFieldFromFilter(filter as FieldFilter, dataView);
+  const operator: Operator | undefined = getOperatorFromFilter(filter);
+  const params: Filter['meta']['params'] = getFilterParams(filter);
 
-  const [selectedField, setSelectedField] = useState<DataViewField | undefined>(
-    getFieldFromFilter(filter as FieldFilter, dataView)
-  );
-  const [selectedOperator, setSelectedOperator] = useState<Operator | undefined>(
-    getSelectedOperator()
-  );
-  const [selectedParams, setSelectedParams] = useState<Filter['meta']['params']>(
-    getFilterParams(filter)
-  );
-
-  function getSelectedOperator() {
-    return getOperatorFromFilter(filter);
-  }
+  const [, setSelectedParams] = useState<Filter['meta']['params']>(getFilterParams(filter));
 
   const onHandleField = (field: DataViewField) => {
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field, path },
+      payload: { dataView, field, operator, params, path },
     });
-
-    setSelectedField(field);
-    setSelectedOperator(undefined);
-    setSelectedParams(undefined);
   };
 
   const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
     dispatch({
       type: 'updateFilter',
-      payload: { dataView, field: selectedField, operator, params, path },
+      payload: { dataView, field, operator, params, path },
     });
-
-    setSelectedOperator(operator);
-    setSelectedParams(params);
   };
 
   const onHandleParamsChange = (params: Filter['meta']['params']) => {
-    setSelectedParams(params);
+    dispatch({
+      type: 'updateFilter',
+      payload: { dataView, field, operator, params, path },
+    });
   };
 
   const onHandleParamsUpdate = (value: string) => {
@@ -135,19 +122,15 @@ export function FilterItem({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <EuiFormRow fullWidth>
-                  <FieldInput
-                    field={selectedField}
-                    dataView={dataView}
-                    onHandleField={onHandleField}
-                  />
+                  <FieldInput field={field} dataView={dataView} onHandleField={onHandleField} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow fullWidth>
                   <OperatorInput
-                    field={selectedField}
-                    operator={selectedOperator}
-                    params={selectedParams}
+                    field={field}
+                    operator={operator}
+                    params={params}
                     onHandleOperator={onHandleOperator}
                   />
                 </EuiFormRow>
@@ -155,9 +138,9 @@ export function FilterItem({
               <EuiFlexItem>
                 <ParamsEditor
                   dataView={dataView}
-                  field={selectedField}
-                  operator={selectedOperator}
-                  params={selectedParams}
+                  field={field}
+                  operator={operator}
+                  params={params}
                   onHandleParamsChange={onHandleParamsChange}
                   onHandleParamsUpdate={onHandleParamsUpdate}
                   timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
