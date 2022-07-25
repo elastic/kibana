@@ -8,8 +8,7 @@
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { MapCenter } from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 
 export interface RefreshConfig {
   isPaused: boolean;

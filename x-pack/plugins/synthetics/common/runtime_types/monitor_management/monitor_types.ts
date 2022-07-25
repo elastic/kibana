@@ -315,6 +315,24 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+export const HeartbeatConfigCodec = t.intersection([
+  SyntheticsMonitorWithIdCodec,
+  t.partial({
+    fields_under_root: t.boolean,
+    fields: t.intersection([
+      t.interface({
+        config_id: t.string,
+      }),
+      t.partial({
+        run_once: t.boolean,
+        test_run_id: t.string,
+        'monitor.project.name': t.string,
+        'monitor.project.id': t.string,
+      }),
+    ]),
+  }),
+]);
+
 export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({ id: t.string }),
@@ -333,6 +351,8 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
 >;
 
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
+
+export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
 
 export const MonitorDefaultsCodec = t.interface({
   [DataStream.HTTP]: HTTPFieldsCodec,
