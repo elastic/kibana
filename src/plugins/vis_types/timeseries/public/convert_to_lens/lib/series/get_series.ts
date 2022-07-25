@@ -23,10 +23,12 @@ import {
   getTimeScale,
 } from '../metrics';
 
-export const getSeries = (
-  initialMetrics: Metric[],
-  totalSeriesNum: number
-): { metrics: VisualizeEditorLayersContext['metrics']; seriesAgg?: string } | null => {
+export interface VisSeries {
+  metrics: VisualizeEditorLayersContext['metrics'];
+  seriesAgg?: string;
+}
+
+export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): VisSeries | null => {
   const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;

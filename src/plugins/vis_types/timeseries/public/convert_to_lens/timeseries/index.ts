@@ -6,22 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
-import { SUPPORTED_FORMATTERS } from '../lib/formatters';
 import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
-import {
-  convertChartType,
-  convertFilter,
-  convertMetrics,
-  convertSplitFilters,
-  getYExtents,
-  isSplitWithDateHistogram,
-} from '../lib/xy';
+import { getYExtents, isSplitWithDateHistogram } from '../lib/xy';
+import { getLayerConfiguration } from '../lib/layers';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -50,11 +42,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
     if (!series) {
       return null;
     }
-    const { metrics: metricsArray, seriesAgg } = series;
-    const filter = convertFilter(layer);
-    const metrics = convertMetrics(layer, metricsArray, filter);
-    const splitFilters = convertSplitFilters(layer);
-    const palette = layer.palette as PaletteOutput;
+
     const splitFields = getFieldsForTerms(layer.terms_field);
 
     // in case of terms in a date field, we want to apply the date_histogram
@@ -69,43 +57,15 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       return null;
     }
 
-    const layerConfiguration: VisualizeEditorLayersContext = {
+    layersConfiguration[layerIdx] = getLayerConfiguration(
       indexPatternId,
-      timeFieldName: timeField,
-      chartType: convertChartType(layer),
-      axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
-      ...(layer.terms_field && { splitFields }),
-      splitWithDateHistogram,
-      ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
-      ...(splitFilters.length > 0 && { splitFilters }),
-      // for non supported palettes, we will use the default palette
-      palette:
-        !palette || palette.name === 'gradient' || palette.name === 'rainbow'
-          ? { name: 'default', type: 'palette' }
-          : palette,
-      ...(layer.split_mode === 'terms' && {
-        termsParams: {
-          size: layer.terms_size ?? 10,
-          ...(layer.terms_include && { include: [layer.terms_include] }),
-          includeIsRegex: Boolean(layer.terms_include),
-          ...(layer.terms_exclude && { exclude: [layer.terms_exclude] }),
-          excludeIsRegex: Boolean(layer.terms_exclude),
-          otherBucket: false,
-          orderDirection: layer.terms_direction ?? 'desc',
-          orderBy: layer.terms_order_by === '_key' ? { type: 'alphabetical' } : { type: 'column' },
-          parentFormat: { id: 'terms' },
-        },
-      }),
-      collapseFn: seriesAgg,
-      metrics,
-      timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
-      ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
-      ...(layer.label && { label: layer.label }),
-      dropPartialBuckets: layer.override_index_pattern
-        ? layer.series_drop_last_bucket > 0
-        : model.drop_last_bucket > 0,
-    };
-    layersConfiguration[layerIdx] = layerConfiguration;
+      layerIdx,
+      model,
+      series,
+      splitFields,
+      timeField,
+      splitWithDateHistogram
+    );
   }
 
   const extents = getYExtents(model);
