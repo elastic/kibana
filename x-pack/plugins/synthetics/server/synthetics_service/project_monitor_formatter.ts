@@ -284,19 +284,18 @@ export class ProjectMonitorFormatter {
       const staleMonitorsData = Object.values(this.staleMonitorsMap).filter(
         (monitor) => monitor.stale === true
       );
-      await Promise.all(
-        staleMonitorsData.map((monitor) => {
-          if (!this.keepStale) {
-            return this.deleteStaleMonitor({
-              monitorId: monitor.savedObjectId,
-              journeyId: monitor.journeyId,
-            });
-          } else {
-            this.staleMonitors.push(monitor.journeyId);
-            return null;
-          }
-        })
-      );
+
+      for (const staleMonitor of staleMonitorsData) {
+        if (!this.keepStale) {
+          await this.deleteStaleMonitor({
+            monitorId: staleMonitor.savedObjectId,
+            journeyId: staleMonitor.journeyId,
+          });
+        } else {
+          this.staleMonitors.push(staleMonitor.journeyId);
+          return null;
+        }
+      }
     } catch (e) {
       this.server.logger.error(e);
     }

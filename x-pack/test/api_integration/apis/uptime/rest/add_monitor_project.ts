@@ -9,9 +9,12 @@ import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+
+import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('[PUT] /api/uptime/service/monitors', function () {
@@ -24,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     let projectMonitors: ProjectMonitorsRequest;
 
-    let agentId = '';
+    let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -66,10 +69,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+      await supertest
+        .post('/api/fleet/epm/packages/synthetics/0.9.5')
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      agentId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([agentId]);
+      testPolicyId = apiResponse.body.item.id;
+      await testPrivateLocations.setTestLocations([testPolicyId]);
     });
 
     beforeEach(() => {
@@ -719,8 +728,8 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: false,
               isInvalid: false,
               name: 'Test private location 0',
-              policyHostId: agentId,
-              id: agentId,
+              policyHostId: testPolicyId,
+              id: testPolicyId,
               geo: {
                 lat: '',
                 lon: '',
@@ -883,6 +892,282 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
         await security.user.delete(username);
         await security.role.delete(roleName);
+      }
+    });
+
+    it('creates integration policies for project monitors with private locations', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          });
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
+
+    it('deletes integration policies for project monitors when private location is removed from the monitor', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          });
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
+          });
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
+
+    it('deletes integration policies when project monitors are deleted', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          })
+          .expect(200);
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [],
+            keep_stale: false,
+          });
+
+        const monitorsResponse2 = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(monitorsResponse2.body.monitors.length).eql(0);
+
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(null), 3000);
+        });
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy2).eql(undefined);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
+      }
+    });
+
+    it('handles updating package policies when project monitors are updated', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: ['Test private location 0'],
+              },
+            ],
+          });
+
+        const monitorsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const apiResponsePolicy = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy = apiResponsePolicy.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        expect(packagePolicy.policy_id).eql(testPolicyId);
+
+        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: ['Test private location 0'],
+                enabled: false,
+              },
+            ],
+          });
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+
+        const packagePolicy2 = apiResponsePolicy2.body.items.find(
+          (pkgPolicy: PackagePolicy) =>
+            pkgPolicy.id ===
+            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+              '-' +
+              testPolicyId
+        );
+
+        comparePolicies(
+          packagePolicy2,
+          getTestProjectSyntheticsPolicy({
+            inputs: { enabled: { value: false, type: 'bool' } },
+          })
+        );
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
+
+        const apiResponsePolicy2 = await supertest.get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        );
+        expect(apiResponsePolicy2.body.items.length).eql(0);
       }
     });
   });

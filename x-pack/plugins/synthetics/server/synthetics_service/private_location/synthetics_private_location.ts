@@ -13,6 +13,7 @@ import {
   MonitorFields,
   PrivateLocation,
   HeartbeatConfig,
+  SourceType,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
@@ -47,7 +48,12 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.policyHostId;
-      newPolicy.name = config[ConfigKey.NAME] + '-' + privateLocation.name;
+      newPolicy.name =
+        (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+          ? config.id
+          : config[ConfigKey.NAME]) +
+        '-' +
+        privateLocation.name;
       newPolicy.output_id = '';
       newPolicy.namespace = 'default';
 
@@ -81,7 +87,7 @@ export class SyntheticsPrivateLocation {
         const newPolicy = await this.generateNewPolicy(config, location);
 
         if (!newPolicy) {
-          return null;
+          throw new Error('Unable to create Synthetics package policy for private location');
         }
 
         await this.createPolicy(newPolicy, getPolicyId(config, location));
@@ -105,25 +111,29 @@ export class SyntheticsPrivateLocation {
       const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
       const currId = getPolicyId(config, privateLocation);
       const hasPolicy = await this.getMonitor(currId);
+      try {
+        if (hasLocation) {
+          const newPolicy = await this.generateNewPolicy(config, privateLocation);
 
-      if (hasLocation) {
-        const newPolicy = await this.generateNewPolicy(config, privateLocation);
+          if (!newPolicy) {
+            throw new Error('Unable to create Synthetics package policy for private location');
+          }
 
-        if (!newPolicy) {
-          return null;
+          if (hasPolicy) {
+            await this.updatePolicy(newPolicy, currId);
+          } else {
+            await this.createPolicy(newPolicy, currId);
+          }
+        } else if (hasPolicy) {
+          const soClient = this.server.authSavedObjectsClient!;
+          const esClient = this.server.uptimeEsClient.baseESClient;
+          await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId], {
+            force: true,
+          });
         }
-
-        if (hasPolicy) {
-          await this.updatePolicy(newPolicy, currId);
-        } else {
-          await this.createPolicy(newPolicy, currId);
-        }
-      } else if (hasPolicy) {
-        const soClient = this.server.authSavedObjectsClient!;
-        const esClient = this.server.uptimeEsClient.baseESClient;
-        await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId], {
-          force: true,
-        });
+      } catch (e) {
+        this.server.logger.error(e);
+        return null;
       }
     }
   }
@@ -170,6 +180,7 @@ export class SyntheticsPrivateLocation {
       const soClient = this.server.authSavedObjectsClient;
       return await this.server.fleet.packagePolicyService.get(soClient!, id);
     } catch (e) {
+      this.server.logger.debug(e);
       return null;
     }
   }
@@ -222,6 +233,7 @@ export class SyntheticsPrivateLocation {
             );
           } catch (e) {
             this.server.logger.error(e);
+            return null;
           }
         }
       }
