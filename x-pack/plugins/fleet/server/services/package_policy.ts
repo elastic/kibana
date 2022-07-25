@@ -14,6 +14,7 @@ import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
@@ -854,9 +855,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
       const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
@@ -1301,7 +1303,8 @@ export interface PackagePolicyServiceInterface {
 
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
