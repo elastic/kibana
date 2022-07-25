@@ -9,6 +9,7 @@ import type { UseQueryResult } from 'react-query';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
+import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
@@ -74,8 +75,14 @@ export const FindingsNoPageTemplate = () => {
   );
 };
 
-export const Findings = () => (
-  <CspPageTemplate paddingSize="none">
-    <FindingsNoPageTemplate />
-  </CspPageTemplate>
-);
+const FINDINGS_BREADCRUMBS = [cloudPosturePages.findings];
+
+export const Findings = () => {
+  useCspBreadcrumbs(FINDINGS_BREADCRUMBS);
+
+  return (
+    <CspPageTemplate paddingSize="none">
+      <FindingsNoPageTemplate />
+    </CspPageTemplate>
+  );
+};

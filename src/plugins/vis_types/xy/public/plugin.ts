@@ -19,7 +19,6 @@ import {
   setUISettings,
   setDocLinks,
   setPalettesService,
-  setTrackUiMetric,
   setActiveCursor,
 } from './services';
 
@@ -85,9 +84,6 @@ export class VisTypeXyPlugin
     expressions.registerFunction(expressionFunctions.visScale);
 
     visTypesDefinitions.forEach(visualizations.createBaseVisualization);
-
-    setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
-
     return {};
   }
 
