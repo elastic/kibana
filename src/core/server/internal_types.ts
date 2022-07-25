@@ -32,6 +32,10 @@ import type {
   InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
 import type {
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart,
+} from '@kbn/core-metrics-server-internal';
+import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -46,7 +50,6 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
