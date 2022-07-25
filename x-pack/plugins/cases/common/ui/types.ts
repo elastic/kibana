@@ -99,6 +99,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  searchFields: string[];
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];

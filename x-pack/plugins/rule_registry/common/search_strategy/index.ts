@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   QueryDslFieldAndFormat,
@@ -30,6 +30,8 @@ export interface BasicFields {
   _index: string;
 }
 export type EcsFieldsResponse = BasicFields & {
+  [Property in TechnicalRuleDataFieldName]?: string[];
+} & {
   [x: string]: unknown[];
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;

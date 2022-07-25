@@ -9,7 +9,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { User } from '../../common/api';
+import { KueryNode } from '@kbn/es-query';
+import { CaseSeverity, CaseStatuses, User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -40,4 +41,16 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+}
+
+export interface ConstructQueryParams {
+  tags?: string | string[];
+  reporters?: string | string[];
+  status?: CaseStatuses;
+  severity?: CaseSeverity;
+  sortByField?: string;
+  owner?: string | string[];
+  authorizationFilter?: KueryNode;
+  from?: string;
+  to?: string;
 }

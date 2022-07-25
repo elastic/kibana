@@ -17,6 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { mosaicVisFunction } from './mosaic_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('interpreter/functions#mosaicVis', () => {
   const fn = functionWrapper(mosaicVisFunction());
@@ -138,8 +139,10 @@ describe('interpreter/functions#mosaicVis', () => {
           reset: () => {},
         },
       },
-    };
-    await fn(context, visConfig, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, visConfig, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });
