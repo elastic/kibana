@@ -13,14 +13,15 @@ describe('File HTTP API', () => {
   let root: TestEnvironmentUtils['root'];
   let request: TestEnvironmentUtils['request'];
   let createFile: TestEnvironmentUtils['createFile'];
+  let fileKind: string;
 
   beforeAll(async () => {
     testHarness = await setupIntegrationEnvironment();
-    ({ request, createFile, root } = testHarness);
+    ({ request, createFile, root, fileKind } = testHarness);
   });
 
   afterAll(async () => {
-    testHarness.cleanupAfterAll();
+    await testHarness.cleanupAfterAll();
   });
 
   describe('find', () => {
@@ -117,6 +118,81 @@ describe('File HTTP API', () => {
         })
         .expect(200);
       expect(result.body.files).toHaveLength(1);
+    });
+  });
+
+  describe('metrics', () => {
+    const esMaxCapacity = 50 * 1024 * 1024;
+    afterEach(async () => {
+      await testHarness.cleanupAfterEach();
+    });
+    test('returns usage metrics', async () => {
+      {
+        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        expect(metrics).toEqual({
+          countByExtension: {},
+          countByStatus: {},
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: esMaxCapacity,
+              used: 0,
+            },
+          },
+        });
+      }
+
+      const [file1, file2] = await Promise.all([createFile(), createFile(), createFile()]);
+
+      {
+        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        expect(metrics).toEqual({
+          countByExtension: {
+            png: 3,
+          },
+          countByStatus: {
+            AWAITING_UPLOAD: 3,
+          },
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: esMaxCapacity,
+              used: 0,
+            },
+          },
+        });
+      }
+
+      await request
+        .put(root, `/api/files/files/${fileKind}/${file1.id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .send('what have you')
+        .expect(200);
+      await request
+        .put(root, `/api/files/files/${fileKind}/${file2.id}/blob`)
+        .set('Content-Type', 'application/octet-stream')
+        .send('what have you')
+        .expect(200);
+
+      {
+        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        expect(metrics).toEqual({
+          countByExtension: {
+            png: 3,
+          },
+          countByStatus: {
+            AWAITING_UPLOAD: 1,
+            READY: 2,
+          },
+          storage: {
+            esFixedSizeIndex: {
+              capacity: esMaxCapacity,
+              available: 52428774,
+              used: 26,
+            },
+          },
+        });
+      }
     });
   });
 });

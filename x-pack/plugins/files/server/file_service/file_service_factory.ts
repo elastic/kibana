@@ -80,6 +80,9 @@ export class FileServiceFactory {
       async list<M>(args: ListFilesArgs) {
         return internalFileService.list(args) as Promise<Array<File<M>>>;
       },
+      async getUsageMetrics() {
+        return internalFileService.getUsageMetrics();
+      },
       getShareObject: internalFileShareService.get.bind(internalFileShareService),
       updateShareObject: internalFileShareService.update.bind(internalFileShareService),
     };

@@ -26,6 +26,9 @@ export async function setupIntegrationEnvironment() {
     },
   };
 
+  /**
+   * Functionality to create files easily
+   */
   let disposables: Array<() => Promise<void>> = [];
   const createFile = async (
     fileAttrs: Partial<{
@@ -55,6 +58,9 @@ export async function setupIntegrationEnvironment() {
     return result.body.file;
   };
 
+  /**
+   * Register a test file type
+   */
   fileKindsRegistry.register({
     id: fileKind,
     blobStoreSettings: {
@@ -79,6 +85,9 @@ export async function setupIntegrationEnvironment() {
     },
   });
 
+  /**
+   * Clean up methods
+   */
   const cleanupAfterEach = async () => {
     await Promise.all(disposables.map((dispose) => dispose()));
     disposables = [];
@@ -90,6 +99,9 @@ export async function setupIntegrationEnvironment() {
     await manageES.stop();
   };
 
+  /**
+   * Start the servers and set them up
+   */
   const manageES = await startES();
 
   const root = createRootWithCorePlugins(testConfig, { oss: false });
@@ -98,6 +110,9 @@ export async function setupIntegrationEnvironment() {
   const coreStart = await root.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
+  /**
+   * Wait for endpoints to be available
+   */
   await pRetry(() => request.get(root, '/api/licensing/info').expect(200), { retries: 5 });
 
   return {

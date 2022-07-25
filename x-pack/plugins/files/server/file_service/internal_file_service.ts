@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { reduce } from 'lodash';
 import {
   Logger,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
+  SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import { nodeBuilder, escapeKuery, KueryNode } from '@kbn/es-query';
 
@@ -24,6 +27,9 @@ import {
   UpdatableFileAttributes,
   FileKind,
   FileJSON,
+  FilesMetrics,
+  ES_FIXED_SIZE_INDEX_BLOB_STORE,
+  FileStatus,
 } from '../../common';
 import { File, toJSON } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
@@ -70,6 +76,14 @@ export interface FindFileArgs {
   perPage?: number;
 }
 
+interface TermsAgg {
+  buckets: Array<{ key: string; doc_count: number }>;
+}
+interface FilesMetricsAggs {
+  bytesUsed: AggregationsSumAggregate;
+  status: TermsAgg;
+  extension: TermsAgg;
+}
 /**
  * Service containing methods for working with files.
  *
@@ -222,5 +236,67 @@ export class InternalFileService {
       perPage,
     });
     return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
+  }
+
+  public async getUsageMetrics(): Promise<FilesMetrics> {
+    let pit: undefined | SavedObjectsOpenPointInTimeResponse;
+    try {
+      pit = await this.soClient.openPointInTimeForType(this.savedObjectType);
+      const { aggregations } = await this.soClient.find<
+        FileSavedObjectAttributes,
+        FilesMetricsAggs
+      >({
+        type: this.savedObjectType,
+        pit,
+        aggs: {
+          bytesUsed: {
+            sum: {
+              field: `${this.savedObjectType}.attributes.size`,
+            },
+          },
+          status: {
+            terms: {
+              field: `${this.savedObjectType}.attributes.Status`,
+            },
+          },
+          extension: {
+            terms: {
+              field: `${this.savedObjectType}.attributes.extension`,
+            },
+          },
+        },
+      });
+
+      if (aggregations) {
+        const capacity =
+          this.blobStorageService.getStaticBlobStorageSettings().esFixedSizeIndex.capacity;
+        const used = aggregations.bytesUsed!.value!;
+        return {
+          storage: {
+            [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
+              capacity,
+              available: capacity - used,
+              used,
+            },
+          },
+          countByExtension: reduce(
+            aggregations.extension.buckets,
+            (acc, { key, doc_count: docCount }) => ({ ...acc, [key]: docCount }),
+            {}
+          ),
+          countByStatus: reduce(
+            aggregations.status.buckets,
+            (acc, { key, doc_count: docCount }) => ({ ...acc, [key]: docCount }),
+            {} as Record<FileStatus, number>
+          ),
+        };
+      }
+
+      throw new Error('Could not retrieve usage metrics');
+    } finally {
+      if (pit) {
+        await this.soClient.closePointInTime(pit.id).catch(this.logger.error.bind(this.logger));
+      }
+    }
   }
 }

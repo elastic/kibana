@@ -23,6 +23,8 @@ import { mappings } from './mappings';
  */
 export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
+export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024; // 50GiB
+
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -36,6 +38,14 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     );
   }
 
+  /**
+   * @note
+   * There is a known issue where calling this function simultaneously can result
+   * in a race condition where one of the calls will fail because the index is already
+   * being created.
+   *
+   * This is only an issue for the very first time the index is being created.
+   */
   private async createIndexIfNotExists(): Promise<void> {
     const index = this.index;
     if (await this.esClient.indices.exists({ index })) {
@@ -60,7 +70,6 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
-        return;
       }
       throw e;
     }

@@ -8,9 +8,11 @@
 import { FilesRouter } from './types';
 import { registerFileKindRoutes } from './file_kind';
 import * as find from './find';
+import * as metrics from './metrics';
 
 export function registerRoutes(router: FilesRouter) {
   registerFileKindRoutes(router);
 
   find.register(router);
+  metrics.register(router);
 }
