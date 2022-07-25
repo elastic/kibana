@@ -32,7 +32,7 @@ interface UserListProps {
   headline: string;
   loading?: boolean;
   users: ElasticUser[];
-  dataTestSubj: string;
+  dataTestSubj?: string;
 }
 
 const MyAvatar = styled(EuiAvatar)`
