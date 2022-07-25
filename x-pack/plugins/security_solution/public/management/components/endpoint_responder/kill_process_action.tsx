@@ -15,6 +15,7 @@ import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_pr
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
 import { ActionError } from './action_error';
+import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -38,7 +39,7 @@ export const KillProcessActionResult = memo<
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
-    refetchInterval: isPending ? 3000 : false,
+    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
   });
 
   // Send Kill request if not yet done

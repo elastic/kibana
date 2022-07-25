@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDefaultStaticProperties } from '../../../../styles/vector/vector_style_defaults';
+
 jest.mock('../../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
@@ -65,6 +67,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#6092C0',
@@ -77,44 +80,9 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -175,6 +143,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#D36086',
@@ -187,44 +156,9 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -283,59 +217,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
-            fillColor: {
-              options: {
-                color: '#54B399',
-              },
-              type: 'STATIC',
-            },
-            icon: {
-              options: {
-                value: 'marker',
-              },
-              type: 'STATIC',
-            },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
-            iconSize: {
-              options: {
-                size: 6,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
-              },
-              type: 'STATIC',
-            },
+            ...getDefaultStaticProperties(),
             lineColor: {
               options: {
                 color: '#6092C0',
@@ -356,11 +238,6 @@ describe('createLayerDescriptor', () => {
                 minSize: 1,
               },
               type: 'DYNAMIC',
-            },
-            symbolizeAs: {
-              options: {
-                value: 'circle',
-              },
             },
           },
           type: 'VECTOR',
@@ -407,6 +284,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#6092C0',
@@ -419,44 +297,9 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -517,56 +360,16 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#D36086',
               },
               type: 'STATIC',
             },
-            icon: {
-              options: {
-                value: 'marker',
-              },
-              type: 'STATIC',
-            },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -625,59 +428,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
-            fillColor: {
-              options: {
-                color: '#54B399',
-              },
-              type: 'STATIC',
-            },
-            icon: {
-              options: {
-                value: 'marker',
-              },
-              type: 'STATIC',
-            },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
-            iconSize: {
-              options: {
-                size: 6,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
-              },
-              type: 'STATIC',
-            },
+            ...getDefaultStaticProperties(),
             lineColor: {
               options: {
                 color: '#6092C0',
@@ -698,11 +449,6 @@ describe('createLayerDescriptor', () => {
                 minSize: 1,
               },
               type: 'DYNAMIC',
-            },
-            symbolizeAs: {
-              options: {
-                value: 'circle',
-              },
             },
           },
           type: 'VECTOR',
@@ -749,6 +495,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#6092C0',
@@ -761,44 +508,9 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -859,56 +571,16 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
+            ...getDefaultStaticProperties(),
             fillColor: {
               options: {
                 color: '#D36086',
               },
               type: 'STATIC',
             },
-            icon: {
-              options: {
-                value: 'marker',
-              },
-              type: 'STATIC',
-            },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
             iconSize: {
               options: {
                 size: 8,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
               },
               type: 'STATIC',
             },
@@ -967,59 +639,7 @@ describe('createLayerDescriptor', () => {
         style: {
           isTimeAware: true,
           properties: {
-            fillColor: {
-              options: {
-                color: '#54B399',
-              },
-              type: 'STATIC',
-            },
-            icon: {
-              options: {
-                value: 'marker',
-              },
-              type: 'STATIC',
-            },
-            iconOrientation: {
-              options: {
-                orientation: 0,
-              },
-              type: 'STATIC',
-            },
-            iconSize: {
-              options: {
-                size: 6,
-              },
-              type: 'STATIC',
-            },
-            labelBorderColor: {
-              options: {
-                color: '#FFFFFF',
-              },
-              type: 'STATIC',
-            },
-            labelBorderSize: {
-              options: {
-                size: 'SMALL',
-              },
-            },
-            labelColor: {
-              options: {
-                color: '#000000',
-              },
-              type: 'STATIC',
-            },
-            labelSize: {
-              options: {
-                size: 14,
-              },
-              type: 'STATIC',
-            },
-            labelText: {
-              options: {
-                value: '',
-              },
-              type: 'STATIC',
-            },
+            ...getDefaultStaticProperties(),
             lineColor: {
               options: {
                 color: '#6092C0',
@@ -1040,11 +660,6 @@ describe('createLayerDescriptor', () => {
                 minSize: 1,
               },
               type: 'DYNAMIC',
-            },
-            symbolizeAs: {
-              options: {
-                value: 'circle',
-              },
             },
           },
           type: 'VECTOR',

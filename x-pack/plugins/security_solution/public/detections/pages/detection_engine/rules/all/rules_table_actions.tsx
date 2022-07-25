@@ -14,7 +14,7 @@ import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import type { Rule } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
-import { executeRulesBulkAction, goToRuleEditPage } from './actions';
+import { executeRulesBulkAction, goToRuleEditPage, bulkExportRules } from './actions';
 import type { RulesTableActions } from './rules_table/rules_table_context';
 import type { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -91,7 +91,7 @@ export const getRulesTableActions = ({
     name: i18n.EXPORT_RULE,
     onClick: async (rule: Rule) => {
       startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-      await executeRulesBulkAction({
+      await bulkExportRules({
         action: BulkAction.export,
         setLoadingRules,
         visibleRuleIds: [rule.id],

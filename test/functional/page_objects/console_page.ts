@@ -123,15 +123,6 @@ export class ConsolePageObject extends FtrService {
     return this.testSubjects.find('console-application');
   }
 
-  public async dismissTutorial() {
-    try {
-      const closeButton = await this.testSubjects.find('help-close-button');
-      await closeButton.click();
-    } catch (e) {
-      // Ignore because it is probably not there.
-    }
-  }
-
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
@@ -238,21 +229,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasInvalidSyntax() {
-    try {
-      const requestEditor = await this.getRequestEditor();
-      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_invalid');
   }
 
   public async hasErrorMarker() {
-    try {
-      const requestEditor = await this.getRequestEditor();
-      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_error');
   }
 
   public async clickFoldWidget() {
@@ -261,18 +242,21 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async hasFolds() {
-    try {
-      const requestEditor = await this.getRequestEditor();
-      const folds = await requestEditor.findAllByCssSelector('.ace_fold');
-      return folds.length > 0;
-    } catch (e) {
-      return false;
-    }
+    return await this.find.existsByCssSelector('.ace_fold');
   }
 
   public async getResponseStatus() {
     const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
+  }
+
+  async closeHelpIfExists() {
+    await this.retry.try(async () => {
+      const helpPanelShown = await this.testSubjects.exists('help-close-button');
+      if (helpPanelShown) {
+        await this.collapseHelp();
+      }
+    });
   }
 }

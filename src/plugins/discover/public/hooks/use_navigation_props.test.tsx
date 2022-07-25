@@ -9,12 +9,7 @@
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import {
-  getContextHash,
-  HistoryState,
-  useNavigationProps,
-  UseNavigationProps,
-} from './use_navigation_props';
+import { getContextHash, useNavigationProps, UseNavigationProps } from './use_navigation_props';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -45,7 +40,7 @@ const getContextRoute = () => {
 };
 
 const render = (withRouter = true, props?: Partial<UseNavigationProps>) => {
-  const history = createMemoryHistory<HistoryState>({
+  const history = createMemoryHistory({
     initialEntries: ['/' + getSearch()],
   });
   const wrapper = ({ children }: { children: ReactElement }) => (
@@ -66,8 +61,9 @@ describe('useNavigationProps', () => {
     // @ts-expect-error
     result.current.singleDocProps.onClick();
     expect(history.location.pathname).toEqual(getSingeDocRoute());
-    expect(history.location.search).toEqual(`?id=${defaultProps.rowId}`);
-    expect(history.location.state?.breadcrumb).toEqual(`#/${getSearch()}`);
+    expect(history.location.search).toEqual(
+      `?id=${defaultProps.rowId}&breadcrumb=${encodeURIComponent(`#/${getSearch()}`)}`
+    );
   });
 
   test('should provide valid breadcrumb for context page from main view', () => {
@@ -77,9 +73,10 @@ describe('useNavigationProps', () => {
     result.current.surrDocsProps.onClick();
     expect(history.location.pathname).toEqual(getContextRoute());
     expect(history.location.search).toEqual(
-      `?${getContextHash(defaultProps.columns, filterManager)}`
+      `?${getContextHash(defaultProps.columns, filterManager)}&breadcrumb=${encodeURIComponent(
+        `#/${getSearch()}`
+      )}`
     );
-    expect(history.location.state?.breadcrumb).toEqual(`#/${getSearch()}`);
   });
 
   test('should create valid links to the context and single doc pages from embeddable', () => {
