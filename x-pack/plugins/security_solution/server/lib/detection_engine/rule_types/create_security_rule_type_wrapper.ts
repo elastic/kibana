@@ -37,7 +37,7 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { getInputIndex } from '../signals/get_input_output_index';
+import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -179,7 +179,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               inputIndex = index ?? [];
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
-              const errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
+              let errorMessage;
+              if (exc instanceof DataViewError) {
+                errorMessage = buildRuleMessage(`Data View not found ${exc}`);
+              } else {
+                errorMessage = buildRuleMessage(`Check for indices to search failed ${exc}`);
+              }
+
               logger.error(errorMessage);
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus.failed,

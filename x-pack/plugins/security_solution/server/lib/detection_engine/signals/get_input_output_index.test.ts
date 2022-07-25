@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import type { GetInputIndex } from './get_input_output_index';
-import { getInputIndex } from './get_input_output_index';
+import { getInputIndex, DataViewError } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: RuleExecutorServicesMock;
@@ -195,6 +195,22 @@ describe('get_input_output_index', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Saved object [index-pattern/12345] not found"`
       );
+    });
+
+    test('Returns error of DataViewErrorType', async () => {
+      servicesMock.savedObjectsClient.get.mockRejectedValue(
+        new Error('Saved object [index-pattern/12345] not found')
+      );
+      await expect(
+        getInputIndex({
+          services: servicesMock,
+          version: '8.0.0',
+          index: [],
+          dataViewId: '12345',
+          ruleId: 'rule_1',
+          logger,
+        })
+      ).rejects.toBeInstanceOf(DataViewError);
     });
   });
 });
