@@ -22,9 +22,6 @@ const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
   margin-left: auto;
   height: inherit;
 `;
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  align-self: flex-start;
-`;
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
@@ -51,7 +48,7 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
       {!isHelpOpen && (
-        <StyledEuiFlexItem grow={1}>
+        <EuiFlexItem grow={1}>
           <StyledEuiButtonEmpty
             style={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}
@@ -65,7 +62,7 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
               defaultMessage="Help"
             />
           </StyledEuiButtonEmpty>
-        </StyledEuiFlexItem>
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
