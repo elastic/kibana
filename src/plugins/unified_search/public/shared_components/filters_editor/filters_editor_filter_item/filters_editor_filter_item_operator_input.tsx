@@ -22,6 +22,7 @@ export function OperatorInput({
 }: {
   field: DataViewField | undefined;
   operator: Operator | undefined;
+  // todo: please don't use any
   params: any;
   onHandleOperator: (operator: Operator, params: any) => void;
 }) {

@@ -22,8 +22,9 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
   }
 };
 
-export const filterDepthCalculation = (path: string): number => {
-  return path.replace(/([0-9])/g, '').split('.').length;
+
+export const getFilterDepth = (path: string) => {
+  return path.split('.').length || 0 + 1;
 };
 
 export const insertFilterInFilterGroup = (arr: Filter[], index: number, newItem: Filter) => [
@@ -46,7 +47,7 @@ const goIntoFilersGroup = (
   path: string,
   newFilter?: Filter | undefined
 ): Filter[] => {
-  if (filterDepthCalculation(path) === 1) {
+  if (getFilterDepth(path) === 1) {
     if (newFilter) {
       return insertFilterInFilterGroup(root, index + 1, newFilter);
     } else {

@@ -24,12 +24,14 @@ export interface FilterItemProps {
   path: Path;
   filter: Filter;
   timeRangeForSuggestionsOverride: boolean;
+  reverseBackground?: boolean;
 }
 
 export function FilterItem({
   filter,
   path,
   timeRangeForSuggestionsOverride = false,
+  reverseBackground,
 }: FilterItemProps) {
   const conditionalOperationType = getConditionalOperationType(filter);
   const { dispatch, dataView } = useContext(FiltersEditorContextType);
@@ -75,6 +77,7 @@ export function FilterItem({
           conditionType={conditionalOperationType}
           filters={filter.meta?.params?.filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          reverseBackground={!reverseBackground}
         />
       ) : (
         <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
