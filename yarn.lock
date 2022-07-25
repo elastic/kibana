@@ -3071,6 +3071,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-capabilities-common@link:bazel-bin/packages/core/capabilities/core-capabilities-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-server-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-server-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-server@link:bazel-bin/packages/core/capabilities/core-capabilities-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
   version "0.0.0"
   uid ""
@@ -3280,6 +3296,26 @@
   uid ""
 
 "@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-collectors-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-collectors-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server":
   version "0.0.0"
   uid ""
 
@@ -6771,6 +6807,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-capabilities-common@link:bazel-bin/packages/core/capabilities/core-capabilities-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-server-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-server-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-server@link:bazel-bin/packages/core/capabilities/core-capabilities-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6984,6 +7036,26 @@
   uid ""
 
 "@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-collectors-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-collectors-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -81,18 +81,28 @@ export enum SecurityPageName {
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
+   */
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  dashboardsLanding = 'dashboards',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
+  exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
-  hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
   investigate = 'investigate',
+  kubernetes = 'kubernetes',
   landing = 'get_started',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -100,34 +110,24 @@ export enum SecurityPageName {
   networkExternalAlerts = 'network-external_alerts',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
+  noPage = '',
   overview = 'overview',
   policies = 'policy',
   responseActions = 'response_actions',
   rules = 'rules',
   rulesCreate = 'rules-create',
+  sessions = 'sessions',
+  threatIntelligence = 'threat-intelligence',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
-  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
-  usersRisk = 'users-risk',
-  sessions = 'sessions',
+  usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
-  kubernetes = 'kubernetes',
-  exploreLanding = 'explore',
-  dashboardsLanding = 'dashboards',
-  noPage = '',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
-   */
-  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
-  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  usersRisk = 'users-risk',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -156,6 +156,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -180,6 +181,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
+export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -229,6 +231,14 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SHOW_RELATED_INTEGRATIONS_SETTING =
   'securitySolution:showRelatedIntegrations' as const;
 
+/** This Kibana Advanced Setting enables extended rule execution logging to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingEnabled' as const;
+
+/** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
+export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
+  'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -276,10 +286,6 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
-export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
@@ -340,24 +346,6 @@ export const MINIMUM_ML_LICENSE = 'platinum' as const;
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
 export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
-
-/*
-  Rule notifications options
-*/
-export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
-  '.email',
-  '.index',
-  '.jira',
-  '.pagerduty',
-  '.resilient',
-  '.servicenow',
-  '.servicenow-sir',
-  '.servicenow-itom',
-  '.slack',
-  '.swimlane',
-  '.teams',
-  '.webhook',
-];
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
