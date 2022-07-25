@@ -34,7 +34,6 @@ import {
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
@@ -49,12 +48,9 @@ import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
-import { ObservabilityAppServices } from '../../application/types';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 
 export function RuleDetailsPage() {
   const {
-    cases,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -68,7 +64,7 @@ export function RuleDetailsPage() {
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
@@ -155,13 +151,7 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const userPermissions = useGetUserCasesPermissions();
-
   const alertStateProps = {
-    cases: {
-      ui: cases.ui,
-      permissions: userPermissions,
-    },
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
@@ -319,7 +309,7 @@ export function RuleDetailsPage() {
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleAlertsSummary({
             rule,
-            filteredRuleTypes: OBSERVABILITY_SOLUTIONS,
+            filteredRuleTypes,
           })}
         </EuiFlexItem>
         <EuiSpacer size="m" />

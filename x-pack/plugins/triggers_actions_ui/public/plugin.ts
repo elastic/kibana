@@ -76,7 +76,7 @@ import { ActionAccordionFormProps } from './application/sections/action_connecto
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary/rule_alerts_summary';
+import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
