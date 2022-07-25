@@ -27,7 +27,8 @@ export function fetchSql(
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
-  filters?: Filter[]
+  filters?: Filter[],
+  inputQuery?: Query
 ) {
   const timeRange = data.query.timefilter.timefilter.getTime();
   return queryStateToExpressionAst({
@@ -35,6 +36,7 @@ export function fetchSql(
     query,
     time: timeRange,
     dataViewsService,
+    inputQuery,
   })
     .then((ast) => {
       if (ast) {

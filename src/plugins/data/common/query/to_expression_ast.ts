@@ -9,6 +9,7 @@ import {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  Query,
 } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -17,12 +18,14 @@ import {
   ExpressionFunctionKibanaContext,
   QueryState,
   aggregateQueryToAst,
+  queryToAst,
   filtersToAst,
   timerangeToAst,
 } from '..';
 
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
+  inputQuery?: Query;
 }
 
 /**
@@ -31,9 +34,20 @@ interface Args extends QueryState {
  * @param query kibana query or aggregate query
  * @param time kibana time range
  */
-export async function queryStateToExpressionAst({ filters, query, time, dataViewsService }: Args) {
+export async function queryStateToExpressionAst({
+  filters,
+  query,
+  inputQuery,
+  time,
+  dataViewsService,
+}: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
+  let q;
+  if (inputQuery) {
+    q = inputQuery;
+  }
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
+    q: q && queryToAst(q),
     timeRange: time && timerangeToAst(time),
     filters: filters && filtersToAst(filters),
   });

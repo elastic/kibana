@@ -219,7 +219,8 @@ export class SavedSearchEmbeddable
           this.services.indexPatterns,
           this.services.data,
           this.services.expressions,
-          this.input.filters
+          this.input.filters,
+          this.input.query
         );
         this.updateOutput({
           ...this.getOutput(),
