@@ -11,7 +11,7 @@ plugins always rely on valid public contracts:
 *my_plugin/server/plugin.test.ts*
 [source,typescript]
 ----
-import { configServiceMock } from 'kibana/server/mocks';
+import { configServiceMock } from '@kbn/core/server/mocks';
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
@@ -24,7 +24,7 @@ Or if you need to get the whole core `setup` or `start` contracts:
 *my_plugin/server/plugin.test.ts*
 [source,typescript] 
 ----
-import { coreMock } from 'kibana/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const coreSetup = coreMock.createSetup();
 coreSetup.uiSettings.get.mockImplementation((key: string) => {

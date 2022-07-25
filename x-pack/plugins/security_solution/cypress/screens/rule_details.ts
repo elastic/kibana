@@ -25,21 +25,15 @@ export const CUSTOM_QUERY_DETAILS = 'Custom query';
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
 
-export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
-
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
 export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
 
-export const EXCEPTIONS_TAB_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]';
-
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
-
-export const DATA_VIEW_DETAILS = 'Data View';
 
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
@@ -60,6 +54,10 @@ export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]'
 export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"]';
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
+
+export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
+
+export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
 
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
@@ -86,8 +84,6 @@ export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-ac
 export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
-
-export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 

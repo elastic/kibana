@@ -71,6 +71,7 @@ export function useLatencyCorrelations() {
       latencyCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
+      totalDocCount: undefined,
       fieldStats: undefined,
     });
     setResponse.flush();
@@ -84,19 +85,21 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, percentileThresholdValue } = await callApmApi(
-        'POST /internal/apm/latency/overall_distribution/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      const { overallHistogram, totalDocCount, percentileThresholdValue } =
+        await callApmApi(
+          'POST /internal/apm/latency/overall_distribution/transactions',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              },
             },
-          },
-        }
-      );
+          }
+        );
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (abortCtrl.current.signal.aborted) {

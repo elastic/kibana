@@ -17,6 +17,9 @@ describe('fetchIndices lib function', () => {
         get: jest.fn(),
         stats: jest.fn(),
       },
+      security: {
+        hasPrivileges: jest.fn(),
+      },
     },
     asInternalUser: {},
   };
@@ -47,6 +50,16 @@ describe('fetchIndices lib function', () => {
     },
   };
 
+  mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+    index: {
+      'index-without-prefix': { read: true, manage: true },
+      'search-aliased': { read: true, manage: true },
+      'search-double-aliased': { read: true, manage: true },
+      'search-regular-index': { read: true, manage: true },
+      'second-index': { read: true, manage: true },
+    },
+  }));
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -65,6 +78,8 @@ describe('fetchIndices lib function', () => {
         health: 'green',
         name: 'search-regular-index',
         status: 'open',
+        alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -88,6 +103,15 @@ describe('fetchIndices lib function', () => {
       expand_wildcards: ['open'],
       index: 'search-*',
       metric: ['docs', 'store'],
+    });
+
+    expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      index: [
+        {
+          names: ['search-regular-index', 'hidden'],
+          privileges: ['read', 'manage'],
+        },
+      ],
     });
   });
 
@@ -96,12 +120,14 @@ describe('fetchIndices lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => regularIndexStatsResponse);
 
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true, /search-.*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true)
     ).resolves.toEqual([
       {
         health: 'green',
         name: 'search-regular-index',
         status: 'open',
+        alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -128,7 +154,7 @@ describe('fetchIndices lib function', () => {
     });
   });
 
-  it('should return index with aliases', async () => {
+  it('should return index with unique aliases', async () => {
     const aliasedIndexResponse = {
       'index-without-prefix': {
         ...regularIndexResponse['search-regular-index'],
@@ -137,22 +163,48 @@ describe('fetchIndices lib function', () => {
           'search-double-aliased': {},
         },
       },
+      'second-index': {
+        ...regularIndexResponse['search-regular-index'],
+        aliases: {
+          'search-aliased': {},
+        },
+      },
     };
     const aliasedStatsResponse = {
       indices: {
         'index-without-prefix': { ...regularIndexStatsResponse.indices['search-regular-index'] },
+        'second-index': { ...regularIndexStatsResponse.indices['search-regular-index'] },
       },
     };
 
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => aliasedIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => aliasedStatsResponse);
     await expect(
-      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, /^search-*/)
+      fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false)
     ).resolves.toEqual([
+      {
+        health: 'green',
+        name: 'index-without-prefix',
+        status: 'open',
+        alias: false,
+        privileges: { read: true, manage: true },
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      },
       {
         health: 'green',
         name: 'search-aliased',
         status: 'open',
+        alias: true,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -168,6 +220,25 @@ describe('fetchIndices lib function', () => {
         health: 'green',
         name: 'search-double-aliased',
         status: 'open',
+        alias: true,
+        privileges: { read: true, manage: true },
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+      },
+      {
+        health: 'green',
+        name: 'second-index',
+        status: 'open',
+        alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -200,6 +271,8 @@ describe('fetchIndices lib function', () => {
         health: undefined,
         name: 'search-regular-index',
         status: undefined,
+        alias: false,
+        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 0,
