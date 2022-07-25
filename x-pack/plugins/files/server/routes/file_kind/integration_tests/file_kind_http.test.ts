@@ -6,7 +6,7 @@
  */
 
 import type { UpdatableFileAttributes } from '../../../../common/types';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../tests';
+import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File kind HTTP API', () => {
   let fileKind: string;
@@ -119,5 +119,19 @@ describe('File kind HTTP API', () => {
       body: { files: files2 },
     } = await request.get(root, `/api/files/files/${fileKind}/list?page=1&perPage=5`).expect(200);
     expect(files2).toHaveLength(5);
+  });
+
+  test('share', async () => {
+    const { id } = await createFile();
+    const { body: share } = await request
+      .post(root, `/api/files/share/${fileKind}/${id}`)
+      .send({})
+      .expect(200);
+
+    expect(share).toEqual(
+      expect.objectContaining({
+        token: expect.any(String),
+      })
+    );
   });
 });
