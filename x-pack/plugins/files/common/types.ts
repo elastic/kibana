@@ -238,6 +238,9 @@ export interface FileKind {
     download?: {
       tags: string[];
     };
+    share?: {
+      tags: string[];
+    };
   };
 }
 

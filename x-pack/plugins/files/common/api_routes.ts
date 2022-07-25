@@ -137,13 +137,21 @@ export type FilesMetricsHttpEndpoint = HttpApiInterfaceEntryDefinition<
 >;
 
 export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
-  unknown,
   {
     fileId: string;
   },
+  unknown,
   {
-    id: string;
+    /**
+     * Unix timestamp of when the share will expire.
+     */
+    validUntil?: number;
+    /**
+     * Optional name to uniquely identify this share instance.
+     */
+    name?: string;
+  },
+  {
     token: string;
   }
 >;

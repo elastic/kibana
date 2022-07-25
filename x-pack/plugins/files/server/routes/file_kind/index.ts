@@ -18,6 +18,7 @@ import * as deleteEndpoint from './delete';
 import * as list from './list';
 import * as download from './download';
 import * as getById from './get_by_id';
+import * as share from './share/share';
 
 const fileKindApiRoutes = FILES_API_ROUTES.fileKind;
 
@@ -126,6 +127,22 @@ export function registerFileKindRoutes(router: FilesRouter) {
           },
         },
         getById.handler
+      );
+    }
+
+    if (fileKind.http.share) {
+      fileKindRouter[share.method](
+        {
+          path: fileKindApiRoutes.getShareRoute(fileKind.id),
+          validate: {
+            params: share.paramsSchema,
+            body: share.bodySchema,
+          },
+          options: {
+            tags: fileKind.http.share.tags,
+          },
+        },
+        share.handler
       );
     }
   });

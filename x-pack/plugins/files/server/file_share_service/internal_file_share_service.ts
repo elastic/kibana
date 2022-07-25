@@ -20,6 +20,7 @@ import type { File } from '../file';
 import { fileShareObjectType } from '../saved_objects';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
+import { ExpiryDateInThePastError } from './errors';
 
 export interface CreateShareArgs {
   /**
@@ -66,6 +67,12 @@ function toFileShareJSON(so: SavedObject<FileShareSavedObjectAttributes>): FileS
   };
 }
 
+function validateCreateArgs({ validUntil }: CreateShareArgs): void {
+  if ((validUntil || validUntil === 0) && validUntil < Date.now()) {
+    throw new ExpiryDateInThePastError('Share expiry date must be in the future.');
+  }
+}
+
 /**
  * Service for managing file shares and associated Saved Objects.
  *
@@ -78,7 +85,9 @@ export class InternalFileShareService implements FileShareServiceStart {
     private readonly savedObjects: SavedObjectsClientContract | ISavedObjectsRepository
   ) {}
 
-  public async share({ file, name, validUntil }: CreateShareArgs): Promise<FileShareJSON> {
+  public async share(args: CreateShareArgs): Promise<FileShareJSON> {
+    validateCreateArgs(args);
+    const { file, name, validUntil } = args;
     const so = await this.savedObjects.create<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
       {

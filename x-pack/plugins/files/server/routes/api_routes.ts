@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { FILES_API_BASE_PATH, API_BASE_PATH } from '../../common/api_routes';
+import {
+  FILES_API_BASE_PATH,
+  FILES_SHARE_API_BASE_PATH,
+  API_BASE_PATH,
+} from '../../common/api_routes';
 
 export * from '../../common/api_routes';
 
 export const FILES_API_ROUTES = {
   find: `${API_BASE_PATH}/find`,
   metrics: `${API_BASE_PATH}/metrics`,
-  share: `${FILES_API_BASE_PATH}/share`,
   fileKind: {
     getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
     getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob`,
@@ -22,5 +25,6 @@ export const FILES_API_ROUTES = {
     getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
     getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
     getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
+    getShareRoute: (fileKind: string) => `${FILES_SHARE_API_BASE_PATH}/${fileKind}/{fileId}`,
   },
 };
