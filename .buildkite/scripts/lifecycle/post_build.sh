@@ -20,4 +20,4 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   fi
 fi
 
-.buildkite/scripts/steps/checks/own_tests_ran.sh
+#.buildkite/scripts/steps/checks/own_tests_ran.sh
