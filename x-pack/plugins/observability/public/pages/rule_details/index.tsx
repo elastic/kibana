@@ -72,6 +72,7 @@ export function RuleDetailsPage() {
     () => observabilityRuleTypeRegistry.list(),
     [observabilityRuleTypeRegistry]
   );
+
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,

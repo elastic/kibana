@@ -18,7 +18,7 @@ export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
   });
 
   const fetchRuleSummary = useCallback(async () => {
-    setRuleSummary((oldState: FetchRuleSummary) => ({ ...oldState, isLoadingRuleSummary: true }));
+    setRuleSummary((oldState: FetchRuleSummary) => ({ ...oldState, isLoading: true }));
 
     try {
       const response = await loadRuleSummary({
@@ -27,13 +27,13 @@ export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
       });
       setRuleSummary((oldState: FetchRuleSummary) => ({
         ...oldState,
-        isLoadingRuleSummary: false,
+        isLoading: false,
         ruleSummary: response,
       }));
     } catch (error) {
       setRuleSummary((oldState: FetchRuleSummary) => ({
         ...oldState,
-        isLoadingRuleSummary: false,
+        isLoading: false,
         errorRuleSummary: RULE_LOAD_ERROR(
           error instanceof Error ? error.message : typeof error === 'string' ? error : ''
         ),
