@@ -21,10 +21,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-// TODO doclinks
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { makeMappingRequest } = useActions(DocumentsLogic);
@@ -59,7 +60,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                 })}
               </p>
             </EuiText>
-            <EuiLink href="#" external>
+            <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn more',
               })}

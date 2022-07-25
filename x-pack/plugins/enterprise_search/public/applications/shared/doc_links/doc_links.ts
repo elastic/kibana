@@ -55,6 +55,7 @@ class DocLinks {
   public cloudIndexManagement: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
+  public elasticsearchMapping: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
@@ -145,6 +146,7 @@ class DocLinks {
     this.cloudIndexManagement = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
+    this.elasticsearchMapping = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
@@ -237,6 +239,7 @@ class DocLinks {
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
+    this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
