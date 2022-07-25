@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '../theme/kibana_theme_provider';
 
 /**
  * A function that will unmount the element previously mounted by

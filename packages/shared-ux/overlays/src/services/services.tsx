@@ -69,11 +69,6 @@ export type UnmountCallback = () => void;
 
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
 
-interface OverlayCoreStart {
-  openFlyout: (mount: MountPoint, options?: OverlayFlyoutOpenOptions) => OverlayRef;
-  openModal: (mount: MountPoint, options?: OverlayModalOpenOptions) => OverlayRef;
-}
-
 interface OverlayThemeServiceStart {
   darkMode: boolean;
   theme$: Observable<CoreTheme>;
