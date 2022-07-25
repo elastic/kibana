@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -24,28 +24,61 @@ export const DeleteLocation = ({
 
   const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
-  return (
-    <EuiToolTip
-      content={
-        canDelete
-          ? DELETE_LABEL
-          : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete', {
-              defaultMessage: `This location cannot be deleted, because it has {monCount} monitors running. Please remove this location from your monitors before deleting this location.`,
-              values: { monCount },
-            })
-      }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const deleteModal = (
+    <EuiConfirmModal
+      title={DELETE_LABEL}
+      onCancel={() => setIsModalOpen(false)}
+      onConfirm={() => onDelete(id)}
+      cancelButtonText={DO_NOT_IT_LABEL}
+      confirmButtonText={DO_IT_LABEL}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
     >
-      <EuiButtonIcon
-        iconType="trash"
-        color="danger"
-        aria-label={DELETE_LABEL}
-        onClick={() => onDelete(id)}
-        isDisabled={!canDelete || !canSave}
-      />
-    </EuiToolTip>
+      <p>{ARE_YOU_SURE_LABEL}</p>
+    </EuiConfirmModal>
+  );
+
+  return (
+    <>
+      {isModalOpen && deleteModal}
+      <EuiToolTip
+        content={
+          canDelete
+            ? DELETE_LABEL
+            : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete', {
+                defaultMessage: `This location cannot be deleted, because it has {monCount} monitors running. Please remove this location from your monitors before deleting this location.`,
+                values: { monCount },
+              })
+        }
+      >
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          aria-label={DELETE_LABEL}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          isDisabled={!canDelete || !canSave}
+        />
+      </EuiToolTip>
+    </>
   );
 };
 
 const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.delete', {
   defaultMessage: 'Delete location',
+});
+
+const DO_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesLabel', {
+  defaultMessage: 'Yes, do it',
+});
+
+const DO_NOT_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.noLabel', {
+  defaultMessage: "No, don't do it",
+});
+
+const ARE_YOU_SURE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.areYouSure', {
+  defaultMessage: 'Are you sure you want to delete this location?',
 });

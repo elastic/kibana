@@ -29,12 +29,10 @@ import { usePrivateLocationPermissions } from '../hooks/use_private_location_per
 import { LocationForm } from './location_form';
 
 export const AddLocationFlyout = ({
-  saveLoading,
   onSubmit,
   setIsOpen,
   privateLocations,
 }: {
-  saveLoading: boolean;
   onSubmit: (val: PrivateLocation) => void;
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
@@ -74,7 +72,6 @@ export const AddLocationFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isLoading={saveLoading}
               onClick={() => {
                 if (formData) {
                   onSubmit(formData as PrivateLocation);
@@ -82,7 +79,7 @@ export const AddLocationFlyout = ({
                 }
               }}
             >
-              Save
+              {SAVE_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -100,4 +97,8 @@ const ADD_PRIVATE_LOCATION = i18n.translate(
 
 const CANCEL_LABEL = i18n.translate('xpack.synthetics.monitorManagement.cancelLabel', {
   defaultMessage: 'Cancel',
+});
+
+const SAVE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.saveLabel', {
+  defaultMessage: 'save',
 });

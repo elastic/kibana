@@ -16,11 +16,9 @@ import { LOCATION_NAME_LABEL } from './location_form';
 import { AGENT_POLICY_LABEL, MONITORS } from './locations_list';
 
 export const PrivateLocationsTable = ({
-  loading,
   onDelete,
   privateLocations,
 }: {
-  loading: boolean;
   onDelete: (id: string) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -74,7 +72,6 @@ export const PrivateLocationsTable = ({
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable<PrivateLocation & { monitors: number }>
         tableLayout="auto"
-        loading={loading}
         tableCaption={PRIVATE_LOCATIONS}
         items={items}
         columns={columns}

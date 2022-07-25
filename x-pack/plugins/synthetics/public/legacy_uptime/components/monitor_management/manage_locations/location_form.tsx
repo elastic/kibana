@@ -20,7 +20,6 @@ export const LocationForm = ({
 }: {
   setFormData: (val: Partial<PrivateLocation>) => void;
   onDiscard?: () => void;
-  loading?: boolean;
   privateLocations: PrivateLocation[];
 }) => {
   const { data } = useSelector(selectAgentPolicies);

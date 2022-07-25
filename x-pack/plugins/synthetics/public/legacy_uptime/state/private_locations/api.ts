@@ -30,10 +30,12 @@ export const setSyntheticsPrivateLocations = async (
   client: SavedObjectsClientContract,
   privateLocations: SyntheticsPrivateLocations
 ) => {
-  await client.create(privateLocationsSavedObjectName, privateLocations, {
+  const result = await client.create(privateLocationsSavedObjectName, privateLocations, {
     id: privateLocationsSavedObjectId,
     overwrite: true,
   });
+
+  return result.attributes;
 };
 
 export const getSyntheticsPrivateLocations = async (client: SavedObjectsClientContract) => {

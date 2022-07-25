@@ -17,13 +17,15 @@ import {
 export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
+  const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);
 
   const { savedObjects } = useKibana().services;
 
-  const { data: currentPrivateLocations, loading: fetchLoading } = useFetcher(() => {
-    if (!formData) return getSyntheticsPrivateLocations(savedObjects?.client!);
-    return Promise.resolve(null);
-  }, [formData, deleteId, isOpen]);
+  const { data: currentPrivateLocations, loading: fetchLoading } = useFetcher(async () => {
+    const result = await getSyntheticsPrivateLocations(savedObjects?.client!);
+    setPrivateLocations(result);
+    return result;
+  }, [isOpen]);
 
   const { loading: saveLoading } = useFetcher(async () => {
     if (currentPrivateLocations && formData) {
@@ -32,10 +34,10 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
         locations: [...(existingLocations ?? []), { ...formData, id: formData.policyHostId }],
       });
+      setPrivateLocations(result.locations);
       setFormData(undefined);
       return result;
     }
-    return Promise.resolve(null);
   }, [formData, currentPrivateLocations]);
 
   const onSubmit = (data: PrivateLocation) => {
@@ -51,18 +53,17 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
         locations: (currentPrivateLocations ?? []).filter((loc) => loc.id !== deleteId),
       });
+      setPrivateLocations(result.locations);
       setDeleteId(undefined);
       return result;
     }
-    return Promise.resolve(null);
   }, [deleteId, currentPrivateLocations]);
 
   return {
+    formData,
     onSubmit,
     onDelete,
-    fetchLoading: Boolean(fetchLoading || Boolean(formData)),
-    saveLoading: Boolean(saveLoading),
-    deleteLoading: Boolean(deleteLoading),
-    privateLocations: currentPrivateLocations ?? [],
+    loading: fetchLoading || saveLoading || deleteLoading,
+    privateLocations,
   };
 };

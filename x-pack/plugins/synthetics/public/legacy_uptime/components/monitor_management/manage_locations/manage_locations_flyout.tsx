@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -47,10 +48,9 @@ export const ManageLocationsFlyout = () => {
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, saveLoading, fetchLoading, deleteLoading, privateLocations, onDelete } =
-    useLocationsAPI({
-      isOpen,
-    });
+  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({
+    isOpen,
+  });
 
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
@@ -77,17 +77,17 @@ export const ManageLocationsFlyout = () => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <ManageEmptyState
-          privateLocations={privateLocations}
-          setIsAddingNew={setIsAddingNew}
-          hasFleetPermissions={hasFleetPermissions}
-        >
-          <PrivateLocationsList
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <ManageEmptyState
             privateLocations={privateLocations}
-            loading={fetchLoading}
-            onDelete={onDelete}
-          />
-        </ManageEmptyState>
+            setIsAddingNew={setIsAddingNew}
+            hasFleetPermissions={hasFleetPermissions}
+          >
+            <PrivateLocationsList privateLocations={privateLocations} onDelete={onDelete} />
+          </ManageEmptyState>
+        )}
         {!hasFleetPermissions && (
           <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
             <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
@@ -105,7 +105,7 @@ export const ManageLocationsFlyout = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isLoading={saveLoading || fetchLoading || deleteLoading}
+                isLoading={loading}
                 disabled={!hasFleetPermissions || !canSave}
                 onClick={() => setIsAddingNew(true)}
               >
@@ -126,7 +126,6 @@ export const ManageLocationsFlyout = () => {
       {isOpen && !isAddingNew ? flyout : null}
       {isAddingNew ? (
         <AddLocationFlyout
-          saveLoading={saveLoading}
           setIsOpen={setIsAddingNew}
           onSubmit={onSubmit}
           privateLocations={privateLocations}

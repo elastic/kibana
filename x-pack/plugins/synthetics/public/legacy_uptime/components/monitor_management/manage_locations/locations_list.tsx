@@ -7,31 +7,18 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PrivateLocationsTable } from './locations_table';
 import { PrivateLocation } from '../../../../../common/runtime_types';
 
 export const PrivateLocationsList = ({
   privateLocations,
-  loading,
   onDelete,
 }: {
-  loading: boolean;
   privateLocations: PrivateLocation[];
   onDelete: (id: string) => void;
 }) => {
-  if (loading) {
-    return <EuiLoadingSpinner />;
-  }
-
-  return (
-    <PrivateLocationsTable
-      privateLocations={privateLocations}
-      loading={loading}
-      onDelete={onDelete}
-    />
-  );
+  return <PrivateLocationsTable privateLocations={privateLocations} onDelete={onDelete} />;
 };
 
 export const MONITORS = i18n.translate('xpack.synthetics.monitorManagement.monitors', {
