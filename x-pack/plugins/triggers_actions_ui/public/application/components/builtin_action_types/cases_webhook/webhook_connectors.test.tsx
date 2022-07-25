@@ -359,9 +359,9 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       [
         'incidentViewUrl',
         'https://missingexternalid.com',
-        ['{{external.system.id}}', '{{external.system.title}}'],
+        ['{{{external.system.id}}}', '{{{external.system.title}}}'],
       ],
-      ['getIncidentUrl', 'https://missingexternalid.com', ['{{external.system.id}}']],
+      ['getIncidentUrl', 'https://missingexternalid.com', ['{{{external.system.id}}}']],
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
