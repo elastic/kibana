@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiFieldText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, useDebouncedValue } from '../../shared_components';
 import { MetricVisualizationState } from './visualization';
@@ -33,43 +33,29 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.metric.labels', {
-          defaultMessage: 'Labels',
-        })}
-        type="labels"
-        groupPosition="left"
-        buttonDataTestSubj="lnsLabelsButton"
-      >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.metric.subtitleLabel', {
-            defaultMessage: 'Subtitle',
+      {!hasBreakdownBy && (
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.metric.labels', {
+            defaultMessage: 'Labels',
           })}
-          fullWidth
-          display="columnCompressed"
+          type="labels"
+          groupPosition="left"
+          buttonDataTestSubj="lnsLabelsButton"
         >
-          <EuiToolTip
-            position="right"
-            content={
-              hasBreakdownBy ? (
-                <p>
-                  {i18n.translate('xpack.lens.metric.subtitleNotVisible', {
-                    defaultMessage:
-                      'The subtitle is not visible since a "break down by" dimension is in use.',
-                  })}
-                </p>
-              ) : null
-            }
-            display="block"
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.metric.subtitleLabel', {
+              defaultMessage: 'Subtitle',
+            })}
+            fullWidth
+            display="columnCompressed"
           >
             <EuiFieldText
-              disabled={hasBreakdownBy}
               value={subtitleInputVal}
               onChange={({ target: { value } }) => handleSubtitleChange(value)}
             />
-          </EuiToolTip>
-        </EuiFormRow>
-      </ToolbarPopover>
+          </EuiFormRow>
+        </ToolbarPopover>
+      )}
     </EuiFlexGroup>
   );
 }

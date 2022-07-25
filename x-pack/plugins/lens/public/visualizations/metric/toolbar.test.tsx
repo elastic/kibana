@@ -63,9 +63,13 @@ describe('metric toolbar', () => {
       return this._wrapper.find(EuiFieldText);
     }
 
-    public toggleOpenTextOptions() {
+    public get textOptionsButton() {
       const toolbarButtons = this._wrapper.find(ToolbarButton);
-      toolbarButtons.at(0).simulate('click');
+      return toolbarButtons.at(0);
+    }
+
+    public toggleOpenTextOptions() {
+      this.textOptionsButton.simulate('click');
     }
 
     public setSubtitle(subtitle: string) {
@@ -77,26 +81,23 @@ describe('metric toolbar', () => {
     }
   }
 
-  let harness: Harness;
   const mockSetState = jest.fn();
 
   const getHarnessWithState = (state: MetricVisualizationState) =>
     new Harness(mountWithIntl(<Toolbar state={state} setState={mockSetState} frame={frame} />));
 
-  beforeEach(() => {
-    harness = getHarnessWithState(fullState);
-  });
-
   afterEach(() => mockSetState.mockClear());
 
   describe('text options', () => {
     it('sets a subtitle', () => {
-      harness.toggleOpenTextOptions();
+      const localHarness = getHarnessWithState({ ...fullState, breakdownByAccessor: undefined });
+
+      localHarness.toggleOpenTextOptions();
 
       const newSubtitle = 'new subtitle hey';
-      harness.setSubtitle(newSubtitle + ' 1');
-      harness.setSubtitle(newSubtitle + ' 2');
-      harness.setSubtitle(newSubtitle + ' 3');
+      localHarness.setSubtitle(newSubtitle + ' 1');
+      localHarness.setSubtitle(newSubtitle + ' 2');
+      localHarness.setSubtitle(newSubtitle + ' 3');
       expect(mockSetState.mock.calls.map(([state]) => state.subtitle)).toMatchInlineSnapshot(`
         Array [
           "new subtitle hey 1",
@@ -104,6 +105,15 @@ describe('metric toolbar', () => {
           "new subtitle hey 3",
         ]
       `);
+    });
+
+    it('hides text options when has breakdown by', () => {
+      expect(
+        getHarnessWithState({
+          ...fullState,
+          breakdownByAccessor: 'some-accessor',
+        }).textOptionsButton.exists()
+      ).toBeFalsy();
     });
   });
 });
