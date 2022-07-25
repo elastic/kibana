@@ -3458,7 +3458,11 @@
         "signature": [
           "{ currentLayerType: string; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
-          "[]) => Promise<void>; }"
+          "[]) => Promise<void>; onStyleDescriptorChange: (styleDescriptor: ",
+          "StyleDescriptor",
+          ") => void; style: ",
+          "IStyle",
+          "; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,

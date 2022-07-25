@@ -2,6 +2,7 @@
 
 exports[`useSecuritySolutionNavigation should create navigation config 1`] = `
 Object {
+  "canBeCollapsed": true,
   "icon": "logoSecurity",
   "items": Array [
     Object {

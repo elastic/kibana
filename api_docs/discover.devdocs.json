@@ -930,6 +930,19 @@
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1048,6 +1061,19 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchInput.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
             "description": [],
             "signature": [
               "number | undefined"
@@ -1401,6 +1427,20 @@
         "description": [],
         "signature": [
           "\"discover:rowHeightOption\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SAMPLE_ROWS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleRowsPerPage\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

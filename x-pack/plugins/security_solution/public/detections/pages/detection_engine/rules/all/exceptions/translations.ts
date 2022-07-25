@@ -28,13 +28,6 @@ export const EXCEPTION_LIST_ACTIONS = i18n.translate(
   }
 );
 
-export const NUMBER_RULES_ASSIGNED_TO_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.numberRulesAssignedTitle',
-  {
-    defaultMessage: 'Number of rules assigned to',
-  }
-);
-
 export const RULES_ASSIGNED_TO_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.rulesAssignedTitle',
   {

@@ -44,20 +44,20 @@ export abstract class CaseConnector<Config, Secrets>
     this.registerSubAction({
       name: 'pushToService',
       method: 'pushToService',
-      schema: schema.object(
-        {
-          externalId: schema.nullable(schema.string()),
-          comments: schema.nullable(
-            schema.arrayOf(
-              schema.object({
-                comment: schema.string(),
-                commentId: schema.string(),
-              })
-            )
-          ),
-        },
-        { unknowns: 'allow' }
-      ),
+      schema: schema.object({
+        incident: schema.object(
+          { externalId: schema.nullable(schema.string()) },
+          { unknowns: 'allow' }
+        ),
+        comments: schema.nullable(
+          schema.arrayOf(
+            schema.object({
+              comment: schema.string(),
+              commentId: schema.string(),
+            })
+          )
+        ),
+      }),
     });
   }
 
@@ -82,7 +82,8 @@ export abstract class CaseConnector<Config, Secrets>
   public abstract getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse>;
 
   public async pushToService(params: PushToServiceParams) {
-    const { externalId, comments, ...rest } = params;
+    const { incident, comments } = params;
+    const { externalId, ...rest } = incident;
 
     let res: PushToServiceResponse;
 

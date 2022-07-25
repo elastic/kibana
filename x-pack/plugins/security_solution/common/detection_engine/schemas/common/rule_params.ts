@@ -99,7 +99,6 @@ export const RelatedIntegrationArray = t.array(RelatedIntegration);
  *   ecs: false,
  * };
  */
-export type RequiredField = t.TypeOf<typeof RequiredField>;
 export const RequiredField = t.exact(
   t.type({
     name: NonEmptyString,

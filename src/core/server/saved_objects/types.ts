@@ -7,6 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -30,7 +31,6 @@ export type {
 } from './import/types';
 
 import { SavedObject } from '../../types';
-import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
 

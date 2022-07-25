@@ -7,7 +7,7 @@
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 describe('catchRetryableEsClientErrors', () => {

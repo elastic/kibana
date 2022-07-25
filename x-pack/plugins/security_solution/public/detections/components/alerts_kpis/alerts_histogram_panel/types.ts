@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { inputsModel } from '../../../../common/store';
-
 export interface HistogramData {
   x: number;
   y: number;
@@ -37,11 +35,4 @@ export interface AlertsGroupBucket {
 export interface AlertsTotal {
   value: number;
   relation: string;
-}
-
-export interface RegisterQuery {
-  id: string;
-  inspect: inputsModel.InspectQuery | null;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
 }

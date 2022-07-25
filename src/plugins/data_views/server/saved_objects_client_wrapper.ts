@@ -7,7 +7,11 @@
  */
 
 import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
-import { SavedObjectsClientCommon, SavedObjectsClientCommonFindArgs } from '../common/types';
+import {
+  DataViewAttributes,
+  SavedObjectsClientCommon,
+  SavedObjectsClientCommonFindArgs,
+} from '../common/types';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
@@ -27,15 +31,10 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     }
     return response.saved_object;
   }
-  async update(
-    type: string,
-    id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
-  ) {
+  async update(type: string, id: string, attributes: DataViewAttributes, options: {}) {
     return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject;
   }
-  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+  async create(type: string, attributes: DataViewAttributes, options: {}) {
     return await this.savedObjectClient.create(type, attributes, options);
   }
   delete(type: string, id: string) {

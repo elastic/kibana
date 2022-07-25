@@ -12,7 +12,7 @@ import {
   mockRawDocExistsInNamespace,
 } from './collect_multi_namespace_references.test.mock';
 
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import {

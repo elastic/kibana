@@ -7,7 +7,6 @@
 
 import React, { FC } from 'react';
 import { Home } from '../home';
-// @ts-expect-error untyped local
 import { setDocTitle } from '../../lib/doc_title';
 
 export interface Props {
