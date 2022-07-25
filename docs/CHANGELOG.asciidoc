@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.3.x releases.
 
+* <<release-notes-8.3.3>>
 * <<release-notes-8.3.2>>
 * <<release-notes-8.3.1>>
 * <<release-notes-8.3.0>>
@@ -31,6 +32,51 @@ Review important information about the {kib} 8.3.x releases.
 
 --
 
+[[release-notes-8.3.3]]
+== {kib} 8.3.3
+
+coming::[8.3.3]
+
+Review the following information about the {kib} 8.3.3 release.
+
+[float]
+[[breaking-changes-8.3.3]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+There are no breaking changes in {kib} 8.3.3.
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[fixes-v8.3.3]]
+=== Bug fixes
+Dashboard::
+* Fixes `z-index` of `embPanel__header--floater` {kibana-pull}136463[#136463]
+* Filter out experimental visualizations when labs setting is disabled {kibana-pull}136332[#136332]
+
+Discover::
+Fixes filter in / filter out buttons for empty values {kibana-pull}135919[#135919]
+
+Elastic Security::
+For the Elastic Security 8.3.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Pass start_time to actions when the maintenance window for rolling upgrades is set to immediately {kibana-pull}136384[#136384]
+* Allow agent bulk actions without specific licence restrictions {kibana-pull}136334[#136334]
+* Adds reinstall button to integration settings page {kibana-pull}135590[#135590]
+
+Lens & Visualizations::
+Fixes normalizeTable performance bottleneck in *Lens* {kibana-pull}135792[#135792]
+
 [[release-notes-8.3.2]]
 == {kib} 8.3.2
 
@@ -43,11 +89,7 @@ Review the following information about the {kib} 8.3.2 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 There are no breaking changes in {kib} 8.3.2.
-
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
