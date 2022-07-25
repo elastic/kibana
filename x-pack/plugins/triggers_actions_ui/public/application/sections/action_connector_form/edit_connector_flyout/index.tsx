@@ -26,7 +26,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import TestConnectorForm from '../test_connector_form';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
-import { FlyoutFooter } from './foooter';
+import { FlyoutFooter } from './footer';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;

@@ -92,6 +92,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'test.not-enabled',
       name: 'Test: Not Enabled',
       minimumLicenseRequired: 'gold',
+      supportedFeatureIds: ['alerting'],
       async executor() {
         return { status: 'ok', actionId: '' };
       },

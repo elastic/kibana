@@ -22,6 +22,7 @@ describe('Registration', () => {
     id: '.test',
     name: 'Test',
     minimumLicenseRequired: 'basic' as const,
+    supportedFeatureIds: ['alerting'],
     schema: {
       config: TestConfigSchema,
       secrets: TestSecretsSchema,
@@ -51,6 +52,7 @@ describe('Registration', () => {
       id: connector.id,
       name: connector.name,
       minimumLicenseRequired: connector.minimumLicenseRequired,
+      supportedFeatureIds: connector.supportedFeatureIds,
       validate: expect.anything(),
       executor: expect.anything(),
     });

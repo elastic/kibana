@@ -49,6 +49,7 @@ import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -96,6 +97,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  connectorFeatureId?: string;
 }
 
 export const RuleForm = ({
@@ -111,6 +113,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  connectorFeatureId = AlertingConnectorFeatureId,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -550,6 +553,7 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
+            featureId={connectorFeatureId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }

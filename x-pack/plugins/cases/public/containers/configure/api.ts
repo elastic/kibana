@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import {
   ActionConnector,
@@ -93,7 +94,7 @@ export const patchCaseConfigure = async (
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
   const response = await KibanaServices.get().http.fetch<ActionTypeConnector[]>(
     getAllConnectorTypesUrl(),
-    { method: 'GET', signal }
+    { method: 'GET', signal, query: { feature_id: CasesConnectorFeatureId } }
   );
 
   return convertArrayToCamelCase(response) as ActionTypeConnector[];

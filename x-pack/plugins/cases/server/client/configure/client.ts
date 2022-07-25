@@ -14,7 +14,7 @@ import { identity } from 'fp-ts/lib/function';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { ActionType } from '@kbn/actions-plugin/common';
+import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -31,7 +31,7 @@ import {
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
@@ -222,8 +222,9 @@ function isConnectorSupported(
   actionTypes: Record<string, ActionType>
 ): boolean {
   return (
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense
+    (actionTypes[action.actionTypeId]?.supportedFeatureIds ?? []).includes(
+      CasesConnectorFeatureId
+    ) && actionTypes[action.actionTypeId]?.enabledInLicense
   );
 }
 
