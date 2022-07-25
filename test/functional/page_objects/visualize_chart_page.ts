@@ -167,6 +167,8 @@ export class VisualizeChartPageObject extends FtrService {
   public async filterLegend(name: string, force = false) {
     await this.toggleLegend(force);
     await this.testSubjects.click(`legend-${name}`);
+    // wait for a short amount of time for popover to stabilize as there is no good way to check for that
+    await this.common.sleep(250);
     const filterIn = await this.testSubjects.find(`legend-${name}-filterIn`);
     await filterIn.click();
     await this.waitForVisualizationRenderingStabilized();

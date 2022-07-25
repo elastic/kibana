@@ -9,7 +9,7 @@
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Adapters } from '@kbn/inspector-plugin';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
