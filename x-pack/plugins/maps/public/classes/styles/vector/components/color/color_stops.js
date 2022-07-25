@@ -123,6 +123,7 @@ export const ColorStops = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <MbValidatedColorPicker
+              key={color}
               onChange={onColorChange}
               color={color}
               swatches={swatches}
