@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPDATING = i18n.translate('xpack.triggersActionsUI.lastUpdated.updating', {
+export const UPDATING = i18n.translate('xpack.triggersActionsUI.alertsTable.lastUpdated.updating', {
   defaultMessage: 'Updating...',
 });
 
