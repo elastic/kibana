@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import type { EuiButtonGroupOptionProps, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiFormErrorText,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
@@ -247,9 +247,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       <EuiSpacer />
       {showAdvancedOptions && showInvocationCountWarning && (
         <>
-          <EuiFormErrorText data-test-subj="previewInvocationCountWarning">
-            {i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING}
-          </EuiFormErrorText>
+          <EuiCallOut color="warning" title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE} data-test-subj="previewInvocationCountWarning">
+            {i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE}
+          </EuiCallOut>
           <EuiSpacer />
         </>
       )}
