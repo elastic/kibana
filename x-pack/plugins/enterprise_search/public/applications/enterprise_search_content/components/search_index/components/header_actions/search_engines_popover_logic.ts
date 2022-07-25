@@ -7,16 +7,16 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-interface HeaderActionsLogicValues {
+interface SearchEnginesPopoverLogicValues {
   isSearchEnginesPopoverOpen: boolean;
 }
 
-interface HeaderActionsLogicActions {
+interface SearchEnginesPopoverLogicActions {
   toggleSearchEnginesPopover: void;
 }
 
-export const HeaderActionsLogic = kea<
-  MakeLogicType<HeaderActionsLogicValues, HeaderActionsLogicActions>
+export const SearchEnginesPopoverLogic = kea<
+  MakeLogicType<SearchEnginesPopoverLogicValues, SearchEnginesPopoverLogicActions>
 >({
   actions: {
     toggleSearchEnginesPopover: true,

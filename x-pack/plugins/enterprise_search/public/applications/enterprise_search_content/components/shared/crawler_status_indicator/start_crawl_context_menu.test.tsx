@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -19,7 +19,7 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { mountWithIntl } from '../../../../../test_helpers';
+import { mountWithIntl } from '../../../../test_helpers';
 
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
 

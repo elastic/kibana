@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerLogic } from '../crawler_logic';
+import { CrawlerLogic } from '../../search_index/crawler/crawler_logic';
 
 export const StopCrawlPopoverContextMenu: React.FC = () => {
   const [isPopoverOpen, setPopover] = useState(false);
