@@ -6,13 +6,7 @@
  */
 
 import type { UsersTableType } from '../../../users/store/model';
-import { USERS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
-
-export const getUsersUrl = (search?: string) => `${USERS_PATH}${appendSearch(search)}`;
-
-export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
-  `/${tabName}${appendSearch(search)}`;
 
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>
   `/${detailName}${appendSearch(search)}`;
