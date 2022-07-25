@@ -3463,6 +3463,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/get-repo-files@link:bazel-bin/packages/kbn-get-repo-files":
+  version "0.0.0"
+  uid ""
+
 "@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
   version "0.0.0"
   uid ""
@@ -3556,6 +3560,14 @@
   uid ""
 
 "@kbn/react-field@link:bazel-bin/packages/kbn-react-field":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-source-classifier-cli@link:bazel-bin/packages/kbn-repo-source-classifier-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-source-classifier@link:bazel-bin/packages/kbn-repo-source-classifier":
   version "0.0.0"
   uid ""
 
@@ -7191,6 +7203,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__get-repo-files@link:bazel-bin/packages/kbn-get-repo-files/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7288,6 +7304,14 @@
   uid ""
 
 "@types/kbn__react-field@link:bazel-bin/packages/kbn-react-field/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__repo-source-classifier-cli@link:bazel-bin/packages/kbn-repo-source-classifier-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__repo-source-classifier@link:bazel-bin/packages/kbn-repo-source-classifier/npm_module_types":
   version "0.0.0"
   uid ""
 
