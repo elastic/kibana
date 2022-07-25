@@ -82,8 +82,8 @@ export const SummaryTabContent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiPanel style={{ height: 100 }}>{/* TODO: Add status panel*/}</EuiPanel>
-      <EuiSpacer size="l" />
+      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
+      {/* <EuiSpacer size="l" /> */}
       <EuiFlexGroup>
         <EuiFlexItem>
           <LastTestRun />
