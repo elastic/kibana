@@ -31,8 +31,8 @@ export const DeleteLocation = ({
       title={DELETE_LABEL}
       onCancel={() => setIsModalOpen(false)}
       onConfirm={() => onDelete(id)}
-      cancelButtonText={DO_NOT_IT_LABEL}
-      confirmButtonText={DO_IT_LABEL}
+      cancelButtonText={DENY_LABEL}
+      confirmButtonText={CONFIRM_LABEL}
       buttonColor="danger"
       defaultFocusedButton="confirm"
     >
@@ -71,11 +71,11 @@ const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.delete',
   defaultMessage: 'Delete location',
 });
 
-const DO_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesDoItLabel', {
+const CONFIRM_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesDoItLabel', {
   defaultMessage: 'Yes, do it',
 });
 
-const DO_NOT_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.doNotLabel', {
+const DENY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.doNotLabel', {
   defaultMessage: "No, don't do it",
 });
 
