@@ -26,6 +26,7 @@ describe('TagsAddRemove', () => {
   const onTagsUpdated = jest.fn();
   const mockUpdateTags = useUpdateTags().updateTags as jest.Mock;
   const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as jest.Mock;
+  const onClosePopover = jest.fn();
 
   beforeEach(() => {
     onTagsUpdated.mockReset();
@@ -44,6 +45,7 @@ describe('TagsAddRemove', () => {
         selectedTags={selectedTags}
         button={button}
         onTagsUpdated={onTagsUpdated}
+        onClosePopover={onClosePopover}
       />
     );
   };
