@@ -647,8 +647,8 @@ describe('Cases webhook service', () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
-            id: '1',
-            key: 'CK-1',
+            id: '../../malicious-app/malicious-endpoint/',
+            key: '../../malicious-app/malicious-endpoint/',
             fields: {
               updated: '2020-04-27T10:59:46.202Z',
               created: '2020-04-27T10:59:46.202Z',
@@ -665,6 +665,23 @@ describe('Cases webhook service', () => {
       await service.getIncident('../../malicious-app/malicious-endpoint/');
       expect(requestMock.mock.calls[0][0].url).toEqual(
         'https://siem-kibana.atlassian.net/rest/api/2/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
+      );
+    });
+
+    test('createIncident- escapes url', async () => {
+      const incident = {
+        incident: {
+          title: 'title',
+          description: 'desc',
+          tags: ['hello', 'world'],
+          issueType: '10006',
+          priority: 'High',
+          parent: 'RJ-107',
+        },
+      };
+      const res = await service.createIncident(incident);
+      expect(res.url).toEqual(
+        'https://siem-kibana.atlassian.net/browse/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
 
