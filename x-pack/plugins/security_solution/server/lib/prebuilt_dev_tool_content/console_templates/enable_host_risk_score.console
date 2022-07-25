@@ -187,9 +187,10 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
 }
 
 
+# 8. Start the pivot transform
+POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
 
-
-# 8. Create mappings for the destination index of the Host Risk Score latest transform
+# 9. Create mappings for the destination index of the Host Risk Score latest transform
 PUT ml_host_risk_score_latest_{{space_name}}
 {
   "mappings":{
@@ -217,7 +218,7 @@ PUT ml_host_risk_score_latest_{{space_name}}
   }
 }
 
-# 9. Upload the latest transform
+# 10. Upload the latest transform
 # This transform gets the latest risk information about hosts in a Kibana space
 PUT _transform/ml_hostriskscore_latest_transform_{{space_name}}
 {
@@ -244,15 +245,18 @@ PUT _transform/ml_hostriskscore_latest_transform_{{space_name}}
   }
 }
 
-# Hint: If no data after finishing all the steps, re-do step 10-13 again.
-# 10. Make sure the transform is stopped
+# 11. Start the latest transform
+POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_start
+
+# Hint: If you don't see data after running any of the transforms, stop and restart the transforms
+# Stop the pivot transform
 POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_stop
 
-# 11. Make sure the transform is stopped
-POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_stop
-
-# 12. Start the pivot transform
+# Start the pivot transform
 POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
 
-# 13. Start the latest transform
+# Stop the latest transform
+POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_stop
+
+# Start the latest transform
 POST _transform/ml_hostriskscore_latest_transform_{{space_name}}/_start

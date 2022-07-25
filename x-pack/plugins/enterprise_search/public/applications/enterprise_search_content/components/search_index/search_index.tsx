@@ -20,6 +20,7 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
@@ -125,8 +126,8 @@ export const SearchIndex: React.FC = () => {
 
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
-    ...(indexData?.connector ? CONNECTOR_TABS : []),
-    ...(indexData?.crawler ? CRAWLER_TABS : []),
+    ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
+    ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
@@ -151,14 +152,14 @@ export const SearchIndex: React.FC = () => {
         pageTitle: indexName,
         rightSideItems: [
           ...headerActions,
-          ...(indexData?.crawler ? [<CrawlerStatusIndicator />] : []),
+          ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
         ],
       }}
     >
       <>
         {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
         <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-        {indexData?.crawler && <CrawlCustomSettingsFlyout />}
+        {isCrawlerIndex(indexData) && <CrawlCustomSettingsFlyout />}
       </>
     </EnterpriseSearchContentPageTemplate>
   );

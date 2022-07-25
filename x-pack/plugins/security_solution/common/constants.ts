@@ -249,7 +249,7 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged` as const;
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
-export const DETECTION_ENGINE_SIGNAL_INDEX_URL = `/internal${DETECTION_ENGINE_URL}/signal/index` as const;
+
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
@@ -263,7 +263,8 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-export const DEV_TOOL_PREBUILT_CONTENT = `/internal/prebuilt_content/dev_tool/{console_id}` as const;
+export const DEV_TOOL_PREBUILT_CONTENT =
+  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (consoleId: string) =>
   `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
 export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
@@ -281,7 +282,8 @@ export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
-
+  export const DETECTION_ENGINE_ALERTS_INDEX_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.

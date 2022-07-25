@@ -13,7 +13,6 @@ import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
-import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
@@ -54,7 +53,6 @@ const BackToResourcesButton = () => (
 );
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
-  useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
 

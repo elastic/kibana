@@ -6,10 +6,13 @@
  */
 
 import React, { useEffect, FC } from 'react';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
 import { useFetchStream } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { Query } from '@kbn/es-query';
 
 import { useAiOpsKibana } from '../../kibana_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -29,6 +32,10 @@ interface ExplainLogRateSpikesAnalysisProps {
   latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
+  searchQuery: Query['query'];
+  onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
+  onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
+  selectedChangePoint?: ChangePoint;
 }
 
 export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
@@ -36,6 +43,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   earliest,
   latest,
   windowParameters,
+  searchQuery,
+  onPinnedChangePoint,
+  onSelectedChangePoint,
+  selectedChangePoint,
 }) => {
   const { services } = useAiOpsKibana();
   const basePath = services.http?.basePath.get() ?? '';
@@ -48,8 +59,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     {
       start: earliest,
       end: latest,
-      // TODO Consider an optional Kuery.
-      kuery: '',
+      searchQuery: JSON.stringify(searchQuery),
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.title,
@@ -57,10 +67,23 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     },
     { reducer: streamReducer, initialState }
   );
+
   useEffect(() => {
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Start handler clears possibly hovered or pinned
+  // change points on analysis refresh.
+  function startHandler() {
+    if (onPinnedChangePoint) {
+      onPinnedChangePoint(null);
+    }
+    if (onSelectedChangePoint) {
+      onSelectedChangePoint(null);
+    }
+    start();
+  }
 
   return (
     <>
@@ -68,11 +91,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
-        onRefresh={start}
+        onRefresh={startHandler}
         onCancel={cancel}
       />
       {data?.changePoints ? (
-        <SpikeAnalysisTable changePointData={data.changePoints} loading={isRunning} error={error} />
+        <SpikeAnalysisTable
+          changePoints={data.changePoints}
+          loading={isRunning}
+          error={error}
+          onPinnedChangePoint={onPinnedChangePoint}
+          onSelectedChangePoint={onSelectedChangePoint}
+          selectedChangePoint={selectedChangePoint}
+        />
       ) : null}
     </>
   );

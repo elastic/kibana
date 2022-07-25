@@ -14,7 +14,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
-  DETECTION_ENGINE_SIGNAL_INDEX_URL,
+  DETECTION_ENGINE_ALERTS_INDEX_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -116,7 +116,7 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
  * @throws An error if response is not OK
  */
 export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
-  KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_SIGNAL_INDEX_URL, {
+  KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_ALERTS_INDEX_URL, {
     method: 'GET',
     signal,
   });

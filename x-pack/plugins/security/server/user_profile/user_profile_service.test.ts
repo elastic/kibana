@@ -348,20 +348,9 @@ describe('UserProfileService', () => {
   });
 
   describe('#bulkGet', () => {
-    it('properly parses returned profiles', async () => {
+    it('properly parses and sorts returned profiles', async () => {
       mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
         profiles: [
-          userProfileMock.createWithSecurity({
-            uid: 'UID-1',
-            user: {
-              username: 'user-1',
-              display_name: 'display-name-1',
-              full_name: 'full-name-1',
-              realm_name: 'some-realm',
-              realm_domain: 'some-domain',
-              roles: ['role-1'],
-            },
-          }),
           userProfileMock.createWithSecurity({
             uid: 'UID-2',
             user: {
@@ -371,6 +360,17 @@ describe('UserProfileService', () => {
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
               roles: ['role-2'],
+            },
+          }),
+          userProfileMock.createWithSecurity({
+            uid: 'UID-1',
+            user: {
+              username: 'user-1',
+              display_name: 'display-name-1',
+              full_name: 'full-name-1',
+              realm_name: 'some-realm',
+              realm_domain: 'some-domain',
+              roles: ['role-1'],
             },
           }),
         ],
@@ -417,9 +417,9 @@ describe('UserProfileService', () => {
     it('filters out not requested profiles', async () => {
       mockStartParams.clusterClient.asInternalUser.transport.request.mockResolvedValue({
         profiles: [
-          userProfileMock.createWithSecurity({ uid: 'UID-1' }),
           userProfileMock.createWithSecurity({ uid: 'UID-2' }),
           userProfileMock.createWithSecurity({ uid: 'UID-NOT-REQUESTED' }),
+          userProfileMock.createWithSecurity({ uid: 'UID-1' }),
         ],
       });
 

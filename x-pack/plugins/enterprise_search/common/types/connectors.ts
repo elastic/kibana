@@ -34,6 +34,7 @@ export interface Connector {
   configuration: ConnectorConfiguration;
   id: string;
   index_name: string;
+  language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_status: string | null;

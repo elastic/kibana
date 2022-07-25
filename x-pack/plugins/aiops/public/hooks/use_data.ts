@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { SavedSearch } from '@kbn/discover-plugin/public';
-import { useAiOpsKibana } from '../kibana_context';
-import { useTimefilter } from './use_time_filter';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+
 import { TimeBuckets } from '../../common/time_buckets';
-import { useDocumentCountStats } from './use_document_count_stats';
-import { Dictionary } from './url_state';
-import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+
+import { useAiOpsKibana } from '../kibana_context';
+import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import {
   getEsQueryFromSavedSearch,
   SavedSearchSavedObject,
 } from '../application/utils/search_utils';
-import { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_wrapper';
+
+import { useTimefilter } from './use_time_filter';
+import { useDocumentCountStats } from './use_document_count_stats';
+import type { Dictionary } from './url_state';
 
 export const useData = (
   {
@@ -29,7 +35,8 @@ export const useData = (
     currentSavedSearch,
   }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
-  onUpdate: (params: Dictionary<unknown>) => void
+  onUpdate: (params: Dictionary<unknown>) => void,
+  selectedChangePoint?: ChangePoint
 ) => {
   const { services } = useAiOpsKibana();
   const { uiSettings, data } = services;
@@ -90,7 +97,23 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+  const overallStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const selectedChangePointStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
+  const { docStats: selectedDocStats } = useDocumentCountStats(
+    selectedChangePointStatsRequest,
+    lastRefresh
+  );
 
   function updateFieldStatsRequest() {
     const timefilterActiveBounds = timefilter.getActiveBounds();
@@ -150,7 +173,8 @@ export const useData = (
   }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    docStats,
+    overallDocStats,
+    selectedDocStats,
     timefilter,
     /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,
