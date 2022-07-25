@@ -61,18 +61,25 @@ export class TimelineTestService extends FtrService {
       title,
     };
 
-    const updatedTimeline = await this.supertest
+    // Update the title
+    return this.updateTimeline(timelineId, titleUpdate, version);
+  }
+
+  async updateTimeline(
+    timelineId: string,
+    updates: TimelineInput,
+    version: string
+  ): Promise<TimelineResponse> {
+    return await this.supertest
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
       .send({
         timelineId,
         version,
-        timeline: titleUpdate,
+        timeline: updates,
       })
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as TimelineResponse);
-
-    return updatedTimeline;
   }
 
   /** Deletes a timeline using it timeline id */
