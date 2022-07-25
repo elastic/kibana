@@ -12,7 +12,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
 import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
-import { addFilter, removeFilter, updateFilterItem } from './filters_editor_utils';
+import { addFilter, removeFilter, updateFilter } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -27,11 +27,11 @@ export interface AddFilterPayload {
 }
 
 /** @internal **/
-export interface UpdateFiltersPayload {
+export interface UpdateFilterPayload {
   dataView: DataView;
   field?: DataViewField | undefined;
   operator?: Operator | undefined;
-  params?: any | undefined;
+  params?: Filter['meta']['params'];
   path: string;
 }
 
@@ -49,7 +49,7 @@ export interface MoveFilterPayload {
 /** @internal **/
 export type FiltersEditorActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
-  | { type: 'updateFilters'; payload: UpdateFiltersPayload }
+  | { type: 'updateFilter'; payload: UpdateFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload };
 
@@ -67,10 +67,11 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
           action.payload.conditionalType
         ),
       };
-    case 'updateFilters':
+    case 'updateFilter':
       return {
         ...state,
-        filters: updateFilterItem(state.filters, action.payload),
+        //todo:
+        filters: updateFilter(state.filters, action.payload),
       };
     case 'removeFilter':
       return {

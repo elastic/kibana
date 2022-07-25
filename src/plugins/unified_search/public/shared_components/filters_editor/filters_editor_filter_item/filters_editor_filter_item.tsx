@@ -54,7 +54,7 @@ export function FilterItem({
 
   const onHandleField = (field: DataViewField) => {
     dispatch({
-      type: 'updateFilters',
+      type: 'updateFilter',
       payload: { dataView, field, path },
     });
 
@@ -65,7 +65,7 @@ export function FilterItem({
 
   const onHandleOperator = (operator: Operator, params: any) => {
     dispatch({
-      type: 'updateFilters',
+      type: 'updateFilter',
       payload: { dataView, field: selectedField, operator, params, path },
     });
 

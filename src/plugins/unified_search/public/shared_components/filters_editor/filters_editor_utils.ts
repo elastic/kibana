@@ -53,13 +53,22 @@ export const addFilter = (
 ) => {
   const newFilters = [...filters];
 
-  doForFilterByPath(newFilters, path, (f) => {
-    console.log(getFilterByPath(newFilters, getParentFilterPath(path)));
-  });
+  console.log(getFilterByPath(newFilters, getParentFilterPath(path)));
 
   return newFilters;
 };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
+  return [...filters];
+};
+
+export const updateFilter = (
+  filters: Filter[],
+  path: string,
+  params: {
+    // todo: add more parameters
+    dataViewId: string | undefined;
+  }
+) => {
   return [...filters];
 };
