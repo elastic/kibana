@@ -24,6 +24,10 @@ export interface GetAgentsResponse extends ListResult<Agent> {
   list?: Agent[];
 }
 
+export interface GetAgentTagsResponse {
+  items: string[];
+}
+
 export interface GetOneAgentRequest {
   params: {
     agentId: string;

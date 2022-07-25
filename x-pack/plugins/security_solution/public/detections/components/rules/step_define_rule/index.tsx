@@ -63,6 +63,7 @@ import { schema } from './schema';
 import * as i18n from './translations';
 import {
   isEqlRule,
+  isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -73,6 +74,8 @@ import type { BrowserField, BrowserFields } from '../../../../common/containers/
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { NewTermsFields } from '../new_terms_fields';
+import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 
 const DATA_VIEW_SELECT_ID = 'dataView';
@@ -116,6 +119,8 @@ export const stepDefineDefaultValue: DefineStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   eqlOptions: {},
+  newTermsFields: [],
+  historyWindowSize: '7d',
 };
 
 /**
@@ -197,6 +202,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatMapping: formThreatMapping,
       machineLearningJobId: formMachineLearningJobId,
       anomalyThreshold: formAnomalyThreshold,
+      newTermsFields: formNewTermsFields,
+      historyWindowSize: formHistoryWindowSize,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -214,6 +221,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'threatMapping',
       'machineLearningJobId',
       'anomalyThreshold',
+      'newTermsFields',
+      'historyWindowSize',
     ],
   });
 
@@ -224,6 +233,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
+  const newTermsFields = formNewTermsFields ?? initialState.newTermsFields;
+  const historyWindowSize = formHistoryWindowSize ?? initialState.historyWindowSize;
   const ruleType = formRuleType || initialState.ruleType;
 
   // if 'index' is selected, use these browser fields
@@ -726,6 +737,30 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={isNewTermsRule(ruleType)}
+            data-test-subj="newTermsInput"
+            fullWidth
+          >
+            <>
+              <UseField
+                path="newTermsFields"
+                component={NewTermsFields}
+                componentProps={{
+                  browserFields,
+                }}
+              />
+              <UseField
+                path="historyWindowSize"
+                component={ScheduleItem}
+                componentProps={{
+                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
+                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
+                  timeTypes: ['m', 'h', 'd'],
+                }}
+              />
+            </>
+          </RuleTypeEuiFormRow>
           <UseField
             path="timeline"
             component={PickTimeline}
@@ -760,6 +795,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           machineLearningJobId={machineLearningJobId}
           anomalyThreshold={anomalyThreshold}
           eqlOptions={optionsSelected}
+          newTermsFields={newTermsFields}
+          historyWindowSize={historyWindowSize}
         />
       </StepContentWrapper>
 
