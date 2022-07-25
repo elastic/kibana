@@ -913,7 +913,14 @@ export interface PolicyConfig {
   windows: {
     advanced?: {
       [key: string]: unknown;
-      rollback?: string | boolean;
+      alerts?: {
+        [key: string]: unknown;
+        rollback: {
+          remediation: {
+            enabled: boolean;
+          };
+        };
+      };
     };
     events: {
       dll_and_driver_load: boolean;
