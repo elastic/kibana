@@ -8,7 +8,14 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
