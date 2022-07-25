@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
@@ -194,27 +193,7 @@ describe('<ComplianceDashboard />', () => {
     );
   };
 
-  it('shows noDataConfig when status is not deployed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({ status: 'success', data: 'not-deployed' })
-    );
-    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({ status: 'success', data: undefined })
-    );
-
-    renderComplianceDashboardPage();
-
-    expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).toBeInTheDocument();
-    expect(screen.queryByTestId(DASHBOARD_CONTAINER)).not.toBeInTheDocument();
-  });
-
   it('shows dashboard when there are findings in latest findings index', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      isLoading: false,
-      isSuccess: true,
-      data: { status: 'indexed' },
-    }));
-
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
