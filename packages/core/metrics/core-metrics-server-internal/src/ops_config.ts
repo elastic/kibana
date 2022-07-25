@@ -18,8 +18,8 @@ const OPS_METRICS_INTERVAL = '5s';
 
 /** @internal */
 interface OpsConfigCGroupOverridesOps {
-  cpuPath?: string | undefined;
-  cpuAcctPath?: string | undefined;
+  cpuPath?: string;
+  cpuAcctPath?: string;
 }
 
 /** @internal */

@@ -9,8 +9,8 @@
 import os from 'os';
 import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
-import { Logger } from '@kbn/logging';
-import { OpsOsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
+import type { Logger } from '@kbn/logging';
+import type { OpsOsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 const getos = promisify(getosAsync);

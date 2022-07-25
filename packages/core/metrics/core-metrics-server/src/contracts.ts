@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { OpsMetrics } from './metrics';
+import type { Observable } from 'rxjs';
+import type { OpsMetrics } from './metrics';
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
  *

@@ -12,7 +12,7 @@ import type {
   MetricsService,
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
-} from '@kbn/core-metrics-server-internal'; // only importing types from here
+} from '@kbn/core-metrics-server-internal';
 import {
   mocked as eventLoopDelaysMonitorMock,
   collectorMock,
