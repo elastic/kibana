@@ -10,10 +10,11 @@ import React, { FC } from 'react';
 import { ComponentStory } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { getFiltersMock } from '../__mock__/filters';
 import { FiltersEditor, FiltersEditorProps } from '../filters_editor';
 
 export default {
@@ -51,86 +52,7 @@ const mockedDataView = {
   ],
 } as DataView;
 
-const filters: Filter[] = [
-  {
-    meta: {
-      index: '1234',
-      type: 'phrase',
-      key: 'category.keyword',
-      params: {
-        query: 'Filter 1',
-      },
-    },
-  },
-  {
-    meta: {
-      params: {
-        conditionalType: 'or',
-        filters: [
-          {
-            meta: {
-              index: '1234',
-              type: 'phrase',
-              key: 'category.keyword',
-              params: {
-                query: 'Filter 2',
-              },
-            },
-          },
-          {
-            meta: {
-              params: {
-                conditionalType: 'and',
-                filters: [
-                  {
-                    meta: {
-                      index: '1234',
-                      type: 'phrase',
-                      key: 'category.keyword',
-                      params: {
-                        query: 'Filter 2-1',
-                      },
-                    },
-                  },
-                  {
-                    meta: {
-                      index: '1234',
-                      type: 'phrase',
-                      key: 'category.keyword',
-                      params: {
-                        query: 'Filter 2-2',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          {
-            meta: {
-              index: '1234',
-              type: 'phrase',
-              key: 'category.keyword',
-              params: {
-                query: 'Filter 3',
-              },
-            },
-          },
-        ],
-      },
-    },
-  },
-  {
-    meta: {
-      index: '1234',
-      type: 'phrase',
-      key: 'category.keyword',
-      params: {
-        query: 'Filter 4',
-      },
-    },
-  },
-] as Filter[];
+const filters = getFiltersMock();
 
 const createMockWebStorage = () => ({
   clear: action('clear'),
@@ -240,5 +162,5 @@ const services = {
 Default.args = {
   filters,
   dataView: mockedDataView,
-  onChange: (filters) => {},
+  onChange: (f: Filter[]) => {},
 };
