@@ -12,11 +12,13 @@ import {
   type CspSecuritySolutionContext,
 } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { MANAGE_PATH } from '../../common/constants';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
+import { MANAGE } from '../app/translations';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName }: { pageName?: CloudSecurityPosturePageId }) => (
@@ -29,6 +31,7 @@ const CloudSecurityPosture = memo(() => {
   const securitySolutionContext: CspSecuritySolutionContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
     getSpyRouteComponent: () => CloudPostureSpyRoute,
+    getManageBreadcrumbEntry: () => ({ name: MANAGE, path: MANAGE_PATH }),
   };
 
   return (

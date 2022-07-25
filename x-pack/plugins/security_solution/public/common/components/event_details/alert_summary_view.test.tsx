@@ -74,14 +74,7 @@ describe('AlertSummaryView', () => {
         </TestProviders>
       );
 
-      [
-        'host.name',
-        'user.name',
-        i18n.RULE_TYPE,
-        'query',
-        i18n.SOURCE_EVENT_ID,
-        i18n.SESSION_ID,
-      ].forEach((fieldId) => {
+      ['host.name', 'user.name', i18n.RULE_TYPE, 'query'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
@@ -689,6 +682,40 @@ describe('AlertSummaryView', () => {
           expect(() => getByText(fieldText)).toThrow();
         }
       );
+    });
+  });
+
+  test('New terms events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['new_terms'],
+            originalValue: ['new_terms'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.new_terms',
+        values: ['127.0.0.1'],
+        originalValue: ['127.0.0.1'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['New Terms'].forEach((fieldId) => {
+      expect(getByText(fieldId));
     });
   });
 
