@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
+import { clusterResponseMock } from '../mocks';
 import { TreeNav } from '.';
 import { TreeViewContextProvider } from '../contexts';
 
@@ -14,6 +15,7 @@ describe('TreeNav component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let mockedApi: AppContextTestRender['coreStart']['http']['get'];
 
   const defaultProps = {
     globalFilter: {
@@ -32,6 +34,8 @@ describe('TreeNav component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedApi = mockedContext.coreStart.http.get;
+    mockedApi.mockResolvedValue(clusterResponseMock);
   });
 
   it('mount with Logical View selected by default', async () => {
@@ -55,5 +59,19 @@ describe('TreeNav component', () => {
 
     logicViewRadio.click();
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
+  });
+
+  it('collapses / expands the tree nav when clicking on collapse button', async () => {
+    renderResult = mockedContext.render(<TreeNav {...defaultProps} />);
+
+    expect(renderResult.getByText(/cluster/i)).toBeVisible();
+
+    const collapseButton = await renderResult.getByLabelText(/collapse/i);
+    collapseButton.click();
+    expect(renderResult.getByText(/cluster/i)).not.toBeVisible();
+
+    const expandButton = await renderResult.getByLabelText(/expand/i);
+    expandButton.click();
+    expect(renderResult.getByText(/cluster/i)).toBeVisible();
   });
 });

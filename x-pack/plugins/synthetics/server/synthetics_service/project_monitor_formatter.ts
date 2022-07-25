@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
   ConfigKey,
@@ -46,6 +48,7 @@ export class ProjectMonitorFormatter {
   private spaceId: string;
   private keepStale: boolean;
   private locations: Locations;
+  private privateLocations: Locations;
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
@@ -58,9 +61,12 @@ export class ProjectMonitorFormatter {
   public failedStaleMonitors: FailedMonitors = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
+  private syntheticsMonitorClient: SyntheticsMonitorClient;
+  private request: KibanaRequest;
 
   constructor({
     locations,
+    privateLocations,
     keepStale,
     savedObjectsClient,
     encryptedSavedObjectsClient,
@@ -68,8 +74,11 @@ export class ProjectMonitorFormatter {
     spaceId,
     monitors,
     server,
+    syntheticsMonitorClient,
+    request,
   }: {
     locations: Locations;
+    privateLocations: Locations;
     keepStale: boolean;
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -77,36 +86,49 @@ export class ProjectMonitorFormatter {
     spaceId: string;
     monitors: ProjectBrowserMonitor[];
     server: UptimeServerSetup;
+    syntheticsMonitorClient: SyntheticsMonitorClient;
+    request: KibanaRequest;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
     this.locations = locations;
+    this.privateLocations = privateLocations;
     this.keepStale = keepStale;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+    this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.request = request;
   }
 
   public configureAllProjectMonitors = async () => {
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
-    await Promise.all(
-      this.monitors.map((monitor) =>
-        this.configureProjectMonitor({
-          monitor,
-        })
-      )
-    );
+    for (const monitor of this.monitors) {
+      await this.configureProjectMonitor({ monitor });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
     await this.handleStaleMonitors();
   };
 
   private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
     try {
+      const {
+        integrations: { writeIntegrationPolicies },
+      } = await this.server.fleet.authz.fromRequest(this.request);
+
+      if (monitor.privateLocations?.length && !writeIntegrationPolicies) {
+        throw new Error(
+          'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.'
+        );
+      }
+
       // check to see if monitor already exists
       const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,
+        privateLocations: this.privateLocations,
         monitor,
         projectId: this.projectId,
         namespace: this.spaceId,
@@ -148,6 +170,7 @@ export class ProjectMonitorFormatter {
           server: this.server,
           monitor: normalizedMonitor,
           monitorSavedObject: newMonitor,
+          syntheticsMonitorClient: this.syntheticsMonitorClient,
         });
         this.createdMonitors.push(monitor.id);
       }
@@ -244,11 +267,12 @@ export class ProjectMonitorFormatter {
       );
 
     if (hasMonitorBeenEdited) {
-      syncEditedMonitor({
+      await syncEditedMonitor({
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
         server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
       });
     }
 
@@ -260,19 +284,18 @@ export class ProjectMonitorFormatter {
       const staleMonitorsData = Object.values(this.staleMonitorsMap).filter(
         (monitor) => monitor.stale === true
       );
-      await Promise.all(
-        staleMonitorsData.map((monitor) => {
-          if (!this.keepStale) {
-            return this.deleteStaleMonitor({
-              monitorId: monitor.savedObjectId,
-              journeyId: monitor.journeyId,
-            });
-          } else {
-            this.staleMonitors.push(monitor.journeyId);
-            return null;
-          }
-        })
-      );
+
+      for (const staleMonitor of staleMonitorsData) {
+        if (!this.keepStale) {
+          await this.deleteStaleMonitor({
+            monitorId: staleMonitor.savedObjectId,
+            journeyId: staleMonitor.journeyId,
+          });
+        } else {
+          this.staleMonitors.push(staleMonitor.journeyId);
+          return null;
+        }
+      }
     } catch (e) {
       this.server.logger.error(e);
     }
@@ -290,6 +313,7 @@ export class ProjectMonitorFormatter {
         savedObjectsClient: this.savedObjectsClient,
         server: this.server,
         monitorId,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
       });
       this.deletedMonitors.push(journeyId);
     } catch (e) {

@@ -61,7 +61,7 @@ export type ExposedToBrowserDescriptor<T> = {
  * ```typescript
  * // my_plugin/server/index.ts
  * import { schema, TypeOf } from '@kbn/config-schema';
- * import { PluginConfigDescriptor } from 'kibana/server';
+ * import { PluginConfigDescriptor } from '@kbn/core/server';
  *
  * const configSchema = schema.object({
  *   secret: schema.string({ defaultValue: 'Only on server' }),
