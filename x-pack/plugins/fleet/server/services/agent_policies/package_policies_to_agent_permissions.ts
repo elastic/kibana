@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   FullAgentPolicyOutputPermissions,
   RegistryDataStreamPrivileges,
-} from '../../../common';
+} from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';

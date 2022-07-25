@@ -57,21 +57,25 @@ export const useStyles = () => {
       marginBottom: size.m,
     };
 
-    const noBottomSpacing: CSSObject = {
-      marginBottom: 0,
-    };
-
     const countWidgetsGroup: CSSObject = {
       ...widgetsBottomSpacing,
       flexWrap: 'wrap',
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        flexDirection: 'column',
+      },
     };
 
     const leftWidgetsGroup: CSSObject = {
-      ...noBottomSpacing,
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        marginBottom: '0 !important',
+      },
       minWidth: `calc(70% - ${size.xxxl})`,
     };
 
     const rightWidgetsGroup: CSSObject = {
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        marginTop: '0 !important',
+      },
       minWidth: '30%',
     };
 
@@ -113,7 +117,6 @@ export const useStyles = () => {
       rightWidgetsGroup,
       widgetsBottomSpacing,
       percentageChartTitle,
-      noBottomSpacing,
       widgetHolder,
       widgetsGroup,
       betaBadge,
