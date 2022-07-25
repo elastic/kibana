@@ -131,18 +131,17 @@ describe('When using the release action from response actions console', () => {
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
-    // should have created action request
+    // Release API response
+    deferrable.resolve();
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
     });
-
-    deferrable.resolve();
 
     // open console
     await consoleManagerMockAccess.openRunningConsole();
     // status should be updating
     await waitFor(() => {
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
+      expect(apiMocks.responseProvider.actionDetails.mock.calls.length).toBeGreaterThan(0);
     });
   });
 
