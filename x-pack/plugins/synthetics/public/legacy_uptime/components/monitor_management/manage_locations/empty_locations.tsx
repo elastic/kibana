@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
@@ -40,14 +40,12 @@ export const EmptyLocations = ({
         </EuiButton>
       }
       footer={
-        <>
-          <EuiTitle size="xxs">
-            <h3>{LEARN_MORE}</h3>
-          </EuiTitle>
+        <EuiText size="s">
+          {LEARN_MORE}{' '}
           <EuiLink href="#" target="_blank">
             {READ_DOCS}
           </EuiLink>
-        </>
+        </EuiText>
       }
     />
   );

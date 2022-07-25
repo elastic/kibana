@@ -73,7 +73,7 @@ export const ManageLocationsFlyout = () => {
     <EuiFlyout onClose={closeFlyout} size="m" style={{ width: 540 }}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>{MANAGE_PRIVATE_LOCATIONS}</h2>
+          <h2>{PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -121,7 +121,7 @@ export const ManageLocationsFlyout = () => {
   return (
     <div>
       {isEnabled && (
-        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{MANAGE_PRIVATE_LOCATIONS}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{PRIVATE_LOCATIONS}</EuiButtonEmpty>
       )}
       {isOpen && !isAddingNew ? flyout : null}
       {isAddingNew ? (
@@ -135,10 +135,10 @@ export const ManageLocationsFlyout = () => {
   );
 };
 
-const MANAGE_PRIVATE_LOCATIONS = i18n.translate(
+const PRIVATE_LOCATIONS = i18n.translate(
   'xpack.synthetics.monitorManagement.managePrivateLocations',
   {
-    defaultMessage: 'Manage private locations',
+    defaultMessage: 'Private locations',
   }
 );
 
