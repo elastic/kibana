@@ -16,7 +16,7 @@ import type { FormSchema } from '../../../../shared_imports';
 export const schema: FormSchema<AdvancedPreviewForm> = {
   interval: {
     label: i18n.translate('xpack.securitySolution.detectionEngine.previewRule.fieldIntervalLabel', {
-      defaultMessage: 'Runs every',
+      defaultMessage: 'Runs every (Rule interval)',
     }),
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.previewRule.fieldIntervalHelpText',

@@ -76,7 +76,7 @@ export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewInvocationCountWarning',
   {
     defaultMessage:
-      'The timeframe and rule interval that you selected might cause timeout or take long time to execute.',
+      'The timeframe and rule interval that you selected might cause timeout or take long time to execute. Try to decrease the timeframe and/or increase the interval if preview has timed out.',
   }
 );
 
