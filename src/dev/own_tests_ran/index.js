@@ -42,6 +42,14 @@ export function runCheckOwnTestsRanCli() {
       const fileNames = xs.map((x) => x.filename);
 
       console.log(`\n### fileNames: \n${JSON.stringify(fileNames, null, 2)}`);
+
+      // TODO-TRE: Next, we need access to the log output, from ci.
+      // TODO-TRE: We prolly can use the fileNames above, find the test(s) file(s)
+      // TODO-TRE: , find their configs and use the configs and see where they are used in
+      // TODO-TRE: , the "pick test group run order" output.
+      // TODO-TRE: From there, we should be able to stream through the ouput.
+      // TODO-TRE: This link mentions it's possible: https://buildkite.com/docs/apis/rest-api/jobs#get-a-jobs-log-output
+
     },
     {
       description: `
