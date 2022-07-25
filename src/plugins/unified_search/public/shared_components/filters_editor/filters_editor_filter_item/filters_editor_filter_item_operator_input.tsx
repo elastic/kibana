@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -38,27 +37,25 @@ export function OperatorInput({
   );
 
   return (
-    <EuiFormRow fullWidth>
-      <GenericComboBox
-        fullWidth
-        compressed
-        isDisabled={!field}
-        placeholder={
-          field
-            ? i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                defaultMessage: 'Select',
-              })
-            : i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                defaultMessage: 'Waiting',
-              })
-        }
-        options={operators}
-        selectedOptions={operator ? [operator] : []}
-        getLabel={({ message }) => message}
-        onChange={onOperatorChange}
-        singleSelection={{ asPlainText: true }}
-        isClearable={false}
-      />
-    </EuiFormRow>
+    <GenericComboBox
+      fullWidth
+      compressed
+      isDisabled={!field}
+      placeholder={
+        field
+          ? i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect', {
+              defaultMessage: 'Select',
+            })
+          : i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting', {
+              defaultMessage: 'Waiting',
+            })
+      }
+      options={operators}
+      selectedOptions={operator ? [operator] : []}
+      getLabel={({ message }) => message}
+      onChange={onOperatorChange}
+      singleSelection={{ asPlainText: true }}
+      isClearable={false}
+    />
   );
 }

@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useContext, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ConditionTypes } from '../filters_editor_condition_types';
@@ -134,19 +134,23 @@ export function FilterItem({
           <EuiFlexItem grow={3}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
-                <FieldInput
-                  field={selectedField}
-                  dataView={dataView}
-                  onHandleField={onHandleField}
-                />
+                <EuiFormRow fullWidth>
+                  <FieldInput
+                    field={selectedField}
+                    dataView={dataView}
+                    onHandleField={onHandleField}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <OperatorInput
-                  field={selectedField}
-                  operator={selectedOperator}
-                  params={selectedParams}
-                  onHandleOperator={onHandleOperator}
-                />
+                <EuiFormRow fullWidth>
+                  <OperatorInput
+                    field={selectedField}
+                    operator={selectedOperator}
+                    params={selectedParams}
+                    onHandleOperator={onHandleOperator}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <ParamsEditor
