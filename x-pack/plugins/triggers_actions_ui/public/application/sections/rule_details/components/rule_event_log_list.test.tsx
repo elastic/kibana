@@ -16,7 +16,8 @@ import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filte
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
-import { Rule, RuleSummary, RuleType } from '../../../../types';
+import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
+import { RuleType } from '../../../../types';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -99,83 +100,11 @@ const mockLogResponse: any = {
   total: 4,
 };
 
-const mockRule: Rule = {
-  id: uuid.v4(),
-  enabled: true,
-  name: `rule-${uuid.v4()}`,
-  tags: [],
-  ruleTypeId: '.noop',
-  consumer: 'consumer',
-  schedule: { interval: '1m' },
-  actions: [],
-  params: {},
-  createdBy: null,
-  updatedBy: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  apiKeyOwner: null,
-  throttle: null,
-  notifyWhen: null,
-  muteAll: false,
-  mutedInstanceIds: [],
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-};
-
 const loadExecutionLogAggregationsMock = jest.fn();
 
 const onChangeDurationMock = jest.fn();
 
-function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
-  return {
-    id: 'test.testRuleType',
-    name: 'My Test Rule Type',
-    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
-    actionVariables: {
-      context: [],
-      state: [],
-      params: [],
-    },
-    defaultActionGroupId: 'default',
-    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-    authorizedConsumers: {},
-    producer: 'rules',
-    minimumLicenseRequired: 'basic',
-    enabledInLicense: true,
-    ...overloads,
-  };
-}
-
-function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
-  const summary: RuleSummary = {
-    id: 'rule-id',
-    name: 'rule-name',
-    tags: ['tag-1', 'tag-2'],
-    ruleTypeId: mockRule.ruleTypeId,
-    consumer: 'rule-consumer',
-    status: 'OK',
-    muteAll: false,
-    throttle: '',
-    enabled: true,
-    errorMessages: [],
-    statusStartDate: '2022-03-21T07:40:46-07:00',
-    statusEndDate: '2022-03-25T07:40:46-07:00',
-    alerts: {
-      foo: {
-        status: 'OK',
-        muted: false,
-        actionGroupId: 'testActionGroup',
-      },
-    },
-    executionDuration: {
-      average: 100,
-      valuesWithTimestamp: {},
-    },
-  };
-  return { ...summary, ...overloads };
-}
+const ruleMock = mockRule();
 
 const authorizedConsumers = {
   [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -183,18 +112,11 @@ const authorizedConsumers = {
 
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
-const ruleType: RuleType = {
-  id: '.noop',
-  name: 'No Op',
-  actionGroups: [{ id: 'default', name: 'Default' }],
-  recoveryActionGroup,
-  actionVariables: { context: [], state: [], params: [] },
-  defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
+const ruleType: RuleType = mockRuleType({
   producer: ALERTS_FEATURE_ID,
   authorizedConsumers,
-  enabledInLicense: true,
-};
+  recoveryActionGroup,
+});
 
 describe('rule_event_log_list', () => {
   beforeEach(() => {
@@ -216,9 +138,9 @@ describe('rule_event_log_list', () => {
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -230,7 +152,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -262,9 +184,9 @@ describe('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -294,7 +216,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [
           {
             timestamp: {
@@ -323,7 +245,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [
           {
             timestamp: {
@@ -359,7 +281,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [
           {
             timestamp: { order: 'desc' },
@@ -378,9 +300,9 @@ describe('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -404,7 +326,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: ['success'],
         page: 0,
@@ -424,7 +346,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: ['success', 'failure'],
         page: 0,
@@ -441,9 +363,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -467,7 +389,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 1,
@@ -487,7 +409,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -501,9 +423,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -517,7 +439,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -542,7 +464,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -558,9 +480,9 @@ describe('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -601,9 +523,9 @@ describe('rule_event_log_list', () => {
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -626,9 +548,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -676,9 +598,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -703,9 +625,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -730,9 +652,9 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -779,9 +701,10 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        fetchRuleSummary={false}
+        rule={ruleMock}
         ruleType={ruleType}
-        ruleSummary={mockRuleSummary()}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
         onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
@@ -812,11 +735,13 @@ describe('rule_event_log_list', () => {
     const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
     });
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        fetchRuleSummary={false}
+        rule={ruleMock}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}
@@ -843,6 +768,7 @@ describe('rule_event_log_list', () => {
     const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284345, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
     });
 
     loadExecutionLogAggregationsMock.mockResolvedValue({
@@ -852,7 +778,8 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        fetchRuleSummary={false}
+        rule={ruleMock}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}

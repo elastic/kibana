@@ -26,11 +26,11 @@ export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
 type RuleExecutionSummaryAndChartProps = {
   rule: Rule;
   ruleType: RuleType;
-  ruleSummary: RuleSummary;
-  numberOfExecutions: number;
+  ruleSummary?: RuleSummary;
+  numberOfExecutions?: number;
   isLoadingRuleSummary?: boolean;
   refreshToken?: number;
-  onChangeDuration: (duration: number) => void;
+  onChangeDuration?: (duration: number) => void;
   requestRefresh?: () => Promise<void>;
   fetchRuleSummary?: boolean;
 } & Pick<RuleApis, 'loadRuleSummary'>;
@@ -94,7 +94,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
     if (fetchRuleSummary) {
       return internalOnChangeDuration;
     }
-    return onChangeDuration;
+    return onChangeDuration || internalOnChangeDuration;
   }, [fetchRuleSummary, onChangeDuration, internalOnChangeDuration]);
 
   const getRuleSummary = async () => {
