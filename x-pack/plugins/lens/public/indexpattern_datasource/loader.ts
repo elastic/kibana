@@ -7,8 +7,12 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { CoreStart, HttpSetup, SavedObjectReference } from '@kbn/core/public';
+import type {
+  DataViewsContract,
+  DataView,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -19,6 +23,8 @@ import {
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fetchFieldExistence } from './existing_fields';
 import type {
   DatasourceDataPanelProps,
   InitializationOptions,
@@ -35,7 +41,6 @@ import {
 
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
-import { BASE_API_URL } from '../../common';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -412,23 +417,22 @@ async function loadIndexPatternRefs(
 }
 
 export async function syncExistingFields({
+  core,
+  data,
+  dataViews,
   indexPatterns,
   dateRange,
-  fetchJson,
   setState,
   isFirstExistenceFetch,
   currentIndexPatternTitle,
   dslQuery,
   showNoDataPopover,
 }: {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateRange: DateRange;
-  indexPatterns: Array<{
-    id: string;
-    title: string;
-    fields: IndexPatternField[];
-    timeFieldName?: string | null;
-    hasRestrictions: boolean;
-  }>;
+  indexPatterns: DataView[];
   fetchJson: HttpSetup['post'];
   setState: SetState;
   isFirstExistenceFetch: boolean;
@@ -437,24 +441,23 @@ export async function syncExistingFields({
   showNoDataPopover: () => void;
 }) {
   const existenceRequests = indexPatterns.map((pattern) => {
-    if (pattern.hasRestrictions) {
+    const hasRestrictions = !!pattern.typeMeta?.aggs;
+    if (hasRestrictions) {
       return {
         indexPatternTitle: pattern.title,
         existingFieldNames: pattern.fields.map((field) => field.name),
       };
     }
-    const body: Record<string, string | object> = {
+
+    return fetchFieldExistence({
       dslQuery,
       fromDate: dateRange.fromDate,
       toDate: dateRange.toDate,
-    };
-
-    if (pattern.timeFieldName) {
-      body.timeFieldName = pattern.timeFieldName;
-    }
-
-    return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
-      body: JSON.stringify(body),
+      dataView: pattern,
+      dataService: data,
+      timeFieldName: pattern.timeFieldName,
+      dataViewsService: dataViews,
+      uiSettingsClient: core.uiSettings,
     }) as Promise<ExistingFields>;
   });
 

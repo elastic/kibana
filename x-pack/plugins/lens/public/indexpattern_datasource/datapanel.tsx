@@ -180,18 +180,24 @@ export function IndexPatternDataPanel({
   return (
     <>
       <Loader
-        load={() =>
-          syncExistingFields({
+        load={async () => {
+          const actualIndexPatterns = await Promise.all(
+            indexPatternList.map(async (entry) => await dataViews.get(entry.id))
+          );
+          return syncExistingFields({
+            core,
+            data,
+            dataViews,
             dateRange,
             setState,
             isFirstExistenceFetch: state.isFirstExistenceFetch,
             currentIndexPatternTitle: indexPatterns[currentIndexPatternId]?.title || '',
             showNoDataPopover,
-            indexPatterns: indexPatternList,
+            indexPatterns: actualIndexPatterns,
             fetchJson: core.http.post,
             dslQuery,
-          })
-        }
+          });
+        }}
         loadDeps={[
           query,
           filters,
