@@ -16,6 +16,9 @@ describe('addConnector lib function', () => {
     asCurrentUser: {
       get: jest.fn(),
       index: jest.fn(),
+      indices: {
+        refresh: jest.fn(),
+      },
     },
     asInternalUser: {},
   };
@@ -36,7 +39,7 @@ describe('addConnector lib function', () => {
           last_sync_error: null,
           last_sync_status: null,
           last_synced: null,
-          scheduling: { enabled: true, interval: '1 2 3 4 5' },
+          scheduling: { enabled: false, interval: '* * * * *' },
           service_type: null,
           status: 'not connected',
           sync_now: false,
@@ -70,9 +73,12 @@ describe('addConnector lib function', () => {
       id: 'connectorId',
       index: CONNECTORS_INDEX,
     });
+    expect(mockClient.asCurrentUser.indices.refresh).toHaveBeenCalledWith({
+      index: CONNECTORS_INDEX,
+    });
   });
 
-  it('should not create index if there is no connector', async () => {
+  it('should not index document if there is no connector', async () => {
     mockClient.asCurrentUser.get.mockImplementationOnce(() => {
       return Promise.resolve({});
     });
