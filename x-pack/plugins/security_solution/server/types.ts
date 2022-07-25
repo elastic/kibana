@@ -39,7 +39,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
-  getRacClient: () => (req: KibanaRequest) => Promise<AlertsClient>;
+  getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;

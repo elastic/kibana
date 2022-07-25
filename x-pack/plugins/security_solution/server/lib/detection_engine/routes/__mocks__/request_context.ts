@@ -123,7 +123,7 @@ const createSecuritySolutionRequestContextMock = (
       };
     }),
     getAppClient: jest.fn(() => clients.appClient),
-    getRacClient: jest.fn(() => {
+    getRacClient: jest.fn((req: KibanaRequest) => {
       throw new Error('Not implemented');
     }),
     getSpaceId: jest.fn(() => 'default'),
