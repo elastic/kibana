@@ -103,11 +103,11 @@ export class SavedObjectLoader {
     updatedAt?: string
   ) {
     return {
+      ...attributes,
       id,
       url: this.urlFor(id),
       references,
-      updated_at: updatedAt,
-      attributes,
+      updatedAt,
     };
   }
 
@@ -158,7 +158,7 @@ export class SavedObjectLoader {
       .then((resp) => {
         return {
           total: resp.total,
-          hits: resp.savedObjects,
+          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject)),
         };
       });
   }

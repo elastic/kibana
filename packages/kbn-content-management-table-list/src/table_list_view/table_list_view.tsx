@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
-import { SimpleSavedObject, SavedObjectsFindOptionsReference } from '../types';
+import { SavedObjectsFindOptionsReference } from '../types';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
@@ -89,10 +89,14 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   };
 }
 
-export type UserContentCommonSchema = SimpleSavedObject<{
-  title: string;
-  description?: string;
-}>;
+export interface UserContentCommonSchema {
+  id: string;
+  updatedAt: string;
+  attributes: {
+    title: string;
+    description?: string;
+  };
+}
 
 function TableListView<T extends UserContentCommonSchema>({
   findItems,

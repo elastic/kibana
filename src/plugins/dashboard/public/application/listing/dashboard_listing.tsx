@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { TableListViewKibanaProvider, TableListView } from '@kbn/content-management-table-list';
 import useMount from 'react-use/lib/useMount';
@@ -33,8 +33,8 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { DashboardAttributes } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../services/data';
+import { SavedObjectLoader } from '../../services/saved_objects';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
@@ -54,13 +54,15 @@ export interface DashboardListingProps {
 }
 
 const toTableListViewSavedObject = (
-  savedObject: SimpleSavedObject<DashboardAttributes>
+  savedObject: ReturnType<SavedObjectLoader['mapSavedObjectApiHits']>
 ): DashboardSavedObjectUserContent => {
   return {
-    ...savedObject,
+    id: savedObject.id,
+    updatedAt: savedObject.updatedAt!,
     attributes: {
-      ...savedObject.attributes,
-      title: savedObject.attributes.title ?? '',
+      ...savedObject,
+      title: savedObject.title ?? '',
+      description: savedObject.description,
     },
   };
 };
@@ -295,7 +297,17 @@ export const DashboardListing = ({
       )}
       {!showNoDataPage && (
         <TableListViewKibanaProvider
-          savedObjectTaggingApi={savedObjectsTagging!}
+          savedObjectTaggingApi={
+            savedObjectsTagging === undefined
+              ? undefined
+              : {
+                  ui: {
+                    ...savedObjectsTagging.ui,
+                    getTableColumnDefinition: () =>
+                      savedObjectsTagging.ui.getTableColumnDefinition() as any,
+                  },
+                }
+          }
           applicationStart={{
             capabilities: {
               advancedSettings: {

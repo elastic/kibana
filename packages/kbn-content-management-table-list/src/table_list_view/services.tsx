@@ -11,7 +11,8 @@ import type { Observable } from 'rxjs';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 
-import type { SavedObject, MountPoint, SavedObjectsFindOptionsReference } from '../types';
+import type { MountPoint, SavedObjectsFindOptionsReference } from '../types';
+import { UserContentCommonSchema } from './table_list_view';
 
 /**
  * Abstract external services for this component.
@@ -33,7 +34,7 @@ export interface Services {
   };
   savedObjectTagging?: {
     ui: {
-      getTableColumnDefinition: () => EuiTableFieldDataColumnType<SavedObject>;
+      getTableColumnDefinition: () => EuiTableFieldDataColumnType<UserContentCommonSchema>;
       parseSearchQuery: (
         query: string,
         options?: {
