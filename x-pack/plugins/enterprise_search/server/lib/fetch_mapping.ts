@@ -13,8 +13,8 @@ export const fetchMapping = async (
   indexName: string
 ): Promise<IndicesGetMappingIndexMappingRecord> => {
   const mapping = await client.asCurrentUser.indices.getMapping({
-    index: indexName,
     expand_wildcards: ['open'],
+    index: indexName,
   });
   return mapping[indexName];
 };

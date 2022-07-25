@@ -13,7 +13,32 @@ import { RouteDependencies } from '../../plugin';
 export function registerSearchRoute({ router }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/{index_name}/search/{query}',
+      path: '/internal/enterprise_search/indices/{index_name}/search',
+      validate: {
+        params: schema.object({
+          index_name: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const searchResults = await fetchSearchResults(client, request.params.index_name, '');
+        return response.ok({
+          body: searchResults,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return response.customError({
+          body: 'Error fetching data from Enterprise Search',
+          statusCode: 502,
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
       validate: {
         params: schema.object({
           index_name: schema.string(),
@@ -35,8 +60,8 @@ export function registerSearchRoute({ router }: RouteDependencies) {
         });
       } catch (error) {
         return response.customError({
-          statusCode: 502,
           body: 'Error fetching data from Enterprise Search',
+          statusCode: 502,
         });
       }
     }
