@@ -62,7 +62,7 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionType = getTransactionType({
+  const transactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
@@ -88,7 +88,7 @@ export function ApmServiceContextProvider({
   );
 }
 
-export function getTransactionType({
+export function getOrRedirectToTransactionType({
   transactionType,
   transactionTypes,
   agentName,
