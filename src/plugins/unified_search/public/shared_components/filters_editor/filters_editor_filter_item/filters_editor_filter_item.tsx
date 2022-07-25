@@ -63,6 +63,10 @@ export function FilterItem({
     setSelectedParams((prevState: any) => ({ params: [value, ...(prevState.params || [])] }));
   };
 
+  if (!dataView) {
+    return null;
+  }
+
   return (
     <EuiFlexItem>
       {conditionalOperationType ? (

@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { getOperatorOptions } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { GenericComboBox } from '../../../filter_bar/filter_editor/generic_combo_box';
@@ -28,12 +27,14 @@ export function OperatorInput({
 }) {
   const operators = field ? getOperatorOptions(field) : [];
 
-  function onOperatorChange([selectedOperator]: Operator[]) {
-    const selectedParams =
-      get(selectedOperator, 'type') === get(selectedOperator, 'type') ? params : undefined;
+  const onOperatorChange = useCallback(
+    ([selectedOperator]: Operator[]) => {
+      const selectedParams = selectedOperator?.type === operator?.type ? params : undefined;
 
-    onHandleOperator(selectedOperator, selectedParams);
-  }
+      onHandleOperator(selectedOperator, selectedParams);
+    },
+    [onHandleOperator, operator?.type, params]
+  );
 
   return (
     <EuiFormRow fullWidth>

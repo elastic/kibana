@@ -6,14 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
 
-export function ParamsEditor({
+interface ParamsEditorProps {
+  dataView: DataView;
+  field: DataViewField | undefined;
+  operator: Operator | undefined;
+  // @todo: remove any;
+  params: any;
+  onHandleParamsChange: (params: string) => void;
+  onHandleParamsUpdate: (value: any) => void;
+  timeRangeForSuggestionsOverride: boolean;
+}
+
+export const ParamsEditor = ({
   dataView,
   field,
   operator,
@@ -21,30 +32,24 @@ export function ParamsEditor({
   onHandleParamsChange,
   onHandleParamsUpdate,
   timeRangeForSuggestionsOverride,
-}: {
-  dataView: DataView;
-  field: DataViewField | undefined;
-  operator: Operator | undefined;
-  params: any;
-  onHandleParamsChange: (params: string) => void;
-  onHandleParamsUpdate: (value: any) => void;
-  timeRangeForSuggestionsOverride: boolean;
-}): JSX.Element {
-  if (!dataView) {
-    return <></>;
-  }
+}: ParamsEditorProps) => {
+  const onParamsChange = useCallback(
+    (selectedParams: any) => {
+      onHandleParamsChange(selectedParams);
+    },
+    [onHandleParamsChange]
+  );
 
-  function onParamsChange(seletedParams: any) {
-    onHandleParamsChange(seletedParams);
-  }
-
-  function onParamsUpdate(value: string) {
-    onHandleParamsUpdate(value);
-  }
+  const onParamsUpdate = useCallback(
+    (value: string) => {
+      onHandleParamsUpdate(value);
+    },
+    [onHandleParamsUpdate]
+  );
 
   switch (operator?.type) {
     case 'exists':
-      return <></>;
+      return null;
     case 'phrase':
       return (
         <PhraseValueInput
@@ -94,4 +99,4 @@ export function ParamsEditor({
         />
       );
   }
-}
+};
