@@ -51,4 +51,4 @@ export interface Meta {
   page: MetaPage;
 }
 
-export type { ElasticsearchIndex } from './indices';
+export type { ElasticsearchIndexWithPrivileges } from './indices';

@@ -22,11 +22,10 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { ErrorLike, RenderMode } from '@kbn/expressions-plugin';
+import { ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionRendererEvent,
@@ -54,6 +53,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -68,7 +68,7 @@ import {
   Datasource,
 } from '../types';
 
-import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
+import { getEditPath, DOC_TYPE } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -232,10 +232,9 @@ export class Embeddable
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
-    this.deps.usageCollection?.reportUiCounter(
-      PLUGIN_ID,
-      METRIC_TYPE.COUNT,
-      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error'
+    trackUiCounterEvents(
+      type === 'runtime' ? 'embeddable_runtime_error' : 'embeddable_validation_error',
+      this.getExecutionContext()
     );
   }
 
@@ -268,6 +267,7 @@ export class Embeddable
       },
       parent
     );
+
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
@@ -492,12 +492,61 @@ export class Embeddable
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    let datasourceEvents: string[] = [];
+    let visualizationEvents: string[] = [];
+
+    if (this.savedVis) {
+      datasourceEvents = Object.values(this.deps.datasourceMap).reduce<string[]>(
+        (acc, datasource) => [
+          ...acc,
+          ...(datasource.getRenderEventCounters?.(
+            this.savedVis!.state.datasourceStates[datasource.id]
+          ) ?? []),
+        ],
+        []
+      );
+
+      if (this.savedVis.visualizationType) {
+        visualizationEvents =
+          this.deps.visualizationMap[this.savedVis.visualizationType].getRenderEventCounters?.(
+            this.savedVis!.state.visualization
+          ) ?? [];
+      }
+    }
+
+    const executionContext = this.getExecutionContext();
+
+    trackUiCounterEvents(
+      [...datasourceEvents, ...visualizationEvents, ...getExecutionContextEvents(executionContext)],
+      executionContext
+    );
+
     this.renderComplete.dispatchComplete();
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
     });
   };
+
+  getExecutionContext() {
+    if (this.savedVis) {
+      const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
+      const child: KibanaExecutionContext = {
+        type: 'lens',
+        name: this.savedVis.visualizationType ?? '',
+        id: this.id,
+        description: this.savedVis.title || this.input.title || '',
+        url: this.output.editUrl,
+      };
+
+      return parentContext
+        ? {
+            ...parentContext,
+            child,
+          }
+        : child;
+    }
+  }
 
   /**
    *
@@ -522,21 +571,6 @@ export class Embeddable
       error: undefined,
     });
     this.renderComplete.dispatchInProgress();
-
-    const parentContext = this.input.executionContext;
-    const child: KibanaExecutionContext = {
-      type: 'lens',
-      name: this.savedVis.visualizationType ?? '',
-      id: this.id,
-      description: this.savedVis.title || this.input.title || '',
-      url: this.output.editUrl,
-    };
-    const executionContext = parentContext
-      ? {
-          ...parentContext,
-          child,
-        }
-      : child;
 
     const input = this.getInput();
 
@@ -564,7 +598,7 @@ export class Embeddable
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
-          executionContext={executionContext}
+          executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
           onRuntimeError={() => {
             this.logError('runtime');

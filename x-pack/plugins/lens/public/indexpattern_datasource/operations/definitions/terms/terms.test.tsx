@@ -2556,13 +2556,19 @@ describe('terms', () => {
       const functionComboBox = comboBoxes.filter(
         '[data-test-subj="indexPattern-reference-function"]'
       );
-      const fieldComboBox = comboBoxes.filter('[data-test-subj="indexPattern-dimension-field"]');
       const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });
+      instance.update();
 
-      expect(fieldComboBox.prop('isInvalid')).toBeTruthy();
+      expect(
+        instance
+          .find('ReferenceEditor')
+          .find(EuiComboBox)
+          .filter('[data-test-subj="indexPattern-dimension-field"]')
+          .prop('isInvalid')
+      ).toBeTruthy();
       expect(updateLayerSpy).not.toHaveBeenCalled();
     });
 

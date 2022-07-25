@@ -18,7 +18,7 @@ import type { FindingsBaseURLQuery } from '../types';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
   getFindingsPageSizeInfo,
-  addFilter,
+  getFilters,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -26,8 +26,6 @@ import {
 } from '../utils';
 import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
-import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
-import { findingsNavigation } from '../../../common/navigation/constants';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
 
@@ -43,8 +41,6 @@ export const getDefaultQuery = ({
 });
 
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  useCspBreadcrumbs([findingsNavigation.findings_default]);
-
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
@@ -123,7 +119,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
                   pageIndex: 0,
-                  filters: addFilter({
+                  filters: getFilters({
                     filters: urlQuery.filters,
                     dataView,
                     field,

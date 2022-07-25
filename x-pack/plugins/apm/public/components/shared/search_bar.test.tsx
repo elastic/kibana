@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getByTestId, fireEvent, getByText } from '@testing-library/react';
+import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
@@ -37,6 +37,7 @@ function setup({
 
   const KibanaReactContext = createKibanaReactContext({
     usageCollection: { reportUiCounter: () => {} },
+    dataViews: { get: async () => {} },
   } as Partial<CoreStart>);
 
   // mock transaction types
@@ -91,7 +92,7 @@ describe('when transactionType is selected and multiple transaction types are gi
     expect(dropdown).toHaveValue('secondType');
   });
 
-  it('should update the URL when a transaction type is selected', () => {
+  it('should update the URL when a transaction type is selected', async () => {
     const { container } = setup({
       history,
       serviceTransactionTypes: ['firstType', 'secondType'],
@@ -112,7 +113,9 @@ describe('when transactionType is selected and multiple transaction types are gi
     expect(getByText(dropdown, 'secondType')).toBeInTheDocument();
 
     // change dropdown value
-    fireEvent.change(dropdown, { target: { value: 'firstType' } });
+    await act(async () => {
+      fireEvent.change(dropdown, { target: { value: 'firstType' } });
+    });
 
     // assert that value was changed
     expect(dropdown).toHaveValue('firstType');

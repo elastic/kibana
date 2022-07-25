@@ -241,7 +241,8 @@ export type BulkResponseErrorAggregation = Record<string, { count: number; statu
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>
+  docs: Array<WrappedFieldsLatest<T>>,
+  maxAlerts?: number
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;

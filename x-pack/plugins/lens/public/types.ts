@@ -354,6 +354,10 @@ export interface Datasource<T = unknown, P = unknown> {
     references2: SavedObjectReference[]
   ) => boolean;
   /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
+  /**
    * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
@@ -973,6 +977,11 @@ export interface Visualization<T = unknown> {
    * Gets custom display options for showing the visualization.
    */
   getDisplayOptions?: () => VisualizationDisplayOptions;
+
+  /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 // Use same technique as TriggerContext

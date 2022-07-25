@@ -27,7 +27,7 @@ import type {
   DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
