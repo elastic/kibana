@@ -391,7 +391,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('ip'),
+          field: getField('@tags'),
           id: '123',
           nested: undefined,
           operator: matchesOperator,
@@ -412,7 +412,7 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'matches'
     );
@@ -428,7 +428,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('ip'),
+          field: getField('@tags'),
           id: '123',
           nested: undefined,
           operator: doesNotMatchOperator,
@@ -449,13 +449,123 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'does not match'
     );
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
       '1234*'
     );
+  });
+
+  test('it renders the correct set of operators for string fields', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('@tags'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').first().prop('options')
+    ).toEqual([
+      {
+        label: 'is',
+      },
+      {
+        label: 'is not',
+      },
+      {
+        label: 'is one of',
+      },
+      {
+        label: 'is not one of',
+      },
+      {
+        label: 'exists',
+      },
+      {
+        label: 'does not exist',
+      },
+      {
+        label: 'matches',
+      },
+      {
+        label: 'does not match',
+      },
+    ]);
+  });
+
+  test('it renders the correct set of operators for ip fields', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').first().prop('options')
+    ).toEqual([
+      {
+        label: 'is',
+      },
+      {
+        label: 'is not',
+      },
+      {
+        label: 'is one of',
+      },
+      {
+        label: 'is not one of',
+      },
+      {
+        label: 'exists',
+      },
+      {
+        label: 'does not exist',
+      },
+    ]);
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
