@@ -109,6 +109,11 @@ module.exports = {
           disallowedMessage: `import from @kbn/utility-types-jest instead`
         },
         {
+          from: '@kbn/inspector-plugin',
+          to: '@kbn/inspector-plugin/common',
+          exact: true,
+        },
+        {
           from: '@kbn/expressions-plugin',
           to: '@kbn/expressions-plugin/common',
           exact: true,
