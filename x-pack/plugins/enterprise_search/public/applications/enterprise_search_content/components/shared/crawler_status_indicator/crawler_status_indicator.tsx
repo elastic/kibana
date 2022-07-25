@@ -13,8 +13,8 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerStatus } from '../../../../api/crawler/types';
-import { CrawlerLogic } from '../crawler_logic';
+import { CrawlerStatus } from '../../../api/crawler/types';
+import { CrawlerLogic } from '../../search_index/crawler/crawler_logic';
 
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';

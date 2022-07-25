@@ -21,13 +21,16 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
+import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../common';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
+import type { UserProfileBulkGetParams, UserProfileGetCurrentParams } from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
@@ -71,6 +74,7 @@ export class SecurityPlugin
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private securityApiClients!: SecurityApiClients;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -93,7 +97,7 @@ export class SecurityPlugin
       http: core.http,
     });
 
-    const securityApiClients = {
+    this.securityApiClients = {
       userProfiles: new UserProfileAPIClient(core.http),
       users: new UserAPIClient(core.http),
     };
@@ -101,7 +105,7 @@ export class SecurityPlugin
     this.navControlService.setup({
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
     this.analyticsService.setup({ securityLicense: license });
@@ -110,7 +114,7 @@ export class SecurityPlugin
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
     if (management) {
@@ -181,6 +185,14 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      userProfiles: {
+        getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
+          this.securityApiClients.userProfiles
+        ),
+        bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
+          this.securityApiClients.userProfiles
+        ),
+      },
     };
   }
 
@@ -217,6 +229,32 @@ export interface SecurityPluginStart {
    * Exposes authentication information about the currently logged in user.
    */
   authc: AuthenticationServiceStart;
+  /**
+   * A set of methods to work with Kibana user profiles.
+   */
+  userProfiles: {
+    /**
+     * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
+     * users authenticated via authenticating proxies, the `null` value is returned.
+     * @param [params] Get current user profile operation parameters.
+     * @param params.dataPath By default `getCurrent()` returns user information, but does not return any user data. The
+     * optional "dataPath" parameter can be used to return personal data for this user.
+     */
+    getCurrent<D extends UserProfileData>(
+      params?: UserProfileGetCurrentParams
+    ): Promise<UserProfileWithSecurity<D> | null>;
+    /**
+     * Retrieves multiple user profiles by their identifiers.
+     * @param params Bulk get operation parameters.
+     * @param params.uids List of user profile identifiers.
+     * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
+     * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+     */
+    bulkGet<D extends UserProfileData>(
+      params: UserProfileBulkGetParams
+    ): Promise<Array<UserProfile<D>>>;
+  };
+
   /**
    * Exposes UI components that will be loaded asynchronously.
    * @deprecated

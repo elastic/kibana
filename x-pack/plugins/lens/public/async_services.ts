@@ -31,7 +31,7 @@ export * from './indexpattern_datasource/indexpattern';
 export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
 
 export * from './indexpattern_datasource';
-
+export * from './lens_ui_telemetry';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service';
 export * from './embeddable';
