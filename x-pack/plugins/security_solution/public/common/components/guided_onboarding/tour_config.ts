@@ -10,11 +10,9 @@ import { i18n } from '@kbn/i18n';
 import alertsGif from '../../images/onboarding_tour_step_alerts.gif';
 import casesGif from '../../images/onboarding_tour_step_cases.gif';
 
-export type StepConfig = Pick<
-  EuiTourStepProps,
-  'step' | 'content' | 'anchorPosition' | 'title' | 'data-test-subj'
-> & {
+export type StepConfig = Pick<EuiTourStepProps, 'step' | 'content' | 'anchorPosition' | 'title'> & {
   anchor: string;
+  dataTestSubj: string;
   imageConfig?: {
     altText: string;
     src: string;
@@ -38,7 +36,7 @@ export const tourConfig: TourConfig = [
     ),
     anchor: `[id^="SolutionNav"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'welcomeStep',
+    dataTestSubj: 'welcomeStep',
   },
   {
     step: 2,
@@ -54,7 +52,7 @@ export const tourConfig: TourConfig = [
     ),
     anchor: `[data-test-subj="groupedNavItemLink-administration"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'manageStep',
+    dataTestSubj: 'manageStep',
   },
   {
     step: 3,
@@ -78,7 +76,7 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
-    'data-test-subj': 'alertsStep',
+    dataTestSubj: 'alertsStep',
   },
   {
     step: 4,
@@ -100,7 +98,7 @@ export const tourConfig: TourConfig = [
         }
       ),
     },
-    'data-test-subj': 'casesStep',
+    dataTestSubj: 'casesStep',
   },
   {
     step: 5,
@@ -112,6 +110,6 @@ export const tourConfig: TourConfig = [
     }),
     anchor: `[data-test-subj="add-data"]`,
     anchorPosition: 'rightUp',
-    'data-test-subj': 'dataStep',
+    dataTestSubj: 'dataStep',
   },
 ];

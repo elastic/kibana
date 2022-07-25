@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { useTourContext, TourContextProvider } from './tour';
+export {
+  useTourContext,
+  TourContextProvider,
+  SECURITY_TOUR_ACTIVE_KEY,
+  SECURITY_TOUR_STEP_KEY,
+} from './tour';

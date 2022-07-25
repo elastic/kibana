@@ -97,7 +97,7 @@ const getSteps = (tourControls: {
     </EuiButtonEmpty>
   );
   return tourConfig.map((stepConfig: StepConfig) => {
-    const { content, imageConfig, ...rest } = stepConfig;
+    const { content, imageConfig, dataTestSubj, ...rest } = stepConfig;
     return (
       <EuiTourStep
         {...rest}
@@ -108,6 +108,9 @@ const getSteps = (tourControls: {
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
         onFinish={() => resetTour()}
+        panelProps={{
+          'data-test-subj': dataTestSubj,
+        }}
         content={
           <>
             <EuiText size="xs">
