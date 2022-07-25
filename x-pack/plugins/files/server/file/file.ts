@@ -31,6 +31,12 @@ import { InternalFileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { toJSON } from './to_json';
+import {
+  AlreadyDeletedError,
+  ContentAlreadyUploadedError,
+  NoDownloadAvailableError,
+  UploadInProgressError,
+} from './errors';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
@@ -63,11 +69,16 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  private canUpload(): boolean {
-    return (
-      this.fileSO.attributes.Status === 'AWAITING_UPLOAD' ||
-      this.fileSO.attributes.Status === 'UPLOAD_ERROR'
-    );
+  private hasContent(): boolean {
+    return this.status === 'READY';
+  }
+
+  private isDeleted(): boolean {
+    return this.status === 'DELETED';
+  }
+
+  private uploadInProgress(): boolean {
+    return this.status === 'UPLOADING';
   }
 
   public async update(attrs: Partial<UpdatableFileAttributes>): Promise<IFile> {
@@ -79,8 +90,11 @@ export class File<M = unknown> implements IFile {
   }
 
   public async uploadContent(content: Readable): Promise<void> {
-    if (!this.canUpload()) {
-      throw new Error(`Already uploaded file [id = ${this.id}][name = ${this.name}].`);
+    if (this.uploadInProgress()) {
+      throw new UploadInProgressError('Upload already in progress.');
+    }
+    if (this.hasContent()) {
+      throw new ContentAlreadyUploadedError('Already uploaded file content.');
     }
     this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
     await this.updateFileState({
@@ -105,24 +119,26 @@ export class File<M = unknown> implements IFile {
 
   public downloadContent(): Promise<Readable> {
     const { size } = this.attributes;
-    if (this.status !== 'READY') {
-      throw new Error('This file is not ready for download.');
+    if (!this.hasContent()) {
+      throw new NoDownloadAvailableError('This file content is not available for download.');
     }
     // We pass through this file ID to retrieve blob content.
     return this.blobStorage.download({ id: this.id, size });
   }
 
   public async delete(): Promise<void> {
-    const { attributes } = this.fileSO;
-    if (attributes.Status === 'UPLOADING') {
-      throw new Error('Cannot delete file while upload in progress');
+    if (this.uploadInProgress()) {
+      throw new UploadInProgressError('Cannot delete file while upload in progress');
+    }
+    if (this.isDeleted()) {
+      throw new AlreadyDeletedError('File has already been deleted');
     }
     await this.updateFileState({
       action: 'delete',
     });
     // Stop sharing this file
     await this.fileShareService.deleteForFile({ file: this });
-    if (attributes.Status === 'READY') {
+    if (this.hasContent()) {
       await this.blobStorage.delete(this.id);
     }
     await this.internalFileService.deleteSO(this.id);
