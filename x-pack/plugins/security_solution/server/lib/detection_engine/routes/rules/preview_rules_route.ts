@@ -52,7 +52,6 @@ import {
   createNewTermsAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
-import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 
