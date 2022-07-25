@@ -42,7 +42,7 @@ const config = {
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: 'post',
   createCommentUrl:
-    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}/comment',
+    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   createIncidentMethod: 'post',
@@ -53,12 +53,12 @@ const config = {
   getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: [{ key: 'content-type', value: 'text' }],
-  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}',
-  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
+  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
+  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: 'put',
-  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{external.system.id}}',
+  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
 };
 const actionConnector = {
   secrets: {

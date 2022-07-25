@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             createCommentJson: '{"body":{{{case.comment}}}}',
             createCommentMethod: 'post',
-            createCommentUrl: 'http://some.non.existent.com/{{external.system.id}}/comment',
+            createCommentUrl: 'http://some.non.existent.com/{{{external.system.id}}}/comment',
             createIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
             createIncidentMethod: 'post',
@@ -76,12 +76,12 @@ export default ({ getService }: FtrProviderContext): void => {
             getIncidentResponseUpdatedDateKey: 'fields.updated',
             hasAuth: true,
             headers: { [`content-type`]: 'application/json' },
-            incidentViewUrl: 'http://some.non.existent.com/browse/{{external.system.title}}',
-            getIncidentUrl: 'http://some.non.existent.com/{{external.system.id}}',
+            incidentViewUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
+            getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
             updateIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
             updateIncidentMethod: 'put',
-            updateIncidentUrl: 'http://some.non.existent.com/{{external.system.id}}',
+            updateIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
           },
           isPreconfigured: false,
           isDeprecated: false,

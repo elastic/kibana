@@ -131,7 +131,7 @@ describe('mustache_renderer', () => {
     const summary = 'A cool good summary';
     const description = 'A cool good description';
     const tags = ['cool', 'neat', 'nice'];
-    const str = 'https://siem-kibana.atlassian.net/browse/{{external.system.title}}';
+    const str = 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}';
 
     const objStr =
       '{\n' +
