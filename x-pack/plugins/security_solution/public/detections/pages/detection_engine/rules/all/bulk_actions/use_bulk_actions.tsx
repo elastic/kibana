@@ -7,7 +7,6 @@
 /* eslint-disable complexity */
 
 import React, { useCallback } from 'react';
-import { useQueryClient } from 'react-query';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiTextColor, EuiFlexGroup, EuiButton, EuiFlexItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -25,13 +24,15 @@ import { canEditRuleWithActions } from '../../../../../../common/utils/privilege
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import { executeRulesBulkAction } from '../actions';
+import { executeRulesBulkAction, downloadExportedRules } from '../actions';
+import { getExportedRulesDetails } from '../helpers';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
-import { getCustomRulesCountFromCache } from './use_custom_rules_count';
+import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
+import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
-
+import { prepareSearchParams } from './utils/prepare_search_params';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import {
   useInvalidateRules,
@@ -41,24 +42,30 @@ import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
+import type { DryRunResult, BulkActionForConfirmation } from './types';
+
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
-  confirmBulkEdit: () => Promise<boolean>;
+  showBulkActionConfirmation: (
+    result: DryRunResult | undefined,
+    action: BulkActionForConfirmation
+  ) => Promise<boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
   reFetchTags: () => void;
+  executeBulkActionsDryRun: ExecuteBulkActionsDryRun;
 }
 
 export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
-  confirmBulkEdit,
+  showBulkActionConfirmation,
   completeBulkEditForm,
   reFetchTags,
+  executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
-  const queryClient = useQueryClient();
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
@@ -89,7 +96,7 @@ export const useBulkActions = ({
     actions: { setLoadingRules, clearRulesSelection },
   } = rulesTableContext;
 
-  return useCallback(
+  const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
 
@@ -174,6 +181,7 @@ export const useBulkActions = ({
         }
 
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.delete,
@@ -190,15 +198,34 @@ export const useBulkActions = ({
 
       const handleExportAction = async () => {
         closePopover();
-
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
-        await executeRulesBulkAction({
+
+        const response = await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.export,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
+
+        // if response null, likely network error happened and export rules haven't been received
+        if (!response) {
+          return;
+        }
+
+        const details = await getExportedRulesDetails(response);
+
+        // if there are failed exported rules, show modal window to users.
+        // they can either cancel action or proceed with export of succeeded rules
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          transformExportDetailsToDryRunResult(details),
+          BulkAction.export
+        );
+        if (hasActionBeenConfirmed === false) {
+          return;
+        }
+
+        await downloadExportedRules({ response, toasts });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -208,12 +235,20 @@ export const useBulkActions = ({
         // disabling auto-refresh so user's selected rules won't disappear after table refresh
         closePopover();
 
-        const customSelectedRuleIds = selectedRules
-          .filter((rule) => rule.immutable === false)
-          .map((rule) => rule.id);
+        const dryRunResult = await executeBulkActionsDryRun({
+          action: BulkAction.edit,
+          editAction: bulkEditActionType,
+          searchParams: isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds },
+        });
 
         // User has cancelled edit action or there are no custom rules to proceed
-        if ((await confirmBulkEdit()) === false) {
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkAction.edit
+        );
+        if (hasActionBeenConfirmed === false) {
           return;
         }
 
@@ -230,10 +265,6 @@ export const useBulkActions = ({
           }
         };
 
-        const customRulesCount = isAllSelected
-          ? getCustomRulesCountFromCache(queryClient)
-          : customSelectedRuleIds.length;
-
         // show warning toast only if bulk edit action exceeds 5s
         // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
         setTimeout(() => {
@@ -245,7 +276,11 @@ export const useBulkActions = ({
               title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
               text: mountReactNode(
                 <>
-                  <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
+                  <p>
+                    {i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(
+                      dryRunResult?.succeededRulesCount ?? 0
+                    )}
+                  </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiButton color="warning" size="s" onClick={hideWarningToast}>
@@ -268,14 +303,10 @@ export const useBulkActions = ({
           toasts,
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
-          search: isAllSelected
-            ? {
-                query: convertRulesFilterToKQL({
-                  ...filterOptions,
-                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
-                }),
-              }
-            : { ids: customSelectedRuleIds },
+          search: prepareSearchParams({
+            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+            dryRunResult,
+          }),
         });
 
         isBulkEditFinished = true;
@@ -343,10 +374,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_EXPORT,
               name: i18n.BULK_ACTION_EXPORT,
               'data-test-subj': 'exportRuleBulk',
-              disabled:
-                (containsImmutable && !isAllSelected) ||
-                containsLoading ||
-                selectedRuleIds.length === 0,
+              disabled: containsLoading || selectedRuleIds.length === 0,
               onClick: handleExportAction,
               icon: undefined,
             },
@@ -442,17 +470,19 @@ export const useBulkActions = ({
       setLoadingRules,
       toasts,
       filterQuery,
+      updateRulesCache,
       invalidateRules,
       invalidatePrePackagedRulesStatus,
+      clearRulesSelection,
       confirmDeletion,
-      confirmBulkEdit,
-      completeBulkEditForm,
-      queryClient,
+      showBulkActionConfirmation,
+      executeBulkActionsDryRun,
       filterOptions,
+      completeBulkEditForm,
       getIsMounted,
       resolveTagsRefetch,
-      updateRulesCache,
-      clearRulesSelection,
     ]
   );
+
+  return getBulkItemsPopoverContent;
 };

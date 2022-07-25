@@ -181,7 +181,9 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
           optional: optionalArgs,
         });
       })
-    : [buildArgumentText({ required: requiredArgs, optional: optionalArgs })];
+    : requiredArgs || optionalArgs
+    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+    : [];
 };
 
 export const parsedPidOrEntityIdParameter = (parameters: {

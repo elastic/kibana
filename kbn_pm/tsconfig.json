@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target",
+    "allowJs": true,
+    "checkJs": true,
+    "composite": false,
+    "target": "ES2022",
+    "module": "ESNext"
+  },
+  "include": [
+    "src/**/*.mjs",
+    "src/**/*.ts",
+  ],
+  "exclude": []
+}

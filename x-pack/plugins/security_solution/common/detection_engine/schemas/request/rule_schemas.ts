@@ -74,6 +74,8 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
+  newTermsFields,
+  historyWindowStart,
 } from '../common';
 
 export const createSchema = <
@@ -358,6 +360,30 @@ const {
 } = buildAPISchemas(machineLearningRuleParams);
 
 export { machineLearningCreateParams };
+
+const newTermsRuleParams = {
+  required: {
+    type: t.literal('new_terms'),
+    query,
+    new_terms_fields: newTermsFields,
+    history_window_start: historyWindowStart,
+  },
+  optional: {
+    index,
+    data_view_id,
+    filters,
+  },
+  defaultable: {
+    language: t.keyof({ kuery: null, lucene: null }),
+  },
+};
+const {
+  create: newTermsCreateParams,
+  patch: newTermsPatchParams,
+  response: newTermsResponseParams,
+} = buildAPISchemas(newTermsRuleParams);
+
+export { newTermsCreateParams };
 // ---------------------------------------
 // END type specific parameter definitions
 
@@ -368,6 +394,7 @@ export const createTypeSpecific = t.union([
   savedQueryCreateParams,
   thresholdCreateParams,
   machineLearningCreateParams,
+  newTermsCreateParams,
 ]);
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
@@ -381,6 +408,7 @@ export type ThresholdCreateSchema = CreateSchema<t.TypeOf<typeof thresholdCreate
 export type MachineLearningCreateSchema = CreateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsCreateSchema = CreateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
@@ -392,14 +420,11 @@ export const previewRulesSchema = t.intersection([
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
-export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
-export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
 export type QueryUpdateSchema = UpdateSchema<t.TypeOf<typeof queryCreateParams>>;
-export type SavedQueryUpdateSchema = UpdateSchema<t.TypeOf<typeof savedQueryCreateParams>>;
-export type ThresholdUpdateSchema = UpdateSchema<t.TypeOf<typeof thresholdCreateParams>>;
 export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsUpdateSchema = UpdateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 export const patchTypeSpecific = t.union([
   eqlPatchParams,
@@ -408,6 +433,7 @@ export const patchTypeSpecific = t.union([
   savedQueryPatchParams,
   thresholdPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
 ]);
 export {
   eqlPatchParams,
@@ -416,8 +442,8 @@ export {
   savedQueryPatchParams,
   thresholdPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
 };
-export type PatchTypeSpecific = t.TypeOf<typeof patchTypeSpecific>;
 
 export type EqlPatchParams = t.TypeOf<typeof eqlPatchParams>;
 export type ThreatMatchPatchParams = t.TypeOf<typeof threatMatchPatchParams>;
@@ -425,6 +451,7 @@ export type QueryPatchParams = t.TypeOf<typeof queryPatchParams>;
 export type SavedQueryPatchParams = t.TypeOf<typeof savedQueryPatchParams>;
 export type ThresholdPatchParams = t.TypeOf<typeof thresholdPatchParams>;
 export type MachineLearningPatchParams = t.TypeOf<typeof machineLearningPatchParams>;
+export type NewTermsPatchParams = t.TypeOf<typeof newTermsPatchParams>;
 
 const responseTypeSpecific = t.union([
   eqlResponseParams,
@@ -433,30 +460,12 @@ const responseTypeSpecific = t.union([
   savedQueryResponseParams,
   thresholdResponseParams,
   machineLearningResponseParams,
+  newTermsResponseParams,
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
-
-export const eqlFullPatchSchema = t.intersection([eqlPatchParams, sharedPatchSchema]);
-export type EqlFullPatchSchema = t.TypeOf<typeof eqlFullPatchSchema>;
-export const threatMatchFullPatchSchema = t.intersection([
-  threatMatchPatchParams,
-  sharedPatchSchema,
-]);
-export type ThreatMatchFullPatchSchema = t.TypeOf<typeof threatMatchFullPatchSchema>;
-export const queryFullPatchSchema = t.intersection([queryPatchParams, sharedPatchSchema]);
-export type QueryFullPatchSchema = t.TypeOf<typeof queryFullPatchSchema>;
-export const savedQueryFullPatchSchema = t.intersection([savedQueryPatchParams, sharedPatchSchema]);
-export type SavedQueryFullPatchSchema = t.TypeOf<typeof savedQueryFullPatchSchema>;
-export const thresholdFullPatchSchema = t.intersection([thresholdPatchParams, sharedPatchSchema]);
-export type ThresholdFullPatchSchema = t.TypeOf<typeof thresholdFullPatchSchema>;
-export const machineLearningFullPatchSchema = t.intersection([
-  machineLearningPatchParams,
-  sharedPatchSchema,
-]);
-export type MachineLearningFullPatchSchema = t.TypeOf<typeof machineLearningFullPatchSchema>;
 
 const responseRequiredFields = {
   id,

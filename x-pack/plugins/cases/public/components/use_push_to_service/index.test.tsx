@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
-import { readCasesPermissions, TestProviders } from '../../common/mock';
+import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
@@ -280,6 +280,24 @@ describe('usePushToService', () => {
   });
 
   describe('user does not have write permissions', () => {
+    it('disables the push button when the user does not have push permissions', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () => usePushToService(defaultArgs),
+          {
+            wrapper: ({ children }) => (
+              <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
+            ),
+          }
+        );
+        await waitForNextUpdate();
+
+        const { getByTestId } = render(result.current.pushButton);
+
+        expect(getByTestId('push-to-external-service')).toBeDisabled();
+      });
+    });
+
     it('does not display a message when user does not have a premium license', async () => {
       useFetchActionLicenseMock.mockImplementation(() => ({
         isLoading: false,

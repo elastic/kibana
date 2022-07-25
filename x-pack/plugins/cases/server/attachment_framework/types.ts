@@ -23,7 +23,14 @@ export interface PersistableStateAttachmentTypeSetup
   id: string;
 }
 
+export interface ExternalReferenceAttachmentType {
+  id: string;
+}
+
 export interface AttachmentFramework {
+  registerExternalReference: (
+    externalReferenceAttachmentType: ExternalReferenceAttachmentType
+  ) => void;
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;

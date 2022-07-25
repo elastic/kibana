@@ -39,17 +39,25 @@ const ConsoleWindow = styled.div`
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
-        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeM};
+      padding: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingMedium};
     }
 
     &-header {
+      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
+      border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
+        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
     }
 
-    &-footer,
     &-commandInput {
       padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
+    &-footer {
+      padding-top: 0;
       padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
@@ -138,7 +146,7 @@ export const Console = memo<ConsoleProps>(
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
+        <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
             <EuiFlexItem>
               <EuiFlexGroup
@@ -148,7 +156,7 @@ export const Console = memo<ConsoleProps>(
                 responsive={false}
                 data-test-subj={getTestId('mainPanel')}
               >
-                <EuiFlexItem grow={false} className="layout-container layout-header">
+                <EuiFlexItem grow={false} className="layout-header">
                   <ConsoleHeader TitleComponent={TitleComponent} />
                 </EuiFlexItem>
 
@@ -173,7 +181,12 @@ export const Console = memo<ConsoleProps>(
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                        <EuiFlexItem
+                          onClick={setFocusOnInput}
+                          grow={false}
+                          className="layout-container layout-commandInput"
+                          data-test-subj={getTestId('mainPanel-inputArea')}
+                        >
                           <CommandInput prompt={prompt} focusRef={inputFocusRef} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} className="layout-container layout-footer">

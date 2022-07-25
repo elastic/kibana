@@ -7,6 +7,12 @@
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '..';
+import {
   CasePatchRequest,
   CaseStatuses,
   User,
@@ -24,6 +30,7 @@ import {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
 } from '../api';
+import { PUSH_CASES_CAPABILITY } from '../constants';
 import { SnakeToCamelCase } from '../types';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -92,6 +99,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  searchFields: string[];
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
@@ -229,3 +237,20 @@ export interface Ecs {
 export type CaseActionConnector = ActionConnector;
 
 export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
+
+export interface CasesPermissions {
+  all: boolean;
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+  push: boolean;
+}
+
+export interface CasesCapabilities {
+  [CREATE_CASES_CAPABILITY]: boolean;
+  [READ_CASES_CAPABILITY]: boolean;
+  [UPDATE_CASES_CAPABILITY]: boolean;
+  [DELETE_CASES_CAPABILITY]: boolean;
+  [PUSH_CASES_CAPABILITY]: boolean;
+}

@@ -1718,7 +1718,7 @@
               "The size of the avatar."
             ],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
+              "\"s\" | \"m\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false

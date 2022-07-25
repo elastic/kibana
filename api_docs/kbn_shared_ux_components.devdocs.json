@@ -221,7 +221,7 @@
         "signature": [
           "Omit<",
           "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"s\" | \"m\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
           "EuiPageSideBarProps",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",

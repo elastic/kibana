@@ -109,11 +109,11 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
             titleSize="xs"
-            body={permissions.all ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
+            body={permissions.create ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
             actions={
-              permissions.all && (
+              permissions.create && (
                 <LinkButton
-                  isDisabled={!permissions.all}
+                  isDisabled={!permissions.create}
                   fill
                   size="s"
                   onClick={navigateToCreateCaseClick}

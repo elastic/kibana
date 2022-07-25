@@ -16,12 +16,9 @@ import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
-  GaugeTicksPosition,
   GaugeLabelMajorModes,
   GaugeColorModes,
-  GaugeShapes,
 } from '../../common';
-import { GaugeTicksPositions } from '../../common';
 import {
   getAccessorsFromArgs,
   getIcons,
@@ -122,50 +119,6 @@ function getTitle(
   return major || fallbackTitle || '';
 }
 
-// TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
-function getTicksLabels(baseStops: number[]) {
-  const tenPercentRange = (Math.max(...baseStops) - Math.min(...baseStops)) * 0.1;
-  const lastIndex = baseStops.length - 1;
-  return baseStops.filter((stop, i) => {
-    if (i === 0 || i === lastIndex) {
-      return true;
-    }
-
-    return !(
-      stop - baseStops[i - 1] < tenPercentRange || baseStops[lastIndex] - stop < tenPercentRange
-    );
-  });
-}
-
-function getTicks(
-  ticksPosition: GaugeTicksPosition,
-  range: [number, number],
-  colorBands?: number[],
-  percentageMode?: boolean
-) {
-  if (ticksPosition === GaugeTicksPositions.HIDDEN) {
-    return [];
-  }
-
-  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
-    return colorBands && getTicksLabels(colorBands);
-  }
-
-  const TICKS_NO = 3;
-  const min = Math.min(...(colorBands || []), ...range);
-  const max = Math.max(...(colorBands || []), ...range);
-  const step = (max - min) / TICKS_NO;
-
-  const ticks = [
-    ...Array(TICKS_NO)
-      .fill(null)
-      .map((_, i) => Number((min + step * i).toFixed(2))),
-    max,
-  ];
-  const convertToPercents = toPercents(min, max);
-  return percentageMode ? ticks.map(convertToPercents) : ticks;
-}
-
 const calculateRealRangeValueMin = (
   relativeRangeValue: number,
   { min, max }: { min: number; max: number }
@@ -213,7 +166,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       centralMajor,
       centralMajorMode,
-      ticksPosition,
       commonLabel,
     } = args;
 
@@ -367,9 +319,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     // TODO: format in charts
     let actualValue = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
-    const totalTicks = getTicks(ticksPosition, [min, max], bands, args.percentageMode);
-    const ticks =
-      gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
 
     if (args.percentageMode && palette?.params && palette?.params.stops?.length) {
       bands = normalizeBandsLegacy(palette?.params as CustomPaletteState, actualValue);
@@ -411,7 +360,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
             tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
             bands={bands}
-            ticks={ticks}
             domain={{ min, max }}
             bandFillColor={
               colorMode === GaugeColorModes.PALETTE

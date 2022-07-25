@@ -640,7 +640,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
-    const properties = indexPattern.flattenHit(hit);
+    const properties = indexPattern.flattenHit(hit) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];

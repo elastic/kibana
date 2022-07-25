@@ -42,7 +42,9 @@ class DocLinks {
   public clientsNetIntroduction: string;
   public clientsNetNest: string;
   public clientsNetSingleNode: string;
+  public clientsPerlGuide: string;
   public clientsPhpConnecting: string;
+  public clientsPhpGuide: string;
   public clientsPhpInstallation: string;
   public clientsPhpOverview: string;
   public clientsPythonAuthentication: string;
@@ -130,7 +132,9 @@ class DocLinks {
     this.clientsNetIntroduction = '';
     this.clientsNetNest = '';
     this.clientsNetSingleNode = '';
+    this.clientsPerlGuide = '';
     this.clientsPhpConnecting = '';
+    this.clientsPhpGuide = '';
     this.clientsPhpInstallation = '';
     this.clientsPhpOverview = '';
     this.clientsPythonAuthentication = '';
@@ -220,7 +224,9 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
+    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
+    this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
     this.clientsPhpOverview = docLinks.links.clients.phpOverview;
     this.clientsPythonAuthentication = docLinks.links.clients.pythonAuthentication;

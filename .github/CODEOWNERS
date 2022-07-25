@@ -106,6 +106,7 @@
 /x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
@@ -371,6 +372,7 @@
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
+/x-pack/test/api_integration/apis/cases @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -586,6 +588,12 @@ x-pack/plugins/kubernetes_security @elastic/awp-platform
 x-pack/plugins/session_view @elastic/awp-platform
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
 x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
+
+## Security Solution sub teams - Protections Experience
+x-pack/plugins/threat_intelligence @elastic/protections-experience
+x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
+x-pack/test/threat_intelligence_cypress @elastic/protections-experience
+
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

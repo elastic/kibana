@@ -37,32 +37,37 @@ import { NewSearchIndexLogic } from './new_search_index_logic';
 import { LanguageForOptimization } from './types';
 
 export interface Props {
-  title: React.ReactNode;
-  description: React.ReactNode;
-  docsUrl: string;
-  type: string;
+  buttonLoading?: boolean;
+  error?: string | React.ReactNode;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
-  buttonLoading?: boolean;
-  formDisabled?: boolean;
+  title: React.ReactNode;
+  type: string;
 }
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
+  error,
   title,
-  description,
   onNameChange,
   onSubmit,
-  formDisabled,
   buttonLoading,
 }) => {
-  const { name, language, rawName, languageSelectValue } = useValues(NewSearchIndexLogic);
+  const {
+    fullIndexName,
+    fullIndexNameExists,
+    fullIndexNameIsValid,
+    isLoading,
+    language,
+    rawName,
+    languageSelectValue,
+  } = useValues(NewSearchIndexLogic);
   const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
-      onNameChange(e.target.value);
+      onNameChange(fullIndexName);
     }
   };
 
@@ -70,12 +75,40 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     setLanguageSelectValue(e.target.value);
   };
 
+  const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
+
+  const formError = () => {
+    if (fullIndexNameExists) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.alreadyExists.error',
+        {
+          defaultMessage: 'An index with the name {indexName} already exists',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    if (!fullIndexNameIsValid) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.isInvalid.error',
+        {
+          defaultMessage: '{indexName} is an invalid index name',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    return error;
+  };
+
   return (
     <EuiPanel hasBorder>
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(name, language);
+          onSubmit(fullIndexName, language);
         }}
         component="form"
         id="enterprise-search-add-connector"
@@ -85,19 +118,6 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
             <EuiTitle size="s">
               <h2>{title}</h2>
             </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>
-                {description}
-                <EuiLink target="_blank" href="#">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMore.linkText',
-                    {
-                      defaultMessage: 'Learn more',
-                    }
-                  )}
-                </EuiLink>
-              </p>
-            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup>
@@ -109,13 +129,14 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                       defaultMessage: 'Index name',
                     }
                   )}
+                  isInvalid={formInvalid}
+                  error={formError()}
                   helpText={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText',
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
                     {
-                      defaultMessage:
-                        'Names cannot contain spaces or special characters. {indexName}',
+                      defaultMessage: 'Your index will be named: {indexName}',
                       values: {
-                        indexName: name.length > 0 ? `Your index will be named: ${name}` : '',
+                        indexName: fullIndexName,
                       },
                     }
                   )}
@@ -133,21 +154,31 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
+                    prepend="search-"
                   />
                 </EuiFormRow>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineTwo',
+                    {
+                      defaultMessage:
+                        'Names should be lowercase and cannot contain spaces or special characters.',
+                    }
+                  )}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                     {
-                      defaultMessage: 'Document language',
+                      defaultMessage: 'Language analyzer',
                     }
                   )}
                   helpText={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputHelpText',
                     {
-                      defaultMessage: 'Analyzers can be changed later, but may require a reindex',
+                      defaultMessage: 'Language can be changed later, but may require a reindex',
                     }
                   )}
                 >
@@ -166,8 +197,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!name || formDisabled}
-              isLoading={buttonLoading}
+              isDisabled={!rawName || buttonLoading || isLoading || formInvalid}
+              isLoading={buttonLoading || isLoading}
               type="submit"
             >
               {i18n.translate(

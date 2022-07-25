@@ -30,70 +30,71 @@ import { baseBreadcrumbs } from '../search_indices';
 
 import { ButtonGroup, ButtonGroupOption } from './button_group';
 import { SearchIndexEmptyState } from './empty_state';
-import { MethodApi } from './method_api';
-import { MethodConnector } from './method_connector';
+import { MethodApi } from './method_api/method_api';
+import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
-import { MethodEs } from './method_es';
-import { MethodJson } from './method_json';
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   {
-    id: 'crawler',
-    icon: 'globe',
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
-      defaultMessage: 'Use the web crawler',
-    }),
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
-        defaultMessage: 'Index content from your websites',
+        defaultMessage: 'Discover, extract, index, and sync of all your website content',
       }
     ),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
       defaultMessage: 'No development required',
     }),
+    icon: 'globe',
+    id: 'crawler',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
+      defaultMessage: 'Use the web crawler',
+    }),
   },
   {
-    id: 'api',
-    icon: 'visVega',
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
-      defaultMessage: 'Use the API',
-    }),
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
       {
-        defaultMessage: 'Use a variety of client libraries to add documents to your search index',
+        defaultMessage: 'Add documents programmatically by connecting with the API',
       }
     ),
     footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.footer', {
       defaultMessage: 'Some development required',
     }),
+    icon: 'visVega',
+    id: 'api',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
+      defaultMessage: 'Use the API',
+    }),
   },
   {
-    id: 'connector',
-    icon: 'package',
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
-      defaultMessage: 'Build a connector package',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
-      {
-        defaultMessage: 'Clone the connector package repo and build a custom connector',
-      }
-    ),
-    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
-      defaultMessage: 'Development required',
-    }),
     badge: (
       <EuiBadge iconType="beaker">
         <EuiText size="xs">Technical Preview</EuiText>
       </EuiBadge>
     ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
+      {
+        defaultMessage:
+          'Use the connector framework to quickly build connectors for custom data sources',
+      }
+    ),
+    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
+      defaultMessage: 'Development required',
+    }),
+    icon: 'package',
+    id: 'connector',
+    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
+      defaultMessage: 'Build a connector',
+    }),
   },
 ];
 
 export const NewIndex: React.FC = () => {
-  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>();
+  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(
+    METHOD_BUTTON_GROUP_OPTIONS[0]
+  );
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -114,21 +115,21 @@ export const NewIndex: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ maxWidth: '24rem' }}>
           <EuiPanel hasShadow={false} paddingSize="m" grow={false} color="subdued">
-            <EuiTitle size="xs">
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
                   defaultMessage: 'Select an ingestion method',
                 })}
               </h2>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs">
+            <EuiSpacer size="s" />
+            <EuiText size="s">
               <p>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
                   {
                     defaultMessage:
-                      'Add your content to Enterprise Search by creating a search index.',
+                      'Create a search optimized Elasticsearch index by selecting an ingestion method for your use case.',
                   }
                 )}
               </p>
@@ -146,9 +147,7 @@ export const NewIndex: React.FC = () => {
             <>
               {selectedMethod.id === 'crawler' && <MethodCrawler />}
               {selectedMethod.id === 'api' && <MethodApi />}
-              {selectedMethod.id === 'elasticsearch' && <MethodEs />}
               {selectedMethod.id === 'connector' && <MethodConnector />}
-              {selectedMethod.id === 'json' && <MethodJson />}
             </>
           ) : (
             <SearchIndexEmptyState />

@@ -9,6 +9,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
@@ -21,7 +22,8 @@ import type {
   UnifiedSearchPublicPluginStart,
 } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
-import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
+import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
+import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 
 import './index.scss';
 
@@ -43,9 +45,14 @@ export class UnifiedSearchPublicPlugin
     { uiActions, data, usageCollection }: UnifiedSearchSetupDependencies
   ): UnifiedSearchPluginSetup {
     const { query } = data;
+
+    uiActions.registerTrigger(updateFilterReferencesTrigger);
+
     uiActions.registerAction(
       createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
     );
+
+    uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));
 
     return {
       autocomplete: this.autocomplete.setup(core, {
@@ -76,6 +83,11 @@ export class UnifiedSearchPublicPlugin
     uiActions.addTriggerAction(
       APPLY_FILTER_TRIGGER,
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
+
+    uiActions.addTriggerAction(
+      UPDATE_FILTER_REFERENCES_TRIGGER,
+      uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION)
     );
 
     return {

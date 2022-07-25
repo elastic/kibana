@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -23,16 +23,18 @@ export const KillProcessActionResult = memo<
       actionId?: string;
       actionRequestSent?: boolean;
       completedActionDetails?: ActionDetails;
+      apiError?: IHttpFetchError;
     },
     EndpointCommandDefinitionMeta
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
-  const { actionId, completedActionDetails } = store;
+  const { actionId, completedActionDetails, apiError } = store;
   const isPending = status === 'pending';
+  const isError = status === 'error';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
-  const killProcessApi = useSendKillProcessRequest();
+  const { mutate, data, isSuccess, error } = useSendKillProcessRequest();
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
@@ -44,7 +46,7 @@ export const KillProcessActionResult = memo<
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
     if (!actionRequestSent && endpointId && parameters) {
-      killProcessApi.mutate({
+      mutate({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],
         parameters,
@@ -53,22 +55,21 @@ export const KillProcessActionResult = memo<
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args, endpointId, killProcessApi, setStore]);
+  }, [actionRequestSent, command.args.args, endpointId, mutate, setStore]);
 
   // If kill-process request was created, store the action id if necessary
   useEffect(() => {
-    if (killProcessApi.isSuccess && actionId !== killProcessApi.data.data.id) {
+    if (isSuccess && actionId !== data.data.id) {
       setStore((prevState) => {
-        return { ...prevState, actionId: killProcessApi.data.data.id };
+        return { ...prevState, actionId: data.data.id };
+      });
+    } else if (error) {
+      setStatus('error');
+      setStore((prevState) => {
+        return { ...prevState, apiError: error };
       });
     }
-  }, [
-    actionId,
-    killProcessApi?.data?.data.id,
-    killProcessApi.isSuccess,
-    killProcessApi.error,
-    setStore,
-  ]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore, setStatus]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
@@ -84,11 +85,17 @@ export const KillProcessActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
+    return <ResultComponent showAs="pending" />;
+  }
+
+  // Show API errors if perform action fails
+  if (isError && apiError) {
     return (
-      <ResultComponent showAs="pending">
+      <ResultComponent showAs="failure" data-test-subj="killProcessAPIErrorCallout">
         <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.pendingMessage"
-          defaultMessage="Killing process"
+          id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
+          defaultMessage="The following error was encountered: {error}"
+          values={{ error: apiError.message }}
         />
       </ResultComponent>
     );
@@ -98,10 +105,6 @@ export const KillProcessActionResult = memo<
   if (completedActionDetails?.errors) {
     return (
       <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
-          { defaultMessage: 'Kill process action failure' }
-        )}
         dataTestSubj={'killProcessErrorCallout'}
         errors={completedActionDetails?.errors}
         ResultComponent={ResultComponent}
@@ -110,14 +113,6 @@ export const KillProcessActionResult = memo<
   }
 
   // Show Success
-  return (
-    <ResultComponent
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
-        { defaultMessage: 'Process killed successfully!' }
-      )}
-      data-test-subj="killProcessSuccessCallout"
-    />
-  );
+  return <ResultComponent showAs="success" data-test-subj="killProcessSuccessCallout" />;
 });
 KillProcessActionResult.displayName = 'KillProcessActionResult';

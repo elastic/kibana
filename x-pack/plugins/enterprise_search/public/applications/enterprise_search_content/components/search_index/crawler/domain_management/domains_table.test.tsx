@@ -66,9 +66,10 @@ const values = {
 
 const actions = {
   // CrawlerDomainsLogic
-  deleteDomain: jest.fn(),
   fetchCrawlerDomainsData: jest.fn(),
   onPaginate: jest.fn(),
+  // DeleteDomainModalLogic
+  showModal: jest.fn(),
 };
 
 describe('DomainsTable', () => {
@@ -161,21 +162,9 @@ describe('DomainsTable', () => {
 
         describe('delete action', () => {
           it('clicking the action and confirming deletes the domain', () => {
-            jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
-
             getDeleteAction().simulate('click');
 
-            expect(actions.deleteDomain).toHaveBeenCalledWith(
-              expect.objectContaining({ id: '1234' })
-            );
-          });
-
-          it('clicking the action and not confirming does not delete the engine', () => {
-            jest.spyOn(global, 'confirm').mockReturnValueOnce(false);
-
-            getDeleteAction().simulate('click');
-
-            expect(actions.deleteDomain).not.toHaveBeenCalled();
+            expect(actions.showModal).toHaveBeenCalled();
           });
         });
       });

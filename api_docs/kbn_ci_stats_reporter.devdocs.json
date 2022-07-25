@@ -33,7 +33,7 @@
             ],
             "signature": [
               "(log: ",
-              "ToolingLog",
+              "SomeDevLog",
               ") => ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
@@ -54,7 +54,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  "SomeDevLog"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
@@ -99,7 +99,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "ToolingLog"
+                  "SomeDevLog"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,

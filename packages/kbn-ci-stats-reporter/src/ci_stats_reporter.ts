@@ -14,11 +14,13 @@ import crypto from 'crypto';
 
 import execa from 'execa';
 import Axios, { AxiosRequestConfig } from 'axios';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 import httpAdapter from 'axios/lib/adapters/http';
-import { ToolingLog } from '@kbn/tooling-log';
 
-import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
@@ -119,11 +121,11 @@ export class CiStatsReporter {
   /**
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
    */
-  static fromEnv(log: ToolingLog) {
+  static fromEnv(log: SomeDevLog) {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
-  constructor(private readonly config: Config | undefined, private readonly log: ToolingLog) {}
+  constructor(private readonly config: Config | undefined, private readonly log: SomeDevLog) {}
 
   /**
    * Determine if CI_STATS is explicitly disabled by the environment. To determine
@@ -327,28 +329,16 @@ export class CiStatsReporter {
   }
 
   /**
-   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-   * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
-   * we rely on @kbn/utils to find the package.json file.
+   * In order to allow this code to run before @kbn/utils is built
    */
   private getUpstreamBranch() {
-    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
-    const hideFromWebpack = ['@', 'kbn/utils'];
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { kibanaPackageJson } = require(hideFromWebpack.join(''));
     return kibanaPackageJson.branch;
   }
 
   /**
-   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-   * in the kibanaUuid when calling the timings() method. Outside of @kbn/pm
-   * we rely on @kbn/utils to find the repo root.
+   * In order to allow this code to run before @kbn/utils is built
    */
   private getKibanaUuid() {
-    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
-    const hideFromWebpack = ['@', 'kbn/utils'];
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { REPO_ROOT } = require(hideFromWebpack.join(''));
     try {
       return Fs.readFileSync(Path.resolve(REPO_ROOT, 'data/uuid'), 'utf-8').trim();
     } catch (error) {

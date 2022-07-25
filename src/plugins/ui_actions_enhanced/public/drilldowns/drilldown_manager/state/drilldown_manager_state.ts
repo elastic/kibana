@@ -344,7 +344,7 @@ export class DrilldownManagerState {
           title: toastDrilldownsCRUDError,
         });
       }
-    })().catch(console.error); // eslint-disable-line
+    })().catch(console.error); // eslint-disable-line no-console
   };
 
   /**

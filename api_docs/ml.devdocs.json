@@ -1262,7 +1262,7 @@
           },
           " extends Pick<",
           "UseDataGridReturnType",
-          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"baseline\" | \"rowCount\" | \"errorMessage\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
@@ -1685,129 +1685,7 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "ml",
-        "id": "def-server.getHistogramsForFields",
-        "type": "Function",
-        "tags": [],
-        "label": "getHistogramsForFields",
-        "description": [],
-        "signature": [
-          "(client: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IScopedClusterClient",
-            "text": "IScopedClusterClient"
-          },
-          ", indexPattern: string, query: any, fields: ",
-          "HistogramField",
-          "[], samplerShardSize: number, runtimeMappings?: ",
-          "MappingRuntimeFields",
-          " | undefined) => Promise<ChartData[]>"
-        ],
-        "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "client",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$2",
-            "type": "string",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$3",
-            "type": "Any",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$4",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "HistogramField",
-              "[]"
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$5",
-            "type": "number",
-            "tags": [],
-            "label": "samplerShardSize",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "ml",
-            "id": "def-server.getHistogramsForFields.$6",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeMappings",
-            "description": [],
-            "signature": [
-              "MappingRuntimeFields",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "ml",

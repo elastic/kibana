@@ -68,6 +68,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_view_editor'));
       loadTestFile(require.resolve('./_hide_announcements'));
       loadTestFile(require.resolve('./classic/_hide_announcements'));
+      loadTestFile(require.resolve('./embeddable/saved_search_embeddable'));
     }
   });
 }

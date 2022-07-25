@@ -52,6 +52,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "//packages/kbn-tooling-log:npm_module_types",
+  "//packages/kbn-some-dev-log:npm_module_types",
 ]
 
 jsts_transpiler(

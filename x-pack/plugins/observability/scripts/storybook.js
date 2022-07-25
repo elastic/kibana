@@ -7,7 +7,6 @@
 
 import { join } from 'path';
 
-// eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'observability',
   storyGlobs: [

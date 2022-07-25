@@ -73,7 +73,7 @@ interface Props {
    */
   index?: number;
 
-  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getActions?: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
   overlays?: CoreStart['overlays'];
@@ -168,9 +168,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showBadges === false) {
       return;
     }
-    let badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    let badges =
+      (await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -191,9 +192,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showNotifications === false) {
       return;
     }
-    let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    let notifications =
+      (await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -430,9 +432,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    let regularActions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    let regularActions =
+      (await this.props.getActions?.(CONTEXT_MENU_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {

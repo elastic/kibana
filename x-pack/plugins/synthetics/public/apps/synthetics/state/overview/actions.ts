@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { createAction } from '@reduxjs/toolkit';
 import { createAsyncAction } from '../utils/actions';
 
 import { MonitorOverviewPageState } from './models';
@@ -14,3 +14,5 @@ export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('fetchMonitorOverivewAction');
+
+export const setOverviewPerPageAction = createAction<number>('setOverviewPerPageAction');

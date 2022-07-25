@@ -10,12 +10,19 @@ import { HttpLogic } from '../../../shared/http';
 
 import { CrawlerDomain } from './types';
 
-export interface GetCrawlerDomainsArgs {
+export interface DeleteCrawlerDomainArgs {
   domain: CrawlerDomain;
   indexName: string;
 }
 
-export const deleteCrawlerDomain = async ({ domain, indexName }: GetCrawlerDomainsArgs) => {
+export interface DeleteCrawlerDomainResponse {
+  domain: CrawlerDomain;
+}
+
+export const deleteCrawlerDomain = async ({
+  domain,
+  indexName,
+}: DeleteCrawlerDomainArgs): Promise<DeleteCrawlerDomainResponse> => {
   await HttpLogic.values.http.delete(
     `/internal/enterprise_search/indices/${indexName}/crawler/domains/${domain.id}`
   );

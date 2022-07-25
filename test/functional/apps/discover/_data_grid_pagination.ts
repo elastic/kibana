@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
@@ -20,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid pagination', function describeIndexTests() {
     before(async () => {
+      await browser.setWindowSize(1200, 2000);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
     });
@@ -27,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
     });
 
     beforeEach(async function () {
@@ -61,6 +64,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverTableFooter');
         await testSubjects.existOrFail('discoverTableSampleSizeSettingsLink');
       });
+    });
+
+    it('should update pagination when rows per page is changed', async () => {
+      const rows = await dataGrid.getDocTableRows();
+      expect(rows.length).to.be.above(0);
+      await testSubjects.existOrFail('pagination-button-0'); // first page
+      await testSubjects.existOrFail('pagination-button-4'); // last page
+      await testSubjects.click('tablePaginationPopoverButton');
+      await retry.try(async function () {
+        return testSubjects.exists('tablePagination-500-rows');
+      });
+      await testSubjects.click('tablePagination-500-rows');
+      await retry.try(async function () {
+        return !testSubjects.exists('pagination-button-1'); // only page 0 is left
+      });
+      await testSubjects.existOrFail('discoverTableFooter');
+    });
+
+    it('should render exact number of rows which where configured in the saved search or in settings', async () => {
+      await kibanaServer.uiSettings.update({
+        ...defaultSettings,
+        'discover:sampleSize': 12,
+        'discover:sampleRowsPerPage': 6,
+        hideAnnouncements: true,
+      });
+
+      // first render is based on settings value
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(6);
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
+
+      // now we change it via popover
+      await dataGrid.changeRowsPerPageTo(10);
+
+      // save as a new search
+      const savedSearchTitle = 'search with saved rowsPerPage';
+      await PageObjects.discover.saveSearch(savedSearchTitle);
+
+      // start a new search session
+      await testSubjects.click('discoverNewButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
+
+      // open the saved search
+      await PageObjects.discover.loadSavedSearch(savedSearchTitle);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
+      await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
   });
 }

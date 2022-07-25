@@ -105,6 +105,7 @@ describe('getSavedSearch', () => {
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "rowHeight": undefined,
+        "rowsPerPage": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],
@@ -112,6 +113,7 @@ describe('getSavedSearch', () => {
           "destroy": [MockFunction],
           "fetch": [MockFunction],
           "fetch$": [MockFunction],
+          "getActiveIndexFilter": [MockFunction],
           "getField": [MockFunction],
           "getFields": [MockFunction],
           "getId": [MockFunction],
@@ -121,6 +123,7 @@ describe('getSavedSearch', () => {
           "getSerializedFields": [MockFunction],
           "history": Array [],
           "onRequestStart": [MockFunction],
+          "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],
           "serialize": [MockFunction],
           "setField": [MockFunction],

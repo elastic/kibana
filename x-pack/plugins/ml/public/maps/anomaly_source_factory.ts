@@ -6,14 +6,13 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
-export const ML_ANOMALY = 'ML_ANOMALIES';
-
 export class AnomalySourceFactory {
-  public readonly type = ML_ANOMALY;
+  public readonly type = SOURCE_TYPES.ES_ML_ANOMALIES;
 
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,

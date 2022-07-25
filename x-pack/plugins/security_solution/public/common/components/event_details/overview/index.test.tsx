@@ -15,6 +15,13 @@ jest.mock('../../utils', () => ({
   useThrottledResizeObserver: () => ({ width: 400 }), // force row-chunking
 }));
 
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+  })
+);
+
 describe('Event Details Overview Cards', () => {
   it('renders all cards', () => {
     const { getByText } = render(

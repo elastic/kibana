@@ -35,6 +35,7 @@ const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
 const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
   [ListOperatorTypeEnum.MATCH_ANY]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH,
+  [ListOperatorTypeEnum.WILDCARD]: i18n.CONDITION_OPERATOR_TYPE_WILDCARD_DOES_NOT_MATCH,
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`

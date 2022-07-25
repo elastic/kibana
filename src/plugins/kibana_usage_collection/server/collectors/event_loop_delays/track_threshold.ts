@@ -10,7 +10,7 @@ import { takeUntil, finalize } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { EventLoopDelaysMonitor } from '@kbn/core/server';
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
@@ -27,7 +27,7 @@ export function startTrackingEventLoopDelaysThreshold(
   eventLoopCounter: UsageCounter,
   logger: Logger,
   stopMonitoringEventLoop$: Observable<void>,
-  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
+  eventLoopDelaysMonitor: IEventLoopDelaysMonitor<IntervalHistogram>,
   configs: {
     warnThreshold?: number;
     collectionStartDelay?: number;

@@ -23,7 +23,6 @@ import {
   NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
-  UptimeCell,
 } from '../shared';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
@@ -125,14 +124,6 @@ function podNodeColumns(
           <MetricsNodeDetailsLink id={id} label={name} nodeType={'pod'} timerange={timerange} />
         );
       },
-    },
-    {
-      name: i18n.translate('xpack.infra.metricsTable.pod.uptimeColumnHeader', {
-        defaultMessage: 'Uptime',
-      }),
-      field: 'uptime',
-      align: 'right',
-      render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
     },
     {
       name: i18n.translate('xpack.infra.metricsTable.pod.averageCpuUsagePercentColumnHeader', {

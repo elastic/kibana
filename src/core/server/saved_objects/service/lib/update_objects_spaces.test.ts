@@ -13,7 +13,7 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './update_objects_spaces.test.mock';
 
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';

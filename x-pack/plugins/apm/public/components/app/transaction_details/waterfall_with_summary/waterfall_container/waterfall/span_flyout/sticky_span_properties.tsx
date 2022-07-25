@@ -19,7 +19,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
-import { BackendLink } from '../../../../../../shared/backend_link';
+import { DependencyLink } from '../../../../../../shared/dependency_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
@@ -112,10 +112,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           ),
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
-            <BackendLink
+            <DependencyLink
               query={{
                 ...query,
-                backendName: dependencyName,
+                dependencyName,
               }}
               subtype={span.span.subtype}
               type={span.span.type}
@@ -123,7 +123,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
                 trackEvent({
                   app: 'apm',
                   metricType: METRIC_TYPE.CLICK,
-                  metric: 'span_flyout_to_backend_detail',
+                  metric: 'span_flyout_to_dependency_detail',
                 });
               }}
             />
