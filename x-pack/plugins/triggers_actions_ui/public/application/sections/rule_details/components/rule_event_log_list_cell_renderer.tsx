@@ -9,7 +9,6 @@ import React from 'react';
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EcsEventOutcome } from '@kbn/core/server';
-import { EuiText } from '@elastic/eui';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
@@ -35,10 +34,6 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
 
   if (typeof value === 'undefined') {
     return null;
-  }
-
-  if (columnId === 'message') {
-    return <EuiText size="xs">{value}</EuiText>;
   }
 
   if (columnId === 'status') {
