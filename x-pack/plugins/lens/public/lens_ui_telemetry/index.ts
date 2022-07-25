@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './factory';
 export {
   setUsageCollectionStart,
   getUsageCollectionStart,

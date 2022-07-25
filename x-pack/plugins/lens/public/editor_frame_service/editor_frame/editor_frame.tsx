@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry/track_counter_events';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';

@@ -11,7 +11,7 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import { trackUiCounterEvents } from '../lens_ui_telemetry/track_counter_events';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import {
   DragDropIdentifier,
   DropIdentifier,
