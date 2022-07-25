@@ -11,13 +11,13 @@ import {
   EuiColorPaletteDisplay,
   EuiFormRow,
   EuiFlexItem,
-  EuiSwitchEvent,
-  EuiSwitch,
   EuiFieldText,
   EuiButtonGroup,
   EuiFieldNumber,
   htmlIdGenerator,
   EuiSpacer,
+  EuiColorPicker,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -39,7 +39,7 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
@@ -179,7 +179,6 @@ function MaximumEditor({ setState, state }: Props) {
         fullWidth
         display="columnCompressed"
       >
-        {/* TODO - debounce this */}
         <EuiFieldNumber
           compressed={true}
           min={1}
@@ -200,7 +199,6 @@ function PrimaryMetricEditor(props: Props) {
   const currentData = frame.activeData?.[state.layerId];
 
   if (accessor == null || !isNumericFieldForDatatable(currentData, accessor)) {
-    // TODO - do we need both these guarding conditions?
     return null;
   }
 
@@ -233,41 +231,60 @@ function PrimaryMetricEditor(props: Props) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
+  const idPrefix = htmlIdGenerator()();
   return (
     <>
       <EuiFormRow
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
-          defaultMessage: 'Color by value',
+          defaultMessage: 'Color mode',
         })}
         css={css`
           align-items: center;
         `}
       >
-        <EuiSwitch
-          data-test-subj="lnsDynamicColoringMetricSwitch"
-          compressed
-          label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
-            defaultMessage: 'Color by value',
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={i18n.translate('xpack.lens.metric.colorMode.label', {
+            defaultMessage: 'Color mode',
           })}
-          showLabel={false}
-          checked={hasDynamicColoring}
-          onChange={(e: EuiSwitchEvent) => {
-            const { checked } = e.target;
-            const params = checked
-              ? {
-                  palette: {
-                    ...activePalette,
-                    params: {
-                      ...activePalette.params,
-                      stops: displayStops,
+          data-test-subj="lnsMetric_color_mode_buttons"
+          options={[
+            {
+              id: `${idPrefix}static`,
+              label: i18n.translate('xpack.lens.metric.colorMode.static', {
+                defaultMessage: 'Static',
+              }),
+              'data-test-subj': 'lnsMetric_color_mode_static',
+            },
+            {
+              id: `${idPrefix}dynamic`,
+              label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
+                defaultMessage: 'Dynamic',
+              }),
+              'data-test-subj': 'lnsMetric_color_mode_dynamic',
+            },
+          ]}
+          idSelected={`${idPrefix}${state.palette ? 'dynamic' : 'static'}`}
+          onChange={(id) => {
+            const colorMode = id.replace(idPrefix, '') as 'static' | 'dynamic';
+
+            const params =
+              colorMode === 'dynamic'
+                ? {
+                    palette: {
+                      ...activePalette,
+                      params: {
+                        ...activePalette.params,
+                        stops: displayStops,
+                      },
                     },
-                  },
-                }
-              : {
-                  palette: undefined,
-                };
+                  }
+                : {
+                    palette: undefined,
+                  };
 
             setState({
               ...state,
@@ -276,6 +293,7 @@ function PrimaryMetricEditor(props: Props) {
           }}
         />
       </EuiFormRow>
+      {!hasDynamicColoring && <StaticColorControls {...props} />}
       {hasDynamicColoring && (
         <>
           <EuiFormRow
@@ -334,5 +352,46 @@ function PrimaryMetricEditor(props: Props) {
         </>
       )}
     </>
+  );
+}
+
+function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setState'>) {
+  const colorLabel = i18n.translate('xpack.lens.metric.color', {
+    defaultMessage: 'Color',
+  });
+
+  const defaultColor = getDefaultColor(!!state.maxAccessor);
+
+  const setColor = useCallback(
+    (color: string) => {
+      setState({ ...state, color: color === '' ? undefined : color });
+    },
+    [setState, state]
+  );
+
+  const { inputValue: currentColor, handleInputChange: handleColorChange } =
+    useDebouncedValue<string>(
+      {
+        onChange: setColor,
+        value: state.color || '',
+      },
+      { allowFalsyValue: true }
+    );
+
+  return (
+    <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
+      <EuiColorPicker
+        fullWidth
+        data-test-subj="lnsMetric_colorpicker"
+        compressed
+        isClearable={true}
+        onChange={(color: string) => handleColorChange(color)}
+        color={currentColor}
+        placeholder={defaultColor}
+        aria-label={colorLabel}
+        showAlpha={false}
+        swatches={euiPaletteColorBlind()}
+      />
+    </EuiFormRow>
   );
 }

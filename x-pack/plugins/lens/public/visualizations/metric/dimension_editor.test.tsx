@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import React, { ChangeEvent, FormEvent } from 'react';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
-import { MetricVisualizationState } from './visualization';
+import { getDefaultColor, MetricVisualizationState } from './visualization';
 import { DimensionEditor } from './dimension_editor';
 import { HTMLAttributes, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiButtonGroup, EuiFieldText } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker, EuiFieldText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
 import { act } from 'react-dom/test-utils';
+import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
+import { createMockFramePublicAPI } from '../../mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -34,10 +39,6 @@ const SELECTORS = {
 };
 
 describe('dimension editor', () => {
-  let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
-    paletteService: PaletteRegistry;
-  };
-
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
     name: 'foo',
@@ -62,8 +63,81 @@ describe('dimension editor', () => {
     palette,
   };
 
+  const mockedFrame = createMockFramePublicAPI();
+
+  const props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
+    paletteService: PaletteRegistry;
+  } = {
+    layerId: 'first',
+    groupId: 'some-group',
+    accessor: 'some-accessor',
+    state: fullState,
+    frame: mockedFrame,
+    setState: jest.fn(),
+    panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
+    paletteService: chartPluginMock.createPaletteRegistry(),
+  };
+
   describe('primary metric dimension', () => {
     const accessor = 'primary-metric-col-id';
+
+    props.frame.activeData = {
+      first: {
+        type: 'datatable',
+        columns: [
+          {
+            id: accessor,
+            name: 'foo',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        rows: [],
+      },
+    };
+
+    class Harness {
+      public _wrapper;
+
+      constructor(
+        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
+      ) {
+        this._wrapper = wrapper;
+      }
+
+      private get rootComponent() {
+        return this._wrapper.find(DimensionEditor);
+      }
+
+      public get colorPicker() {
+        return this._wrapper.find(EuiColorPicker);
+      }
+
+      public get currentState() {
+        return this.rootComponent.props().state;
+      }
+
+      public setColor(color: string) {
+        act(() => {
+          this.colorPicker.props().onChange!(color, {} as EuiColorPickerOutput);
+        });
+      }
+    }
+
+    const mockSetState = jest.fn();
+
+    const getHarnessWithState = (state: MetricVisualizationState) =>
+      new Harness(
+        mountWithIntl(
+          <DimensionEditor
+            {...props}
+            state={{ ...state, metricAccessor: accessor }}
+            setState={mockSetState}
+            accessor={accessor}
+          />
+        )
+      );
 
     it('renders when the accessor matches', () => {
       const component = shallow(
@@ -77,6 +151,50 @@ describe('dimension editor', () => {
       expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeTruthy();
       expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
       expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+    });
+
+    describe('static color controls', () => {
+      it('is hidden when dynamic coloring is enabled', () => {
+        const harnessWithPalette = getHarnessWithState({ ...fullState, palette });
+        expect(harnessWithPalette.colorPicker.exists()).toBeFalsy();
+
+        const harnessNoPalette = getHarnessWithState({ ...fullState, palette: undefined });
+        expect(harnessNoPalette.colorPicker.exists()).toBeTruthy();
+      });
+
+      it('fills placeholder with default value', () => {
+        const localHarness = getHarnessWithState({
+          ...fullState,
+          palette: undefined,
+          color: undefined,
+        });
+        expect(localHarness.colorPicker.props().placeholder).toBe(
+          getDefaultColor(!!fullState.maxAccessor)
+        );
+      });
+
+      it('sets color', () => {
+        const localHarness = getHarnessWithState({
+          ...fullState,
+          palette: undefined,
+          color: 'some-color',
+        });
+
+        const newColor = 'new-color';
+        localHarness.setColor(newColor + 1);
+        localHarness.setColor(newColor + 2);
+        localHarness.setColor(newColor + 3);
+        localHarness.setColor('');
+        expect(mockSetState).toHaveBeenCalledTimes(4);
+        expect(mockSetState.mock.calls.map((args) => args[0].color)).toMatchInlineSnapshot(`
+          Array [
+            "new-color1",
+            "new-color2",
+            "new-color3",
+            undefined,
+          ]
+        `);
+      });
     });
   });
 
