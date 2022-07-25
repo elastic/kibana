@@ -20,7 +20,6 @@ import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value
 import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../../../filter_bar/filter_editor/range_value_input';
 import {
-  getFilterableFields,
   getOperatorFromFilter,
   getOperatorOptions,
 } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
@@ -30,6 +29,7 @@ import {
 } from '../../../filter_bar/filter_editor/generic_combo_box';
 import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
 import { FieldInput } from './filters_editor_filter_item_field_input';
+import { OperatorInput } from './filters_editor_filter_item_operator_input';
 
 export interface FilterItemProps {
   path: Path;
@@ -61,37 +61,10 @@ export function FilterItem({
     setSelectedParams(undefined);
   };
 
-  function renderFieldInput() {
-    const fields = dataView ? getFilterableFields(dataView) : [];
-
-    function onFieldChange([field]: DataViewField[]) {
-      const operator = undefined;
-      const params = undefined;
-      setSelectedField(field);
-      setSelectedOperator(operator);
-      setSelectedParams(params);
-    }
-
-    return (
-      <EuiFormRow fullWidth>
-        <FieldComboBox
-          fullWidth
-          compressed
-          id="fieldInput"
-          isDisabled={!dataView}
-          placeholder={i18n.translate('unifiedSearch.filter.filterEditor.fieldSelectPlaceholder', {
-            defaultMessage: 'Select a field first',
-          })}
-          options={fields}
-          selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={(field) => field.customLabel || field.name}
-          onChange={onFieldChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-        />
-      </EuiFormRow>
-    );
-  }
+  const onHandleOperator = (operator: Operator, params: any) => {
+    setSelectedOperator(operator);
+    setSelectedParams(params);
+  };
 
   function renderOperatorInput() {
     const operators = selectedField ? getOperatorOptions(selectedField) : [];
@@ -202,10 +175,6 @@ export function FilterItem({
     }
   }
 
-  function FieldComboBox(props: GenericComboBoxProps<DataViewField>) {
-    return GenericComboBox(props);
-  }
-
   function OperatorComboBox(props: GenericComboBoxProps<Operator>) {
     return GenericComboBox(props);
   }
@@ -234,7 +203,14 @@ export function FilterItem({
                   onHandleField={onHandleField}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>{renderOperatorInput()}</EuiFlexItem>
+              <EuiFlexItem>
+                <OperatorInput
+                  field={selectedField}
+                  operator={selectedOperator}
+                  params={selectedParams}
+                  onHandleOperator={onHandleOperator}
+                />
+              </EuiFlexItem>
               <EuiFlexItem>{renderParamsEditor()}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
