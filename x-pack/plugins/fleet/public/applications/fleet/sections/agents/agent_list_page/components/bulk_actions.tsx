@@ -224,6 +224,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           onTagsUpdated={() => {
             refreshAgents({ refreshTags: true });
           }}
+          onClosePopover={() => {
+            setIsTagAddVisible(false);
+          }}
         />
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
