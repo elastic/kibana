@@ -26,6 +26,12 @@ export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   );
 }
 
+export function getActiveScheduledSnoozes(
+  rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
+): ActiveSnoozes | null {
+  return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
+}
+
 export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
   return first(getActiveSnoozes(rule))?.snoozeEndTime ?? null;
 }

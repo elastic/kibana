@@ -20,6 +20,8 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -28,7 +30,6 @@ import type {
   CorePreboot,
   RequestHandlerContext,
 } from '.';
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
@@ -36,7 +37,6 @@ import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
@@ -46,8 +46,8 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export { httpServerMock, sessionStorageMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+export { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
-export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
@@ -58,7 +58,7 @@ export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
@@ -70,7 +70,7 @@ export type {
   ElasticsearchClientMock,
   ClusterClientMock,
   ScopedClusterClientMock,
-} from './elasticsearch/client/mocks';
+} from '@kbn/core-elasticsearch-client-server-mocks';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 

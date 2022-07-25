@@ -6,11 +6,13 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
+export const benchmarkIdSchema = rt.oneOf([rt.literal('cis_k8s'), rt.literal('cis_eks')]);
+
 export const cspRuleMetadataSchema = rt.object({
   audit: rt.string(),
   benchmark: rt.object({
     name: rt.string(),
-    id: rt.oneOf([rt.literal('cis_k8s'), rt.literal('cis_eks')]),
+    id: benchmarkIdSchema,
     version: rt.string(),
   }),
   default_value: rt.maybe(rt.string()),
