@@ -19,7 +19,7 @@ import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps, CspFinding } from '../../types';
 import {
   getFindingsPageSizeInfo,
-  addFilter,
+  getFilters,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -147,7 +147,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
                   pageIndex: 0,
-                  filters: addFilter({
+                  filters: getFilters({
                     filters: urlQuery.filters,
                     dataView,
                     field,
