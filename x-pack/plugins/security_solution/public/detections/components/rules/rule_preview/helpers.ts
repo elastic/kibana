@@ -169,6 +169,7 @@ export const getIsRulePreviewDisabled = ({
   threatMapping,
   machineLearningJobId,
   queryBar,
+  newTermsFields,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
@@ -179,6 +180,7 @@ export const getIsRulePreviewDisabled = ({
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  newTermsFields: string[];
 }) => {
   if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
     return true;
@@ -197,6 +199,9 @@ export const getIsRulePreviewDisabled = ({
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
     return queryBar.query.query.length === 0;
+  }
+  if (ruleType === 'new_terms') {
+    return newTermsFields.length === 0;
   }
   return false;
 };

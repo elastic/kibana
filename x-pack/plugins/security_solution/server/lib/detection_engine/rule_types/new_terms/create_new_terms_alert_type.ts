@@ -34,6 +34,7 @@ import {
   TIMESTAMP_RUNTIME_FIELD,
 } from './build_timestamp_runtime_mapping';
 import type { SignalSource } from '../../signals/types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -81,6 +82,18 @@ export const createNewTermsAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
