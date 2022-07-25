@@ -28,6 +28,7 @@ import type {
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
@@ -316,7 +317,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               type: 'osquery',
               enabled: true,
               streams: [],
-              policy_template: 'osquery_manager',
+              policy_template: OSQUERY_INTEGRATION_NAME,
             });
           }
 
