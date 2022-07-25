@@ -162,6 +162,7 @@ export const getCaseUserActions = async (
 export const getCases = async ({
   filterOptions = {
     search: '',
+    searchFields: [],
     severity: SeverityAll,
     reporters: [],
     status: StatusAll,
@@ -182,6 +183,7 @@ export const getCases = async ({
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
+    ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };

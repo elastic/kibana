@@ -14,10 +14,6 @@ import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
-export const totalNumberOfPrebuiltRulesInEsArchive = 127;
-
-export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
-
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 interface MitreAttackTechnique {
@@ -85,6 +81,11 @@ export interface ThreatIndicatorRule extends CustomRule {
   matchedType?: string;
   matchedId?: string;
   matchedIndex?: string;
+}
+
+export interface NewTermsRule extends CustomRule {
+  newTermsFields: string[];
+  historyWindowSize: Interval;
 }
 
 export interface MachineLearningRule {
@@ -316,6 +317,26 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   note: '# test markdown',
   thresholdField: 'host.name',
   threshold: '1',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
+export const getNewTermsRule = (): NewTermsRule => ({
+  customQuery: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'New Terms Rule',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  newTermsFields: ['host.name'],
+  historyWindowSize: getLookBack(),
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),

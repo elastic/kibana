@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const KQL_PLACEHOLDER = i18n.translate('xpack.securitySolution.hosts.kqlPlaceholder', {
-  defaultMessage: 'e.g. host.name: "foo"',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.hosts.pageTitle', {
   defaultMessage: 'Hosts',
 });
@@ -68,13 +64,6 @@ export const NAVIGATION_SESSIONS_TITLE = i18n.translate(
   'xpack.securitySolution.hosts.navigation.sessionsTitle',
   {
     defaultMessage: 'Sessions',
-  }
-);
-
-export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
-  {
-    defaultMessage: 'Failed to query authentications data',
   }
 );
 

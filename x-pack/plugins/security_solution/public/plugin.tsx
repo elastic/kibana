@@ -475,7 +475,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
 
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
+    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
 
     let appLinksSubscription: Subscription | null = null;
     license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {

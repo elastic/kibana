@@ -19,7 +19,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.delete(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
