@@ -6,13 +6,14 @@
  */
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '../../common/constants';
+import { SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
 import type { LinkCategories, LinkItem } from '../common/links/types';
 import { IconExceptionLists } from '../management/icons/exception_lists';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
+  capabilities: [`${SERVER_APP_ID}.show`],
 };
 
 export const rootLinks: LinkItem = {
