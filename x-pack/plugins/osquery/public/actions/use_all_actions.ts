@@ -18,7 +18,6 @@ import {
 import { useKibana } from '../common/lib/kibana';
 import type {
   ActionEdges,
-  PageInfoPaginated,
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,
@@ -33,8 +32,6 @@ export interface ActionsArgs {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  pageInfo: PageInfoPaginated;
-  totalCount: number;
 }
 
 interface UseAllActions {

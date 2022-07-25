@@ -22,7 +22,6 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  groupedNavigation: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.
@@ -42,6 +41,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the cloud security posture navigation inside the security solution
    */
   cloudSecurityPostureNavigation: false,
+
+  /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -57,6 +57,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -479,8 +480,16 @@ export function FailedTransactionsCorrelations({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <ChartTitleToolTip />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <TotalDocCountLabel
+            eventType={ProcessorEvent.transaction}
+            totalDocCount={response.totalDocCount}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
