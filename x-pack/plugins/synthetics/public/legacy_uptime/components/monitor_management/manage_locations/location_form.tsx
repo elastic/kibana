@@ -29,7 +29,7 @@ export const LocationForm = ({
     control,
     register,
     formState: { errors },
-  } = useFormWrapped({
+  } = useFormWrapped<PrivateLocation>({
     mode: 'onTouched',
     reValidateMode: 'onChange',
     shouldFocusError: true,
