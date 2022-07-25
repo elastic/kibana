@@ -6,18 +6,17 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
-import { buildRuleMessageFactory } from '../rule_messages';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 jest.mock('../find_ml_signals');
 jest.mock('../bulk_create_ml_signals');
@@ -25,31 +24,29 @@ jest.mock('../bulk_create_ml_signals');
 describe('ml_executor', () => {
   let jobsSummaryMock: jest.Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
-  const exceptionItems = [getExceptionListItemSchemaMock()];
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: RuleExecutorServicesMock;
+  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   const params = getMlRuleParams();
   const mlCompleteRule = getCompleteRuleMock<MachineLearningRuleParams>(params);
-
+  const exceptionItems = [getExceptionListItemSchemaMock()];
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
-  const buildRuleMessage = buildRuleMessageFactory({
-    id: mlCompleteRule.alertId,
-    ruleId: mlCompleteRule.ruleParams.ruleId,
-    name: mlCompleteRule.ruleConfig.name,
-    index: mlCompleteRule.ruleParams.outputIndex,
-  });
 
   beforeEach(() => {
     jobsSummaryMock = jest.fn();
-    alertServices = alertsMock.createRuleExecutorServices();
-    logger = loggingSystemMock.createLogger();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+    });
+    alertServices = alertsMock.createRuleExecutorServices();
+    ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleId: mlCompleteRule.alertId,
+      ruleUuid: mlCompleteRule.ruleParams.ruleId,
+      ruleName: mlCompleteRule.ruleConfig.name,
+      ruleType: mlCompleteRule.ruleConfig.ruleTypeId,
     });
     (findMlSignals as jest.Mock).mockResolvedValue({
       _shards: {},
@@ -73,8 +70,7 @@ describe('ml_executor', () => {
         ml: undefined,
         exceptionItems,
         services: alertServices,
-        logger,
-        buildRuleMessage,
+        ruleExecutionLogger,
         listClient: getListClientMock(),
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
@@ -90,14 +86,15 @@ describe('ml_executor', () => {
       ml: mlMock,
       exceptionItems,
       services: alertServices,
-      logger,
-      buildRuleMessage,
+      ruleExecutionLogger,
       listClient: getListClientMock(),
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
     });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(response.warningMessages.length).toEqual(1);
   });
 
@@ -116,14 +113,15 @@ describe('ml_executor', () => {
       ml: mlMock,
       exceptionItems,
       services: alertServices,
-      logger,
-      buildRuleMessage,
+      ruleExecutionLogger,
       listClient: getListClientMock(),
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
     });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(response.warningMessages.length).toEqual(1);
   });
 });

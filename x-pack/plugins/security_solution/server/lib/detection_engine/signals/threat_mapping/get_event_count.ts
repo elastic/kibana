@@ -15,6 +15,7 @@ export const MAX_PER_PAGE = 9000;
 
 export const getEventList = async ({
   services,
+  ruleExecutionLogger,
   query,
   language,
   index,
@@ -22,8 +23,6 @@ export const getEventList = async ({
   searchAfter,
   exceptionItems,
   filters,
-  buildRuleMessage,
-  logger,
   tuple,
   primaryTimestamp,
   secondaryTimestamp,
@@ -34,22 +33,19 @@ export const getEventList = async ({
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 
-  logger.debug(
-    buildRuleMessage(
-      `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
-    )
+  ruleExecutionLogger.debug(
+    `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
 
   const { searchResult } = await singleSearchAfter({
-    buildRuleMessage,
     searchAfterSortIds: searchAfter,
     index,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
     services,
-    logger,
+    ruleExecutionLogger,
     filter,
     pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
     primaryTimestamp,
@@ -59,9 +55,7 @@ export const getEventList = async ({
     runtimeMappings,
   });
 
-  logger.debug(
-    buildRuleMessage(`Retrieved events items of size: ${searchResult.hits.hits.length}`)
-  );
+  ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
   return searchResult;
 };
 

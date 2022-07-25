@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
 

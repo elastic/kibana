@@ -13,9 +13,8 @@ import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import { buildRuleMessageFactory } from './rule_messages';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
@@ -52,7 +51,6 @@ import {
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
-  mockLogger,
   sampleSignalHit,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
@@ -63,24 +61,19 @@ import {
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import type { ShardError } from '../../types';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
-
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
   const unix = moment(anchor).valueOf();
   let nowDate = moment('2020-01-01T00:00:00.000Z');
   let clock: sinon.SinonFakeTimers;
+  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
 
   beforeEach(() => {
     nowDate = moment('2020-01-01T00:00:00.000Z');
     clock = sinon.useFakeTimers(unix);
+    ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   });
 
   afterEach(() => {
@@ -449,14 +442,13 @@ describe('utils', () => {
   describe('getRuleRangeTuples', () => {
     test('should return a single tuple if no gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
         from: 'now-30s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -466,14 +458,13 @@ describe('utils', () => {
 
     test('should return a single tuple if malformed interval prevents gap calculation', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: 'invalid',
         from: 'now-30s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -483,14 +474,13 @@ describe('utils', () => {
 
     test('should return two tuples if gap and previouslyStartedAt', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(),
         startedAt: moment().toDate(),
         interval: '50s',
         from: 'now-55s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
@@ -499,14 +489,13 @@ describe('utils', () => {
 
     test('should return five tuples when give long gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
         startedAt: moment().toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
@@ -522,14 +511,13 @@ describe('utils', () => {
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(-15, 's').toDate(),
         startedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
@@ -651,8 +639,6 @@ describe('utils', () => {
           },
         },
       };
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-      mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
         timestampField,
@@ -662,14 +648,9 @@ describe('utils', () => {
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
       expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -702,9 +683,6 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-      mockLogger.warn.mockClear();
-
       const res = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
@@ -713,14 +691,9 @@ describe('utils', () => {
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
       expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -738,10 +711,9 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'Endpoint Security',
       });
-      mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
         timestampField,
@@ -751,14 +723,9 @@ describe('utils', () => {
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
       expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -777,11 +744,9 @@ describe('utils', () => {
       };
 
       // SUT uses rule execution logger's context to check the rule name
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'NOT Endpoint Security',
       });
-
-      mockLogger.warn.mockClear();
 
       const res = await hasTimestampFields({
         timestampField,
@@ -791,14 +756,9 @@ describe('utils', () => {
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
       expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:

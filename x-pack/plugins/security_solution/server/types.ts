@@ -20,7 +20,7 @@ import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
 import { AppClient } from './client';
 import type { ConfigType } from './config';
-import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
+import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type {

@@ -12,7 +12,6 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 import type {
@@ -20,7 +19,6 @@ import type {
   TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import type { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
@@ -32,6 +30,7 @@ import type {
   ThresholdSingleBucketAggregationResult,
 } from './types';
 import { shouldFilterByCardinality } from './utils';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -39,10 +38,9 @@ interface FindThresholdSignalsParams {
   maxSignals: number;
   inputIndexPattern: string[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   filter: ESBoolQuery;
   threshold: ThresholdNormalized;
-  buildRuleMessage: BuildRuleMessage;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverrideOrUndefined;
@@ -61,10 +59,9 @@ export const findThresholdSignals = async ({
   maxSignals,
   inputIndexPattern,
   services,
-  logger,
+  ruleExecutionLogger,
   filter,
   threshold,
-  buildRuleMessage,
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
@@ -96,11 +93,10 @@ export const findThresholdSignals = async ({
         from,
         to,
         services,
-        logger,
+        ruleExecutionLogger,
         filter,
         pageSize: 0,
         sortOrder: 'desc',
-        buildRuleMessage,
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
@@ -132,11 +128,10 @@ export const findThresholdSignals = async ({
       from,
       to,
       services,
-      logger,
+      ruleExecutionLogger,
       filter,
       pageSize: 0,
       sortOrder: 'desc',
-      buildRuleMessage,
       trackTotalHits: true,
       runtimeMappings,
       primaryTimestamp,
