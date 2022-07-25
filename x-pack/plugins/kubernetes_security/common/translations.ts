@@ -55,6 +55,20 @@ export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
     defaultMessage: 'Show more {name}',
   });
 
+export const TREE_NAVIGATION_COLLAPSE = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.collapse',
+  {
+    defaultMessage: 'Collapse Tree Navigation',
+  }
+);
+
+export const TREE_NAVIGATION_EXPAND = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.expand',
+  {
+    defaultMessage: 'Expand Tree Navigation',
+  }
+);
+
 export const CHART_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.chartsToggle.show', {
   defaultMessage: 'Show charts',
 });
