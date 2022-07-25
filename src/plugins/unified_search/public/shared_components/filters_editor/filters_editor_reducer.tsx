@@ -9,7 +9,8 @@
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filter_editors_types';
-import { addFilter, addFilterGroupWithEmptyFilter, removeFilter } from './filters_editor_utils';
+import { ConditionTypes } from './filters_editor_condition_types';
+import { addFilter, removeFilter } from './filters_editor_utils';
 
 /** @internal **/
 export interface FiltersEditorState {
@@ -17,15 +18,10 @@ export interface FiltersEditorState {
 }
 
 /** @internal **/
-export interface AddFiltersPayload {
+export interface AddFilterPayload {
   path: Path;
   dataViewId: string | undefined;
-}
-
-/** @internal **/
-export interface AddFilterGroupWithFilterPayload {
-  path: Path;
-  dataViewId: string | undefined;
+  conditionalType: ConditionTypes;
 }
 
 /** @internal **/
@@ -46,8 +42,7 @@ export interface MoveFilterPayload {
 
 /** @internal **/
 export type FiltersEditorActions =
-  | { type: 'addFilter'; payload: AddFiltersPayload }
-  | { type: 'addFilterGroupWithFilter'; payload: AddFilterGroupWithFilterPayload }
+  | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'updateFilters'; payload: UpdateFiltersPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload };
@@ -59,14 +54,13 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
   switch (action.type) {
     case 'addFilter':
       return {
-        filters: addFilter(state.filters, action.payload),
+        filters: addFilter(
+          state.filters,
+          action.payload.path,
+          action.payload.dataViewId,
+          action.payload.conditionalType
+        ),
       };
-    case 'addFilterGroupWithFilter': {
-      return {
-        ...state,
-        filters: addFilterGroupWithEmptyFilter(state.filters, action.payload),
-      };
-    }
     case 'updateFilters':
       return {
         ...state,
