@@ -9,7 +9,7 @@
 import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayersFieldFormats } from './layers';
 

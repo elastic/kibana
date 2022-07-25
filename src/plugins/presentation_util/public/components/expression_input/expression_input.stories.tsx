@@ -10,7 +10,11 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { Meta } from '@storybook/react';
 
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from '@kbn/expressions-plugin';
+import {
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  Style,
+} from '@kbn/expressions-plugin/common';
 import { ExpressionInput } from '.';
 import { registerExpressionsLanguage } from './language';
 

@@ -12,7 +12,7 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import {

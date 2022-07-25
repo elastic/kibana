@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiDataGridSorting } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 import {
   createGridFilterHandler,

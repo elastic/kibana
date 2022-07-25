@@ -8,7 +8,7 @@
 
 import React, { CSSProperties } from 'react';
 import { storiesOf } from '@storybook/react';
-import { Style } from '@kbn/expressions-plugin';
+import { Style } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getMetricRenderer } from '../metric_renderer';
 import { MetricRendererConfig } from '../../../common';

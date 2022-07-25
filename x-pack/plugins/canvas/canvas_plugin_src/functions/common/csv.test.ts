@@ -9,7 +9,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable, ExecutionContext } from '@kbn/expressions-plugin';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin';
 
 const errors = getFunctionErrors().csv;
