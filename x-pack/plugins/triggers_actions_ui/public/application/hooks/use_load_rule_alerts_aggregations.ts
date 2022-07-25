@@ -40,7 +40,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
     ruleAlertsAggs: { active: 0, recovered: 0 },
-    alertsChartData: [] as AlertChartData[],
+    alertsChartData: [],
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -79,7 +79,7 @@ export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAgg
             ...oldState,
             isLoadingRuleAlertsAggs: false,
             errorRuleAlertsAggs: 'error',
-            alertsChartData: [] as AlertChartData[],
+            alertsChartData: [],
           }));
         }
       }
