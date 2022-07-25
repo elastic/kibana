@@ -7,7 +7,7 @@
 
 import { useQuery } from 'react-query';
 
-import type { SavedObjectsFindResponsePublic } from '@kbn/core/public';
+import type { SavedObjectsFindResponse } from '@kbn/core/public';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
@@ -24,7 +24,7 @@ export const useSavedQueries = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
+    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
       data: SavedQuerySO[];
     },
     { body: { error: string; message: string } }
