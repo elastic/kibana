@@ -211,6 +211,24 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.getManageBreadcrumbEntry",
+            "type": "Function",
+            "tags": [],
+            "label": "getManageBreadcrumbEntry",
+            "description": [
+              "Gets the `Manage` breadcrumb entry."
+            ],
+            "signature": [
+              "() => ",
+              "BreadcrumbEntry"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
