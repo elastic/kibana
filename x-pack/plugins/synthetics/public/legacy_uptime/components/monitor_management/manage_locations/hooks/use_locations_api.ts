@@ -21,15 +21,15 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
 
   const { savedObjects } = useKibana().services;
 
-  const { data: currentPrivateLocations, loading: fetchLoading } = useFetcher(async () => {
+  const { loading: fetchLoading } = useFetcher(async () => {
     const result = await getSyntheticsPrivateLocations(savedObjects?.client!);
     setPrivateLocations(result);
     return result;
   }, [isOpen]);
 
   const { loading: saveLoading } = useFetcher(async () => {
-    if (currentPrivateLocations && formData) {
-      const existingLocations = currentPrivateLocations.filter((loc) => loc.id !== formData.id);
+    if (privateLocations && formData) {
+      const existingLocations = privateLocations.filter((loc) => loc.id !== formData.policyHostId);
 
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
         locations: [...(existingLocations ?? []), { ...formData, id: formData.policyHostId }],
@@ -38,7 +38,7 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
       setFormData(undefined);
       return result;
     }
-  }, [formData, currentPrivateLocations]);
+  }, [formData, privateLocations]);
 
   const onSubmit = (data: PrivateLocation) => {
     setFormData(data);
@@ -51,13 +51,13 @@ export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const { loading: deleteLoading } = useFetcher(async () => {
     if (deleteId) {
       const result = await setSyntheticsPrivateLocations(savedObjects?.client!, {
-        locations: (currentPrivateLocations ?? []).filter((loc) => loc.id !== deleteId),
+        locations: (privateLocations ?? []).filter((loc) => loc.id !== deleteId),
       });
       setPrivateLocations(result.locations);
       setDeleteId(undefined);
       return result;
     }
-  }, [deleteId, currentPrivateLocations]);
+  }, [deleteId, privateLocations]);
 
   return {
     onSubmit,
