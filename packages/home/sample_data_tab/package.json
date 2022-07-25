@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/home-sample-data-tab-content",
+  "name": "@kbn/home-sample-data-tab",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

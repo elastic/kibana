@@ -14,7 +14,12 @@ import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
 
 // TODO: clintandrewhall - pull from config.
-import { URL_DEMO_ENV, METRIC_CLICK_DEMO_ENV_BUTTON } from './constants';
+import {
+  URL_DEMO_ENV,
+  METRIC_CLICK_DEMO_ENV_BUTTON,
+  METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON,
+  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
+} from './constants';
 import { useServices } from './services';
 
 const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sampleDataLabel', {
@@ -22,12 +27,18 @@ const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sample
 });
 
 /**
- * Teh content for the Sample Data Tab in the `home` plugin.
+ * The content for the Sample Data Tab in the `home` plugin.
  */
-export const SampleDataTabContent = () => {
+export const SampleDataTab = () => {
   const { logClick } = useServices();
   const onClick = () => {
     logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
+  };
+
+  const onToggle = (isOpen: boolean) => {
+    if (isOpen) {
+      logClick(METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON);
+    }
   };
 
   return (
@@ -37,10 +48,11 @@ export const SampleDataTabContent = () => {
       <EuiAccordion
         id="sampleDataTab"
         buttonContent={sampleDataLabel}
-        data-test-subj="sampleDataAccordion"
+        data-test-subj={DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON}
         buttonProps={{
-          'data-test-subj': 'sampleDataAccordionButton',
+          'data-test-subj': DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
         }}
+        onToggle={onToggle}
       >
         <EuiSpacer />
         <EuiPanel color="subdued" paddingSize="xl">

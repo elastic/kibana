@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/home/sample_data_tab_content'],
+  roots: ['<rootDir>/packages/home/sample_data_tab'],
 };

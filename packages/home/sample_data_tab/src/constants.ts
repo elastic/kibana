@@ -18,6 +18,16 @@ export const URL_DEMO_ENV = 'https://ela.st/demo';
 export const DATA_TEST_SUBJ_DEMO_ENV_BUTTON = 'goToDemoEnvButton';
 
 /**
+ * Test Subject name for the sample data accordion button.
+ */
+export const DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON = 'showSampleDataButton';
+
+/**
  * Metric name for counting number of clicks of the Demo Environment button.
  */
 export const METRIC_CLICK_DEMO_ENV_BUTTON = 'sample_data__demo_env_button';
+
+/**
+ * Metric name for counting number of clicks of the sample data accordion button.
+ */
+export const METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON = 'sample_data__show_sample_data_button';

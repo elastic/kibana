@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "sample_data_tab_content"
-PKG_REQUIRE_NAME = "@kbn/home-sample-data-tab-content"
+PKG_DIRNAME = "sample_data_tab"
+PKG_REQUIRE_NAME = "@kbn/home-sample-data-tab"
 
 SOURCE_FILES = glob(
   [

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { SampleDataTabContent } from './sample_data_tab';
-export { SampleDataTabContentKibanaProvider } from './services';
+export { SampleDataTab } from './sample_data_tab';
+export { SampleDataTabKibanaProvider, SampleDataTabProvider } from './services';

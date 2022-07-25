@@ -3475,7 +3475,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-tab-content@link:bazel-bin/packages/home/sample_data_tab_content":
+"@kbn/home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab":
   version "0.0.0"
   uid ""
 
@@ -7211,7 +7211,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__home-sample-data-tab-content@link:bazel-bin/packages/home/sample_data_tab_content/npm_module_types":
+"@types/kbn__home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab/npm_module_types":
   version "0.0.0"
   uid ""
 

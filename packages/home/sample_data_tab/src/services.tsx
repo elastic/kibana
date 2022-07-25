@@ -30,26 +30,23 @@ type NotifyInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 
 type NotifyInput = string | NotifyInputFields;
 type NotifyFn = (notification: NotifyInput) => void;
 
-/**
- * A list of services that are consumed by this component.
- */
-export interface Services {
+interface Services {
   fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   notifyError: NotifyFn;
   logClick: (metric: string) => void;
 }
 
-export type SampleDataTabContentServices = Services & SampleDataCardServices;
+/**
+ * A list of services that are consumed by this component.
+ */
+export type SampleDataTabServices = Services & SampleDataCardServices;
 
 const Context = React.createContext<Services | null>(null);
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataTabContentProvider: FC<SampleDataTabContentServices> = ({
-  children,
-  ...services
-}) => {
+export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...services }) => {
   const { fetchSampleDataSets, notifyError, logClick } = services;
 
   return (
@@ -81,13 +78,15 @@ interface KibanaDependencies {
   trackUiMetric: (type: string, eventNames: string | string[], count?: number) => void;
 }
 
-export type SampleDataTabContentKibanaDependencies = KibanaDependencies &
-  SampleDataCardKibanaDependencies;
+/**
+ * Services that are consumed by this component and its dependencies.
+ */
+export type SampleDataTabKibanaDependencies = KibanaDependencies & SampleDataCardKibanaDependencies;
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataTabContentKibanaProvider: FC<SampleDataTabContentKibanaDependencies> = ({
+export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
@@ -115,7 +114,7 @@ export function useServices() {
 
   if (!context) {
     throw new Error(
-      'SampleDataTabContent Context is missing.  Ensure your component or React root is wrapped with SampleDataTabContentContext.'
+      'SampleDataTab Context is missing.  Ensure your component or React root is wrapped with SampleDataTabContext.'
     );
   }
 

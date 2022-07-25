@@ -9,10 +9,10 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 
-import { SampleDataTabContent } from './sample_data_tab';
+import { SampleDataTab } from './sample_data_tab';
 
 import mdx from '../README.mdx';
-import { SampleDataTabContentProvider } from './services';
+import { SampleDataTabProvider } from './services';
 import { getStoryServices, getStoryArgTypes, Params } from './mocks';
 
 export default {
@@ -24,12 +24,12 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: 1200 }}>{Story()}</div>],
-} as ComponentMeta<typeof SampleDataTabContent>;
+} as ComponentMeta<typeof SampleDataTab>;
 
 export const TabContent = (params: Params) => (
-  <SampleDataTabContentProvider {...getStoryServices(params)}>
-    <SampleDataTabContent />
-  </SampleDataTabContentProvider>
+  <SampleDataTabProvider {...getStoryServices(params)}>
+    <SampleDataTab />
+  </SampleDataTabProvider>
 );
 
 TabContent.argTypes = getStoryArgTypes();
