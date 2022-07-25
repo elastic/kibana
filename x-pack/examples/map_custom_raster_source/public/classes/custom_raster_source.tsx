@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
-
 import { ReactElement } from 'react';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,
   Attribution,
+  DataFilters,
   DataRequestMeta,
   Timeslice,
 } from '@kbn/maps-plugin/common/descriptor_types';
@@ -167,18 +162,29 @@ export class CustomRasterSource implements ITMSSource {
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
-    // TODO
     return true;
   }
 
-  async getUrlTemplate(): Promise<string> {
-    if (!this.getApplyGlobalQuery() && (await !this.isTimeAware())) {
+  async getUrlTemplate(dataFilters: DataFilters): Promise<string> {
+    if (!this.getApplyGlobalTime() || (await !this.isTimeAware())) {
       return this._descriptor.urlTemplate;
     }
 
-    // TODO Replace this with date from time picker
-    const date = new Date();
-    date.setHours(date.getHours() - 6); // Data may not be current, use data from 6 hours ago
-    return this._descriptor.urlTemplate.replace('{time}', date.toISOString().split('.')[0] + 'Z');
+    const { timeslice, timeFilters } = dataFilters;
+    let timestamp;
+
+    if (timeslice) {
+      // Use the value from the timeslider
+      timestamp = new Date(timeslice.to).getTime();
+    } else {
+      // Otherwise use the max value from the Time Picker
+      const { max } = calculateBounds(timeFilters);
+      timestamp = max?.valueOf();
+    }
+
+    if (timestamp === undefined || timestamp === null) return this._descriptor.urlTemplate;
+
+    // Replace the '{time}' template value in the URL with the Unix timestamp
+    return this._descriptor.urlTemplate.replace('{time}', timestamp.toString());
   }
 }

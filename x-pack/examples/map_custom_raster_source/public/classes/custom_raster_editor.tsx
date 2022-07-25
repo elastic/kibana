@@ -25,7 +25,7 @@ export class CustomRasterEditor extends Component<Props, State> {
   };
 
   componentDidMount() {
-    this.props.onSourceConfigChange({ urlTemplate: this.props.defaultUrl });
+    this.props.onSourceConfigChange({ urlTemplate: this.props.defaultUrl, isTimeAware: true });
   }
 
   _previewLayer = _.debounce(() => {

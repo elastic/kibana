@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Map as MbMap, RasterTileSource } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { DataFilters, LayerDescriptor, Timeslice } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
 import { ITMSSource } from '../../sources/tms_source';
 import { DataRequestContext } from '../../../actions';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+
+interface RasterTileSourceData extends DataFilters {
+  url: string;
+  applyGlobalTime: boolean;
+}
 
 export class RasterTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
@@ -53,16 +59,31 @@ export class RasterTileLayer extends AbstractLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }: DataRequestContext) {
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      // data is immmutable
-      return;
+    const source = this.getSource();
+    const nextMeta: RasterTileSourceData = {
+      ...dataFilters,
+      url: await source.getUrlTemplate(dataFilters),
+      applyGlobalTime: source.getApplyGlobalTime(),
+    };
+    const prevDataRequest = this.getSourceDataRequest();
+    if (prevDataRequest) {
+      const prevMeta = prevDataRequest?.getMeta();
+      const canSkip = await canSkipSourceUpdate({
+        extentAware: false,
+        source,
+        prevDataRequest,
+        nextRequestMeta: nextMeta,
+        getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+          if (!prevMeta) return true;
+          return source.getUpdateDueToTimeslice(prevMeta, timeslice);
+        },
+      });
+      if (canSkip) return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
+    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
     try {
-      const url = await this.getSource().getUrlTemplate();
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, { url }, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
@@ -84,7 +105,26 @@ export class RasterTileLayer extends AbstractLayer {
     return this.getId() === mbSourceId;
   }
 
+  _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as RasterTileSource;
+    if (!mbSource) {
+      return false;
+    }
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return false;
+    }
+    const sourceData = sourceDataRequest.getData() as RasterTileSourceData | undefined;
+    if (!sourceData) {
+      return false;
+    }
+
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
   syncLayerWithMB(mbMap: MbMap) {
+    this._removeStaleMbSourcesAndLayers(mbMap);
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getMbLayerId();
 
@@ -134,5 +174,9 @@ export class RasterTileLayer extends AbstractLayer {
 
   isBasemap(order: number) {
     return order === 0;
+  }
+
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    return this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware());
   }
 }

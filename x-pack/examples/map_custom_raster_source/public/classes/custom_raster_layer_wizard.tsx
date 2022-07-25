@@ -14,7 +14,7 @@ import { CustomRasterSource, CustomRasterSourceConfig } from './custom_raster_so
 import { CustomRasterEditor } from './custom_raster_editor';
 
 const defaultUrl =
-  'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GOES-East_ABI_GeoColor/default/{time}/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png';
+  'https://idpgis.ncep.noaa.gov/arcgis/rest/services/radar/radar_base_reflectivity_time/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&size=256%2C256&imageSR=3857&time={time}&format=jpgpng&f=image';
 
 export const customRasterLayerWizard: LayerWizard = {
   id: PLUGIN_ID,
@@ -35,6 +35,7 @@ export const customRasterLayerWizard: LayerWizard = {
         type: LAYER_TYPE.RASTER_TILE,
         sourceDescriptor: CustomRasterSource.createDescriptor({
           urlTemplate: sourceConfig.urlTemplate,
+          isTimeAware: sourceConfig.isTimeAware,
         }),
         style: {
           type: 'RASTER',
