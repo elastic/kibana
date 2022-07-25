@@ -39,7 +39,7 @@ const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
 type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
-export interface IndicesActions {
+export interface IndexViewActions {
   clearFetchIndexTimeout(): void;
   createNewFetchIndexTimeout(duration: number): { duration: number };
   fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
@@ -54,7 +54,7 @@ export interface IndicesActions {
   stopFetchIndexPoll(): void;
 }
 
-export interface IndicesValues {
+export interface IndexViewValues {
   data: typeof FetchIndexApiLogic.values.data;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
@@ -64,10 +64,10 @@ export interface IndicesValues {
   isWaitingForSync: boolean;
   lastUpdated: string | null;
   localSyncNowValue: boolean; // holds local value after update so UI updates correctly
-  syncStatus: SyncStatus;
+  syncStatus: SyncStatus | null;
 }
 
-export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
+export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
   actions: {
     clearFetchIndexTimeout: true,
     createNewFetchIndexTimeout: (duration) => ({ duration }),
@@ -150,7 +150,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
     localSyncNowValue: [
       false,
       {
-        fetchIndexSuccess: (_, index) =>
+        fetchIndexApiSuccess: (_, index) =>
           isConnectorIndex(index) ? index.connector.sync_now : false,
         startSyncApiSuccess: () => true,
       },
@@ -162,13 +162,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>(
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
     isSyncing: [
       () => [selectors.syncStatus],
-      (syncStatus) => syncStatus === SyncStatus.IN_PROGRESS,
+      (syncStatus: SyncStatus) => syncStatus === SyncStatus.IN_PROGRESS,
     ],
     isWaitingForSync: [
       () => [selectors.data, selectors.localSyncNowValue],
       (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
     ],
     lastUpdated: [() => [selectors.data], (data) => getLastUpdated(data)],
-    syncStatus: [() => [selectors.data], (data) => data?.connector?.last_sync_status],
+    syncStatus: [() => [selectors.data], (data) => data?.connector?.last_sync_status ?? null],
   }),
 });
