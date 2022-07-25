@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -45,6 +46,13 @@ const API_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.errorLogColumn.searchPlaceholder',
+  {
+    defaultMessage: 'Search error log message',
+  }
+);
+
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
@@ -54,12 +62,13 @@ const MAX_RESULTS = 1000;
 
 export type RuleErrorLogProps = {
   rule: Rule;
+  runId?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadActionErrorLog'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
-  const { rule, loadActionErrorLog, refreshToken } = props;
+  const { rule, runId, loadActionErrorLog, refreshToken } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -74,6 +83,9 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     field: 'timestamp',
     direction: 'desc',
   });
+
+  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
 
   // Date related states
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -120,6 +132,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     try {
       const result = await loadActionErrorLog({
         id: rule.id,
+        runId,
+        message: searchText,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
@@ -150,6 +164,25 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       setDateEnd(end);
     },
     [setDateStart, setDateEnd]
+  );
+
+  const onSearchChange = useCallback(
+    (e) => {
+      if (e.target.value === '') {
+        setSearchText('');
+      }
+      setSearch(e.target.value);
+    },
+    [setSearchText, setSearch]
+  );
+
+  const onKeyUp = useCallback(
+    (e) => {
+      if (e.key === 'Enter') {
+        setSearchText(search);
+      }
+    },
+    [search, setSearchText]
   );
 
   const onRefresh = () => {
@@ -197,7 +230,15 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateStart, dateEnd, formattedSort, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    dateStart,
+    dateEnd,
+    formattedSort,
+    pagination.pageIndex,
+    pagination.pageSize,
+    searchText,
+    runId,
+  ]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -211,6 +252,18 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     <div>
       <EuiSpacer />
       <EuiFlexGroup>
+        {runId && (
+          <EuiFlexItem grow={false}>
+            <EuiFieldSearch
+              fullWidth
+              isClearable
+              value={search}
+              onChange={onSearchChange}
+              onKeyUp={onKeyUp}
+              placeholder={SEARCH_PLACEHOLDER}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             data-test-subj="ruleEventLogListDatePicker"
