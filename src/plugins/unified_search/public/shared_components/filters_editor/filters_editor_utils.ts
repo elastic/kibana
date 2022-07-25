@@ -37,20 +37,26 @@ export const removeFilterFromFilterGroup = (arr: Filter[], index: number) => [
   ...arr.slice(index + 1),
 ];
 
+const orderInFilterGroup = (path: string) =>
+  path.split('.').length > 0 ? Number(path.split('.')[0]) : 0;
+
 const goIntoFilersGroup = (
   root: Filter[],
   index: number,
   path: string,
-  newFilter: Filter
+  newFilter?: Filter | undefined
 ): Filter[] => {
-  const orderInFilterGroup = path.split('.').length > 0 ? Number(path.split('.')[0]) : 0;
-
   if (filterDepthCalculation(path) === 1) {
-    return insertFilterInFilterGroup(root, index + 1, newFilter);
+    if (newFilter) {
+      return insertFilterInFilterGroup(root, index + 1, newFilter);
+    } else {
+      return removeFilterFromFilterGroup(root, index);
+    }
   } else {
+    // TODO: FIX
     return goIntoFilersGroup(
-      root[orderInFilterGroup].meta.params.filters,
-      orderInFilterGroup + 1,
+      root[orderInFilterGroup(path)].meta.params.filters,
+      orderInFilterGroup(path) + 1,
       path.split('.').slice(1).join('.'),
       newFilter
     );
@@ -62,10 +68,8 @@ export const addFilter = (
   payload: { path: string; dataViewId: string | undefined }
 ) => {
   const newFilter = buildEmptyFilter(true, payload.dataViewId);
-  const orderInFilterGroup =
-    payload.path.split('.').length > 0 ? Number(payload.path.split('.')[0]) : 0;
 
-  return goIntoFilersGroup(filters, orderInFilterGroup, payload.path, newFilter);
+  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilter);
 };
 
 export const addFilterGroupWithEmptyFilter = (
@@ -81,14 +85,9 @@ export const addFilterGroupWithEmptyFilter = (
     },
   };
 
-  const orderInFilterGroup =
-    payload.path.split('.').length > 0 ? Number(payload.path.split('.')[0]) : 0;
-
-  return goIntoFilersGroup(filters, orderInFilterGroup, payload.path, newFilterGroup);
+  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilterGroup);
 };
 
 export const removeFilter = (filters: Filter[], payload: { path: string }) => {
-  const orderInFilterGroup = Number(payload.path.split('.').at(-1));
-
-  return removeFilterFromFilterGroup(filters, orderInFilterGroup);
+  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path);
 };
