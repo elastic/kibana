@@ -67,11 +67,10 @@ export const getXYVisRenderer: (deps: {
       const visualizationType = 'agg_based';
 
       if (plugins.usageCollection && containerType) {
-        const hasMixedXY = visConfig.seriesParams.some((item) => item.type !== visConfig.type);
-
+        const hasMixedXY = new Set(visConfig.seriesParams.map((item) => item.type));
         const counterEvents = [
           `render_${visualizationType}_${visTypeTelemetryMap[visType] ?? visType}`,
-          hasMixedXY ? `render_${visualizationType}_mixed_xy` : undefined,
+          hasMixedXY.size > 1 ? `render_${visualizationType}_mixed_xy` : undefined,
         ].filter(Boolean) as string[];
 
         plugins.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
