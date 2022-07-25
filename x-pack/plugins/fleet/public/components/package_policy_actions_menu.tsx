@@ -19,11 +19,11 @@ import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
-  upgradePackagePolicyHref: string;
+  upgradePackagePolicyHref?: string;
 }> = ({
   agentPolicy,
   packagePolicy,
@@ -38,6 +38,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
   const isManaged = Boolean(packagePolicy.is_managed);
+  const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -55,7 +56,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent && !agentPolicy.is_managed
+    ...(showAddAgent && !agentPolicyIsManaged
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
@@ -89,7 +90,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsUpgradeItem"
-      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
+      disabled={
+        !packagePolicy.hasUpgrade || !canWriteIntegrationPolicies || !upgradePackagePolicyHref
+      }
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -108,7 +111,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy.is_managed) {
+  if (!agentPolicy || !agentPolicyIsManaged) {
     menuItems.push(
       <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
         {(deletePackagePoliciesPrompt) => {
