@@ -30,34 +30,32 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
-const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => (
-  <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-    <EuiFlexItem>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText
-        color="subdued"
-        className={css`
-          color: $euiColorLightShade;
-          font-size: 13px;
-          padding: 3px 6px;
-        `}
-      >
-        {conditionType === ConditionTypes.OR
-          ? i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
-              defaultMessage: 'OR',
-            })
-          : i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
-              defaultMessage: 'AND',
-            })}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
+  conditionType === ConditionTypes.OR ? (
+    <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
+      <EuiFlexItem grow={1}>
+        <EuiHorizontalRule margin="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          className={css`
+            color: $euiColorLightShade;
+            font-size: 13px;
+            padding: 3px 6px;
+          `}
+        >
+          {i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
+            defaultMessage: 'OR',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={10}>
+        <EuiHorizontalRule margin="s" />
+      </EuiFlexItem>{' '}
+    </EuiFlexGroup>
+  ) : null;
 
 export const FilterGroup = ({
   filters,
@@ -82,7 +80,7 @@ export const FilterGroup = ({
       `}
     >
       {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup direction="column" gutterSize="m">
           <>
             <FilterItem
               filter={filter}
