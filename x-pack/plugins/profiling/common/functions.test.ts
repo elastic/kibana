@@ -11,12 +11,12 @@ import { events, stackTraces, stackFrames, executables } from './__fixtures__/st
 
 describe('TopN function operations', () => {
   test('1', () => {
-    const topNFunctions = createTopNFunctions(events, stackTraces, stackFrames, executables, 0, 5);
+    const topNFunctions = createTopNFunctions(events, stackTraces, stackFrames, executables);
 
     expect(topNFunctions.TotalCount).toEqual(40);
-    expect(topNFunctions.TopN.length).toEqual(5);
+    expect(topNFunctions.TopN.length).toEqual(9);
 
     const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
-    expect(exclusiveCounts).toEqual([16, 10, 9, 5, 0]);
+    expect(exclusiveCounts).toEqual([16, 10, 9, 5, 0, 0, 0, 0, 0]);
   });
 });
