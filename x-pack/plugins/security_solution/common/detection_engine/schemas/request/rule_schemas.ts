@@ -29,6 +29,7 @@ import {
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
 
+import { RuleExecutionSummary } from '../../rule_monitoring';
 import {
   id,
   index,
@@ -70,7 +71,6 @@ import {
   created_at,
   created_by,
   namespace,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -486,7 +486,7 @@ const responseRequiredFields = {
 };
 
 const responseOptionalFields = {
-  execution_summary: ruleExecutionSummary,
+  execution_summary: RuleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([
