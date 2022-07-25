@@ -7,10 +7,18 @@
  */
 
 import React, { createContext, useCallback, useContext } from 'react';
-import { LegendColorPicker, Position } from '@elastic/charts';
+import { LegendColorPicker, Position, XYChartSeriesIdentifier } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ColorPicker } from '@kbn/charts-plugin/public';
+import {
+  DatatablesWithFormatInfo,
+  getMetaFromSeriesId,
+  getSeriesName,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from '../helpers';
+import type { CommonXYDataLayerConfig } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;
 
@@ -31,6 +39,10 @@ export interface LegendColorPickerWrapperContextType {
   legendPosition: Position;
   setColor: (newColor: string | null, seriesKey: string | number) => void;
   uiState?: PersistedState;
+  dataLayers: CommonXYDataLayerConfig[];
+  formattedDatatables: DatatablesWithFormatInfo;
+  titles: LayersAccessorsTitles;
+  fieldFormats: LayersFieldFormats;
 }
 
 export const LegendColorPickerWrapperContext = createContext<
@@ -53,8 +65,32 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
     return null;
   }
 
-  const { legendPosition, setColor, uiState } = colorPickerWrappingContext;
-  const seriesName = seriesIdentifier.key;
+  const {
+    legendPosition,
+    setColor,
+    uiState,
+    dataLayers,
+    titles,
+    formattedDatatables,
+    fieldFormats,
+  } = colorPickerWrappingContext;
+  const { layerId } = getMetaFromSeriesId(seriesIdentifier.specId);
+
+  const layer = dataLayers.find((dataLayer) => dataLayer.layerId === layerId);
+  const seriesName = layer
+    ? getSeriesName(
+        seriesIdentifier as XYChartSeriesIdentifier,
+        {
+          splitAccessors: layer.splitAccessors ?? [],
+          accessorsCount: layer.accessors.length,
+          columns: formattedDatatables[layer.layerId].table.columns,
+          splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
+          alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
+          columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+        },
+        titles[layer.layerId]
+      )?.toString() || ''
+    : '';
 
   const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
   const colorIsOverwritten = seriesName.toString() in overwriteColors;

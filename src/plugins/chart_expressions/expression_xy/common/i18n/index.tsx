@@ -129,10 +129,6 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
       defaultMessage: 'Specifies split row of the xy chart',
     }),
-  getHandleEmptyXAccessorHelp: () =>
-    i18n.translate('expressionXY.xyVis.handleEmptyXAccessor.help', {
-      defaultMessage: 'Allow handling empty x accessor',
-    }),
   getUseAdjustedIntervalHelp: () =>
     i18n.translate('expressionXY.xyVis.useAdjustedInterval.help', {
       defaultMessage: 'Use adjusted interval fox x domain',

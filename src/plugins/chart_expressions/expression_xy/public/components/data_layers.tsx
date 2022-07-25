@@ -53,7 +53,6 @@ interface Props {
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
-  handleEmptyXAccessor?: boolean;
   uiState?: PersistedState;
 }
 
@@ -75,7 +74,6 @@ export const DataLayers: FC<Props> = ({
   chartHasMoreThanOneBarSeries,
   defaultXScaleType,
   fieldFormats,
-  handleEmptyXAccessor,
   uiState,
 }) => {
   const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
@@ -119,7 +117,6 @@ export const DataLayers: FC<Props> = ({
             fillOpacity,
             defaultXScaleType,
             fieldFormats,
-            handleEmptyXAccessor,
             uiState,
           });
 

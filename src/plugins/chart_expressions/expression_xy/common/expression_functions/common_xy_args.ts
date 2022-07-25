@@ -103,11 +103,6 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getMinTimeBarIntervalHelp(),
   },
-  handleEmptyXAccessor: {
-    types: ['boolean'],
-    default: false,
-    help: strings.getHandleEmptyXAccessorHelp(),
-  },
   useAdjustedInterval: {
     types: ['boolean'],
     default: false,

@@ -28,7 +28,6 @@ import {
   Direction,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
@@ -196,7 +195,6 @@ export function XYChart({
     xAxisConfig,
     splitColumnAccessor,
     splitRowAccessor,
-    handleEmptyXAccessor,
     useAdjustedInterval,
   } = args;
   const chartRef = useRef<Chart>(null);
@@ -317,14 +315,7 @@ export function XYChart({
     [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
   );
 
-  const allDocs = i18n.translate('expressionXY.xyVis.allDocsTitle', {
-    defaultMessage: 'All docs',
-  });
-
-  const xTitle =
-    xAxisConfig?.title ||
-    (xAxisColumn && xAxisColumn.name) ||
-    (handleEmptyXAccessor ? allDocs : undefined);
+  const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name) || undefined;
   const yAxesMap = {
     left: yAxesConfiguration.find(
       ({ position }) => position === getAxisPosition(Position.Left, shouldRotate)
@@ -338,8 +329,7 @@ export function XYChart({
     dataLayers,
     { splitColumnAccessor, splitRowAccessor },
     { xTitle },
-    yAxesConfiguration,
-    handleEmptyXAccessor
+    yAxesConfiguration
   );
 
   const filteredBarLayers = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR);
@@ -699,6 +689,10 @@ export function XYChart({
           uiState,
           setColor,
           legendPosition: legend.position,
+          dataLayers,
+          formattedDatatables,
+          titles,
+          fieldFormats,
         }}
       >
         <Chart ref={chartRef}>
@@ -771,7 +765,6 @@ export function XYChart({
                         splitRowAccessor: splitRowId,
                       }}
                       xDomain={isTimeViz ? rawXDomain : undefined}
-                      handleEmptyXAccessor={handleEmptyXAccessor}
                     />
                   )
                 : undefined,
@@ -819,11 +812,7 @@ export function XYChart({
             }
             title={xTitle}
             gridLine={gridLineStyle}
-            hide={
-              xAxisConfig?.hide ||
-              dataLayers[0]?.simpleView ||
-              !(handleEmptyXAccessor || dataLayers[0]?.xAccessor)
-            }
+            hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
             tickFormat={(d) => {
               let value = safeXAccessorLabelRenderer(d) || '';
               if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
@@ -905,7 +894,6 @@ export function XYChart({
               chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
               defaultXScaleType={defaultXScaleType}
               fieldFormats={fieldFormats}
-              handleEmptyXAccessor={handleEmptyXAccessor}
               uiState={uiState}
             />
           )}

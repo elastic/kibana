@@ -8,6 +8,7 @@
 
 import moment from 'moment';
 import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import {
   VisToExpressionAst,
   getVisSchemas,
@@ -128,7 +129,7 @@ const prepareLayers = (
       prepareDecoration(seriesParam.valueAxis, accessor, seriesParam.data.id)
     ),
     accessors: yAccessors.map((accessor) => prepareVisDimension(accessor)),
-    xAccessor: xAccessor ? prepareVisDimension(xAccessor) : undefined,
+    xAccessor: xAccessor ? prepareVisDimension(xAccessor) : 'all',
     xScaleType: getScaleType(
       xScale,
       xAccessor?.format?.id === 'number' ||
@@ -399,6 +400,14 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const xScale = vis.params.categoryAxes[0].scale;
 
+  const mapColumn = buildExpressionFunction('mapColumn', {
+    id: 'all',
+    expression: '_all',
+    name: i18n.translate('visTypeXy.allDocsTitle', {
+      defaultMessage: 'All docs',
+    }),
+  });
+
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
       ...finalSeriesParams
@@ -452,12 +461,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         : undefined,
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
     splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
-    handleEmptyXAccessor: true,
     valueLabels: vis.params.labels.show ? 'show' : 'hide',
     useAdjustedInterval: true,
   });
 
-  const ast = buildExpression([visTypeXy]);
+  const ast = buildExpression([mapColumn, visTypeXy]);
 
   return ast.toAst();
 };

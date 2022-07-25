@@ -52,7 +52,6 @@ type GetSeriesPropsFn = (config: {
   formattedDatatableInfo: DatatableWithFormatInfo;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
-  handleEmptyXAccessor?: boolean;
   uiState?: PersistedState;
 }) => SeriesSpec;
 
@@ -302,14 +301,14 @@ const getColor: GetColorFn = (
     return overwriteColor;
   }
 
+  const name = getSeriesNameFn(series)?.toString() || '';
+
   const overwriteColors: Record<string, string> = uiState?.get ? uiState.get('vis.colors', {}) : {};
 
-  if (Object.keys(overwriteColors).includes(series.key)) {
-    return overwriteColors[series.key];
+  if (Object.keys(overwriteColors).includes(name)) {
+    return overwriteColors[name];
   }
   const colorAssignment = colorAssignments[layer.palette.name];
-
-  const name = getSeriesNameFn(series)?.toString() || '';
 
   const seriesLayers: SeriesLayer[] = [
     {
@@ -343,12 +342,11 @@ export const generateSeriesId = (
     SPLIT_CHAR
   );
 
-export const getMetaFromSeriesId = (seriesId: string, handleEmptyXAccessor?: boolean) => {
+export const getMetaFromSeriesId = (seriesId: string) => {
   const [layerId, xAccessor, yAccessor, ...splitAccessors] = seriesId.split(SPLIT_CHAR);
   return {
     layerId,
-    xAccessor:
-      xAccessor === EMPTY_ACCESSOR ? (handleEmptyXAccessor ? 'all' : undefined) : xAccessor,
+    xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
     yAccessor,
     splitAccessor: splitAccessors[0] === EMPTY_ACCESSOR ? undefined : splitAccessors,
   };
@@ -371,7 +369,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   formattedDatatableInfo,
   defaultXScaleType,
   fieldFormats,
-  handleEmptyXAccessor,
   uiState,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
@@ -421,19 +418,11 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       )
   );
 
-  let emptyX: Record<string, string> = {
+  const emptyX: Record<string, string> = {
     unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
       defaultMessage: '(empty)',
     }),
   };
-
-  if (handleEmptyXAccessor) {
-    emptyX = {
-      all: i18n.translate('expressionXY.xyChart.handledEmptyXLabel', {
-        defaultMessage: '_all',
-      }),
-    };
-  }
 
   if (!xColumnId) {
     rows = rows.map((row) => ({
@@ -466,7 +455,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       accessor,
       xColumnId
     ),
-    xAccessor: xColumnId || (handleEmptyXAccessor ? 'all' : 'unifiedX'),
+    xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),

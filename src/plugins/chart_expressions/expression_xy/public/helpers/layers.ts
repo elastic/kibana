@@ -199,8 +199,7 @@ export const getLayerTitles = (
   { xAccessor, accessors, splitAccessors = [], table, layerId }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
   { xTitle }: CustomTitles,
-  groups: GroupsConfiguration,
-  handleEmptyXAccessor?: boolean
+  groups: GroupsConfiguration
 ): LayerAccessorsTitles => {
   const mapTitle = (dimension?: string | ExpressionValueVisDimension) => {
     if (!dimension) {
@@ -215,11 +214,7 @@ export const getLayerTitles = (
     [accessor]: getTitleForYAccessor(layerId, accessor, groups, table.columns),
   });
 
-  const xColumnId = xAccessor
-    ? getAccessorByDimension(xAccessor, table.columns)
-    : handleEmptyXAccessor
-    ? 'all'
-    : undefined;
+  const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
   const yColumnIds = accessors.map((a) => getAccessorByDimension(a, table.columns));
   const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
 
@@ -245,19 +240,12 @@ export const getLayersTitles = (
   layers: CommonXYDataLayerConfig[],
   splitAccessors: SplitAccessors,
   customTitles: CustomTitles,
-  groups: GroupsConfiguration,
-  handleEmptyXAccessor?: boolean
+  groups: GroupsConfiguration
 ): LayersAccessorsTitles =>
   layers.reduce<LayersAccessorsTitles>(
     (formatters, layer) => ({
       ...formatters,
-      [layer.layerId]: getLayerTitles(
-        layer,
-        splitAccessors,
-        customTitles,
-        groups,
-        handleEmptyXAccessor
-      ),
+      [layer.layerId]: getLayerTitles(layer, splitAccessors, customTitles, groups),
     }),
     {}
   );

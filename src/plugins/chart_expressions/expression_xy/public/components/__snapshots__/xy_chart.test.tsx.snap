@@ -295,8 +295,251 @@ exports[`XYChart component it renders area 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "area",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -1031,8 +1274,251 @@ exports[`XYChart component it renders bar 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -1767,8 +2253,251 @@ exports[`XYChart component it renders horizontal bar 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": true,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -2503,8 +3232,251 @@ exports[`XYChart component it renders line 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "line",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -3239,8 +4211,251 @@ exports[`XYChart component it renders stacked area 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": true,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "area",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -3975,8 +5190,251 @@ exports[`XYChart component it renders stacked bar 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": true,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -4711,8 +6169,251 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": true,
+            "isPercentage": false,
+            "isStacked": true,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -5447,8 +7148,266 @@ exports[`XYChart component split chart should render split chart if both, splitR
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+            "splitRowAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {
+              "b": "b",
+            },
+            "splitRowTitles": Object {
+              "c": "c",
+            },
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -6256,8 +8215,260 @@ exports[`XYChart component split chart should render split chart if splitColumnA
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+            "splitRowAccessors": Object {},
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {
+              "b": "b",
+            },
+            "splitRowTitles": Object {},
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }
@@ -7058,8 +9269,260 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
   <ContextProvider
     value={
       Object {
+        "dataLayers": Array [
+          Object {
+            "accessors": Array [
+              "a",
+              "b",
+            ],
+            "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+            "isHistogram": false,
+            "isHorizontal": false,
+            "isPercentage": false,
+            "isStacked": false,
+            "layerId": "first",
+            "layerType": "data",
+            "palette": Object {
+              "name": "mock",
+              "params": Object {},
+              "type": "palette",
+            },
+            "seriesType": "bar",
+            "showLines": true,
+            "splitAccessors": Array [
+              "d",
+            ],
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+            "type": "dataLayer",
+            "xAccessor": "c",
+            "xScaleType": "ordinal",
+          },
+        ],
+        "fieldFormats": Object {
+          "first": Object {
+            "splitColumnAccessors": Object {},
+            "splitRowAccessors": Object {
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+            "splitSeriesAccessors": Object {
+              "d": Object {
+                "format": Object {
+                  "id": "string",
+                },
+                "formatter": Object {
+                  "convert": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        1652034840000,
+                      ],
+                      Array [
+                        1652122440000,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": 1652034840000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": 1652122440000,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            "xAccessors": Object {
+              "c": Object {
+                "id": "string",
+              },
+            },
+            "yAccessors": Object {
+              "a": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "0,0.000",
+                },
+              },
+              "b": Object {
+                "id": "number",
+                "params": Object {
+                  "pattern": "000,0",
+                },
+              },
+            },
+          },
+        },
+        "formattedDatatables": Object {
+          "first": Object {
+            "formattedColumns": Object {
+              "c": true,
+            },
+            "table": Object {
+              "columns": Array [
+                Object {
+                  "id": "a",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "0,0.000",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "a",
+                },
+                Object {
+                  "id": "b",
+                  "meta": Object {
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "000,0",
+                      },
+                    },
+                    "type": "number",
+                  },
+                  "name": "b",
+                },
+                Object {
+                  "id": "c",
+                  "meta": Object {
+                    "field": "order_date",
+                    "params": Object {
+                      "id": "string",
+                    },
+                    "sourceParams": Object {
+                      "params": Object {
+                        "interval": "auto",
+                      },
+                      "type": "date-histogram",
+                    },
+                    "type": "date",
+                  },
+                  "name": "c",
+                },
+                Object {
+                  "id": "d",
+                  "meta": Object {
+                    "type": "string",
+                  },
+                  "name": "ColD",
+                },
+              ],
+              "rows": Array [
+                Object {
+                  "a": 1,
+                  "b": 2,
+                  "c": 1652034840000,
+                  "d": "Foo",
+                },
+                Object {
+                  "a": 1,
+                  "b": 5,
+                  "c": 1652122440000,
+                  "d": "Bar",
+                },
+              ],
+              "type": "datatable",
+            },
+          },
+        },
         "legendPosition": "top",
         "setColor": [Function],
+        "titles": Object {
+          "first": Object {
+            "splitColumnTitles": Object {},
+            "splitRowTitles": Object {
+              "b": "b",
+            },
+            "splitSeriesTitles": Object {
+              "d": "ColD",
+            },
+            "xTitles": Object {
+              "c": "c",
+            },
+            "yTitles": Object {
+              "a": "a",
+              "b": "b",
+            },
+          },
+        },
         "uiState": undefined,
       }
     }

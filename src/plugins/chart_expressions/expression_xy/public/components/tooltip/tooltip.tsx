@@ -32,7 +32,6 @@ type Props = TooltipInfo & {
     splitRowAccessor?: string;
     splitColumnAccessor?: string;
   };
-  handleEmptyXAccessor?: boolean;
 };
 
 export const Tooltip: FC<Props> = ({
@@ -44,7 +43,6 @@ export const Tooltip: FC<Props> = ({
   formattedDatatables,
   splitAccessors,
   xDomain,
-  handleEmptyXAccessor,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
@@ -54,10 +52,7 @@ export const Tooltip: FC<Props> = ({
 
   const data: TooltipData[] = [];
   const seriesIdentifier = pickedValue.seriesIdentifier as XYChartSeriesIdentifier;
-  const { layerId, xAccessor, yAccessor } = getMetaFromSeriesId(
-    seriesIdentifier.specId,
-    handleEmptyXAccessor
-  );
+  const { layerId, xAccessor, yAccessor } = getMetaFromSeriesId(seriesIdentifier.specId);
   const { formattedColumns } = formattedDatatables[layerId];
   const layerTitles = titles[layerId];
   const layerFormats = fieldFormats[layerId];
