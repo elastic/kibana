@@ -200,6 +200,18 @@ export interface BlobStorageSettings {
   // Other blob store settings will go here once available
 }
 
+interface HttpEndpointDefinition {
+  /**
+   * Specify the tags for this endpoint.
+   *
+   * @example
+   * // This will enable access control to this endpoint for users that can access "myApp" only.
+   * { tags: ['access:myApp'] }
+   *
+   */
+  tags: string[];
+}
+
 export interface FileKind {
   /**
    * Unique file kind ID
@@ -217,30 +229,37 @@ export interface FileKind {
   blobStoreSettings?: BlobStorageSettings;
 
   /**
-   * Optionally specify which routes to create for the file kind
+   * Optionally specify which HTTP routes to create for the file kind
    */
   http: {
-    create?: {
-      tags: string[];
-    };
-    update?: {
-      tags: string[];
-    };
-    delete?: {
-      tags: string[];
-    };
-    getById?: {
-      tags: string[];
-    };
-    list?: {
-      tags: string[];
-    };
-    download?: {
-      tags: string[];
-    };
-    share?: {
-      tags: string[];
-    };
+    /**
+     * Enable creating this file type
+     */
+    create?: HttpEndpointDefinition;
+    /**
+     * Enable the file metadata to updated
+     */
+    update?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be deleted (metadata and contents)
+     */
+    delete?: HttpEndpointDefinition;
+    /**
+     * Enable file to be retrieved by ID.
+     */
+    getById?: HttpEndpointDefinition;
+    /**
+     * Enable file to be listed
+     */
+    list?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be downloaded
+     */
+    download?: HttpEndpointDefinition;
+    /**
+     * Enable the file to be shared publicly
+     */
+    share?: HttpEndpointDefinition;
   };
 }
 
