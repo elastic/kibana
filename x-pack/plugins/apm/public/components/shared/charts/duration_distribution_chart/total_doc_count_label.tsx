@@ -35,7 +35,8 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
         ? i18n.translate(
             'xpack.apm.durationDistributionChart.totalTransactionsCount',
             {
-              defaultMessage: '{totalDocCount} total transactions',
+              defaultMessage:
+                '{totalDocCount} total {totalDocCount, plural, one {transaction} other {transactions}}',
               values: {
                 totalDocCount,
               },
@@ -44,7 +45,8 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
         : i18n.translate(
             'xpack.apm.durationDistributionChart.totalSpansCount',
             {
-              defaultMessage: '{totalDocCount} total spans',
+              defaultMessage:
+                '{totalDocCount} total {totalDocCount, plural, one {span} other {spans}}',
               values: {
                 totalDocCount,
               },
