@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import { sumBy } from 'lodash';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
@@ -32,7 +33,10 @@ export const fetchDurationRanges = async ({
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
   searchMetrics: boolean;
-}): Promise<Array<{ key: number; doc_count: number }>> => {
+}): Promise<{
+  totalDocCount: number;
+  durationRanges: Array<{ key: number; doc_count: number }>;
+}> => {
   const { apmEventClient } = setup;
 
   const ranges = rangeSteps.reduce(
@@ -71,7 +75,7 @@ export const fetchDurationRanges = async ({
     },
   });
 
-  return (
+  const durationRanges =
     resp.aggregations?.logspace_ranges.buckets
       .map((d) => ({
         key: d.from,
@@ -79,6 +83,10 @@ export const fetchDurationRanges = async ({
       }))
       .filter(
         (d): d is { key: number; doc_count: number } => d.key !== undefined
-      ) ?? []
-  );
+      ) ?? [];
+
+  return {
+    totalDocCount: sumBy(durationRanges, 'doc_count'),
+    durationRanges,
+  };
 };

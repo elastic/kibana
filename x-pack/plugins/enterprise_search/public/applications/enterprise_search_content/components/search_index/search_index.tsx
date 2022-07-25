@@ -25,14 +25,13 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
-import { headerActions } from './components/header_actions/header_actions';
+import { getHeaderActions } from './components/header_actions/header_actions';
 import { IndexCreatedCallout } from './components/index_created_callout/callout';
 import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
-import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
@@ -150,10 +149,7 @@ export const SearchIndex: React.FC = () => {
       isLoading={indexApiStatus === Status.LOADING || indexApiStatus === Status.IDLE}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: [
-          ...headerActions,
-          ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
-        ],
+        rightSideItems: getHeaderActions(indexData),
       }}
     >
       <>

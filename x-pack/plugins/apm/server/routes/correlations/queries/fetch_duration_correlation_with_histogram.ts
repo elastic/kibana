@@ -75,7 +75,7 @@ export async function fetchDurationCorrelationWithHistogram({
 
   if (correlation !== null && ksTest !== null && !isNaN(ksTest)) {
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
-      const logHistogram = await fetchDurationRanges({
+      const { durationRanges: histogram } = await fetchDurationRanges({
         setup,
         chartType,
         start,
@@ -90,7 +90,7 @@ export async function fetchDurationCorrelationWithHistogram({
         ...fieldValuePair,
         correlation,
         ksTest,
-        histogram: logHistogram,
+        histogram,
       };
     } else {
       return {

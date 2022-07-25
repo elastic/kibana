@@ -135,7 +135,7 @@ export const fetchSignificantCorrelations = async ({
           }, undefined);
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
-    const logHistogram = await fetchDurationRanges({
+    const { durationRanges: histogram } = await fetchDurationRanges({
       setup,
       chartType,
       start,
@@ -154,7 +154,7 @@ export const fetchSignificantCorrelations = async ({
     if (fallbackResult) {
       fallbackResult = {
         ...fallbackResult,
-        histogram: logHistogram,
+        histogram,
       };
     }
   }
