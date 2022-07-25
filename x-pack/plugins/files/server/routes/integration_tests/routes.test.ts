@@ -68,13 +68,13 @@ describe('File HTTP API', () => {
     });
 
     test('without filters', async () => {
-      const result = await request.post(root, '/api/files/files/find').send({}).expect(200);
+      const result = await request.post(root, '/api/files/find').send({}).expect(200);
       expect(result.body.files).toHaveLength(3);
     });
 
     test('names', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({ name: ['firstFile', 'secondFile'] })
         .expect(200);
       expect(result.body.files).toHaveLength(2);
@@ -83,7 +83,7 @@ describe('File HTTP API', () => {
     test('file kind', async () => {
       {
         const result = await request
-          .post(root, `/api/files/files/find`)
+          .post(root, `/api/files/find`)
           .send({ kind: 'non-existent' })
           .expect(200);
         expect(result.body.files).toHaveLength(0);
@@ -91,7 +91,7 @@ describe('File HTTP API', () => {
 
       {
         const result = await request
-          .post(root, '/api/files/files/find')
+          .post(root, '/api/files/find')
           .send({ kind: testHarness.fileKind })
           .expect(200);
         expect(result.body.files).toHaveLength(3);
@@ -100,7 +100,7 @@ describe('File HTTP API', () => {
 
     test('status', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({
           status: 'READY',
         })
@@ -110,7 +110,7 @@ describe('File HTTP API', () => {
 
     test('combination', async () => {
       const result = await request
-        .post(root, '/api/files/files/find')
+        .post(root, '/api/files/find')
         .send({
           kind: testHarness.fileKind,
           name: ['firstFile', 'secondFile'],
@@ -128,7 +128,7 @@ describe('File HTTP API', () => {
     });
     test('returns usage metrics', async () => {
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {},
           countByStatus: {},
@@ -145,7 +145,7 @@ describe('File HTTP API', () => {
       const [file1, file2] = await Promise.all([createFile(), createFile(), createFile()]);
 
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {
             png: 3,
@@ -175,7 +175,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       {
-        const { body: metrics } = await request.get(root, '/api/files/files/metrics').expect(200);
+        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
         expect(metrics).toEqual({
           countByExtension: {
             png: 3,
