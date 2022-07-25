@@ -29,10 +29,11 @@ import {
   TypedLensByValueInput,
   XYCurveType,
   XYState,
-  FormulaPublicApi,
   YAxisMode,
   MinIndexPatternColumn,
   MaxIndexPatternColumn,
+  FormulaPublicApi,
+  FormulaIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -47,6 +48,7 @@ import {
   PERCENTILE,
   PERCENTILE_RANKS,
   ReportTypes,
+  FORMULA_COLUMN,
 } from './constants';
 import {
   ColumnFilter,
@@ -403,10 +405,11 @@ export class LensAttributes {
     layerConfig: LayerConfig,
     layerId: string,
     columnFilter?: string
-  ): Record<string, FieldBasedIndexPatternColumn> {
+  ): Record<string, FieldBasedIndexPatternColumn | FormulaIndexPatternColumn> {
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
-    const lensColumns: Record<string, FieldBasedIndexPatternColumn> = {};
+    const lensColumns: Record<string, FieldBasedIndexPatternColumn | FormulaIndexPatternColumn> =
+      {};
 
     // start at 1, because main y axis will have the first percentile breakdown
     for (let i = 1; i < PERCENTILE_RANKS.length; i++) {
@@ -522,6 +525,7 @@ export class LensAttributes {
   }) {
     const { breakdown, seriesConfig } = layerConfig;
     const {
+      formula,
       fieldMeta,
       columnType,
       fieldName,
@@ -530,6 +534,16 @@ export class LensAttributes {
       columnFilters,
       showPercentileAnnotations,
     } = this.getFieldMeta(sourceField, layerConfig);
+
+    if (columnType === FORMULA_COLUMN) {
+      return getDistributionInPercentageColumn({
+        layerId,
+        formula,
+        label: columnLabel ?? label,
+        dataView: layerConfig.indexPattern,
+        lensFormulaHelper: this.lensFormulaHelper!,
+      }).main;
+    }
 
     if (showPercentileAnnotations) {
       this.addThresholdLayer(fieldName, layerId, layerConfig);
@@ -607,9 +621,11 @@ export class LensAttributes {
         timeScale,
         paramFilters,
         showPercentileAnnotations,
+        formula,
       } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
+        formula,
         palette,
         fieldMeta,
         fieldName,
@@ -666,7 +682,10 @@ export class LensAttributes {
     forAccessorsKeys?: boolean
   ) {
     const { breakdown } = layerConfig;
-    const lensColumns: Record<string, FieldBasedIndexPatternColumn | SumIndexPatternColumn> = {};
+    const lensColumns: Record<
+      string,
+      FieldBasedIndexPatternColumn | SumIndexPatternColumn | FormulaIndexPatternColumn
+    > = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
 
@@ -678,6 +697,20 @@ export class LensAttributes {
         dataView: layerConfig.indexPattern,
         lensFormulaHelper: this.lensFormulaHelper!,
       }).supportingColumns;
+    }
+
+    if (mainSourceField && !forAccessorsKeys) {
+      const { columnLabel, formula, columnType } = this.getFieldMeta(mainSourceField, layerConfig);
+
+      if (columnType === FORMULA_COLUMN) {
+        return getDistributionInPercentageColumn({
+          label: columnLabel,
+          layerId,
+          formula,
+          dataView: layerConfig.indexPattern,
+          lensFormulaHelper: this.lensFormulaHelper!,
+        }).supportingColumns;
+      }
     }
 
     if (yAxisColumns.length === 1 && breakdown === PERCENTILE) {

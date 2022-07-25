@@ -42,6 +42,7 @@ export interface ExploratoryEmbeddableProps {
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
   legendPosition?: Position;
+  hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
@@ -83,6 +84,7 @@ export default function Embeddable({
   withActions = true,
   lensFormulaHelper,
   align,
+  hideTicks,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -125,6 +127,14 @@ export default function Embeddable({
   }
   if (typeof legendPosition !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
+  }
+
+  if (hideTicks) {
+    (attributesJSON.state.visualization as XYState).tickLabelsVisibilitySettings = {
+      x: false,
+      yRight: false,
+      yLeft: false,
+    };
   }
 
   const actions = useActions({
