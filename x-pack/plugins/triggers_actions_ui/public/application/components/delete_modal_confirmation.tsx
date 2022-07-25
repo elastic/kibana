@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
@@ -19,6 +19,8 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  showWarningText,
+  warningText,
   setIsLoadingState,
 }: {
   idsToDelete: string[];
@@ -34,6 +36,8 @@ export const DeleteModalConfirmation = ({
   onErrors: () => void;
   singleTitle: string;
   multipleTitle: string;
+  showWarningText: boolean;
+  warningText: string;
   setIsLoadingState: (isLoading: boolean) => void;
 }) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
@@ -56,6 +60,12 @@ export const DeleteModalConfirmation = ({
       defaultMessage:
         "You won't be able to recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
       values: { numIdsToDelete, singleTitle, multipleTitle },
+    }
+  );
+  const warningModalText = i18n.translate(
+    'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.warningText',
+    {
+      defaultMessage: warningText,
     }
   );
   const confirmButtonText = i18n.translate(
@@ -120,7 +130,15 @@ export const DeleteModalConfirmation = ({
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
     >
-      {confirmModalText}
+      {showWarningText && (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" color="warning" />
+          </EuiFlexItem>
+          <p>{warningModalText}</p>
+        </EuiFlexGroup>
+      )}
+      <p>{confirmModalText}</p>
     </EuiConfirmModal>
   );
 };

@@ -23,7 +23,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
+import { omit, sumBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
@@ -104,6 +104,15 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const [showWarningText, setShowWarningText] = useState<boolean>(false);
+  const singleWarningText = i18n.translate(
+    'xpack.triggersActionsUI.sections.actionsConnectorsList.singleWarningText',
+    { defaultMessage: 'This' }
+  );
+  const multipleWarningText = i18n.translate(
+    'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleWarningText',
+    { defaultMessage: 'At least one' }
+  );
 
   useEffect(() => {
     (async () => {
@@ -153,6 +162,15 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
+
+  function setDeleteConnectorWarning(connectors: string[]) {
+    const show =
+      sumBy(connectors, (c) => {
+        const action = actions.find((a) => a.id === c);
+        return action && action.referencedByCount ? action.referencedByCount : 0;
+      }) > 0;
+    setShowWarningText(show);
+  }
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -265,7 +283,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             <DeleteOperation
               canDelete={canDelete}
               item={item}
-              onDelete={() => setConnectorsToDelete([item.id])}
+              onDelete={() => {
+                setConnectorsToDelete([item.id]);
+                setDeleteConnectorWarning([item.id]);
+              }}
             />
             {item.isMissingSecrets ? (
               <>
@@ -370,7 +391,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                   color="danger"
                   data-test-subj="bulkDelete"
                   onClick={() => {
-                    setConnectorsToDelete(selectedItems.map((selected: any) => selected.id));
+                    const items = selectedItems.map((selected: any) => selected.id);
+                    setConnectorsToDelete(items);
+                    setDeleteConnectorWarning(items);
                   }}
                   title={
                     canDelete
@@ -439,6 +462,19 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         multipleTitle={i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
           { defaultMessage: 'connectors' }
+        )}
+        showWarningText={showWarningText}
+        warningText={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
+          {
+            defaultMessage:
+              '{connectors, plural, one {{singleWarningText}} other {{multipleWarningText}}} connector is used in a rule.',
+            values: {
+              connectors: connectorsToDelete.length,
+              singleWarningText,
+              multipleWarningText,
+            },
+          }
         )}
         setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
