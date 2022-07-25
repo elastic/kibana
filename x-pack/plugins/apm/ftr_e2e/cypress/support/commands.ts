@@ -84,6 +84,22 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add(
+  'updateAdvancedSettings',
+  (settings: Record<string, unknown>) => {
+    const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.request({
+      log: false,
+      method: 'POST',
+      url: `${kibanaUrl}/api/kibana/settings`,
+      body: { changes: settings },
+      headers: {
+        'kbn-xsrf': 'e2e_test',
+      },
+    });
+  }
+);
+
 // A11y configuration
 
 const axeConfig = {

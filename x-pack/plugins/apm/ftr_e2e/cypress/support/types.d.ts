@@ -16,5 +16,6 @@ declare namespace Cypress {
       apisIntercepted: string[];
       value: string;
     }): void;
+    updateAdvancedSettings(settings: Record<string, unknown>): void;
   }
 }

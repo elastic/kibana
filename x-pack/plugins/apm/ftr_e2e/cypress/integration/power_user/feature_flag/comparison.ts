@@ -29,14 +29,14 @@ describe('Comparison feature flag', () => {
     await synthtrace.clean();
   });
 
-  beforeEach(() => {
-    cy.loginAsEditorUser();
-  });
-
   describe('when comparison feature is enabled', () => {
+    beforeEach(() => {
+      cy.loginAsEditorUser();
+    });
+
     it('shows the flag as enabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
-
+      cy.contains('Comparison feature');
       cy.get(comparisonToggle)
         .should('have.attr', 'aria-checked')
         .and('equal', 'true');
@@ -62,21 +62,23 @@ describe('Comparison feature flag', () => {
   });
 
   describe('when comparison feature is disabled', () => {
-    // Reverts to default state, which is comparison enabled
+    beforeEach(() => {
+      cy.loginAsEditorUser();
+      //Disables comparison feature on advanced settings
+      cy.updateAdvancedSettings({
+        'observability:enableComparisonByDefault': false,
+      });
+    });
+
     after(() => {
-      cy.visit(settingsPath);
-      cy.get(comparisonToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
+      cy.updateAdvancedSettings({
+        'observability:enableComparisonByDefault': true,
+      });
     });
 
     it('shows the flag as disabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
-      cy.get(comparisonToggle).click();
-      cy.contains('Save changes').should('not.be.disabled');
-      cy.contains('Save changes').click();
-      cy.get(comparisonToggle).should('not.be.checked');
-
+      cy.contains('Comparison feature');
       cy.get(comparisonToggle)
         .should('have.attr', 'aria-checked')
         .and('equal', 'false');
@@ -89,7 +91,11 @@ describe('Comparison feature flag', () => {
     });
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
+      cy.intercept('GET', '/internal/apm/dependencies/top_dependencies?*').as(
+        'topDependenciesRequest'
+      );
       cy.visit('/app/apm/dependencies');
+      cy.wait('@topDependenciesRequest');
       cy.get('input[type="checkbox"]#comparison').should('not.be.checked');
       cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });
