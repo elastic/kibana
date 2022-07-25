@@ -1,5 +1,5 @@
 package_paths:
-  - /packages/production
+  - /packages/package-storage
   #  TODO remove temp
   - /packages/snapshot
   - /packages/test-packages
