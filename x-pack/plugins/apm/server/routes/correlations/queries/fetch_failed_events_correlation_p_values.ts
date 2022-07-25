@@ -101,7 +101,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    const histogram = await fetchDurationRanges({
+    const { durationRanges: histogram } = await fetchDurationRanges({
       setup,
       eventType,
       start,

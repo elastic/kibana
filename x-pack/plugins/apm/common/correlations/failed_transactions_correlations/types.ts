@@ -29,6 +29,7 @@ export interface FailedTransactionsCorrelationsResponse {
   failedTransactionsCorrelations?: FailedTransactionsCorrelation[];
   percentileThresholdValue?: number | null;
   overallHistogram?: HistogramItem[];
+  totalDocCount?: number;
   errorHistogram?: HistogramItem[];
   fieldStats?: FieldStats[];
   fallbackResult?: FailedTransactionsCorrelation;
