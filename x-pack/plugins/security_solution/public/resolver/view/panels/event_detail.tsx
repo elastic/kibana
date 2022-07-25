@@ -12,8 +12,8 @@
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import {
-  EuiBreadcrumb,
   EuiSpacer,
   EuiText,
   EuiDescriptionList,
@@ -32,10 +32,10 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { PanelLoading } from './panel_loading';
 import { PanelContentError } from './panel_content_error';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';

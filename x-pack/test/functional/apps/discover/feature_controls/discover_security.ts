@@ -90,6 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
       });
 
       after(async () => {
@@ -230,6 +231,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');

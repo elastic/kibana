@@ -6,15 +6,25 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
-import { ConsoleProps } from '..';
+import type { ConsoleProps } from '..';
 
 const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',
 });
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  margin-left: auto;
+  height: inherit;
+`;
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  align-self: flex-start;
+`;
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
@@ -40,17 +50,23 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       <EuiFlexItem grow={1} className="eui-textTruncate">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EuiButtonIcon
-          style={{ marginLeft: 'auto' }}
-          onClick={handleHelpButtonOnClick}
-          iconType="help"
-          title={HELP_LABEL}
-          aria-label={HELP_LABEL}
-          isSelected={isHelpOpen}
-          display={isHelpOpen ? 'fill' : 'empty'}
-        />
-      </EuiFlexItem>
+      {!isHelpOpen && (
+        <StyledEuiFlexItem grow={1}>
+          <StyledEuiButtonEmpty
+            style={{ marginLeft: 'auto' }}
+            onClick={handleHelpButtonOnClick}
+            iconType="help"
+            title={HELP_LABEL}
+            aria-label={HELP_LABEL}
+            isSelected={isHelpOpen}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.console.layoutHeader.helpButtonTitle"
+              defaultMessage="Help"
+            />
+          </StyledEuiButtonEmpty>
+        </StyledEuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

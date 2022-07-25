@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Unit } from '@kbn/datemath';
-import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Unit } from '@kbn/datemath';
+import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
-import { FieldValueQueryBar } from '../query_bar';
+import type { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
@@ -26,9 +26,9 @@ import { getTimeframeOptions } from './helpers';
 import { PreviewLogsComponent } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
-import { FieldValueThreshold } from '../threshold_input';
+import type { FieldValueThreshold } from '../threshold_input';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
@@ -52,6 +52,8 @@ export interface RulePreviewProps {
   machineLearningJobId: string[];
   anomalyThreshold: number;
   eqlOptions: EqlOptionsSelected;
+  newTermsFields: string[];
+  historyWindowSize: string;
 }
 
 const Select = styled(EuiSelect)`
@@ -77,6 +79,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   machineLearningJobId,
   anomalyThreshold,
   eqlOptions,
+  newTermsFields,
+  historyWindowSize,
 }) => {
   const { spaces } = useKibana().services;
   const { loading: isMlLoading, jobs } = useSecurityJobs(false);
@@ -121,6 +125,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     machineLearningJobId,
     anomalyThreshold,
     eqlOptions,
+    newTermsFields,
+    historyWindowSize,
   });
 
   // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types

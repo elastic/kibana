@@ -44,10 +44,6 @@ export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
   onClose: () => void;
 }
-export interface SolutionNavPanelItemProps {
-  item: DefaultSideNavItem;
-  onClose: () => void;
-}
 
 /**
  * Renders the side navigation panel for secondary links
@@ -137,6 +133,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
           }
           return acc;
         }, []);
+
+        if (!links.length) {
+          return null;
+        }
 
         return (
           <Fragment key={label}>

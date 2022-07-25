@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { handleActions, type Action } from 'redux-actions';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import {
   getMonitorList,
   getMonitorListSuccess,
@@ -15,9 +15,9 @@ import {
   clearRefreshedMonitorId,
   setUpdatingMonitorId,
 } from '../actions';
-import { MonitorSummariesResult } from '../../../../common/runtime_types';
-import { AppState } from '..';
-import { TestNowResponse } from '../api';
+import type { MonitorSummariesResult } from '../../../../common/runtime_types';
+import type { AppState } from '..';
+import type { TestNowResponse } from '../api';
 
 export interface MonitorList {
   loading: boolean;

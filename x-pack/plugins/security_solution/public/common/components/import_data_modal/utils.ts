@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ErrorToastOptions, Toast, ToastInput, ToastOptions } from '@kbn/core/public';
+import type { ErrorToastOptions, Toast, ToastInput, ToastOptions } from '@kbn/core/public';
 
 import * as i18n from './translations';
 
-import {
+import type {
   ImportDataResponse,
   ImportResponseError,
   ImportRulesResponseError,

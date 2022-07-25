@@ -9,11 +9,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import {
-  useCasesByStatus,
-  UseCasesByStatusProps,
-  UseCasesByStatusResults,
-} from './use_cases_by_status';
+import type { UseCasesByStatusProps, UseCasesByStatusResults } from './use_cases_by_status';
+import { useCasesByStatus } from './use_cases_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);

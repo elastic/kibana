@@ -70,6 +70,8 @@ export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.nullable(schema.number())),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
+  // Optional value that takes precedence over cluster's setting.
+  num_failure_retries: schema.maybe(schema.nullable(schema.number())),
 });
 
 export const sourceSchema = schema.object({

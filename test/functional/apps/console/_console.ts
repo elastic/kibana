@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
 
-GET _search
+# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }
 
@@ -51,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -124,6 +126,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with query params', () => {
+      it('should issue a successful request', async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(
+          '\n GET _cat/aliases?format=json&v=true&pretty=true'
+        );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
     describe('multiple requests output', () => {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
@@ -152,6 +170,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasWarningBadge()).to.be(true);
         expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
+      });
+    });
+
+    describe('with folded/unfolded lines in request body', () => {
+      const enterRequest = async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n\t\t"_source": []');
+        await PageObjects.console.clickPlay();
+      };
+
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+
+      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
+        await enterRequest();
+        await PageObjects.console.clickFoldWidget();
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.navigateToApp('console');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.closeHelpIfExists();
+        expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should restore the state of folding/unfolding when the page reloads', async () => {
+        await enterRequest();
+        await PageObjects.console.clickFoldWidget();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should not have folds by default', async () => {
+        await enterRequest();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(false);
       });
     });
   });

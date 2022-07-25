@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { RulePreview, RulePreviewProps } from '.';
+import type { RulePreviewProps } from '.';
+import { RulePreview } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
 
@@ -58,6 +59,8 @@ const defaultProps: RulePreviewProps = {
   anomalyThreshold: 50,
   machineLearningJobId: ['test-ml-job-id'],
   eqlOptions: {},
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
 };
 
 describe('PreviewQuery', () => {

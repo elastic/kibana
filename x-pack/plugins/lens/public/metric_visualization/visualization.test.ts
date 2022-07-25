@@ -372,7 +372,7 @@ describe('metric_visualization', () => {
                   true,
                 ],
               },
-              "function": "metricVis",
+              "function": "legacyMetricVis",
               "type": "function",
             },
           ],

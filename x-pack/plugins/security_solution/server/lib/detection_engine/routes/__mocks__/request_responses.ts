@@ -9,9 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 
-import { ActionResult } from '@kbn/actions-plugin/server';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,32 +25,28 @@ import {
   DETECTION_ENGINE_RULES_BULK_DELETE,
   DETECTION_ENGINE_RULES_BULK_CREATE,
 } from '../../../../../common/constants';
-import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
-import { RuleAlertType, HapiReadableStream } from '../../rules/types';
+import type { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import type { RuleAlertType, HapiReadableStream } from '../../rules/types';
 import { requestMock } from './request';
-import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
-import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../../schemas/rule_schemas';
+import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
-import {
-  RuleExecutionEvent,
-  RuleExecutionStatus,
-  RuleExecutionSummary,
-} from '../../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributes } from '../../rule_actions/legacy_types';
-import { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
+import type { LegacyIRuleActionsAttributes } from '../../rule_actions/legacy_types';
+import type { RuleExecutionSummariesByRuleId } from '../../rule_execution_log';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -316,28 +311,6 @@ export const createBulkMlRuleRequest = () => {
   });
 };
 
-// TODO: Replace this with a mocks file version
-export const createRuleWithActionsRequest = () => {
-  const payload = getCreateRulesSchemaMock();
-
-  return requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...payload,
-      throttle: '5m',
-      actions: [
-        {
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-          params: { message: 'Rule generated {{state.signals_count}} signals' },
-          action_type_id: '.slack',
-        },
-      ],
-    },
-  });
-};
-
 export const getSetSignalStatusByIdsRequest = () =>
   requestMock.create({
     method: 'post',
@@ -372,15 +345,6 @@ export const getSignalsAggsAndQueryRequest = () =>
     path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
-
-export const createActionResult = (): ActionResult => ({
-  id: 'result-1',
-  actionTypeId: 'action-id-1',
-  name: '',
-  config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
-});
 
 export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
@@ -419,15 +383,6 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
   outcome: 'exactMatch',
   ...getRuleMock(params),
-});
-
-export const updateActionResult = (): ActionResult => ({
-  id: 'result-1',
-  actionTypeId: 'action-id-1',
-  name: '',
-  config: {},
-  isPreconfigured: false,
-  isDeprecated: false,
 });
 
 export const getMockPrivilegesResult = () => ({
@@ -527,35 +482,6 @@ export const getRuleExecutionSummaries = (): RuleExecutionSummariesByRuleId => (
   '1ea5a820-4da1-4e82-92a1-2b43a7bece08': getRuleExecutionSummaryFailed(),
 });
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
-export const getLastFailures = (): RuleExecutionEvent[] => [
-  {
-    date: '2021-12-28T10:30:00.806Z',
-    status: RuleExecutionStatus.failed,
-    message: 'Rule failed',
-  },
-  {
-    date: '2021-12-28T10:25:00.806Z',
-    status: RuleExecutionStatus.failed,
-    message: 'Rule failed',
-  },
-  {
-    date: '2021-12-28T10:20:00.806Z',
-    status: RuleExecutionStatus.failed,
-    message: 'Rule failed',
-  },
-  {
-    date: '2021-12-28T10:15:00.806Z',
-    status: RuleExecutionStatus.failed,
-    message: 'Rule failed',
-  },
-  {
-    date: '2021-12-28T10:10:00.806Z',
-    status: RuleExecutionStatus.failed,
-    message: 'Rule failed',
-  },
-];
-
 export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsResponse => ({
   events: [
     {
@@ -639,22 +565,6 @@ export const getEmptySignalsResponse = (): estypes.SearchResponse<unknown> => ({
   aggregations: {
     alertsByGrouping: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
   },
-});
-
-export const getEmptyEqlSearchResponse = (): EqlSearchResponse<unknown> => ({
-  hits: { total: { value: 0, relation: 'eq' }, events: [] },
-  is_partial: false,
-  is_running: false,
-  took: 1,
-  timed_out: false,
-});
-
-export const getEmptyEqlSequencesResponse = (): EqlSearchResponse<unknown> => ({
-  hits: { total: { value: 0, relation: 'eq' }, sequences: [] },
-  is_partial: false,
-  is_running: false,
-  took: 1,
-  timed_out: false,
 });
 
 export const getSuccessfulSignalUpdateResponse = (): estypes.UpdateByQueryResponse => ({

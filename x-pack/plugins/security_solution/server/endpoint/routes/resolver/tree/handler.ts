@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import { validateTree } from '../../../../../common/endpoint/schema/resolver';
+import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 
 export function handleTree(

@@ -23,7 +23,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -32,9 +31,12 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaFeature } from '@kbn/features-plugin/common';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import {
+  ActionTypeRegistryContract,
+  RuleTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -49,7 +51,6 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
-
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -69,9 +70,9 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
-  features: FeaturesPluginStart;
-  kibanaFeatures: KibanaFeature[];
   sharedUX: SharedUXPluginStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -152,23 +153,13 @@ export class Plugin
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
-      // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-      // subset of this privilege are not authorized to access this endpoint and will receive a 404
-      // error that causes the Alerting view to fail to load.
-      let kibanaFeatures: KibanaFeature[];
-      try {
-        kibanaFeatures = await pluginsStart.features.getFeatures();
-      } catch (err) {
-        kibanaFeatures = [];
-      }
-
+      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       return renderApp({
         core: coreStart,
-        plugins: pluginsStart,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
-        kibanaFeatures,
         usageCollection: pluginsSetup.usageCollection,
         isDev: this.initContext.env.mode.dev,
       });
@@ -309,11 +300,7 @@ export class Plugin
       },
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(
-        coreStart.uiSettings,
-        pluginsStart.dataViews,
-        pluginsStart.lens
-      ),
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable({ ...coreStart, ...pluginsStart }),
       useRulesLink: createUseRulesLink(),
     };
   }

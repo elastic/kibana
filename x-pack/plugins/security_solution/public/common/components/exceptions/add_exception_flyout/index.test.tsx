@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
 import { AddExceptionFlyout } from '.';
@@ -29,7 +30,7 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { AlertData } from '../types';
+import type { AlertData } from '../types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../lib/kibana');

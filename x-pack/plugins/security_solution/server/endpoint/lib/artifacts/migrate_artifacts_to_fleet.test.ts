@@ -10,7 +10,7 @@ import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import {
+import type {
   Logger,
   SavedObjectsClient,
   SavedObjectsFindResponse,
@@ -18,10 +18,10 @@ import {
 } from '@kbn/core/server';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
-import { InternalArtifactCompleteSchema } from '../../schemas';
+import type { InternalArtifactCompleteSchema } from '../../schemas';
 import { generateArtifactEsGetSingleHitMock } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
-import { NewArtifact } from '@kbn/fleet-plugin/server/services';
-import { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { NewArtifact } from '@kbn/fleet-plugin/server/services';
+import type { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;
