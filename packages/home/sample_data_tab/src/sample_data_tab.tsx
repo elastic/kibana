@@ -19,6 +19,7 @@ import {
   METRIC_CLICK_DEMO_ENV_BUTTON,
   METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON,
   DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
+  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
 } from './constants';
 import { useServices } from './services';
 
@@ -48,7 +49,7 @@ export const SampleDataTab = () => {
       <EuiAccordion
         id="sampleDataTab"
         buttonContent={sampleDataLabel}
-        data-test-subj={DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON}
+        data-test-subj={DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION}
         buttonProps={{
           'data-test-subj': DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
         }}

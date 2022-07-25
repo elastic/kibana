@@ -23,6 +23,11 @@ export const DATA_TEST_SUBJ_DEMO_ENV_BUTTON = 'goToDemoEnvButton';
 export const DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON = 'showSampleDataButton';
 
 /**
+ * Test Subject name for the sample data accordion button.
+ */
+export const DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION = 'showSampleDataAccordion';
+
+/**
  * Metric name for counting number of clicks of the Demo Environment button.
  */
 export const METRIC_CLICK_DEMO_ENV_BUTTON = 'sample_data__demo_env_button';
