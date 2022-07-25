@@ -76,6 +76,8 @@ import { ActionAccordionFormProps } from './application/sections/action_connecto
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
+import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
+import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -118,6 +120,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
+  getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
 }
 
 interface PluginsSetup {
@@ -350,6 +353,9 @@ export class Plugin
       },
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
         return getRuleStatusPanelLazy(props);
+      },
+      getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
+        return getRuleAlertsSummaryLazy(props);
       },
     };
   }
