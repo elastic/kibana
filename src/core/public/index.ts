@@ -44,6 +44,7 @@ import type {
 } from '@kbn/core-fatal-errors-browser';
 import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -74,7 +75,7 @@ import type {
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import type { ApplicationSetup, ApplicationStart } from './application';
 import type { SavedObjectsStart } from './saved_objects';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';

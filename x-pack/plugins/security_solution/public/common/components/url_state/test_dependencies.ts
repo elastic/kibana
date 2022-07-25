@@ -8,7 +8,6 @@
 import type { Query } from '@kbn/es-query';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
-import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
 import type { UrlStateContainerPropTypes, LocationTypes } from './types';
@@ -22,19 +21,6 @@ export const getFilterQuery = (): Query => ({
   query: 'host.name:"siem-es"',
   language: 'kuery',
 });
-
-export const mockSetFilterQuery: jest.Mock = inputsActions.setFilterQuery as unknown as jest.Mock;
-export const mockAddGlobalLinkTo: jest.Mock = inputsActions.addGlobalLinkTo as unknown as jest.Mock;
-export const mockAddTimelineLinkTo: jest.Mock =
-  inputsActions.addTimelineLinkTo as unknown as jest.Mock;
-export const mockRemoveGlobalLinkTo: jest.Mock =
-  inputsActions.removeGlobalLinkTo as unknown as jest.Mock;
-export const mockRemoveTimelineLinkTo: jest.Mock =
-  inputsActions.removeTimelineLinkTo as unknown as jest.Mock;
-export const mockSetAbsoluteRangeDatePicker: jest.Mock =
-  inputsActions.setAbsoluteRangeDatePicker as unknown as jest.Mock;
-export const mockSetRelativeRangeDatePicker: jest.Mock =
-  inputsActions.setRelativeRangeDatePicker as unknown as jest.Mock;
 
 jest.mock('../../store/actions', () => ({
   inputsActions: {

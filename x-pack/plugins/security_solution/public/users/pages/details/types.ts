@@ -6,18 +6,13 @@
  */
 
 import type { ActionCreator } from 'typescript-fsa';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../common/components/navigation/types';
 
 import type { UsersTableType } from '../../store/model';
 import type { usersModel } from '../../store';
-
-interface UsersDetailsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
 
 interface UserBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
@@ -29,18 +24,10 @@ interface UserBodyComponentDispatchProps {
   usersDetailsPagePath: string;
 }
 
-interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
-  setUsersDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
 export interface UsersDetailsProps {
   detailName: string;
   usersDetailsPagePath: string;
 }
-
-export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
-  UsersDetailsComponentDispatchProps &
-  UsersQueryProps;
 
 export type KeyUsersDetailsNavTabWithoutMlPermission = UsersTableType.events &
   UsersTableType.alerts;
@@ -62,9 +49,3 @@ export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
     indexPattern: DataViewBase;
     type: usersModel.UsersType;
   };
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;

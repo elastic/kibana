@@ -339,6 +339,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
       eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
       blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
+      threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/deploy-elastic-endpoint.html#system-extension-endpoint`,

@@ -64,7 +64,7 @@ export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> 
 }
 
 export interface Props {
-  /** Optional field to edit */
+  /** Optional field to edit or preselected field to create */
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;

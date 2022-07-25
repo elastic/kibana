@@ -1924,6 +1924,25 @@
         }
       }
     },
+    "/agents/tags": {
+      "get": {
+        "summary": "Agent Tags - List",
+        "description": "List all agent tags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/get_agent_tags_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-tags"
+      }
+    },
     "/agent_policies": {
       "get": {
         "summary": "Agent policies - List",
@@ -4322,6 +4341,18 @@
           }
         ]
       },
+      "get_agent_tags_response": {
+        "title": "Get Agent Tags response",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "new_agent_policy": {
         "title": "New agent policy",
         "type": "object",
@@ -4942,7 +4973,6 @@
           }
         },
         "required": [
-          "id",
           "is_default",
           "name",
           "host"

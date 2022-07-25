@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import { UPTIME_RULE_TYPES } from '../common/constants/alerts';
 import { umDynamicSettings } from './legacy_uptime/lib/saved_objects/uptime_settings';
@@ -29,7 +30,12 @@ export const uptimeFeature = {
       catalogue: ['uptime'],
       api: ['uptime-read', 'uptime-write', 'lists-all'],
       savedObject: {
-        all: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
+        all: [
+          umDynamicSettings.name,
+          syntheticsMonitorType,
+          syntheticsApiKeyObjectType,
+          privateLocationsSavedObjectName,
+        ],
         read: [],
       },
       alerting: {
@@ -51,7 +57,12 @@ export const uptimeFeature = {
       api: ['uptime-read', 'lists-read'],
       savedObject: {
         all: [],
-        read: [umDynamicSettings.name, syntheticsMonitorType, syntheticsApiKeyObjectType],
+        read: [
+          umDynamicSettings.name,
+          syntheticsMonitorType,
+          syntheticsApiKeyObjectType,
+          privateLocationsSavedObjectName,
+        ],
       },
       alerting: {
         rule: {

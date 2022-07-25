@@ -11,3 +11,4 @@ export { useSorting } from './use_sorting';
 export type { UseFetchAlerts } from './use_fetch_alerts';
 export { useFetchAlerts } from './use_fetch_alerts';
 export { DefaultSort } from './constants';
+export { useBulkActions } from './use_bulk_actions';

@@ -63,6 +63,11 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
+      },
     },
     mac: {
       events: {
@@ -146,6 +151,14 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      remediation: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
@@ -155,7 +168,15 @@ export const policyFactoryWithoutPaidFeatures = (
           ? undefined
           : {
               ...policy.windows.advanced,
-              rollback: undefined,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
             },
       ransomware: {
         mode: ProtectionModes.off,
@@ -168,6 +189,11 @@ export const policyFactoryWithoutPaidFeatures = (
       behavior_protection: {
         mode: ProtectionModes.off,
         supported: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,

@@ -31,8 +31,6 @@ import {
 } from './rules_schema.mocks';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
-export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
-
 describe('rules_schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getRulesSchemaMock();
@@ -665,9 +663,9 @@ describe('rules_schema', () => {
       expect(emptyArray).toEqual(expected);
     });
 
-    test('should array of size 1 given a "saved_query"', () => {
+    test('should array of size 2 given a "saved_query"', () => {
       const array = addSavedId({ type: 'saved_query' });
-      expect(array.length).toEqual(1);
+      expect(array.length).toEqual(2);
     });
   });
 
