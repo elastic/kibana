@@ -42,7 +42,7 @@ export const fetchConnectorByIndexName = async (
   try {
     const connectorResult = await client.asCurrentUser.search<ConnectorDocument>({
       index: CONNECTORS_INDEX,
-      query: { term: { 'index_name.keyword': indexName } },
+      query: { term: { index_name: indexName } },
     });
     const result = connectorResult.hits.hits[0]?._source
       ? {
@@ -73,7 +73,7 @@ export const fetchConnectors = async (
     let connectors = connectorResult.hits.hits;
     let length = connectors.length;
     const query: QueryDslQueryContainer = indexNames
-      ? { terms: { 'index_name.keyword': indexNames } }
+      ? { terms: { index_name: indexNames } }
       : { match_all: {} };
     while (length >= 1000) {
       const newConnectorResult = await client.asCurrentUser.search<ConnectorDocument>({

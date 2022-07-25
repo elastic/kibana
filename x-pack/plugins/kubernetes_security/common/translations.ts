@@ -55,6 +55,20 @@ export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
     defaultMessage: 'Show more {name}',
   });
 
+export const TREE_NAVIGATION_COLLAPSE = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.collapse',
+  {
+    defaultMessage: 'Collapse Tree Navigation',
+  }
+);
+
+export const TREE_NAVIGATION_EXPAND = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.expand',
+  {
+    defaultMessage: 'Expand Tree Navigation',
+  }
+);
+
 export const CHART_TOGGLE_SHOW = i18n.translate('xpack.kubernetesSecurity.chartsToggle.show', {
   defaultMessage: 'Show charts',
 });
@@ -95,14 +109,14 @@ export const COUNT_WIDGET_CONTAINER_IMAGES = i18n.translate(
 export const CONTAINER_NAME_SESSION = i18n.translate(
   'xpack.kubernetesSecurity.containerNameWidget.containerImage',
   {
-    defaultMessage: 'Container Images Session',
+    defaultMessage: 'Container images',
   }
 );
 
 export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
   'xpack.kubernetesSecurity.containerNameWidget.containerImageCountColumn',
   {
-    defaultMessage: 'Count',
+    defaultMessage: 'Session count',
   }
 );
 

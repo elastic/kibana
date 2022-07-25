@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const aiopsExplainLogRateSpikesSchema = schema.object({
   start: schema.number(),
   end: schema.number(),
-  kuery: schema.string(),
+  searchQuery: schema.string(),
   timeFieldName: schema.string(),
   includeFrozen: schema.maybe(schema.boolean()),
   /** Analysis selection time ranges */

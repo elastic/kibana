@@ -7,7 +7,6 @@
 
 import {
   ADD_EXCEPTION_BTN,
-  ALERT_RISK_SCORE_HEADER,
   ALERT_CHECKBOX,
   CHART_SELECT,
   CLOSE_ALERT_BTN,
@@ -111,12 +110,6 @@ export const goToOpenedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
-export const refreshAlerts = () => {
-  // ensure we've refetched fields the first time index is defined
-  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(REFRESH_BUTTON).first().click({ force: true });
-};
-
 export const openFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(OPEN_ALERT_BTN).click();
@@ -153,12 +146,6 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
   }
-};
-
-export const sortRiskScore = () => {
-  cy.get(ALERT_RISK_SCORE_HEADER).click();
-  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const investigateFirstAlertInTimeline = () => {

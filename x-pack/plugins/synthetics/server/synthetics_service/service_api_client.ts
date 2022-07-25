@@ -13,7 +13,7 @@ import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
-import { MonitorFields, ServiceLocations, ServiceLocationErrors } from '../../common/runtime_types';
+import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../common/config';
 
@@ -32,15 +32,15 @@ export interface ServiceData {
 export class ServiceAPIClient {
   private readonly username?: string;
   private readonly authorization: string;
-  public locations: ServiceLocations;
+  public locations: PublicLocations;
   private logger: Logger;
-  private readonly config: ServiceConfig;
+  private readonly config?: ServiceConfig;
   private readonly kibanaVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
-    const { username, password } = config;
+    const { username, password } = config ?? {};
     this.username = username;
     this.kibanaVersion = server.kibanaVersion;
 
@@ -61,7 +61,7 @@ export class ServiceAPIClient {
     const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
     const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
 
-    const config = this.config;
+    const config = this.config ?? {};
 
     // If using basic-auth, ignore certificate configs
     if (this.authorization) return baseHttpsAgent;
@@ -105,6 +105,8 @@ export class ServiceAPIClient {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
+      /* url is required for service locations, but omitted for private locations.
+      /* this.locations is only service locations */
       const httpsAgent = this.getHttpsAgent(url);
 
       if (httpsAgent) {
@@ -171,9 +173,8 @@ export class ServiceAPIClient {
     const promises: Array<Observable<unknown>> = [];
 
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = allMonitors.filter(
-        ({ locations }) =>
-          !locations || locations.length === 0 || locations?.find((loc) => loc.id === id)
+      const locMonitors = allMonitors.filter(({ locations }) =>
+        locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
         promises.push(

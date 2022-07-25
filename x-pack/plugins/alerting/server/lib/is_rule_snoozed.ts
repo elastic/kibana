@@ -12,7 +12,7 @@ import { isSnoozeActive } from './snooze/is_snooze_active';
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
 
-export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
+function getActiveSnoozes(rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null) {
     return null;
   }
@@ -24,6 +24,12 @@ export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
       // Sort in descending snoozeEndTime order
       .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as ActiveSnoozes
   );
+}
+
+export function getActiveScheduledSnoozes(
+  rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
+): ActiveSnoozes | null {
+  return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
 }
 
 export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {

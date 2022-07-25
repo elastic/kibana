@@ -106,6 +106,7 @@ export const fetchRuleExecutionEvents = async ({
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
 
+// do not delete
 export const fetchInstalledIntegrations = async ({
   packages,
   signal,

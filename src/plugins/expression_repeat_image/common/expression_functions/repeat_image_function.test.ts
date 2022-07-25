@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import {
   getElasticLogo,
   getElasticOutline,

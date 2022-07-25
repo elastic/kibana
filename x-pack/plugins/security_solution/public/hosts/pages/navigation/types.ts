@@ -46,5 +46,3 @@ export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
   filterQuery?: string;
   pageFilters?: Filter[];
 };
-
-export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;

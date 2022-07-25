@@ -7,8 +7,30 @@
 
 import moment from 'moment';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from './filters';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
+
+/**
+ * Constructs the configs telemetry schema from a collection of config saved objects
+ */
+export const templateConfigs = (
+  configsData: PackagePolicy[],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined
+) =>
+  configsData.map((item) => {
+    const template: ListTemplate = {
+      '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
+    };
+
+    return {
+      ...template,
+      ...item,
+    };
+  });
 
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
@@ -26,16 +48,10 @@ export const templatePacks = (
       license_id: licenseInfo?.uid,
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredPackItem = copyAllowlistedFields(
-      packEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
     return {
       ...template,
       id: item.id,
-      ...filteredPackItem,
+      ...(item.attributes as TelemetryEvent),
     };
   });
 
@@ -55,16 +71,10 @@ export const templateSavedQueries = (
       license_id: licenseInfo?.uid,
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredSavedQueryItem = copyAllowlistedFields(
-      savedQueryEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
     return {
       ...template,
       id: item.id,
-      ...filteredSavedQueryItem,
+      ...(item.attributes as TelemetryEvent),
     };
   });
 

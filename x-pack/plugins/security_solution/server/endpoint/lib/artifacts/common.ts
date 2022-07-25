@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type {
-  InternalArtifactSchema,
-  InternalArtifactCompleteSchema,
-} from '../../schemas/artifacts';
-import { internalArtifactCompleteSchema } from '../../schemas/artifacts';
+import type { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
@@ -39,12 +35,6 @@ export const ManifestConstants = {
 
 export const getArtifactId = (artifact: InternalArtifactSchema) => {
   return `${artifact.identifier}-${artifact.decodedSha256}`;
-};
-
-export const isCompleteArtifact = (
-  artifact: InternalArtifactSchema
-): artifact is InternalArtifactCompleteSchema => {
-  return internalArtifactCompleteSchema.is(artifact);
 };
 
 export const reportErrors = (logger: Logger, errors: Error[]) => {

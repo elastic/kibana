@@ -11,10 +11,6 @@ import type {
   StatusChangeArgs,
 } from '../../rule_execution_log';
 
-export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLogForExecutorsFactory;
-}
-
 export const createPreviewRuleExecutionLogger = (
   loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
 ) => {
