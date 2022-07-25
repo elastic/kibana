@@ -129,7 +129,7 @@ function TableListView<T extends UserContentCommonSchema>({
     tableColumns: [
       {
         field: 'title',
-        name: i18n.translate('kibana-react.tableListView.titleColumnName', {
+        name: i18n.translate('contentManagementTableList.titleColumnName', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -146,7 +146,7 @@ function TableListView<T extends UserContentCommonSchema>({
       },
       {
         field: 'description',
-        name: i18n.translate('kibana-react.tableListView.descriptionColumnName', {
+        name: i18n.translate('contentManagementTableList.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
         render: (field: keyof T, record: T) => <span>{record.attributes.description}</span>,
@@ -197,14 +197,14 @@ function TableListView<T extends UserContentCommonSchema>({
       const actions: EuiTableActionsColumnType<T>['actions'] = [
         {
           name: (item) =>
-            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+            i18n.translate('contentManagementTableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
               values: {
                 itemDescription: get(item, rowHeader),
               },
             }),
           description: i18n.translate(
-            'kibana-react.tableListView.listing.table.editActionDescription',
+            'contentManagementTableList.listing.table.editActionDescription',
             {
               defaultMessage: 'Edit',
             }
@@ -217,7 +217,7 @@ function TableListView<T extends UserContentCommonSchema>({
       ];
 
       columns.push({
-        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
+        name: i18n.translate('contentManagementTableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
         width: '100px',
@@ -288,7 +288,7 @@ function TableListView<T extends UserContentCommonSchema>({
       toast.addDanger({
         title: toMountPoint(
           <FormattedMessage
-            id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
+            id="contentManagementTableList.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName }}
           />,
@@ -322,7 +322,7 @@ function TableListView<T extends UserContentCommonSchema>({
           fill
         >
           <FormattedMessage
-            id="kibana-react.tableListView.listing.createNewItemButtonLabel"
+            id="contentManagementTableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"
             values={{ entityName }}
           />
@@ -341,7 +341,7 @@ function TableListView<T extends UserContentCommonSchema>({
             <h1>
               {
                 <FormattedMessage
-                  id="kibana-react.tableListView.listing.noAvailableItemsMessage"
+                  id="contentManagementTableList.listing.noAvailableItemsMessage"
                   defaultMessage="No {entityNamePlural} available."
                   values={{ entityNamePlural }}
                 />
@@ -360,7 +360,7 @@ function TableListView<T extends UserContentCommonSchema>({
         <EuiCallOut
           title={
             <FormattedMessage
-              id="kibana-react.tableListView.listing.fetchErrorTitle"
+              id="contentManagementTableList.listing.fetchErrorTitle"
               defaultMessage="Fetching listing failed"
             />
           }
@@ -369,7 +369,7 @@ function TableListView<T extends UserContentCommonSchema>({
         >
           <p>
             <FormattedMessage
-              id="kibana-react.tableListView.listing.fetchErrorDescription"
+              id="contentManagementTableList.listing.fetchErrorDescription"
               defaultMessage="The {entityName} listing could not be fetched: {message}."
               values={{
                 entityName,

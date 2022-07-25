@@ -31,7 +31,7 @@ export function ListingLimitWarning<T>({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="kibana-react.tableListView.listing.listingLimitExceededTitle"
+            id="contentManagementTableList.listing.listingLimitExceededTitle"
             defaultMessage="Listing limit exceeded"
           />
         }
@@ -41,7 +41,7 @@ export function ListingLimitWarning<T>({
         <p>
           {canEditAdvancedSettings ? (
             <FormattedMessage
-              id="kibana-react.tableListView.listing.listingLimitExceededDescription"
+              id="contentManagementTableList.listing.listingLimitExceededDescription"
               defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
               values={{
@@ -52,7 +52,7 @@ export function ListingLimitWarning<T>({
                 advancedSettingsLink: (
                   <EuiLink href={advancedSettingsLink}>
                     <FormattedMessage
-                      id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
+                      id="contentManagementTableList.listing.listingLimitExceeded.advancedSettingsLinkText"
                       defaultMessage="Advanced Settings"
                     />
                   </EuiLink>
@@ -61,7 +61,7 @@ export function ListingLimitWarning<T>({
             />
           ) : (
             <FormattedMessage
-              id="kibana-react.tableListView.listing.listingLimitExceededDescriptionNoPermissions"
+              id="contentManagementTableList.listing.listingLimitExceededDescriptionNoPermissions"
               defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                   the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
               values={{

@@ -30,7 +30,7 @@ export function ConfirmDeleteModal<T>({
 }: Props<T>) {
   let deleteButton = (
     <FormattedMessage
-      id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
+      id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
       defaultMessage="Delete"
     />
   );
@@ -38,7 +38,7 @@ export function ConfirmDeleteModal<T>({
   if (isDeletingItems) {
     deleteButton = (
       <FormattedMessage
-        id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
+        id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
         defaultMessage="Deleting"
       />
     );
@@ -48,7 +48,7 @@ export function ConfirmDeleteModal<T>({
     <EuiConfirmModal
       title={
         <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
+          id="contentManagementTableList.listing.deleteSelectedConfirmModal.title"
           defaultMessage="Delete {itemCount} {entityName}?"
           values={{
             itemCount: items.length,
@@ -61,7 +61,7 @@ export function ConfirmDeleteModal<T>({
       onConfirm={onConfirm}
       cancelButtonText={
         <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+          id="contentManagementTableList.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
           defaultMessage="Cancel"
         />
       }
@@ -70,7 +70,7 @@ export function ConfirmDeleteModal<T>({
     >
       <p>
         <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
+          id="contentManagementTableList.listing.deleteConfirmModalDescription"
           defaultMessage="You can't recover deleted {entityNamePlural}."
           values={{ entityNamePlural }}
         />

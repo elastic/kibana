@@ -71,7 +71,7 @@ export function Table<T extends UserContentCommonSchema>({
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
-          id="kibana-react.tableListView.listing.deleteButtonMessage"
+          id="contentManagementTableList.listing.deleteButtonMessage"
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selectedIds.length,
@@ -108,7 +108,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const noItemsMessage = (
     <FormattedMessage
-      id="kibana-react.tableListView.listing.noMatchedItemsMessage"
+      id="contentManagementTableList.listing.noMatchedItemsMessage"
       defaultMessage="No {entityNamePlural} matched your search."
       values={{ entityNamePlural }}
     />

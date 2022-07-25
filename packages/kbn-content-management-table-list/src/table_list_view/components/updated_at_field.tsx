@@ -16,7 +16,7 @@ export const UpdatedAtField: FC<{ dateTime?: string }> = ({ dateTime }) => {
   if (!dateTime) {
     return (
       <EuiToolTip
-        content={i18n.translate('kibana-react.tableListView.updatedDateUnknownLabel', {
+        content={i18n.translate('contentManagementTableList.updatedDateUnknownLabel', {
           defaultMessage: 'Last updated unknown',
         })}
       >

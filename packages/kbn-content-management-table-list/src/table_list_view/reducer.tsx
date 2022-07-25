@@ -35,7 +35,7 @@ function getTableState<T extends UserContentCommonSchema>(
     tableColumns = [
       {
         field: 'updatedAt',
-        name: i18n.translate('kibana-react.tableListView.lastUpdatedColumnTitle', {
+        name: i18n.translate('contentManagementTableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
         render: (field: string, record: { updatedAt?: string }) => (
