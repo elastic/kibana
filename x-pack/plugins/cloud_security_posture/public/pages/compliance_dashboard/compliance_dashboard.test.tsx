@@ -6,17 +6,24 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
-import { DASHBOARD_CONTAINER, MISSING_FINDINGS_NO_DATA_CONFIG } from './test_subjects';
+import { DASHBOARD_CONTAINER } from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_compliance_dashboard_data_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 const mockDashboardData = {
   stats: {
@@ -162,6 +169,15 @@ const mockDashboardData = {
   ],
 };
 
+const toBeOrNotToBe = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
+  be.forEach((testId) => {
+    expect(screen.getByTestId(testId)).toBeInTheDocument();
+  });
+  notToBe.forEach((testId) => {
+    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+  });
+};
+
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -195,6 +211,70 @@ describe('<ComplianceDashboard />', () => {
     );
   };
 
+  it('no findings state: not-deployed - shows NotDeployed instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'not-deployed' },
+      })
+    );
+    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
+  });
+
+  it('no findings state: indexing - shows Indexing instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexing' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
+  });
+
+  it('no findings state: index-timeout - shows IndexTimeout instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'index-timeout' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
+  });
+
   it('shows dashboard when there are findings in latest findings index', () => {
     (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
@@ -204,7 +284,13 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    expect(screen.queryByTestId(MISSING_FINDINGS_NO_DATA_CONFIG)).not.toBeInTheDocument();
-    expect(screen.getByTestId(DASHBOARD_CONTAINER)).toBeInTheDocument();
+    toBeOrNotToBe({
+      be: [DASHBOARD_CONTAINER],
+      notToBe: [
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
   });
 });

@@ -77,7 +77,7 @@ export const NoFindingsStates = () => {
   const status = getSetupStatus.data?.status;
 
   const render = () => {
-    if (status === 'not-deployed' || true) return <NotDeployed />; // integration installed, but no agents added
+    if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
     if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
   };

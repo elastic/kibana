@@ -14,9 +14,12 @@ import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
@@ -27,6 +30,7 @@ describe('<Benchmarks />', () => {
         data: { status: 'indexed' },
       })
     );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   const renderBenchmarks = (

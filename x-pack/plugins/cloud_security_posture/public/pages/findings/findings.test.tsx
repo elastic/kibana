@@ -5,58 +5,141 @@
  * 2.0.
  */
 import React from 'react';
+import Chance from 'chance';
 import type { UseQueryResult } from 'react-query';
-import { render, screen } from '@testing-library/react';
 import { of } from 'rxjs';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { Findings } from './findings';
 import { TestProvider } from '../../test/test_provider';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { DataView } from '@kbn/data-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { render, screen } from '@testing-library/react';
+import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('./es_pit/use_findings_es_pit');
+const chance = new Chance();
+
+const toBeOrNotToBe = ({ be = [], notToBe = [] }: { be: string[]; notToBe: string[] }) => {
+  be.forEach((testId) => {
+    expect(screen.getByTestId(testId)).toBeInTheDocument();
+  });
+  notToBe.forEach((testId) => {
+    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+  });
+};
 
 beforeEach(() => {
   jest.restoreAllMocks();
+  (useFindingsEsPit as jest.Mock).mockImplementation(() => ({
+    pitQuery: createReactQueryResponse({
+      status: 'success',
+      data: [],
+    }),
+    setPitId: () => {},
+    pitIdRef: chance.guid(),
+  }));
 });
 
-const Wrapper = ({
-  data = dataPluginMock.createStartContract(),
-  unifiedSearch = unifiedSearchPluginMock.createStartContract(),
-  charts = chartPluginMock.createStartContract(),
-  discover = discoverPluginMock.createStartContract(),
-}: {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  charts: ChartsPluginStart;
-  discover: DiscoverStart;
-}) => (
-  <TestProvider deps={{ data, unifiedSearch, charts, discover }}>
-    <Findings />
-  </TestProvider>
-);
+const renderFindingsPage = () => {
+  render(
+    <TestProvider
+      deps={{
+        data: dataPluginMock.createStartContract(),
+        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        charts: chartPluginMock.createStartContract(),
+        discover: discoverPluginMock.createStartContract(),
+      }}
+    >
+      <Findings />
+    </TestProvider>
+  );
+};
 
-describe.skip('<Findings />', () => {
+describe('<Findings />', () => {
+  it('no findings state: not-deployed - shows NotDeployed instead of findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'not-deployed' },
+      })
+    );
+    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderFindingsPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
+      notToBe: [
+        TEST_SUBJECTS.FINDINGS_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
+  });
+
+  it('no findings state: indexing - shows Indexing instead of findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexing' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderFindingsPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
+      notToBe: [
+        TEST_SUBJECTS.FINDINGS_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+      ],
+    });
+  });
+
+  it('no findings state: index-timeout - shows IndexTimeout instead of findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'index-timeout' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderFindingsPage();
+
+    toBeOrNotToBe({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
+      notToBe: [
+        TEST_SUBJECTS.FINDINGS_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
+  });
+
   it("renders the success state component when 'latest findings' DataView exists and request status is 'success'", async () => {
-    const data = dataPluginMock.createStartContract();
-    const unifiedSearch = unifiedSearchPluginMock.createStartContract();
-    const charts = chartPluginMock.createStartContract();
-    const discover = discoverPluginMock.createStartContract();
-    const source = await data.search.searchSource.create();
+    const source = await dataPluginMock.createStartContract().search.searchSource.create();
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
+      status: 'success',
       data: { status: 'indexed' },
     }));
     (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
@@ -70,10 +153,15 @@ describe.skip('<Findings />', () => {
       }),
     } as UseQueryResult<DataView>);
 
-    render(
-      <Wrapper data={data} unifiedSearch={unifiedSearch} charts={charts} discover={discover} />
-    );
+    renderFindingsPage();
 
-    expect(await screen.findByTestId(TEST_SUBJECTS.FINDINGS_CONTAINER)).toBeInTheDocument();
+    toBeOrNotToBe({
+      be: [TEST_SUBJECTS.FINDINGS_CONTAINER],
+      notToBe: [
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+      ],
+    });
   });
 });
