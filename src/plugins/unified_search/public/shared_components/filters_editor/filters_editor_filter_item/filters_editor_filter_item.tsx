@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -43,34 +43,41 @@ export function FilterItem({
   const operator: Operator | undefined = getOperatorFromFilter(filter);
   const params: Filter['meta']['params'] = getFilterParams(filter);
 
-  const [, setSelectedParams] = useState<Filter['meta']['params']>(getFilterParams(filter));
+  const onHandleField = useCallback(() => {
+    (field: DataViewField) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { dataView, field, operator, params, path, filter },
+      });
+    };
+  }, [dispatch, dataView, operator, params, path, filter]);
 
-  const onHandleField = (field: DataViewField) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
-    });
-  };
+  const onHandleOperator = useCallback(() => {
+    (operator: Operator, params: Filter['meta']['params']) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { dataView, field, operator, params, path, filter },
+      });
+    };
+  }, [dispatch, dataView, field, path, filter]);
 
-  const onHandleOperator = (operator: Operator, params: Filter['meta']['params']) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
-    });
-  };
+  const onHandleParamsChange = useCallback(() => {
+    (params: Filter['meta']['params']) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { dataView, field, operator, params, path, filter },
+      });
+    };
+  }, [dispatch, dataView, field, operator, path, filter]);
 
-  const onHandleParamsChange = (params: Filter['meta']['params']) => {
-    dispatch({
-      type: 'updateFilter',
-      payload: { dataView, field, operator, params, path },
-    });
-  };
-
-  const onHandleParamsUpdate = (value: string) => {
-    setSelectedParams((prevState: Filter['meta']['params']) => ({
-      params: [value, ...(prevState.params || [])],
-    }));
-  };
+  const onHandleParamsUpdate = useCallback(() => {
+    (params: Filter['meta']['params']) => {
+      dispatch({
+        type: 'updateFilter',
+        payload: { dataView, field, operator, params, path, filter },
+      });
+    };
+  }, [dispatch, dataView, field, operator, path, filter]);
 
   const onRemoveFilter = useCallback(() => {
     dispatch({
@@ -92,7 +99,7 @@ export function FilterItem({
         },
       });
     },
-    [dataView.id, dispatch, path]
+    [dispatch, dataView.id, path]
   );
 
   const onAddButtonClick = useCallback(() => onAddFilter(ConditionTypes.AND), [onAddFilter]);

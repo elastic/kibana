@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { ConditionTypes } from './filters_editor_condition_types';
 
 const PATH_SEPARATOR = '.';
@@ -149,10 +151,11 @@ export const removeFilter = (filters: Filter[], path: string) => {
 export const updateFilter = (
   filters: Filter[],
   path: string,
-  params: {
-    // todo: add more parameters
-    dataViewId: string | undefined;
-  }
+  dataView: DataView,
+  field?: DataViewField,
+  operator?: Operator,
+  params?: Filter['meta']['params'],
+  filter?: Filter
 ) => {
   return [...filters];
 };

@@ -32,8 +32,6 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
       this.props.value
     );
 
-    // debugger
-
     return (
       <EuiFormRow fullWidth={this.props.fullWidth} isInvalid={isInvalid} error={errorMessage}>
         {this.isSuggestingValues() ? (

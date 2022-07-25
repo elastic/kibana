@@ -33,6 +33,7 @@ export interface UpdateFilterPayload {
   operator?: Operator | undefined;
   params?: Filter['meta']['params'];
   path: string;
+  filter: Filter;
 }
 
 /** @internal **/
@@ -71,7 +72,15 @@ export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActi
       return {
         ...state,
         // todo:
-        filters: updateFilter(state.filters, action.payload),
+        filters: updateFilter(
+          state.filters,
+          action.payload.path,
+          action.payload.dataView,
+          action.payload.field,
+          action.payload.operator,
+          action.payload.params,
+          action.payload.filter
+        ),
       };
     case 'removeFilter':
       return {
