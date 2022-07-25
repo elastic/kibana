@@ -81,7 +81,6 @@ export interface RuleEventLogListCommonProps {
   localStorageKey?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
-  customLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   fetchRuleSummary?: boolean;
 }
@@ -110,6 +109,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     refreshToken,
     requestRefresh,
     fetchRuleSummary = true,
+    loadExecutionLogAggregations,
   } = props;
 
   const {
@@ -118,9 +118,6 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     onChangeDuration,
     isLoadingRuleSummary = false,
   } = props as RuleEventLogListStackManagementProps;
-
-  const loadExecutionLogAggregations =
-    props.customLoadExecutionLogAggregations || props.loadExecutionLogAggregations;
 
   const { uiSettings, notifications } = useKibana().services;
 
@@ -339,7 +336,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   }, [localStorageKey, visibleColumns]);
 
   return (
-    <div style={ruleEventListContainerStyle}>
+    <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
       <RuleExecutionSummaryAndChartWithApi
         rule={rule}
