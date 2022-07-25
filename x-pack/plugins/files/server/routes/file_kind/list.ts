@@ -6,7 +6,6 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
-import type { FileJSON } from '../../../common';
 import type { ListFileKindHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 
@@ -30,21 +29,9 @@ export const handler: FileKindsRequestHandler<unknown, Query> = async (
     query: { page, perPage },
   } = req;
   const { fileService } = await files;
-  let results: FileJSON[] = [];
-  try {
-    const response = await fileService.asCurrentUser().list({ fileKind, page, perPage });
-    results = response.map((result) => result.toJSON());
-  } catch (e) {
-    return res.customError({
-      statusCode: 500,
-      body: {
-        message:
-          'Something went wrong while update file attributes. Check server logs for more details.',
-      },
-    });
-  }
+  const response = await fileService.asCurrentUser().list({ fileKind, page, perPage });
   const body: Response = {
-    files: results,
+    files: response.map((result) => result.toJSON()),
   };
   return res.ok({ body });
 };

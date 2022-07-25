@@ -11,6 +11,7 @@ import { Readable } from 'stream';
 
 import type { File } from '../../../common';
 import type { DownloadFileKindHttpEndpoint } from '../../../common/api_routes';
+import { fileErrors } from '../../file';
 
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
@@ -46,13 +47,23 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  const body: Response = await file.downloadContent();
-  return res.ok({
-    body,
-    headers: {
-      'content-type': file.mimeType ?? 'application/octet-stream',
-      // note, this name can be overridden by the client if set via a "download" attribute.
-      'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
-    },
-  });
+  try {
+    const body: Response = await file.downloadContent();
+    return res.ok({
+      body,
+      headers: {
+        'content-type': file.mimeType ?? 'application/octet-stream',
+        // note, this name can be overridden by the client if set via a "download" attribute.
+        'content-disposition': `attachment; filename="${fileName || getDownloadedFileName(file)}"`,
+      },
+    });
+  } catch (e) {
+    if (e instanceof fileErrors.NoDownloadAvailableError) {
+      return res.notFound({ body: e.message });
+    }
+    return res.customError({
+      statusCode: 500,
+      body: e,
+    });
+  }
 };

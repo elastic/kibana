@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import type { UploadFileKindHttpEndpoint } from '../../../common/api_routes';
+import { fileErrors } from '../../file';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
@@ -39,8 +40,11 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   try {
     await file.uploadContent(stream as Readable);
   } catch (e) {
-    if (e?.message.startsWith('Already uploaded file')) {
-      return res.badRequest({ body: 'File content already uploaded' });
+    if (
+      e instanceof fileErrors.ContentAlreadyUploadedError ||
+      e instanceof fileErrors.UploadInProgressError
+    ) {
+      return res.badRequest({ body: e });
     }
     throw e;
   }
