@@ -20,6 +20,7 @@ import { fetchConnectorByIndexName } from './fetch_connectors';
 const createConnector = async (
   document: ConnectorDocument,
   client: IScopedClusterClient,
+  language: string | null,
   deleteExisting: boolean
 ): Promise<{ id: string; index_name: string }> => {
   const index = document.index_name;
@@ -42,7 +43,7 @@ const createConnector = async (
     document,
     index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({ index: document.index_name });
+  await client.asCurrentUser.indices.create({ index });
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
@@ -50,12 +51,13 @@ const createConnector = async (
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  input: { delete_existing_connector?: boolean; index_name: string }
+  input: { delete_existing_connector?: boolean; index_name: string; language: string | null }
 ): Promise<{ id: string; index_name: string }> => {
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
     index_name: input.index_name,
+    language: input.language,
     last_seen: null,
     last_sync_error: null,
     last_sync_status: null,
@@ -66,13 +68,18 @@ export const addConnector = async (
     sync_now: false,
   };
   try {
-    return await createConnector(document, client, !!input.delete_existing_connector);
+    return await createConnector(
+      document,
+      client,
+      input.language,
+      !!input.delete_existing_connector
+    );
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       // This means .ent-search-connectors index doesn't exist yet
       // So we first have to create it, and then try inserting the document again
       await setupConnectorsIndices(client.asCurrentUser);
-      return await createConnector(document, client, false);
+      return await createConnector(document, client, input.language, false);
     } else {
       throw error;
     }

@@ -228,10 +228,6 @@ export interface ThreatEnrichment {
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
-export interface SortWithTieBreaker {
-  [key: string]: string;
-}
-
 export interface ThreatMatchNamedQuery {
   id: string;
   index: string;

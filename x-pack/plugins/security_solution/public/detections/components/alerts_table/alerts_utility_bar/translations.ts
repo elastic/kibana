@@ -63,34 +63,6 @@ export const TAKE_ACTION = i18n.translate(
   }
 );
 
-export const BATCH_ACTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActionsTitle',
-  {
-    defaultMessage: 'Batch actions',
-  }
-);
-
-export const BATCH_ACTION_VIEW_SELECTED_IN_HOSTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.viewSelectedInHostsTitle',
-  {
-    defaultMessage: 'View selected in hosts',
-  }
-);
-
-export const BATCH_ACTION_VIEW_SELECTED_IN_NETWORK = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.viewSelectedInNetworkTitle',
-  {
-    defaultMessage: 'View selected in network',
-  }
-);
-
-export const BATCH_ACTION_VIEW_SELECTED_IN_TIMELINE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.viewSelectedInTimelineTitle',
-  {
-    defaultMessage: 'View selected in timeline',
-  }
-);
-
 export const BATCH_ACTION_OPEN_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.batchActions.openSelectedTitle',
   {
