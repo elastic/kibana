@@ -30,7 +30,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_sync_error: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
-
+      name: 'connector',
       scheduling: {
         enabled: false,
         interval: '',
