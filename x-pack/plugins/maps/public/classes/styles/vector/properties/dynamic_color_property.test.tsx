@@ -157,7 +157,7 @@ describe('renderLegendDetailRow', () => {
   });
 
   describe('categorical', () => {
-    test('Should render categorical legend with breaks from default', async () => {
+    test('Should render categorical legend with breaks from color ramp', async () => {
       const colorStyle = makeProperty({
         type: COLOR_MAP_TYPE.CATEGORICAL,
         useCustomColorPalette: false,
@@ -603,6 +603,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           colorCategory: 'palette_0',
+          otherCategoryColor: 'grey',
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -613,7 +614,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           '#54B399',
           'CN',
           '#6092C0',
-          '#D36086',
+          'grey',
         ]);
       });
     });
@@ -645,9 +646,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
           customColorPalette: [
-            { stop: null, color: '#f7faff' },
             { stop: 'MX', color: '#072f6b' },
           ],
+          otherCategoryColor: '#f7faff',
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
