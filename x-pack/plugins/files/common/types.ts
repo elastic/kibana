@@ -135,6 +135,11 @@ export type FileShareSavedObjectAttributes = {
   created_at: string;
 
   /**
+   * Secret token used to access the associated file.
+   */
+  token: string;
+
+  /**
    * Human friendly name for this share token.
    */
   name?: string;
@@ -153,7 +158,15 @@ export type FileShareSavedObjectAttributes = {
 /**
  * Attributes of a file that represent a serialised version of the file.
  */
-export type FileShareJSON = FileShareSavedObjectAttributes & { id: string; fileId: string };
+export interface FileShareJSON {
+  id: string;
+  created: FileShareSavedObjectAttributes['created_at'];
+  validUntil: FileShareSavedObjectAttributes['valid_until'];
+  name?: FileShareSavedObjectAttributes['name'];
+  fileId: string;
+}
+
+export type FileShareJSONWithToken = FileShareJSON & { token: string };
 
 export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
@@ -170,7 +183,7 @@ export interface File<Meta = unknown> extends FileJSON<Meta> {
 
   delete(): Promise<void>;
 
-  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSON>;
+  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSONWithToken>;
 
   listShares(): Promise<FileShareJSON[]>;
 

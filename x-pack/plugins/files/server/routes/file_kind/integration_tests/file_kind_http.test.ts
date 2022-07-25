@@ -160,4 +160,38 @@ describe('File kind HTTP API', () => {
 
     await request.delete(root, `/api/files/share/${fileKind}/${token}`).expect(200);
   });
+
+  test('list shares', async () => {
+    {
+      const {
+        body: { shares },
+      } = await request.get(root, `/api/files/share/${fileKind}`).expect(200);
+      expect(shares).toEqual([]);
+    }
+
+    const { id } = await createFile();
+    await request
+      .post(root, `/api/files/share/${fileKind}/${id}`)
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
+      .expect(200);
+    await request
+      .post(root, `/api/files/share/${fileKind}/${id}`)
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
+      .expect(200);
+
+    {
+      const {
+        body: { shares },
+      } = await request.get(root, `/api/files/share/${fileKind}?forFileId=${id}`).expect(200);
+      expect(shares).toHaveLength(2);
+      expect(shares[0]).toEqual({
+        id: expect.any(String),
+        created: expect.any(String),
+        token: expect.any(String),
+        validUntil: expect.any(Number),
+        name: 'my-share',
+        fileId: id,
+      });
+    }
+  });
 });

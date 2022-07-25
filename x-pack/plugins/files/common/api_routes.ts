@@ -6,7 +6,7 @@
  */
 
 import { PLUGIN_ID } from './constants';
-import type { FileJSON, FilesMetrics } from './types';
+import type { FileJSON, FileShareJSON, FileShareJSONWithToken, FilesMetrics } from './types';
 
 export const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
@@ -15,6 +15,11 @@ export const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 export const FILES_SHARE_API_BASE_PATH = `${API_BASE_PATH}/share`;
 
 export const FILES_PUBLIC_API_BASE_PATH = `${API_BASE_PATH}/public`;
+
+interface Pagination {
+  page?: number;
+  perPage?: number;
+}
 
 export interface HttpApiInterfaceEntryDefinition<
   P = unknown,
@@ -73,7 +78,7 @@ export type GetByIdFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type ListFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
-  { page?: number; perPage?: number },
+  Pagination,
   unknown,
   { files: FileJSON[] }
 >;
@@ -94,7 +99,7 @@ export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
-  { perPage?: number; page?: number },
+  Pagination,
   {
     /**
      * Filter for set of file-kinds
@@ -151,9 +156,7 @@ export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
      */
     name?: string;
   },
-  {
-    token: string;
-  }
+  FileShareJSONWithToken
 >;
 
 export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
@@ -164,5 +167,14 @@ export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   {
     ok: true;
+  }
+>;
+
+export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  Pagination & { forFileId?: string },
+  unknown,
+  {
+    shares: FileShareJSON[];
   }
 >;

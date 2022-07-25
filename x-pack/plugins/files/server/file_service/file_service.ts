@@ -58,6 +58,11 @@ export interface FileServiceStart {
   getShareObject: FileShareServiceStart['get'];
 
   /**
+   * List share objects
+   */
+  listShareObjects: FileShareServiceStart['list'];
+
+  /**
    * Update an instance of a share object
    */
   updateShareObject: FileShareServiceStart['update'];

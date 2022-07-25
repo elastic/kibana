@@ -86,6 +86,7 @@ export class FileServiceFactory {
       getShareObject: internalFileShareService.get.bind(internalFileShareService),
       updateShareObject: internalFileShareService.update.bind(internalFileShareService),
       deleteShareObject: internalFileShareService.delete.bind(internalFileShareService),
+      listShareObjects: internalFileShareService.list.bind(internalFileShareService),
     };
   }
 

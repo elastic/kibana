@@ -55,7 +55,12 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   try {
     const share = await file.share({ name, validUntil });
     const body: Response = {
-      token: share.id,
+      id: share.id,
+      created: share.created,
+      fileId: share.fileId,
+      token: share.token,
+      validUntil: share.validUntil,
+      name: share.name,
     };
     return res.ok({
       body,
