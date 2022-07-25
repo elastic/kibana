@@ -23,7 +23,20 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
 };
 
 export const getFilterDepth = (path: string) => {
-  return path.split('.').length || 0 + 1;
+  return path.split('.').length || 1;
+};
+
+export const getFilterByPath = (filters: Filter[], path: string) => {
+  const depth = getFilterDepth(path);
+  return depth;
+};
+
+export const addFilter = (
+  filters: Filter[],
+  payload: { path: string; dataViewId: string | undefined }
+) => {
+  const newFilter = buildEmptyFilter(true, payload.dataViewId);
+  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilter);
 };
 
 export const insertFilterInFilterGroup = (arr: Filter[], index: number, newItem: Filter) => [
@@ -61,15 +74,6 @@ const goIntoFilersGroup = (
       newFilter
     );
   }
-};
-
-export const addFilter = (
-  filters: Filter[],
-  payload: { path: string; dataViewId: string | undefined }
-) => {
-  const newFilter = buildEmptyFilter(true, payload.dataViewId);
-
-  return goIntoFilersGroup(filters, orderInFilterGroup(payload.path), payload.path, newFilter);
 };
 
 export const addFilterGroupWithEmptyFilter = (
