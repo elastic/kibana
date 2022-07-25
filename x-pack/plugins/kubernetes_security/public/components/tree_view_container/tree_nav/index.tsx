@@ -14,7 +14,7 @@ import {
 import { useStyles } from './styles';
 import { IndexPattern, GlobalFilter, TreeNavSelection } from '../../../types';
 import { DynamicTreeView } from '../dynamic_tree_view';
-import { addTimerangeToQuery } from '../../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../../utils/add_timerange_and_default_filter_to_query';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
 import { TreeViewKind, TreeViewOptionsGroup } from './types';
 
@@ -31,7 +31,7 @@ export const TreeNav = ({ indexPattern, globalFilter, onSelect, hasSelection }: 
   const [selected, setSelected] = useState('');
 
   const filterQueryWithTimeRange = useMemo(() => {
-    return addTimerangeToQuery(
+    return addTimerangeAndDefaultFilterToQuery(
       globalFilter.filterQuery,
       globalFilter.startDate,
       globalFilter.endDate
