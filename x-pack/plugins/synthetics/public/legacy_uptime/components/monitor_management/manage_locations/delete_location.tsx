@@ -75,7 +75,7 @@ const DO_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesLabel'
   defaultMessage: 'Yes, do it',
 });
 
-const DO_NOT_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.noLabel', {
+const DO_NOT_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.doNotLabel', {
   defaultMessage: "No, don't do it",
 });
 
