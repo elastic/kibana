@@ -10,8 +10,8 @@
  * Use * syntax so that these exports do not break when internal
  * types are stripped.
  */
-export * from './capabilities';
 export * from './app_category';
+export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   SavedObject,
   SavedObjectsNamespaceType,
