@@ -23,11 +23,13 @@ export const updateConnectorScheduling = async (
   });
   const connector = connectorResult._source;
   if (connector) {
-    return await client.asCurrentUser.index<ConnectorDocument>({
+    const result = await client.asCurrentUser.index<ConnectorDocument>({
       document: { ...connector, scheduling },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
+    await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+    return result;
   } else {
     throw new Error(
       i18n.translate('xpack.enterpriseSearch.server.connectors.scheduling.error', {

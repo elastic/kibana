@@ -9,7 +9,8 @@
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
@@ -21,3 +22,8 @@ export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('Cha
 
 export const [getFieldFormats, setFieldFormats] =
   createGetterSetter<FieldFormatsStart>('FieldFormats');
+
+export const [getUsageCollection, setUsageCollection] = createGetterSetter<UsageCollectionStart>(
+  'UsageCollection',
+  false
+);
