@@ -17,7 +17,7 @@ import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_b
 import { FindingsByResourceTable } from './findings_by_resource_table';
 import {
   getFindingsPageSizeInfo,
-  addFilter,
+  getFilters,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -26,7 +26,6 @@ import {
 import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -39,6 +38,7 @@ const getDefaultQuery = ({
   filters,
   pageIndex: 0,
   pageSize: 10,
+  sortDirection: 'desc',
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -56,8 +56,6 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
-  useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
-
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
@@ -75,6 +73,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    */
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery(urlQuery),
+    sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
   });
@@ -131,13 +130,20 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
                 pageIndex: urlQuery.pageIndex,
                 totalItemCount: findingsGroupByResource.data?.total || 0,
               })}
-              setTableOptions={({ page }) =>
-                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              setTableOptions={({ sort, page }) =>
+                setUrlQuery({
+                  sortDirection: sort?.direction,
+                  pageIndex: page.index,
+                  pageSize: page.size,
+                })
               }
+              sorting={{
+                sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              }}
               onAddFilter={(field, value, negate) =>
                 setUrlQuery({
                   pageIndex: 0,
-                  filters: addFilter({
+                  filters: getFilters({
                     filters: urlQuery.filters,
                     dataView,
                     field,
