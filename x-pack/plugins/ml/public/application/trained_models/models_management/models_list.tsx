@@ -17,7 +17,6 @@ import {
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -50,13 +49,13 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import {
+  BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
-  BUILT_IN_MODEL_TYPE,
 } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { TestTrainedModelFlyout, isTestable, isTestEnabled } from './test_models';
+import { isTestable, isTestEnabled, TestTrainedModelFlyout } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -754,23 +753,5 @@ export const ModelsList: FC<Props> = ({
         />
       )}
     </>
-  );
-};
-
-export const RefreshModelsListButton: FC<{ refresh: () => Promise<void>; isLoading: boolean }> = ({
-  refresh,
-  isLoading,
-}) => {
-  return (
-    <EuiButtonEmpty
-      data-test-subj={`mlTrainedModelsRefreshListButton${isLoading ? ' loading' : ' loaded'}`}
-      onClick={refresh}
-      isLoading={isLoading}
-    >
-      <FormattedMessage
-        id="xpack.ml.trainedModels.modelsList.refreshManagementList"
-        defaultMessage="Refresh"
-      />
-    </EuiButtonEmpty>
   );
 };
