@@ -9,7 +9,7 @@ import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
 import { shouldCompose, useCompositeImage } from './use_composite_image';
-import * as compose from '../utils/browser_journey/compose_screenshot_images';
+import * as compose from '../utils/monitor_test_result/compose_screenshot_images';
 
 const MIME = 'image/jpeg';
 
