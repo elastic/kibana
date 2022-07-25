@@ -51,25 +51,6 @@ export const getFormComponentMock = (): {
   };
 };
 
-interface DeferredInterface<T = void> {
-  promise: Promise<T>;
-  resolve: (data: T) => void;
-  reject: (e: Error) => void;
-}
-
-export const getDeferred = function <T = void>(): DeferredInterface<T> {
-  let resolve: DeferredInterface<T>['resolve'];
-  let reject: DeferredInterface<T>['reject'];
-
-  const promise = new Promise<T>((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
-
-  // @ts-ignore
-  return { promise, resolve, reject };
-};
-
 export const getFirstCard = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
   {

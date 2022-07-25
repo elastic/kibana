@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
-import type { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
+import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -149,7 +149,7 @@ export const createHostIsolation = async ({
   endpointId: string;
   comment?: string;
   caseIds?: string[];
-}): Promise<HostIsolationResponse> =>
+}): Promise<ResponseActionApiResponse> =>
   isolateHost({
     endpoint_ids: [endpointId],
     comment,
@@ -173,7 +173,7 @@ export const createHostUnIsolation = async ({
   endpointId: string;
   comment?: string;
   caseIds?: string[];
-}): Promise<HostIsolationResponse> =>
+}): Promise<ResponseActionApiResponse> =>
   unIsolateHost({
     endpoint_ids: [endpointId],
     comment,

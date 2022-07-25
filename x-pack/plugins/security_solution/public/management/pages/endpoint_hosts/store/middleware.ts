@@ -22,7 +22,7 @@ import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
@@ -264,7 +264,7 @@ const handleIsolateEndpointHost = async (
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    let response: HostIsolationResponse;
+    let response: ResponseActionApiResponse;
 
     if (action.payload.type === 'unisolate') {
       response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
@@ -274,12 +274,12 @@ const handleIsolateEndpointHost = async (
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createLoadedResourceState<HostIsolationResponse>(response),
+      payload: createLoadedResourceState<ResponseActionApiResponse>(response),
     });
   } catch (error) {
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
+      payload: createFailedResourceState<ResponseActionApiResponse>(error.body ?? error),
     });
   }
 };
