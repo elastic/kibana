@@ -71,7 +71,7 @@ const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.delete',
   defaultMessage: 'Delete location',
 });
 
-const DO_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesLabel', {
+const DO_IT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesDoItLabel', {
   defaultMessage: 'Yes, do it',
 });
 
