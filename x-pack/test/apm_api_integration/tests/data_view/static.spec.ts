@@ -20,11 +20,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
   function createDataViewViaApmApi() {
-    return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
+    return apmApiClient.writeUser({ endpoint: 'POST /internal/apm/data_view/static' });
   }
 
   function deleteDataView() {
-    // return supertest.delete('/api/saved_objects/<type>/<id>').set('kbn-xsrf', 'foo').expect(200)
     return supertest
       .delete(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`)
       .set('kbn-xsrf', 'foo')
@@ -51,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('does not create data view', async () => {
         expect(response.status).to.be(200);
-        expect(response.body.created).to.be(false);
+        expect(response.body.dataView).to.be(undefined);
       });
 
       it('cannot fetch data view', async () => {
@@ -79,7 +78,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('successfully creates the apm data view', async () => {
           expect(response.status).to.be(200);
-          expect(response.body.created).to.be(true);
+
+          expect(response.body.dataView!.id).to.be('apm_static_index_pattern_id');
+          expect(response.body.dataView!.name).to.be('APM');
+          expect(response.body.dataView!.title).to.be(
+            'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+          );
         });
 
         describe('when fetching the data view', async () => {
