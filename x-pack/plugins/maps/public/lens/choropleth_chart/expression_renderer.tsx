@@ -9,13 +9,43 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
+
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
+/** @internal **/
+const extractVisualizationType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.child) {
+        return recursiveGet(item.child);
+      } else {
+        return item;
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
 
 export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDependencies>) {
   return {
@@ -48,6 +78,20 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         // ignore error, lack of EMS file layers will be surfaced in dimension editor
       }
 
+      const renderComplete = () => {
+        const executionContext = handlers.getExecutionContext();
+        const containerType = extractContainerType(executionContext);
+        const visualizationType = extractVisualizationType(executionContext);
+
+        if (containerType && visualizationType) {
+          plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+            `render_${visualizationType}_regionmap`,
+          ]);
+        }
+
+        handlers.done();
+      };
+
       ReactDOM.render(
         <ChoroplethChart
           {...config}
@@ -57,9 +101,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
           mapEmbeddableFactory={mapEmbeddableFactory}
         />,
         domNode,
-        () => {
-          handlers.done();
-        }
+        renderComplete
       );
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },

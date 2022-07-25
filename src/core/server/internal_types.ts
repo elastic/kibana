@@ -36,7 +36,7 @@ import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
