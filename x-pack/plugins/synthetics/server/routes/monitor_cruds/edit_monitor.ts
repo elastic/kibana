@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import {
+  SavedObjectsUpdateResponse,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
@@ -70,9 +74,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
             namespace: previousMonitor.namespaces?.[0],
           }
         );
+      const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
       const editedMonitor = {
-        ...normalizeSecrets(decryptedPreviousMonitor).attributes,
+        ...normalizedPreviousMonitor,
         ...monitor,
       };
 
@@ -101,7 +106,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         editedMonitor,
         editedMonitorSavedObject,
         previousMonitor,
+        decryptedPreviousMonitor,
         syntheticsMonitorClient,
+        savedObjectsClient,
       });
 
       // Return service sync errors in OK response
@@ -127,31 +134,48 @@ export const syncEditedMonitor = async ({
   editedMonitor,
   editedMonitorSavedObject,
   previousMonitor,
+  decryptedPreviousMonitor,
   server,
   syntheticsMonitorClient,
+  savedObjectsClient,
 }: {
   editedMonitor: SyntheticsMonitor;
   editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
+  decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }) => {
-  const errors = await syntheticsMonitorClient.editMonitor(
-    editedMonitor as MonitorFields,
-    editedMonitorSavedObject.id
-  );
+  try {
+    const errors = await syntheticsMonitorClient.editMonitor(
+      editedMonitor as MonitorFields,
+      editedMonitorSavedObject.id
+    );
 
-  sendTelemetryEvents(
-    server.logger,
-    server.telemetry,
-    formatTelemetryUpdateEvent(
-      editedMonitorSavedObject,
-      previousMonitor,
-      server.kibanaVersion,
-      Boolean((editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-      errors
-    )
-  );
+    sendTelemetryEvents(
+      server.logger,
+      server.telemetry,
+      formatTelemetryUpdateEvent(
+        editedMonitorSavedObject,
+        previousMonitor,
+        server.kibanaVersion,
+        Boolean((editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        errors
+      )
+    );
 
-  return errors;
+    return errors;
+  } catch (e) {
+    server.logger.error(
+      `Unable to update Synthetics monitor ${decryptedPreviousMonitor.attributes[ConfigKey.NAME]}`
+    );
+    await savedObjectsClient.update<MonitorFields>(
+      syntheticsMonitorType,
+      editedMonitorSavedObject.id,
+      decryptedPreviousMonitor.attributes
+    );
+
+    throw e;
+  }
 };

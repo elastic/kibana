@@ -171,6 +171,7 @@ export class ProjectMonitorFormatter {
           monitor: normalizedMonitor,
           monitorSavedObject: newMonitor,
           syntheticsMonitorClient: this.syntheticsMonitorClient,
+          savedObjectsClient: this.savedObjectsClient,
         });
         this.createdMonitors.push(monitor.id);
       }
@@ -182,6 +183,9 @@ export class ProjectMonitorFormatter {
         details: e.message,
         payload: monitor,
       });
+      if (this.staleMonitorsMap[monitor.id]) {
+        this.staleMonitorsMap[monitor.id].stale = false;
+      }
     }
   };
 
@@ -271,8 +275,10 @@ export class ProjectMonitorFormatter {
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
+        decryptedPreviousMonitor,
         server: this.server,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
+        savedObjectsClient: this.savedObjectsClient,
       });
     }
 

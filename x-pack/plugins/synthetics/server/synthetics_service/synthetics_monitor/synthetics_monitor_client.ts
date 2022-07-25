@@ -45,6 +45,7 @@ export class SyntheticsMonitorClient {
       return await this.syntheticsService.addConfig(config);
     }
   }
+
   async editMonitor(editedMonitor: MonitorFields, id: string) {
     const editedConfig = formatHeartbeatRequest({
       monitor: editedMonitor,
@@ -62,6 +63,7 @@ export class SyntheticsMonitorClient {
 
     await this.syntheticsService.editConfig(editedConfig);
   }
+
   async deleteMonitor(monitor: SyntheticsMonitorWithId) {
     await this.privateLocationAPI.deleteMonitor(monitor);
     return await this.syntheticsService.deleteConfigs([monitor]);

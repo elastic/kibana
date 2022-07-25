@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SavedObject,
+  SavedObjectsErrorHelpers,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -21,6 +25,7 @@ import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
+import { deleteMonitor } from './delete_monitor';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -89,6 +94,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       monitorSavedObject: newMonitor,
       server,
       syntheticsMonitorClient,
+      savedObjectsClient,
     });
 
     if (errors && errors.length > 0) {
@@ -110,27 +116,39 @@ export const syncNewMonitor = async ({
   monitorSavedObject,
   server,
   syntheticsMonitorClient,
+  savedObjectsClient,
 }: {
   monitor: SyntheticsMonitor;
   monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }) => {
-  const errors = await syntheticsMonitorClient.addMonitor(
-    monitor as MonitorFields,
-    monitorSavedObject.id
-  );
+  try {
+    const errors = await syntheticsMonitorClient.addMonitor(
+      monitor as MonitorFields,
+      monitorSavedObject.id
+    );
 
-  sendTelemetryEvents(
-    server.logger,
-    server.telemetry,
-    formatTelemetryEvent({
-      monitor: monitorSavedObject,
-      errors,
-      isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-      kibanaVersion: server.kibanaVersion,
-    })
-  );
+    sendTelemetryEvents(
+      server.logger,
+      server.telemetry,
+      formatTelemetryEvent({
+        monitor: monitorSavedObject,
+        errors,
+        isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        kibanaVersion: server.kibanaVersion,
+      })
+    );
 
-  return errors;
+    return errors;
+  } catch (e) {
+    await deleteMonitor({
+      savedObjectsClient,
+      server,
+      monitorId: monitorSavedObject.id,
+      syntheticsMonitorClient,
+    });
+    throw e;
+  }
 };

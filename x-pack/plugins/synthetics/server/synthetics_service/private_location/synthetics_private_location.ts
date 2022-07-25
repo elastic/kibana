@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewPackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import {
@@ -43,7 +43,9 @@ export class SyntheticsPrivateLocation {
       );
 
       if (!newPolicy) {
-        throw new Error('Could not create new synthetics policy');
+        throw new Error(
+          `Unable to create Synthetics package policy for private location ${privateLocation.name}`
+        );
       }
 
       newPolicy.is_managed = true;
@@ -73,28 +75,34 @@ export class SyntheticsPrivateLocation {
   }
 
   async createMonitor(config: HeartbeatConfig) {
-    try {
-      const { locations } = config;
+    const { locations } = config;
 
-      const privateLocations = await getSyntheticsPrivateLocations(
-        this.server.authSavedObjectsClient!
-      );
+    const privateLocations = await getSyntheticsPrivateLocations(
+      this.server.authSavedObjectsClient!
+    );
 
-      const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
+    const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
 
-      for (const privateLocation of fleetManagedLocations) {
-        const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
-        const newPolicy = await this.generateNewPolicy(config, location);
+    for (const privateLocation of fleetManagedLocations) {
+      const location = privateLocations?.find((loc) => loc.id === privateLocation.id)!;
+      const newPolicy = await this.generateNewPolicy(config, location);
 
-        if (!newPolicy) {
-          throw new Error('Unable to create Synthetics package policy for private location');
-        }
-
-        await this.createPolicy(newPolicy, getPolicyId(config, location));
+      if (!newPolicy) {
+        throw new Error(
+          `Unable to create Synthetics package policy for private location ${location.name}`
+        );
       }
-    } catch (e) {
-      this.server.logger.error(e);
-      return null;
+
+      try {
+        await this.createPolicy(newPolicy, getPolicyId(config, location));
+      } catch (e) {
+        this.server.logger.error(e);
+        throw new Error(
+          `Unable to create Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
+          } with private location ${location.name}`
+        );
+      }
     }
   }
 
@@ -116,7 +124,9 @@ export class SyntheticsPrivateLocation {
           const newPolicy = await this.generateNewPolicy(config, privateLocation);
 
           if (!newPolicy) {
-            throw new Error('Unable to create Synthetics package policy for private location');
+            throw new Error(
+              `Unable to create Synthetics package policy for private location ${privateLocation.name}`
+            );
           }
 
           if (hasPolicy) {
@@ -127,13 +137,26 @@ export class SyntheticsPrivateLocation {
         } else if (hasPolicy) {
           const soClient = this.server.authSavedObjectsClient!;
           const esClient = this.server.uptimeEsClient.baseESClient;
-          await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId], {
-            force: true,
-          });
+          try {
+            await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId], {
+              force: true,
+            });
+          } catch (e) {
+            this.server.logger.error(e);
+            throw new Error(
+              `Unable to delete Synthetics package policy for monitor ${
+                config[ConfigKey.NAME]
+              } with private location ${privateLocation.name}`
+            );
+          }
         }
       } catch (e) {
         this.server.logger.error(e);
-        return null;
+        throw new Error(
+          `Unable to ${hasPolicy ? 'update' : 'create'} Synthetics package policy for monitor ${
+            config[ConfigKey.NAME]
+          } with private location ${privateLocation.name}`
+        );
       }
     }
   }
@@ -142,15 +165,10 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
-      try {
-        return await this.server.fleet.packagePolicyService.create(soClient, esClient, newPolicy, {
-          id,
-          overwrite: true,
-        });
-      } catch (e) {
-        this.server.logger.error(e);
-        return null;
-      }
+      return await this.server.fleet.packagePolicyService.create(soClient, esClient, newPolicy, {
+        id,
+        overwrite: true,
+      });
     }
   }
 
@@ -158,20 +176,15 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
-      try {
-        return await this.server.fleet.packagePolicyService.update(
-          soClient,
-          esClient,
-          id,
-          updatedPolicy,
-          {
-            force: true,
-          }
-        );
-      } catch (e) {
-        this.server.logger.error(e);
-        return null;
-      }
+      return await this.server.fleet.packagePolicyService.update(
+        soClient,
+        esClient,
+        id,
+        updatedPolicy,
+        {
+          force: true,
+        }
+      );
     }
   }
 
@@ -185,33 +198,10 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async findMonitor(config: HeartbeatConfig) {
-    const soClient = this.server.authSavedObjectsClient;
-    try {
-      const list = await this.server.fleet.packagePolicyService.list(soClient!, {
-        page: 1,
-        perPage: 10000,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:synthetics`,
-      });
-
-      const { locations } = config;
-
-      const fleetManagedLocationIds = locations
-        .filter((loc) => !loc.isServiceManaged)
-        .map((loc) => config.id + '-' + loc.id);
-
-      return list.items.filter((policy) => {
-        return fleetManagedLocationIds.includes(policy.name);
-      });
-    } catch (e) {
-      this.server.logger.error(e);
-      return null;
-    }
-  }
-
   async deleteMonitor(config: HeartbeatConfig) {
     const soClient = this.server.authSavedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
+
     if (soClient && esClient) {
       const { locations } = config;
 
@@ -233,7 +223,11 @@ export class SyntheticsPrivateLocation {
             );
           } catch (e) {
             this.server.logger.error(e);
-            return null;
+            throw new Error(
+              `Unable to delete Synthetics package policy for monitor ${
+                config[ConfigKey.NAME]
+              } with private location ${location.name}`
+            );
           }
         }
       }

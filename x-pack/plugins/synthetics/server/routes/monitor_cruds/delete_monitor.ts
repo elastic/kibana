@@ -99,12 +99,12 @@ export const deleteMonitor = async ({
 
     const normalizedMonitor = normalizeSecrets(monitor);
 
-    await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
     const errors = await syntheticsMonitorClient.deleteMonitor({
       ...normalizedMonitor.attributes,
       id:
         (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
     });
+    await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
     sendTelemetryEvents(
       logger,
