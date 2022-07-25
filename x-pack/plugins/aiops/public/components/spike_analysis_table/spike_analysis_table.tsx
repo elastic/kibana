@@ -6,10 +6,11 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiTableSortingType, EuiToolTip } from '@elastic/eui';
 import { sortBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { MiniHistogram } from '../mini_histogram';
@@ -66,14 +67,15 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     {
       field: 'pValue',
       name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel',
-            {
-              defaultMessage: 'Log rate',
-            }
-          )}
-        </>
+        <EuiToolTip position="top" content={i18n.translate(
+          'xpack.aiops.correlations.failedTransactions.correlationsTable.logRateColumnTooltip',
+          { defaultMessage: 'Visual representation of amount of impact given field name and value have on metric change point.' }
+        )}>
+          <FormattedMessage
+            id='xpack.aiops.correlations.failedTransactions.correlationsTable.logRateLabel'
+            defaultMessage='Log rate'
+          />
+        </EuiToolTip>
       ),
       render: (_, { histogram, fieldName, fieldValue }) => {
         return histogram ? (
@@ -84,21 +86,32 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       field: 'pValue',
-      name: 'p-value',
+      name: (
+        <EuiToolTip position="top" content={i18n.translate(
+          'xpack.aiops.correlations.failedTransactions.correlationsTable.pValueColumnTooltip',
+          { defaultMessage: 'For statistically significant changes in the distribution of values, indicates how extreme the change is; lower values indicate greater change.' }
+        )}>
+          <FormattedMessage
+            id='xpack.aiops.correlations.failedTransactions.correlationsTable.pValueLabel'
+            defaultMessage='p-value'
+          />
+        </EuiToolTip>
+      ),
       render: (pValue: number) => pValue.toPrecision(3),
       sortable: true,
     },
     {
       field: 'pValue',
       name: (
-        <>
-          {i18n.translate(
-            'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel',
-            {
-              defaultMessage: 'Impact',
-            }
-          )}
-        </>
+        <EuiToolTip position="top" content={i18n.translate(
+          'xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabelColumnTooltip',
+          { defaultMessage: 'Indicates level of impact of given field name and value on metric change point.' }
+        )}>
+          <FormattedMessage
+            id='xpack.aiops.correlations.failedTransactions.correlationsTable.impactLabel'
+            defaultMessage='Impact'
+          />
+        </EuiToolTip>
       ),
       render: (_, { pValue }) => {
         const label = getFailedTransactionsCorrelationImpactLabel(pValue);
