@@ -16,6 +16,7 @@ import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+import { LabelZoomRangeEditor } from './label/label_zoom_range_editor';
 // @ts-expect-error
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 // @ts-expect-error
@@ -51,6 +52,7 @@ import { LabelBorderSizeProperty } from '../properties/label_border_size_propert
 import { StaticTextProperty } from '../properties/static_text_property';
 import { DynamicTextProperty } from '../properties/dynamic_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
+import { LabelZoomRangeProperty } from '../properties/label_zoom_range_property';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { getHasLabel } from '../style_util';
 
@@ -300,6 +302,16 @@ export class VectorStyleEditor extends Component<Props, State> {
           defaultDynamicStyleOptions={
             this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]
               .options as LabelDynamicOptions
+          }
+        />
+        <EuiSpacer size="m" />
+
+        <LabelZoomRangeEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={
+            this.props.styleProperties[VECTOR_STYLES.LABEL_ZOOM_RANGE] as LabelZoomRangeProperty
           }
         />
         <EuiSpacer size="m" />
