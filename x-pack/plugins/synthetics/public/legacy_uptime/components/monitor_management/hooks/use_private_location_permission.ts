@@ -12,15 +12,14 @@ import { BrowserFields, ConfigKey } from '../../../../../common/runtime_types';
 export function usePrivateLocationPermissions(monitor?: BrowserFields) {
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
-  const canSaveIntegrations: boolean = !!fleet?.authz.integrations.writeIntegrationPolicies;
+  const canSaveIntegrations: boolean = Boolean(fleet?.authz.integrations.writeIntegrationPolicies);
+  const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
 
   const locations = (monitor as BrowserFields)?.[ConfigKey.LOCATIONS];
 
   const hasPrivateLocation = locations?.some((location) => !location.isServiceManaged);
 
   const canUpdatePrivateMonitor = !(hasPrivateLocation && !canSaveIntegrations);
-
-  const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
 
   return { canUpdatePrivateMonitor, canReadAgentPolicies };
 }
