@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -34,6 +35,8 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
+
+import './explain_log_rate_spikes_page.scss';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -156,14 +159,14 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }, [dataService, searchQueryLanguage, searchString]);
 
   return (
-    <>
+    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
             <EuiPageContentHeaderSection>
-              <div className="aiopsTitleHeader">
+              <div className="dataViewTitleHeader">
                 <EuiTitle size={'s'}>
-                  <h2>{dataView.title}</h2>
+                  <h2>{dataView.getName()}</h2>
                 </EuiTitle>
               </div>
             </EuiPageContentHeaderSection>
@@ -233,6 +236,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
           )}
         </EuiFlexGroup>
       </EuiPageContentBody>
-    </>
+    </EuiPageBody>
   );
 };
