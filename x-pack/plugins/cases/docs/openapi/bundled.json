@@ -443,7 +443,7 @@
       "delete": {
         "summary": "Deletes one or more cases from the default space.",
         "operationId": "deleteCaseDefaultSpace",
-        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "description": "You must have `read` or `all` privileges and the `delete` sub-feature privilege for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
@@ -4061,7 +4061,7 @@
       "delete": {
         "summary": "Deletes one or more cases.",
         "operationId": "deleteCase",
-        "description": "You must have `all` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the cases you're deleting.\n",
+        "description": "You must have `read` or `all` privileges and the `delete` sub-feature privilege for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
