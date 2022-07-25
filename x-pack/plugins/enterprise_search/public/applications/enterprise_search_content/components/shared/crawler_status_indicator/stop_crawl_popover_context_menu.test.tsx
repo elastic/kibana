@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { setMockActions } from '../../../../../__mocks__/kea_logic';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -18,7 +18,7 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { mountWithIntl } from '../../../../../test_helpers';
+import { mountWithIntl } from '../../../../test_helpers';
 
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 

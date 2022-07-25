@@ -60,10 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickTourNextButton();
         await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
 
-        // Step 4: Traces
-        await pageObjects.infraHome.waitForTourStep('tracesStep');
+        // Step 4: Services
+        await pageObjects.infraHome.waitForTourStep('servicesStep');
         await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('tracesStep');
+        await pageObjects.infraHome.ensureTourStepIsClosed('servicesStep');
 
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
