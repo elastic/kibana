@@ -27,7 +27,7 @@ import { generateId } from '../../id_generator';
 export const DEFAULT_MAX_COLUMNS = 3;
 
 export const getDefaultColor = (hasMax: boolean) =>
-  hasMax ? euiLightVars.euiColorPrimary : '#F1F1F1';
+  hasMax ? euiLightVars.euiColorPrimary : '#FFFFFF';
 
 export interface MetricVisualizationState {
   layerId: string;

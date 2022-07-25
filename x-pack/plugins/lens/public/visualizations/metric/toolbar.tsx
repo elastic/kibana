@@ -41,7 +41,14 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
       { allowFalsyValue: true }
     );
 
-  const setColor = useCallback((color: string) => setState({ ...state, color }), [setState, state]);
+  const defaultColor = getDefaultColor(!!state.maxAccessor);
+
+  const setColor = useCallback(
+    (color: string) => {
+      setState({ ...state, color: color || defaultColor });
+    },
+    [defaultColor, setState, state]
+  );
 
   const { inputValue: currentColor, handleInputChange: handleColorChange } =
     useDebouncedValue<string>(
@@ -199,7 +206,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
               onChange={(color: string) => handleColorChange(color)}
               color={currentColor}
               disabled={!!state.palette}
-              placeholder={getDefaultColor(!!state.maxAccessor)}
+              placeholder={defaultColor}
               aria-label={colorLabel}
               showAlpha={false}
               swatches={euiPaletteColorBlind()}

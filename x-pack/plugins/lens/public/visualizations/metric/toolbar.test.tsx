@@ -223,12 +223,14 @@ describe('metric toolbar', () => {
         harness.setColor(newColor + 1);
         harness.setColor(newColor + 2);
         harness.setColor(newColor + 3);
-        expect(mockSetState).toHaveBeenCalledTimes(3);
+        harness.setColor('');
+        expect(mockSetState).toHaveBeenCalledTimes(4);
         expect(mockSetState.mock.calls.map((args) => args[0].color)).toMatchInlineSnapshot(`
           Array [
             "new-color1",
             "new-color2",
             "new-color3",
+            "#0077cc",
           ]
         `);
       });
