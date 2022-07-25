@@ -10,6 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { createMachine, InterpreterFrom } from 'xstate';
 import { LogExplorerChunk, LogExplorerPosition } from '../types';
+import { LoadAroundEvent } from './services/load_around';
 
 export interface LogExplorerContext {
   dataView: DataView;
@@ -19,70 +20,101 @@ export interface LogExplorerContext {
   bottomChunk: LogExplorerChunk;
 }
 
-export type LogExplorerEvent =
+export type LogExplorerExternalEvent =
   | {
-      type: 'columns-changed';
+      type: 'columnsChanged';
       columns: string[];
     }
   | {
-      type: 'load-around';
-    }
-  | {
-      type: 'time-range-changed';
+      type: 'timeRangeChanged';
       timeRange: TimeRange;
     }
+  | {
+      type: 'filtersChanged';
+    }
+  | {
+      type: 'dataViewChanged';
+      dataView: DataView;
+    }
+  | {
+      type: 'positionChanged';
+      position: LogExplorerPosition;
+    };
+
+export type LogExplorerInternalEvent =
   | {
       type: 'retry';
     }
   | {
-      type: 'retry-bottom';
+      type: 'retryBottom';
     }
   | {
-      type: 'retry-top';
+      type: 'retryTop';
+    }
+  | LoadAroundEvent
+  | {
+      // the following event types will be moved to their respective services
+      // once these exist
+      type: 'loadTopSucceeded';
     }
   | {
-      type: 'filters-changed';
+      type: 'loadTopFailed';
     }
   | {
-      type: 'data-view-changed';
-      dataView: DataView;
+      type: 'loadBottomSucceeded';
     }
   | {
-      type: 'position-changed';
-      position: LogExplorerPosition;
+      type: 'loadBottomFailed';
+    }
+  | {
+      type: 'extendTopSucceeded';
+    }
+  | {
+      type: 'extendTopFailed';
+    }
+  | {
+      type: 'extendBottomSucceeded';
+    }
+  | {
+      type: 'extendBottomFailed';
+    }
+  | {
+      type: 'reloadSucceeded';
+    }
+  | {
+      type: 'reloadFailed';
     };
+
+export type LogExplorerEvent = LogExplorerExternalEvent | LogExplorerInternalEvent;
 
 export const dataAccessStateMachine = createMachine({
   schema: {
     context: {} as LogExplorerContext,
     events: {} as LogExplorerEvent,
   },
-  id: 'Log Explorer Data',
-  initial: 'loading-around',
+  id: 'logExplorerData',
+  initial: 'loadingAround',
   states: {
-    'loading-around': {
+    loadingAround: {
       entry: 'resetChunks',
       invoke: {
         src: 'loadAround',
-        onDone: [
-          {
-            actions: ['updateTopChunk', 'updateBottomChunk'],
-            target: ['loaded.top.loaded', 'loaded.bottom.loaded'],
-          },
-        ],
-        onError: [
-          {
-            target: 'failed-no-data',
-          },
-        ],
+        id: 'loadAround',
       },
       on: {
-        'position-changed': {
-          target: 'loading-around',
+        loadAroundSucceeded: {
+          actions: ['updateTopChunk', 'updateBottomChunk'],
+          target: 'loaded',
+        },
+        positionChanged: {
+          target: 'loadingAround',
           internal: false,
         },
-        'time-range-changed': {},
-        'columns-changed': {},
+        loadAroundFailed: {
+          target: 'failedNoData',
+        },
+        timeRangeChanged: {},
+        columnsChanged: {},
       },
     },
     loaded: {
@@ -105,17 +137,17 @@ export const dataAccessStateMachine = createMachine({
             },
             failed: {
               on: {
-                'retry-top': {
-                  target: '#Log Explorer Data.extending-top',
+                retryTop: {
+                  target: '#logExplorerData.extendingTop',
                 },
               },
             },
             loaded: {
               on: {
-                'position-changed': {
+                positionChanged: {
                   actions: 'rotateChunksUpwards',
                   cond: 'isNearStart',
-                  target: '#Log Explorer Data.loading-top',
+                  target: '#logExplorerData.loadingTop',
                 },
               },
             },
@@ -138,17 +170,17 @@ export const dataAccessStateMachine = createMachine({
             },
             failed: {
               on: {
-                'retry-bottom': {
-                  target: '#Log Explorer Data.extending-bottom',
+                retryBottom: {
+                  target: '#logExplorerData.extendingBottom',
                 },
               },
             },
             loaded: {
               on: {
-                'position-changed': {
+                positionChanged: {
                   actions: 'rotateChunkDownwards',
                   cond: 'isNearEnd',
-                  target: '#Log Explorer Data.loading-bottom',
+                  target: '#logExplorerData.loadingBottom',
                 },
               },
             },
@@ -156,15 +188,15 @@ export const dataAccessStateMachine = createMachine({
         },
       },
       on: {
-        'position-changed': {
+        positionChanged: {
           cond: '!isWithinLoadedChunks',
-          target: 'loading-around',
+          target: 'loadingAround',
         },
-        'time-range-changed': [
+        timeRangeChanged: [
           {
             actions: 'extendTopChunk',
             cond: 'startTimestampExtendsLoadedTop',
-            target: 'extending-top',
+            target: 'extendingTop',
           },
           {
             actions: 'reduceTopChunk',
@@ -173,122 +205,110 @@ export const dataAccessStateMachine = createMachine({
           {
             actions: 'extendBottomChunk',
             cond: 'endTimestampExtendsLoadedBottom',
-            target: 'extending-bottom',
+            target: 'extendingBottom',
           },
           {
             actions: 'reduceBottomChunk',
             cond: 'endTimestampReducesLoadedBottom',
           },
           {
-            actions: 'reset-position',
-            target: 'loading-around',
+            actions: 'resetPosition',
+            target: 'loadingAround',
           },
         ],
-        'columns-changed': {
+        columnsChanged: {
           target: 'reloading',
         },
       },
     },
-    'failed-no-data': {
+    failedNoData: {
       on: {
-        'position-changed': {
-          target: 'loading-around',
+        positionChanged: {
+          target: 'loadingAround',
         },
         retry: {
-          target: 'loading-around',
+          target: 'loadingAround',
         },
-        'filters-changed': {
-          target: 'loading-around',
+        filtersChanged: {
+          target: 'loadingAround',
         },
-        'time-range-changed': {
-          target: 'loading-around',
+        timeRangeChanged: {
+          target: 'loadingAround',
         },
       },
     },
-    'loading-top': {
+    loadingTop: {
       invoke: {
         src: 'loadBefore',
-        onDone: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.top.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.top.failed',
-          },
-        ],
+        id: 'loadBefore',
       },
       on: {
-        'columns-changed': {
+        loadTopSucceeded: {
+          actions: 'updateTopChunk',
+          target: '#logExplorerData.loaded.top.loaded',
+        },
+        loadTopFailed: {
+          actions: 'updateTopChunk',
+          target: '#logExplorerData.loaded.top.failed',
+        },
+        columnsChanged: {
           target: 'reloading',
         },
       },
     },
-    'loading-bottom': {
+    loadingBottom: {
       invoke: {
         src: 'loadAfter',
-        onDone: [
-          {
-            actions: 'updateTopChunk',
-            target: '#Log Explorer Data.loaded.bottom.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.failed',
-          },
-        ],
+        id: 'loadAfter',
       },
       on: {
-        'columns-changed': {
+        loadBottomSucceeded: {
+          actions: 'updateBottomChunk',
+          target: '#logExplorerData.loaded.bottom.loaded',
+        },
+        loadBottomFailed: {
+          actions: 'updateBottomChunk',
+          target: '#logExplorerData.loaded.bottom.failed',
+        },
+        columnsChanged: {
           target: 'reloading',
         },
       },
     },
-    'extending-top': {
+    extendingTop: {
       invoke: {
         src: 'extendTop',
-        onDone: [
-          {
-            actions: 'prependToTopChunk',
-            target: '#Log Explorer Data.loaded.top.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.top.failed',
-          },
-        ],
+        id: 'extendTop',
       },
       on: {
-        'columns-changed': {
+        extendTopSucceeded: {
+          actions: 'prependToTopChunk',
+          target: '#logExplorerData.loaded.top.loaded',
+        },
+        extendTopFailed: {
+          actions: 'updateBottomChunk',
+          target: '#logExplorerData.loaded.top.failed',
+        },
+        columnsChanged: {
           target: 'reloading',
         },
       },
     },
-    'extending-bottom': {
+    extendingBottom: {
       invoke: {
         src: 'extendBottom',
-        onDone: [
-          {
-            actions: 'appendToBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.loaded',
-          },
-        ],
-        onError: [
-          {
-            actions: 'updateBottomChunk',
-            target: '#Log Explorer Data.loaded.bottom.failed',
-          },
-        ],
+        id: 'extendBottom',
       },
       on: {
-        'columns-changed': {
+        extendBottomSucceeded: {
+          actions: 'appendToBottomChunk',
+          target: '#logExplorerData.loaded.bottom.loaded',
+        },
+        extendBottomFailed: {
+          actions: 'updateBottomChunk',
+          target: '#logExplorerData.loaded.bottom.failed',
+        },
+        columnsChanged: {
           target: 'reloading',
         },
       },
@@ -296,26 +316,25 @@ export const dataAccessStateMachine = createMachine({
     reloading: {
       invoke: {
         src: 'reload',
-        onError: [
-          {
-            target: 'failed-no-data',
-          },
-        ],
-        onDone: [
-          {
-            actions: ['updateTopChunk', 'updateBottomChunk'],
-            target: 'loaded',
-          },
-        ],
+        id: 'reload',
+      },
+      on: {
+        reloadFailed: {
+          target: 'failedNoData',
+        },
+        reloadSucceeded: {
+          actions: ['updateTopChunk', 'updateBottomChunk'],
+          target: 'loaded',
+        },
       },
     },
   },
   on: {
-    'filters-changed': {
-      target: '.loading-around',
+    filtersChanged: {
+      target: '.loadingAround',
     },
-    'data-view-changed': {
-      target: '.loading-around',
+    dataViewChanged: {
+      target: '.loadingAround',
     },
   },
 });
