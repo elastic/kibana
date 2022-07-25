@@ -73,7 +73,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-        `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'cases')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '..',
+          'alerting_api_integration',
+          'common',
+          'fixtures',
+          'plugins',
+          'actions_simulators'
+        )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
           'ruleTagFilter',
