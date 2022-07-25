@@ -35,7 +35,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   } = useCreateListIndex();
   const loading = readLoading || createLoading;
 
-  // read route utilizes `esClient.indices.getAlias` which requires 
+  // read route utilizes `esClient.indices.getAlias` which requires
   // management privileges
   const readIndex = useCallback(() => {
     if (lists && canReadIndex && canManageIndex) {

@@ -46,7 +46,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
           req.reply((res) => {
             res.send(200, {
               index_mapping_outdated: true,
-              name: '.alerts-security.alerts-default'
+              name: '.alerts-security.alerts-default',
             });
           });
         });
