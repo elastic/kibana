@@ -51,7 +51,6 @@ import {
   createNewTermsAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
-import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
@@ -92,14 +91,7 @@ export const previewRulesRoute = async (
         const siemClient = (await context.securitySolution).getAppClient();
 
         let invocationCount = request.body.invocationCount;
-        if (
-          ![
-            RULE_PREVIEW_INVOCATION_COUNT.HOUR,
-            RULE_PREVIEW_INVOCATION_COUNT.DAY,
-            RULE_PREVIEW_INVOCATION_COUNT.WEEK,
-            RULE_PREVIEW_INVOCATION_COUNT.MONTH,
-          ].includes(invocationCount)
-        ) {
+        if (invocationCount < 1) {
           return response.ok({
             body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
