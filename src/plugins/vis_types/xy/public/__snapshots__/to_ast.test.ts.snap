@@ -4,18 +4,41 @@ exports[`xy vis toExpressionAst function should match basic snapshot 1`] = `
 Object {
   "addArgument": [Function],
   "arguments": Object {
-    "expression": Array [
-      "_all",
+    "addTimeMarker": Array [
+      false,
     ],
-    "id": Array [
-      "all",
+    "layers": Array [
+      Object {
+        "toAst": [Function],
+      },
     ],
-    "name": Array [
-      "All docs",
+    "legend": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "showTooltip": Array [
+      true,
+    ],
+    "useAdjustedInterval": Array [
+      true,
+    ],
+    "valueLabels": Array [
+      "hide",
+    ],
+    "xAxisConfig": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "yAxisConfigs": Array [
+      Object {
+        "toAst": [Function],
+      },
     ],
   },
   "getArgument": [Function],
-  "name": "mapColumn",
+  "name": "layeredXyVis",
   "removeArgument": [Function],
   "replaceArgument": [Function],
   "toAst": [Function],

@@ -400,13 +400,17 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const xScale = vis.params.categoryAxes[0].scale;
 
-  const mapColumn = buildExpressionFunction('mapColumn', {
-    id: 'all',
-    expression: '_all',
-    name: i18n.translate('visTypeXy.allDocsTitle', {
-      defaultMessage: 'All docs',
-    }),
-  });
+  let mapColumn;
+
+  if (!dimensions.x) {
+    mapColumn = buildExpressionFunction('mapColumn', {
+      id: 'all',
+      expression: '_all',
+      name: i18n.translate('visTypeXy.allDocsTitle', {
+        defaultMessage: 'All docs',
+      }),
+    });
+  }
 
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
@@ -465,7 +469,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     useAdjustedInterval: true,
   });
 
-  const ast = buildExpression([mapColumn, visTypeXy]);
+  const ast = buildExpression(mapColumn ? [mapColumn, visTypeXy] : [visTypeXy]);
 
   return ast.toAst();
 };
