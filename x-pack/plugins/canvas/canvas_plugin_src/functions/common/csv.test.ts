@@ -10,7 +10,7 @@ import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
 import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin';
+import { Adapters } from '@kbn/inspector-plugin/common';
 
 const errors = getFunctionErrors().csv;
 
