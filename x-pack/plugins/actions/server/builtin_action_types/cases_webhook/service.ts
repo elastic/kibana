@@ -204,10 +204,7 @@ export const createExternalService = (
         configurationUtilities,
         'Update case URL'
       );
-      console.log({
-        updateUrl,
-        normalizedUrl,
-      });
+
       const { tags, title, description } = incident;
       const json = renderMustacheStringNoEscape(updateIncidentJson, {
         ...stringifyObjValues({
@@ -222,7 +219,6 @@ export const createExternalService = (
         },
       });
 
-      console.log('JSON', json);
       validateJson(json, 'Update case JSON body');
       const res = await request({
         axios: axiosInstance,
@@ -233,13 +229,10 @@ export const createExternalService = (
         configurationUtilities,
       });
 
-      console.log('res', res);
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
       });
-      console.log('1');
       const updatedIncident = await getIncident(incidentId as string);
-      console.log('2');
       const viewUrl = renderMustacheStringNoEscape(incidentViewUrl, {
         external: {
           system: {
@@ -248,13 +241,11 @@ export const createExternalService = (
           },
         },
       });
-      console.log('3');
       const normalizedViewUrl = validateAndNormalizeUrl(
         `${viewUrl}`,
         configurationUtilities,
         'View case URL'
       );
-      console.log('4');
       return {
         id: incidentId,
         title: updatedIncident.title,
@@ -262,7 +253,6 @@ export const createExternalService = (
         pushedDate: getPushedDate(updatedIncident.updatedAt),
       };
     } catch (error) {
-      console.log('error', error);
       throw createServiceError(error, `Unable to update case with id ${incidentId}`);
     }
   };
