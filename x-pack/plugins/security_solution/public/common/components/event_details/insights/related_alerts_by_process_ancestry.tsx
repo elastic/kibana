@@ -61,7 +61,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId
   const [cache, setCache] = useState<Partial<Cache>>({});
 
   const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
-  console.log(data, eventId);
 
   // Makes sure the component is not fetching data before the accordion
   // has been openend.
