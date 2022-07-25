@@ -23,7 +23,7 @@ import {
   addDefaultAdvancedPolicyConfigSettings,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
-import type {PolicyConfig, PolicyData } from '../../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { cloneDeep, set } from 'lodash';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
@@ -309,174 +309,174 @@ describe('test endpoint policy data config extraction', () => {
 
 describe('test advanced policy config overlap ', () => {
   const defaultStubPolicyConfig = {
-    "windows": {
-      "events": {
-        "dll_and_driver_load": true,
-        "dns": true,
-        "file": true,
-        "network": true,
-        "process": true,
-        "registry": true,
-        "security": true
+    windows: {
+      events: {
+        dll_and_driver_load: true,
+        dns: true,
+        file: true,
+        network: true,
+        process: true,
+        registry: true,
+        security: true,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "ransomware": {
-        "mode": "prevent",
-        "supported": true
+      ransomware: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "ransomware": {
-          "message": "",
-          "enabled": true
+        ransomware: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
+        memory_protection: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
-        }
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
+      logging: {
+        file: 'info',
       },
-      "antivirus_registration": {
-        "enabled": false
-      }
+      antivirus_registration: {
+        enabled: false,
+      },
     },
-    "mac": {
-      "events": {
-        "process": true,
-        "file": true,
-        "network": true
+    mac: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
+        behavior_protection: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
-        }
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
-      }
+      logging: {
+        file: 'info',
+      },
     },
-    "linux": {
-      "events": {
-        "process": true,
-        "file": true,
-        "network": true,
-        "session_data": false
+    linux: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+        session_data: false,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
+        behavior_protection: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
-        }
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
-      }
-    }
+      logging: {
+        file: 'info',
+      },
+    },
   } as unknown as PolicyConfig;
   const defaultStubPolicyConfigResponse = {
     linux: {
-      "events": {
-        "process": true,
-        "file": true,
-        "network": true,
-        "session_data": false
+      events: {
+        process: true,
+        file: true,
+        network: true,
+        session_data: false,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
+        behavior_protection: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
-        }
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
+      logging: {
+        file: 'info',
       },
       advanced: {
         agent: {
-          connection_delay: null
+          connection_delay: null,
         },
         alerts: {
-          require_user_artifacts: null
+          require_user_artifacts: null,
         },
         artifacts: {
           global: {
@@ -484,96 +484,96 @@ describe('test advanced policy config overlap ', () => {
             manifest_relative_url: null,
             public_key: null,
             interval: null,
-            ca_cert: null
+            ca_cert: null,
           },
           user: {
             public_key: null,
             ca_cert: null,
             base_url: null,
-            interval: null
-          }
+            interval: null,
+          },
         },
         elasticsearch: {
           delay: null,
           tls: {
             verify_peer: null,
             verify_hostname: null,
-            ca_cert: null
-          }
+            ca_cert: null,
+          },
         },
         fanotify: {
           ignore_unknown_filesystems: null,
           monitored_filesystems: null,
-          ignored_filesystems: null
+          ignored_filesystems: null,
         },
         logging: {
           file: null,
           stdout: null,
           stderr: null,
-          syslog: null
+          syslog: null,
         },
         diagnostic: {
-          enabled: null
+          enabled: null,
         },
         malware: {
-          quarantine: null
+          quarantine: null,
         },
         memory_protection: {
           memory_scan_collect_sample: null,
-          memory_scan: null
+          memory_scan: null,
         },
         kernel: {
-          capture_mode: null
+          capture_mode: null,
         },
         event_filter: {
-          default: null
+          default: null,
         },
         utilization_limits: {
-          cpu: null
+          cpu: null,
         },
         logstash: {
-          delay: null
-        }
-      }
+          delay: null,
+        },
+      },
     },
     mac: {
-      "events": {
-        "process": true,
-        "file": true,
-        "network": true
+      events: {
+        process: true,
+        file: true,
+        network: true,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
+        behavior_protection: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
-        }
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
+      logging: {
+        file: 'info',
       },
       advanced: {
         agent: {
-          connection_delay: null
+          connection_delay: null,
         },
         artifacts: {
           global: {
@@ -581,35 +581,35 @@ describe('test advanced policy config overlap ', () => {
             manifest_relative_url: null,
             public_key: null,
             interval: null,
-            ca_cert: null
+            ca_cert: null,
           },
           user: {
             public_key: null,
             ca_cert: null,
             base_url: null,
-            interval: null
-          }
+            interval: null,
+          },
         },
         elasticsearch: {
           delay: null,
           tls: {
             verify_peer: null,
             verify_hostname: null,
-            ca_cert: null
-          }
+            ca_cert: null,
+          },
         },
         logging: {
           file: null,
           stdout: null,
           stderr: null,
-          syslog: null
+          syslog: null,
         },
         logstash: {
-          delay: null
+          delay: null,
         },
         malware: {
           quarantine: null,
-          threshold: null
+          threshold: null,
         },
         kernel: {
           connect: null,
@@ -619,14 +619,14 @@ describe('test advanced policy config overlap ', () => {
           network: null,
           network_extension: {
             enable_content_filtering: null,
-            enable_packet_filtering: null
-          }
+            enable_packet_filtering: null,
+          },
         },
         harden: {
-          self_protect: null
+          self_protect: null,
         },
         diagnostic: {
-          enabled: null
+          enabled: null,
         },
         alerts: {
           cloud_lookup: null,
@@ -635,66 +635,66 @@ describe('test advanced policy config overlap ', () => {
         },
         memory_protection: {
           memory_scan_collect_sample: false,
-          memory_scan: null
+          memory_scan: null,
         },
         event_filter: {
-          default: null
-        }
-      }
+          default: null,
+        },
+      },
     },
     windows: {
-      "events": {
-        "dll_and_driver_load": true,
-        "dns": true,
-        "file": true,
-        "network": true,
-        "process": true,
-        "registry": true,
-        "security": true
+      events: {
+        dll_and_driver_load: true,
+        dns: true,
+        file: true,
+        network: true,
+        process: true,
+        registry: true,
+        security: true,
       },
-      "malware": {
-        "mode": "prevent",
-        "blocklist": true
+      malware: {
+        mode: 'prevent',
+        blocklist: true,
       },
-      "ransomware": {
-        "mode": "prevent",
-        "supported": true
+      ransomware: {
+        mode: 'prevent',
+        supported: true,
       },
-      "memory_protection": {
-        "mode": "prevent",
-        "supported": true
+      memory_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "behavior_protection": {
-        "mode": "prevent",
-        "supported": true
+      behavior_protection: {
+        mode: 'prevent',
+        supported: true,
       },
-      "popup": {
-        "malware": {
-          "message": "",
-          "enabled": true
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
         },
-        "ransomware": {
-          "message": "",
-          "enabled": true
+        ransomware: {
+          message: '',
+          enabled: true,
         },
-        "memory_protection": {
-          "message": "",
-          "enabled": true
+        memory_protection: {
+          message: '',
+          enabled: true,
         },
-        "behavior_protection": {
-          "message": "",
-          "enabled": true
-        }
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
       },
-      "logging": {
-        "file": "info"
+      logging: {
+        file: 'info',
       },
-      "antivirus_registration": {
-        "enabled": false
+      antivirus_registration: {
+        enabled: false,
       },
       advanced: {
         agent: {
-          connection_delay: null
+          connection_delay: null,
         },
         artifacts: {
           global: {
@@ -702,32 +702,32 @@ describe('test advanced policy config overlap ', () => {
             manifest_relative_url: null,
             public_key: null,
             interval: null,
-            ca_cert: null
+            ca_cert: null,
           },
           user: {
             public_key: null,
             ca_cert: null,
             base_url: null,
-            interval: null
-          }
+            interval: null,
+          },
         },
         elasticsearch: {
           delay: null,
           tls: {
             verify_peer: null,
             verify_hostname: null,
-            ca_cert: null
-          }
+            ca_cert: null,
+          },
         },
         logging: {
           file: null,
           stdout: null,
           stderr: null,
-          syslog: null
+          syslog: null,
         },
         malware: {
           quarantine: null,
-          threshold: null
+          threshold: null,
         },
         kernel: {
           connect: null,
@@ -741,20 +741,20 @@ describe('test advanced policy config overlap ', () => {
           registry: null,
           fileaccess: null,
           registryaccess: null,
-          process_handle: null
+          process_handle: null,
         },
         diagnostic: {
           enabled: null,
-          rollback_telemetry_enabled: null
+          rollback_telemetry_enabled: null,
         },
         alerts: {
           cloud_lookup: null,
           cloud_lookup_url: null,
-          require_user_artifacts: null
+          require_user_artifacts: null,
         },
         ransomware: {
           mbr: null,
-          canary: null
+          canary: null,
         },
         memory_protection: {
           context_manipulation_detection: null,
@@ -763,21 +763,22 @@ describe('test advanced policy config overlap ', () => {
           shellcode_collect_sample: null,
           memory_scan_collect_sample: null,
           shellcode_enhanced_pe_parsing: null,
-          shellcode_trampoline_detection: null
+          shellcode_trampoline_detection: null,
         },
         event_filter: {
-          default: null
+          default: null,
         },
         utilization_limits: {
-          cpu: null
-        }
-      }
-    }
+          cpu: null,
+        },
+      },
+    },
   };
 
-
   test('can succeed when policy config does not have any advanced settings already set', async () => {
-    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(cloneDeep(defaultStubPolicyConfig));
+    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(
+      cloneDeep(defaultStubPolicyConfig)
+    );
     expect(endpointPolicyConfig).toEqual(defaultStubPolicyConfigResponse);
   });
 
@@ -785,13 +786,14 @@ describe('test advanced policy config overlap ', () => {
     const stubPolicyConfigWithAdvancedSettings = cloneDeep(defaultStubPolicyConfig);
     stubPolicyConfigWithAdvancedSettings.linux.advanced = {
       agent: {
-        connection_delay: 20
-      }
+        connection_delay: 20,
+      },
     };
     const stubPolicyConfigWithAdvancedSettingsResponse = cloneDeep(defaultStubPolicyConfigResponse);
     set(stubPolicyConfigWithAdvancedSettingsResponse, 'linux.advanced.agent.connection_delay', 20);
-    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(stubPolicyConfigWithAdvancedSettings);
+    const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(
+      stubPolicyConfigWithAdvancedSettings
+    );
     expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
   });
 });
-
