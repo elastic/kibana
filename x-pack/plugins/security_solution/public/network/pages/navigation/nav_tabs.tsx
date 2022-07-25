@@ -47,7 +47,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
     },
     [NetworkRouteType.alerts]: {
       id: NetworkRouteType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.alerts),
       disabled: false,
     },

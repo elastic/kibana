@@ -11,6 +11,7 @@ import type { FieldHook, ValidationError, ValidationFunc } from '../../../../sha
 import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { validateEql } from '../../../../common/hooks/eql/api';
 import type { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
@@ -69,7 +70,11 @@ export const eqlValidator = async (
     const { data } = KibanaServices.get();
     let dataViewTitle = index?.join();
     let runtimeMappings = {};
-    if (dataViewId != null) {
+    if (
+      dataViewId != null &&
+      dataViewId !== '' &&
+      formData.dataSourceType === DataSourceType.DataView
+    ) {
       const dataView = await data.dataViews.get(dataViewId);
 
       dataViewTitle = dataView.title;

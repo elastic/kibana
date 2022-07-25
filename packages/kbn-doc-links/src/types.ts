@@ -249,6 +249,7 @@ export interface DocLinks {
       full_disk_access: string;
       macos_system_ext: string;
     };
+    readonly threatIntelInt: string;
   };
   readonly query: {
     readonly eql: string;
