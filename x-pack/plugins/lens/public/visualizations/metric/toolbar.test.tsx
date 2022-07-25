@@ -160,45 +160,6 @@ describe('metric toolbar', () => {
       harness.toggleOpenDisplayOptions();
     });
 
-    it('disables progress direction toggle when no maximum', () => {
-      const localHarness = getHarnessWithState({ ...fullState, maxAccessor: undefined });
-      localHarness.toggleOpenDisplayOptions();
-      expect(localHarness.progressDirectionDisabled).toBe(true);
-    });
-
-    it('toggles progress direction', () => {
-      expect(harness.progressDirectionDisabled).toBeFalsy();
-      expect(harness.currentState.progressDirection).toBe('vertical');
-
-      harness.setProgressDirection('horizontal');
-      harness.setProgressDirection('vertical');
-      harness.setProgressDirection('horizontal');
-
-      expect(mockSetState).toHaveBeenCalledTimes(3);
-      expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
-        .toMatchInlineSnapshot(`
-        Array [
-          "horizontal",
-          "vertical",
-          "horizontal",
-        ]
-      `);
-    });
-
-    it('sets max columns', () => {
-      harness.setMaxCols(1);
-      harness.setMaxCols(2);
-      harness.setMaxCols(3);
-      expect(mockSetState).toHaveBeenCalledTimes(3);
-      expect(mockSetState.mock.calls.map((args) => args[0].maxCols)).toMatchInlineSnapshot(`
-        Array [
-          1,
-          2,
-          3,
-        ]
-      `);
-    });
-
     describe('color picker', () => {
       it('is disabled when color-by-value is enabled', () => {
         const harnessWithPalette = getHarnessWithState({ ...fullState, palette });

@@ -12,16 +12,12 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiToolTip,
-  EuiButtonGroup,
-  EuiFieldNumber,
   EuiColorPicker,
   euiPaletteColorBlind,
 } from '@elastic/eui';
-import { htmlIdGenerator } from '@elastic/eui';
-import { LayoutDirection } from '@elastic/charts';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, useDebouncedValue } from '../../shared_components';
-import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
+import { MetricVisualizationState } from './visualization';
 import { getDefaultColor } from './visualization';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
@@ -64,7 +60,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
   });
 
   const hasBreakdownBy = Boolean(state.breakdownByAccessor);
-  const idPrefix = htmlIdGenerator()();
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
@@ -112,76 +108,6 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
         groupPosition="right"
         buttonDataTestSubj="lnsVisualOptionsButton"
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-            defaultMessage: 'Progress bar direction',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiToolTip
-            position="right"
-            content={
-              !state.maxAccessor ? (
-                <p>
-                  {i18n.translate('xpack.lens.metric.progressDirectionDisabledExplanation', {
-                    defaultMessage: 'Add a maximum to your visualization to see a progress bar.',
-                  })}
-                </p>
-              ) : null
-            }
-            display="block"
-          >
-            <EuiButtonGroup
-              isFullWidth
-              buttonSize="compressed"
-              legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-                defaultMessage: 'Progress bar direction',
-              })}
-              isDisabled={!state.maxAccessor}
-              data-test-subj="lnsMetric_progress_direction_buttons"
-              name="alignment"
-              options={[
-                {
-                  id: `${idPrefix}vertical`,
-                  label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
-                    defaultMessage: 'Vertical',
-                  }),
-                  'data-test-subj': 'lnsMetric_progress_bar_vertical',
-                },
-                {
-                  id: `${idPrefix}horizontal`,
-                  label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
-                    defaultMessage: 'Horizontal',
-                  }),
-                  'data-test-subj': 'lnsMetric_progress_bar_horizontal',
-                },
-              ]}
-              idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
-              onChange={(id) => {
-                const newDirection = id.replace(idPrefix, '') as LayoutDirection;
-                setState({
-                  ...state,
-                  progressDirection: newDirection,
-                });
-              }}
-            />
-          </EuiToolTip>
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.metric.maxColumns', {
-            defaultMessage: 'Max columns',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiFieldNumber
-            data-test-subj="lnsMetric_max_cols"
-            value={state.maxCols ?? DEFAULT_MAX_COLUMNS}
-            onChange={(event) => setState({ ...state, maxCols: parseInt(event.target.value, 10) })}
-          />
-        </EuiFormRow>
-
         <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
           {/* TODO - could we give the user a button to disable color-by-value? */}
           <EuiToolTip

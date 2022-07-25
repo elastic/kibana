@@ -14,7 +14,12 @@ import {
   EuiSwitchEvent,
   EuiSwitch,
   EuiFieldText,
+  EuiButtonGroup,
+  EuiFieldNumber,
+  htmlIdGenerator,
+  EuiSpacer,
 } from '@elastic/eui';
+import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,14 +39,14 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
-import { MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
 };
 
-export function MetricDimensionEditor(props: Props) {
+export function DimensionEditor(props: Props) {
   const { state, setState, accessor } = props;
 
   const setPrefix = useCallback(
@@ -83,6 +88,12 @@ export function MetricDimensionEditor(props: Props) {
           </EuiFormRow>
         </div>
       );
+    case state.maxAccessor:
+      return (
+        <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
+          <MaximumEditor {...props} />
+        </div>
+      );
     case state.breakdownByAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_breakdown">
@@ -100,6 +111,85 @@ export function MetricDimensionEditor(props: Props) {
     default:
       return null;
   }
+}
+
+function MaximumEditor({ setState, state }: Props) {
+  const setMaxCols = useCallback(
+    (columns: string) => {
+      setState({ ...state, maxCols: parseInt(columns, 10) });
+    },
+    [setState, state]
+  );
+
+  const { inputValue: currentMaxCols, handleInputChange: handleMaxColsChange } =
+    useDebouncedValue<string>({
+      onChange: setMaxCols,
+      value: String(state.maxCols ?? DEFAULT_MAX_COLUMNS),
+    });
+
+  const idPrefix = htmlIdGenerator()();
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+          defaultMessage: 'Progress bar direction',
+        })}
+        fullWidth
+        display="columnCompressed"
+      >
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+            defaultMessage: 'Progress bar direction',
+          })}
+          data-test-subj="lnsMetric_progress_direction_buttons"
+          name="alignment"
+          options={[
+            {
+              id: `${idPrefix}vertical`,
+              label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+                defaultMessage: 'Vertical',
+              }),
+              'data-test-subj': 'lnsMetric_progress_bar_vertical',
+            },
+            {
+              id: `${idPrefix}horizontal`,
+              label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+                defaultMessage: 'Horizontal',
+              }),
+              'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+            },
+          ]}
+          idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+          onChange={(id) => {
+            const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+            setState({
+              ...state,
+              progressDirection: newDirection,
+            });
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.metric.maxColumns', {
+          defaultMessage: 'Max columns',
+        })}
+        fullWidth
+        display="columnCompressed"
+      >
+        {/* TODO - debounce this */}
+        <EuiFieldNumber
+          compressed={true}
+          min={1}
+          data-test-subj="lnsMetric_max_cols"
+          value={currentMaxCols}
+          onChange={({ target: { value } }) => handleMaxColsChange(value)}
+        />
+      </EuiFormRow>
+    </>
+  );
 }
 
 function PrimaryMetricEditor(props: Props) {

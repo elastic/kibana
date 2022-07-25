@@ -20,7 +20,7 @@ import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { MetricDimensionEditor } from './dimension_editor';
+import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
@@ -272,7 +272,7 @@ export const getMetricVisualization = ({
             : [],
           supportsMoreColumns: !props.state.maxAccessor,
           filterOperations: isSupportedMetricOperation,
-          enableDimensionEditor: false,
+          enableDimensionEditor: true,
           supportFieldFormat: false,
           supportStaticValue: true,
           required: false,
@@ -385,7 +385,7 @@ export const getMetricVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <MetricDimensionEditor {...props} paletteService={paletteService} />
+        <DimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
