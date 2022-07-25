@@ -5,32 +5,61 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import type { Search } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
-import {
-  useSecurityDashboardsTableItems,
-  useDashboardsTableColumns,
-} from '../../containers/dashboards/use_security_dashboards';
+import { useSecurityDashboardsTable } from '../../containers/dashboards/use_security_dashboards_table';
 
-const DASHBOARDS_TABLE_SEARCH: Search = {
-  box: {
-    incremental: true,
+/** wait this many ms after the user completes typing before applying the filter input */
+const INPUT_TIMEOUT = 250;
+
+const DASHBOARDS_TABLE_SORTING = {
+  sort: {
+    field: 'title',
+    direction: 'asc',
   },
 } as const;
 
 export const DashboardsTable: React.FC = () => {
-  const items = useSecurityDashboardsTableItems();
-  const columns = useDashboardsTableColumns();
+  const { items, columns } = useSecurityDashboardsTable();
+  const [filteredItems, setFilteredItems] = useState(items);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const search = useMemo<Search>(() => {
+    const debouncedSetSearchQuery = debounce(setSearchQuery, INPUT_TIMEOUT);
+
+    return {
+      onChange: ({ query }) => {
+        debouncedSetSearchQuery(query?.text.toLowerCase() ?? '');
+      },
+      box: {
+        incremental: true,
+      },
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length === 0) {
+      setFilteredItems(items);
+    } else {
+      setFilteredItems(
+        items.filter(({ title, description }) => {
+          const normalizedName = `${title} ${description}`.toLowerCase();
+          return normalizedName.includes(searchQuery);
+        })
+      );
+    }
+  }, [items, searchQuery]);
 
   return (
     <EuiInMemoryTable
-      data-test-subj="dashboards-table"
-      items={items}
+      data-test-subj="dashboardsTable"
+      items={filteredItems}
       columns={columns}
-      search={DASHBOARDS_TABLE_SEARCH}
+      search={search}
       pagination={true}
-      sorting={true}
+      sorting={DASHBOARDS_TABLE_SORTING}
     />
   );
 };
