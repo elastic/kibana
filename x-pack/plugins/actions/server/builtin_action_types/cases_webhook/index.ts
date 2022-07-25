@@ -8,7 +8,7 @@
 import { curry } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { CasesConnectorFeatureId, SecurityConnectorFeatureId } from '../../../common';
+import { CasesConnectorFeatureId } from '../../../common';
 import {
   CasesWebhookActionParamsType,
   CasesWebhookExecutorResultData,
@@ -60,7 +60,7 @@ export function getActionType({
       connector: validate.connector,
     },
     executor: curry(executor)({ logger, configurationUtilities }),
-    supportedFeatureIds: [CasesConnectorFeatureId, SecurityConnectorFeatureId],
+    supportedFeatureIds: [CasesConnectorFeatureId],
   };
 }
 
