@@ -26,6 +26,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
+  const savedSearch = context.currentSavedSearch;
 
   return (
     <>
@@ -42,7 +43,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView.timeFieldName && <ExplainLogRateSpikes dataView={dataView} />}
+      {dataView.timeFieldName && (
+        <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />
+      )}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

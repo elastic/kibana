@@ -10,7 +10,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { CloudSecurityPosturePageId } from './common/navigation/types';
+import type { BreadcrumbEntry, CloudSecurityPosturePageId } from './common/navigation/types';
 
 /**
  * The cloud security posture's public plugin setup interface.
@@ -52,4 +52,6 @@ export interface CspSecuritySolutionContext {
   getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
   /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
   getSpyRouteComponent: () => ComponentType<{ pageName?: CloudSecurityPosturePageId }>;
+  /** Gets the `Manage` breadcrumb entry. */
+  getManageBreadcrumbEntry: () => BreadcrumbEntry;
 }
