@@ -6,18 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getFilterDepth, getFilterByPath } from './filters_editor_utils';
+import { getFilterByPath } from './filters_editor_utils';
+
 import { getFiltersMock } from './__mock__/filters';
 describe('filters_editor_utils', () => {
-  describe('getFilterDepth', () => {
-    test('should return correct depth level', () => {
-      expect(getFilterDepth('')).toBe(1);
-      expect(getFilterDepth('0')).toBe(1);
-      expect(getFilterDepth('0.1')).toBe(2);
-      expect(getFilterDepth('0.1.1.5')).toBe(4);
-    });
-  });
-
   describe('getFilterByPath', () => {
     const filters = getFiltersMock();
 

@@ -6,10 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { ConditionTypes } from './filters_editor_condition_types';
 
 const PATH_SEPARATOR = '.';
+
+/** to: @kbn/es-query **/
+const buildConditionalFilter = (conditionalType: 'or' | 'and', filters: Filter[]) => {
+  const filter = buildEmptyFilter(false);
+
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      params: {
+        ...filter.meta.params,
+        conditionalType,
+        filters,
+      },
+    },
+  };
+};
 
 export const getConditionalOperationType = (filter: Filter): ConditionTypes | undefined => {
   const { conditionalType } = filter.meta?.params || {};
@@ -24,7 +41,7 @@ export const getConditionalOperationType = (filter: Filter): ConditionTypes | un
   }
 };
 
-const doForFilterByPath = (filters: Filter[], path: string, action: (filter: Filter) => void) => {
+const doForFilterByPath = <T>(filters: Filter[], path: string, action: (filter: Filter) => T) => {
   const pathArray = path.split(PATH_SEPARATOR);
   let f: Filter = filters[+pathArray[0]];
   for (let i = 1, depth = pathArray.length; i < depth; i++) {
@@ -37,11 +54,7 @@ const getParentFilterPath = (path: string) => {
   return path.split(PATH_SEPARATOR).slice(0, -1).join(PATH_SEPARATOR);
 };
 
-export const getFilterDepth = (path: string) => {
-  return path.split(PATH_SEPARATOR).length || 1;
-};
-
-export const getFilterByPath = (filters: Filter[], path: string) => {
+export const getFilterByPath = (filters: Filter[], path: string): Filter => {
   return doForFilterByPath(filters, path, (f) => f);
 };
 
@@ -52,8 +65,32 @@ export const addFilter = (
   conditionalType: ConditionTypes
 ) => {
   const newFilters = [...filters];
+  const pathInArray = path.split(PATH_SEPARATOR);
+  let targetArray: Filter[] = newFilters;
+  let parentFilter: Filter | undefined;
+  let parentConditionType = ConditionTypes.AND;
 
-  console.log(getFilterByPath(newFilters, getParentFilterPath(path)));
+  if (pathInArray.length > 1) {
+    parentFilter = getFilterByPath(newFilters, getParentFilterPath(path));
+    parentConditionType = getConditionalOperationType(parentFilter) ?? parentConditionType;
+    targetArray = parentFilter.meta.params.filters;
+  }
+
+  const newFilter = buildEmptyFilter(false, dataViewId);
+  const selector = +pathInArray[pathInArray.length - 1];
+
+  if (parentConditionType !== conditionalType) {
+    targetArray.splice(
+      selector,
+      1,
+      buildConditionalFilter(conditionalType === ConditionTypes.AND ? 'and' : 'or', [
+        targetArray[selector],
+        newFilter,
+      ])
+    );
+  } else {
+    targetArray.splice(selector, 0, newFilter);
+  }
 
   return newFilters;
 };
