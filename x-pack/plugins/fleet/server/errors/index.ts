@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
-import type { FleetErrorType } from '../../common';
+import type { FleetErrorType } from '../../common/types';
 
 import { isESClientError } from './utils';
 

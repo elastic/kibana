@@ -19,7 +19,7 @@ import type { GetSecuritySolutionUrl } from '../../../common/components/link_to'
 
 export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
-  [NetworkRouteType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+  [NetworkRouteType.alerts]: i18n.NAVIGATION_EVENTS_TITLE,
   [NetworkRouteType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [NetworkRouteType.flows]: i18n.NAVIGATION_FLOWS_TITLE,
   [NetworkRouteType.dns]: i18n.NAVIGATION_DNS_TITLE,
