@@ -28,17 +28,18 @@ export default ({ getService }: FtrProviderContext) => {
     deviationMin: 1561986810992,
     end: 2147483647000,
     index: 'ft_ecommerce',
-    kuery: '',
+    searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
     start: 0,
     timeFieldName: 'order_date',
   };
 
   const expected = {
-    chunksLength: 8,
-    actionsLength: 7,
+    chunksLength: 12,
+    actionsLength: 11,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
-    actionFilter: 'add_change_points',
+    changePointFilter: 'add_change_points',
+    histogramFilter: 'add_change_points_histogram',
     errorFilter: 'error',
     changePoints: [
       {
@@ -60,6 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
         normalizedScore: 0.7661649691018979,
       },
     ],
+    histogramLength: 20,
   };
 
   describe('POST /internal/aiops/explain_log_rate_spikes', () => {
@@ -100,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const addChangePointsActions = data.filter((d) => d.type === expected.actionFilter);
+      const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
       expect(addChangePointsActions.length).to.greaterThan(0);
 
       const changePoints = addChangePointsActions
@@ -119,6 +121,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(cp.fieldValue).to.equal(ecp.fieldValue);
         expect(cp.doc_count).to.equal(ecp.doc_count);
         expect(cp.bg_count).to.equal(ecp.bg_count);
+      });
+
+      const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+      const histograms = histogramActions.flatMap((d) => d.payload);
+      // for each change point we should get a histogram
+      expect(histogramActions.length).to.be(changePoints.length);
+      // each histogram should have a length of 20 items.
+      histograms.forEach((h, index) => {
+        expect(h.histogram.length).to.be(20);
       });
     });
 
@@ -148,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(data.length).to.be(expected.actionsLength);
-        const addChangePointsActions = data.filter((d) => d.type === expected.actionFilter);
+        const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
         expect(addChangePointsActions.length).to.greaterThan(0);
 
         const changePoints = addChangePointsActions
@@ -167,6 +178,15 @@ export default ({ getService }: FtrProviderContext) => {
           expect(cp.fieldValue).to.equal(ecp.fieldValue);
           expect(cp.doc_count).to.equal(ecp.doc_count);
           expect(cp.bg_count).to.equal(ecp.bg_count);
+        });
+
+        const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
+        const histograms = histogramActions.flatMap((d) => d.payload);
+        // for each change point we should get a histogram
+        expect(histogramActions.length).to.be(changePoints.length);
+        // each histogram should have a length of 20 items.
+        histograms.forEach((h, index) => {
+          expect(h.histogram.length).to.be(20);
         });
       }
     });

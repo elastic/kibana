@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ExpandWildcard,
+  IndicesIndexState,
+  IndicesStatsIndicesStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndex } from '../../../common/types';
+import { ElasticsearchIndexWithPrivileges } from '../../../common/types';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,
@@ -43,42 +47,83 @@ export const mapIndexStats = (
 export const fetchIndices = async (
   client: IScopedClusterClient,
   indexPattern: string,
-  indexRegExp: RegExp
-): Promise<ElasticsearchIndex[]> => {
+  returnHiddenIndices: boolean
+): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
-  const indices = await client.asCurrentUser.indices.get({
-    expand_wildcards: ['open'],
+  const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
+  const totalIndices = await client.asCurrentUser.indices.get({
+    expand_wildcards: expandWildcards,
     // for better performance only compute aliases and settings of indices but not mappings
     features: ['aliases', 'settings'],
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
-    filter_path: ['*.aliases'],
+    filter_path: ['*.aliases', '*.settings.index.hidden'],
     index: indexPattern,
   });
 
-  if (!Object.keys(indices).length) {
+  const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
+    accum.push(indexName);
+    const aliases = Object.keys(totalIndices[indexName].aliases!);
+
+    aliases.forEach((alias) => accum.push(alias));
+    return accum;
+  }, [] as string[]);
+
+  const indicesNames = returnHiddenIndices
+    ? Object.keys(totalIndices)
+    : Object.keys(totalIndices).filter(
+        (indexName) => !(totalIndices[indexName]?.settings?.index?.hidden === 'true')
+      );
+  if (indicesNames.length === 0) {
     return [];
   }
 
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    expand_wildcards: ['open'],
+    expand_wildcards: expandWildcards,
     index: indexPattern,
     metric: ['docs', 'store'],
   });
-  const indicesNames = Object.keys(indices);
+
+  // TODO: make multiple batched requests if indicesNames.length > SOMETHING
+  const { index: indexPrivileges } = await client.asCurrentUser.security.hasPrivileges({
+    index: [
+      {
+        names: indexAndAliasNames,
+        privileges: ['read', 'manage'],
+      },
+    ],
+  });
+
   return indicesNames
     .map((indexName: string) => {
-      const indexData = indices[indexName];
+      const indexData = totalIndices[indexName];
       const indexStats = indicesStats[indexName];
       return mapIndexStats(indexData, indexStats, indexName);
     })
-    .flatMap(({ name, aliases, ...engineData }) => {
-      const engines = [];
-      engines.push({ name, ...engineData });
-      aliases.forEach((alias) => {
-        engines.push({ name: alias, ...engineData });
+    .flatMap(({ name, aliases, ...indexData }) => {
+      // expand aliases and add to results
+      const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
+      indicesAndAliases.push({
+        name,
+        alias: false,
+        privileges: { read: false, manage: false, ...indexPrivileges[name] },
+        ...indexData,
       });
-      return engines;
+
+      aliases.forEach((alias) => {
+        indicesAndAliases.push({
+          name: alias,
+          alias: true,
+          privileges: { read: false, manage: false, ...indexPrivileges[name] },
+          ...indexData,
+        });
+      });
+      return indicesAndAliases;
     })
-    .filter(({ name }) => name.match(indexRegExp));
+    .filter(
+      ({ name }, index, array) =>
+        // make list of aliases unique since we add an alias per index above
+        // and aliases can point to multiple indices
+        array.findIndex((engineData) => engineData.name === name) === index
+    );
 };

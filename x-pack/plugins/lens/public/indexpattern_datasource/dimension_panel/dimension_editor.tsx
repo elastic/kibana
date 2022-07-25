@@ -30,7 +30,6 @@ import {
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
-  DEFAULT_TIME_SCALE,
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
@@ -41,11 +40,12 @@ import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../type
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { setTimeScaling, TimeScaling } from './time_scaling';
-import { defaultFilter, Filtering, setFilter } from './filtering';
+import { TimeScaling } from './time_scaling';
+import { Filtering } from './filtering';
 import { AdvancedOptions } from './advanced_options';
-import { setTimeShift, TimeShift } from './time_shift';
+import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common';
 import {
   quickFunctionsName,
   staticValueOperationName,
@@ -63,6 +63,7 @@ import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import { FieldChoiceWithOperationType } from './field_select';
+import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;
@@ -270,8 +271,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
-  const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
-  const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
   const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     return () => {
@@ -452,7 +451,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: undefined,
+                // if document field can be used, default to it
+                field: possibleFields.has(DOCUMENT_FIELD_NAME) ? documentField : undefined,
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
@@ -838,23 +838,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <AdvancedOptions
             options={[
               {
-                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                  defaultMessage: 'Normalize by unit',
-                }),
                 dataTestSubj: 'indexPattern-time-scaling-enable',
-                onClick: () => {
-                  setStateWrapper(
-                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
-                  );
-                },
-                showInPopover: Boolean(
-                  selectedOperationDefinition.timeScalingMode &&
-                    selectedOperationDefinition.timeScalingMode !== 'disabled' &&
-                    Object.values(state.layers[layerId].columns).some(
-                      (col) => col.operationType === 'date_histogram'
-                    ) &&
-                    !selectedColumn.timeScale
-                ),
                 inlineElement: selectedOperationDefinition.timeScalingMode ? (
                   <TimeScaling
                     selectedColumn={selectedColumn}
@@ -865,67 +849,43 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 ) : null,
               },
               {
-                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
-                  defaultMessage: 'Filter by',
-                }),
                 dataTestSubj: 'indexPattern-filter-by-enable',
-                onClick: () => {
-                  setFilterByOpenInitally(true);
-                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
-                },
-                showInPopover: Boolean(
-                  selectedOperationDefinition.filterable && !selectedColumn.filter
-                ),
-                inlineElement:
-                  selectedOperationDefinition.filterable && selectedColumn.filter ? (
-                    <Filtering
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isInitiallyOpen={filterByOpenInitially}
-                      helpMessage={
-                        selectedOperationDefinition.filterable &&
-                        typeof selectedOperationDefinition.filterable !== 'boolean'
-                          ? selectedOperationDefinition.filterable.helpMessage
-                          : null
-                      }
-                    />
-                  ) : null,
+                inlineElement: selectedOperationDefinition.filterable ? (
+                  <Filtering
+                    indexPattern={currentIndexPattern}
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                    helpMessage={
+                      selectedOperationDefinition.filterable &&
+                      typeof selectedOperationDefinition.filterable !== 'boolean'
+                        ? selectedOperationDefinition.filterable.helpMessage
+                        : null
+                    }
+                  />
+                ) : null,
               },
               {
-                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-                  defaultMessage: 'Time shift',
-                }),
                 dataTestSubj: 'indexPattern-time-shift-enable',
-                onClick: () => {
-                  setTimeShiftFocused(true);
-                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
-                },
-                showInPopover: Boolean(
+                inlineElement: Boolean(
                   selectedOperationDefinition.shiftable &&
-                    selectedColumn.timeShift === undefined &&
                     (currentIndexPattern.timeFieldName ||
                       Object.values(state.layers[layerId].columns).some(
                         (col) => col.operationType === 'date_histogram'
                       ))
-                ),
-                inlineElement:
-                  selectedOperationDefinition.shiftable &&
-                  selectedColumn.timeShift !== undefined ? (
-                    <TimeShift
-                      datatableUtilities={services.data.datatableUtilities}
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isFocused={timeShiftedFocused}
-                      activeData={props.activeData}
-                      layerId={layerId}
-                    />
-                  ) : null,
+                ) ? (
+                  <TimeShift
+                    datatableUtilities={services.data.datatableUtilities}
+                    indexPattern={currentIndexPattern}
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                    activeData={props.activeData}
+                    layerId={layerId}
+                  />
+                ) : null,
               },
               ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
                 paramEditorProps

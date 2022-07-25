@@ -938,14 +938,48 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.rollback',
+    key: 'windows.advanced.alerts.rollback.remediation.enabled',
     first_supported_version: '8.4',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
       {
-        defaultMessage: 'Experimental',
+        defaultMessage:
+          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
       }
     ),
     license: 'platinum',
+  },
+  {
+    key: 'linux.advanced.fanotify.ignore_unknown_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignore_unknown_filesystems',
+      {
+        defaultMessage:
+          'Whether fanotify should ignore unknown filesystems. When true, only CI tested filesystems will be marked by default; additional filesystems can be added or removed with "monitored_filesystems" and "ignored_filesystems", respectively. When false, only an internally curated list of filesystems will be ignored, all others will be marked; additional filesystems can be ignored via "ignored_filesystems". "monitored_filesystems" is ignored when "ignore_unknown_filesystems" is false. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.monitored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to monitor. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "jfs,ufs,ramfs". It is recommended to avoid network-backed filesystems. When "ignore_unknown_filesystems" is false, this option is ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option are monitored by fanotify unless overridden by entries in "ignored_filesystems" or internally known bad filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.ignored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
+      }
+    ),
   },
 ];
