@@ -114,6 +114,11 @@ module.exports = {
           exact: true,
         },
         {
+          from: '@kbn/expressions-plugin',
+          to: '@kbn/expressions-plugin/common',
+          exact: true,
+        },
+        {
           from: '@kbn/kibana-utils-plugin',
           to: '@kbn/kibana-utils-plugin/common',
           exact: true,

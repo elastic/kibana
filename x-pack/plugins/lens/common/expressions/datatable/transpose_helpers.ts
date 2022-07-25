@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableArgs } from './datatable';
 import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
