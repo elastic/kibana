@@ -62,10 +62,30 @@ export const NameField = ({ editData, existingDataViewNames }: NameFieldProps) =
     [existingDataViewNames]
   );
 
+  const defaultValue = useMemo(
+    () => () => {
+      let defaultValueText = i18n.translate('indexPatternEditor.dataViewCreation.defaultName', {
+        defaultMessage: 'Data View',
+      });
+      let count = 2;
+
+      while (existingDataViewNames.includes(defaultValueText)) {
+        defaultValueText = i18n.translate('indexPatternEditor.dataViewCreation.defaultNamePlural', {
+          defaultMessage: 'Data View {count}',
+          values: { count: count++ },
+        });
+      }
+
+      return defaultValueText;
+    },
+    [existingDataViewNames]
+  );
+
   return (
     <UseField<string, IndexPatternConfig>
       path="name"
       config={config}
+      defaultValue={defaultValue()}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.nameAriaLabel', {
