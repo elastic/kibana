@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { sumBy } from 'lodash';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
