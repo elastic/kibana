@@ -125,17 +125,14 @@ export class InternalFileService {
     await file.delete();
   }
 
-  public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
+  private async get(id: string) {
     try {
       const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
-      const { FileKind: actualFileKind, Status } = result.attributes;
-      if (actualFileKind !== fileKind) {
-        throw new Error(`Unexpected file kind "${actualFileKind}", expected "${fileKind}".`);
-      }
+      const { Status } = result.attributes;
       if (Status === 'DELETED') {
         throw new FileNotFoundError('File has been deleted');
       }
-      return this.toFile(result, this.getFileKind(fileKind));
+      return this.toFile(result, this.getFileKind(result.attributes.FileKind));
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new FileNotFoundError('File not found');
@@ -143,6 +140,14 @@ export class InternalFileService {
       this.logger.error(`Could not retrieve file: ${e}`);
       throw e;
     }
+  }
+
+  public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
+    const file = await this.get(id);
+    if (file.fileKind !== fileKind) {
+      throw new Error(`Unexpected file kind "${file.fileKind}", expected "${fileKind}".`);
+    }
+    return file;
   }
 
   public async list({
@@ -156,6 +161,8 @@ export class InternalFileService {
       filter: `${this.savedObjectType}.attributes.FileKind: ${fileKindId} AND NOT ${this.savedObjectType}.attributes.Status: DELETED`,
       page,
       perPage,
+      sortField: 'created',
+      sortOrder: 'desc',
     });
     return result.saved_objects.map((file) => this.toFile(file, fileKind));
   }
@@ -234,6 +241,8 @@ export class InternalFileService {
       filter: kueryExpressions ? nodeBuilder.and(kueryExpressions) : undefined,
       page,
       perPage,
+      sortOrder: 'desc',
+      sortField: 'created',
     });
     return result.saved_objects.map((so) => toJSON(so.id, so.attributes));
   }
@@ -298,5 +307,10 @@ export class InternalFileService {
         await this.soClient.closePointInTime(pit.id).catch(this.logger.error.bind(this.logger));
       }
     }
+  }
+
+  public async getByToken(token: string) {
+    const { fileId } = await this.fileShareService.getByToken(token);
+    return this.get(fileId);
   }
 }

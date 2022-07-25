@@ -14,7 +14,7 @@ import { FileShareNotFoundError } from '../../../file_share_service/errors';
 export const method = 'delete' as const;
 
 export const paramsSchema = schema.object({
-  token: schema.string(),
+  id: schema.string(),
 });
 
 type Params = Ensure<FileUnshareHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
@@ -28,11 +28,11 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
 ) => {
   const { fileService } = await files;
   const {
-    params: { token },
+    params: { id },
   } = req;
 
   try {
-    await fileService.asCurrentUser().deleteShareObject({ tokenId: token });
+    await fileService.asCurrentUser().deleteShareObject({ id });
   } catch (e) {
     if (e instanceof FileShareNotFoundError) {
       return res.notFound({ body: e });

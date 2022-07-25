@@ -152,13 +152,13 @@ describe('File kind HTTP API', () => {
 
     const { id } = await createFile();
     const {
-      body: { token },
+      body: { id: shareId },
     } = await request
       .post(root, `/api/files/share/${fileKind}/${id}`)
       .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
       .expect(200);
 
-    await request.delete(root, `/api/files/share/${fileKind}/${token}`).expect(200);
+    await request.delete(root, `/api/files/share/${fileKind}/${shareId}`).expect(200);
   });
 
   test('list shares', async () => {
@@ -172,11 +172,17 @@ describe('File kind HTTP API', () => {
     const { id } = await createFile();
     await request
       .post(root, `/api/files/share/${fileKind}/${id}`)
-      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share-1' })
       .expect(200);
     await request
       .post(root, `/api/files/share/${fileKind}/${id}`)
-      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share-2' })
+      .expect(200);
+
+    const { id: id2 } = await createFile();
+    await request
+      .post(root, `/api/files/share/${fileKind}/${id2}`)
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share-3' })
       .expect(200);
 
     {
@@ -184,12 +190,12 @@ describe('File kind HTTP API', () => {
         body: { shares },
       } = await request.get(root, `/api/files/share/${fileKind}?forFileId=${id}`).expect(200);
       expect(shares).toHaveLength(2);
+      // When we list file shares we do not get the file token back
       expect(shares[0]).toEqual({
         id: expect.any(String),
         created: expect.any(String),
-        token: expect.any(String),
         validUntil: expect.any(Number),
-        name: 'my-share',
+        name: 'my-share-2',
         fileId: id,
       });
     }

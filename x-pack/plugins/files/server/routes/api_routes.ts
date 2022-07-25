@@ -8,6 +8,7 @@
 import {
   FILES_API_BASE_PATH,
   FILES_SHARE_API_BASE_PATH,
+  FILES_PUBLIC_API_BASE_PATH,
   API_BASE_PATH,
 } from '../../common/api_routes';
 
@@ -16,6 +17,9 @@ export * from '../../common/api_routes';
 export const FILES_API_ROUTES = {
   find: `${API_BASE_PATH}/find`,
   metrics: `${API_BASE_PATH}/metrics`,
+  public: {
+    download: `${FILES_PUBLIC_API_BASE_PATH}/blob/{fileName?}`,
+  },
   fileKind: {
     getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
     getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob`,

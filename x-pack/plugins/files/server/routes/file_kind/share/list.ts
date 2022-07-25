@@ -15,7 +15,7 @@ export const method = 'get' as const;
 export const querySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
-  forFile: schema.maybe(schema.string()),
+  forFileId: schema.maybe(schema.string()),
 });
 
 type Query = Ensure<FileListSharesHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;

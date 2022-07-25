@@ -132,7 +132,7 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<FileJSON<Meta>, 'meta
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShareSavedObjectAttributes = {
-  created_at: string;
+  created: string;
 
   /**
    * Secret token used to access the associated file.
@@ -152,7 +152,7 @@ export type FileShareSavedObjectAttributes = {
    * TODO: in future we could add a special value like "forever", but this should
    * not be the default.
    */
-  valid_until?: number;
+  valid_until: number;
 };
 
 /**

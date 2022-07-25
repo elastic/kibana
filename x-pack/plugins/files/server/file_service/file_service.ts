@@ -78,4 +78,9 @@ export interface FileServiceStart {
    * Returns diagnostics or `undefined` if metrics could not be retrieved.
    */
   getUsageMetrics(): Promise<FilesMetrics>;
+
+  /**
+   * Get a file by a shareable token.
+   */
+  getByToken<M>(token: string): Promise<File<M>>;
 }

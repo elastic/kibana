@@ -11,6 +11,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { nodeBuilder, escapeKuery } from '@kbn/es-query';
 import type {
   FileShareJSON,
   FileShareJSONWithToken,
@@ -22,7 +23,11 @@ import type { File } from '../file';
 import { fileShareObjectType } from '../saved_objects';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
-import { ExpiryDateInThePastError, FileShareNotFoundError } from './errors';
+import {
+  ExpiryDateInThePastError,
+  FileShareNotFoundError,
+  FileShareTokenInvalidError,
+} from './errors';
 
 export interface CreateShareArgs {
   /**
@@ -45,12 +50,12 @@ export interface ListArgs {
   perPage?: number;
 }
 
-interface TokenIdArg {
-  tokenId: string;
+interface IdArg {
+  id: string;
 }
 
-export type DeleteArgs = TokenIdArg;
-export type GetArgs = TokenIdArg;
+export type DeleteArgs = IdArg;
+export type GetArgs = IdArg;
 
 export interface DeleteForFileArgs {
   file: File;
@@ -65,7 +70,7 @@ function toFileShareJSON(so: SavedObject<FileShareSavedObjectAttributes>): FileS
   return {
     id: so.id,
     fileId: so.references[0]?.id, // Assuming a single file reference
-    created: so.attributes.created_at,
+    created: so.attributes.created,
     validUntil: so.attributes.valid_until,
     name: so.attributes.name,
   };
@@ -95,7 +100,7 @@ export class InternalFileShareService implements FileShareServiceStart {
     const so = await this.savedObjects.create<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
       {
-        created_at: new Date().toISOString(),
+        created: new Date().toISOString(),
         name,
         valid_until: validUntil ? validUntil : moment().add(30, 'days').unix(),
         token: generateShareToken(),
@@ -108,18 +113,18 @@ export class InternalFileShareService implements FileShareServiceStart {
     return { ...toFileShareJSON(so), token: so.attributes.token };
   }
 
-  public async delete({ tokenId }: DeleteArgs): Promise<void> {
+  public async delete({ id }: DeleteArgs): Promise<void> {
     try {
-      await this.savedObjects.delete(this.savedObjectsType, tokenId);
+      await this.savedObjects.delete(this.savedObjectsType, id);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw new FileShareNotFoundError(`File share with id "${tokenId}" not found.`);
+        throw new FileShareNotFoundError(`File share with id "${id}" not found.`);
       }
       throw e;
     }
   }
 
-  private async listInternal({
+  private async internalList({
     fileId,
     perPage,
     page,
@@ -134,21 +139,46 @@ export class InternalFileShareService implements FileShareServiceStart {
         : undefined,
       perPage,
       page,
+      sortField: 'created',
+      sortOrder: 'desc',
     });
     return result.saved_objects;
   }
 
   public async deleteForFile({ file }: DeleteForFileArgs): Promise<void> {
-    const savedObjects = await this.listInternal({ fileId: file.id });
-    await Promise.all(savedObjects.map(({ id }) => this.delete({ tokenId: id })));
+    const savedObjects = await this.internalList({ fileId: file.id });
+    await Promise.all(savedObjects.map(({ id }) => this.delete({ id })));
   }
 
-  public async get({ tokenId }: GetArgs): Promise<FileShareJSON> {
-    const result = await this.savedObjects.get<FileShareSavedObjectAttributes>(
-      this.savedObjectsType,
-      tokenId
-    );
-    return toFileShareJSON(result);
+  /**
+   * Get a share token and also check whether it is valid.
+   */
+  public async getByToken(token: string): Promise<FileShareJSON> {
+    const {
+      saved_objects: [share],
+    } = await this.savedObjects.find<FileShareSavedObjectAttributes>({
+      type: this.savedObjectsType,
+      filter: nodeBuilder.is('token', escapeKuery(token)),
+    });
+
+    if (!share) {
+      throw new FileShareNotFoundError(`Could not find file share with token "${token}".`);
+    }
+    if (share.attributes.valid_until < Date.now()) {
+      throw new FileShareTokenInvalidError(`Share "${token}" has expired.`);
+    }
+    return toFileShareJSON(share);
+  }
+
+  public async get({ id }: GetArgs): Promise<FileShareJSON> {
+    try {
+      return toFileShareJSON(await this.savedObjects.get(this.savedObjectsType, id));
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw new FileShareNotFoundError(e);
+      }
+      throw e;
+    }
   }
 
   public async update({
@@ -164,7 +194,7 @@ export class InternalFileShareService implements FileShareServiceStart {
   }
 
   public async list(args: ListArgs): Promise<{ shares: FileShareJSON[] }> {
-    const savedObjects = await this.listInternal(args);
+    const savedObjects = await this.internalList(args);
     return {
       shares: savedObjects.map(toFileShareJSON),
     };

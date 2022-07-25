@@ -83,6 +83,9 @@ export class FileServiceFactory {
       async getUsageMetrics() {
         return internalFileService.getUsageMetrics();
       },
+      async getByToken<M>(token: string) {
+        return internalFileService.getByToken(token) as Promise<File<M>>;
+      },
       getShareObject: internalFileShareService.get.bind(internalFileShareService),
       updateShareObject: internalFileShareService.update.bind(internalFileShareService),
       deleteShareObject: internalFileShareService.delete.bind(internalFileShareService),

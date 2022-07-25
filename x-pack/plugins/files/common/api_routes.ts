@@ -161,7 +161,10 @@ export type FileShareHttpEndpoint = HttpApiInterfaceEntryDefinition<
 
 export type FileUnshareHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
-    token: string;
+    /**
+     * Share token id
+     */
+    id: string;
   },
   unknown,
   unknown,
@@ -177,4 +180,12 @@ export type FileListSharesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     shares: FileShareJSON[];
   }
+>;
+
+export type FilePublicDownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  { token: string },
+  unknown,
+  // Should be a readable stream
+  any
 >;

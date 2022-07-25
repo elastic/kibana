@@ -16,3 +16,4 @@ abstract class FileShareError extends Error {
 
 export class ExpiryDateInThePastError extends FileShareError {}
 export class FileShareNotFoundError extends FileShareError {}
+export class FileShareTokenInvalidError extends FileShareError {}
