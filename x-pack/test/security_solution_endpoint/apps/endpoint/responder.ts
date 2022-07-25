@@ -21,6 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
   const timelineTestService = getService('timeline');
+  const detectionsTestService = getService('detections');
   const log = getService('log');
 
   const performResponderSanityChecks = async () => {
@@ -39,12 +40,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe.only('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
+    let endpointAgentId: string;
 
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData({
         numHosts: 2,
         generatorSeed: 'responder',
       });
+
+      endpointAgentId = indexedData.hosts[0].agent.id;
     });
 
     after(async () => {
@@ -60,12 +64,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should show Responder from the endpoint list', async () => {
-        await pageObjects.endpoint.showResponderFromEndpointList(indexedData.hosts[0].agent.id);
+        await pageObjects.endpoint.showResponderFromEndpointList(endpointAgentId);
         await performResponderSanityChecks();
       });
 
       it('should show Responder from the endpoint details', async () => {
-        await pageObjects.endpoint.showResponderFromEndpointDetails(indexedData.hosts[0].agent.id);
+        await pageObjects.endpoint.showResponderFromEndpointDetails(endpointAgentId);
         await performResponderSanityChecks();
       });
     });
@@ -76,9 +80,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         timeline = await timelineTestService.createTimeline('endpoint responder test');
 
-        // FIXME:PT Need to add alert to timeline
-
         await pageObjects.timeline.navigateToTimelineList();
+        await detectionsTestService.waitForAlerts();
+
+        // Add all alerts for the Endpoint to the timeline created
+        await timelineTestService.updateTimeline(
+          timeline.data.persistTimeline.timeline.savedObjectId,
+          {
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  kind: 'kuery',
+                  expression: `agent.type: "endpoint" AND agent.id : "${endpointAgentId}" AND kibana.alert.rule.uuid : *`,
+                },
+                serializedQuery: `{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"agent.type":"endpoint"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"agent.id":"${endpointAgentId}"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"kibana.alert.rule.uuid"}}],"minimum_should_match":1}}]}}`,
+              },
+            },
+          },
+          timeline.data.persistTimeline.timeline.version
+        );
       });
 
       after(async () => {
