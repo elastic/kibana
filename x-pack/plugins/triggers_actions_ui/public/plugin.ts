@@ -59,6 +59,7 @@ import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RuleEventLogListOptions,
   RulesListProps,
   RulesListNotifyBadgeProps,
   AlertsTableConfigurationRegistry,
@@ -111,7 +112,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleTagBadge: <T extends RuleTagBadgeOptions>(
     props: RuleTagBadgeProps<T>
   ) => ReactElement<RuleTagBadgeProps<T>>;
-  getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
+  getRuleEventLogList: <T extends RuleEventLogListOptions>(
+    props: RuleEventLogListProps<T>
+  ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
@@ -327,7 +330,7 @@ export class Plugin
       getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
         return getRuleTagBadgeLazy(props);
       },
-      getRuleEventLogList: (props: RuleEventLogListProps) => {
+      getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
       getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {

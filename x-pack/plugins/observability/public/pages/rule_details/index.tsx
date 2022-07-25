@@ -34,7 +34,6 @@ import {
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { RuleDetailsPathParams, EVENT_LOG_LIST_TAB, ALERT_LIST_TAB } from './types';
@@ -73,14 +72,9 @@ export function RuleDetailsPage() {
     () => observabilityRuleTypeRegistry.list(),
     [observabilityRuleTypeRegistry]
   );
-  const [numberOfExecutions, setNumberOfExecutions] = useState(60);
   const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
-  });
-  const { ruleSummary, reloadRuleSummary, isLoadingRuleSummary } = useFetchRuleSummary({
-    ruleId,
-    http,
   });
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
@@ -111,14 +105,6 @@ export function RuleDetailsPage() {
     setIsRuleEditPopoverOpen(false);
     setEditFlyoutVisible(true);
   }, []);
-
-  const handleChangeDuration = useCallback(
-    (executions: number) => {
-      setNumberOfExecutions(executions);
-      reloadRuleSummary();
-    },
-    [setNumberOfExecutions, reloadRuleSummary]
-  );
 
   useEffect(() => {
     if (ruleTypes.length && rule) {
@@ -190,19 +176,10 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: (
-        <>
-          {ruleSummary &&
-            getRuleEventLogList({
-              rule,
-              ruleType,
-              ruleSummary,
-              isLoadingRuleSummary,
-              numberOfExecutions,
-              onChangeDuration: handleChangeDuration,
-            } as RuleEventLogListProps)}
-        </>
-      ),
+      content: getRuleEventLogList<'default'>({
+        rule,
+        ruleType,
+      } as RuleEventLogListProps),
     },
     {
       id: ALERT_LIST_TAB,

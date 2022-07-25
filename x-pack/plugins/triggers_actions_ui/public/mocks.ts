@@ -24,6 +24,8 @@ import {
   FieldBrowserProps,
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
+  RuleEventLogListOptions,
+  RuleEventLogListProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -102,8 +104,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
       return getRuleTagBadgeLazy<T>(props);
     },
-    getRuleEventLogList: (props) => {
-      return getRuleEventLogListLazy(props);
+    getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
+      return getRuleEventLogListLazy<T>(props);
     },
     getRulesListNotifyBadge: (props) => {
       return getRulesListNotifyBadgeLazy(props);

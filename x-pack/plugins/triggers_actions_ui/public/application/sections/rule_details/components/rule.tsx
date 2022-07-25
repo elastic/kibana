@@ -25,7 +25,7 @@ import {
   rulesStatusesTranslationsMapping,
   ALERT_STATUS_LICENSE_ERROR,
 } from '../../rules_list/translations';
-// import { RuleEventLogListWithApi } from './rule_event_log_list';
+import type { RuleEventLogListProps } from './rule_event_log_list';
 import { AlertListItem } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -105,10 +105,11 @@ export function RuleComponent({
         defaultMessage: 'History',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: suspendedComponentWithProps(
+      content: suspendedComponentWithProps<RuleEventLogListProps<'stackManagement'>>(
         RuleEventLogListWithApi,
         'xl'
       )({
+        fetchRuleSummary: false,
         rule,
         ruleType,
         ruleSummary,

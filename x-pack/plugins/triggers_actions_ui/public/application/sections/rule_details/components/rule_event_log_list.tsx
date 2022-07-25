@@ -9,8 +9,6 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
-  EuiPanel,
-  EuiStat,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -19,19 +17,14 @@ import {
   Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
-  EuiIconTip,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import {
-  formatMillisForDisplay,
-  shouldShowDurationWarning,
-} from '../../../lib/execution_duration_utils';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -64,34 +57,53 @@ const updateButtonProps = {
 
 const MAX_RESULTS = 1000;
 
-const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
-
 const ruleEventListContainerStyle = { minHeight: 400 };
 
-export type RuleEventLogListProps = {
+export type RuleEventLogListOptions = 'stackManagement' | 'default';
+
+export interface RuleEventLogListCommonProps {
   rule: Rule;
   ruleType: RuleType;
-  ruleSummary: RuleSummary;
   localStorageKey?: string;
   refreshToken?: number;
-  numberOfExecutions: number;
-  isLoadingRuleSummary?: boolean;
-  onChangeDuration: (length: number) => void;
   requestRefresh?: () => Promise<void>;
   customLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+  loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
+  fetchRuleSummary?: boolean;
+}
 
-export const RuleEventLogList = (props: RuleEventLogListProps) => {
+export interface RuleEventLogListStackManagementProps {
+  ruleSummary: RuleSummary;
+  onChangeDuration: (duration: number) => void;
+  numberOfExecutions: number;
+  isLoadingRuleSummary?: boolean;
+}
+
+export type RuleEventLogListProps<T extends RuleEventLogListOptions = 'default'> =
+  T extends 'default'
+    ? RuleEventLogListCommonProps
+    : T extends 'stackManagement'
+    ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
+    : never;
+
+export const RuleEventLogList = <T extends RuleEventLogListOptions>(
+  props: RuleEventLogListProps<T>
+) => {
   const {
     rule,
     ruleType,
-    ruleSummary,
-    numberOfExecutions = DEFAULT_NUMBER_OF_EXECUTIONS,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
+    requestRefresh,
+    fetchRuleSummary = true,
+  } = props;
+
+  const {
+    ruleSummary,
+    numberOfExecutions,
     onChangeDuration,
     isLoadingRuleSummary = false,
-  } = props;
+  } = props as RuleEventLogListStackManagementProps;
 
   const loadExecutionLogAggregations =
     props.customLoadExecutionLogAggregations || props.loadExecutionLogAggregations;
@@ -148,14 +160,10 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     }));
   }, [sortingColumns]);
 
-  const showDurationWarning = useMemo(() => {
-    if (!ruleSummary) {
-      return false;
-    }
-    return shouldShowDurationWarning(ruleType, ruleSummary.executionDuration.average);
-  }, [ruleType, ruleSummary]);
-
   const loadEventLogs = async () => {
+    if (!loadExecutionLogAggregations) {
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await loadExecutionLogAggregations({
@@ -253,63 +261,6 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     );
   };
 
-  const renderRuleSummaryAndChart = () => {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <EuiPanel
-            data-test-subj="avgExecutionDurationPanel"
-            color={showDurationWarning ? 'warning' : 'subdued'}
-            hasBorder={false}
-          >
-            <EuiStat
-              data-test-subj="avgExecutionDurationStat"
-              titleSize="xs"
-              title={
-                <EuiFlexGroup gutterSize="xs">
-                  {showDurationWarning && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        data-test-subj="ruleDurationWarning"
-                        anchorClassName="ruleDurationWarningIcon"
-                        type="alert"
-                        color="warning"
-                        content={i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',
-                          {
-                            defaultMessage: `Duration exceeds the rule's expected run time.`,
-                          }
-                        )}
-                        position="top"
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false} data-test-subj="ruleEventLogListAvgDuration">
-                    {formatMillisForDisplay(ruleSummary.executionDuration.average)}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              description={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.alertsList.avgDurationDescription',
-                {
-                  defaultMessage: `Average duration`,
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <ExecutionDurationChart
-            executionDuration={ruleSummary.executionDuration}
-            numberOfExecutions={numberOfExecutions}
-            onChangeDuration={onChangeDuration}
-            isLoading={isLoadingRuleSummary}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,7 +281,17 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   return (
     <div style={ruleEventListContainerStyle}>
       <EuiSpacer />
-      {renderRuleSummaryAndChart()}
+      <RuleExecutionSummaryAndChartWithApi
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingRuleSummary={isLoadingRuleSummary}
+        refreshToken={refreshToken}
+        onChangeDuration={onChangeDuration}
+        requestRefresh={requestRefresh}
+        fetchRuleSummary={fetchRuleSummary}
+      />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
