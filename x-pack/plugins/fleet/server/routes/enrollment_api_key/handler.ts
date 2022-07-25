@@ -19,7 +19,7 @@ import type {
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';

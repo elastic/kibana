@@ -14,7 +14,7 @@ import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
-} from '../../common';
+} from '../../common/types';
 
 export type PostPackagePolicyDeleteCallback = (
   deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>

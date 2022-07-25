@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../../common';
+import { isValidNamespace } from '../../../common/services';
 
 export const NamespaceSchema = schema.string({
   minLength: 1,

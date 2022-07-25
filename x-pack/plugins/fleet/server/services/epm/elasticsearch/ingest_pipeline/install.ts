@@ -20,7 +20,7 @@ import {
 import {
   getCustomPipelineNameForDatastream,
   getPipelineNameForDatastream,
-} from '../../../../../common';
+} from '../../../../../common/services';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';

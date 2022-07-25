@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import semverLt from 'semver/functions/lt';
 
-import type { UpgradePackagePolicyDryRunResponseItem } from '../../common';
+import type { UpgradePackagePolicyDryRunResponseItem } from '../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 

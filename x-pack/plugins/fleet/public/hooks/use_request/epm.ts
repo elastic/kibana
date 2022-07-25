@@ -20,7 +20,7 @@ import type {
   UpdatePackageRequest,
   UpdatePackageResponse,
 } from '../../types';
-import type { FleetErrorResponse, GetStatsResponse } from '../../../common';
+import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 

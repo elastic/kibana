@@ -7,7 +7,11 @@
 
 import { useStartServices } from '../../../hooks/use_core';
 import { epmRouteService } from '../../../services';
-import type { PackageSpecIcon, PackageSpecScreenshot, RegistryImage } from '../../../../common';
+import type {
+  PackageSpecIcon,
+  PackageSpecScreenshot,
+  RegistryImage,
+} from '../../../../common/types';
 
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;

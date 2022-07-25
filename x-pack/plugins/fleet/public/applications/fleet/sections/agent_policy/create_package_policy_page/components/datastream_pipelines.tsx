@@ -24,7 +24,7 @@ import { useStartServices, useGetPipeline } from '../../../../hooks';
 import {
   getPipelineNameForDatastream,
   getCustomPipelineNameForDatastream,
-} from '../../../../../../../common';
+} from '../../../../../../../common/services';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 

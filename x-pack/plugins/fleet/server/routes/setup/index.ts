@@ -6,7 +6,7 @@
  */
 
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import type { FleetConfigType } from '../../../common';
+import type { FleetConfigType } from '../../../common/types';
 
 import type { FleetAuthzRouter } from '../security';
 

@@ -14,7 +14,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
-} from '../../../../../../../common';
+} from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
   const { isLoading, data } = useGetPackageInfoByKey(FLEET_ELASTIC_AGENT_PACKAGE);

@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../../common';
+import {
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+} from '../../../common/constants';
 
 export const AgentTypeSchema = schema.oneOf([
   schema.literal(AGENT_TYPE_EPHEMERAL),

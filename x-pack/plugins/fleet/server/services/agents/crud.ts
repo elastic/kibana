@@ -15,8 +15,9 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
-import type { FleetServerAgent } from '../../../common';
-import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
+import type { FleetServerAgent } from '../../../common/types';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';

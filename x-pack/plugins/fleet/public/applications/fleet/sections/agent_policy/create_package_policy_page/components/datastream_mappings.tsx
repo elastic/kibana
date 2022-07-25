@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackageInfo } from '../../../../types';
-import { getComponentTemplateNameForDatastream } from '../../../../../../../common';
+import { getComponentTemplateNameForDatastream } from '../../../../../../../common/services';
 import { useStartServices } from '../../../../hooks';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';

@@ -7,7 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
 
-import { isPackageLimited } from '../../../common';
+import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
   FullAgentPolicyInput,

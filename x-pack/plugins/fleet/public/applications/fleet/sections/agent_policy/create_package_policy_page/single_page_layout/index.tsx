@@ -24,9 +24,10 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
 import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
-import type { CreatePackagePolicyRequest } from '../../../../../../../common';
+import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
 
-import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
+import { splitPkgKey } from '../../../../../../../common/services';
+import { dataTypes, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common/constants';
 import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
