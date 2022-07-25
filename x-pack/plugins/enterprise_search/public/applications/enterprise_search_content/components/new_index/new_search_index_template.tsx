@@ -57,7 +57,6 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
-    isLoading,
     language,
     rawName,
     languageSelectValue,
@@ -197,8 +196,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!rawName || buttonLoading || isLoading || formInvalid}
-              isLoading={buttonLoading || isLoading}
+              isDisabled={!rawName || buttonLoading || formInvalid}
+              isLoading={buttonLoading}
               type="submit"
             >
               {i18n.translate(

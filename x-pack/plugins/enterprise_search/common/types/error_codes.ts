@@ -7,6 +7,7 @@
 
 export enum ErrorCode {
   CONNECTOR_DOCUMENT_ALREADY_EXISTS = 'connector_document_already_exists',
+  CRAWLER_ALREADY_EXISTS = 'crawler_already_exists',
   INDEX_ALREADY_EXISTS = 'index_already_exists',
   INDEX_NOT_FOUND = 'index_not_found',
   RESOURCE_NOT_FOUND = 'resource_not_found',
