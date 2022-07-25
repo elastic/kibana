@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('create and add embeddables', () => {
     before(async () => {
@@ -191,6 +192,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.clickDashboard();
         });
       });
+
+
+      describe('adds metric and markdown by value to a new dashboard', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.preserveCrossAppState();
+          await PageObjects.dashboard.clickNewDashboard();
+
+        });
+
+        after(async () => {
+          //await kibanaServer.importExport.unload(
+            //'test/functional/fixtures/kbn_archiver/visualize_flow.json'
+          //);
+
+          //await kibanaServer.savedObjects.cleanStandardList();
+        });
+
+
+        it('adding a metric visualization', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+          expect(originalPanelCount).to.eql(0);
+          await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
+          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboardExpect.metricValuesExist(['0']);
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(1);
+        });
+        it('adding a markdown', async function () {
+          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+          expect(originalPanelCount).to.eql(1);
+          await dashboardVisualizations.createAndEmbedMarkdown({
+            name: 'Embedding Markdown Test',
+            markdown: 'Nice to meet you, markdown is my name',
+          });
+          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(2);
+        });
+
+
+      });
+
+
+
     });
   });
 }
