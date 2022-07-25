@@ -61,6 +61,7 @@ describe('addConnector lib function', () => {
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -139,6 +140,7 @@ describe('addConnector lib function', () => {
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -160,21 +162,22 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => false);
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
-        index_name: 'index_name',
+        index_name: 'search-index_name',
         language: 'en',
       })
-    ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
+    ).resolves.toEqual({ id: 'fakeId', index_name: 'search-index_name' });
     expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,
         configuration: {},
-        index_name: 'index_name',
+        index_name: 'search-index_name',
         language: 'en',
         last_seen: null,
         last_sync_error: null,
         last_sync_status: null,
         last_synced: null,
+        name: 'index_name',
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -182,7 +185,9 @@ describe('addConnector lib function', () => {
       },
       index: CONNECTORS_INDEX,
     });
-    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+      index: 'search-index_name',
+    });
   });
   it('should not create index if status code is not 404', async () => {
     mockClient.asCurrentUser.index.mockImplementationOnce(() => {
