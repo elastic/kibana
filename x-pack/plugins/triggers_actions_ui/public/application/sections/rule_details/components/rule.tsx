@@ -32,7 +32,6 @@ import { suspendedComponentWithProps } from '../../../lib/suspended_component_wi
 import RuleStatusPanelWithApi from './rule_status_panel';
 
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
-const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 
@@ -51,7 +50,6 @@ type RuleProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
-const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
 
 export function RuleComponent({
   rule,
@@ -127,17 +125,6 @@ export function RuleComponent({
       }),
       'data-test-subj': 'ruleAlertListTab',
       content: renderRuleAlertList(),
-    },
-    {
-      id: EVENT_ERROR_LOG_TAB,
-      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.errorLogTabText', {
-        defaultMessage: 'Error log',
-      }),
-      'data-test-subj': 'errorLogTab',
-      content: suspendedComponentWithProps(
-        RuleErrorLogWithApi,
-        'xl'
-      )({ requestRefresh, rule, refreshToken }),
     },
   ];
 

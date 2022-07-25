@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -20,11 +21,12 @@ import {
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
+import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, LOCKED_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
+import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -48,7 +50,19 @@ const API_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.searchPlaceholder',
+  {
+    defaultMessage: 'Search event log message',
+  }
+);
+
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
+
+const getDefaultColumns = (columns: string[]) => {
+  const columnsWithoutLockedColumn = columns.filter((column) => !LOCKED_COLUMNS.includes(column));
+  return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
+};
 
 const updateButtonProps = {
   iconOnly: true,
@@ -110,12 +124,17 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
 
   const { uiSettings, notifications } = useKibana().services;
 
+  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
+
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
-    return (
+    return getDefaultColumns(
       JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
-      RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
+        RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
     );
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -170,6 +189,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
         id: rule.id,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
+        message: searchText,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
@@ -237,6 +257,35 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     [setPagination, setFilter]
   );
 
+  const onFlyoutOpen = useCallback((runLog: IExecutionLog) => {
+    setIsFlyoutOpen(true);
+    setSelectedRunLog(runLog);
+  }, []);
+
+  const onFlyoutClose = useCallback(() => {
+    setIsFlyoutOpen(false);
+    setSelectedRunLog(undefined);
+  }, []);
+
+  const onSearchChange = useCallback(
+    (e) => {
+      if (e.target.value === '') {
+        setSearchText('');
+      }
+      setSearch(e.target.value);
+    },
+    [setSearchText, setSearch]
+  );
+
+  const onKeyUp = useCallback(
+    (e) => {
+      if (e.key === 'Enter') {
+        setSearchText(search);
+      }
+    },
+    [search, setSearchText]
+  );
+
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -252,8 +301,11 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
           sortingColumns={sortingColumns}
           visibleColumns={visibleColumns}
           dateFormat={dateFormat}
+          selectedRunLog={selectedRunLog}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
+          onFlyoutOpen={onFlyoutOpen}
+          onFilterChange={setFilter}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
         />
@@ -264,7 +316,15 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    sortingColumns,
+    dateStart,
+    dateEnd,
+    filter,
+    pagination.pageIndex,
+    pagination.pageSize,
+    searchText,
+  ]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -294,6 +354,16 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
       />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            value={search}
+            onChange={onSearchChange}
+            onKeyUp={onKeyUp}
+            placeholder={SEARCH_PLACEHOLDER}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -318,6 +388,14 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
           documentSize={actualTotalItemCount}
           visibleDocumentSize={MAX_RESULTS}
           backToTopAnchor="rule_event_log_list"
+        />
+      )}
+      {isFlyoutOpen && selectedRunLog && (
+        <RuleActionErrorLogFlyout
+          rule={rule}
+          runLog={selectedRunLog}
+          refreshToken={refreshToken}
+          onClose={onFlyoutClose}
         />
       )}
     </div>
