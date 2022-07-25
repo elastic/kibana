@@ -7,12 +7,11 @@
  */
 
 import type Eslint from 'eslint';
-import { ArrElement } from './types';
 
 const ESLINT_DISABLE_RE = /^eslint-disable(?:-next-line|-line)?(?<rulesBlock>.*)/;
 
 export function getRulesBlockFromEslintDisableComment(
-  comment: ArrElement<Eslint.AST.Program['comments']>
+  comment: Eslint.AST.Program['comments'][0]
 ): string | null | undefined {
   const commentVal = comment.value.trim();
   const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);
