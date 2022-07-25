@@ -13,12 +13,10 @@ export interface ProjectTimeQuery {
 }
 
 export function createCommonFilter({
-  projectID,
   kuery,
   timeFrom,
   timeTo,
 }: {
-  projectID: string;
   kuery: string;
   timeFrom: string;
   timeTo: string;
@@ -26,11 +24,6 @@ export function createCommonFilter({
   return {
     bool: {
       filter: [
-        {
-          term: {
-            ProjectID: projectID,
-          },
-        },
         ...kqlQuery(kuery),
         {
           range: {

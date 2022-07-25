@@ -8,6 +8,11 @@
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
+export const INDEX_EVENTS = 'profiling-events-all';
+export const INDEX_TRACES = 'profiling-stacktraces';
+export const INDEX_FRAMES = 'profiling-stackframes';
+export const INDEX_EXECUTABLES = 'profiling-executables';
+
 const BASE_ROUTE_PATH = '/api/prodfiler/v2';
 
 export function getRoutePaths() {

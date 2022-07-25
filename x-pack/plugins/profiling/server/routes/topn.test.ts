@@ -13,7 +13,6 @@ import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
 const anyQuery = 'any::query';
-const index = 'test';
 const testAgg = { aggs: { test: {} } };
 
 jest.mock('./query', () => ({
@@ -48,8 +47,6 @@ describe('TopN data from Elasticsearch', () => {
       const response = await topNElasticSearchQuery({
         client,
         logger,
-        index,
-        projectID: '123',
         timeFrom: '456',
         timeTo: '789',
         n: 200,

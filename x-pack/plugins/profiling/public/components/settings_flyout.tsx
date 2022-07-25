@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyout,
@@ -28,17 +27,13 @@ import {
 interface SettingsFlyoutProps {
   title: string;
   values: {
-    index: string;
-    projectID: number;
     n: number;
   };
-  onChange: (nextValues: { index: string; projectID: number; n: number }) => void;
+  onChange: (nextValues: { n: number }) => void;
 }
 
 export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps) {
   const [formValues, setFormValues] = useState({
-    index: values.index.toString(),
-    projectID: values.projectID.toString(),
     n: values.n.toString(),
   });
 
@@ -53,8 +48,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   const saveFlyout = () => {
     onChange({
-      index: formValues.index,
-      projectID: Number(formValues.projectID),
       n: Number(formValues.n),
     });
     setIsFlyoutVisible(false);
@@ -62,11 +55,9 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
 
   useEffect(() => {
     setFormValues({
-      index: values.index.toString(),
-      projectID: values.projectID.toString(),
       n: values.n.toString(),
     });
-  }, [values.index, values.projectID, values.n]);
+  }, [values.n]);
 
   return (
     <div>
@@ -81,36 +72,6 @@ export function SettingsFlyout({ title, values, onChange }: SettingsFlyoutProps)
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiForm component="form">
-              <EuiFormRow
-                label="Index"
-                helpText="This is the primary Elasticsearch index used before sampling."
-              >
-                <EuiFieldText
-                  name="index"
-                  value={formValues.index}
-                  onChange={(e) => {
-                    setFormValues((nextValues) => ({
-                      ...nextValues,
-                      index: e.target.value,
-                    }));
-                  }}
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label="Project ID"
-                helpText="This is the project ID as defined by the host agent."
-              >
-                <EuiFieldNumber
-                  name="projectID"
-                  value={formValues.projectID}
-                  onChange={(e) => {
-                    setFormValues((nextValues) => ({
-                      ...nextValues,
-                      projectID: e.target.value,
-                    }));
-                  }}
-                />
-              </EuiFormRow>
               <EuiFormRow
                 label="N"
                 helpText="This is the maximum number of items per histogram bucket (Stack Traces) or is currently ignored (FlameGraph)."

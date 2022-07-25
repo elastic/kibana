@@ -12,6 +12,7 @@ import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useHistory } from 'react-router-dom';
+import { INDEX_EVENTS } from '../../../common';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -28,7 +29,7 @@ export function ProfilingAppPageTemplate({
   const {
     path,
     query,
-    query: { rangeFrom, rangeTo, n, projectID, index, kuery },
+    query: { rangeFrom, rangeTo, n, kuery },
   } = useProfilingParams('/*');
 
   const {
@@ -58,10 +59,10 @@ export function ProfilingAppPageTemplate({
   useEffect(() => {
     dataViews
       .create({
-        title: index,
+        title: INDEX_EVENTS,
       })
       .then((nextDataView) => setDataView(nextDataView));
-  }, [index, dataViews]);
+  }, [dataViews]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -86,8 +87,6 @@ export function ProfilingAppPageTemplate({
               defaultMessage: 'Settings',
             })}
             values={{
-              index,
-              projectID,
               n,
             }}
             onChange={(values) => {
@@ -95,8 +94,6 @@ export function ProfilingAppPageTemplate({
                 path,
                 query: {
                   ...query,
-                  index: values.index,
-                  projectID: values.projectID,
                   n: values.n,
                 },
               });
