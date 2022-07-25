@@ -29,20 +29,28 @@ import { URL_PARAM_KEY } from '../use_url_state';
 /**
  * After the initial load of the security solution, timeline is not updated when the timeline url search value is changed
  * This is because those state changes happen in place and doesn't lead to a requerying of data for the new id.
- * To circumvent this for the sake of the redirects needed for the saved object Id changes happening in 8.0
- * We are actively pulling the id changes that take place for timeline in the url and calling the query below
+ *
+ * But this scenario only happens when there are timelines with conflicted ids. Bwcause it shows a HTML link to the conflicted
+ * timeline which we do not have contrioll of. For all other timeline links in the app we alredy fetch the data on the onClick callback.
+ * For the conflict scenario we are actively pulling the id changes that take place for timeline in the url and calling the query below
  * to request the new data.
+ *
+ * *** The conflict scenario happens when migrating from an older version to 8.0+
  */
-
-// TODO change the name. OnUrlChange
-// TODO TEST THIS SCENARIO https://github.com/elastic/kibana/pull/107099#issuecomment-891147792
 export const useQueryTimelineByIdOnUrlChange = () => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const flyoutTimeline = useShallowEqualSelector((state) => getTimeline(state, TimelineId.active));
+
   const { search } = useLocation();
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
   const dispatch = useDispatch();
+
+  // console.log({
+  //   search,
+  //   oldSearch,
+  //   timelineIdFromReduxStore,
+  // });
 
   useEffect(() => {
     const oldUrlStateString = getQueryStringKeyValue({

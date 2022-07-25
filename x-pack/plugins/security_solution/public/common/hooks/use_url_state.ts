@@ -11,7 +11,7 @@ import { useInitTimerangeFromUrlParam } from './search_bar/use_init_timerange_ur
 import { useUpdateTimerangeOnPageChange } from './search_bar/use_update_timerange_on_page_change';
 import { useInitTimelineFromUrlParam } from './timeline/use_init_timeline_url_param';
 import { useSyncTimelineUrlParam } from './timeline/use_sync_timeline_url_param';
-import { useQueryTimelineByIdOnUrlChange } from './timeline/use_update_timeline_on_page_change';
+import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_by_id_on_url_change';
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();
