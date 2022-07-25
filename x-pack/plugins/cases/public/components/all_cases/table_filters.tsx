@@ -10,12 +10,7 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import {
-  StatusAll,
-  CaseStatusWithAllStatus,
-  SeverityAll,
-  CaseSeverityWithAll,
-} from '../../../common/ui/types';
+import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -25,6 +20,7 @@ import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
+import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -52,28 +48,12 @@ const SeverityFilterWrapper = styled(EuiFlexItem)`
   }
 `;
 
-/**
- * Collection of filters for filtering data within the CasesTable. Contains search bar,
- * and tag selection
- *
- * @param onFilterChanged change listener to be notified on filter changes
- */
-
-const defaultInitial = {
-  search: '',
-  severity: SeverityAll,
-  reporters: [],
-  status: StatusAll,
-  tags: [],
-  owner: [],
-};
-
 const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   countInProgressCases,
   onFilterChanged,
-  initial = defaultInitial,
+  initial = DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
   hiddenStatuses,
   availableSolutions,

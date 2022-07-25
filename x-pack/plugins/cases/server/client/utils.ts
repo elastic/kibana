@@ -43,6 +43,7 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
+import { ConstructQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -283,46 +284,31 @@ export const constructQueryOptions = ({
   authorizationFilter,
   from,
   to,
-}: {
-  tags?: string | string[];
-  reporters?: string | string[];
-  status?: CaseStatuses;
-  severity?: CaseSeverity;
-  sortByField?: string;
-  owner?: string | string[];
-  authorizationFilter?: KueryNode;
-  from?: string;
-  to?: string;
-}): SavedObjectFindOptionsKueryNode => {
-  const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
-    filter != null;
-
-  const tagsFilter = buildFilter({ filters: tags ?? [], field: 'tags', operator: 'or' });
+}: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = buildFilter({
-    filters: reporters ?? [],
+    filters: reporters,
     field: 'created_by.username',
     operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
-  const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
+  const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
 
-  const filters: KueryNode[] = [
+  const filters = combineFilters([
     statusFilter,
     severityFilter,
     tagsFilter,
     reportersFilter,
     rangeFilter,
     ownerFilter,
-  ].filter(kueryNodeExists);
-
-  const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+  ]);
 
   return {
-    filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
+    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
     sortField,
   };
 };

@@ -25,6 +25,7 @@ import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
+import { ConstructQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -48,7 +49,7 @@ export const find = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs = {
+    const queryArgs: ConstructQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
