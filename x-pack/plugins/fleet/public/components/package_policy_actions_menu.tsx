@@ -40,6 +40,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
 
+  const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
+
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
   }, []);
@@ -56,7 +58,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent && !agentPolicyIsManaged
+    ...(isAddAgentVisible
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
@@ -76,7 +78,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies}
+      disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
