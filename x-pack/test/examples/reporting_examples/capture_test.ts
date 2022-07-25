@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(
         await compareImages.checkIfPngsMatch(pngSessionFilePath, fixtures.baselineAPng)
-      ).to.be.lessThan(0.09);
+      ).to.be.lessThan(0.12);
     });
   });
 }
