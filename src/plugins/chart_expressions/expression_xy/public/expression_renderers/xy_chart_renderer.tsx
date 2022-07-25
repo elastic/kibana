@@ -14,7 +14,7 @@ import ReactDOM from 'react-dom';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { XYChartProps } from '../../common';

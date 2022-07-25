@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 /** @public **/
 export const checkColumnForPrecisionError = (column: DatatableColumn) =>

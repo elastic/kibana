@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import {

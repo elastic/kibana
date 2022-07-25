@@ -22,7 +22,7 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { RenderMode } from '@kbn/expressions-plugin';
+import { RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';

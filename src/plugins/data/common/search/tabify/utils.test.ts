@@ -7,7 +7,7 @@
  */
 
 import { checkColumnForPrecisionError } from './utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 describe('tabify utils', () => {
   describe('checkDatatableForPrecisionError', () => {

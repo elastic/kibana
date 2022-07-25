@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape } from 'lodash';
 import { checkColumnForPrecisionError, Query, TimeRange } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';
