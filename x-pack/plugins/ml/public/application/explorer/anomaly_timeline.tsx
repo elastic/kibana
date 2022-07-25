@@ -215,7 +215,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </EuiFlexItem>
 
             {menuItems.length > 0 && (
-              <EuiFlexItem grow={false} css={{ 'margin-left': 'auto', 'align-self': 'baseline' }}>
+              <EuiFlexItem
+                grow={false}
+                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+              >
                 <EuiPopover
                   button={
                     <EuiButtonIcon
