@@ -12,7 +12,6 @@ import type { NavTab } from '../components/navigation/types';
 import { getLinkInfo } from '../links';
 import { useRouteSpy } from '../utils/route/use_route_spy';
 
-// TODO write unit tests
 export const useUpdateBrowserTitle = () => {
   const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
   const [{ pageName }] = useRouteSpy();

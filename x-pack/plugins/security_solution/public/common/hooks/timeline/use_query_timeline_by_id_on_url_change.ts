@@ -27,12 +27,12 @@ import {
 import { URL_PARAM_KEY } from '../use_url_state';
 
 /**
- * After the initial load of the security solution, timeline is not updated when the timeline url search value is changed
- * This is because those state changes happen in place and doesn't lead to a requerying of data for the new id.
+ * After the initial load of the security solution, timeline is not updated when the timeline URL search value is changed
+ * This is because those state changes happen in place and don't lead to querying data for the new id.
  *
- * But this scenario only happens when there are timelines with conflicted ids. Bwcause it shows a HTML link to the conflicted
- * timeline which we do not have contrioll of. For all other timeline links in the app we alredy fetch the data on the onClick callback.
- * For the conflict scenario we are actively pulling the id changes that take place for timeline in the url and calling the query below
+ * But this scenario only happens when there are timelines with conflicted ids. Because it shows a HTML link to the conflicted
+ * timeline, which we do not have control of. We already fetch the data on the onClick callback for all other timeline links in the APP.
+ * For the conflict scenario, we are actively pulling the id changes that take place for the timeline in the URL and calling the query below
  * to request the new data.
  *
  * *** The conflict scenario happens when migrating from an older version to 8.0+
@@ -45,12 +45,6 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
   const dispatch = useDispatch();
-
-  // console.log({
-  //   search,
-  //   oldSearch,
-  //   timelineIdFromReduxStore,
-  // });
 
   useEffect(() => {
     const oldUrlStateString = getQueryStringKeyValue({
