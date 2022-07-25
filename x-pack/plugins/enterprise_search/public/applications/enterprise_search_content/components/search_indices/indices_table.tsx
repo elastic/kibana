@@ -26,6 +26,10 @@ import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
+import {
+  ingestionStatusToColor,
+  ingestionStatusToText,
+} from '../../utils/ingestion_status_helpers';
 
 const healthColorsMap = {
   green: 'success',
@@ -122,45 +126,12 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
         defaultMessage: 'Ingestion status',
       }
     ),
-    render: (ingestionStatus: IngestionStatus) => {
-      const getBadge = (status: string, text: string) => {
-        return <EuiBadge color={status}>{text}</EuiBadge>;
-      };
-      if (ingestionStatus === IngestionStatus.CONNECTED) {
-        return getBadge(
-          'success',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
-            { defaultMessage: 'Connected' }
-          )
-        );
-      }
-      if (ingestionStatus === IngestionStatus.ERROR) {
-        return getBadge(
-          'danger',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connectorError.label',
-            { defaultMessage: 'Connector failure' }
-          )
-        );
-      }
-      if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
-        return getBadge(
-          'danger',
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.syncError.label',
-            { defaultMessage: 'Sync failure' }
-          )
-        );
-      }
-      return getBadge(
-        'warning',
-        i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
-          { defaultMessage: 'Incomplete' }
-        )
-      );
-    },
+    render: (ingestionStatus: IngestionStatus) => (
+      <EuiBadge color={ingestionStatusToColor(ingestionStatus)}>
+        {ingestionStatusToText(ingestionStatus)}
+      </EuiBadge>
+    ),
+
     truncateText: true,
   },
   {

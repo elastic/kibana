@@ -62,6 +62,7 @@ export const addConnector = async (
     last_sync_error: null,
     last_sync_status: null,
     last_synced: null,
+    name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: null,
     status: ConnectorStatus.CREATED,
