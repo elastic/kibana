@@ -11,7 +11,7 @@ import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter, useScroll } from '../../hooks';
-import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { useFetchContainerNameData } from './hooks';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import {
@@ -63,7 +63,7 @@ export const ContainerNameWidget = ({
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
-    return addTimerangeToQuery(
+    return addTimerangeAndDefaultFilterToQuery(
       globalFilter.filterQuery,
       globalFilter.startDate,
       globalFilter.endDate
