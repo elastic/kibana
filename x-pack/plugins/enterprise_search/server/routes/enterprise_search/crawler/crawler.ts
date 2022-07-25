@@ -42,7 +42,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         return createError({
           errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
           message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
+            'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
             {
               defaultMessage: 'This index already exists',
             }
