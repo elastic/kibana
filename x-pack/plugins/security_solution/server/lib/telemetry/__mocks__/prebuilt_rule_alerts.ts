@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable */
-
 export const prebuiltRuleAlertsResponse = {
   events: [
     {
