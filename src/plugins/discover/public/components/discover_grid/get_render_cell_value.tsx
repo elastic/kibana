@@ -113,10 +113,9 @@ export const getRenderCellValueFn =
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription
-                className="dscDiscoverGrid__descriptionListDescription"
-                dangerouslySetInnerHTML={{ __html: value }}
-              />
+              <EuiDescriptionListDescription className="dscDiscoverGrid__descriptionListDescription">
+                {value}
+              </EuiDescriptionListDescription>
             </Fragment>
           ))}
         </EuiDescriptionList>
@@ -124,14 +123,9 @@ export const getRenderCellValueFn =
     }
 
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        {formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field)}
+      </span>
     );
   };
 
@@ -208,20 +202,9 @@ function renderPopoverContent({
   return (
     <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
       <EuiFlexItem>
-        <span
-          className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
-          // formatFieldValue guarantees sanitized values
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: formatFieldValue(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            ),
-          }}
-        />
+        <span className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord">
+          {formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field)}
+        </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
     </EuiFlexGroup>
