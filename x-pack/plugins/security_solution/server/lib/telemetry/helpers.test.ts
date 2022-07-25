@@ -24,7 +24,7 @@ import {
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type {PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -773,7 +773,7 @@ describe('test advanced policy config overlap ', () => {
         }
       }
     }
-  } as any;
+  };
 
 
   test('can succeed when policy config does not have any advanced settings already set', async () => {
@@ -789,7 +789,7 @@ describe('test advanced policy config overlap ', () => {
       }
     };
     const stubPolicyConfigWithAdvancedSettingsResponse = cloneDeep(defaultStubPolicyConfigResponse);
-    stubPolicyConfigWithAdvancedSettingsResponse.linux.advanced.agent.connection_delay = 20;
+    set(stubPolicyConfigWithAdvancedSettingsResponse, 'linux.advanced.agent.connection_delay', 20)
     const endpointPolicyConfig = addDefaultAdvancedPolicyConfigSettings(stubPolicyConfigWithAdvancedSettings);
     expect(endpointPolicyConfig).toEqual(stubPolicyConfigWithAdvancedSettingsResponse);
   });
