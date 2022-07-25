@@ -20,9 +20,6 @@ import type {
   PolicyData,
   UIPolicyConfig,
   MaybeImmutable,
-  GetTrustedAppsListResponse,
-  TrustedApp,
-  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { ImmutableMiddlewareAPI } from '../../../common/store';
@@ -69,16 +66,6 @@ export interface PolicyDetailsState {
   };
   /** current license */
   license?: ILicense;
-}
-
-export interface PolicyAssignedTrustedApps {
-  location: PolicyDetailsArtifactsPageListLocationParams;
-  artifacts: GetTrustedAppsListResponse;
-}
-
-export interface PolicyRemoveTrustedApps {
-  artifacts: TrustedApp[];
-  response: PutTrustedAppUpdateResponse[];
 }
 
 /**

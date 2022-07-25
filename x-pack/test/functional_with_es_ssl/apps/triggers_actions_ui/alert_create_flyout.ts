@@ -134,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
 
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
@@ -188,7 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(alertName);
 
       // create Slack connector and attach an action using it
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
@@ -204,7 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).type('some text ');
 
       await testSubjects.click('addAlertActionButton');
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
         await find.byCssSelector(

@@ -15,7 +15,8 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
-import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
+import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
+import { getThresholdTermsHash } from '../utils';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -44,7 +45,12 @@ describe('threshold_executor', () => {
   beforeEach(() => {
     alertServices = alertsMock.createRuleExecutorServices();
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        ...sampleEmptyAggsSearchResults(),
+        aggregations: {
+          thresholdTerms: { buckets: [] },
+        },
+      })
     );
     logger = loggingSystemMock.createLogger();
   });
@@ -78,6 +84,67 @@ describe('threshold_executor', () => {
         primaryTimestamp: TIMESTAMP,
       });
       expect(response.warningMessages.length).toEqual(1);
+    });
+
+    it('should clean up any signal history that has fallen outside the window when state is initialized', async () => {
+      const ruleDataClientMock = createRuleDataClientMock();
+      const terms1 = [
+        {
+          field: 'host.name',
+          value: 'elastic-pc-1',
+        },
+      ];
+      const signalHistoryRecord1 = {
+        terms: terms1,
+        lastSignalTimestamp: tuple.from.valueOf() - 60 * 1000,
+      };
+      const terms2 = [
+        {
+          field: 'host.name',
+          value: 'elastic-pc-2',
+        },
+      ];
+      const signalHistoryRecord2 = {
+        terms: terms2,
+        lastSignalTimestamp: tuple.from.valueOf() + 60 * 1000,
+      };
+      const state = {
+        initialized: true,
+        signalHistory: {
+          [`${getThresholdTermsHash(terms1)}`]: signalHistoryRecord1,
+          [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
+        },
+      };
+      const response = await thresholdExecutor({
+        completeRule: thresholdCompleteRule,
+        tuple,
+        exceptionItems: [],
+        experimentalFeatures: allowedExperimentalValues,
+        services: alertServices,
+        state,
+        version,
+        logger,
+        buildRuleMessage,
+        startedAt: new Date(),
+        bulkCreate: jest.fn().mockImplementation((hits) => ({
+          errors: [],
+          success: true,
+          bulkCreateDuration: '0',
+          createdItemsCount: 0,
+          createdItems: [],
+        })),
+        wrapHits: jest.fn(),
+        ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
+        runtimeMappings: {},
+        inputIndex: ['auditbeat-*'],
+        primaryTimestamp: TIMESTAMP,
+      });
+      expect(response.state).toEqual({
+        initialized: true,
+        signalHistory: {
+          [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
+        },
+      });
     });
   });
 });

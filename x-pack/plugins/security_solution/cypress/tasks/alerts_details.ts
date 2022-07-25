@@ -7,7 +7,6 @@
 
 import {
   ENRICHMENT_COUNT_NOTIFICATION,
-  JSON_VIEW_WRAPPER,
   JSON_VIEW_TAB,
   OVERVIEW_TAB,
   TABLE_TAB,
@@ -32,10 +31,4 @@ export const openTable = () => {
 
 export const openThreatIndicatorDetails = () => {
   cy.get(ENRICHMENT_COUNT_NOTIFICATION).click();
-};
-
-export const scrollJsonViewToBottom = () => {
-  cy.get(JSON_VIEW_WRAPPER).click({ force: true });
-  cy.get(JSON_VIEW_WRAPPER).type('{pagedown}{pagedown}{pagedown}');
-  cy.get(JSON_VIEW_WRAPPER).should('be.visible');
 };

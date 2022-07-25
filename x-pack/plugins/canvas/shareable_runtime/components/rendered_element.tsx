@@ -7,7 +7,7 @@
 
 import React, { FC, PureComponent } from 'react';
 import { css as emotionCss } from '@emotion/css';
-import { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Positionable } from '../../public/components/positionable/positionable';
 import { elementToShape } from '../../public/components/workpad_page/positioning_utils';
 import { CanvasRenderedElement } from '../types';

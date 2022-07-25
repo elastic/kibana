@@ -146,8 +146,6 @@ export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]
 
 export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="siem-landing-page"]';
 
-export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timelines"]';
-
 export const OVERVIEW_CTI_LINKS = '[data-test-subj="cti-dashboard-links"]';
 export const OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL = '[data-test-subj="cti-inner-panel-danger"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;

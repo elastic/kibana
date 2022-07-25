@@ -15,8 +15,7 @@ import { HttpError } from '../../../../../../common/types/api';
 
 import { MethodCrawlerLogic } from './method_crawler_logic';
 
-// Failing https://github.com/elastic/kibana/issues/135440
-describe.skip('MethodCrawlerLogic', () => {
+describe('MethodCrawlerLogic', () => {
   const { mount } = new LogicMounter(MethodCrawlerLogic);
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
@@ -31,7 +30,7 @@ describe.skip('MethodCrawlerLogic', () => {
       it('navigates user to index detail view', () => {
         MethodCrawlerLogic.actions.apiSuccess({ created: 'my-index' });
 
-        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index');
+        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index/domain_management');
       });
     });
 

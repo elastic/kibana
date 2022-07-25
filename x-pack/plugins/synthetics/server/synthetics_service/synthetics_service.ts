@@ -29,11 +29,7 @@ import {
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
-import {
-  formatMonitorConfig,
-  formatHeartbeatRequest,
-  SyntheticsConfig,
-} from './formatters/format_configs';
+import { formatMonitorConfig, formatHeartbeatRequest } from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
@@ -43,6 +39,7 @@ import {
   SyntheticsMonitorWithId,
   ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
+  HeartbeatConfig,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 import { hydrateSavedObjects } from './hydrate_saved_object';
@@ -68,7 +65,7 @@ export class SyntheticsService {
   public locations: ServiceLocations;
   public throttling: ThrottlingOptions | undefined;
 
-  private indexTemplateExists?: boolean;
+  public indexTemplateExists?: boolean;
   private indexTemplateInstalling?: boolean;
 
   public isAllowed: boolean;
@@ -76,21 +73,23 @@ export class SyntheticsService {
 
   public syncErrors?: ServiceLocationErrors | null = [];
 
-  constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
-    this.logger = logger;
+  constructor(server: UptimeServerSetup) {
+    this.logger = server.logger;
     this.server = server;
-    this.config = config;
+    this.config = server.config.service ?? {};
     this.isAllowed = false;
     this.signupUrl = null;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config, this.server);
+    this.apiClient = new ServiceAPIClient(server.logger, this.config, this.server);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
   }
 
-  public async init() {
+  public async setup(taskManager: TaskManagerSetupContract) {
+    this.registerSyncTask(taskManager);
+
     await this.registerServiceLocations();
 
     const { allowed, signupUrl } = await this.apiClient.checkAccountAccessStatus();
@@ -98,30 +97,42 @@ export class SyntheticsService {
     this.signupUrl = signupUrl;
   }
 
-  private setupIndexTemplates() {
+  public start(taskManager: TaskManagerStartContract) {
+    if (this.config?.manifestUrl) {
+      this.scheduleSyncTask(taskManager);
+    }
+    this.setupIndexTemplates();
+  }
+
+  public async setupIndexTemplates() {
     if (this.indexTemplateExists) {
       // if already installed, don't need to reinstall
       return;
     }
+    try {
+      if (!this.indexTemplateInstalling) {
+        this.indexTemplateInstalling = true;
 
-    if (!this.indexTemplateInstalling) {
-      installSyntheticsIndexTemplates(this.server).then(
-        (result) => {
-          this.indexTemplateInstalling = false;
-          if (result.name === 'synthetics' && result.install_status === 'installed') {
-            this.logger.info('Installed synthetics index templates');
-            this.indexTemplateExists = true;
-          } else if (result.name === 'synthetics' && result.install_status === 'install_failed') {
-            this.logger.warn(new IndexTemplateInstallationError());
-            this.indexTemplateExists = false;
-          }
-        },
-        () => {
-          this.indexTemplateInstalling = false;
+        const installedPackage = await installSyntheticsIndexTemplates(this.server);
+        this.indexTemplateInstalling = false;
+        if (
+          installedPackage.name === 'synthetics' &&
+          installedPackage.install_status === 'installed'
+        ) {
+          this.logger.info('Installed synthetics index templates');
+          this.indexTemplateExists = true;
+        } else if (
+          installedPackage.name === 'synthetics' &&
+          installedPackage.install_status === 'install_failed'
+        ) {
           this.logger.warn(new IndexTemplateInstallationError());
+          this.indexTemplateExists = false;
         }
-      );
-      this.indexTemplateInstalling = true;
+      }
+    } catch (e) {
+      this.logger.error(e);
+      this.indexTemplateInstalling = false;
+      this.logger.warn(new IndexTemplateInstallationError());
     }
   }
 
@@ -248,7 +259,7 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: SyntheticsConfig) {
+  async addConfig(config: HeartbeatConfig) {
     const monitors = this.formatConfigs([config]);
 
     this.apiKey = await this.getApiKey();
@@ -273,7 +284,31 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(configs?: SyntheticsConfig[], isEdit?: boolean) {
+  async editConfig(monitorConfig: HeartbeatConfig) {
+    const monitors = this.formatConfigs([monitorConfig]);
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
+    const data = {
+      monitors,
+      output: await this.getOutput(this.apiKey),
+      isEdit: true,
+    };
+
+    try {
+      this.syncErrors = await this.apiClient.put(data);
+      return this.syncErrors;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async pushConfigs(configs?: HeartbeatConfig[], isEdit?: boolean) {
     const monitorConfigs = configs ?? (await this.getMonitorConfigs());
     const monitors = this.formatConfigs(monitorConfigs);
 
@@ -310,11 +345,12 @@ export class SyntheticsService {
     }
   }
 
-  async runOnceConfigs(configs?: SyntheticsConfig[]) {
+  async runOnceConfigs(configs?: HeartbeatConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
     }
+
     this.apiKey = await this.getApiKey();
 
     if (!this.apiKey) {
@@ -334,7 +370,7 @@ export class SyntheticsService {
     }
   }
 
-  async triggerConfigs(request?: KibanaRequest, configs?: SyntheticsConfig[]) {
+  async triggerConfigs(request?: KibanaRequest, configs?: HeartbeatConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
