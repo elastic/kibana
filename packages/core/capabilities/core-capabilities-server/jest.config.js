@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-
-export const [getThemeService, setThemeService] =
-  createGetterSetter<ChartsPluginSetup['theme']>('charts.theme');
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/capabilities/core-capabilities-server'],
+};

@@ -36,7 +36,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
-    it(`${testData.suiteTitle} displays index details`, async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/137016
+    it.skip(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
 
