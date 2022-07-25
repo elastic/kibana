@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 
+import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
@@ -60,6 +61,12 @@ export const SearchIndexOverview: React.FC = () => {
           <EuiSpacer />
           <CrawlRequestsPanel />
           <CrawlDetailsFlyout />
+        </>
+      )}
+      {isConnectorIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <ConnectorOverviewPanels />
         </>
       )}
     </>

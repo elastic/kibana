@@ -44,6 +44,7 @@ describe('Setup Indices', () => {
       last_sync_error: { type: 'keyword' },
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
+      name: { type: 'keyword' },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
@@ -62,6 +63,7 @@ describe('Setup Indices', () => {
     },
     properties: {
       completed_at: { type: 'date' },
+      connector: connectorsMappings.properties,
       connector_id: {
         type: 'keyword',
       },
