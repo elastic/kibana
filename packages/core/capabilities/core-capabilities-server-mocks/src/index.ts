@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { StateContainer } from './common';
-export { createStateContainer, of } from './common';
+export { capabilitiesServiceMock } from './capabilities_service.mock';
+export type { CapabilitiesServiceContract } from './capabilities_service.mock';

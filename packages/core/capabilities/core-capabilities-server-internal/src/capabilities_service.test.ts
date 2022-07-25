@@ -13,7 +13,8 @@ import {
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
-import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
+import { CapabilitiesService } from './capabilities_service';
 
 describe('CapabilitiesService', () => {
   let http: InternalHttpServiceSetupMock;
