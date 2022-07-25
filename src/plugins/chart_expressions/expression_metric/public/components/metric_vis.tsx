@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -284,6 +284,12 @@ const MetricVisComponent = ({
     pixelWidth = grid[0].length * maxTileSideLength;
   }
 
+  // force chart to re-render to circumvent a charts bug
+  const magicKey = useRef(0);
+  useEffect(() => {
+    magicKey.current++;
+  }, [data]);
+
   return (
     <div
       css={css`
@@ -293,7 +299,7 @@ const MetricVisComponent = ({
         max-width: 100%;
       `}
     >
-      <Chart>
+      <Chart key={magicKey.current}>
         <Settings
           theme={[{ background: { color: 'transparent' } }, chartTheme]}
           onRenderChange={onRenderChange}
