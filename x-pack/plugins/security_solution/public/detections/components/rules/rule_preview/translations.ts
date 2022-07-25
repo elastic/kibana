@@ -65,39 +65,10 @@ export const QUERY_GRAPH_COUNT = i18n.translate(
   }
 );
 
-export const THRESHOLD_QUERY_GRAPH_COUNT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryThresholdGraphCountLabel',
-  {
-    defaultMessage: 'Cumulative Threshold Count',
-  }
-);
-
 export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewTitle',
   {
     defaultMessage: 'Rule Preview',
-  }
-);
-
-export const QUERY_PREVIEW_TITLE = (hits: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle', {
-    values: { hits },
-    defaultMessage: '{hits} {hits, plural, =1 {hit} other {hits}}',
-  });
-
-export const QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE = (buckets: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphThresholdWithFieldTitle',
-    {
-      values: { buckets },
-      defaultMessage: '{buckets} {buckets, plural, =1 {unique hit} other {unique hits}}',
-    }
-  );
-
-export const QUERY_PREVIEW_INSPECT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewInspectTitle',
-  {
-    defaultMessage: 'query preview',
   }
 );
 
@@ -106,13 +77,6 @@ export const QUERY_PREVIEW_NOISE_WARNING = i18n.translate(
   {
     defaultMessage:
       'Noise warning: This rule may cause a lot of noise. Consider narrowing your query. This is based on a linear progression of 1 alert per hour.',
-  }
-);
-
-export const QUERY_PREVIEW_NO_HITS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryNoHits',
-  {
-    defaultMessage: 'No hits were found.',
   }
 );
 
@@ -143,21 +107,6 @@ export const ML_PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.mlHistogramDisclaimer',
   {
     defaultMessage: 'Note: Alerts with multiple host.name values will be counted more than once.',
-  }
-);
-
-export const QUERY_PREVIEW_EQL_SEQUENCE_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceTitle',
-  {
-    defaultMessage: 'No histogram available',
-  }
-);
-
-export const QUERY_PREVIEW_EQL_SEQUENCE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceDescription',
-  {
-    defaultMessage:
-      'No histogram is available at this time for EQL sequence queries. You can use the inspect in the top right corner to view query details.',
   }
 );
 

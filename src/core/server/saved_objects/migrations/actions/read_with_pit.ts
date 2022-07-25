@@ -9,7 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
@@ -49,24 +49,20 @@ export const readWithPit =
   () => {
     return client
       .search<SavedObjectsRawDoc>({
+        allow_partial_search_results: false,
         seq_no_primary_term: seqNoPrimaryTerm,
-        body: {
-          // Sort fields are required to use searchAfter
-          sort: {
-            // the most efficient option as order is not important for the migration
-            _shard_doc: { order: 'asc' },
-          },
-          pit: { id: pitId, keep_alive: pitKeepAlive },
-          size: batchSize,
-          search_after: searchAfter,
-          /**
-           * We want to know how many documents we need to process so we can log the progress.
-           * But we also want to increase the performance of these requests,
-           * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
-           */
-          track_total_hits: typeof searchAfter === 'undefined',
-          query,
-        },
+        // Sort fields are required to use searchAfter
+        sort: '_shard_doc:asc',
+        pit: { id: pitId, keep_alive: pitKeepAlive },
+        size: batchSize,
+        search_after: searchAfter,
+        /**
+         * We want to know how many documents we need to process so we can log the progress.
+         * But we also want to increase the performance of these requests,
+         * so we ask ES to report the total count only on the first request (when searchAfter does not exist)
+         */
+        track_total_hits: typeof searchAfter === 'undefined',
+        query,
       })
       .then((body) => {
         const totalHits =

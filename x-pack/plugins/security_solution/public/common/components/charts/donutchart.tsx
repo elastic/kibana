@@ -22,8 +22,6 @@ import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
 
-export const NO_LEGEND_DATA: LegendItem[] = [];
-
 const donutTheme: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
   partition: {

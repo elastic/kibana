@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Benchmarks } from './benchmarks';
+export { Benchmarks, BenchmarksNoPageTemplate } from './benchmarks';
