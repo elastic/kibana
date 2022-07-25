@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput', '3');
-    await testSubjects.click('.index-ActionTypeSelectOption');
+    await testSubjects.click('.index-alerting-ActionTypeSelectOption');
 
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{ruleId}}",
