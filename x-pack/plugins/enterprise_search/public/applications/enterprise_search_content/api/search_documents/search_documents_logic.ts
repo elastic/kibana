@@ -17,7 +17,7 @@ export const searchDocuments = async ({
   indexName: string;
   query: string;
 }) => {
-  const route = `/internal/enterprise_search/search/${indexName}/${query}`;
+  const route = `/internal/enterprise_search/indices/${indexName}/search/${query}`;
 
   return await HttpLogic.values.http.get<SearchResponseBody>(route);
 };
