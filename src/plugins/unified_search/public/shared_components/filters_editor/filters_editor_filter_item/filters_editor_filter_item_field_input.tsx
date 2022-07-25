@@ -43,7 +43,7 @@ export function FieldInput({
         })}
         options={fields}
         selectedOptions={field ? [field] : []}
-        getLabel={(field) => field.customLabel || field.name}
+        getLabel={(view: DataViewField) => view.customLabel || view.name}
         onChange={onFieldChange}
         singleSelection={{ asPlainText: true }}
         isClearable={false}
