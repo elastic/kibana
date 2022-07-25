@@ -38,7 +38,7 @@ import {
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { MONITORS_ROUTE } from '../common/constants/ui';
@@ -76,6 +76,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
+  cloud?: CloudStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

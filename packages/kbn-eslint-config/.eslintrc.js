@@ -108,6 +108,16 @@ module.exports = {
           to: '@kbn/utility-types-jest',
           disallowedMessage: `import from @kbn/utility-types-jest instead`
         },
+        {
+          from: '@kbn/expressions-plugin',
+          to: '@kbn/expressions-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/kibana-utils-plugin',
+          to: '@kbn/kibana-utils-plugin/common',
+          exact: true,
+        },
       ],
     ],
 

@@ -15,8 +15,9 @@ import {
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
   ALERTS_HEADERS_RULE_DESCRIPTION,
+  ALERTS_HEADERS_NEW_TERMS,
 } from '../../../detections/components/alerts_table/translations';
-import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
+import { ALERT_NEW_TERMS, ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { AlertSummaryRow } from './helpers';
 import { getEnrichedFieldInfo } from './helpers';
@@ -38,8 +39,6 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
-  { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
-  { id: 'process.entry_leader.entity_id', label: i18n.SESSION_ID },
 ];
 
 /**
@@ -168,6 +167,13 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
         {
           id: `${ALERT_RULE_PARAMETERS}.threat_query`,
           legacyId: 'signal.rule.threat_query',
+        },
+      ];
+    case 'new_terms':
+      return [
+        {
+          id: ALERT_NEW_TERMS,
+          label: ALERTS_HEADERS_NEW_TERMS,
         },
       ];
     default:

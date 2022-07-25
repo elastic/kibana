@@ -14,6 +14,7 @@ import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import { AlertsField, AlertsTableProps, BulkActionsState } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -92,6 +93,7 @@ describe('AlertsTable.BulkActions', () => {
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
+    updatedAt: Date.now(),
   };
 
   const tablePropsWithBulkActions = {
@@ -127,22 +129,32 @@ describe('AlertsTable.BulkActions', () => {
     );
 
     return (
-      <BulkActionsContext.Provider value={initialBulkActionsState}>
-        <AlertsTable {...props} />
-      </BulkActionsContext.Provider>
+      <IntlProvider locale="en">
+        <BulkActionsContext.Provider value={initialBulkActionsState}>
+          <AlertsTable {...props} />
+        </BulkActionsContext.Provider>
+      </IntlProvider>
     );
   };
 
   describe('when the bulk action hook is not set', () => {
     it('should not show the bulk actions column', () => {
-      const { queryByTestId } = render(<AlertsTable {...tableProps} />);
+      const { queryByTestId } = render(
+        <IntlProvider locale="en">
+          <AlertsTable {...tableProps} />
+        </IntlProvider>
+      );
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
   });
 
   describe('when the bulk action hook is set', () => {
     it('should show the bulk actions column', () => {
-      const { getByTestId } = render(<AlertsTable {...tablePropsWithBulkActions} />);
+      const { getByTestId } = render(
+        <IntlProvider locale="en">
+          <AlertsTable {...tablePropsWithBulkActions} />
+        </IntlProvider>
+      );
       expect(getByTestId('bulk-actions-header')).toBeDefined();
     });
 

@@ -44,10 +44,6 @@ export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
   onClose: () => void;
 }
-export interface SolutionNavPanelItemProps {
-  item: DefaultSideNavItem;
-  onClose: () => void;
-}
 
 /**
  * Renders the side navigation panel for secondary links

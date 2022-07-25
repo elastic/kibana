@@ -9,7 +9,6 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -29,47 +28,44 @@ export function RumHome() {
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { data: rumHasData, loading: isLoading } = useHasRumData();
+  const { hasData, loading: isLoading } = useHasRumData();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
-    !rumHasData?.hasData
-      ? {
-          solution: i18n.translate('xpack.ux.overview.solutionName', {
-            defaultMessage: 'Observability',
-          }),
-          action: {
-            elasticAgent: {
-              title: i18n.translate('xpack.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add RUM data',
-              }),
-              description: i18n.translate(
-                'xpack.ux.overview.beatsCard.description',
-                {
-                  defaultMessage:
-                    'Enable RUM with the APM agent to collect user experience data.',
-                }
-              ),
-              href: http.basePath.prepend(`/app/home#/tutorial/apm`),
-            },
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !hasData
+    ? {
+        solution: i18n.translate('xpack.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        action: {
+          elasticAgent: {
+            title: i18n.translate('xpack.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add RUM data',
+            }),
+            description: i18n.translate(
+              'xpack.ux.overview.beatsCard.description',
+              {
+                defaultMessage:
+                  'Enable RUM with the APM agent to collect user experience data.',
+              }
+            ),
+            href: http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
-          docsLink: docLinks.links.observability.guide,
-        }
-      : undefined;
+        },
+        docsLink: docLinks.links.observability.guide,
+      }
+    : undefined;
 
   return (
     <Fragment>
-      <CsmSharedContextProvider>
-        <PageTemplateComponent
-          noDataConfig={isLoading ? undefined : noDataConfig}
-          pageHeader={{ children: <PageHeader /> }}
-          isPageDataLoaded={isLoading === false}
-        >
-          {isLoading && <EmptyStateLoading />}
-          <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-            <RumOverview />
-          </div>
-        </PageTemplateComponent>
-      </CsmSharedContextProvider>
+      <PageTemplateComponent
+        noDataConfig={isLoading ? undefined : noDataConfig}
+        pageHeader={{ children: <PageHeader /> }}
+        isPageDataLoaded={isLoading === false}
+      >
+        {isLoading && <EmptyStateLoading />}
+        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+          <RumOverview />
+        </div>
+      </PageTemplateComponent>
     </Fragment>
   );
 }

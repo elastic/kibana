@@ -29,7 +29,6 @@ import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
@@ -134,7 +133,7 @@ export async function mountApp(
 
   const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
 
-  const { stateTransfer, data, storage } = lensServices;
+  const { stateTransfer, data } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -152,13 +151,6 @@ export async function mountApp(
   }
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
-  );
-
-  setReportManager(
-    new LensReportManager({
-      http: core.http,
-      storage,
-    })
   );
 
   const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
@@ -282,7 +274,6 @@ export async function mountApp(
           initCallback();
         })();
       }, [initCallback, initialInput, props.history, redirectCallback]);
-      trackUiEvent('loaded');
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
@@ -343,7 +334,6 @@ export async function mountApp(
   };
 
   function NotFound() {
-    trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
   // dispatch synthetic hash change event to update hash history objects

@@ -10,7 +10,7 @@ import type { Readable } from 'stream';
 import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import type { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
+import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import type {
@@ -54,12 +54,6 @@ export interface HapiReadableStream extends Readable {
 export interface Clients {
   rulesClient: RulesClient;
 }
-
-export const isAlertTypes = (
-  partialAlert: Array<PartialRule<RuleParams>>
-): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(rule));
-};
 
 export const isAlertType = (
   partialAlert: PartialRule<RuleParams>
@@ -108,15 +102,6 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}
-
-export interface BulkEditRulesOptions {
-  isRuleRegistryEnabled: boolean;
-  rulesClient: RulesClient;
-  operations: BulkEditOperation[];
-  filter?: QueryFilterOrUndefined;
-  ids?: string[];
-  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 export interface LegacyMigrateParams {

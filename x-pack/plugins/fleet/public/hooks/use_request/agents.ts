@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { PostBulkUpdateAgentTagsRequest, UpdateAgentRequest } from '../../../common';
+import type {
+  GetAgentTagsResponse,
+  PostBulkUpdateAgentTagsRequest,
+  UpdateAgentRequest,
+} from '../../../common/types';
 
 import { agentRouteService } from '../../services';
 
@@ -90,6 +94,13 @@ export function sendGetAgentStatus(
     path: agentRouteService.getStatusPath(),
     query,
     ...options,
+  });
+}
+
+export function sendGetAgentTags() {
+  return sendRequest<GetAgentTagsResponse>({
+    method: 'get',
+    path: agentRouteService.getListTagsPath(),
   });
 }
 

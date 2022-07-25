@@ -241,6 +241,7 @@ export type ActionConnectorWithoutId<
 
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
+  featureIds: ActionType['supportedFeatureIds'];
 };
 
 type AsActionVariables<Keys extends string> = {
@@ -418,6 +419,7 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
   'data-test-subj': string;
+  updatedAt: number;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -459,7 +461,10 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    renderCustomActionsRow: (
+      alert: EcsFieldsResponse,
+      setFlyoutAlert: (data: unknown) => void
+    ) => JSX.Element;
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;

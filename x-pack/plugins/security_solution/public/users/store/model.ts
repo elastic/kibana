@@ -22,8 +22,6 @@ export enum UsersTableType {
   alerts = 'externalAlerts',
 }
 
-export type AllUsersTables = UsersTableType;
-
 export interface BasicQueryPaginated {
   activePage: number;
   limit: number;
@@ -59,14 +57,6 @@ export interface UsersPageModel {
 
 export interface UserDetailsPageModel {
   queries: UserDetailsQueries;
-}
-
-export interface UsersDetailsQueries {
-  [UsersTableType.allUsers]: AllUsersQuery;
-}
-
-export interface UsersDetailsModel {
-  queries: UsersDetailsQueries;
 }
 
 export interface UsersModel {
