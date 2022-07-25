@@ -81,18 +81,28 @@ export enum SecurityPageName {
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
+   */
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  dashboardsLanding = 'dashboards',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
+  exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
-  hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
   investigate = 'investigate',
+  kubernetes = 'kubernetes',
   landing = 'get_started',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -100,34 +110,24 @@ export enum SecurityPageName {
   networkExternalAlerts = 'network-external_alerts',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
+  noPage = '',
   overview = 'overview',
   policies = 'policy',
   responseActions = 'response_actions',
   rules = 'rules',
   rulesCreate = 'rules-create',
+  sessions = 'sessions',
+  threatIntelligence = 'threat-intelligence',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
-  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
-  usersRisk = 'users-risk',
-  sessions = 'sessions',
+  usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
-  kubernetes = 'kubernetes',
-  exploreLanding = 'explore',
-  dashboardsLanding = 'dashboards',
-  noPage = '',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
-   */
-  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
-  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  usersRisk = 'users-risk',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -156,6 +156,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -180,6 +181,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
+export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
