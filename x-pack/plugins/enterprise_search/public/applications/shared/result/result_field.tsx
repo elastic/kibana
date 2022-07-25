@@ -16,6 +16,8 @@ import {
   EuiToken,
 } from '@elastic/eui';
 
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { ResultFieldProps } from './types';
 import './result.scss';
 
@@ -64,20 +66,27 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 }) => {
   return (
     <EuiTableRow className="resultField">
-      <EuiTableRowCell width="5%" valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" width={euiThemeVars.euiSizeL} valign="middle">
         <span>
-          <EuiToken iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)} />
+          <EuiToken
+            className="resultField__token"
+            iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)}
+          />
         </span>
       </EuiTableRowCell>
-      <EuiTableRowCell width="25%" valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" width="25%" valign="middle">
         <EuiText size="xs" grow={false}>
           {fieldName}
         </EuiText>
       </EuiTableRowCell>
-      <EuiTableRowCell width="5%" valign="middle">
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        width={euiThemeVars.euiSizeXXL}
+        valign="middle"
+      >
         <EuiIcon type="sortRight" color="subdued" />
       </EuiTableRowCell>
-      <EuiTableRowCell truncateText valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" truncateText valign="middle">
         {(fieldType === 'object' ||
           fieldType === 'array' ||
           fieldType === 'nested' ||

@@ -31,8 +31,8 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
           defaultMessage: 'All fields are visible',
         })
       : isExpanded
-      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showLess', {
-          defaultMessage: 'Show {amount} less fields',
+      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showFewer', {
+          defaultMessage: 'Show {amount} fewer fields',
           values: { amount: fields.length - 3 },
         })
       : i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showMore', {

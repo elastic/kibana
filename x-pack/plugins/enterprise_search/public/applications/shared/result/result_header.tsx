@@ -43,7 +43,7 @@ const Term: React.FC<TermDef> = ({ label }) => (
 );
 
 const Definition: React.FC<TermDef> = ({ label }) => (
-  <EuiFlexItem grow={false}>
+  <EuiFlexItem>
     <EuiTextColor color="subdued">{label}</EuiTextColor>
   </EuiFlexItem>
 );
@@ -74,7 +74,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       </EuiPopoverTitle>
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
             <Term label="ID" />
             <Definition label={id} />
           </EuiFlexGroup>

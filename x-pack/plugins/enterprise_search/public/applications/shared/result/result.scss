@@ -11,6 +11,15 @@
 
 .resultField {
   padding: $euiSizeXS $euiSizeS;
+
+  > .euiTableRowCell {
+    border-top: none;
+    border-bottom: none;
+
+    > .euiTableCellContent {
+      padding: $euiSizeXS;
+    }
+  }
 }
 
 .resultExpandColumn {
@@ -18,9 +27,15 @@
   align-items: flex-start;
   justify-content: center;
   height: 100%;
-  padding: $euiSizeS;
+  padding: 0 0 0 $euiSizeS;
 }
 
 .resultHeader {
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  padding: 0 $euiSizeS $euiSizeXS 0;
+}
+
+.euiToken.resultField__token {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }

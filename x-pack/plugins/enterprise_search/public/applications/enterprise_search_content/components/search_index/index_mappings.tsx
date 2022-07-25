@@ -58,7 +58,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <p>
                 {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.description', {
                   defaultMessage:
-                    'Index mappings tell all the bits of bacon where arrange themselves in the omlet. Perfect bacon arrangement leads to the perfect omlet.',
+                    'Your documents are made up of a set of fields. Index mappings give each field a type (such as `keyword`, `number`, or `date`) and additional subfields. These index mappings determine the functions available in your relevance tuning and search experience.',
                 })}
               </p>
             </EuiText>
