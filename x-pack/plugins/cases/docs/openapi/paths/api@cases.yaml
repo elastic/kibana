@@ -32,12 +32,7 @@ post:
             owner:
               $ref: '../components/schemas/owners.yaml'
             settings:
-              description: An object that contains the case settings.
-              type: object
-              properties:
-                syncAlerts:
-                  description: Turns alert syncing on or off.
-                  type: boolean
+              $ref: '../components/schemas/settings.yaml'
             severity:
               $ref: '../components/schemas/severity_property.yaml' 
             tags:
@@ -138,12 +133,7 @@ patch:
                     description: The identifier for the case.
                     type: string
                   settings:
-                    description: An object that contains the case settings.
-                    type: object
-                    properties:
-                      syncAlerts:
-                        description: Turns alert syncing on or off.
-                        type: boolean
+                    $ref: '../components/schemas/settings.yaml'
                   severity:
                     $ref: '../components/schemas/severity_property.yaml'
                   status:

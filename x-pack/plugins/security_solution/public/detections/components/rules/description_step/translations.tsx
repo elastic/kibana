@@ -70,6 +70,13 @@ export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription',
+  {
+    defaultMessage: 'New Terms',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
