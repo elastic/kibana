@@ -10,15 +10,23 @@ import { isEmpty, isObjectLike, get } from 'lodash';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 
-export const createServiceError = (error: AxiosError, message: string) =>
-  new Error(
+export const createServiceError = (error: AxiosError, message: string) => {
+  const serverResponse =
+    error.response && error.response.data ? JSON.stringify(error.response.data) : null;
+
+  return new Error(
     getErrorMessage(
       i18n.NAME,
       `${message}. Error: ${error.message}. ${
-        error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
+        serverResponse != null
+          ? serverResponse
+          : error.response?.statusText != null
+          ? `Reason: ${error.response?.statusText}`
+          : ''
       }`
     )
   );
+};
 
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null && new Date(timestamp).getTime() > 0) {
