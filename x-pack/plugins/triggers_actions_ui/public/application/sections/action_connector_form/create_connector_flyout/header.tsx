@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import {
+  EuiBadge,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,14 +15,17 @@ import {
   EuiText,
   EuiFlyoutHeader,
   IconType,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
 
 const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
-}> = ({ icon, actionTypeName, actionTypeMessage }) => {
+  featureIds?: string[] | null;
+}> = ({ icon, actionTypeName, actionTypeMessage, featureIds }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -47,6 +51,28 @@ const FlyoutHeaderComponent: React.FC<{
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}
               </EuiText>
+              {featureIds && featureIds.length > 0 && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup
+                    data-test-subj="create-connector-flyout-header-availability"
+                    wrap
+                    responsive={false}
+                    gutterSize="xs"
+                    alignItems="center"
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderAvailability"
+                      defaultMessage="Availability:"
+                    />{' '}
+                    {featureIds.map((featureId: string) => (
+                      <EuiFlexItem grow={false} key={featureId}>
+                        <EuiBadge color="default">{getConnectorFeatureName(featureId)}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </>
+              )}
             </>
           ) : (
             <EuiTitle size="s">

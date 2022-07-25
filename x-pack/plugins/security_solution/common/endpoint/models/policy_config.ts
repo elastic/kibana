@@ -151,6 +151,14 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      remediation: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
@@ -160,7 +168,15 @@ export const policyFactoryWithoutPaidFeatures = (
           ? undefined
           : {
               ...policy.windows.advanced,
-              rollback: undefined,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
             },
       ransomware: {
         mode: ProtectionModes.off,

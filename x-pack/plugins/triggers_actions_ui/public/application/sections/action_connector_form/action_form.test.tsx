@@ -24,6 +24,8 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
+const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
@@ -234,6 +236,63 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown as Rule;
 
+      loadActionTypes.mockResolvedValue([
+        {
+          id: actionType.id,
+          name: 'Test',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: '.index',
+          name: 'Index',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: 'preconfigured',
+          name: 'Preconfigured only',
+          enabled: true,
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: 'disabled-by-config',
+          name: 'Disabled by config',
+          enabled: false,
+          enabledInConfig: false,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: 'disabled-by-license',
+          name: 'Disabled by license',
+          enabled: false,
+          enabledInConfig: true,
+          enabledInLicense: false,
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: '.jira',
+          name: 'Disabled by action type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
       const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
         <ActionForm
@@ -246,6 +305,7 @@ describe('action_form', () => {
             state: [],
             context: [{ name: 'contextVar', description: 'context var1' }],
           }}
+          featureId="alerting"
           defaultActionGroupId={'default'}
           isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
             const recoveryActionGroupId = customRecoveredActionGroup
@@ -275,56 +335,6 @@ describe('action_form', () => {
           }
           actionTypeRegistry={actionTypeRegistry}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          actionTypes={[
-            {
-              id: actionType.id,
-              name: 'Test',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: '.index',
-              name: 'Index',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: 'preconfigured',
-              name: 'Preconfigured only',
-              enabled: true,
-              enabledInConfig: false,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: 'disabled-by-config',
-              name: 'Disabled by config',
-              enabled: false,
-              enabledInConfig: false,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: 'disabled-by-license',
-              name: 'Disabled by license',
-              enabled: false,
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'gold',
-            },
-            {
-              id: '.jira',
-              name: 'Disabled by action type',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-          ]}
         />
       );
 
@@ -340,35 +350,42 @@ describe('action_form', () => {
     it('renders available action cards', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
-          .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
+          .find(`EuiToolTip [data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
+      expect(loadActionTypes).toBeCalledWith(
+        expect.objectContaining({
+          featureId: 'alerting',
+        })
+      );
     });
 
     it('does not render action types disabled by config', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
+        '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
 
     it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       expect(actionOption.exists()).toBeTruthy();
     });
 
     it('renders available action groups for the selected action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
@@ -403,7 +420,7 @@ describe('action_form', () => {
           },
         },
       ]);
-      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
         `[data-test-subj="addNewActionConnectorActionGroup-1"]`
@@ -440,7 +457,7 @@ describe('action_form', () => {
         ],
         'iHaveRecovered'
       );
-      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
         `[data-test-subj="addNewActionConnectorActionGroup-1"]`
@@ -466,7 +483,7 @@ describe('action_form', () => {
     it('renders available connectors for the selected action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}-0"]`);
@@ -507,7 +524,9 @@ describe('action_form', () => {
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       actionOption.first().simulate('click');
       const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured-1"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
@@ -528,7 +547,9 @@ describe('action_form', () => {
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
       const wrapper = await setup();
-      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      const actionOption = wrapper.find(
+        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
+      );
       actionOption.first().simulate('click');
       const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
       const addNewConnectorButton = preconfigPannel.find(
@@ -540,12 +561,12 @@ describe('action_form', () => {
     it('renders action types disabled by license', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
+        '[data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
-          .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
+          .find('EuiToolTip [data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]')
           .exists()
       ).toBeTruthy();
     });
