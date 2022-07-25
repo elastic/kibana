@@ -5,10 +5,11 @@
  * 2.0.
  */
 import moment from 'moment';
-import type {
+import {
   SavedObjectsClientContract,
   SavedObject,
   ISavedObjectsRepository,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type {
   FileShareJSON,
@@ -20,7 +21,7 @@ import type { File } from '../file';
 import { fileShareObjectType } from '../saved_objects';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
-import { ExpiryDateInThePastError } from './errors';
+import { ExpiryDateInThePastError, FileShareNotFoundError } from './errors';
 
 export interface CreateShareArgs {
   /**
@@ -105,7 +106,14 @@ export class InternalFileShareService implements FileShareServiceStart {
   }
 
   public async delete({ tokenId }: DeleteArgs): Promise<void> {
-    await this.savedObjects.delete(this.savedObjectsType, tokenId);
+    try {
+      await this.savedObjects.delete(this.savedObjectsType, tokenId);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw new FileShareNotFoundError(`File share with id "${tokenId}" not found.`);
+      }
+      throw e;
+    }
   }
 
   public async deleteForFile({ file }: DeleteForFileArgs): Promise<void> {

@@ -19,6 +19,7 @@ import * as list from './list';
 import * as download from './download';
 import * as getById from './get_by_id';
 import * as share from './share/share';
+import * as unshare from './share/unshare';
 
 const fileKindApiRoutes = FILES_API_ROUTES.fileKind;
 
@@ -143,6 +144,18 @@ export function registerFileKindRoutes(router: FilesRouter) {
           },
         },
         share.handler
+      );
+      fileKindRouter[unshare.method](
+        {
+          path: fileKindApiRoutes.getUnshareRoute(fileKind.id),
+          validate: {
+            params: unshare.paramsSchema,
+          },
+          options: {
+            tags: fileKind.http.share.tags,
+          },
+        },
+        unshare.handler
       );
     }
   });

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-export class ExpiryDateInThePastError extends Error {
+/* eslint-disable max-classes-per-file */
+
+abstract class FileShareError extends Error {
   constructor(message: string) {
     super(message);
     Error.captureStackTrace(this);
   }
 }
+
+export class ExpiryDateInThePastError extends FileShareError {}
+export class FileShareNotFoundError extends FileShareError {}

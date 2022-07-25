@@ -63,6 +63,11 @@ export interface FileServiceStart {
   updateShareObject: FileShareServiceStart['update'];
 
   /**
+   * Delete a share instance
+   */
+  deleteShareObject: FileShareServiceStart['delete'];
+
+  /**
    * Get the current usage metrics for all storage media.
    *
    * Returns diagnostics or `undefined` if metrics could not be retrieved.

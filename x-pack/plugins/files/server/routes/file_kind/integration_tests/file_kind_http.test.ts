@@ -146,4 +146,18 @@ describe('File kind HTTP API', () => {
       })
     );
   });
+
+  test('unshare', async () => {
+    await request.delete(root, `/api/files/share/${fileKind}/bogus`).expect(404);
+
+    const { id } = await createFile();
+    const {
+      body: { token },
+    } = await request
+      .post(root, `/api/files/share/${fileKind}/${id}`)
+      .send({ validUntil: twoDaysFromNow(), name: 'my-share' })
+      .expect(200);
+
+    await request.delete(root, `/api/files/share/${fileKind}/${token}`).expect(200);
+  });
 });
