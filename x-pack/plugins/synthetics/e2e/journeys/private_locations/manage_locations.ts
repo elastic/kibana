@@ -30,7 +30,6 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
 
   step('Open manage location', async () => {
     await page.click('button:has-text("Manage private locations")');
-    await page.click('button:has-text("Add location")');
   });
 
   step('Click text=Add two agent policies', async () => {
@@ -68,7 +67,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
     await page.fill('[aria-label="Location name"]', name);
     await page.click('[aria-label="Select agent policy"]');
     await page.click(`button[role="option"]:has-text("${policy}Agents: 0")`);
-    await page.click('button:has-text("Create location")');
+    await page.click('button:has-text("Save")');
   };
 
   const addAgentPolicy = async (name: string) => {
