@@ -41,7 +41,7 @@ Object {
           "columnId": "max-metric-col-id",
         },
       ],
-      "enableDimensionEditor": false,
+      "enableDimensionEditor": true,
       "filterOperations": [Function],
       "groupId": "max",
       "groupLabel": "Maximum",
