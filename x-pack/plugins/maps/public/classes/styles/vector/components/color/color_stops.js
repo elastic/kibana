@@ -118,7 +118,7 @@ export const ColorStops = ({
         display="rowCompressed"
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+          <EuiFlexItem grow={true} className="mapStyleSettings__fixedBox">
             {stopInput}
           </EuiFlexItem>
           <EuiFlexItem>
