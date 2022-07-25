@@ -26,7 +26,7 @@ export const fetchDurationPercentiles = async ({
   chartType: LatencyDistributionChartType;
   setup: Setup;
   percents?: number[];
-  searchMetrics?: boolean;
+  searchMetrics: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;

@@ -17,7 +17,7 @@ const {
 
 export function getEventType(
   chartType: LatencyDistributionChartType,
-  searchMetrics = false
+  searchMetrics: boolean
 ): ProcessorEvent {
   switch (chartType) {
     case transactionLatency:

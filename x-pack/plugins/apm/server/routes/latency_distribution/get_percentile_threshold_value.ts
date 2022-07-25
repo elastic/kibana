@@ -24,7 +24,7 @@ export async function getPercentileThresholdValue({
   setup: Setup;
   chartType: LatencyDistributionChartType;
   percentileThreshold: number;
-  searchMetrics?: boolean;
+  searchMetrics: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
     setup,

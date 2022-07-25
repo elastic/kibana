@@ -48,7 +48,8 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount: number;
   fieldValuePair: FieldValuePair;
 }) {
-  const eventType = getEventType(chartType);
+  const searchMetrics = false; // latency correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
   const queryWithFieldValuePair = {
     bool: {
       filter: [
@@ -83,6 +84,7 @@ export async function fetchDurationCorrelationWithHistogram({
         kuery,
         query: queryWithFieldValuePair,
         rangeSteps: histogramRangeSteps,
+        searchMetrics,
       });
       return {
         ...fieldValuePair,

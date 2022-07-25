@@ -28,7 +28,8 @@ export const fetchPValues = async ({
   fieldCandidates: string[];
 }) => {
   const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
-  const eventType = getEventType(chartType);
+  const searchMetrics = false; // failed transactions correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
 
   const rangeSteps = await fetchDurationHistogramRangeSteps({
     setup,
@@ -38,6 +39,7 @@ export const fetchPValues = async ({
     environment,
     kuery,
     query,
+    searchMetrics,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(

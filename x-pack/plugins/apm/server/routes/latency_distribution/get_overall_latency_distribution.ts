@@ -39,7 +39,7 @@ export async function getOverallLatencyDistribution({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   percentileThreshold: number;
-  searchMetrics?: boolean;
+  searchMetrics: boolean;
 }) {
   // when using metrics data, ensure we filter by docs with the appropriate duration field
   const filteredQuery = searchMetrics

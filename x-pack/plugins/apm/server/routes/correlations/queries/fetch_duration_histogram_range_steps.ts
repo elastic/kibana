@@ -35,7 +35,7 @@ export const fetchDurationHistogramRangeSteps = async ({
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   setup: Setup;
-  searchMetrics?: boolean;
+  searchMetrics: boolean;
 }): Promise<number[]> => {
   const { apmEventClient } = setup;
 

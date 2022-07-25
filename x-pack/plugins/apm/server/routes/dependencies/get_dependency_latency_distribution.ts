@@ -48,6 +48,7 @@ export async function getDependencyLatencyDistribution({
     environment,
     kuery,
     percentileThreshold,
+    searchMetrics: false,
   };
 
   const commonQuery = {

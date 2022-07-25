@@ -31,7 +31,7 @@ export const fetchDurationRanges = async ({
   kuery: string;
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
-  searchMetrics?: boolean;
+  searchMetrics: boolean;
 }): Promise<Array<{ key: number; doc_count: number }>> => {
   const { apmEventClient } = setup;
 
