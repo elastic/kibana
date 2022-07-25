@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery, type UseQueryOptions } from 'react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { CspSetupStatus } from '../../../common/types';
 import { STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
-export const useCspSetupStatusApi = () => {
+export const useCspSetupStatusApi = ({ options }: { options?: UseQueryOptions } = {}) => {
   const { http } = useKibana().services;
-  return useQuery([getCspSetupStatusQueryKey], () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH));
+  return useQuery(
+    [getCspSetupStatusQueryKey],
+    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH),
+    options
+  );
 };

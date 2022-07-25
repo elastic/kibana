@@ -13,6 +13,8 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 
+const REFETCH_INTERVAL = 20000;
+
 const NotDeployed = () => {
   // using an existing hook to get agent id and package policy id
   const benchmarks = useCspBenchmarkIntegrations({
@@ -73,7 +75,7 @@ const IndexTimeout = () => (
  * since 'not-installed' is being checked globally by CloudPosturePage and 'indexed' is the pass condition, those states won't be handled here
  * */
 export const NoFindingsStates = () => {
-  const getSetupStatus = useCspSetupStatusApi();
+  const getSetupStatus = useCspSetupStatusApi({ options: { refetchInterval: REFETCH_INTERVAL } });
   const status = getSetupStatus.data?.status;
 
   const render = () => {
