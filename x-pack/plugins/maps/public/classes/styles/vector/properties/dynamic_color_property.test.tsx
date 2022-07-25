@@ -645,9 +645,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
-          customColorPalette: [
-            { stop: 'MX', color: '#072f6b' },
-          ],
+          customColorPalette: [{ stop: 'MX', color: '#072f6b' }],
           otherCategoryColor: '#f7faff',
           fieldMetaOptions,
         };
