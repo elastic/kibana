@@ -245,7 +245,7 @@ export const getTestProjectSyntheticsPolicy = (
     name,
     inputs = {},
   }: {
-    name: string;
+    name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
   } = {
     name: 'check if title is present-Test private location 0',

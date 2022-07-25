@@ -754,8 +754,8 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'meep';
-      const roleName = `meep2`;
+      const username = 'admin';
+      const roleName = 'uptime read only';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
@@ -842,8 +842,8 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'meep';
-      const roleName = `meep2`;
+      const username = 'admin';
+      const roleName = 'uptime with fleet';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
@@ -926,7 +926,9 @@ export default function ({ getService }: FtrProviderContext) {
               '-' +
               testPolicyId
         );
-
+        expect(packagePolicy.name).eql(
+          `${projectMonitors.monitors[0].id}-${projectMonitors.project}-default-Test private location 0`
+        );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
         comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
