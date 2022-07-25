@@ -18,7 +18,8 @@ const getFullPath = (relativePath: string) => path.join(path.dirname(__filename)
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite-v2-experimental';
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:production-v2-experimental';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
