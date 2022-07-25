@@ -42,7 +42,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--telemetry.labels.ciBuildId=${process.env.BUILDKITE_BUILD_ID}`,
         `--telemetry.labels.ciBuildJobId=${process.env.BUILDKITE_JOB_ID}`,
         `--telemetry.labels.ciBuildNumber=${process.env.BUILDKITE_BUILD_NUMBER}`,
-        `--telemetry.labels.git_rev=${process.env.BUILDKITE_COMMIT}`,
+        `--telemetry.labels.gitRev=${process.env.BUILDKITE_COMMIT}`,
         `--telemetry.labels.isPr=${!!process.env.GITHUB_PR_NUMBER}`,
         `--telemetry.labels.prId=${process.env.GITHUB_PR_NUMBER || ''}`,
         `--telemetry.labels.testJobId=${testJobId}`,
