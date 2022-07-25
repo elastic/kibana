@@ -47,8 +47,8 @@ export const useLocationMonitors = () => {
         ({ key, doc_count: count }) => ({ id: key, count })
       );
 
-      return { locations: newValues };
+      return { locationMonitors: newValues };
     }
-    return { locations: [] };
+    return { locationMonitors: [] };
   }, [data]);
 };

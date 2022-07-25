@@ -13,3 +13,7 @@ export const selectAgentPolicies = createSelector(getState, (state) => state);
 export const selectManageFlyoutOpen = createSelector(getState, (state) =>
   Boolean(state.isManageFlyoutOpen)
 );
+
+export const selectAddingNewPrivateLocation = createSelector(getState, (state) =>
+  Boolean(state.isAddingNewPrivateLocation)
+);

@@ -24,12 +24,10 @@ import { PrivateLocation } from '../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const PolicyHostsField = ({
-  isDisabled,
   errors,
   control,
   privateLocations,
 }: {
-  isDisabled: boolean;
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
   privateLocations: PrivateLocation[];
@@ -71,7 +69,7 @@ export const PolicyHostsField = ({
             </EuiHealth>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiText size="s" color="subdued">
+                <EuiText size="s" color="subdued" className="eui-textNoWrap">
                   <p>
                     {AGENTS_LABEL} {item.agents}
                   </p>
@@ -91,6 +89,7 @@ export const PolicyHostsField = ({
 
   return (
     <EuiFormRow
+      fullWidth
       label={POLICY_HOST_LABEL}
       helpText={!errors?.policyHostId ? SELECT_POLICY_HOSTS : undefined}
       isInvalid={!!errors?.policyHostId}
@@ -102,7 +101,6 @@ export const PolicyHostsField = ({
         rules={{ required: true }}
         render={({ field }) => (
           <EuiSuperSelect
-            disabled={isDisabled}
             fullWidth
             aria-label={SELECT_POLICY_HOSTS}
             placeholder={SELECT_POLICY_HOSTS}

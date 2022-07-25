@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlyout,
   EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiSpacer,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -21,26 +20,32 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ManageEmptyState } from './manage_empty_state';
+import { useEnablement } from '../hooks/use_enablement';
+import { AddLocationFlyout } from './add_location_flyout';
 import { ClientPluginsStart } from '../../../../plugin';
-import { EmptyLocations } from './empty_locations';
 import { getServiceLocations } from '../../../state/actions';
-import { LocationForm } from './location_form';
 import { PrivateLocationsList } from './locations_list';
 import { useLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
+  selectAddingNewPrivateLocation,
   selectManageFlyoutOpen,
+  setAddingNewPrivateLocation,
   setManageFlyoutOpen,
 } from '../../../state/private_locations';
 
 export const ManageLocationsFlyout = () => {
-  const [isAddingNew, setIsAddingNew] = useState(false);
-
   const dispatch = useDispatch();
+
+  const { isEnabled } = useEnablement().enablement;
 
   const setIsOpen = (val: boolean) => dispatch(setManageFlyoutOpen(val));
 
   const isOpen = useSelector(selectManageFlyoutOpen);
+  const isAddingNew = useSelector(selectAddingNewPrivateLocation);
+
+  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
   const { onSubmit, saveLoading, fetchLoading, deleteLoading, privateLocations, onDelete } =
     useLocationsAPI({
@@ -65,42 +70,38 @@ export const ManageLocationsFlyout = () => {
   };
 
   const flyout = (
-    <EuiFlyout onClose={closeFlyout}>
+    <EuiFlyout onClose={closeFlyout} size="m" style={{ width: 540 }}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>{MANAGE_PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <ManageEmptyState
+          privateLocations={privateLocations}
+          setIsAddingNew={setIsAddingNew}
+          hasFleetPermissions={hasFleetPermissions}
+        >
+          <PrivateLocationsList
+            privateLocations={privateLocations}
+            loading={fetchLoading}
+            onDelete={onDelete}
+          />
+        </ManageEmptyState>
         {!hasFleetPermissions && (
           <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
             <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
           </EuiCallOut>
         )}
-        {privateLocations.length === 0 && !(saveLoading || fetchLoading) && !isAddingNew ? (
-          <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />
-        ) : (
-          <PrivateLocationsList
-            privateLocations={privateLocations}
-            loading={fetchLoading}
-            onDelete={onDelete}
-            onSubmit={onSubmit}
-            hasFleetPermissions={hasFleetPermissions}
-          />
-        )}
-        <EuiSpacer />
-        {isAddingNew && (
-          <LocationForm
-            privateLocations={privateLocations}
-            onSubmit={(val) => {
-              onSubmit(val);
-              setIsAddingNew(false);
-            }}
-            onDiscard={() => setIsAddingNew(false)}
-          />
-        )}
-        {!isAddingNew && privateLocations.length > 0 && (
-          <EuiFlexGroup justifyContent="flexEnd">
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              {CLOSE_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {privateLocations.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -111,16 +112,7 @@ export const ManageLocationsFlyout = () => {
                 {ADD_LABEL}
               </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              {CLOSE_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
@@ -128,10 +120,20 @@ export const ManageLocationsFlyout = () => {
 
   return (
     <div>
-      <EuiButtonEmpty onClick={() => setIsOpen(true)} iconType="visMapCoordinate">
-        {MANAGE_PRIVATE_LOCATIONS}
-      </EuiButtonEmpty>
-      {isOpen ? flyout : null}
+      {isEnabled && (
+        <EuiButtonEmpty onClick={() => setIsOpen(true)} iconType="visMapCoordinate">
+          {MANAGE_PRIVATE_LOCATIONS}
+        </EuiButtonEmpty>
+      )}
+      {isOpen && !isAddingNew ? flyout : null}
+      {isAddingNew ? (
+        <AddLocationFlyout
+          saveLoading={saveLoading}
+          setIsOpen={setIsAddingNew}
+          onSubmit={onSubmit}
+          privateLocations={privateLocations}
+        />
+      ) : null}
     </div>
   );
 };
@@ -151,11 +153,14 @@ const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addLocation
   defaultMessage: 'Add location',
 });
 
-const NEED_PERMISSIONS = i18n.translate('xpack.synthetics.monitorManagement.needPermissions', {
-  defaultMessage: 'Need permissions',
-});
+export const NEED_PERMISSIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.needPermissions',
+  {
+    defaultMessage: 'Need permissions',
+  }
+);
 
-const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
+export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
   'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
   {
     defaultMessage:
