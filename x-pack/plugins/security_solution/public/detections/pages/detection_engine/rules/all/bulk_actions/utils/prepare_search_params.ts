@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DryRunResult } from '../use_bulk_actions_dry_run';
+import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../../containers/detection_engine/rules/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../containers/detection_engine/rules/utils';

@@ -18,6 +18,7 @@ export * from './empty_string_array';
 export * from './enumeration';
 export * from './iso_date_string';
 export * from './import_query_schema';
+export * from './limited_size_array';
 export * from './non_empty_array';
 export * from './non_empty_or_nullable_string_array';
 export * from './non_empty_string_array';
