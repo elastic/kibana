@@ -25,6 +25,7 @@ import {
   extractUnknownDocFailureReason,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedUnknownDocs,
+  extractDiscardedCorruptDocs,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -53,6 +54,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
   let stateP: State = currentState;
+  let logs: MigrationLog[] = stateP.logs;
+  let excludeOnUpgradeQuery = stateP.excludeOnUpgradeQuery;
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
@@ -80,7 +83,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isRight(res)) {
       // cluster routing allocation is enabled and we can continue with the migration as normal
       const indices = res.right;
-      const aliases = getAliases(indices);
+      const aliasesRes = getAliases(indices);
+
+      if (Either.isLeft(aliasesRes)) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            aliasesRes.left.alias
+          } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+        };
+      }
+
+      const aliases = aliasesRes.right;
 
       if (
         // `.kibana` and the version specific aliases both exists and
@@ -372,9 +387,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    let logs: MigrationLog[] = stateP.logs;
-    let excludeOnUpgradeQuery = stateP.excludeOnUpgradeQuery;
-
     if (isTypeof(res.right, 'unknown_docs_found')) {
       if (!stateP.discardUnknownObjects) {
         return {
@@ -447,7 +459,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
     if (Either.isRight(res)) {
-      const excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
+      excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
         res.right.mustNotClauses,
         stateP.excludeOnUpgradeQuery?.bool
       );
@@ -518,7 +530,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const progress = setProgressTotal(stateP.progress, res.right.totalHits);
-      const logs = logProgress(stateP.logs, progress);
+      logs = logProgress(stateP.logs, progress);
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
@@ -531,24 +543,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const transformFailureReason = extractTransformFailuresReason(
-            stateP.corruptDocumentIds,
-            stateP.transformErrors
-          );
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
-          };
-        } else {
-          // we don't have any more outdated documents and we haven't encountered any document transformation issues.
-          // Close the PIT search and carry on with the happy path.
-          return {
-            ...stateP,
-            controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
-            logs,
-          };
+          if (!stateP.discardCorruptObjects) {
+            const transformFailureReason = extractTransformFailuresReason(
+              stateP.migrationDocLinks.resolveMigrationFailures,
+              stateP.corruptDocumentIds,
+              stateP.transformErrors
+            );
+            return {
+              ...stateP,
+              controlState: 'FATAL',
+              reason: transformFailureReason,
+            };
+          }
+
+          // at this point, users have configured kibana to discard corrupt objects
+          // thus, we can ignore corrupt documents and transform errors and proceed with the migration
+          logs = [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message: extractDiscardedCorruptDocs(
+                stateP.corruptDocumentIds,
+                stateP.transformErrors
+              ),
+            },
+          ];
         }
+
+        // we don't have any more outdated documents and either
+        //   we haven't encountered any document transformation issues.
+        //   or the user chose to ignore them
+        // Close the PIT search and carry on with the happy path.
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
+          logs,
+        };
       }
     } else {
       throwBadResponse(stateP, res);
@@ -576,16 +606,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // Otherwise the progress might look off when there are errors.
     const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
 
-    if (Either.isRight(res)) {
-      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(
-          res.right.processedDocs,
-          stateP.tempIndex,
-          stateP.maxBatchSizeBytes
-        );
+    if (
+      Either.isRight(res) ||
+      (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
+    ) {
+      if (
+        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
+        stateP.discardCorruptObjects
+      ) {
+        const processedDocs = Either.isRight(res)
+          ? res.right.processedDocs
+          : res.left.processedDocs;
+        const batches = createBatches(processedDocs, stateP.tempIndex, stateP.maxBatchSizeBytes);
         if (Either.isRight(batches)) {
+          let corruptDocumentIds = stateP.corruptDocumentIds;
+          let transformErrors = stateP.transformErrors;
+
+          if (Either.isLeft(res)) {
+            corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
+            transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
+          }
+
           return {
             ...stateP,
+            corruptDocumentIds,
+            transformErrors,
             controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
             transformedDocBatches: batches.right,
             currentBatch: 0,
@@ -642,9 +687,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-          // we're still on the happy path with no transformation failures seen.
-          corruptDocumentIds: [],
-          transformErrors: [],
         };
       }
     } else {
@@ -764,7 +806,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       if (res.right.outdatedDocuments.length > 0) {
         const progress = setProgressTotal(stateP.progress, res.right.totalHits);
-        const logs = logProgress(stateP.logs, progress);
+        logs = logProgress(stateP.logs, progress);
 
         return {
           ...stateP,
@@ -778,6 +820,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
           const transformFailureReason = extractTransformFailuresReason(
+            stateP.migrationDocLinks.resolveMigrationFailures,
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
@@ -1038,7 +1081,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const indices = res.right;
-      const aliases = getAliases(indices);
+      const aliasesRes = getAliases(indices);
+
+      if (Either.isLeft(aliasesRes)) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            aliasesRes.left.alias
+          } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+        };
+      }
+
+      const aliases = aliasesRes.right;
       if (
         aliases[stateP.currentAlias] != null &&
         aliases[stateP.versionAlias] != null &&

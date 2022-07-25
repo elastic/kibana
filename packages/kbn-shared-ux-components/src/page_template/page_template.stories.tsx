@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
+import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+
 import { KibanaPageTemplate } from './page_template';
 import mdx from './page_template.mdx';
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 import { KibanaPageTemplateProps } from './types';
 
 export default {
@@ -24,7 +25,9 @@ export default {
   },
 };
 
-type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader' | 'solutionNav'>;
+type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader' | 'solutionNav'> & {
+  canBeCollapsed: boolean;
+};
 
 const noDataConfig = {
   solution: 'Kibana',
@@ -34,7 +37,7 @@ const noDataConfig = {
   docsLink: 'http://wwww.docs.elastic.co',
 };
 
-const items: KibanaPageTemplateSolutionNavProps['items'] = [
+const items: SolutionNavProps['items'] = [
   {
     name: 'Ingest',
     id: '1',
@@ -108,7 +111,11 @@ export const PureComponent = (params: Params) => {
     <KibanaPageTemplate
       {...params}
       pageHeader={params.pageHeader ? header : undefined}
-      solutionNav={params.solutionNav ? solutionNavBar : undefined}
+      solutionNav={
+        params.solutionNav
+          ? { ...solutionNavBar, canBeCollapsed: params.canBeCollapsed }
+          : undefined
+      }
     >
       {content}
     </KibanaPageTemplate>
@@ -125,6 +132,10 @@ PureComponent.argTypes = {
     defaultValue: true,
   },
   solutionNav: {
+    control: 'boolean',
+    defaultValue: true,
+  },
+  canBeCollapsed: {
     control: 'boolean',
     defaultValue: true,
   },

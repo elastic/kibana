@@ -37,7 +37,7 @@ describe('useUpdateCase', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -54,7 +54,7 @@ describe('useUpdateCase', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
 
@@ -72,7 +72,7 @@ describe('useUpdateCase', () => {
   it('patch case and refresh the case page', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);
@@ -91,7 +91,7 @@ describe('useUpdateCase', () => {
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);
@@ -109,7 +109,7 @@ describe('useUpdateCase', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
+        useUpdateCase()
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);

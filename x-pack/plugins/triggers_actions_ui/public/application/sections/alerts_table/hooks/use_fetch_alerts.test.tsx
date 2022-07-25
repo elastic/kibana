@@ -113,6 +113,8 @@ describe('useFetchAlerts', () => {
       {
         alerts: [
           {
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _id: '38dd308706a127696cc63b8f142e8e4d66f8f79bc7d491dd79a42ea4ead62dd1',
             '@timestamp': ['2022-03-22T16:48:07.518Z'],
             'host.name': ['Host-4dbzugdlqd'],
             'kibana.alert.reason': [
@@ -125,6 +127,8 @@ describe('useFetchAlerts', () => {
             'user.name': ['5qcxz8o4j7'],
           },
           {
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _id: '8361363c0db6f30ca2dfb4aeb4835e7d6ec57bc195b96d9ee5a4ead1bb9f8b86',
             '@timestamp': ['2022-03-22T16:17:50.769Z'],
             'host.name': ['Host-4dbzugdlqd'],
             'kibana.alert.reason': [

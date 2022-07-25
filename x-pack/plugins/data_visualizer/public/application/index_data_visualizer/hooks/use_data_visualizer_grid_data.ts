@@ -11,6 +11,8 @@ import { merge } from 'rxjs';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import { DataViewField, KBN_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/common';
+import seedrandom from 'seedrandom';
+import { RandomSamplerOption } from '../constants/random_sampler';
 import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
@@ -20,7 +22,7 @@ import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  JOB_FIELD_TYPES,
+  SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
 } from '../../../../common/constants';
@@ -44,14 +46,28 @@ function isDisplayField(fieldName: string): boolean {
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
+  savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data } = services;
+  const { uiSettings, data, security } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
+
+  const browserSessionSeed = useMemo(() => {
+    let seed = Math.abs(seedrandom().int32());
+    if (security !== undefined) {
+      security.authc.getCurrentUser().then((user) => {
+        const username = user.username;
+        if (username) {
+          seed = Math.abs(seedrandom(username).int32());
+        }
+      });
+    }
+    return seed;
+  }, [security]);
 
   const {
     currentSavedSearch,
@@ -215,7 +231,9 @@ export const useDataVisualizerGridData = (
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
-    lastRefresh
+    lastRefresh,
+    browserSessionSeed,
+    dataVisualizerListState.probability
   );
 
   const configsWithoutStats = useMemo(() => {
@@ -319,7 +337,7 @@ export const useDataVisualizerGridData = (
       const metricConfig: FieldVisConfig = {
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
-        type: JOB_FIELD_TYPES.NUMBER,
+        type: SUPPORTED_FIELD_TYPES.NUMBER,
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
@@ -394,7 +412,6 @@ export const useDataVisualizerGridData = (
 
     nonMetricFieldsToShow.forEach((field) => {
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
-
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
         fieldFormat: currentDataView.getFormatterForField(field),
@@ -512,6 +529,7 @@ export const useDataVisualizerGridData = (
 
   return {
     progress: combinedProgress,
+    overallStatsProgress,
     configs,
     searchQueryLanguage,
     searchString,

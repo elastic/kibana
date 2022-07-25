@@ -8,26 +8,25 @@ import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import {
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
-  parseDuration,
 } from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorType } from '@kbn/alerting-plugin/server/types';
-import { Alert } from '@kbn/alerting-plugin/server';
-import type { StartPlugins } from '../../../../plugin';
+import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import type { Alert } from '@kbn/alerting-plugin/server';
+import type { StartPlugins, SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import {
@@ -35,25 +34,26 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../common/constants';
 import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
-import {
-  previewRulesSchema,
-  RulePreviewLogs,
-} from '../../../../../common/detection_engine/schemas/request';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-import { ConfigType } from '../../../../config';
+import type { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
+import type { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
+  createSavedQueryAlertType,
   createThresholdAlertType,
+  createNewTermsAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
-import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+import type { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
@@ -105,7 +105,7 @@ export const previewRulesRoute = async (
           });
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(request.body);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
@@ -295,6 +295,19 @@ export const previewRulesRoute = async (
               { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
+          case 'saved_query':
+            const savedQueryAlertType = previewRuleTypeWrapper(
+              createSavedQueryAlertType(ruleOptions)
+            );
+            await runExecutors(
+              savedQueryAlertType.executor,
+              savedQueryAlertType.id,
+              savedQueryAlertType.name,
+              previewRuleParams,
+              () => true,
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+            );
+            break;
           case 'threshold':
             const thresholdAlertType = previewRuleTypeWrapper(
               createThresholdAlertType(ruleOptions)
@@ -343,6 +356,19 @@ export const previewRulesRoute = async (
               { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
+          case 'new_terms':
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
+            await runExecutors(
+              newTermsAlertType.executor,
+              newTermsAlertType.id,
+              newTermsAlertType.name,
+              previewRuleParams,
+              () => true,
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+            );
+            break;
+          default:
+            assertUnreachable(previewRuleParams);
         }
 
         // Refreshes alias to ensure index is able to be read before returning

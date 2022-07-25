@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  GetAgentTagsResponse,
+  PostBulkUpdateAgentTagsRequest,
+  UpdateAgentRequest,
+} from '../../../common';
+
 import { agentRouteService } from '../../services';
 
 import type {
@@ -88,6 +94,13 @@ export function sendGetAgentStatus(
     path: agentRouteService.getStatusPath(),
     query,
     ...options,
+  });
+}
+
+export function sendGetAgentTags() {
+  return sendRequest<GetAgentTagsResponse>({
+    method: 'get',
+    path: agentRouteService.getListTagsPath(),
   });
 }
 
@@ -190,5 +203,30 @@ export function sendPostCancelAction(actionId: string) {
   return sendRequest<GetCurrentUpgradesResponse>({
     path: agentRouteService.getCancelActionPath(actionId),
     method: 'post',
+  });
+}
+
+export function sendPutAgentTagsUpdate(
+  agentId: string,
+  body: UpdateAgentRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetOneAgentResponse>({
+    method: 'put',
+    path: agentRouteService.getUpdatePath(agentId),
+    body,
+    ...options,
+  });
+}
+
+export function sendPostBulkAgentTagsUpdate(
+  body: PostBulkUpdateAgentTagsRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetOneAgentResponse>({
+    method: 'post',
+    path: agentRouteService.getBulkUpdateTagsPath(),
+    body,
+    ...options,
   });
 }

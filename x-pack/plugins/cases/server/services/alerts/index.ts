@@ -13,6 +13,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -180,7 +181,7 @@ export class AlertService {
     );
   }
 
-  public async getAlerts(alertsInfo: AlertInfo[]): Promise<AlertsResponse | undefined> {
+  public async getAlerts(alertsInfo: AlertInfo[]): Promise<MgetResponse<Alert> | undefined> {
     try {
       const docs = alertsInfo
         .filter((alert) => !AlertService.isEmptyAlert(alert))
@@ -193,8 +194,7 @@ export class AlertService {
 
       const results = await this.scopedClusterClient.mget<Alert>({ body: { docs } });
 
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return results.body;
+      return results;
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
@@ -230,14 +230,10 @@ function updateIndexEntryWithStatus(
   }
 }
 
-interface Alert {
+export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
 }
 
 interface AlertIdIndex {

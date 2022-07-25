@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Filter, isFilters, isFilterPinned } from '@kbn/es-query';
+import { type Filter, isFilters, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import { DashboardAppLocatorParams, cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import {
-  APPLY_FILTER_TRIGGER,
-  isQuery,
-  isTimeRange,
-  Query,
-  TimeRange,
-} from '@kbn/data-plugin/public';
+import { APPLY_FILTER_TRIGGER, isQuery, isTimeRange } from '@kbn/data-plugin/public';
 import { extractTimeRange } from '@kbn/es-query';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';

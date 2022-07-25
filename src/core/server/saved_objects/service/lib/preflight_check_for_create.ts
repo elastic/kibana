@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type {
@@ -255,7 +256,7 @@ async function bulkGetObjectsAndAliases(
     docsToBulkGet.push({
       _id: serializer.generateRawId(undefined, type, id), // namespace is intentionally undefined because multi-namespace objects don't have a namespace in their raw ID
       _index: getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: ['type', 'namespaces', 'originId'],
     });
     if (checkAliases) {
       for (const space of spaces) {

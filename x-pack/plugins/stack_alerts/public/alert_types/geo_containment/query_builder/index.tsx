@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataView } from '@kbn/data-plugin/common';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';

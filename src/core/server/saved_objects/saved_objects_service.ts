@@ -10,6 +10,14 @@ import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -17,18 +25,12 @@ import {
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
-import {
-  ElasticsearchClient,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-} from '../elasticsearch';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
 import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
-import { KibanaRequest, InternalHttpServiceSetup } from '../http';
 import {
   SavedObjectsClientContract,
   SavedObjectsType,
@@ -49,7 +51,6 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { DocLinksServiceStart } from '../doc_links';
 
 const kibanaIndex = '.kibana';
 

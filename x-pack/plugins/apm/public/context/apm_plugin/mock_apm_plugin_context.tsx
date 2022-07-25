@@ -28,6 +28,7 @@ const mockCore = merge({}, coreStart, {
     capabilities: {
       apm: {},
       ml: {},
+      savedObjectsManagement: { edit: true },
     },
   },
   uiSettings: {
@@ -85,9 +86,6 @@ const mockPlugin = {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
-  },
-  observability: {
-    isAlertingExperienceEnabled: () => false,
   },
 };
 

@@ -8,7 +8,7 @@
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { RouteDefinitionParams } from '../..';
 import type { CheckPrivileges } from '../../../authorization/types';

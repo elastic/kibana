@@ -51,10 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should duplicate the style when duplicating an annotation and group them in the chart', async () => {
       // drag and drop to the empty field to generate a duplicate
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
-        'lnsXY_xAnnotationsPanel > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+        to: 'lnsXY_xAnnotationsPanel > lns-empty-dimension',
+      });
 
       await (
         await find.byCssSelector(

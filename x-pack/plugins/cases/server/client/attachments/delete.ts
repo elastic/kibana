@@ -79,6 +79,7 @@ export async function deleteAll(
       attachmentService.delete({
         unsecuredSavedObjectsClient,
         attachmentId: comment.id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -149,6 +150,7 @@ export async function deleteComment(
     await attachmentService.delete({
       unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
+      refresh: false,
     });
 
     await userActionService.createUserAction({

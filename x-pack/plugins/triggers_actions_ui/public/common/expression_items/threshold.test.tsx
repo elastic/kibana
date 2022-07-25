@@ -83,7 +83,7 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertThresholdInput"]').exists()).toBeTruthy();
 
@@ -122,7 +122,7 @@ describe('threshold expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="thresholdPopover"]').last().simulate('click');
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
     expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
 

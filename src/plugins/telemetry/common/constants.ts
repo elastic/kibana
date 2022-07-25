@@ -8,7 +8,7 @@
 
 /**
  * The amount of time, in milliseconds, to wait between reports when enabled.
- * Currently 24 hours.
+ * Currently, 24 hours.
  */
 export const REPORT_INTERVAL_MS = 86400000;
 

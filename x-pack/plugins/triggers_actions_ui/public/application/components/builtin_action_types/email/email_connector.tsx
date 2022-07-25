@@ -5,314 +5,244 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
-import {
-  EuiFieldText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFieldNumber,
-  EuiFieldPassword,
-  EuiSelect,
-  EuiSwitch,
-  EuiFormRow,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { lazy, useEffect, useMemo } from 'react';
+import { isEmpty } from 'lodash';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
+import { AdditionalEmailServices, InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+  FieldConfig,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  NumericField,
+  SelectField,
+  TextField,
+  ToggleField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
+import { PasswordField } from '../../password_field';
+import * as i18n from './translations';
+import { useConnectorContext } from '../../../context/use_connector_context';
+
+const { emptyField } = fieldValidators;
 
 const ExchangeFormFields = lazy(() => import('./exchange_form'));
-export const EmailActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<EmailActionConnector>
-> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks, http, isCloud } = useKibana().services;
-  const { from, host, port, secure, hasAuth, service } = action.config;
-  const { user, password } = action.secrets;
 
-  const { emailServiceConfigurable, setEmailService } = useEmailConfig(
+const shouldDisableEmailConfiguration = (service: string | null | undefined) =>
+  isEmpty(service) ||
+  (service !== AdditionalEmailServices.EXCHANGE && service !== AdditionalEmailServices.OTHER);
+
+const getEmailConfig = (
+  href: string,
+  validateFunc: ActionsPublicPluginSetup['validateEmailAddresses']
+): FieldConfig<string> => ({
+  label: i18n.FROM_LABEL,
+  helpText: (
+    <EuiLink href={href} target="_blank">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
+        defaultMessage="Configure email accounts"
+      />
+    </EuiLink>
+  ),
+  validations: [
+    { validator: emptyField(i18n.SENDER_REQUIRED) },
+    {
+      validator: ({ value }) => {
+        const validatedEmail = validateFunc([value])[0];
+        if (!validatedEmail.valid) {
+          const message =
+            validatedEmail.reason === InvalidEmailReason.notAllowed
+              ? i18n.getNotAllowedEmailAddress(value)
+              : i18n.getInvalidEmailAddress(value);
+
+          return {
+            message,
+          };
+        }
+      },
+    },
+  ],
+});
+
+const portConfig: FieldConfig<string> = {
+  label: i18n.PORT_LABEL,
+  validations: [
+    {
+      validator: emptyField(i18n.PORT_REQUIRED),
+    },
+    {
+      validator: ({ value }) => {
+        const port = Number.parseFloat(value);
+
+        if (!Number.isInteger(port)) {
+          return { message: i18n.PORT_INVALID };
+        }
+      },
+    },
+  ],
+};
+
+export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+}) => {
+  const {
+    docLinks,
     http,
-    service,
-    editActionConfig
+    isCloud,
+    notifications: { toasts },
+  } = useKibana().services;
+  const {
+    services: { validateEmailAddresses },
+  } = useConnectorContext();
+
+  const form = useFormContext();
+  const { updateFieldValues } = form;
+  const [{ config }] = useFormData({
+    watch: ['config.service', 'config.hasAuth'],
+  });
+
+  const emailFieldConfig = useMemo(
+    () => getEmailConfig(docLinks.links.alerting.emailActionConfig, validateEmailAddresses),
+    [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
+
+  const { service = null, hasAuth = false } = config ?? {};
+  const disableServiceConfig = shouldDisableEmailConfiguration(service);
+  const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
 
   useEffect(() => {
-    if (!action.id) {
-      editActionConfig('hasAuth', true);
+    async function fetchConfig() {
+      if (
+        service === null ||
+        service === AdditionalEmailServices.OTHER ||
+        service === AdditionalEmailServices.EXCHANGE
+      ) {
+        return;
+      }
+
+      const emailConfig = await getEmailServiceConfig(service);
+      updateFieldValues({
+        config: {
+          host: emailConfig?.host,
+          port: emailConfig?.port,
+          secure: emailConfig?.secure,
+        },
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  const isFromInvalid: boolean =
-    from !== undefined && errors.from !== undefined && errors.from.length > 0;
-  const isHostInvalid: boolean =
-    host !== undefined && errors.host !== undefined && errors.host.length > 0;
-  const isServiceInvalid: boolean =
-    service !== undefined && errors.service !== undefined && errors.service.length > 0;
-  const isPortInvalid: boolean =
-    port !== undefined && errors.port !== undefined && errors.port.length > 0;
-
-  const isPasswordInvalid: boolean =
-    password !== undefined && errors.password !== undefined && errors.password.length > 0;
-  const isUserInvalid: boolean =
-    user !== undefined && errors.user !== undefined && errors.user.length > 0;
-
-  const authForm = (
-    <>
-      {getEncryptedFieldNotifyLabel(
-        !action.id,
-        2,
-        action.isMissingSecrets ?? false,
-        i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
-          {
-            defaultMessage:
-              'Username and password are encrypted. Please reenter values for these fields.',
-          }
-        )
-      )}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFormRow
-            id="emailUser"
-            fullWidth
-            error={errors.user}
-            isInvalid={isUserInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
-              {
-                defaultMessage: 'Username',
-              }
-            )}
-          >
-            <EuiFieldText
-              fullWidth
-              isInvalid={isUserInvalid}
-              name="user"
-              readOnly={readOnly}
-              value={user || ''}
-              data-test-subj="emailUserInput"
-              onChange={(e) => {
-                editActionSecrets('user', nullableString(e.target.value));
-              }}
-              onBlur={() => {
-                if (!user) {
-                  editActionSecrets('user', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="emailPassword"
-            fullWidth
-            error={errors.password}
-            isInvalid={isPasswordInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
-              {
-                defaultMessage: 'Password',
-              }
-            )}
-          >
-            <EuiFieldPassword
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={isPasswordInvalid}
-              name="password"
-              value={password || ''}
-              data-test-subj="emailPasswordInput"
-              onChange={(e) => {
-                editActionSecrets('password', nullableString(e.target.value));
-              }}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
+    fetchConfig();
+  }, [updateFieldValues, getEmailServiceConfig, service]);
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            id="from"
-            fullWidth
-            error={errors.from}
-            isInvalid={isFromInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
-              {
-                defaultMessage: 'Sender',
-              }
-            )}
-            helpText={
-              <EuiLink href={docLinks.links.alerting.emailActionConfig} target="_blank">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
-                  defaultMessage="Configure email accounts"
-                />
-              </EuiLink>
-            }
-          >
-            <EuiFieldText
-              fullWidth
-              readOnly={readOnly}
-              isInvalid={isFromInvalid}
-              name="from"
-              value={from || ''}
-              data-test-subj="emailFromInput"
-              onChange={(e) => {
-                editActionConfig('from', e.target.value);
-              }}
-              onBlur={() => {
-                if (!from) {
-                  editActionConfig('from', '');
-                }
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path="config.from"
+            component={TextField}
+            config={emailFieldConfig}
+            componentProps={{
+              euiFieldProps: { 'data-test-subj': 'emailFromInput', readOnly },
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
-              {
-                defaultMessage: 'Service',
-              }
-            )}
-            error={errors.serverType}
-            isInvalid={isServiceInvalid}
-          >
-            <EuiSelect
-              name="service"
-              hasNoInitialSelection={true}
-              value={service}
-              disabled={readOnly}
-              isInvalid={isServiceInvalid}
-              data-test-subj="emailServiceSelectInput"
-              options={getEmailServices(isCloud)}
-              onChange={(e) => {
-                setEmailService(e.target.value);
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path="config.service"
+            component={SelectField}
+            config={{
+              label: i18n.SERVICE_LABEL,
+              validations: [
+                {
+                  validator: emptyField(i18n.SERVICE_REQUIRED),
+                },
+              ],
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'emailServiceSelectInput',
+                options: getEmailServices(isCloud),
+                fullWidth: true,
+                hasNoInitialSelection: true,
+                disabled: readOnly || isLoading,
+                isLoading,
+                readOnly,
+              },
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {service === AdditionalEmailServices.EXCHANGE ? (
-        <ExchangeFormFields
-          action={action}
-          editActionConfig={editActionConfig}
-          editActionSecrets={editActionSecrets}
-          errors={errors}
-          readOnly={readOnly}
-        />
+        <ExchangeFormFields readOnly={readOnly} />
       ) : (
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiFormRow
-                id="emailHost"
-                fullWidth
-                error={errors.host}
-                isInvalid={isHostInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
-                  {
-                    defaultMessage: 'Host',
-                  }
-                )}
-              >
-                <EuiFieldText
-                  fullWidth
-                  disabled={!emailServiceConfigurable}
-                  readOnly={readOnly}
-                  isInvalid={isHostInvalid}
-                  name="host"
-                  value={host || ''}
-                  data-test-subj="emailHostInput"
-                  onChange={(e) => {
-                    editActionConfig('host', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!host) {
-                      editActionConfig('host', '');
-                    }
-                  }}
-                />
-              </EuiFormRow>
+              <UseField
+                path="config.host"
+                component={TextField}
+                config={{
+                  label: i18n.HOST_LABEL,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.HOST_REQUIRED),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'emailHostInput',
+                    readOnly,
+                    isLoading,
+                    disabled: disableServiceConfig,
+                  },
+                }}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
-                  <EuiFormRow
-                    id="emailPort"
-                    fullWidth
-                    placeholder="587"
-                    error={errors.port}
-                    isInvalid={isPortInvalid}
-                    label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
-                      {
-                        defaultMessage: 'Port',
-                      }
-                    )}
-                  >
-                    <EuiFieldNumber
-                      prepend=":"
-                      isInvalid={isPortInvalid}
-                      fullWidth
-                      disabled={!emailServiceConfigurable}
-                      readOnly={readOnly}
-                      name="port"
-                      value={port || ''}
-                      data-test-subj="emailPortInput"
-                      onChange={(e) => {
-                        editActionConfig('port', parseInt(e.target.value, 10));
-                      }}
-                      onBlur={() => {
-                        if (!port) {
-                          editActionConfig('port', 0);
-                        }
-                      }}
-                    />
-                  </EuiFormRow>
+                  <UseField
+                    path="config.port"
+                    component={NumericField}
+                    config={portConfig}
+                    componentProps={{
+                      euiFieldProps: {
+                        'data-test-subj': 'emailPortInput',
+                        readOnly,
+                        isLoading,
+                        disabled: disableServiceConfig,
+                      },
+                    }}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow hasEmptyLabelSpace>
-                      <EuiSwitch
-                        label={i18n.translate(
-                          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
-                          {
-                            defaultMessage: 'Secure',
-                          }
-                        )}
-                        data-test-subj="emailSecureSwitch"
-                        disabled={readOnly || !emailServiceConfigurable}
-                        checked={secure || false}
-                        onChange={(e) => {
-                          editActionConfig('secure', e.target.checked);
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
+                  <UseField
+                    path="config.secure"
+                    component={ToggleField}
+                    config={{ defaultValue: false }}
+                    componentProps={{
+                      hasEmptyLabelSpace: true,
+                      euiFieldProps: {
+                        label: i18n.SECURE_LABEL,
+                        disabled: readOnly || disableServiceConfig,
+                        'data-test-subj': 'emailSecureSwitch',
+                        readOnly,
+                      },
+                    }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -329,26 +259,51 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 </h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hasAuthSwitchLabel',
-                  {
-                    defaultMessage: 'Require authentication for this server',
-                  }
-                )}
-                disabled={readOnly}
-                checked={hasAuth || false}
-                onChange={(e) => {
-                  editActionConfig('hasAuth', e.target.checked);
-                  if (!e.target.checked) {
-                    editActionSecrets('user', null);
-                    editActionSecrets('password', null);
-                  }
+              <UseField
+                path="config.hasAuth"
+                component={ToggleField}
+                config={{ defaultValue: true }}
+                componentProps={{
+                  euiFieldProps: {
+                    label: i18n.HAS_AUTH_LABEL,
+                    disabled: readOnly,
+                    readOnly,
+                  },
                 }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {hasAuth ? authForm : null}
+          {hasAuth ? (
+            <>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <UseField
+                    path="secrets.user"
+                    component={TextField}
+                    config={{
+                      label: i18n.USERNAME_LABEL,
+                      validations: [
+                        {
+                          validator: emptyField(i18n.USERNAME_REQUIRED),
+                        },
+                      ],
+                    }}
+                    componentProps={{
+                      euiFieldProps: { 'data-test-subj': 'emailUserInput', readOnly },
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <PasswordField
+                    path="secrets.password"
+                    label={i18n.PASSWORD_LABEL}
+                    readOnly={readOnly}
+                    data-test-subj="emailPasswordInput"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </>
       )}
     </>

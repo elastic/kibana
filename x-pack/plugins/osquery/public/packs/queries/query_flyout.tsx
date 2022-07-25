@@ -27,7 +27,8 @@ import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
+import type { UsePackQueryFormProps, PackQueryFormData } from './use_pack_query_form';
+import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
@@ -37,7 +38,7 @@ const CommonUseField = getUseField({ component: Field });
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
-  onSave: (payload: PackFormData) => Promise<void>;
+  onSave: (payload: PackQueryFormData) => Promise<void>;
   onClose: () => void;
 }
 
@@ -72,7 +73,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           id: savedQuery.id,
           query: savedQuery.query,
           description: savedQuery.description,
-          platform: savedQuery.platform,
+          platform: savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin',
           version: savedQuery.version,
           interval: savedQuery.interval,
           // @ts-expect-error update types

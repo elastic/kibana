@@ -9,7 +9,7 @@ import { first } from 'lodash';
 import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
-import { ApmUser } from '../../../common/authentication';
+import { ApmUsername } from '../../../common/authentication';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -92,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       afterEach(async () => {
         await esClient.security.invalidateApiKey({
-          username: ApmUser.apmManageOwnAndCreateAgentKeys,
+          username: ApmUsername.apmManageOwnAndCreateAgentKeys,
         });
       });
 

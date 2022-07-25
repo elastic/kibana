@@ -9,8 +9,8 @@
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
 
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 
 import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
@@ -47,12 +47,9 @@ describe('ui settings', () => {
       log: logger,
     });
 
-    const createOrUpgradeSavedConfig = createOrUpgradeSavedConfigMock;
-
     return {
       uiSettings,
       savedObjectsClient,
-      createOrUpgradeSavedConfig,
     };
   }
 
@@ -84,7 +81,7 @@ describe('ui settings', () => {
     });
 
     it('automatically creates the savedConfig if it is missing', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       savedObjectsClient.update
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({} as any);
@@ -92,14 +89,14 @@ describe('ui settings', () => {
       await uiSettings.setMany({ foo: 'bar' });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledWith(
         expect.objectContaining({ handleWriteErrors: false })
       );
     });
 
     it('only tried to auto create once and throws NotFound', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       savedObjectsClient.update.mockRejectedValue(
         SavedObjectsClient.errors.createGenericNotFoundError()
       );
@@ -112,8 +109,8 @@ describe('ui settings', () => {
       }
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledWith(
         expect.objectContaining({ handleWriteErrors: false })
       );
     });
@@ -374,7 +371,7 @@ describe('ui settings', () => {
     });
 
     it('automatically creates the savedConfig if it is missing and returns empty object', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       savedObjectsClient.get = jest
         .fn()
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
@@ -384,15 +381,15 @@ describe('ui settings', () => {
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
 
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledWith(
         expect.objectContaining({ handleWriteErrors: true })
       );
     });
 
     it('returns result of savedConfig creation in case of notFound error', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
-      createOrUpgradeSavedConfig.mockResolvedValue({ foo: 'bar ' });
+      const { uiSettings, savedObjectsClient } = setup();
+      mockCreateOrUpgradeSavedConfig.mockResolvedValue({ foo: 'bar ' });
       savedObjectsClient.get.mockRejectedValue(
         SavedObjectsClient.errors.createGenericNotFoundError()
       );
@@ -401,23 +398,23 @@ describe('ui settings', () => {
     });
 
     it('returns an empty object on Forbidden responses', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
 
       const error = SavedObjectsClient.errors.decorateForbiddenError(new Error());
       savedObjectsClient.get.mockRejectedValue(error);
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
     });
 
     it('returns an empty object on EsUnavailable responses', async () => {
-      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
 
       const error = SavedObjectsClient.errors.decorateEsUnavailableError(new Error());
       savedObjectsClient.get.mockRejectedValue(error);
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
+      expect(mockCreateOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
     });
 
     it('throws Unauthorized errors', async () => {

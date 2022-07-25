@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { AlertsComponentQueryProps } from './types';
+import type { AlertsComponentQueryProps } from './types';
 
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, ...rest } = alertsProps;

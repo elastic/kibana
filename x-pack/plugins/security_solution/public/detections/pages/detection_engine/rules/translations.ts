@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_DETECTIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.backOptionsHeader',
-  {
-    defaultMessage: 'Back to detections',
-  }
-);
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
     defaultMessage: 'Tooltip for column: {columnName}',
@@ -26,10 +20,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -99,20 +93,6 @@ export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle',
   {
     defaultMessage: 'Bulk actions',
-  }
-);
-
-export const ACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.activeRuleDescription',
-  {
-    defaultMessage: 'active',
-  }
-);
-
-export const INACTIVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.inactiveRuleDescription',
-  {
-    defaultMessage: 'inactive',
   }
 );
 
@@ -230,13 +210,22 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+export const BULK_EDIT_CONFIRMATION_DENIED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
     {
-      values: { elasticRulesCount },
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be edited',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationPartlyTitle',
+    {
+      values: { customRulesCount },
       defaultMessage:
-        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
+        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
     }
   );
 
@@ -247,12 +236,21 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   }
 );
 
-export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+export const BULK_EDIT_CONFIRMATION_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCloseButtonLabel',
   {
-    defaultMessage: 'Edit custom rules',
+    defaultMessage: 'Close',
   }
 );
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+    }
+  );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -272,7 +270,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to add. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -280,7 +278,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.transl
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+      'Enter the pattern of Elasticsearch indices that you would like to delete. By default, the dropdown includes index patterns defined in Security Solution advanced settings.',
   }
 );
 
@@ -308,7 +306,14 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules index patterns',
+    defaultMessage: "Overwrite all selected rules' index patterns",
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DATA_VIEWS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.dataViewsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Apply changes to rules configured with data views',
   }
 );
 
@@ -366,7 +371,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
   {
-    defaultMessage: 'Overwrite all selected rules tags',
+    defaultMessage: "Overwrite all selected rules' tags",
   }
 );
 
@@ -452,13 +457,6 @@ export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
   }
 );
 
-export const DUPLICATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateTitle',
-  {
-    defaultMessage: 'Duplicate',
-  }
-);
-
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
@@ -536,13 +534,6 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
-export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsPopoverTitle',
-  {
-    defaultMessage: 'See all',
-  }
-);
-
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
@@ -603,13 +594,6 @@ export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
     defaultMessage: 'Rule Monitoring',
-  }
-);
-
-export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
-  {
-    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -792,27 +776,6 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
       defaultMessage: '{message}',
     }
   );
-
-export const REFRESH_PROMPT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
-  {
-    defaultMessage: 'Are you still there?',
-  }
-);
-
-export const REFRESH_PROMPT_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
-  {
-    defaultMessage: 'Continue',
-  }
-);
-
-export const REFRESH_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
-  {
-    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
-  }
-);
 
 export const DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
@@ -1066,7 +1029,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.",
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}. If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.",
     }
   );
 
@@ -1083,55 +1046,5 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
-    }
-  );
-
-export const INTEGRATIONS_BADGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.integrations.badgeTitle',
-  {
-    defaultMessage: 'integrations',
-  }
-);
-
-export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
-    {
-      values: { integrationsCount },
-      defaultMessage:
-        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {integration} other {integrations}} to your prebuilt rule',
-    }
-  );
-
-export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledTitle',
-    {
-      values: { installedCount },
-      defaultMessage:
-        'You have [{installedCount}] related {installedCount, plural, =1 {integration} other {integrations}} installed, click the link below to view the integration:',
-    }
-  );
-
-export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionUninstalledTitle',
-    {
-      values: { uninstalledCount },
-      defaultMessage:
-        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {integration} other {integrations}} uninstalled, click the link to add integration:',
-    }
-  );
-
-export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
-  installedVersion: string,
-  targetVersion: string
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledVersionTooltip',
-    {
-      values: { installedVersion, targetVersion },
-      defaultMessage:
-        'Version mismatch -- please resolve! Installed version `{installedVersion}` when target version `{targetVersion}`',
     }
   );

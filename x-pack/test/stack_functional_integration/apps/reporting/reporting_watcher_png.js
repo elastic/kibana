@@ -42,6 +42,7 @@ export default ({ getService, getPageObjects }) => {
             interval: `${interval}s`,
           },
         },
+        throttle_period: '15m',
         actions: {
           email_admin: {
             email: {
@@ -78,6 +79,7 @@ export default ({ getService, getPageObjects }) => {
       it('should successfully add a new watch for PNG Reporting', async () => {
         await putWatcher(watch, id, body, client, log);
       });
+
       it('should be successful and increment revision', async () => {
         await getWatcher(watch, id, client, log, PageObjects.common, retry.tryForTime.bind(retry));
       });

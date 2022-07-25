@@ -15,6 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ListFilters } from '../list_filters/list_filters';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -31,6 +32,7 @@ import * as labels from './labels';
 interface Props {
   pageState: MonitorListPageState;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
+  total: number;
   error: IHttpSerializedFetchError | null;
   loading: boolean;
   loadPage: (state: MonitorListPageState) => void;
@@ -41,6 +43,7 @@ interface Props {
 export const MonitorList = ({
   pageState: { pageIndex, pageSize, sortField, sortOrder },
   syntheticsMonitors,
+  total,
   error,
   loading,
   loadPage,
@@ -82,9 +85,9 @@ export const MonitorList = ({
   );
 
   const pagination = {
-    pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
+    pageIndex,
     pageSize,
-    totalItemCount: syntheticsMonitors.length || 0,
+    totalItemCount: total,
     pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
@@ -98,7 +101,7 @@ export const MonitorList = ({
   const recordRangeLabel = labels.getRecordRangeLabel({
     rangeStart: pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
-    total: syntheticsMonitors.length,
+    total,
   });
 
   const columns = getMonitorListColumns({
@@ -113,7 +116,8 @@ export const MonitorList = ({
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <EuiSpacer size="s" />
+      <ListFilters />
+      <EuiSpacer />
       {recordRangeLabel}
       <EuiSpacer size="s" />
       <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />

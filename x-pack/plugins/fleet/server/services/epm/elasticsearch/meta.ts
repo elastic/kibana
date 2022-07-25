@@ -58,6 +58,6 @@ export function appendMetadataToIngestPipeline({
 
   return {
     ...pipeline,
-    contentForInstallation: parsedPipelineContent,
+    contentForInstallation: JSON.stringify(parsedPipelineContent),
   };
 }

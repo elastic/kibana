@@ -13,7 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from '@kbn/tinymath';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
@@ -498,7 +498,7 @@ Example: Calculate area based on side length
     help: i18n.translate('xpack.lens.formula.maxFunction.markdown', {
       defaultMessage: `
 Finds the maximum value between two numbers.
-    
+
 Example: Find the maximum between two fields averages
 \`pick_max(average(bytes), average(memory))\`
         `,

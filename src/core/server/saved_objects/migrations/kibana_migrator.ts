@@ -14,7 +14,8 @@
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
-import { ElasticsearchClient } from '../../elasticsearch';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
 import {
   SavedObjectUnsanitizedDoc,
@@ -29,7 +30,6 @@ import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
-import { DocLinksServiceStart } from '../../doc_links';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;

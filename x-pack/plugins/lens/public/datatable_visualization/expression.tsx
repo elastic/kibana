@@ -81,13 +81,11 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
+            renderComplete={() => handlers.done()}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

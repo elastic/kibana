@@ -13,18 +13,21 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
-import { IPsQueryTabBody } from './ips_query_tab_body';
-import { CountriesQueryTabBody } from './countries_query_tab_body';
-import { HttpQueryTabBody } from './http_query_tab_body';
+import {
+  CountriesQueryTabBody,
+  DnsQueryTabBody,
+  HttpQueryTabBody,
+  IPsQueryTabBody,
+  NetworkAlertsQueryTabBody,
+  TlsQueryTabBody,
+} from '.';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
-import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
-import { NetworkRoutesProps, NetworkRouteType } from './types';
-import { TlsQueryTabBody } from './tls_query_tab_body';
-import { Anomaly } from '../../../common/components/ml/types';
-import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { NetworkRoutesProps } from './types';
+import { NetworkRouteType } from './types';
+import type { Anomaly } from '../../../common/components/ml/types';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(

@@ -8,17 +8,17 @@
 import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
     {
-      path: '/internal/osquery/saved_query/{id}',
+      path: '/api/osquery/saved_queries/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -112,7 +112,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       }
 
       return response.ok({
-        body: updatedSavedQuerySO,
+        body: { data: updatedSavedQuerySO },
       });
     }
   );

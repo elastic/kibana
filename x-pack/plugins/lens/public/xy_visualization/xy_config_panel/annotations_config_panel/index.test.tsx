@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../types';
 import { layerTypes } from '../../..';
@@ -36,6 +37,7 @@ const customLineStaticAnnotation = {
 };
 
 describe('AnnotationsPanel', () => {
+  const datatableUtilities = createDatatableUtilitiesMock();
   let frame: FramePublicAPI;
 
   function testState(): State {
@@ -68,6 +70,7 @@ describe('AnnotationsPanel', () => {
           accessor="ann1"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -128,6 +131,7 @@ describe('AnnotationsPanel', () => {
           accessor="ann1"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -166,6 +170,7 @@ describe('AnnotationsPanel', () => {
           accessor="ann1"
           groupId="left"
           state={state}
+          datatableUtilities={datatableUtilities}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}

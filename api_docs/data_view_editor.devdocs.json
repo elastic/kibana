@@ -109,12 +109,34 @@
           },
           {
             "parentPluginId": "dataViewEditor",
-            "id": "def-public.DataViewEditorProps.showEmptyPrompt",
+            "id": "def-public.DataViewEditorProps.editData",
+            "type": "Object",
+            "tags": [],
+            "label": "editData",
+            "description": [
+              "\nPass the data view to be edited."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_view_editor/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.allowAdHocDataView",
             "type": "CompoundType",
             "tags": [],
-            "label": "showEmptyPrompt",
+            "label": "allowAdHocDataView",
             "description": [
-              "\nIf set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly\nto data view creation."
+              "\nif set to true user is presented with an option to create ad-hoc dataview without a saved object."
             ],
             "signature": [
               "boolean | undefined"

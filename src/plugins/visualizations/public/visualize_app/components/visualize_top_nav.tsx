@@ -324,7 +324,7 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : vis.data.indexPattern.title,
+                  : vis.data.indexPattern.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,

@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { byTestId, waitForLoadingToFinish } from './utils';
+import { byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 
 journey('uptime', ({ page, params }) => {
   before(async () => {

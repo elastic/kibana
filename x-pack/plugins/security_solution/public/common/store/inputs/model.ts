@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import { InputsModelId } from './constants';
-import { CONSTANTS } from '../../components/url_state/constants';
+import type { InputsModelId } from './constants';
+import type { CONSTANTS } from '../../components/url_state/constants';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';

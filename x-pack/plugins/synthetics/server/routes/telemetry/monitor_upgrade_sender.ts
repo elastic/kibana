@@ -21,7 +21,7 @@ import { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender'
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
-  MONITOR_ERROR_EVENT_CHANNEL,
+  MONITOR_ERROR_EVENTS_CHANNEL,
   MONITOR_SYNC_STATE_CHANNEL,
   MONITOR_SYNC_EVENTS_CHANNEL,
 } from '../../legacy_uptime/lib/telemetry/constants';
@@ -77,7 +77,7 @@ export function sendErrorTelemetryEvents(
   }
 
   try {
-    eventsTelemetry.queueTelemetryEvents(MONITOR_ERROR_EVENT_CHANNEL, [updateEvent]);
+    eventsTelemetry.queueTelemetryEvents(MONITOR_ERROR_EVENTS_CHANNEL, [updateEvent]);
   } catch (exc) {
     logger.error(`queuing telemetry events failed ${exc}`);
   }
