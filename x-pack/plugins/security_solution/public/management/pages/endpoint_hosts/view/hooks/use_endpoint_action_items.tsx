@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowEndpointResponder } from '../../../../hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -23,12 +22,12 @@ import type { ContextMenuItemNavByRouterProps } from '../../../../components/con
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { useDoesEndpointSupportResponder } from '../../../../../common/hooks/endpoint/use_does_endpoint_support_responder';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../../../common/translations';
 
 interface Options {
   isEndpointList: boolean;
 }
-
-const responderCapabilitiesList = ['kill_process', 'suspend_process', 'running_processes'];
 
 const launchResponderMenuText = i18n.translate('xpack.securitySolution.endpoint.actions.console', {
   defaultMessage: 'Launch responder',
@@ -53,12 +52,10 @@ export const useEndpointActionItems = (
     'responseActionsConsoleEnabled'
   );
   const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
+  const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(endpointMetadata);
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
-      const isResponderCapabilitiesEnabled = responderCapabilitiesList.every((capability) =>
-        endpointMetadata.Endpoint.capabilities?.includes(capability)
-      );
       const isIsolated = isEndpointHostIsolated(endpointMetadata);
       const endpointId = endpointMetadata.agent.id;
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
@@ -143,21 +140,15 @@ export const useEndpointActionItems = (
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
                 },
-                children: isResponderCapabilitiesEnabled ? (
-                  launchResponderMenuText
-                ) : (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.securitySolution.endpoint.actions.disabledResponder.tooltip',
-                      {
-                        defaultMessage:
-                          'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
-                      }
-                    )}
-                  >
-                    <p>{launchResponderMenuText}</p>
-                  </EuiToolTip>
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.console"
+                    defaultMessage="Launch responder"
+                  />
                 ),
+                toolTipContent: !isResponderCapabilitiesEnabled
+                  ? UPGRADE_ENDPOINT_FOR_RESPONDER
+                  : '',
               },
             ]
           : []),
