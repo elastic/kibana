@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const EXTERNAL_ALERTS_TAB = '[data-test-subj="navigation-externalAlerts"]';
-export const EXTERNAL_ALERTS_TAB_CONTENT = '[data-test-subj="events-viewer-panel"]';
+export { SignalsByCategory } from './signals_by_category';
