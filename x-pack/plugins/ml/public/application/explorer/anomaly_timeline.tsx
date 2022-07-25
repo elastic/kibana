@@ -60,6 +60,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const {
       services: {
         application: { capabilities },
+        charts: chartsService,
       },
     } = useMlKibana();
 
@@ -214,7 +215,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </EuiFlexItem>
 
             {menuItems.length > 0 && (
-              <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+              <EuiFlexItem
+                grow={false}
+                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+              >
                 <EuiPopover
                   button={
                     <EuiButtonIcon
@@ -261,7 +265,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
                 onChange={useCallback((update) => {
@@ -297,7 +301,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 )}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
+            <EuiFlexItem grow={false} css={{ visibility: selectedCells ? 'visible' : 'hidden' }}>
               <EuiButtonEmpty
                 size="xs"
                 onClick={setSelectedCells.bind(anomalyTimelineStateService, undefined)}
@@ -349,6 +353,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             showTimeline={false}
             showLegend={false}
             yAxisWidth={Y_AXIS_LABEL_WIDTH}
+            chartsService={chartsService}
           />
 
           <EuiSpacer size="m" />
@@ -367,6 +372,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
               swimlaneLimit={swimlaneLimit}
+              chartsService={chartsService}
               onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
                 if (perPageUpdate) {
                   anomalyTimelineStateService.setSwimLanePagination({

@@ -24,7 +24,6 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
 } from '../constants';
-
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
 export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;

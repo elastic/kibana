@@ -24,7 +24,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await browser.refresh();
   };
 
-  describe('Onboarding Observability tour', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/136876
+  describe.skip('Onboarding Observability tour', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -59,10 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickTourNextButton();
         await pageObjects.infraHome.ensureTourStepIsClosed('metricsExplorerStep');
 
-        // Step 4: Traces
-        await pageObjects.infraHome.waitForTourStep('tracesStep');
+        // Step 4: Services
+        await pageObjects.infraHome.waitForTourStep('servicesStep');
         await pageObjects.infraHome.clickTourNextButton();
-        await pageObjects.infraHome.ensureTourStepIsClosed('tracesStep');
+        await pageObjects.infraHome.ensureTourStepIsClosed('servicesStep');
 
         // Step 5: Alerts
         await pageObjects.infraHome.waitForTourStep('alertStep');
@@ -128,6 +129,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
         const overviewPageUrl = await browser.getCurrentUrl();
         expect(overviewPageUrl).to.contain('/app/observability/overview');
+      });
+
+      it('ends the tour if the user clicks on the guided setup button', async () => {
+        // For brevity, starting the tour at step 5, "Alerts"
+        await setInitialTourState(5);
+
+        await pageObjects.infraHome.clickTourNextButton();
+        await pageObjects.infraHome.waitForTourStep('guidedSetupStep');
+        await pageObjects.infraHome.clickGuidedSetupButton();
+        await pageObjects.infraHome.ensureTourStepIsClosed('guidedSetupStep');
       });
     });
   });

@@ -31,12 +31,12 @@ import type {
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import {
+import type {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,

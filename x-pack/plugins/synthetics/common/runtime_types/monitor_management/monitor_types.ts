@@ -8,7 +8,11 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
+import {
+  MonitorServiceLocationsCodec,
+  MonitorServiceLocationCodec,
+  ServiceLocationErrors,
+} from './locations';
 import {
   DataStream,
   DataStreamCodec,
@@ -78,6 +82,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
 ]);
 
@@ -310,6 +315,24 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+export const HeartbeatConfigCodec = t.intersection([
+  SyntheticsMonitorWithIdCodec,
+  t.partial({
+    fields_under_root: t.boolean,
+    fields: t.intersection([
+      t.interface({
+        config_id: t.string,
+      }),
+      t.partial({
+        run_once: t.boolean,
+        test_run_id: t.string,
+        'monitor.project.name': t.string,
+        'monitor.project.id': t.string,
+      }),
+    ]),
+  }),
+]);
+
 export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({ id: t.string }),
@@ -328,6 +351,8 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
 >;
 
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
+
+export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
 
 export const MonitorDefaultsCodec = t.interface({
   [DataStream.HTTP]: HTTPFieldsCodec,
@@ -355,19 +380,19 @@ export const MonitorManagementListResultCodec = t.type({
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
+export const MonitorOverviewItemCodec = t.interface({
+  name: t.string,
+  id: t.string,
+  location: MonitorServiceLocationCodec,
+  isEnabled: t.boolean,
+});
+
+export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
+
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(
-    t.number,
-    t.array(
-      t.interface({
-        name: t.string,
-        id: t.string,
-        location: MonitorServiceLocationsCodec,
-      })
-    )
-  ),
+  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
